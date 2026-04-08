@@ -1082,9 +1082,9 @@ export default function SearchPage() {
       <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.26fr)_minmax(320px,0.74fr)]">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
           <SurfacePanel
-            className="space-y-6 rounded-[40px] px-5 py-5 sm:px-7 sm:py-7"
+            className="space-y-7 rounded-[44px] px-5 py-5 sm:px-7 sm:py-8"
             tone="highlight"
             accent="amber"
             appearance="light"
@@ -1110,7 +1110,7 @@ export default function SearchPage() {
                 ) : null}
               </div>
 
-              <div className="rounded-[30px] border border-black/6 bg-[rgba(255,252,247,0.72)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur-sm sm:p-5">
+              <div className="rounded-[32px] border border-black/6 bg-[rgba(255,252,247,0.6)] p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] backdrop-blur-xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                   {query ? "Closest lane" : "Search cues"}
                 </p>
@@ -1131,7 +1131,7 @@ export default function SearchPage() {
               </div>
             </div>
 
-            <div className="rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(248,244,238,0.94))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
+            <div className="rounded-[34px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(248,244,238,0.86))] p-4 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1175,7 +1175,7 @@ export default function SearchPage() {
 
           <div className="grid gap-4">
             <SurfacePanel
-              className="h-full space-y-5 rounded-[34px] p-5 sm:p-6"
+              className="h-full space-y-5 rounded-[36px] p-5 sm:p-6"
               tone="muted"
               accent="amber"
               appearance="light"
@@ -1185,7 +1185,7 @@ export default function SearchPage() {
               </p>
 
               {leadSearchResult ? (
-                <div className="rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,245,239,0.94))] p-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]">
+                <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(249,245,239,0.86))] p-4 shadow-[0_18px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl">
                   <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
                     <div className="overflow-hidden rounded-[18px] border border-black/6 bg-neutral-900 shadow-[0_14px_28px_rgba(15,23,42,0.08)]">
                       <Cover
@@ -1230,7 +1230,7 @@ export default function SearchPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,245,239,0.94))] p-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]">
+                <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(249,245,239,0.86))] p-4 shadow-[0_18px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl">
                   <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
                     {query ? "Closest result." : "Start here."}
                   </h2>
@@ -1244,8 +1244,8 @@ export default function SearchPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <div className="grid gap-4 border-t border-black/6 pt-4 sm:grid-cols-3">
+                <div className="sm:border-l sm:border-black/8 sm:pl-4 first:sm:border-l-0 first:sm:pl-0">
                   <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {query
                       ? total.toLocaleString()
@@ -1255,7 +1255,7 @@ export default function SearchPage() {
                     {query ? "Matches" : "Titles"}
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                <div className="sm:border-l sm:border-black/8 sm:pl-4">
                   <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {hotKeywords.length.toLocaleString()}
                   </p>
@@ -1263,7 +1263,7 @@ export default function SearchPage() {
                     Hot
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                <div className="sm:border-l sm:border-black/8 sm:pl-4">
                   <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {page}
                   </p>
@@ -1618,7 +1618,7 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden rounded-[34px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(247,242,235,0.95))] p-5 text-left shadow-[0_20px_52px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                      className="group block overflow-hidden rounded-[36px] border border-black/6 bg-[rgba(255,252,247,0.58)] p-5 text-left shadow-[0_24px_58px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
                       aria-label={`Open ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">

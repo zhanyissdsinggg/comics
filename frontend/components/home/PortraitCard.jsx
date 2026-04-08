@@ -98,58 +98,65 @@ function PortraitCard({
     <div
       className={cn(
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
-        isCompact ? "rounded-[22px]" : "rounded-[26px]",
+        isCompact ? "rounded-[24px]" : "rounded-[30px]",
         isLight
-          ? "border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.98),rgba(247,241,233,0.96))] shadow-[0_12px_28px_rgba(37,28,19,0.03)] group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_16px_32px_rgba(37,28,19,0.05)]"
+          ? "border border-[color:var(--gush-border)] bg-[rgba(255,252,247,0.62)] shadow-[0_18px_40px_rgba(37,28,19,0.04)] backdrop-blur-xl group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_22px_50px_rgba(37,28,19,0.06)]"
           : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
       )}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900">
-        <Cover
-          tone={tone || item.coverTone}
-          coverUrl={item.coverUrl}
-          label={item.title}
-          eyebrow={metaLine}
-          badge={item.badge}
-          genres={item.genres}
-          seriesType={item.seriesType || item.type}
-          fallbackVariant={coverFallbackVariant}
-          className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
-        />
+      <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "absolute inset-0",
-            isLight
-              ? "bg-gradient-to-t from-black/38 via-black/6 to-transparent"
-              : "bg-gradient-to-t from-black/85 via-black/18 to-transparent",
+            "relative aspect-[3/4] overflow-hidden bg-neutral-900",
+            isCompact ? "rounded-[20px]" : "rounded-[24px]",
           )}
-        />
-        <div
-          className={cn(
-            "absolute inset-0",
-            isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_22%)]",
-          )}
-        />
+        >
+          <Cover
+            tone={tone || item.coverTone}
+            coverUrl={item.coverUrl}
+            label={item.title}
+            eyebrow={metaLine}
+            badge={item.badge}
+            genres={item.genres}
+            seriesType={item.seriesType || item.type}
+            fallbackVariant={coverFallbackVariant}
+            className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
+          />
+          <div
+            className={cn(
+              "absolute inset-0",
+              isLight
+                ? "bg-gradient-to-t from-black/44 via-black/10 to-transparent"
+                : "bg-gradient-to-t from-black/85 via-black/18 to-transparent",
+            )}
+          />
+          <div
+            className={cn(
+              "absolute inset-0",
+              isLight
+                ? "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]"
+                : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_22%)]",
+            )}
+          />
 
-        {typeof item.progressPercent === "number" &&
-        item.progressPercent > 0 ? (
-          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/30">
-            <div
-              className="h-full bg-[var(--gush-accent,#3157d6)]"
-              style={{ width: `${Math.round(progressWidth)}%` }}
-            />
-          </div>
-        ) : null}
+          {typeof item.progressPercent === "number" &&
+          item.progressPercent > 0 ? (
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/30">
+              <div
+                className="h-full bg-[var(--gush-accent,#3157d6)]"
+                style={{ width: `${Math.round(progressWidth)}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div
         className={cn(
-          isCompact ? "space-y-2.5 px-3.5 py-3.5" : "space-y-3 px-4 py-4",
+          isCompact ? "space-y-2.5 px-4 pb-4 pt-2" : "space-y-3 px-4 pb-4 pt-2",
         )}
       >
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {showGenrePills ? (
             <div className="flex flex-wrap gap-2">
               {genrePills.map((genre) => (
@@ -186,8 +193,8 @@ function PortraitCard({
             className={cn(
               "line-clamp-2 font-semibold tracking-[-0.025em] transition-colors",
               isCompact
-                ? "text-[0.99rem] leading-5"
-                : "text-[1.04rem] leading-6",
+                ? "text-[1.02rem] leading-5"
+                : "text-[1.08rem] leading-6",
               isLight
                 ? "text-[color:var(--gush-ink-strong)] group-hover:text-[color:var(--gush-ink-strong)]"
                 : "text-neutral-100 group-hover:text-white",
@@ -213,7 +220,7 @@ function PortraitCard({
 
         <div
           className={cn(
-            "flex items-center pt-1",
+            "flex items-center border-t border-[color:var(--gush-border-faint)] pt-3",
             typeof item.progressPercent === "number" && item.progressPercent > 0
               ? "justify-between"
               : showActionLabel

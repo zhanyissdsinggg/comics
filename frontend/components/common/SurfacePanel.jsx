@@ -13,11 +13,11 @@ const toneClasses = {
   },
   light: {
     default:
-      "border-black/8 bg-[rgba(255,255,255,0.9)] text-slate-900 dark:border-white/8 dark:bg-[rgba(17,22,31,0.92)] dark:text-white",
+      "border-black/[0.055] bg-[rgba(255,252,247,0.68)] text-slate-900 backdrop-blur-2xl dark:border-white/8 dark:bg-[rgba(17,22,31,0.76)] dark:text-white",
     muted:
-      "border-black/6 bg-[rgba(250,247,241,0.92)] text-slate-900 dark:border-white/8 dark:bg-[rgba(20,26,37,0.9)] dark:text-white",
+      "border-black/[0.05] bg-[rgba(250,246,239,0.58)] text-slate-900 backdrop-blur-[28px] dark:border-white/8 dark:bg-[rgba(20,26,37,0.72)] dark:text-white",
     highlight:
-      "border-[rgba(134,98,69,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(250,247,241,0.94))] text-slate-900 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,27,38,0.98),rgba(14,20,29,0.95))] dark:text-white",
+      "border-[rgba(134,98,69,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(250,246,239,0.72))] text-slate-900 backdrop-blur-[30px] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,27,38,0.84),rgba(14,20,29,0.78))] dark:text-white",
     warning:
       "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
@@ -79,20 +79,20 @@ export default function SurfacePanel({
         "relative overflow-hidden rounded-[var(--gush-radius-xl)] border p-5 shadow-[var(--gush-shadow-soft)] sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] ||
           toneClasses[resolvedAppearance].default,
-        isLight ? "" : "backdrop-blur-xl",
+        isLight ? "" : "backdrop-blur-[24px]",
         className,
       )}
     >
       <div
         className={cn(
-          "pointer-events-none absolute left-5 top-0 h-px w-16 rounded-full sm:left-6 sm:w-20",
+          "pointer-events-none absolute left-5 top-5 h-16 w-16 rounded-full blur-2xl sm:left-6 sm:top-6 sm:h-20 sm:w-20",
           accentEdgeClasses[resolvedAppearance]?.[accent] ||
             accentEdgeClasses[resolvedAppearance].blue,
         )}
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 opacity-85",
+          "pointer-events-none absolute inset-0 opacity-90",
           accentWashClasses[resolvedAppearance]?.[accent] ||
             accentWashClasses[resolvedAppearance].blue,
         )}
@@ -101,8 +101,16 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_36%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_34%)]"
-            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_34%)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.38),rgba(255,255,255,0.08)_28%,transparent_56%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
+            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
+        )}
+      />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-[1px] rounded-[calc(var(--gush-radius-xl)-2px)]",
+          isLight
+            ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
+            : "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
         )}
       />
       <div className="relative">{children}</div>

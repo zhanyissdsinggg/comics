@@ -160,17 +160,17 @@ export default function SeriesHeader({
 
   return (
     <header className="py-4 sm:py-6">
-      <section className="relative overflow-hidden rounded-[42px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.985),rgba(247,242,235,0.96))] shadow-[0_30px_84px_rgba(15,23,42,0.09)]">
+      <section className="relative overflow-hidden rounded-[46px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(247,242,235,0.74))] shadow-[0_34px_92px_rgba(15,23,42,0.1)] backdrop-blur-[30px]">
         {coverBackdropUrl ? (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-[0.1]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.98)_0%,rgba(255,249,240,0.95)_40%,rgba(250,245,236,0.84)_72%,rgba(246,239,230,0.72)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.95)_0%,rgba(255,249,240,0.86)_40%,rgba(250,245,236,0.72)_72%,rgba(246,239,230,0.62)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(183,129,64,0.14),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(134,98,69,0.08),transparent_28%)]" />
 
-        <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.1fr)_280px] lg:gap-10 xl:p-10">
+        <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_300px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-black/8 bg-white/78 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
@@ -224,7 +224,7 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-7 max-w-3xl space-y-3">
+            <div className="mt-8 max-w-3xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Story
               </p>
@@ -238,7 +238,7 @@ export default function SeriesHeader({
               <div className="mt-8 max-w-sm">{primaryActions}</div>
             ) : null}
 
-            <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (
                 <button
                   type="button"
@@ -271,7 +271,7 @@ export default function SeriesHeader({
           </div>
 
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[32px] border border-black/8 bg-white/84 shadow-[0_24px_60px_rgba(15,23,42,0.09)]">
+            <div className="overflow-hidden rounded-[34px] border border-black/8 bg-white/78 shadow-[0_26px_68px_rgba(15,23,42,0.1)] backdrop-blur-xl">
               <div className="aspect-[3/4] w-full overflow-hidden">
                 <Cover
                   tone={series.coverTone}
@@ -285,7 +285,7 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="rounded-[28px] border border-black/8 bg-white/78 p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)]">
+            <div className="rounded-[30px] border border-black/8 bg-[rgba(255,252,247,0.62)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)] backdrop-blur-xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Credits
               </p>
@@ -300,41 +300,45 @@ export default function SeriesHeader({
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-2 xl:grid-cols-5">
-            {heroFacts.map((item) =>
-              item.href ? (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="rounded-[24px] border border-black/8 bg-white/82 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:border-black/12 hover:bg-white"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-slate-950">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    {item.detail}
-                  </p>
-                </Link>
-              ) : (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border border-black/8 bg-white/82 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-base font-semibold text-slate-950">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    {item.detail}
-                  </p>
-                </div>
-              ),
-            )}
+          <div className="lg:col-span-2">
+            <div className="rounded-[30px] border border-black/8 bg-[rgba(255,252,247,0.5)] px-5 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                {heroFacts.map((item) =>
+                  item.href ? (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="xl:border-l xl:border-black/8 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-base font-semibold text-slate-950">
+                        {item.value}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        {item.detail}
+                      </p>
+                    </Link>
+                  ) : (
+                    <div
+                      key={item.label}
+                      className="xl:border-l xl:border-black/8 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-base font-semibold text-slate-950">
+                        {item.value}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        {item.detail}
+                      </p>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
