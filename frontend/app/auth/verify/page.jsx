@@ -38,7 +38,7 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.18)] focus:ring-4 focus:ring-[rgba(134,98,69,0.08)]";
+    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.18)] focus:ring-4 focus:ring-[rgba(0,113,227,0.08)]";
   const primaryButtonClass =
     "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
@@ -172,7 +172,7 @@ function VerifyPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-3 text-sm text-slate-700">
+            <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-3 text-sm text-slate-700">
               Verification link loaded from your email. No code field required.
             </div>
             <button
@@ -226,14 +226,14 @@ function VerifyPageContent() {
           Already confirmed? Go to{" "}
           <Link
             href="/account"
-            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#0071e3)]"
           >
             your account
           </Link>
           . Need help with a missing email? Contact{" "}
           <Link
             href="/support"
-            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#0071e3)]"
           >
             us
           </Link>

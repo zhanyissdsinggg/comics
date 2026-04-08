@@ -11,12 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
-    lightAccent: "text-[var(--gush-accent,#866245)]",
-    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#0071e3)]",
+    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
   },
   continue: {
-    lightAccent: "text-[var(--gush-accent,#866245)]",
-    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#0071e3)]",
+    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
   },
   trending: {
     lightAccent: "text-rose-500",
@@ -35,20 +35,20 @@ const RAIL_THEME_BY_ID = {
     lightPanel: "border-emerald-100 bg-emerald-50/80",
   },
   adult: {
-    lightAccent: "text-amber-700",
-    lightPanel: "border-amber-100 bg-amber-50/80",
+    lightAccent: "text-rose-600",
+    lightPanel: "border-rose-100 bg-rose-50/80",
   },
   history: {
     lightAccent: "text-slate-700",
     lightPanel: "border-black/8 bg-[#f8f9fc]",
   },
   starter: {
-    lightAccent: "text-[var(--gush-accent,#866245)]",
-    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#0071e3)]",
+    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
   },
   "ai-recommended": {
-    lightAccent: "text-[var(--gush-accent,#866245)]",
-    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#0071e3)]",
+    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
   },
   recommended: {
     lightAccent: "text-slate-700",
@@ -116,7 +116,7 @@ export default function Rail({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.04),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.4),transparent)]"
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.04),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.4),transparent)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]",
           )}
         />

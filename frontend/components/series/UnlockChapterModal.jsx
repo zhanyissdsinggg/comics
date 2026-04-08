@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, LockKeyhole, ShieldCheck, Sparkles, Wallet, X } from "lucide-react";
+import {
+  ArrowLeft,
+  LockKeyhole,
+  ShieldCheck,
+  Sparkles,
+  Wallet,
+  X,
+} from "lucide-react";
 import { OFFERS } from "../../lib/offers/catalog";
-import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
+import {
+  formatUSDisplayCurrency,
+  formatUSNumber,
+} from "../../lib/localization";
 import { getRegionConfig } from "../../lib/region/config";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 
@@ -11,7 +21,10 @@ const DEFAULT_PACKAGE_IDS = ["starter", "medium", "value"];
 const US_REGION = getRegionConfig("us");
 
 function normalizePackageId(value) {
-  return String(value || "").replace(/^points_pack_/, "").trim().toLowerCase();
+  return String(value || "")
+    .replace(/^points_pack_/, "")
+    .trim()
+    .toLowerCase();
 }
 
 function titleCase(value) {
@@ -41,7 +54,9 @@ function getFallbackPackage(packageId) {
 }
 
 function resolveFallbackPackages() {
-  return DEFAULT_PACKAGE_IDS.map((packageId) => getFallbackPackage(packageId)).filter(Boolean);
+  return DEFAULT_PACKAGE_IDS.map((packageId) =>
+    getFallbackPackage(packageId),
+  ).filter(Boolean);
 }
 
 function resolvePackageName(pkg) {
@@ -85,8 +100,12 @@ function normalizeDisplayPackage(pkg) {
     return null;
   }
 
-  const paidPts = Number(pkg?.paidPts || OFFERS[`points_pack_${id}`]?.paidPts || 0);
-  const bonusPts = Number(pkg?.bonusPts || OFFERS[`points_pack_${id}`]?.bonusPts || 0);
+  const paidPts = Number(
+    pkg?.paidPts || OFFERS[`points_pack_${id}`]?.paidPts || 0,
+  );
+  const bonusPts = Number(
+    pkg?.bonusPts || OFFERS[`points_pack_${id}`]?.bonusPts || 0,
+  );
   const totalPts = Number(pkg?.points || paidPts + bonusPts);
   const priceLabel = resolvePackagePriceLabel(pkg, id);
 
@@ -110,7 +129,9 @@ function buildDisplayPackages(packages) {
     ? packages.map((pkg) => normalizeDisplayPackage(pkg)).filter(Boolean)
     : [];
   const byId = new Map(normalizedPackages.map((pkg) => [pkg.id, pkg]));
-  const prioritized = DEFAULT_PACKAGE_IDS.map((id) => byId.get(id)).filter(Boolean);
+  const prioritized = DEFAULT_PACKAGE_IDS.map((id) => byId.get(id)).filter(
+    Boolean,
+  );
 
   if (prioritized.length >= 2) {
     return prioritized.slice(0, 3);
@@ -121,11 +142,16 @@ function buildDisplayPackages(packages) {
 
 function getHighlightPackageId(packages, preferredPackageId) {
   const normalizedPreferred = normalizePackageId(preferredPackageId);
-  if (normalizedPreferred && packages.some((pkg) => pkg.id === normalizedPreferred)) {
+  if (
+    normalizedPreferred &&
+    packages.some((pkg) => pkg.id === normalizedPreferred)
+  ) {
     return normalizedPreferred;
   }
 
-  const taggedPackage = packages.find((pkg) => /popular|best/i.test(String(pkg.tag || "")));
+  const taggedPackage = packages.find((pkg) =>
+    /popular|best/i.test(String(pkg.tag || "")),
+  );
   if (taggedPackage) {
     return taggedPackage.id;
   }
@@ -171,10 +197,14 @@ export default function UnlockChapterModal({
   const resolvedWalletBalance = Number(walletBalance || 0);
   const computedShortfall = Math.max(
     0,
-    Number(shortfallPts || 0) || Math.max(0, resolvedPrice - resolvedWalletBalance),
+    Number(shortfallPts || 0) ||
+      Math.max(0, resolvedPrice - resolvedWalletBalance),
   );
   const insufficient = isSignedIn && resolvedWalletBalance < resolvedPrice;
-  const highlightPackageId = getHighlightPackageId(packages, preferredPackageId);
+  const highlightPackageId = getHighlightPackageId(
+    packages,
+    preferredPackageId,
+  );
   const chapterSuffix = chapterNumber ? ` ${chapterNumber}` : "";
   const primaryButtonLabel = getPrimaryButtonLabel({
     isSignedIn,
@@ -266,8 +296,12 @@ export default function UnlockChapterModal({
         <div className="relative p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/8 text-[var(--gush-accent,#8b5cf6)]">
-                {view === "packs" ? <Wallet size={20} /> : <LockKeyhole size={20} />}
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/8 text-[var(--gush-accent,#0071e3)]">
+                {view === "packs" ? (
+                  <Wallet size={20} />
+                ) : (
+                  <LockKeyhole size={20} />
+                )}
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">
@@ -294,7 +328,8 @@ export default function UnlockChapterModal({
           {view === "confirm" ? (
             <div className="mt-6">
               <h2 className="font-display text-[1.9rem] font-semibold tracking-tight text-white">
-                Unlock Chapter{chapterSuffix} for {formatUSNumber(resolvedPrice)} Points
+                Unlock Chapter{chapterSuffix} for{" "}
+                {formatUSNumber(resolvedPrice)} Points
               </h2>
               <p className="mt-3 text-sm leading-7 text-white/68">
                 {!isSignedIn
@@ -313,7 +348,9 @@ export default function UnlockChapterModal({
                     {isSignedIn ? formatUSNumber(resolvedWalletBalance) : "--"}
                   </p>
                   <p className="mt-1 text-xs text-white/55">
-                    {isSignedIn ? "Available points on this account." : "Sign in to view your points balance."}
+                    {isSignedIn
+                      ? "Available points on this account."
+                      : "Sign in to view your points balance."}
                   </p>
                 </div>
                 <div className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-4">
@@ -339,7 +376,8 @@ export default function UnlockChapterModal({
                   <div>
                     <p className="font-semibold text-white">Secure unlock</p>
                     <p className="mt-1 text-xs leading-6 text-white/60">
-                      Point options are shown in USD and stay tied to your current account.
+                      Point options are shown in USD and stay tied to your
+                      current account.
                     </p>
                   </div>
                 </div>
@@ -358,7 +396,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full bg-[var(--gush-accent,#8b5cf6)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(139,92,246,0.34)] transition hover:bg-[var(--gush-accent-strong,#7c3aed)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-full bg-[var(--gush-accent,#0071e3)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(0,113,227,0.28)] transition hover:bg-[var(--gush-accent-strong,#0058cc)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {primaryButtonLabel}
                 </button>
@@ -372,7 +410,8 @@ export default function UnlockChapterModal({
                     Get More Points
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-white/68">
-                    Add a pack to unlock Chapter{chapterSuffix}. Prices are shown in US dollars.
+                    Add a pack to unlock Chapter{chapterSuffix}. Prices are
+                    shown in US dollars.
                   </p>
                 </div>
                 <button
@@ -386,9 +425,11 @@ export default function UnlockChapterModal({
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-amber-300/16 bg-amber-300/8 px-4 py-3 text-sm text-white/76">
+              <div className="mt-5 rounded-[22px] border border-sky-300/18 bg-sky-300/10 px-4 py-3 text-sm text-white/76">
                 <div className="flex items-center justify-between gap-3">
-                  <span>Need {formatUSNumber(computedShortfall)} more points</span>
+                  <span>
+                    Need {formatUSNumber(computedShortfall)} more points
+                  </span>
                   <span className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/68">
                     Secure checkout
                   </span>
@@ -409,14 +450,16 @@ export default function UnlockChapterModal({
                       key={pkg.id}
                       className={`rounded-[24px] border px-4 py-4 transition ${
                         isHighlighted
-                          ? "border-[rgba(139,92,246,0.4)] bg-[rgba(139,92,246,0.14)] shadow-[0_18px_42px_rgba(76,29,149,0.22)]"
+                          ? "border-[rgba(0,113,227,0.4)] bg-[rgba(0,113,227,0.14)] shadow-[0_18px_42px_rgba(0,83,194,0.2)]"
                           : "border-white/10 bg-white/6"
                       }`}
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-lg font-semibold text-white">{pkg.name}</span>
+                            <span className="text-lg font-semibold text-white">
+                              {pkg.name}
+                            </span>
                             {pkg.tag ? (
                               <span className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/62">
                                 <Sparkles size={10} />
@@ -425,9 +468,12 @@ export default function UnlockChapterModal({
                             ) : null}
                           </div>
                           <p className="mt-2 text-2xl font-semibold text-white">
-                            {pkg.priceLabel} for {formatUSNumber(pkg.totalPts)} Points
+                            {pkg.priceLabel} for {formatUSNumber(pkg.totalPts)}{" "}
+                            Points
                           </p>
-                          <p className="mt-1 text-xs text-white/55">{bonusLabel}</p>
+                          <p className="mt-1 text-xs text-white/55">
+                            {bonusLabel}
+                          </p>
                         </div>
 
                         <button
@@ -436,7 +482,9 @@ export default function UnlockChapterModal({
                           disabled={Boolean(busyAction)}
                           className="min-h-[42px] rounded-full border border-white/14 bg-white/8 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/24 hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {busyAction === currentPackAction ? "Buying..." : "Buy"}
+                          {busyAction === currentPackAction
+                            ? "Buying..."
+                            : "Buy"}
                         </button>
                       </div>
                     </div>
@@ -450,7 +498,9 @@ export default function UnlockChapterModal({
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Safe to check out</p>
+                    <p className="font-semibold text-white">
+                      Safe to check out
+                    </p>
                     <p className="mt-1 text-xs leading-6 text-white/58">
                       {packagesUsingFallback
                         ? "Showing current pack defaults while live pricing refreshes."
@@ -479,7 +529,7 @@ export default function UnlockChapterModal({
                     View all options
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full bg-[var(--gush-accent,#8b5cf6)] px-5 py-2.5 text-sm font-semibold text-white/85 opacity-90">
+                <span className="inline-flex items-center justify-center rounded-full bg-[var(--gush-accent,#0071e3)] px-5 py-2.5 text-sm font-semibold text-white/85 opacity-90">
                   {isLoadingPackages ? "Refreshing prices..." : "Point options"}
                 </span>
               </div>

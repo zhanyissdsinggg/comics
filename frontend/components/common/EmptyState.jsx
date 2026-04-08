@@ -54,8 +54,8 @@ export const EmptyState = memo(function EmptyState({
         ? "border-red-200 bg-red-50 text-red-500"
         : "border-red-400/20 bg-red-500/[0.08] text-red-200"
       : isLight
-        ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]"
-        : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100";
+        ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]"
+        : "border-sky-400/20 bg-sky-400/[0.08] text-sky-100";
 
   return (
     <div
@@ -69,8 +69,8 @@ export const EmptyState = memo(function EmptyState({
       <div
         className={`pointer-events-none absolute inset-0 ${
           isLight
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
-            : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(16,185,129,0.12),transparent_24%)]"
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(41,151,255,0.14),transparent_24%)]"
         }`}
       />
       <div className="relative mx-auto flex max-w-xl flex-col items-center">

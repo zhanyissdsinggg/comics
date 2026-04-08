@@ -243,7 +243,7 @@ export default function CommentsSection({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const inputClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
 
   return (
     <section
@@ -269,7 +269,7 @@ export default function CommentsSection({
               onClick={onFollowToggle}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 isFollowing
-                  ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] text-slate-950 hover:border-[rgba(134,98,69,0.22)] hover:bg-[rgba(134,98,69,0.09)]"
+                  ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] text-slate-950 hover:border-[rgba(0,113,227,0.22)] hover:bg-[rgba(0,113,227,0.09)]"
                   : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
               }`}
             >
@@ -399,7 +399,7 @@ export default function CommentsSection({
                   onClick={() => handleLike(comment.id)}
                   className={`rounded-full border px-3 py-1 transition ${
                     getCommentLikedByUser(comment)
-                      ? "border-amber-200 bg-amber-50 text-amber-700"
+                      ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent-strong,#0058cc)]"
                       : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
                   }`}
                 >
@@ -444,7 +444,7 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]"
+                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]"
                   />
                   <button
                     type="button"

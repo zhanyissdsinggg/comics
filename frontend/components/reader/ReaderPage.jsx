@@ -1669,10 +1669,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 text-center shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
             {commerceNotice ? (
-              <div className="mb-4 rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4 text-left">
+              <div className="mb-4 rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4 text-left">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#63472f)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
                       {commerceNotice.eyebrow}
                     </p>
                     <p className="mt-2 text-base font-semibold text-slate-950">
@@ -1759,11 +1759,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </div>
             </div>
             {currentPricing.appliedDailyFree ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                 Free now
               </p>
             ) : currentPricing.discountPct ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                 Member {currentPricing.discountPct}% off
               </p>
             ) : null}

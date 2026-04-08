@@ -100,7 +100,7 @@ function PortraitCard({
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
         isCompact ? "rounded-[24px]" : "rounded-[30px]",
         isLight
-          ? "border border-[color:var(--gush-border)] bg-[rgba(255,252,247,0.62)] shadow-[0_18px_40px_rgba(37,28,19,0.04)] backdrop-blur-xl group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_22px_50px_rgba(37,28,19,0.06)]"
+          ? "border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,248,250,0.96))] shadow-[0_14px_30px_rgba(0,0,0,0.045)] backdrop-blur-xl group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_20px_42px_rgba(0,0,0,0.065)]"
           : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
       )}
     >
@@ -138,6 +138,13 @@ function PortraitCard({
                 : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_22%)]",
             )}
           />
+          <div
+            className={cn(
+              "absolute inset-[1px]",
+              isCompact ? "rounded-[19px]" : "rounded-[23px]",
+              isLight ? "border border-white/38" : "border border-white/10",
+            )}
+          />
 
           {typeof item.progressPercent === "number" &&
           item.progressPercent > 0 ? (
@@ -168,7 +175,7 @@ function PortraitCard({
                       ? "px-2.5 py-1 text-[10px]"
                       : "px-3 py-1 text-[11px]",
                     isLight
-                      ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.62)] text-[color:var(--gush-ink-soft)]"
+                      ? "border-[color:var(--gush-border-faint)] bg-[rgba(255,255,255,0.92)] text-[color:var(--gush-ink-soft)]"
                       : "border-white/10 bg-white/[0.04] text-neutral-300",
                   )}
                 >
@@ -191,10 +198,10 @@ function PortraitCard({
           ) : null}
           <p
             className={cn(
-              "line-clamp-2 font-semibold tracking-[-0.025em] transition-colors",
+              "line-clamp-2 font-semibold tracking-[-0.04em] transition-colors",
               isCompact
-                ? "text-[1.02rem] leading-5"
-                : "text-[1.08rem] leading-6",
+                ? "text-[1.08rem] leading-5"
+                : "text-[1.12rem] leading-6",
               isLight
                 ? "text-[color:var(--gush-ink-strong)] group-hover:text-[color:var(--gush-ink-strong)]"
                 : "text-neutral-100 group-hover:text-white",
@@ -253,12 +260,16 @@ function PortraitCard({
               {actionLabel}
             </span>
           ) : null}
-          <ArrowRight
+          <span
             className={cn(
-              "size-4 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1",
-              isLight ? "text-[color:var(--gush-ink-faint)]" : "text-white",
+              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1",
+              isLight
+                ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]"
+                : "border-white/10 bg-white/[0.04] text-white/82",
             )}
-          />
+          >
+            <ArrowRight className="size-4" />
+          </span>
         </div>
         <div className="sr-only">View series details</div>
       </div>

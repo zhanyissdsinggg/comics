@@ -8,7 +8,11 @@ import UnlockChapterModal from "./UnlockChapterModal";
 import { useWalletStore } from "../../store/useWalletStore";
 import { trackEvent } from "../../lib/trackEvent";
 import { decideOffers } from "../../lib/offers/decide";
-import { getBucket, getOrCreateUserId, trackExposure } from "../../lib/experiments/ab";
+import {
+  getBucket,
+  getOrCreateUserId,
+  trackExposure,
+} from "../../lib/experiments/ab";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
@@ -50,16 +54,16 @@ function getSignalClass(tone) {
     return "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] text-[var(--gush-accent,#3157d6)]";
   }
   if (tone === "preview") {
-    return "border-amber-200 bg-amber-50 text-amber-700";
+    return "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] text-[var(--gush-accent,#3157d6)]";
   }
   if (tone === "points") {
-    return "border-black/10 bg-white text-slate-700";
+    return "border-[color:var(--gush-border)] bg-white text-slate-700";
   }
   if (tone === "locked") {
-    return "border-black/8 bg-[#f8f9fc] text-slate-500";
+    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-slate-500";
   }
 
-  return "border-black/8 bg-[#f8f9fc] text-slate-500";
+  return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-slate-500";
 }
 
 function EpisodeRow({
@@ -78,7 +82,8 @@ function EpisodeRow({
 }) {
   const router = useRouter();
   const { topup } = useWalletStore();
-  const { paidPts, bonusPts, subscription, subscriptionUsage } = useWalletStore();
+  const { paidPts, bonusPts, subscription, subscriptionUsage } =
+    useWalletStore();
   const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { unlockEpisode: recordUnlock } = useBehaviorStore();
@@ -162,35 +167,53 @@ function EpisodeRow({
         nowMs: now,
         fallbackPrice: pricePts,
       }),
-    [coupons, episode, now, pricePts, subscription, subscriptionUsage, ttfStatus?.eligible, ttfStatus?.readyAt, unlocked],
+    [
+      coupons,
+      episode,
+      now,
+      pricePts,
+      subscription,
+      subscriptionUsage,
+      ttfStatus?.eligible,
+      ttfStatus?.readyAt,
+      unlocked,
+    ],
   );
   const effectivePrice = accessState.effectivePrice;
   const hasCustomEpisodeTitle =
     Boolean(episode?.title) && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title);
   const episodeNumberLabel = `Episode ${episode?.number}`;
-  const episodeDisplayTitle = hasCustomEpisodeTitle ? `${episodeNumberLabel} - ${episode.title}` : episodeNumberLabel;
-  const episodeHeading = hasCustomEpisodeTitle ? episode.title : episodeNumberLabel;
-  const shortfallValue = effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
+  const episodeDisplayTitle = hasCustomEpisodeTitle
+    ? `${episodeNumberLabel} - ${episode.title}`
+    : episodeNumberLabel;
+  const episodeHeading = hasCustomEpisodeTitle
+    ? episode.title
+    : episodeNumberLabel;
+  const shortfallValue =
+    effectivePrice > 0 ? Math.max(0, effectivePrice - walletBalance) : 0;
   const progressMetaLabel =
-    progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+    progress?.lastEpisodeId === episode?.id &&
+    progress?.percent &&
+    progress.percent > 0
       ? `${Math.round(progress.percent * 100)}% read`
       : "";
   const sideLabel =
-    progress?.lastEpisodeId === episode?.id && progress?.percent && progress.percent > 0
+    progress?.lastEpisodeId === episode?.id &&
+    progress?.percent &&
+    progress.percent > 0
       ? `${Math.round(progress.percent * 100)}% read`
       : accessState.shortLabel;
   const rowHelperText = accessState.rowHelperText || "";
-  const supportDetail =
-    progressMetaLabel
-      ? ""
-      : accessState.kind === "preview"
-        ? accessState.supportLabel || ""
-        : accessState.kind === "points"
-          ? accessState.supportLabel ||
-            (shortfallValue > 0 ? `Need ${shortfallValue} more points` : "")
-          : accessState.kind === "membership"
-            ? accessState.supportLabel || ""
-        : "";
+  const supportDetail = progressMetaLabel
+    ? ""
+    : accessState.kind === "preview"
+      ? accessState.supportLabel || ""
+      : accessState.kind === "points"
+        ? accessState.supportLabel ||
+          (shortfallValue > 0 ? `Need ${shortfallValue} more points` : "")
+        : accessState.kind === "membership"
+          ? accessState.supportLabel || ""
+          : "";
 
   useEffect(() => {
     if (modalState?.type !== "UNLOCK" || modalState?.view !== "packs") {
@@ -201,7 +224,10 @@ function EpisodeRow({
       return;
     }
     if (recommendedTopup?.id) {
-      trackEvent("offer_impression", { offerId: recommendedTopup.id, entry: "UNLOCK_MODAL" });
+      trackEvent("offer_impression", {
+        offerId: recommendedTopup.id,
+        entry: "UNLOCK_MODAL",
+      });
       impressionRef.current = true;
     }
   }, [modalState?.type, modalState?.view, recommendedTopup?.id]);
@@ -247,7 +273,10 @@ function EpisodeRow({
     setBusyAction("");
   };
 
-  const openUnlockModal = (view = "confirm", nextShortfall = shortfallValue) => {
+  const openUnlockModal = (
+    view = "confirm",
+    nextShortfall = shortfallValue,
+  ) => {
     setModalState({
       type: "UNLOCK",
       view,
@@ -303,7 +332,10 @@ function EpisodeRow({
         description: "Sign in to unlock this episode and keep your place.",
       });
     } else if (response.status === 402) {
-      openUnlockModal("packs", response.shortfallPts || Math.max(0, effectivePrice - walletBalance));
+      openUnlockModal(
+        "packs",
+        response.shortfallPts || Math.max(0, effectivePrice - walletBalance),
+      );
     } else {
       setModalState({
         type: "ERROR",
@@ -319,7 +351,10 @@ function EpisodeRow({
       return;
     }
 
-    if (accessState.actionKind === "read" || accessState.actionKind === "preview") {
+    if (
+      accessState.actionKind === "read" ||
+      accessState.actionKind === "preview"
+    ) {
       onRead(seriesId, episode?.id);
       return;
     }
@@ -338,11 +373,13 @@ function EpisodeRow({
   };
 
   const actionClassName =
-    accessState.actionKind === "claim" || accessState.actionKind === "read" || accessState.actionKind === "preview"
+    accessState.actionKind === "claim" ||
+    accessState.actionKind === "read" ||
+    accessState.actionKind === "preview"
       ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : accessState.actionKind === "subscribe"
-        ? "min-h-[44px] w-full rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : "min-h-[44px] w-full rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 active:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
+      : accessState.actionKind === "subscribe"
+        ? "min-h-[44px] w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-all hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+        : "min-h-[44px] w-full rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,113,227,0.18)] transition-all hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_16px_28px_rgba(0,113,227,0.22)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
 
   const actionNode = (
     <button
@@ -361,10 +398,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[24px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,246,242,0.9))] p-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-black/10"
+      className="group overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,248,250,0.94))] p-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)]"
     >
       <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[20px] border border-black/8 bg-[rgba(246,243,237,0.92)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[108px]">
+        <div className="relative h-24 overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[108px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -375,16 +412,16 @@ function EpisodeRow({
               loading="lazy"
             />
           ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f4f1eb_0%,#ebe7df_100%)] text-slate-400">
-                <span className="text-lg font-semibold tracking-tight">Ep {episode?.number}</span>
-              </div>
+            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f4f7fb_0%,#e9eef6_100%)] text-slate-400">
+              <span className="text-lg font-semibold tracking-tight">
+                Ep {episode?.number}
+              </span>
+            </div>
           )}
         </div>
 
         <div className="min-w-0">
-          <span className="sr-only">
-            {episodeDisplayTitle}
-          </span>
+          <span className="sr-only">{episodeDisplayTitle}</span>
 
           {hasCustomEpisodeTitle ? (
             <>
@@ -435,14 +472,18 @@ function EpisodeRow({
           </div>
 
           {supportDetail && supportDetail !== rowHelperText ? (
-            <p className="mt-3 text-sm leading-6 text-slate-600">{supportDetail}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {supportDetail}
+            </p>
           ) : null}
 
           {progress?.lastEpisodeId === episode?.id ? (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
               <div
                 className="h-full rounded-full bg-[var(--gush-accent,#3157d6)]"
-                style={{ width: `${Math.round((progress.percent || 0) * 100)}%` }}
+                style={{
+                  width: `${Math.round((progress.percent || 0) * 100)}%`,
+                }}
               />
             </div>
           ) : null}
@@ -532,7 +573,11 @@ function EpisodeRow({
             if (retry.status === 402) {
               openUnlockModal(
                 "packs",
-                retry.shortfallPts || Math.max(0, effectivePrice - ((paidPts || 0) + (bonusPts || 0))),
+                retry.shortfallPts ||
+                  Math.max(
+                    0,
+                    effectivePrice - ((paidPts || 0) + (bonusPts || 0)),
+                  ),
               );
               setBusyAction("");
               return;
@@ -596,7 +641,9 @@ function EpisodeRow({
         description={modalState?.description}
         shortfallPts={modalState?.shortfallPts}
         offer={modalState?.type === "SHORTFALL" ? recommendedTopup : null}
-        offerBadge={modalState?.type === "SHORTFALL" ? recommendedTopup?.tag : null}
+        offerBadge={
+          modalState?.type === "SHORTFALL" ? recommendedTopup?.tag : null
+        }
         offerSavingsText={null}
         compareItems={[]}
         tips={[]}

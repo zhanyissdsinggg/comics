@@ -349,7 +349,7 @@ export default function SupportPage() {
   const fieldLabelClass =
     "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
+    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const primaryButtonClass =
@@ -377,12 +377,12 @@ export default function SupportPage() {
             description="Choose an issue and send one request."
             stats={supportHeroStats}
             appearance="light"
-            accent="amber"
+            accent="blue"
           />
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="space-y-4"
           >
@@ -445,11 +445,11 @@ export default function SupportPage() {
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             {successState ? (
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#866245)]">
+                <div className="rounded-[28px] border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#0071e3)]">
                     Request received
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
@@ -512,7 +512,7 @@ export default function SupportPage() {
                       className={[
                         "rounded-[24px] border px-4 py-3 text-sm",
                         feedback.type === "success"
-                          ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] text-slate-700"
+                          ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] text-slate-700"
                           : "border-red-200 bg-red-50 text-red-600",
                       ].join(" ")}
                     >

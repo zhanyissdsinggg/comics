@@ -214,7 +214,7 @@ export default function SeriesFitPanel({
             and the easiest way in.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best way in
           </p>
@@ -273,7 +273,7 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4">
+        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Recommended next step
           </p>

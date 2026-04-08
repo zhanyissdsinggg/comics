@@ -98,7 +98,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           className={cn(
             "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold hover:bg-transparent",
             isLight
-              ? "text-slate-900 hover:text-[var(--gush-accent,#866245)]"
+              ? "text-slate-900 hover:text-[var(--gush-accent)]"
               : "text-white hover:text-[var(--gush-accent)]",
           )}
         >
@@ -139,7 +139,7 @@ export default function StorefrontEventHub({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]",
           )}
         />

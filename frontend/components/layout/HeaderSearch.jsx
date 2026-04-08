@@ -9,8 +9,8 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 });
 
 export default function HeaderSearch({ onSearch, variant = "default" }) {
-  const isHome = variant === "home";
-  const isLight = variant === "light" || variant === "default";
+  const isLight =
+    variant === "light" || variant === "home" || variant === "default";
   const placeholder = "Search titles";
 
   return (
@@ -19,12 +19,10 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <Link
           href="/search"
           aria-label="Open search"
-          className={`inline-flex h-10 w-full items-center gap-2 rounded-full border px-3.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[rgba(134,98,69,0.16)] ${
-            isHome
-              ? "border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.92)] text-[color:var(--gush-ink-soft)] shadow-[0_10px_24px_rgba(15,23,42,0.04)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.2)] dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-              : isLight
-                ? "border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.9)] text-[color:var(--gush-ink-soft)] shadow-[0_10px_24px_rgba(15,23,42,0.04)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.2)] dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-                : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+          className={`inline-flex h-10 w-full items-center gap-2 rounded-full border px-3.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[rgba(0,113,227,0.16)] ${
+            isLight
+              ? "border-[color:var(--gush-border)] bg-white/88 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.2)] dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              : "border-white/10 bg-white/[0.04] text-white/72 hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
           }`}
           title={placeholder}
         >
@@ -37,8 +35,8 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <SearchBar
           onSearch={onSearch}
           placeholder={placeholder}
-          variant={isHome ? "home" : isLight ? "light" : "default"}
-          showShortcut={!isHome && !isLight}
+          variant={isLight ? "light" : "default"}
+          showShortcut={false}
         />
       </div>
     </>

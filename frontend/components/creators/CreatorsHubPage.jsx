@@ -235,7 +235,7 @@ function CreatorDirectorySkeleton() {
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel appearance="light" accent="amber" className="space-y-6">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-6">
             <div className="space-y-3">
               <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
               <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -245,7 +245,7 @@ function CreatorDirectorySkeleton() {
           <SurfacePanel
             tone="muted"
             appearance="light"
-            accent="amber"
+            accent="blue"
             className="space-y-3"
           >
             {Array.from({ length: 3 }).map((_, index) => (
@@ -556,15 +556,21 @@ export default function CreatorsHubPage({
   );
 
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
   const filterButtonClass = (isActive) =>
     `rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
       isActive
-        ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent-strong,#63472f)]"
-        : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
+        ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
+        : "border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] hover:text-[color:var(--gush-ink)]"
     }`;
+  const creatorCardClass =
+    "block w-full rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] p-4 text-left shadow-[0_20px_46px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:shadow-[0_24px_52px_rgba(15,23,42,0.08)]";
+  const neutralChipClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1 text-xs text-[color:var(--gush-ink-soft)]";
+  const accentChipClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-strong)]";
   const jumpToGenreBrowse = (genre) => {
     setQuery("");
     setCreditFilter("all");
@@ -770,7 +776,7 @@ export default function CreatorsHubPage({
         <div className="gush-page-main gush-section-stack">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
-              accent="amber"
+              accent="blue"
               appearance="light"
               eyebrow="Creator credits"
               title="Browse stories for now."
@@ -791,7 +797,7 @@ export default function CreatorsHubPage({
 
             <SurfacePanel
               tone="muted"
-              accent="amber"
+              accent="blue"
               appearance="light"
               className="flex h-full flex-col justify-between space-y-6"
             >
@@ -805,14 +811,14 @@ export default function CreatorsHubPage({
                 <button
                   type="button"
                   onClick={() => router.push("/comics")}
-                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
+                  className={primaryButtonClass}
                 >
                   Browse Comics
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/search")}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  className={secondaryButtonClass}
                 >
                   Search
                 </button>
@@ -820,7 +826,7 @@ export default function CreatorsHubPage({
                   <button
                     type="button"
                     onClick={retryCreatorsDirectory}
-                    className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    className={secondaryButtonClass}
                   >
                     Retry
                   </button>
@@ -852,7 +858,7 @@ export default function CreatorsHubPage({
                     onClick={(event) =>
                       handleFallbackTitleLinkClick(event, series)
                     }
-                    className="group block overflow-hidden rounded-[28px] border border-black/6 bg-white text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    className={`group overflow-hidden ${creatorCardClass}`}
                     aria-label={`Open ${series.title}`}
                   >
                     <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900">
@@ -904,7 +910,7 @@ export default function CreatorsHubPage({
                           `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
                         )
                       }
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
+                      className={filterButtonClass(false)}
                     >
                       {item.genre}
                     </button>
@@ -930,7 +936,7 @@ export default function CreatorsHubPage({
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="amber"
+            accent="blue"
             appearance="light"
             eyebrow="Creators"
             title="Meet the credited creators."
@@ -940,7 +946,7 @@ export default function CreatorsHubPage({
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -1003,7 +1009,7 @@ export default function CreatorsHubPage({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search creators, studios, or titles"
-              className="rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.18)] focus:ring-4 focus:ring-[rgba(134,98,69,0.08)]"
+              className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.2)] focus:ring-4 focus:ring-[rgba(0,113,227,0.08)]"
             />
 
             <div className="flex flex-wrap gap-2.5">
@@ -1070,11 +1076,11 @@ export default function CreatorsHubPage({
                       "CREATORS_HUB_FEATURED",
                     )
                   }
-                  className="block w-full rounded-[28px] border border-black/6 bg-white/90 p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-black/12 hover:bg-white hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                  className={creatorCardClass}
                   aria-label={`Open ${creator.name}`}
                 >
                   <div className="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded-[20px] border border-black/8 bg-white/90 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+                    <div className="overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-white/90 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
                       <Cover
                         tone={leadSeries?.coverTone}
                         coverUrl={leadSeries?.coverUrl}
@@ -1096,7 +1102,7 @@ export default function CreatorsHubPage({
                             {creator.name}
                           </h3>
                         </div>
-                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                        <span className={neutralChipClass}>
                           {formatTitleCountLabel(creator.titleCount)}
                         </span>
                       </div>
@@ -1106,20 +1112,20 @@ export default function CreatorsHubPage({
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                        <span className={accentChipClass}>
                           {buildCreatorStartLabel(creator)}
                         </span>
                         {creatorGenres.map((genre) => (
                           <span
                             key={`${creator.slug}-featured-${genre}`}
-                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600"
+                            className={neutralChipClass}
                           >
                             {genre}
                           </span>
                         ))}
                       </div>
 
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#63472f)]">
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent)]">
                         View Creator
                       </p>
                     </div>
@@ -1148,7 +1154,7 @@ export default function CreatorsHubPage({
                 }) => (
                   <div
                     key={id}
-                    className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+                    className="rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] p-4 shadow-[0_20px_46px_rgba(15,23,42,0.06)]"
                   >
                     <Link
                       href={
@@ -1218,13 +1224,13 @@ export default function CreatorsHubPage({
                                 }
                                 handleFallbackTitleLinkClick(event, series);
                               }}
-                              className="transition-colors hover:text-[var(--gush-accent-strong,#63472f)]"
+                              className="transition-colors hover:text-[var(--gush-accent)]"
                             >
                               {series.title}
                             </Link>
                           </h3>
                         </div>
-                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                        <span className={neutralChipClass}>
                           {creator?.name || series?.type || "Series"}
                         </span>
                       </div>
@@ -1237,10 +1243,10 @@ export default function CreatorsHubPage({
                       </p>
 
                       <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                        <span className={neutralChipClass}>
                           {series?.type || "Series"}
                         </span>
-                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                        <span className={neutralChipClass}>
                           {series?.status || "Ongoing"}
                         </span>
                       </div>
@@ -1359,7 +1365,7 @@ export default function CreatorsHubPage({
                     key={creator.slug}
                     href={buildCreatorHref(creator)}
                     onClick={(event) => handleCreatorLinkClick(event, creator)}
-                    className="group block rounded-[28px] border border-black/6 bg-white p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
+                    className={`group ${creatorCardClass}`}
                     aria-label={`Open ${creator.name}`}
                   >
                     <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
@@ -1382,7 +1388,7 @@ export default function CreatorsHubPage({
                               {creator.name}
                             </h3>
                           </div>
-                          <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600">
+                          <span className={neutralChipClass}>
                             {formatTitleCountLabel(creator.titleCount)}
                           </span>
                         </div>
@@ -1392,13 +1398,13 @@ export default function CreatorsHubPage({
                         </p>
 
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                          <span className={accentChipClass}>
                             {buildCreatorStartLabel(creator)}
                           </span>
                           {creatorGenres.map((genre) => (
                             <span
                               key={`${creator.slug}-grid-${genre}`}
-                              className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-xs text-slate-600"
+                              className={neutralChipClass}
                             >
                               {genre}
                             </span>

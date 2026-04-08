@@ -118,7 +118,7 @@ const ReadingStats = React.memo(() => {
             key={card.label}
             className={`rounded-[24px] border px-4 py-4 ${
               card.highlighted || index === 0
-                ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
+                ? "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
                 : "border-black/8 bg-[#f8f9fc]"
             }`}
           >
@@ -156,7 +156,7 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-4">
+        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             What stands out
           </p>

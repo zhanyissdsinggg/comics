@@ -333,7 +333,7 @@ export default function SubscribePage({
       <main className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="amber"
+            accent="blue"
             appearance="light"
             eyebrow="Membership"
             title={
@@ -349,7 +349,7 @@ export default function SubscribePage({
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -556,9 +556,9 @@ export default function SubscribePage({
                   key={plan.id}
                   className={`relative rounded-[30px] border p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 ${
                     isBest
-                      ? "border-[rgba(134,98,69,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))]"
+                      ? "border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))]"
                       : "border-black/6 bg-white"
-                  } ${isCurrent ? "ring-2 ring-[rgba(134,98,69,0.18)]" : ""}`}
+                  } ${isCurrent ? "ring-2 ring-[rgba(0,113,227,0.18)]" : ""}`}
                 >
                   {isBest ? (
                     <div className="absolute -top-3 left-5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white">
@@ -572,7 +572,7 @@ export default function SubscribePage({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
                             isBest
-                              ? "bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]"
+                              ? "bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]"
                               : "bg-[#f8f9fc] text-slate-600"
                           }`}
                         >
@@ -594,7 +594,7 @@ export default function SubscribePage({
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
+                        <span className="rounded-full border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
                           Active
                         </span>
                       ) : null}
@@ -610,7 +610,7 @@ export default function SubscribePage({
                         </span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                           <Zap className="h-3.5 w-3.5" />
                           Save {perks.discountPct}% on locked chapters
                         </div>
@@ -627,8 +627,8 @@ export default function SubscribePage({
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -638,8 +638,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -651,8 +651,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -662,8 +662,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
                         </div>
                         <span>Better value if you unlock often</span>
                       </div>
@@ -810,7 +810,7 @@ export default function SubscribePage({
                     return (
                       <td key={plan.id} className="py-4 text-center">
                         {perks?.discountPct ? (
-                          <span className="font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                          <span className="font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                             {perks.discountPct}%
                           </span>
                         ) : (
@@ -827,7 +827,7 @@ export default function SubscribePage({
 
         {isActive ? (
           <SurfacePanel
-            className="border-[rgba(134,98,69,0.16)]"
+            className="border-[rgba(0,113,227,0.16)]"
             appearance="light"
             accent="blue"
           >

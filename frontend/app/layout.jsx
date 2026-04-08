@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { Fraunces, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
@@ -14,14 +14,9 @@ const bodyFont = Manrope({
   weight: ["400", "500", "600", "700"],
 });
 
-const displayFont = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-ui-display",
-  display: "swap",
-  weight: ["500", "600", "700"],
-});
-
-const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));
+const CookieConsent = dynamic(
+  () => import("../components/common/CookieConsent"),
+);
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const defaultTitle = `${siteConfig.siteName} | Read comics and novels`;
@@ -88,11 +83,14 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${bodyFont.variable} ${displayFont.variable} font-sans`}
+      className={`${bodyFont.variable} font-sans`}
     >
       <body className="min-h-screen font-sans antialiased">
         {GOOGLE_CLIENT_ID ? (
-          <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+          <Script
+            src="https://accounts.google.com/gsi/client"
+            strategy="afterInteractive"
+          />
         ) : null}
         <ErrorBoundary name="RootBoundary">
           <AppProviders>{children}</AppProviders>

@@ -67,7 +67,7 @@ export default function StorefrontPathwaysGrid({
               className={cn(
                 "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold hover:bg-transparent",
                 isLight
-                  ? "text-slate-900 hover:text-[var(--gush-accent,#866245)]"
+                  ? "text-slate-900 hover:text-[var(--gush-accent)]"
                   : "text-white hover:text-[var(--gush-accent)]",
               )}
             >

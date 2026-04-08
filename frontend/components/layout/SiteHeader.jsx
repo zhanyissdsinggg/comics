@@ -35,8 +35,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isHome = variant === "home";
-  const isLight = variant === "light";
+  const isLight =
+    variant === "light" || variant === "home" || variant === "default";
 
   useEffect(() => {
     const stored =
@@ -167,32 +167,22 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         data-site-header="1"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
-          isHome
+          isLight
             ? scrolled
-              ? "border-[color:var(--gush-border)] bg-[rgba(251,247,241,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.9)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
-              : "border-transparent bg-[rgba(251,247,241,0.68)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.66)]"
-            : isLight
-              ? scrolled
-                ? "border-[color:var(--gush-border)] bg-[rgba(251,247,241,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.88)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
-                : "border-transparent bg-[rgba(251,247,241,0.62)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.6)]"
-              : scrolled
-                ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
-                : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
+              ? "border-black/8 bg-[rgba(255,255,255,0.84)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(15,15,18,0.86)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.28)]"
+              : "border-transparent bg-[rgba(255,255,255,0.68)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(15,15,18,0.72)]"
+            : scrolled
+              ? "border-white/10 bg-[rgba(9,9,11,0.84)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
+              : "border-transparent bg-[rgba(9,9,11,0.66)] backdrop-blur-xl"
         }`}
       >
         <div
           className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
-            isHome
-              ? scrolled
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(134,98,69,0.18),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(242,207,155,0.18),transparent)]"
-                : ""
-              : isLight
-                ? scrolled
-                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(134,98,69,0.18),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
-                  : ""
-                : scrolled
-                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
-                  : ""
+            scrolled
+              ? isLight
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.1),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
+                : "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] before:content-['']"
+              : ""
           }`}
         >
           <div className="flex min-h-[58px] items-center gap-2 py-2 sm:min-h-[64px] sm:gap-4 sm:py-2.5 lg:gap-6">

@@ -13,7 +13,10 @@ function getSeriesBadge(item) {
   }
 
   const updatedAtMs = Date.parse(item?.updatedAt || 0);
-  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+  if (
+    !Number.isNaN(updatedAtMs) &&
+    updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000
+  ) {
     return "Updated";
   }
 
@@ -26,7 +29,15 @@ function getSeriesBadge(item) {
 }
 
 export default function SimilarSeriesSection({ seriesId }) {
-  const { data: similarSeries, loading, error } = useSimilarRecommendations(seriesId, 6);
+  const {
+    data: similarSeries,
+    loading,
+    error,
+  } = useSimilarRecommendations(seriesId, 6);
+  const cardClass =
+    "group overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,248,250,0.96))] text-left shadow-[0_18px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-white";
+  const chipClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-2.5 py-1 text-[11px] text-[color:var(--gush-ink-soft)]";
 
   if (loading) {
     return (
@@ -81,7 +92,7 @@ export default function SimilarSeriesSection({ seriesId }) {
               key={item.id}
               href={`/series/${encodeURIComponent(item.id)}`}
               className={[
-                "group overflow-hidden rounded-[26px] border border-black/6 bg-white text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10",
+                cardClass,
                 isLeadCard ? "md:col-span-2 xl:col-span-4" : "xl:col-span-2",
               ].join(" ")}
               aria-label={`Open ${item.title}`}
@@ -92,10 +103,14 @@ export default function SimilarSeriesSection({ seriesId }) {
                 label={item.title}
                 eyebrow={creatorName || item.subtitle || "Series"}
                 badge={getSeriesBadge(item)}
-                className={isLeadCard ? "aspect-[1.2/1] w-full" : "aspect-[3/4] w-full"}
+                className={
+                  isLeadCard ? "aspect-[1.2/1] w-full" : "aspect-[3/4] w-full"
+                }
               />
               <div className="space-y-2 p-4">
-                <h3 className={`line-clamp-2 font-semibold text-slate-950 ${isLeadCard ? "text-base" : "text-sm"}`}>
+                <h3
+                  className={`line-clamp-2 font-semibold text-slate-950 ${isLeadCard ? "text-base" : "text-sm"}`}
+                >
                   {item.title}
                 </h3>
                 <p className="line-clamp-1 text-xs text-slate-500">
@@ -104,10 +119,7 @@ export default function SimilarSeriesSection({ seriesId }) {
                 {Array.isArray(item.genres) && item.genres.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {item.genres.slice(0, 2).map((genre) => (
-                      <span
-                        key={`${item.id}-${genre}`}
-                        className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] text-slate-500"
-                      >
+                      <span key={`${item.id}-${genre}`} className={chipClass}>
                         {genre}
                       </span>
                     ))}

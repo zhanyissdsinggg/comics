@@ -75,7 +75,7 @@ export default function ActionModal({
         <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
 
         {type === "SHORTFALL" ? (
-          <div className="mt-4 rounded-[22px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-3 text-sm text-slate-700">
+          <div className="mt-4 rounded-[22px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-3 text-sm text-slate-700">
             Need{" "}
             <span className="font-semibold text-slate-950">{shortfallPts}</span>{" "}
             more points to unlock this episode.
@@ -100,7 +100,7 @@ export default function ActionModal({
               </p>
             ) : null}
             {offerSavingsText ? (
-              <p className="mt-2 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+              <p className="mt-2 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                 {offerSavingsText}
               </p>
             ) : null}
@@ -131,7 +131,7 @@ export default function ActionModal({
             </p>
             {tips.map((tip) => (
               <div key={tip} className="flex gap-2">
-                <span className="text-[var(--gush-accent-strong,#63472f)]">
+                <span className="text-[var(--gush-accent-strong,#0058cc)]">
                   -
                 </span>
                 <span>{tip}</span>

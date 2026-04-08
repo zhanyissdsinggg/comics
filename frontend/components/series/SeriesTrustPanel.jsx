@@ -172,7 +172,7 @@ export default function SeriesTrustPanel({
             someone gives a story their time.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Quick take
           </p>
@@ -200,7 +200,7 @@ export default function SeriesTrustPanel({
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 {card.hint}
               </p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#63472f)]">
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#0058cc)]">
                 More by this creator
               </p>
             </button>

@@ -120,10 +120,10 @@ const PWAInstallPrompt = React.memo(() => {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
       <div className="pointer-events-auto mx-auto max-w-4xl rounded-[28px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[0_22px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent,#866245)]">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent,#0071e3)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
             <div>

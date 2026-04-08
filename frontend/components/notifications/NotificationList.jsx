@@ -114,8 +114,8 @@ export default function NotificationList({
                 ? "border-black/8 bg-white"
                 : "border-white/10 bg-black/10"
               : isLight
-                ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
-                : "border-amber-400/20 bg-amber-500/[0.06]",
+                ? "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
+                : "border-sky-400/20 bg-sky-500/[0.08]",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -130,8 +130,8 @@ export default function NotificationList({
                   <span
                     className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${
                       isLight
-                        ? "border-[rgba(134,98,69,0.14)] bg-white text-[var(--gush-accent-strong,#63472f)]"
-                        : "border-amber-400/30 bg-amber-400/10 text-amber-200"
+                        ? "border-[rgba(0,113,227,0.14)] bg-white text-[var(--gush-accent-strong,#0058cc)]"
+                        : "border-sky-400/30 bg-sky-400/10 text-sky-200"
                     }`}
                   >
                     Unread

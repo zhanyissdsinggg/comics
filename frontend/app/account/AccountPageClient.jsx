@@ -406,7 +406,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
-            "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+            "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
         },
         {
           id: "recover",
@@ -477,7 +477,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
       },
       {
         id: "purchases",
@@ -540,13 +540,13 @@ export default function AccountPage({ initialSignedIn = false }) {
   const fieldLabelClass =
     "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.28)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
+    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.28)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
-    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent-strong,#63472f)] focus:ring-[rgba(134,98,69,0.18)]";
+    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent-strong,#0058cc)] focus:ring-[rgba(0,113,227,0.18)]";
   const checkboxCardClass =
     "flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700";
   const messageIsError = /failed|couldn't|not found/i.test(message);
@@ -567,7 +567,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Account"
             title={
               viewerSignedIn
@@ -625,7 +625,7 @@ export default function AccountPage({ initialSignedIn = false }) {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -761,7 +761,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             className={
               messageIsError
                 ? "border border-red-200 bg-red-50"
-                : "border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
+                : "border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
             }
           >
             <p
@@ -917,7 +917,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 {hydrated && isSignedIn ? (
-                  <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-sm text-slate-700">
+                  <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-sm text-slate-700">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         Email status:{" "}
@@ -1220,8 +1220,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <span
                           className={
                             providers.password
-                              ? "text-[var(--gush-accent-strong,#63472f)]"
-                              : "text-amber-600"
+                              ? "text-[var(--gush-accent-strong,#0058cc)]"
+                              : "text-slate-500"
                           }
                         >
                           {providers.password ? "Ready" : "Not set"}
@@ -1238,7 +1238,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                           <span
                             className={
                               providers.google
-                                ? "text-[var(--gush-accent-strong,#63472f)]"
+                                ? "text-[var(--gush-accent-strong,#0058cc)]"
                                 : "text-slate-500"
                             }
                           >

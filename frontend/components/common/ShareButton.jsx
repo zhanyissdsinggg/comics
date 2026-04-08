@@ -182,14 +182,14 @@ const ShareButton = React.memo(function ShareButton({
                   type="text"
                   value={url}
                   readOnly
-                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#866245)]"
+                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#0071e3)]"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
                   className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
                     copied
-                      ? "bg-[var(--gush-accent,#866245)] text-white"
+                      ? "bg-[var(--gush-accent,#0071e3)] text-white"
                       : "bg-slate-950 text-white hover:bg-slate-800"
                   }`}
                 >

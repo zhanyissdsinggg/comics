@@ -122,93 +122,97 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
   };
 
   return (
-    <div className="space-y-4">
-      {history.length > 0 ? (
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-medium text-slate-700">Recent</h3>
-            <button
-              type="button"
-              onClick={clearHistory}
-              className="rounded-full px-2 py-1 text-xs font-medium text-slate-400 transition-colors hover:text-slate-700"
-            >
-              Clear
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {history.map((keyword, index) => (
-              <div
-                key={`${keyword}-${index}`}
-                className="inline-flex min-w-0 items-center gap-1 rounded-full border border-black/6 bg-white/80 px-2 py-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/10"
-              >
-                <button
-                  type="button"
-                  onClick={() => handleSearch(keyword)}
-                  className="max-w-[12rem] truncate px-2 text-sm text-slate-700 transition-colors hover:text-slate-950"
-                >
-                  {keyword}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeFromHistory(keyword)}
-                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {trendingKeywords.length > 0 ? (
-        <div className="space-y-2.5">
-          <h3 className="text-sm font-medium text-slate-700">
-            {normalizedHotKeywords.length > 0 ? "Popular now" : "Browse"}
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {trendingKeywords.map((keyword, index) => (
+    <section className="rounded-[36px] border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.76)] p-5 shadow-[0_22px_52px_rgba(0,0,0,0.05)] backdrop-blur-xl sm:p-6">
+      <div className="space-y-5">
+        {history.length > 0 ? (
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
+                Recent
+              </p>
               <button
-                key={keyword.id}
                 type="button"
-                onClick={() => handleSearch(keyword.value)}
-                className="inline-flex max-w-full items-center gap-2 rounded-full border border-black/6 bg-white/80 px-3 py-2 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/10 hover:bg-white active:border-[var(--gush-accent,#866245)] active:bg-[rgba(134,98,69,0.06)]"
+                onClick={clearHistory}
+                className="rounded-full px-2 py-1 text-xs font-medium text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
               >
-                <span
-                  className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                    index < 3
-                      ? "bg-[var(--gush-accent,#866245)] text-white"
-                      : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  {index + 1}
-                </span>
-                <span className="max-w-[11rem] truncate text-sm text-slate-700">
-                  {keyword.label}
-                </span>
-                {keyword.hint ? (
-                  <span className="hidden max-w-[10rem] truncate text-xs text-slate-400 sm:inline">
-                    {keyword.hint}
-                  </span>
-                ) : null}
+                Clear
               </button>
-            ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {history.map((keyword, index) => (
+                <div
+                  key={`${keyword}-${index}`}
+                  className="inline-flex min-w-0 items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-white/86 px-2 py-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSearch(keyword)}
+                    className="max-w-[12rem] truncate px-2 text-sm text-[color:var(--gush-ink)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                  >
+                    {keyword}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeFromHistory(keyword)}
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[color:var(--gush-ink-faint)] transition-colors hover:bg-black/[0.04] hover:text-[color:var(--gush-ink)]"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : null}
-    </div>
+        ) : null}
+
+        {trendingKeywords.length > 0 ? (
+          <div className="space-y-2.5 border-t border-[color:var(--gush-border-faint)] pt-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
+              {normalizedHotKeywords.length > 0 ? "Popular now" : "Browse"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {trendingKeywords.map((keyword, index) => (
+                <button
+                  key={keyword.id}
+                  type="button"
+                  onClick={() => handleSearch(keyword.value)}
+                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/86 px-3 py-2 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white active:border-[var(--gush-accent)] active:bg-[rgba(0,113,227,0.06)]"
+                >
+                  <span
+                    className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                      index < 3
+                        ? "bg-[var(--gush-accent)] text-white"
+                        : "bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="max-w-[11rem] truncate text-sm text-[color:var(--gush-ink)]">
+                    {keyword.label}
+                  </span>
+                  {keyword.hint ? (
+                    <span className="hidden max-w-[10rem] truncate text-xs text-[color:var(--gush-ink-faint)] sm:inline">
+                      {keyword.hint}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 });
 

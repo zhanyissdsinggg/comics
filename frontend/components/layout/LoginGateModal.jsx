@@ -172,7 +172,7 @@ export default function LoginGateModal({
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
             autoComplete="email"
-            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
           />
 
           {step === "otp" ? (
@@ -211,7 +211,7 @@ export default function LoginGateModal({
               autoComplete={
                 mode === "register" ? "new-password" : "current-password"
               }
-              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
             />
           ) : (
             <>
@@ -220,7 +220,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
+                    className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
                   >
                     {(
                       config?.countryCodes || [
@@ -244,7 +244,7 @@ export default function LoginGateModal({
                     }}
                     placeholder="Phone number"
                     autoComplete="tel-national"
-                    className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+                    className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
                   />
                 </div>
               ) : null}
@@ -253,7 +253,7 @@ export default function LoginGateModal({
                 onChange={(event) => setOtpCode(event.target.value)}
                 placeholder="6-digit code"
                 autoComplete="one-time-code"
-                className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+                className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
               />
             </>
           )}
@@ -292,7 +292,7 @@ export default function LoginGateModal({
             <button
               type="button"
               onClick={handleResendOtp}
-              className="ml-2 font-semibold text-[var(--gush-accent,#866245)] transition-colors duration-300 hover:text-[var(--gush-accent-strong,#63472f)]"
+              className="ml-2 font-semibold text-[var(--gush-accent,#0071e3)] transition-colors duration-300 hover:text-[var(--gush-accent-strong,#0058cc)]"
             >
               Resend
             </button>
@@ -330,14 +330,14 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-            className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#866245)] dark:text-neutral-400"
+            className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#0071e3)] dark:text-neutral-400"
           >
             Forgot password?
           </button>
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-lg border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.07)] px-4 py-2 text-xs text-slate-600">
+          <div className="mt-3 rounded-lg border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.07)] px-4 py-2 text-xs text-slate-600">
             {resetStatus}
           </div>
         ) : null}

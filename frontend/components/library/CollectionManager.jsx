@@ -108,7 +108,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       </div>
 
       {message ? (
-        <div className="rounded-xl border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.06)] p-3 text-sm text-slate-700">
+        <div className="rounded-xl border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.06)] p-3 text-sm text-slate-700">
           {message}
         </div>
       ) : null}
@@ -122,7 +122,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
             onChange={(event) => setNewCollectionName(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && handleCreate()}
             placeholder="Collection name"
-            className="flex-1 rounded-lg border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 focus:border-[rgba(134,98,69,0.24)] focus:outline-none"
+            className="flex-1 rounded-lg border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 focus:border-[rgba(0,113,227,0.24)] focus:outline-none"
           />
           <button
             type="button"
@@ -156,7 +156,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                   type="checkbox"
                   checked={isInCollection}
                   onChange={() => handleToggleCollection(collection.id)}
-                  className="h-4 w-4 rounded border-black/10 bg-white text-[var(--gush-accent-strong,#63472f)] focus:ring-[rgba(134,98,69,0.18)]"
+                  className="h-4 w-4 rounded border-black/10 bg-white text-[var(--gush-accent-strong,#0058cc)] focus:ring-[rgba(0,113,227,0.18)]"
                 />
               ) : null}
 
@@ -169,7 +169,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     onKeyDown={(event) =>
                       event.key === "Enter" && handleSaveEdit()
                     }
-                    className="w-full rounded-lg border border-black/8 bg-white px-2 py-1 text-sm text-slate-700 focus:border-[rgba(134,98,69,0.24)] focus:outline-none"
+                    className="w-full rounded-lg border border-black/8 bg-white px-2 py-1 text-sm text-slate-700 focus:border-[rgba(0,113,227,0.24)] focus:outline-none"
                     autoFocus
                   />
                 ) : (

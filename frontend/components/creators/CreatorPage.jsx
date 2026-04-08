@@ -197,7 +197,7 @@ function CreatorPageSkeleton() {
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel appearance="light" accent="amber" className="space-y-6">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-6">
             <div className="space-y-3">
               <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
               <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -207,13 +207,13 @@ function CreatorPageSkeleton() {
           <SurfacePanel
             tone="muted"
             appearance="light"
-            accent="amber"
+            accent="blue"
             className="space-y-3"
           >
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-black/6 bg-white/84"
+                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white/84"
               />
             ))}
           </SurfacePanel>
@@ -221,7 +221,7 @@ function CreatorPageSkeleton() {
 
         <SurfacePanel appearance="light" accent="blue">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-black/6 bg-white/85" />
+            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white/85" />
             <div className="space-y-4">
               <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
               <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -230,7 +230,7 @@ function CreatorPageSkeleton() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border border-black/6 bg-white/80"
+                    className="h-28 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white/80"
                   />
                 ))}
               </div>
@@ -466,9 +466,15 @@ export default function CreatorPage({
   }, [spotlightSeries]);
 
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+  const creatorCardClass =
+    "overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] shadow-[0_20px_46px_rgba(15,23,42,0.06)]";
+  const neutralChipClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-soft)]";
+  const accentChipClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-strong)]";
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -539,7 +545,7 @@ export default function CreatorPage({
               cta: "View Series",
               onClick: () => handleOpenTitle(spotlightSeries),
               accentClass:
-                "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+                "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)]",
             }
           : null,
         {
@@ -551,7 +557,7 @@ export default function CreatorPage({
           cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
           onClick: handleBrowseGenre,
           accentClass:
-            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
         },
         {
           id: "return",
@@ -560,7 +566,7 @@ export default function CreatorPage({
           cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
           onClick: handleReturn,
           accentClass:
-            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
         },
       ].filter(Boolean),
     [
@@ -584,7 +590,7 @@ export default function CreatorPage({
             `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
           ),
         accentClass:
-          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+          "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)]",
       },
       {
         id: "featured-series",
@@ -593,7 +599,7 @@ export default function CreatorPage({
         cta: "Browse Series",
         onClick: () => router.push("/rankings?view=featured"),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
       },
       {
         id: "catalog",
@@ -602,7 +608,7 @@ export default function CreatorPage({
         cta: "Explore Comics",
         onClick: () => router.push("/comics"),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
       },
       {
         id: "return",
@@ -611,7 +617,7 @@ export default function CreatorPage({
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
       },
     ],
     [creatorName, handleReturn, originSeries, router],
@@ -636,7 +642,7 @@ export default function CreatorPage({
             <button
               type="button"
               onClick={() => router.push("/search")}
-              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className={secondaryButtonClass}
             >
               Search
             </button>
@@ -654,7 +660,7 @@ export default function CreatorPage({
         <div className="gush-page-main gush-section-stack">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
-              accent="amber"
+              accent="blue"
               appearance="light"
               eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
               title={`${creatorName} is not live here yet.`}
@@ -675,7 +681,7 @@ export default function CreatorPage({
 
             <SurfacePanel
               tone="muted"
-              accent="amber"
+              accent="blue"
               appearance="light"
               className="flex h-full flex-col justify-between space-y-6"
             >
@@ -750,7 +756,7 @@ export default function CreatorPage({
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="amber"
+            accent="blue"
             appearance="light"
             eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
             title={heroCopy.title}
@@ -761,7 +767,7 @@ export default function CreatorPage({
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -822,7 +828,7 @@ export default function CreatorPage({
         {spotlightSeries ? (
           <SurfacePanel appearance="light" accent="blue" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-              <div className="overflow-hidden rounded-[28px] border border-black/6 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+              <div className={creatorCardClass}>
                 <div className="aspect-[3/4] w-full overflow-hidden">
                   <Cover
                     tone={spotlightSeries.coverTone}
@@ -852,15 +858,12 @@ export default function CreatorPage({
                     ? spotlightSeries.genres
                     : []
                   ).map((genre) => (
-                    <span
-                      key={genre}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs font-semibold text-slate-600"
-                    >
+                    <span key={genre} className={neutralChipClass}>
                       {genre}
                     </span>
                   ))}
                   {spotlightSeries?.status ? (
-                    <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                    <span className={accentChipClass}>
                       {spotlightSeries.status}
                     </span>
                   ) : null}
@@ -870,7 +873,7 @@ export default function CreatorPage({
                   {spotlightMeta.map((item, index) => (
                     <span
                       key={`${spotlightSeries.id}-meta-${index}`}
-                      className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
+                      className={neutralChipClass}
                     >
                       {item}
                     </span>

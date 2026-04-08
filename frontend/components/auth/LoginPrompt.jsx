@@ -126,7 +126,7 @@ const LoginPrompt = memo(function LoginPrompt({
                     key={index}
                     className="flex items-center gap-3 rounded-[20px] border border-black/6 bg-white/84 p-3.5 shadow-[0_12px_26px_rgba(15,23,42,0.04)]"
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent-strong,#63472f)]">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent-strong,#0058cc)]">
                       <Icon size={20} />
                     </div>
                     <p className="text-sm text-slate-600">{feature.text}</p>

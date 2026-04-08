@@ -4,20 +4,20 @@ import { cn } from "@/lib/utils";
 
 const toneClasses = {
   dark: {
-    default: "border-white/10 bg-[rgba(11,15,22,0.9)] text-white",
-    muted: "border-white/8 bg-[rgba(16,21,31,0.84)] text-white",
+    default: "border-white/10 bg-[rgba(10,10,12,0.9)] text-white",
+    muted: "border-white/8 bg-[rgba(14,14,16,0.88)] text-white",
     highlight:
-      "border-white/12 bg-[linear-gradient(180deg,rgba(14,19,28,0.92),rgba(10,14,21,0.9))] text-white",
+      "border-white/12 bg-[linear-gradient(180deg,rgba(12,12,14,0.96),rgba(8,8,10,0.94))] text-white",
     warning: "border-amber-400/20 bg-[rgba(59,41,13,0.9)] text-white",
     danger: "border-red-400/20 bg-[rgba(64,20,26,0.9)] text-white",
   },
   light: {
     default:
-      "border-black/[0.055] bg-[rgba(255,252,247,0.68)] text-slate-900 backdrop-blur-2xl dark:border-white/8 dark:bg-[rgba(17,22,31,0.76)] dark:text-white",
+      "border-black/[0.055] bg-[rgba(255,255,255,0.82)] text-slate-900 backdrop-blur-2xl dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
     muted:
-      "border-black/[0.05] bg-[rgba(250,246,239,0.58)] text-slate-900 backdrop-blur-[28px] dark:border-white/8 dark:bg-[rgba(20,26,37,0.72)] dark:text-white",
+      "border-black/[0.05] bg-[rgba(248,248,250,0.9)] text-slate-900 backdrop-blur-[28px] dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
-      "border-[rgba(134,98,69,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(250,246,239,0.72))] text-slate-900 backdrop-blur-[30px] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,27,38,0.84),rgba(14,20,29,0.78))] dark:text-white",
+      "border-black/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,247,249,0.96))] text-slate-900 backdrop-blur-[30px] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
       "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
@@ -38,7 +38,7 @@ const accentEdgeClasses = {
     cyan: "bg-cyan-500/38",
     amber: "bg-amber-500/42",
     rose: "bg-rose-500/42",
-    blue: "bg-[rgba(134,98,69,0.42)]",
+    blue: "bg-[rgba(0,113,227,0.42)]",
   },
 };
 
@@ -53,7 +53,7 @@ const accentWashClasses = {
     rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_34%)]",
   },
   light: {
-    blue: "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.07),transparent_30%)]",
+    blue: "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_30%)]",
     emerald:
       "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_30%)]",
     cyan: "bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.06),transparent_30%)]",
@@ -67,7 +67,7 @@ export default function SurfacePanel({
   children,
   className = "",
   tone = "default",
-  accent = "amber",
+  accent = "blue",
   appearance = "default",
 }) {
   const resolvedAppearance = appearance === "default" ? "light" : appearance;
@@ -92,7 +92,7 @@ export default function SurfacePanel({
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 opacity-90",
+          "pointer-events-none absolute inset-0 opacity-80",
           accentWashClasses[resolvedAppearance]?.[accent] ||
             accentWashClasses[resolvedAppearance].blue,
         )}
@@ -101,7 +101,7 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.38),rgba(255,255,255,0.08)_28%,transparent_56%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.12)_28%,transparent_56%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
             : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
         )}
       />

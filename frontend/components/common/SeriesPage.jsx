@@ -550,7 +550,7 @@ export default function SeriesPage({
           <SurfacePanel
             className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
             tone="highlight"
-            accent="amber"
+            accent="blue"
             appearance="light"
           >
             <div className="max-w-3xl">

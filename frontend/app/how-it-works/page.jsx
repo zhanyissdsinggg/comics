@@ -91,7 +91,7 @@ export default function HowItWorksPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="How it works"
             title="How it works."
             description="Start free where available. Use points or choose a plan."
@@ -133,7 +133,7 @@ export default function HowItWorksPage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >

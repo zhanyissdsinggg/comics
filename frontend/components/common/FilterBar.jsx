@@ -250,7 +250,7 @@ export default function FilterBar({
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.07)] text-slate-900"
+                          ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.07)] text-slate-900"
                           : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
                     )}
                   >

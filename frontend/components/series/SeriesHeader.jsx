@@ -116,7 +116,7 @@ export default function SeriesHeader({
     {
       label: "Creator",
       value: creatorPresentation.value,
-      detail: creatorHref ? "View Creator" : creatorPresentation.detail,
+      detail: creatorHref ? "Open credit page." : creatorPresentation.detail,
       href: creatorHref,
     },
     {
@@ -128,18 +128,13 @@ export default function SeriesHeader({
     },
   ];
   const primaryActionClassName = [
-    "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-colors",
+    "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
     highlightPrimaryAction
-      ? "border-[rgba(183,129,64,0.22)] bg-[linear-gradient(180deg,rgba(255,236,210,0.98),rgba(248,219,180,0.98))] text-slate-950 shadow-[0_16px_36px_rgba(183,129,64,0.14)]"
-      : "border-[rgba(183,129,64,0.18)] bg-[linear-gradient(180deg,rgba(255,241,221,0.98),rgba(248,227,196,0.98))] text-slate-950 shadow-[0_14px_34px_rgba(183,129,64,0.12)] hover:border-[rgba(183,129,64,0.26)] hover:bg-[linear-gradient(180deg,rgba(255,244,228,1),rgba(249,231,202,1))]",
+      ? "border-[rgba(0,113,227,0.22)] bg-[linear-gradient(180deg,rgba(41,151,255,1),rgba(0,113,227,0.94))] text-white shadow-[0_18px_36px_rgba(0,113,227,0.28)]"
+      : "border-[rgba(0,113,227,0.18)] bg-[linear-gradient(180deg,rgba(41,151,255,0.96),rgba(0,113,227,0.9))] text-white shadow-[0_16px_34px_rgba(0,113,227,0.24)] hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.28)] hover:bg-[linear-gradient(180deg,rgba(64,164,255,1),rgba(0,113,227,0.94))] hover:shadow-[0_20px_40px_rgba(0,113,227,0.3)]",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
-      {highlightPrimaryAction ? (
-        <p className="text-center text-xs font-semibold text-[rgba(138,95,44,0.88)]">
-          Unlocked. Keep reading.
-        </p>
-      ) : null}
       <button
         ref={(node) => {
           assignRef(desktopPrimaryActionRef, node);
@@ -160,50 +155,47 @@ export default function SeriesHeader({
 
   return (
     <header className="py-4 sm:py-6">
-      <section className="relative overflow-hidden rounded-[46px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(247,242,235,0.74))] shadow-[0_34px_92px_rgba(15,23,42,0.1)] backdrop-blur-[30px]">
+      <section className="relative overflow-hidden rounded-[46px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,10,12,0.98),rgba(18,18,20,0.94))] shadow-[0_40px_110px_rgba(0,0,0,0.28)] backdrop-blur-[30px]">
         {coverBackdropUrl ? (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.1]"
+            className="absolute inset-0 bg-cover bg-center opacity-[0.14]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.95)_0%,rgba(255,249,240,0.86)_40%,rgba(250,245,236,0.72)_72%,rgba(246,239,230,0.62)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(183,129,64,0.14),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(134,98,69,0.08),transparent_28%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,8,10,0.94)_0%,rgba(8,8,10,0.88)_40%,rgba(8,8,10,0.58)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(41,151,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_28%)]" />
 
         <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_300px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-black/8 bg-white/78 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
+              <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72">
                 {formatSeriesKind(series.type)}
               </span>
               {isAdult ? (
-                <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-600">
+                <span className="rounded-full border border-[rgba(255,126,92,0.26)] bg-[rgba(255,126,92,0.14)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd4ca]">
                   18+
                 </span>
               ) : null}
             </div>
 
-            <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-              Story Page
-            </p>
-            <h1 className="mt-4 max-w-4xl font-display text-[2.55rem] font-semibold leading-[0.9] tracking-[-0.055em] text-slate-950 sm:text-[3.3rem] lg:text-[4.5rem]">
+            <h1 className="mt-5 max-w-4xl text-[2.7rem] font-semibold leading-[0.88] tracking-[-0.06em] text-white sm:text-[3.5rem] lg:text-[4.7rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-600">
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/66">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-white/24">•</span>
                   <span>{latestEpisodeValue}</span>
                 </>
               ) : null}
               {creatorHref ? (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-white/24">•</span>
                   <Link
                     href={creatorHref}
-                    className="font-medium text-slate-700 transition-colors hover:text-slate-950"
+                    className="font-medium text-white/78 transition-colors hover:text-white"
                   >
                     View creator
                   </Link>
@@ -216,7 +208,7 @@ export default function SeriesHeader({
                 {visibleHighlights.map((item) => (
                   <span
                     key={`${item.tone}-${item.label}`}
-                    className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-3 py-1 text-xs text-slate-600"
+                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-white/66"
                   >
                     {item.label}
                   </span>
@@ -224,11 +216,8 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-8 max-w-3xl space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Story
-              </p>
-              <p className="text-[15px] leading-8 text-slate-600 sm:text-base">
+            <div className="mt-8 max-w-3xl">
+              <p className="text-[15px] leading-8 text-white/66 sm:text-base">
                 {series.description ||
                   "Open the first episode and see if it lands."}
               </p>
@@ -245,8 +234,8 @@ export default function SeriesHeader({
                   onClick={onFollowToggle}
                   className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isFollowing
-                      ? "border border-pink-200 bg-pink-50 text-pink-700 shadow-[0_12px_28px_rgba(236,72,153,0.08)]"
-                      : "border border-black/8 bg-white/84 text-slate-600 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"
+                      ? "border border-[rgba(0,113,227,0.28)] bg-[rgba(0,113,227,0.16)] text-white shadow-[0_12px_28px_rgba(0,113,227,0.16)]"
+                      : "border border-white/10 bg-white/[0.04] text-white/72 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)] hover:text-white"
                   }`}
                   aria-label={
                     isFollowing ? "Remove from library" : "Save to library"
@@ -265,13 +254,13 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950"
+                className="min-h-[44px] rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/72 transition-colors hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[34px] border border-black/8 bg-white/78 shadow-[0_26px_68px_rgba(15,23,42,0.1)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.04] shadow-[0_30px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl">
               <div className="aspect-[3/4] w-full overflow-hidden">
                 <Cover
                   tone={series.coverTone}
@@ -285,53 +274,53 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="rounded-[30px] border border-black/8 bg-[rgba(255,252,247,0.62)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)] backdrop-blur-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <div className="rounded-[30px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)] backdrop-blur-xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
                 Credits
               </p>
-              <p className="mt-3 text-base font-semibold text-slate-950">
+              <p className="mt-3 text-base font-semibold text-white">
                 {creatorPresentation.value}
               </p>
-              <p className="mt-3 text-sm leading-6 text-slate-500">
+              <p className="mt-3 text-sm leading-6 text-white/62">
                 {creatorHref
-                  ? "Public creator details are available from the credit page."
+                  ? "Open the credit page for public details."
                   : creatorPresentation.detail}
               </p>
             </div>
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-[30px] border border-black/8 bg-[rgba(255,252,247,0.5)] px-5 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.04)] backdrop-blur-xl">
+            <div className="rounded-[30px] border border-white/10 bg-white/[0.04] px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 {heroFacts.map((item) =>
                   item.href ? (
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="xl:border-l xl:border-black/8 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                      className="xl:border-l xl:border-white/10 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-base font-semibold text-slate-950">
+                      <p className="mt-2 text-base font-semibold text-white">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 text-white/62">
                         {item.detail}
                       </p>
                     </Link>
                   ) : (
                     <div
                       key={item.label}
-                      className="xl:border-l xl:border-black/8 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                      className="xl:border-l xl:border-white/10 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-base font-semibold text-slate-950">
+                      <p className="mt-2 text-base font-semibold text-white">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 text-white/62">
                         {item.detail}
                       </p>
                     </div>

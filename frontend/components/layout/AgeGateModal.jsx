@@ -55,9 +55,9 @@ export default function AgeGateModal({
         aria-labelledby="adult-gate-title"
         aria-describedby="adult-gate-description"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(41,151,255,0.08),transparent_24%)]" />
         <div className="relative">
-          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]">
+          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]">
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
@@ -78,7 +78,7 @@ export default function AgeGateModal({
             This catalog is for adults only. Are you {currentAge} or older?
           </p>
 
-          <div className="mt-5 rounded-[24px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.06)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="mt-5 rounded-[24px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.06)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
               Region check
             </p>

@@ -12,11 +12,20 @@ export default function EditorialHero({
   stats = [],
   className = "",
   appearance = "default",
-  accent = "amber",
+  accent = "blue",
 }) {
   const hasStats = Array.isArray(stats) && stats.length > 0;
   const resolvedAppearance = appearance === "default" ? "light" : appearance;
   const isLight = resolvedAppearance === "light";
+  const leadStatClass = isLight
+    ? accent === "rose"
+      ? "border-[rgba(199,40,40,0.12)] bg-[rgba(199,40,40,0.05)] dark:border-white/10 dark:bg-white/[0.05]"
+      : accent === "emerald"
+        ? "border-emerald-200 bg-emerald-50/70 dark:border-white/10 dark:bg-white/[0.05]"
+        : accent === "cyan"
+          ? "border-cyan-200 bg-cyan-50/70 dark:border-white/10 dark:bg-white/[0.05]"
+          : "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] dark:border-white/10 dark:bg-white/[0.05]"
+    : "border-white/10 bg-white/[0.04] shadow-none";
 
   return (
     <SurfacePanel
@@ -92,9 +101,9 @@ export default function EditorialHero({
                   "rounded-[20px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
                   isLight
                     ? index === 0
-                      ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.07)] dark:border-white/10 dark:bg-white/[0.05]"
+                      ? leadStatClass
                       : "border-black/6 bg-white/76 dark:border-white/8 dark:bg-white/[0.04]"
-                    : "border-white/10 bg-white/[0.04] shadow-none",
+                    : leadStatClass,
                 )}
               >
                 <p

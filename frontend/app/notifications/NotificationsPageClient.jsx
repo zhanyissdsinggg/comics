@@ -219,7 +219,7 @@ export default function NotificationsPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Notifications"
             title="Reading updates."
             description="Chapters, offers, and free unlocks stay in one inbox."
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >

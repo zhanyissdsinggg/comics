@@ -137,7 +137,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
       style={{
         background:
           coverTone ||
-          "linear-gradient(160deg, rgba(134,98,69,0.18) 0%, rgba(36,28,22,0.08) 100%)",
+          "linear-gradient(160deg, rgba(0,113,227,0.18) 0%, rgba(15,23,42,0.08) 100%)",
       }}
     >
       <span className="line-clamp-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-900/75">
@@ -175,7 +175,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                  <span className="rounded-full border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                     {item.badge}
                   </span>
                 ) : null}
@@ -208,7 +208,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-black/6">
                 <div
-                  className="h-full rounded-full bg-[var(--gush-accent-strong,#63472f)]"
+                  className="h-full rounded-full bg-[var(--gush-accent-strong,#0058cc)]"
                   style={{
                     width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
                   }}
@@ -603,7 +603,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[26px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-5">
+        <div className="rounded-[26px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-950">
@@ -643,7 +643,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     isActive
-                      ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.09)] text-slate-950"
+                      ? "border-[rgba(0,113,227,0.18)] bg-[rgba(0,113,227,0.09)] text-slate-950"
                       : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
                   }`}
                 >
@@ -678,7 +678,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               </div>
             ) : (
               <div className="rounded-[26px] border border-dashed border-black/10 bg-[#f8f9fc] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent-strong,#63472f)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent-strong,#0058cc)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-semibold text-slate-950">

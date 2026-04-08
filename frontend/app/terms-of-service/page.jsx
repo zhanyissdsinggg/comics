@@ -86,7 +86,7 @@ function LegalSection({
   children = null,
 }) {
   return (
-    <SurfacePanel className={className} appearance="light" accent="amber">
+    <SurfacePanel className={className} appearance="light" accent="blue">
       <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
         {title}
       </h2>
@@ -95,7 +95,7 @@ function LegalSection({
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#866245)]">
+          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#0071e3)]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -114,7 +114,7 @@ function ContactCard() {
         <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.legalEmail}`}
-          className="text-[var(--gush-accent,#866245)] transition hover:text-[var(--gush-accent-strong,#63472f)]"
+          className="text-[var(--gush-accent,#0071e3)] transition hover:text-[var(--gush-accent-strong,#0058cc)]"
         >
           {siteConfig.legalEmail}
         </a>
@@ -138,7 +138,7 @@ export default function TermsOfServicePage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Terms"
             title="Terms of service."
             description={
@@ -147,7 +147,7 @@ export default function TermsOfServicePage() {
                 using the site, you agree to these Terms and our{" "}
                 <Link
                   href="/privacy-policy"
-                  className="text-[var(--gush-accent,#866245)] transition hover:text-[var(--gush-accent-strong,#63472f)]"
+                  className="text-[var(--gush-accent,#0071e3)] transition hover:text-[var(--gush-accent-strong,#0058cc)]"
                 >
                   Privacy Policy
                 </Link>
@@ -176,7 +176,7 @@ export default function TermsOfServicePage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >

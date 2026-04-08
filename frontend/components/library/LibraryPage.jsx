@@ -816,7 +816,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
     const commonAccentClass =
       "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
     const primaryAccentClass =
-      "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]";
+      "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]";
 
     return [
       {
@@ -908,7 +908,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             secondary=""
             stats={libraryStats}
             appearance="light"
-            accent="amber"
+            accent="blue"
             actions={
               <>
                 {resumeSpotlightReadHref ? (
@@ -965,7 +965,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -1049,7 +1049,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         ) : null}
 
         {showLibraryStale ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-3 text-sm text-slate-700">
             Reconnecting. Showing saved data.
           </div>
         ) : null}
@@ -1070,8 +1070,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.07)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
+                    <div className="rounded-[28px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.07)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
                           : "Your Shelf"}
@@ -1094,7 +1094,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-white/85">
                             <div
-                              className="h-full rounded-full bg-[var(--gush-accent-strong,#63472f)]"
+                              className="h-full rounded-full bg-[var(--gush-accent-strong,#0058cc)]"
                               style={{
                                 width: `${Math.round(resumeSpotlightProgressWidth)}%`,
                               }}
@@ -1164,8 +1164,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.07)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
+                    <div className="rounded-[28px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.07)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
                         Your Shelf
                       </p>
                       <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">

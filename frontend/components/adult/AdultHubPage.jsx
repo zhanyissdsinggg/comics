@@ -269,9 +269,9 @@ export default function AdultHubPage() {
   );
   const adultModeActionLabel = isAdultMode ? "18+ is on." : "18+ is off.";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -287,13 +287,13 @@ export default function AdultHubPage() {
               isAdultMode ? "Access is on." : "Sign in and confirm access."
             }
             stats={adultStats}
-            accent="amber"
+            accent="blue"
             appearance="light"
           />
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -342,7 +342,7 @@ export default function AdultHubPage() {
         </section>
 
         {showStale ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-3 text-sm text-[color:var(--gush-ink)]">
             Showing cached 18+ catalog data. Reconnect to refresh the latest
             titles.
           </div>

@@ -516,7 +516,7 @@ export default function StorePage({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const fieldClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[rgba(134,98,69,0.24)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[rgba(0,113,227,0.24)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
@@ -535,13 +535,13 @@ export default function StorePage({
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
-            accent="amber"
+            accent="blue"
             appearance="light"
           />
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -763,7 +763,7 @@ export default function StorePage({
                     Buy once.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4">
+                <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">
                     Membership
                   </p>

@@ -647,6 +647,10 @@ export default function SeriesPage({
       )[0] || null
     );
   }, [episodes]);
+  const primaryButtonClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_18px_34px_rgba(0,113,227,0.22)]";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -835,21 +839,21 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push("/rankings?view=featured")}
-                className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className={primaryButtonClass}
               >
                 Browse Series
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
                 Explore Comics
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
                 Search
               </button>
@@ -885,7 +889,7 @@ export default function SeriesPage({
             <button
               type="button"
               onClick={() => router.push("/rankings?view=featured")}
-              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className={secondaryButtonClass}
             >
               Browse Series
             </button>
@@ -894,7 +898,7 @@ export default function SeriesPage({
               onClick={() =>
                 router.push(isUnavailable ? "/support" : "/search")
               }
-              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className={secondaryButtonClass}
             >
               {isUnavailable ? "Get Help" : "Search"}
             </button>
@@ -954,10 +958,10 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-6 rounded-[28px] border border-[rgba(134,98,69,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
+          <div className="mb-6 rounded-[30px] border border-[rgba(0,113,227,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent)]">
                   {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                 </p>
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
@@ -970,7 +974,7 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={handleReturnToDiscovery}
-                className="shrink-0 rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={`shrink-0 ${secondaryButtonClass}`}
               >
                 {discoveryContext.returnLabel}
               </button>

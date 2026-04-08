@@ -239,7 +239,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
-          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
       },
       {
         id: "support",
@@ -262,7 +262,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
         accentClass:
-          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
       },
       {
         id: "membership",
@@ -315,7 +315,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? () => scrollToSection("purchase-history")
           : signInToOrders,
         accentClass:
-          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
       },
       {
         id: "membership-charges",
@@ -382,7 +382,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Orders"
             title={
               viewerSignedIn ? "Receipts and billing." : "Sign in for receipts."
@@ -396,7 +396,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -467,7 +467,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             className={
               feedback.type === "error"
                 ? "border border-red-200 bg-red-50 text-red-600"
-                : "border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-700"
+                : "border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-700"
             }
           >
             <p
@@ -480,17 +480,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel
-            className="border border-amber-200 bg-amber-50 text-amber-700"
+            className="border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-700"
             appearance="light"
             tone="warning"
-            accent="amber"
+            accent="blue"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-sm font-semibold">
                   Need help with a charge?
                 </p>
-                <p className="text-sm text-amber-700/85">
+                <p className="text-sm text-slate-600">
                   You can still review purchases here. Include the order ID if
                   something looks off.
                 </p>

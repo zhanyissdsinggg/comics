@@ -68,7 +68,7 @@ export default function FAQPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Help"
             title="Quick answers first."
             description="Billing, account access, membership, and 18+ settings."
@@ -110,7 +110,7 @@ export default function FAQPage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >

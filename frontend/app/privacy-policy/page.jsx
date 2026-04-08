@@ -80,7 +80,7 @@ function LegalSection({
   children = null,
 }) {
   return (
-    <SurfacePanel className={className} appearance="light" accent="amber">
+    <SurfacePanel className={className} appearance="light" accent="blue">
       <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
         {title}
       </h2>
@@ -89,7 +89,7 @@ function LegalSection({
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#866245)]">
+          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent)]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -103,12 +103,12 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
       <p className="text-sm text-slate-600">
         <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
-          className="text-[var(--gush-accent,#866245)] transition hover:text-[var(--gush-accent-strong,#63472f)]"
+          className="text-[var(--gush-accent)] transition hover:text-[var(--gush-accent)]"
         >
           {siteConfig.privacyEmail}
         </a>
@@ -124,6 +124,10 @@ function ContactCard() {
 }
 
 export default function PrivacyPolicyPage() {
+  const primaryButtonClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -132,7 +136,7 @@ export default function PrivacyPolicyPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Privacy"
             title="Privacy."
             description={`What data ${siteConfig.companyName} collects, why we need it, and how to contact us about it.`}
@@ -158,7 +162,7 @@ export default function PrivacyPolicyPage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -176,13 +180,13 @@ export default function PrivacyPolicyPage() {
             <div className="flex flex-col gap-2.5">
               <a
                 href={`mailto:${siteConfig.privacyEmail}`}
-                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className={primaryButtonClass}
               >
                 Email privacy
               </a>
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
                 Open Support
               </a>

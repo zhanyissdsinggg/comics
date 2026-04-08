@@ -28,6 +28,10 @@ const CONTACT_LINKS = [
 ];
 
 export default function AboutPage() {
+  const primaryButtonClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-3 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -36,22 +40,16 @@ export default function AboutPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="About Gush"
             title="Stories first. Everything else stays quiet."
             description="Original comics and serialized fiction for calmer reading."
             actions={
               <>
-                <Link
-                  href="/support"
-                  className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
+                <Link href="/support" className={primaryButtonClass}>
                   Open Support
                 </Link>
-                <Link
-                  href="/faq"
-                  className="rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                >
+                <Link href="/faq" className={secondaryButtonClass}>
                   View FAQ
                 </Link>
               </>
@@ -60,7 +58,7 @@ export default function AboutPage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -76,15 +74,12 @@ export default function AboutPage() {
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <Link
-                href="/support"
-                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
+              <Link href="/support" className={primaryButtonClass}>
                 Open Support
               </Link>
               <a
                 href={`mailto:${siteConfig.legalEmail}`}
-                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
                 Email legal
               </a>
@@ -144,7 +139,7 @@ export default function AboutPage() {
                   <a
                     key={item.label}
                     href={item.href}
-                    className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                    className={secondaryButtonClass}
                   >
                     {item.label}
                   </a>
@@ -152,7 +147,7 @@ export default function AboutPage() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                    className={secondaryButtonClass}
                   >
                     {item.label}
                   </Link>
@@ -168,16 +163,10 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/support"
-                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
+              <Link href="/support" className={primaryButtonClass}>
                 Open Support
               </Link>
-              <Link
-                href="/privacy-policy"
-                className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-              >
+              <Link href="/privacy-policy" className={secondaryButtonClass}>
                 Privacy
               </Link>
             </div>

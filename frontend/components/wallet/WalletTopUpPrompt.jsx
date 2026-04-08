@@ -180,7 +180,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           borderTopRightRadius: "1.75rem",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
 
         <div className="relative flex justify-center pb-2 pt-3 sm:hidden">
           <div className="h-1 w-10 rounded-full bg-slate-300" />
@@ -198,7 +198,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]">
                 <Wallet size={30} />
               </div>
             </div>
@@ -207,7 +207,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </h2>
             <p className="text-sm text-slate-500">
               Balance:{" "}
-              <span className="font-semibold text-[var(--gush-accent-strong,#63472f)]">
+              <span className="font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                 {formatUSNumber(currentPoints)} points
               </span>
             </p>
@@ -244,7 +244,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     }
                     className={`relative w-full rounded-[24px] border p-4 text-left shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] active:scale-[0.99] ${
                       isHighlighted
-                        ? "border-[rgba(134,98,69,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))]"
+                        ? "border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))]"
                         : "border-black/8 bg-white"
                     }`}
                   >
@@ -259,7 +259,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
                             isHighlighted
-                              ? "bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]"
+                              ? "bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]"
                               : "bg-[#f8f9fc] text-slate-500"
                           }`}
                         >
@@ -271,7 +271,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                               {getPackageTitle(pkg)}
                             </span>
                             {bonusPts > 0 ? (
-                              <span className="flex items-center gap-1 rounded-full bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                              <span className="flex items-center gap-1 rounded-full bg-[rgba(0,113,227,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                                 <Gift size={12} />+{formatUSNumber(bonusPts)}
                               </span>
                             ) : null}
@@ -320,9 +320,9 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           )}
 
-          <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-4">
+          <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent-strong,#63472f)]">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent-strong,#0058cc)]">
                 <Sparkles size={16} />
               </div>
               <div>

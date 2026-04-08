@@ -23,7 +23,7 @@ export default function Chip({
           "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold",
           active
             ? isLight
-              ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.08)] text-slate-950"
+              ? "border-[rgba(0,113,227,0.18)] bg-[rgba(0,113,227,0.08)] text-slate-950"
               : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
             : isLight
               ? "border-black/8 bg-white text-slate-600"
@@ -44,10 +44,10 @@ export default function Chip({
         "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-200",
         active
           ? isLight
-            ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.08)] text-slate-950 shadow-[0_10px_20px_rgba(134,98,69,0.08)]"
+            ? "border-[rgba(0,113,227,0.18)] bg-[rgba(0,113,227,0.08)] text-slate-950 shadow-[0_10px_20px_rgba(0,113,227,0.08)]"
             : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
           : isLight
-            ? "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-950"
+            ? "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(248,248,250,0.92)] hover:text-slate-950"
             : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
         className,
       )}

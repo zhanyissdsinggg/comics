@@ -89,24 +89,29 @@ export default function AdultGatePage() {
     });
   }, [reason, returnTo]);
 
+  const primaryButtonClass =
+    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+
   return (
     <div className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
       <div className="gush-page-ambient" />
       <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
         <section className="grid gap-5 pt-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-          <section className="rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
+          <section className="rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
               18+ access
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              <span className="rounded-full border border-[color:var(--gush-border)] bg-white/84 px-3 py-1 text-xs text-slate-600">
                 Private by default
               </span>
-              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              <span className="rounded-full border border-[color:var(--gush-border)] bg-white/84 px-3 py-1 text-xs text-slate-600">
                 One quick check
               </span>
-              <span className="rounded-full border border-black/8 bg-white/84 px-3 py-1 text-xs text-slate-600">
+              <span className="rounded-full border border-[color:var(--gush-border)] bg-white/84 px-3 py-1 text-xs text-slate-600">
                 Easy to turn off
               </span>
             </div>
@@ -117,7 +122,7 @@ export default function AdultGatePage() {
               {descriptionMap[reason]}
             </p>
 
-            <div className="mt-5 rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4 text-left">
+            <div className="mt-5 rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4 text-left">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 What happens next
               </p>
@@ -131,14 +136,14 @@ export default function AdultGatePage() {
               <button
                 type="button"
                 onClick={handleOpen}
-                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className={primaryButtonClass}
               >
                 {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
                 Back to all titles
               </button>
@@ -154,7 +159,7 @@ export default function AdultGatePage() {
 
           <SurfacePanel
             tone="muted"
-            accent="amber"
+            accent="blue"
             appearance="light"
             className="flex h-full flex-col justify-between space-y-6"
           >
@@ -175,7 +180,7 @@ export default function AdultGatePage() {
             </div>
 
             <div className="space-y-3 text-sm text-slate-600">
-              <div className="rounded-[22px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Return target
                 </p>
@@ -183,7 +188,7 @@ export default function AdultGatePage() {
                   {returnTo}
                 </p>
               </div>
-              <div className="rounded-[22px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Current reason
                 </p>

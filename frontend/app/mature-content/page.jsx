@@ -88,7 +88,7 @@ export default function MatureContentPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="amber"
+            accent="blue"
             eyebrow="Mature content"
             title="18+ access."
             description="Mature titles stay hidden until you turn them on and complete the age check."
@@ -131,7 +131,7 @@ export default function MatureContentPage() {
           <SurfacePanel
             tone="muted"
             appearance="light"
-            accent="amber"
+            accent="blue"
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
@@ -169,7 +169,7 @@ export default function MatureContentPage() {
 
         <section className="grid gap-4 lg:grid-cols-2">
           {CONTROL_CARDS.map((card) => (
-            <SurfacePanel key={card.title} appearance="light" accent="amber">
+            <SurfacePanel key={card.title} appearance="light" accent="blue">
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.title}
               </h2>
@@ -181,7 +181,7 @@ export default function MatureContentPage() {
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Checklist
@@ -208,7 +208,7 @@ export default function MatureContentPage() {
             </ul>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
+          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Related pages
@@ -252,7 +252,7 @@ export default function MatureContentPage() {
           </SurfacePanel>
         </section>
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="amber">
+        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               FAQ
