@@ -1,6 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 import { siteConfig } from "../../lib/siteConfig";
 
 const primaryFooterLinks = [
@@ -180,6 +184,7 @@ export default function SiteFooter({
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
+  const forceDocumentHomeNavigation = shouldUseDocumentNavigation(pathname, "/");
   const footerPrimaryLinks = filterLinks(
     isHome && isCompact ? homePrimaryFooterLinks : primaryFooterLinks,
     pathname,
@@ -190,6 +195,40 @@ export default function SiteFooter({
   );
   const footerSections = filterSections(fullFooterSections, pathname);
   const footerTagline = taglineOverride ?? siteConfig.tagline;
+  const FooterHomeLink = forceDocumentHomeNavigation ? "a" : Link;
+  const footerHomeLinkProps = forceDocumentHomeNavigation
+    ? {
+        href: "/",
+        onClick: (event) => {
+          event.preventDefault();
+          navigateWithDocument("/");
+        },
+      }
+    : { href: "/" };
+  const renderInternalLink = (link, className) => {
+    const useDocumentNavigation = shouldUseDocumentNavigation(pathname, link.href);
+    if (useDocumentNavigation) {
+      return (
+        <a
+          key={link.href}
+          href={link.href}
+          onClick={(event) => {
+            event.preventDefault();
+            navigateWithDocument(link.href);
+          }}
+          className={className}
+        >
+          {link.label}
+        </a>
+      );
+    }
+
+    return (
+      <Link key={link.href} href={link.href} className={className}>
+        {link.label}
+      </Link>
+    );
+  };
 
   if (isCompact) {
     return (
@@ -203,12 +242,12 @@ export default function SiteFooter({
         <div className="mx-auto max-w-[1280px] px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-md space-y-2">
-              <Link
-                href="/"
+              <FooterHomeLink
+                {...footerHomeLinkProps}
                 className={`font-display text-2xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}
               >
                 {siteConfig.siteName}
-              </Link>
+              </FooterHomeLink>
               {showTagline && footerTagline ? (
                 <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
                   {footerTagline}
@@ -217,15 +256,14 @@ export default function SiteFooter({
             </div>
 
             <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm">
-              {footerPrimaryLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {footerPrimaryLinks.map((link) =>
+                renderInternalLink(
+                  link,
+                  isHome
+                    ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white"
+                    : "text-neutral-300 transition-colors hover:text-white",
+                ),
+              )}
             </nav>
           </div>
 
@@ -243,13 +281,12 @@ export default function SiteFooter({
               </a>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 {footerMetaLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
-                  >
-                    {link.label}
-                  </Link>
+                  renderInternalLink(
+                    link,
+                    isHome
+                      ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
+                      : "text-neutral-400 transition-colors hover:text-white",
+                  )
                 ))}
                 <FooterAgeBadge isHome={isHome} />
               </div>
@@ -281,12 +318,12 @@ export default function SiteFooter({
               <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400 dark:text-neutral-500" : "text-emerald-300/75"}`}>
                 Stories
               </p>
-              <Link
-                href="/"
+              <FooterHomeLink
+                {...footerHomeLinkProps}
                 className={`font-display text-3xl font-semibold tracking-tight ${isHome ? "text-slate-950 dark:text-white" : "text-white"}`}
               >
                 {siteConfig.siteName}
-              </Link>
+              </FooterHomeLink>
               {showTagline && footerTagline ? (
                 <p className={`text-sm leading-6 ${isHome ? "text-slate-600 dark:text-neutral-300" : "text-neutral-300"}`}>
                   {footerTagline}
@@ -302,13 +339,22 @@ export default function SiteFooter({
                 {siteConfig.supportEmail}
               </a>
               {contactActions.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
-                >
-                  {item.label}
-                </Link>
+                item.href.startsWith("mailto:") ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  renderInternalLink(
+                    item,
+                    isHome
+                      ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white"
+                      : "text-neutral-300 transition-colors hover:text-white",
+                  )
+                )
               ))}
             </div>
           </div>
@@ -322,12 +368,10 @@ export default function SiteFooter({
                 <ul className="space-y-2.5">
                   {section.links.map((link) => (
                     <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className={`text-sm transition-colors ${isHome ? "text-slate-600 hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`}
-                      >
-                        {link.label}
-                      </Link>
+                      {renderInternalLink(
+                        link,
+                        `text-sm transition-colors ${isHome ? "text-slate-600 hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`,
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -344,13 +388,12 @@ export default function SiteFooter({
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {footerMetaLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
-                >
-                  {link.label}
-                </Link>
+                renderInternalLink(
+                  link,
+                  isHome
+                    ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
+                    : "text-neutral-400 transition-colors hover:text-white",
+                )
               ))}
               <FooterAgeBadge isHome={isHome} />
             </div>

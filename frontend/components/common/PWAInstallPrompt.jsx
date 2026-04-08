@@ -10,10 +10,38 @@ const PWAInstallPrompt = React.memo(() => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      setIsMobileViewport(false);
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const syncViewport = (event) => {
+      setIsMobileViewport(event.matches);
+    };
+
+    syncViewport(mediaQuery);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncViewport);
+      return () => mediaQuery.removeEventListener("change", syncViewport);
+    }
+
+    mediaQuery.addListener(syncViewport);
+    return () => mediaQuery.removeListener(syncViewport);
+  }, []);
+
+  useEffect(() => {
     if (isAdminRoute) {
+      setShowPrompt(false);
+      return;
+    }
+
+    if (isMobileViewport) {
       setShowPrompt(false);
       return;
     }
@@ -59,7 +87,7 @@ const PWAInstallPrompt = React.memo(() => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, [isAdminRoute]);
+  }, [isAdminRoute, isMobileViewport]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) {
@@ -78,7 +106,7 @@ const PWAInstallPrompt = React.memo(() => {
     localStorage.setItem("mn_pwa_prompt_dismissed", "true");
   }, []);
 
-  if (isAdminRoute || isInstalled || !showPrompt) {
+  if (isAdminRoute || isInstalled || isMobileViewport || !showPrompt) {
     return null;
   }
 

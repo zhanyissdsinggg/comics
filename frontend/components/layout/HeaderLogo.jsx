@@ -2,19 +2,36 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useBrandingStore } from "../../store/useBrandingStore";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 import { siteConfig } from "../../lib/siteConfig";
 
 const BRAND_SUBNOTE = "Comics and novels";
 
 export default function HeaderLogo({ variant = "default" }) {
+  const pathname = usePathname() || "/";
   const { branding } = useBrandingStore();
   const isHome = variant === "home";
   const isLight = variant === "light";
+  const forceDocumentNavigation = shouldUseDocumentNavigation(pathname, "/");
+  const RootLink = forceDocumentNavigation ? "a" : Link;
+  const rootLinkProps = forceDocumentNavigation
+    ? {
+        href: "/",
+        onClick: (event) => {
+          event.preventDefault();
+          navigateWithDocument("/");
+        },
+      }
+    : { href: "/" };
 
   return (
-    <Link
-      href="/"
+    <RootLink
+      {...rootLinkProps}
       aria-label="Go to home"
       className="group flex shrink-0 items-center gap-3 rounded-full pr-2 text-left transition-all duration-300"
     >
@@ -70,6 +87,6 @@ export default function HeaderLogo({ variant = "default" }) {
           {BRAND_SUBNOTE}
         </span>
       </span>
-    </Link>
+    </RootLink>
   );
 }

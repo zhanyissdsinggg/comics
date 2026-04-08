@@ -7,7 +7,6 @@ import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import NetworkFallback from "../common/NetworkFallback";
 import EmptyState from "../common/EmptyState";
 import SkeletonCard from "../common/SkeletonCard";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
@@ -684,32 +683,14 @@ export default function CreatorsHubPage({
     return <CreatorDirectorySkeleton />;
   }
 
-  if (error) {
-    return (
-      <main className="gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient" />
-        <SiteHeader variant="home" />
-        <div className="gush-page-main">
-          <NetworkFallback
-            compact
-            title="The creator directory is unavailable right now."
-            description="Try again or open Search."
-            onRetry={retryCreatorsDirectory}
-          >
-            <button
-              type="button"
-              onClick={() => router.push("/search")}
-              className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-            >
-              Search
-            </button>
-          </NetworkFallback>
-        </div>
-      </main>
-    );
-  }
+  if (error || !creators.length) {
+    const fallbackDescription = error
+      ? "Browse stories while public creator pages catch up."
+      : "Live titles do not yet expose a full public creator directory.";
+    const fallbackDeskTitle = error
+      ? "Browse stories for now."
+      : "No live creator directory yet.";
 
-  if (!creators.length) {
     return (
       <main className="gush-home-shell overflow-hidden">
         <div className="gush-page-ambient" />
@@ -720,7 +701,7 @@ export default function CreatorsHubPage({
               accent="blue"
               eyebrow="Creator credits"
               title="Browse stories for now."
-              description="Live titles do not yet expose a full public creator directory."
+              description={fallbackDescription}
               stats={[
                 {
                   label: "Story picks",
@@ -738,7 +719,7 @@ export default function CreatorsHubPage({
             <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  No live creator directory yet.
+                  {fallbackDeskTitle}
                 </h2>
               </div>
 
@@ -757,6 +738,15 @@ export default function CreatorsHubPage({
                 >
                   Search
                 </button>
+                {error ? (
+                  <button
+                    type="button"
+                    onClick={retryCreatorsDirectory}
+                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  >
+                    Retry
+                  </button>
+                ) : null}
               </div>
             </SurfacePanel>
           </section>

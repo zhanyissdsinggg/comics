@@ -366,7 +366,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             description={
               viewerSignedIn
                 ? "Receipts and charge help in one place."
-                : "Receipts and billing history stay here."
+                : "Billing history stays here."
             }
           />
 

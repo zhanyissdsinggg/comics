@@ -245,7 +245,7 @@ export default function AdultHubPage() {
     ],
     [completedItems.length, freeUnlockItems.length, isAdultMode, loading, seriesList.length],
   );
-  const adultModeActionLabel = isAdultMode ? "18+ mode is on." : "18+ stays off by default.";
+  const adultModeActionLabel = isAdultMode ? "18+ is on." : "18+ is off.";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -255,12 +255,12 @@ export default function AdultHubPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="18+ catalog"
-            title="The protected 18+ shelf."
-            description="Private by default. Turn on 18+ only when you want it."
+            title="18+ shelf."
+            description="Private by default."
             secondary={
               isAdultMode
                 ? "Access is on."
-                : "Nothing 18+ appears until you sign in and confirm access."
+                : "Sign in and confirm access."
             }
             stats={adultStats}
             accent="blue"
@@ -286,14 +286,14 @@ export default function AdultHubPage() {
                     onClick={() => router.push("/rankings?type=popular&window=week")}
                     className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
                   >
-                    Open 18+ Top Series
+                    Top series
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
                   >
-                    See free unlocks
+                    Free unlocks
                   </button>
                 </>
               ) : (

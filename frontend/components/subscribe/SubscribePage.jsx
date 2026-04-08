@@ -299,7 +299,7 @@ export default function SubscribePage({
             description={
               subscriptionActionsEnabled
                 ? "Monthly plans."
-                : "Plans are visible."
+                : "Plans preview."
             }
             stats={subscriptionHeroStats}
           />
@@ -414,9 +414,7 @@ export default function SubscribePage({
                   {subscriptionActionsEnabled ? "Sign in first" : "Account"}
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {subscriptionActionsEnabled
-                    ? "Use one account."
-                    : "Use one account."}
+                  Use one account.
                 </h2>
               </div>
               <div className="flex flex-wrap gap-3">

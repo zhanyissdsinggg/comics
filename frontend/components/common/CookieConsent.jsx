@@ -8,6 +8,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 
 export default function CookieConsent() {
   const pathname = usePathname();
@@ -15,6 +19,7 @@ export default function CookieConsent() {
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
   const isHomeRoute = pathname === "/";
+  const useDocumentNavigation = shouldUseDocumentNavigation(pathname, "/privacy-policy");
 
   useEffect(() => {
     if (isAdminRoute || isReaderRoute) {
@@ -65,12 +70,25 @@ export default function CookieConsent() {
               <h3 className="text-base font-semibold text-slate-900">Cookies</h3>
               <p className="text-sm leading-6 text-slate-600">
                 We use cookies to remember sign-in, keep reading progress, and understand what people actually use.{" "}
-                <Link
-                  href="/privacy-policy"
-                  className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
-                >
-                  Learn more
-                </Link>
+                {useDocumentNavigation ? (
+                  <a
+                    href="/privacy-policy"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      navigateWithDocument("/privacy-policy");
+                    }}
+                    className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
+                  >
+                    Learn more
+                  </a>
+                ) : (
+                  <Link
+                    href="/privacy-policy"
+                    className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
+                  >
+                    Learn more
+                  </Link>
+                )}
               </p>
             </div>
           </div>

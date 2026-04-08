@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useHomeStore } from "../../store/useHomeStore";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 
 const DEFAULT_NAV_ITEMS = [
   { id: "home", label: "Home", href: "/" },
@@ -40,17 +44,33 @@ export default function HeaderNav({ variant = "default" }) {
         {navItems.map((item) => {
           const isActive =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const useDocumentNavigation = shouldUseDocumentNavigation(pathname, item.href);
+          const NavItem = useDocumentNavigation ? "a" : Link;
+          const navItemProps = useDocumentNavigation
+            ? {
+                href: item.href,
+                onClick: (event) => {
+                  if (item.id === "home") {
+                    setHomeTab("home");
+                  }
+                  event.preventDefault();
+                  navigateWithDocument(item.href);
+                },
+              }
+            : {
+                href: item.href,
+                onClick: () => {
+                  if (item.id === "home") {
+                    setHomeTab("home");
+                  }
+                },
+              };
 
           return (
-            <Link
+            <NavItem
               key={item.id}
-              href={item.href}
+              {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              onClick={() => {
-                if (item.id === "home") {
-                  setHomeTab("home");
-                }
-              }}
               className={`relative rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
                   ? isHome
@@ -66,7 +86,7 @@ export default function HeaderNav({ variant = "default" }) {
               }`}
             >
               {item.label}
-            </Link>
+            </NavItem>
           );
         })}
       </div>

@@ -1,17 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ADULT_GATE_ACTION_LABELS,
   ADULT_GATE_DESCRIPTIONS,
   ADULT_GATE_TITLES,
 } from "../../lib/adultGateCopy";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 
 export default function AdultGateBlockingPanel({ status, onOpenModal }) {
   const router = useRouter();
+  const pathname = usePathname() || "/";
   const title = ADULT_GATE_TITLES[status] || ADULT_GATE_TITLES.NEED_AGE_CONFIRM;
   const description =
     ADULT_GATE_DESCRIPTIONS[status] || ADULT_GATE_DESCRIPTIONS.NEED_AGE_CONFIRM;
+  const forceDocumentNavigation = shouldUseDocumentNavigation(pathname, "/");
   const trustItems = [
     "Private by default",
     "Age-gated before access",
@@ -60,13 +67,25 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           >
             {ADULT_GATE_ACTION_LABELS[status] || "Continue"}
           </button>
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-          >
-            Browse standard catalog
-          </button>
+          {forceDocumentNavigation ? (
+            <a
+              href="/"
+              onClick={(event) => {
+                event.preventDefault();
+                navigateWithDocument("/");
+              }}
+              className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+            >
+              Browse standard catalog
+            </a>
+          ) : (
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+            >
+              Browse standard catalog
+            </Link>
+          )}
         </div>
       </div>
     </section>

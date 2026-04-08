@@ -653,20 +653,20 @@ export default function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search the catalog";
+  const heroTitle = query ? `Results for "${query}"` : "Search.";
   const heroDescription = query
     ? loading
       ? "Updating results."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across the catalog.`
-    : "Search titles, creators, and genres.";
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
+    : "Titles, creators, and genres.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
   const recoPanelTitle = !query
-    ? "More to read."
+    ? "Next reads."
     : results.length === 0
-      ? "No direct match. Try one of these."
-      : "A few more picks.";
+      ? "Try these."
+      : "More picks.";
   const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
     "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";

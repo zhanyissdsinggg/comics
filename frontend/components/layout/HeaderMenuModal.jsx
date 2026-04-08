@@ -14,6 +14,10 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { cn } from "@/lib/utils";
+import {
+  navigateWithDocument,
+  shouldUseDocumentNavigation,
+} from "../../lib/adultRouteNavigation";
 
 const MENU_LINKS = [
   { label: "Library", href: "/library", icon: Library },
@@ -53,6 +57,31 @@ export default function HeaderMenuModal({
   const walletTotal = Number(paidPts || 0) + Number(bonusPts || 0);
   const isHome = variant === "home";
   const menuLinks = variant === "home" ? HOME_MENU_LINKS : MENU_LINKS;
+  const renderMenuLink = (item, className, content) => {
+    const useDocumentNavigation = shouldUseDocumentNavigation(pathname, item.href);
+    if (useDocumentNavigation) {
+      return (
+        <a
+          key={item.href}
+          href={item.href}
+          onClick={(event) => {
+            event.preventDefault();
+            onClose?.();
+            navigateWithDocument(item.href);
+          }}
+          className={className}
+        >
+          {content}
+        </a>
+      );
+    }
+
+    return (
+      <Link key={item.href} href={item.href} onClick={onClose} className={className}>
+        {content}
+      </Link>
+    );
+  };
 
   if (!open) {
     return null;
@@ -111,26 +140,25 @@ export default function HeaderMenuModal({
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={onClose}
-                        className="flex min-h-12 items-center justify-between gap-3 rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-black/10 hover:bg-white"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-white text-slate-600">
-                            <Icon className="size-4" />
+                      renderMenuLink(
+                        item,
+                        "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-black/10 hover:bg-white",
+                        <>
+                          <span className="flex items-center gap-3">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-white text-slate-600">
+                              <Icon className="size-4" />
+                            </span>
+                            {item.label}
                           </span>
-                          {item.label}
-                        </span>
-                        {item.badge ? (
-                          <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                            {item.badge}
-                          </span>
-                        ) : (
-                          <ChevronRight className="size-4 text-slate-400" />
-                        )}
-                      </Link>
+                          {item.badge ? (
+                            <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                              {item.badge}
+                            </span>
+                          ) : (
+                            <ChevronRight className="size-4 text-slate-400" />
+                          )}
+                        </>,
+                      )
                     );
                   })}
                 </div>
@@ -156,13 +184,11 @@ export default function HeaderMenuModal({
                   >
                     Sign In
                   </button>
-                  <Link
-                    href="/support"
-                    onClick={onClose}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]"
-                  >
-                    Get Help
-                  </Link>
+                  {renderMenuLink(
+                    { label: "Get Help", href: "/support" },
+                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]",
+                    "Get Help",
+                  )}
                 </div>
               </>
             )}
@@ -177,28 +203,26 @@ export default function HeaderMenuModal({
                 const isActive = isActivePath(pathname, item.href);
                 const Icon = item.icon;
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
+                  renderMenuLink(
+                    item,
+                    cn(
                       "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition",
                       isActive
                         ? "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] text-slate-950"
                         : "border-black/8 bg-white text-slate-800 hover:border-black/10 hover:bg-[rgba(246,243,237,0.92)]",
-                    )}
-                  >
-                    <span className="flex items-center gap-3">
-                      {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-[rgba(246,243,237,0.92)] text-slate-600">
-                          <Icon className="size-4" />
-                        </span>
-                      ) : null}
-                      {item.label}
-                    </span>
-                    <ChevronRight className="size-4 text-slate-400" />
-                  </Link>
+                    ),
+                    <>
+                      <span className="flex items-center gap-3">
+                        {Icon ? (
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-[rgba(246,243,237,0.92)] text-slate-600">
+                            <Icon className="size-4" />
+                          </span>
+                        ) : null}
+                        {item.label}
+                      </span>
+                      <ChevronRight className="size-4 text-slate-400" />
+                    </>,
+                  )
                 );
               })}
             </div>

@@ -4,6 +4,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -29,8 +30,9 @@ import {
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
 const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
@@ -522,54 +524,45 @@ function HomeContent({ initialSearchParams = {} }) {
     );
   };
 
-  const goResume = () => {
-    if (!resumeSpotlight?.seriesId) {
-      router.push("/library");
-      return;
-    }
+  const primaryHeroHref = useMemo(() => {
+    if (resumeSpotlight?.seriesId) {
+      const targetPath = resumeSpotlight.episodeId
+        ? `/read/${resumeSpotlight.seriesId}/${resumeSpotlight.episodeId}`
+        : `/series/${resumeSpotlight.seriesId}`;
 
-    const targetPath = resumeSpotlight.episodeId
-      ? `/read/${resumeSpotlight.seriesId}/${resumeSpotlight.episodeId}`
-      : `/series/${resumeSpotlight.seriesId}`;
-
-    router.push(
-      buildPathWithAttribution(targetPath, {
+      return buildPathWithAttribution(targetPath, {
         entryPoint: "HOME_RETURN_LANE",
         campaignId: "resume_spotlight",
         sourcePath: "/",
         sourceSeriesId: resumeSpotlight.seriesId,
         sourceEpisodeId: resumeSpotlight.episodeId || undefined,
         returnTo: targetPath,
-      }),
-    );
-  };
-
-  const openHeroCardCta = () => {
-    if (!heroSeries?.id) {
-      return;
+      });
     }
 
-    if (resumeSeries) {
-      goResume();
-      return;
+    if (heroSeries?.id) {
+      const targetPath = `/series/${heroSeries.id}`;
+      return buildPathWithAttribution(targetPath, {
+        entryPoint: "HOME_HERO_CARD",
+        campaignId: `home_hero_card_${heroSeries.id}`,
+        sourcePath: "/",
+        sourceSeriesId: heroSeries.id,
+        returnTo: targetPath,
+      });
     }
 
-    openHomeSeries(heroSeries.id, "HOME_HERO_CARD", `home_hero_card_${heroSeries.id}`);
-  };
-
-  const openPrimaryHeroCta = () => {
-    if (resumeSeries) {
-      goResume();
-      return;
-    }
-
-    openHeroCardCta();
-  };
+    return "/search";
+  }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
 
   const heroEyebrow = resumeSeries ? "Continue Reading" : "Featured";
   const heroSummary = resumeSeries
     ? "Pick up where you left off."
     : clampText(heroSeries?.description, 170);
+  const primaryHeroCtaLabel = resumeSeries
+    ? "Continue Reading"
+    : heroSeries?.id
+      ? "Read Now"
+      : "Browse Stories";
 
   return (
     <div className="gush-page-shell gush-home-shell overflow-hidden">
@@ -633,15 +626,16 @@ function HomeContent({ initialSearchParams = {} }) {
                     </div>
 
                     <div className="mt-7 flex flex-wrap items-center gap-3">
-                      <Button
-                        type="button"
-                        size="lg"
-                        onClick={openPrimaryHeroCta}
-                        className="h-12 rounded-full bg-[var(--gush-home-accent)] px-6 text-sm font-semibold text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.22)] hover:bg-[#ffd6a0]"
+                      <Link
+                        href={primaryHeroHref}
+                        className={cn(
+                          buttonVariants({ size: "lg" }),
+                          "h-12 rounded-full bg-[var(--gush-home-accent)] px-6 text-sm font-semibold text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.22)] hover:bg-[#ffd6a0]",
+                        )}
                       >
-                        {resumeSeries ? "Continue Reading" : "Read Now"}
+                        {primaryHeroCtaLabel}
                         <ArrowRight className="size-4" />
-                      </Button>
+                      </Link>
                     </div>
 
                   </div>

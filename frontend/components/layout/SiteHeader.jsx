@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { HomeProvider } from "../../store/useHomeStore";
+import { navigateWithDocument } from "../../lib/adultRouteNavigation";
 import { getCookie } from "../../lib/cookies";
 import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
@@ -114,7 +115,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     } else {
       trackEvent("adult_gate_disabled", { source: "header" });
       if (pathname?.startsWith("/adult")) {
-        router.push("/");
+        navigateWithDocument("/");
       }
     }
 
