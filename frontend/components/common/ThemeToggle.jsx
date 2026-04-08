@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 export default function ThemeToggle({ variant = "default" }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isLight = variant === "light";
+  const isLight =
+    variant === "light" || variant === "home" || variant === "default";
 
   useEffect(() => {
     setMounted(true);
@@ -21,7 +22,9 @@ export default function ThemeToggle({ variant = "default" }) {
         aria-hidden="true"
         className={cn(
           "h-10 w-10 animate-pulse rounded-full border",
-          isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-white/[0.04]",
+          isLight
+            ? "border-black/8 bg-white/80"
+            : "border-white/10 bg-white/[0.04]",
         )}
       />
     );
@@ -47,12 +50,16 @@ export default function ThemeToggle({ variant = "default" }) {
     >
       <Sun
         className={`absolute size-4 transition-all duration-300 ${
-          isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100 text-amber-300"
+          isDark
+            ? "rotate-90 scale-0 opacity-0"
+            : "rotate-0 scale-100 opacity-100 text-[var(--gush-accent)]"
         }`}
       />
       <Moon
         className={`absolute size-4 transition-all duration-300 ${
-          isDark ? "rotate-0 scale-100 opacity-100 text-sky-300" : "-rotate-90 scale-0 opacity-0"
+          isDark
+            ? "rotate-0 scale-100 opacity-100 text-[var(--gush-accent)]"
+            : "-rotate-90 scale-0 opacity-0"
         }`}
       />
     </Button>

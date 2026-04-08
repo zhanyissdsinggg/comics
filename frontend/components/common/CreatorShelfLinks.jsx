@@ -74,8 +74,11 @@ export default function CreatorShelfLinks({
   appearance = "default",
 }) {
   const router = useRouter();
-  const creators = useMemo(() => collectCreators(items, maxCreators), [items, maxCreators]);
-  const isLight = appearance === "light";
+  const creators = useMemo(
+    () => collectCreators(items, maxCreators),
+    [items, maxCreators],
+  );
+  const isLight = appearance === "light" || appearance === "default";
 
   if (creators.length === 0) {
     return null;
@@ -114,14 +117,30 @@ export default function CreatorShelfLinks({
   return (
     <div className={`${baseClassName} ${className}`.trim()}>
       <div className={compact ? "flex flex-col gap-3" : "space-y-3"}>
-        <div className={compact ? "flex flex-wrap items-center gap-2" : "space-y-2"}>
-          <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-emerald-300/80"}`}>
+        <div
+          className={
+            compact ? "flex flex-wrap items-center gap-2" : "space-y-2"
+          }
+        >
+          <p
+            className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-[var(--gush-accent)]/80"}`}
+          >
             {label}
           </p>
           {title ? (
-            <h3 className={`font-display text-lg font-semibold tracking-tight sm:text-xl ${isLight ? "text-slate-950" : "text-white"}`}>{title}</h3>
+            <h3
+              className={`font-display text-lg font-semibold tracking-tight sm:text-xl ${isLight ? "text-slate-950" : "text-white"}`}
+            >
+              {title}
+            </h3>
           ) : null}
-          {description ? <p className={`max-w-3xl text-sm leading-6 ${isLight ? "text-slate-500" : "text-neutral-400"}`}>{description}</p> : null}
+          {description ? (
+            <p
+              className={`max-w-3xl text-sm leading-6 ${isLight ? "text-slate-500" : "text-neutral-400"}`}
+            >
+              {description}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex flex-wrap gap-2.5">
@@ -137,8 +156,14 @@ export default function CreatorShelfLinks({
               }`}
             >
               <span className="flex items-center gap-2">
-                <span className={`text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>{creator.name}</span>
-                <span className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400"}`}>
+                <span
+                  className={`text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
+                >
+                  {creator.name}
+                </span>
+                <span
+                  className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-slate-400 group-hover:text-slate-500" : "text-neutral-500 group-hover:text-neutral-400"}`}
+                >
                   {formatTitleCount(creator.titles)}
                 </span>
                 <span

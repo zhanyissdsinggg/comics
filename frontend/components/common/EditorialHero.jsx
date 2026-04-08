@@ -12,17 +12,18 @@ export default function EditorialHero({
   stats = [],
   className = "",
   appearance = "default",
-  accent = "blue",
+  accent = "amber",
 }) {
   const hasStats = Array.isArray(stats) && stats.length > 0;
-  const isLight = appearance === "light";
+  const resolvedAppearance = appearance === "default" ? "light" : appearance;
+  const isLight = resolvedAppearance === "light";
 
   return (
     <SurfacePanel
       className={cn("relative overflow-hidden p-0", className)}
       tone="highlight"
       accent={accent}
-      appearance={appearance}
+      appearance={resolvedAppearance}
     >
       <div className="relative grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)] xl:items-start">
         <div className="max-w-3xl">
@@ -30,7 +31,9 @@ export default function EditorialHero({
             <p
               className={cn(
                 "text-[11px] font-semibold uppercase tracking-[0.24em]",
-                isLight ? "text-slate-500 dark:text-neutral-400" : "text-neutral-400",
+                isLight
+                  ? "text-slate-500 dark:text-neutral-400"
+                  : "text-neutral-400",
               )}
             >
               {eyebrow}
@@ -50,7 +53,9 @@ export default function EditorialHero({
             <p
               className={cn(
                 "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
-                isLight ? "text-slate-600 dark:text-neutral-300" : "text-neutral-200",
+                isLight
+                  ? "text-slate-600 dark:text-neutral-300"
+                  : "text-neutral-200",
               )}
             >
               {description}
@@ -61,7 +66,9 @@ export default function EditorialHero({
             <p
               className={cn(
                 "mt-2.5 max-w-xl text-sm leading-6",
-                isLight ? "text-slate-500 dark:text-neutral-400" : "text-neutral-400",
+                isLight
+                  ? "text-slate-500 dark:text-neutral-400"
+                  : "text-neutral-400",
               )}
             >
               {secondary}
@@ -85,7 +92,7 @@ export default function EditorialHero({
                   "rounded-[20px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
                   isLight
                     ? index === 0
-                      ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] dark:border-white/10 dark:bg-white/[0.05]"
+                      ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.07)] dark:border-white/10 dark:bg-white/[0.05]"
                       : "border-black/6 bg-white/76 dark:border-white/8 dark:bg-white/[0.04]"
                     : "border-white/10 bg-white/[0.04] shadow-none",
                 )}
@@ -93,7 +100,9 @@ export default function EditorialHero({
                 <p
                   className={cn(
                     "text-[11px] font-semibold uppercase tracking-[0.22em]",
-                    isLight ? "text-slate-500 dark:text-neutral-400" : "text-neutral-400",
+                    isLight
+                      ? "text-slate-500 dark:text-neutral-400"
+                      : "text-neutral-400",
                   )}
                 >
                   {stat.label}
@@ -110,7 +119,9 @@ export default function EditorialHero({
                   <p
                     className={cn(
                       "mt-2 text-sm leading-6",
-                      isLight ? "text-slate-500 dark:text-neutral-400" : "text-neutral-400",
+                      isLight
+                        ? "text-slate-500 dark:text-neutral-400"
+                        : "text-neutral-400",
                     )}
                   >
                     {stat.hint}

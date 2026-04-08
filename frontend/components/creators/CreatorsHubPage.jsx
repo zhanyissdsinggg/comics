@@ -45,18 +45,22 @@ function buildGenreOptions(creators) {
   const counts = new Map();
 
   (Array.isArray(creators) ? creators : []).forEach((creator) => {
-    (Array.isArray(creator?.topGenres) ? creator.topGenres : []).forEach((genre) => {
-      const key = String(genre || "").trim();
-      if (!key) {
-        return;
-      }
+    (Array.isArray(creator?.topGenres) ? creator.topGenres : []).forEach(
+      (genre) => {
+        const key = String(genre || "").trim();
+        if (!key) {
+          return;
+        }
 
-      counts.set(key, (counts.get(key) || 0) + 1);
-    });
+        counts.set(key, (counts.get(key) || 0) + 1);
+      },
+    );
   });
 
   return Array.from(counts.entries())
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+    )
     .map(([genre]) => genre)
     .slice(0, 8);
 }
@@ -100,7 +104,10 @@ function getCreatorStoryBadge(series) {
   }
 
   const updatedAtMs = Date.parse(series?.updatedAt || 0);
-  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+  if (
+    !Number.isNaN(updatedAtMs) &&
+    updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000
+  ) {
     return "Updated";
   }
 
@@ -127,7 +134,9 @@ function buildFallbackSeriesSubtitle(series) {
 }
 
 function summarizeLeadCopy(text, fallback) {
-  const source = String(text || "").replace(/\s+/g, " ").trim();
+  const source = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (!source) {
     return fallback;
   }
@@ -150,10 +159,10 @@ function getCreatorLeadSeries(creator) {
 function isModifiedEvent(event) {
   return Boolean(
     event.metaKey ||
-      event.altKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.button !== 0,
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.button !== 0,
   );
 }
 
@@ -174,7 +183,9 @@ function buildCreatorShelfMeta(creator) {
 }
 
 function formatSeriesTypeLabel(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (!normalized) {
     return "Series";
   }
@@ -194,7 +205,9 @@ function formatTitleCountLabel(count) {
 
 function buildCreatorWorksSummary(creator) {
   const leadSeries = getCreatorLeadSeries(creator);
-  const genres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
+  const genres = Array.isArray(creator?.topGenres)
+    ? creator.topGenres.slice(0, 2)
+    : [];
 
   if (leadSeries?.title) {
     return `Known for ${leadSeries.title}.`;
@@ -222,18 +235,23 @@ function CreatorDirectorySkeleton() {
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel accent="blue" className="space-y-6">
+          <SurfacePanel appearance="light" accent="amber" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/10" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/8" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-100" />
             </div>
           </SurfacePanel>
-          <SurfacePanel tone="muted" accent="blue" className="space-y-3">
+          <SurfacePanel
+            tone="muted"
+            appearance="light"
+            accent="amber"
+            className="space-y-3"
+          >
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-hero-stat-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-white/10 bg-white/[0.05]"
+                className="h-24 animate-pulse rounded-[24px] border border-black/6 bg-white/84"
               />
             ))}
           </SurfacePanel>
@@ -262,7 +280,10 @@ function CreatorDirectorySkeleton() {
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
-            <SkeletonCard key={`creator-grid-skeleton-${index}`} appearance="light" />
+            <SkeletonCard
+              key={`creator-grid-skeleton-${index}`}
+              appearance="light"
+            />
           ))}
         </div>
       </div>
@@ -276,7 +297,9 @@ export default function CreatorsHubPage({
 }) {
   const router = useRouter();
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
-  const [catalog, setCatalog] = useState(Array.isArray(initialCatalog) ? initialCatalog : []);
+  const [catalog, setCatalog] = useState(
+    Array.isArray(initialCatalog) ? initialCatalog : [],
+  );
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -291,7 +314,11 @@ export default function CreatorsHubPage({
   }, []);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/creators")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(
+        consumeCommerceSuccessForPath("/creators"),
+      ),
+    );
   }, []);
 
   useEffect(() => {
@@ -323,39 +350,45 @@ export default function CreatorsHubPage({
         return true;
       }
 
-      setCatalog(Array.isArray(response.data?.series) ? response.data.series : []);
+      setCatalog(
+        Array.isArray(response.data?.series) ? response.data.series : [],
+      );
       setError("");
       return true;
     };
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then((response) => {
-      if (!applyResponse(response)) {
-        return;
-      }
+    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then(
+      (response) => {
+        if (!applyResponse(response)) {
+          return;
+        }
 
-      if (isCurrentRequest()) {
-        setLoading(false);
-      }
+        if (isCurrentRequest()) {
+          setLoading(false);
+        }
 
-      if (response.ok && response.stale) {
-        apiGet(`/api/series?adult=${adultFlag}`, {
-          cacheMs: 30000,
-          bust: true,
-          dedupeMs: 0,
-        }).then((freshResponse) => {
-          if (!isCurrentRequest()) {
-            return;
-          }
-          applyResponse(freshResponse);
-        });
-      }
-    });
+        if (response.ok && response.stale) {
+          apiGet(`/api/series?adult=${adultFlag}`, {
+            cacheMs: 30000,
+            bust: true,
+            dedupeMs: 0,
+          }).then((freshResponse) => {
+            if (!isCurrentRequest()) {
+              return;
+            }
+            applyResponse(freshResponse);
+          });
+        }
+      },
+    );
   }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode, retryTick]);
 
   const creators = useMemo(() => buildCreatorDirectory(catalog), [catalog]);
   const genreOptions = useMemo(() => buildGenreOptions(creators), [creators]);
   const filteredCreators = useMemo(() => {
-    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const normalizedQuery = String(query || "")
+      .trim()
+      .toLowerCase();
 
     return creators.filter((creator) => {
       const matchesCredit =
@@ -365,7 +398,9 @@ export default function CreatorsHubPage({
           : !isCollectiveCreditType(creator?.creditType));
       const matchesGenre =
         activeGenre === "All" ||
-        (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(activeGenre);
+        (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(
+          activeGenre,
+        );
 
       if (!matchesCredit || !matchesGenre) {
         return false;
@@ -387,13 +422,26 @@ export default function CreatorsHubPage({
       return haystack.includes(normalizedQuery);
     });
   }, [activeGenre, creators, creditFilter, query]);
-  const spotlightCreators = useMemo(() => filteredCreators.slice(0, 3), [filteredCreators]);
+  const spotlightCreators = useMemo(
+    () => filteredCreators.slice(0, 3),
+    [filteredCreators],
+  );
   const featuredTeams = useMemo(
-    () => creators.filter((creator) => isCollectiveCreditType(creator?.creditType)).slice(0, 3),
+    () =>
+      creators
+        .filter((creator) => isCollectiveCreditType(creator?.creditType))
+        .slice(0, 3),
     [creators],
   );
   const featuredVoices = useMemo(
-    () => creators.filter((creator) => !isCollectiveCreditType(creator?.creditType) && creator?.titleCount > 1).slice(0, 3),
+    () =>
+      creators
+        .filter(
+          (creator) =>
+            !isCollectiveCreditType(creator?.creditType) &&
+            creator?.titleCount > 1,
+        )
+        .slice(0, 3),
     [creators],
   );
   const fallbackEntryTitles = useMemo(
@@ -401,12 +449,15 @@ export default function CreatorsHubPage({
       [...catalog]
         .filter((series) => series?.id)
         .sort((left, right) => {
-          const scoreDelta = getSeriesSignalScore(right) - getSeriesSignalScore(left);
+          const scoreDelta =
+            getSeriesSignalScore(right) - getSeriesSignalScore(left);
           if (scoreDelta !== 0) {
             return scoreDelta;
           }
 
-          return Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
+          return (
+            Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0)
+          );
         })
         .slice(0, 4)
         .map((series) => {
@@ -446,7 +497,9 @@ export default function CreatorsHubPage({
     });
 
     return Array.from(counts.entries())
-      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .sort(
+        (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+      )
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [catalog]);
@@ -467,11 +520,18 @@ export default function CreatorsHubPage({
     return Array.from(bySlug.values()).slice(0, 6);
   }, [featuredTeams, featuredVoices, spotlightCreators]);
   const collectiveCreatorCount = useMemo(
-    () => creators.filter((creator) => isCollectiveCreditType(creator?.creditType)).length,
+    () =>
+      creators.filter((creator) => isCollectiveCreditType(creator?.creditType))
+        .length,
     [creators],
   );
   const creditedSeriesCount = useMemo(
-    () => creators.reduce((total, creator) => total + Math.max(0, Number(creator?.titleCount || 0)), 0),
+    () =>
+      creators.reduce(
+        (total, creator) =>
+          total + Math.max(0, Number(creator?.titleCount || 0)),
+        0,
+      ),
     [creators],
   );
   const creatorHeroStats = useMemo(
@@ -502,7 +562,7 @@ export default function CreatorsHubPage({
   const filterButtonClass = (isActive) =>
     `rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
       isActive
-        ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+        ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent-strong,#63472f)]"
         : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
     }`;
   const jumpToGenreBrowse = (genre) => {
@@ -515,7 +575,9 @@ export default function CreatorsHubPage({
     }
 
     window.requestAnimationFrame(() => {
-      document.getElementById("creator-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document
+        .getElementById("creator-list")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
 
@@ -533,7 +595,11 @@ export default function CreatorsHubPage({
     });
   };
 
-  const handleCreatorLinkClick = (event, creator, entryPoint = "CREATORS_HUB_GRID") => {
+  const handleCreatorLinkClick = (
+    event,
+    creator,
+    entryPoint = "CREATORS_HUB_GRID",
+  ) => {
     if (!creator?.path) {
       event.preventDefault();
       return;
@@ -551,7 +617,11 @@ export default function CreatorsHubPage({
     }
   };
 
-  const buildSeriesHref = (series, creator, entryPoint = "CREATORS_HUB_TITLE") => {
+  const buildSeriesHref = (
+    series,
+    creator,
+    entryPoint = "CREATORS_HUB_TITLE",
+  ) => {
     if (!series?.id) {
       return "#";
     }
@@ -642,20 +712,22 @@ export default function CreatorsHubPage({
     const entries = [];
     const seenSeriesIds = new Set();
 
-    creatorEntryTitles.forEach(({ creator, series, canStartFromChapterOne: hasOpeningChapter }) => {
-      if (!series?.id || seenSeriesIds.has(series.id)) {
-        return;
-      }
+    creatorEntryTitles.forEach(
+      ({ creator, series, canStartFromChapterOne: hasOpeningChapter }) => {
+        if (!series?.id || seenSeriesIds.has(series.id)) {
+          return;
+        }
 
-      seenSeriesIds.add(series.id);
-      entries.push({
-        id: `creator-${series.id}`,
-        mode: "creator",
-        creator,
-        series,
-        canStartFromChapterOne: hasOpeningChapter,
-      });
-    });
+        seenSeriesIds.add(series.id);
+        entries.push({
+          id: `creator-${series.id}`,
+          mode: "creator",
+          creator,
+          series,
+          canStartFromChapterOne: hasOpeningChapter,
+        });
+      },
+    );
 
     fallbackEntryTitles.forEach((series) => {
       if (!series?.id || seenSeriesIds.has(series.id) || entries.length >= 4) {
@@ -698,7 +770,8 @@ export default function CreatorsHubPage({
         <div className="gush-page-main gush-section-stack">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
-              accent="blue"
+              accent="amber"
+              appearance="light"
               eyebrow="Creator credits"
               title="Browse stories for now."
               description={fallbackDescription}
@@ -716,9 +789,14 @@ export default function CreatorsHubPage({
               ]}
             />
 
-            <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <SurfacePanel
+              tone="muted"
+              accent="amber"
+              appearance="light"
+              className="flex h-full flex-col justify-between space-y-6"
+            >
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
                   {fallbackDeskTitle}
                 </h2>
               </div>
@@ -727,14 +805,14 @@ export default function CreatorsHubPage({
                 <button
                   type="button"
                   onClick={() => router.push("/comics")}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
                 >
                   Browse Comics
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/search")}
-                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
                 >
                   Search
                 </button>
@@ -742,7 +820,7 @@ export default function CreatorsHubPage({
                   <button
                     type="button"
                     onClick={retryCreatorsDirectory}
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
                   >
                     Retry
                   </button>
@@ -771,7 +849,9 @@ export default function CreatorsHubPage({
                   <Link
                     key={`creator-fallback-${series.id}`}
                     href={buildFallbackTitleHref(series)}
-                    onClick={(event) => handleFallbackTitleLinkClick(event, series)}
+                    onClick={(event) =>
+                      handleFallbackTitleLinkClick(event, series)
+                    }
                     className="group block overflow-hidden rounded-[28px] border border-black/6 bg-white text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-black/10 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
                     aria-label={`Open ${series.title}`}
                   >
@@ -799,11 +879,14 @@ export default function CreatorsHubPage({
                 ))}
               </div>
             ) : null}
-
           </SurfacePanel>
 
           <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
-            <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+            <SurfacePanel
+              appearance="light"
+              accent="blue"
+              className="space-y-5"
+            >
               <div>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   Browse by Genre
@@ -816,15 +899,21 @@ export default function CreatorsHubPage({
                     <button
                       key={`creator-fallback-genre-${item.genre}`}
                       type="button"
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=latest`)}
+                      onClick={() =>
+                        router.push(
+                          `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
+                        )
+                      }
                       className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
-                  >
+                    >
                       {item.genre}
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">Use comics, novels, or search.</p>
+                <p className="text-sm text-slate-500">
+                  Use comics, novels, or search.
+                </p>
               )}
             </SurfacePanel>
           </section>
@@ -841,16 +930,22 @@ export default function CreatorsHubPage({
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="blue"
+            accent="amber"
+            appearance="light"
             eyebrow="Creators"
             title="Meet the credited creators."
             description="Writers, artists, studios, and teams on live titles."
             stats={creatorHeroStats}
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div>
-              <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+              <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                 Move between creators and titles.
               </h2>
             </div>
@@ -859,14 +954,14 @@ export default function CreatorsHubPage({
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className={primaryButtonClass}
               >
                 Browse Comics
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 Browse Stories
               </button>
@@ -908,7 +1003,7 @@ export default function CreatorsHubPage({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search creators, studios, or titles"
-              className="rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]"
+              className="rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.18)] focus:ring-4 focus:ring-[rgba(134,98,69,0.08)]"
             />
 
             <div className="flex flex-wrap gap-2.5">
@@ -960,13 +1055,21 @@ export default function CreatorsHubPage({
           <div className="grid gap-4 xl:grid-cols-2">
             {featuredCreatorCards.map((creator) => {
               const leadSeries = getCreatorLeadSeries(creator);
-              const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
+              const creatorGenres = Array.isArray(creator?.topGenres)
+                ? creator.topGenres.slice(0, 2)
+                : [];
 
               return (
                 <Link
                   key={`featured-${creator.slug}`}
                   href={buildCreatorHref(creator, "CREATORS_HUB_FEATURED")}
-                  onClick={(event) => handleCreatorLinkClick(event, creator, "CREATORS_HUB_FEATURED")}
+                  onClick={(event) =>
+                    handleCreatorLinkClick(
+                      event,
+                      creator,
+                      "CREATORS_HUB_FEATURED",
+                    )
+                  }
                   className="block w-full rounded-[28px] border border-black/6 bg-white/90 p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:border-black/12 hover:bg-white hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
                   aria-label={`Open ${creator.name}`}
                 >
@@ -1003,7 +1106,7 @@ export default function CreatorsHubPage({
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                        <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                           {buildCreatorStartLabel(creator)}
                         </span>
                         {creatorGenres.map((genre) => (
@@ -1016,7 +1119,7 @@ export default function CreatorsHubPage({
                         ))}
                       </div>
 
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#63472f)]">
                         View Creator
                       </p>
                     </div>
@@ -1036,110 +1139,145 @@ export default function CreatorsHubPage({
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {guidedDiscoveryEntries.map(({ id, creator, series, canStartFromChapterOne: hasOpeningChapter }) => (
-                <div
-                  key={id}
-                  className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
-                >
-                  <Link
-                    href={
-                      creator
-                        ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
-                        : buildFallbackTitleHref(series)
-                    }
-                    onClick={(event) => {
-                      if (creator) {
-                        handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
-                        return;
-                      }
-                      handleFallbackTitleLinkClick(event, series);
-                    }}
-                    className="group block overflow-hidden rounded-[22px]"
-                    aria-label={`Open ${series.title}`}
+              {guidedDiscoveryEntries.map(
+                ({
+                  id,
+                  creator,
+                  series,
+                  canStartFromChapterOne: hasOpeningChapter,
+                }) => (
+                  <div
+                    key={id}
+                    className="rounded-[28px] border border-black/6 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
                   >
-                    <Cover
-                      tone={series?.coverTone}
-                      coverUrl={series?.coverUrl}
-                      label={series?.title}
-                      eyebrow={creator?.name || series?.subtitle || "Featured title"}
-                      badge={getCreatorStoryBadge(series)}
-                      fallbackVariant="minimal-card"
-                      className="h-56 rounded-[22px] transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
-                  </Link>
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {creator ? formatCreditTypeLabel(creator.creditType) : "Story pick"}
-                        </p>
-                        <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
-                          <Link
-                            href={
-                              creator
-                                ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
-                                : buildFallbackTitleHref(series)
-                            }
-                            onClick={(event) => {
-                              if (creator) {
-                                handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
-                                return;
-                              }
-                              handleFallbackTitleLinkClick(event, series);
-                            }}
-                            className="transition-colors hover:text-[var(--gush-accent,#2f6bff)]"
-                          >
-                            {series.title}
-                          </Link>
-                        </h3>
-                      </div>
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
-                        {creator?.name || series?.type || "Series"}
-                      </span>
-                    </div>
-
-                    <p className="text-sm leading-6 text-slate-600">
-                      {summarizeLeadCopy(
-                        series?.description,
+                    <Link
+                      href={
                         creator
-                          ? `From ${creator.name}.`
-                          : "Featured.",
-                      )}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
-                        {series?.type || "Series"}
-                      </span>
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
-                        {series?.status || "Ongoing"}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <Link
-                        href={
-                          creator
-                            ? buildSeriesHref(series, creator, "CREATORS_HUB_GUIDED_TITLE")
-                            : buildFallbackTitleHref(series)
+                          ? buildSeriesHref(
+                              series,
+                              creator,
+                              "CREATORS_HUB_GUIDED_TITLE",
+                            )
+                          : buildFallbackTitleHref(series)
+                      }
+                      onClick={(event) => {
+                        if (creator) {
+                          handleCreatorSeriesLinkClick(
+                            event,
+                            series,
+                            creator,
+                            "CREATORS_HUB_GUIDED_TITLE",
+                          );
+                          return;
                         }
-                        onClick={(event) => {
-                          if (creator) {
-                            handleCreatorSeriesLinkClick(event, series, creator, "CREATORS_HUB_GUIDED_TITLE");
-                            return;
+                        handleFallbackTitleLinkClick(event, series);
+                      }}
+                      className="group block overflow-hidden rounded-[22px]"
+                      aria-label={`Open ${series.title}`}
+                    >
+                      <Cover
+                        tone={series?.coverTone}
+                        coverUrl={series?.coverUrl}
+                        label={series?.title}
+                        eyebrow={
+                          creator?.name || series?.subtitle || "Featured title"
+                        }
+                        badge={getCreatorStoryBadge(series)}
+                        fallbackVariant="minimal-card"
+                        className="h-56 rounded-[22px] transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+                    </Link>
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                            {creator
+                              ? formatCreditTypeLabel(creator.creditType)
+                              : "Story pick"}
+                          </p>
+                          <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
+                            <Link
+                              href={
+                                creator
+                                  ? buildSeriesHref(
+                                      series,
+                                      creator,
+                                      "CREATORS_HUB_GUIDED_TITLE",
+                                    )
+                                  : buildFallbackTitleHref(series)
+                              }
+                              onClick={(event) => {
+                                if (creator) {
+                                  handleCreatorSeriesLinkClick(
+                                    event,
+                                    series,
+                                    creator,
+                                    "CREATORS_HUB_GUIDED_TITLE",
+                                  );
+                                  return;
+                                }
+                                handleFallbackTitleLinkClick(event, series);
+                              }}
+                              className="transition-colors hover:text-[var(--gush-accent-strong,#63472f)]"
+                            >
+                              {series.title}
+                            </Link>
+                          </h3>
+                        </div>
+                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs text-slate-600">
+                          {creator?.name || series?.type || "Series"}
+                        </span>
+                      </div>
+
+                      <p className="text-sm leading-6 text-slate-600">
+                        {summarizeLeadCopy(
+                          series?.description,
+                          creator ? `From ${creator.name}.` : "Featured.",
+                        )}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                          {series?.type || "Series"}
+                        </span>
+                        <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                          {series?.status || "Ongoing"}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Link
+                          href={
+                            creator
+                              ? buildSeriesHref(
+                                  series,
+                                  creator,
+                                  "CREATORS_HUB_GUIDED_TITLE",
+                                )
+                              : buildFallbackTitleHref(series)
                           }
-                          handleFallbackTitleLinkClick(event, series);
-                        }}
-                        className={primaryButtonClass}
-                      >
-                        {hasOpeningChapter ? "Read Chapter 1" : "View Series"}
-                      </Link>
+                          onClick={(event) => {
+                            if (creator) {
+                              handleCreatorSeriesLinkClick(
+                                event,
+                                series,
+                                creator,
+                                "CREATORS_HUB_GUIDED_TITLE",
+                              );
+                              return;
+                            }
+                            handleFallbackTitleLinkClick(event, series);
+                          }}
+                          className={primaryButtonClass}
+                        >
+                          {hasOpeningChapter ? "Read Chapter 1" : "View Series"}
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
-
           </SurfacePanel>
         ) : null}
 
@@ -1164,11 +1302,18 @@ export default function CreatorsHubPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">Use comics, novels, or search.</p>
+            <p className="text-sm text-slate-500">
+              Use comics, novels, or search.
+            </p>
           )}
         </SurfacePanel>
 
-        <SurfacePanel id="creator-list" appearance="light" accent="blue" className="space-y-5">
+        <SurfacePanel
+          id="creator-list"
+          appearance="light"
+          accent="blue"
+          className="space-y-5"
+        >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
@@ -1176,7 +1321,8 @@ export default function CreatorsHubPage({
               </h2>
             </div>
             <p className="text-sm text-slate-500">
-              {filteredCreators.length.toLocaleString()} match{filteredCreators.length === 1 ? "" : "es"}
+              {filteredCreators.length.toLocaleString()} match
+              {filteredCreators.length === 1 ? "" : "es"}
             </p>
           </div>
         </SurfacePanel>
@@ -1204,7 +1350,9 @@ export default function CreatorsHubPage({
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredCreators.map((creator) => {
                 const leadSeries = getCreatorLeadSeries(creator);
-                const creatorGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 2) : [];
+                const creatorGenres = Array.isArray(creator?.topGenres)
+                  ? creator.topGenres.slice(0, 2)
+                  : [];
 
                 return (
                   <Link
@@ -1244,7 +1392,7 @@ export default function CreatorsHubPage({
                         </p>
 
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                          <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                             {buildCreatorStartLabel(creator)}
                           </span>
                           {creatorGenres.map((genre) => (
@@ -1259,7 +1407,9 @@ export default function CreatorsHubPage({
 
                         <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
                           {buildCreatorShelfMeta(creator).map((item) => (
-                            <span key={`${creator.slug}-list-meta-${item}`}>{item}</span>
+                            <span key={`${creator.slug}-list-meta-${item}`}>
+                              {item}
+                            </span>
                           ))}
                         </div>
                       </div>

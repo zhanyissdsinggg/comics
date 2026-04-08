@@ -78,28 +78,40 @@ export default function SeriesHeader({
   const genres = series.genres || [];
   const isAdult = Boolean(series.adult);
   const isCompleted = String(series.status || "").toLowerCase() === "completed";
-  const headerHighlights = genres.slice(0, 2).map((genre) => ({ label: genre, tone: "genre" }));
+  const headerHighlights = genres
+    .slice(0, 2)
+    .map((genre) => ({ label: genre, tone: "genre" }));
   const primaryAction = onPrimaryAction || null;
   const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
-  const latestEpisodeValue = latestEpisodeNumber ? `Episode ${latestEpisodeNumber}` : "Coming soon";
+  const latestEpisodeValue = latestEpisodeNumber
+    ? `Episode ${latestEpisodeNumber}`
+    : "Coming soon";
   const creatorPresentation = getCreatorPresentation(series);
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
   const heroFacts = [
     {
       label: "Format",
       value: formatSeriesKind(series.type),
-      detail: Array.isArray(genres) && genres.length > 0 ? genres.slice(0, 2).join(" / ") : "Series",
+      detail:
+        Array.isArray(genres) && genres.length > 0
+          ? genres.slice(0, 2).join(" / ")
+          : "Series",
     },
     {
       label: "Status",
-      value: isCompleted ? "Completed" : capitalize(series.status || "updating"),
+      value: isCompleted
+        ? "Completed"
+        : capitalize(series.status || "updating"),
       detail: isCompleted ? "Completed run." : "Still updating.",
     },
     {
       label: "Episodes",
       value: episodeCount > 0 ? `${episodeCount}` : "Coming soon",
-      detail: episodeCount > 0 ? `${episodeCount} listed.` : "No episodes listed yet.",
+      detail:
+        episodeCount > 0
+          ? `${episodeCount} listed.`
+          : "No episodes listed yet.",
     },
     {
       label: "Creator",
@@ -118,13 +130,13 @@ export default function SeriesHeader({
   const primaryActionClassName = [
     "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-colors",
     highlightPrimaryAction
-      ? "border-[rgba(244,201,138,0.34)] bg-[rgba(244,201,138,0.9)] text-slate-950 shadow-[0_18px_40px_rgba(0,0,0,0.18)]"
-      : "border-[rgba(244,201,138,0.3)] bg-[var(--gush-home-accent)] text-slate-950 shadow-[0_18px_42px_rgba(0,0,0,0.2)] hover:bg-[#ffd6a0]",
+      ? "border-[rgba(183,129,64,0.24)] bg-[linear-gradient(180deg,rgba(255,232,202,0.98),rgba(248,214,168,0.98))] text-slate-950 shadow-[0_16px_36px_rgba(183,129,64,0.14)]"
+      : "border-[rgba(183,129,64,0.2)] bg-[linear-gradient(180deg,rgba(255,236,210,0.98),rgba(247,221,184,0.98))] text-slate-950 shadow-[0_14px_34px_rgba(183,129,64,0.12)] hover:border-[rgba(183,129,64,0.28)] hover:bg-[linear-gradient(180deg,rgba(255,240,220,1),rgba(248,226,194,1))]",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
       {highlightPrimaryAction ? (
-        <p className="text-center text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
+        <p className="text-center text-xs font-semibold text-[rgba(138,95,44,0.88)]">
           Unlocked. Keep reading.
         </p>
       ) : null}
@@ -142,23 +154,25 @@ export default function SeriesHeader({
       </button>
     </div>
   ) : null;
-  const visibleHighlights = headerHighlights.filter((item) => Boolean(item?.label)).slice(0, 2);
+  const visibleHighlights = headerHighlights
+    .filter((item) => Boolean(item?.label))
+    .slice(0, 2);
 
   return (
     <header className="py-4 sm:py-6">
-      <section className="relative overflow-hidden rounded-[38px] border border-white/10 bg-[linear-gradient(180deg,#111723,#0c1018)] shadow-[0_32px_90px_rgba(0,0,0,0.28)]">
+      <section className="relative overflow-hidden rounded-[38px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,244,238,0.96))] shadow-[0_28px_72px_rgba(15,23,42,0.08)]">
         {coverBackdropUrl ? (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.12]"
+            className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,20,0.94)_0%,rgba(9,13,20,0.9)_44%,rgba(9,13,20,0.7)_72%,rgba(9,13,20,0.5)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(77,106,215,0.22),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(244,201,138,0.12),transparent_24%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.97)_0%,rgba(255,249,240,0.92)_42%,rgba(250,245,236,0.82)_72%,rgba(246,239,230,0.72)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(183,129,64,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(134,98,69,0.08),transparent_28%)]" />
 
         <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8 xl:p-8">
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[28px] border border-white/12 bg-black/20 shadow-[0_24px_60px_rgba(0,0,0,0.24)]">
+            <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/82 shadow-[0_24px_54px_rgba(15,23,42,0.08)]">
               <div className="aspect-[3/4] w-full overflow-hidden">
                 <Cover
                   tone={series.coverTone}
@@ -176,25 +190,25 @@ export default function SeriesHeader({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72">
+              <span className="rounded-full border border-black/8 bg-white/78 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
                 {formatSeriesKind(series.type)}
               </span>
               {isAdult ? (
-                <span className="rounded-full border border-red-400/30 bg-red-500/[0.12] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-100">
+                <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-red-600">
                   18+
                 </span>
               ) : null}
             </div>
 
-            <h1 className="mt-4 font-display text-[2.35rem] font-semibold leading-[0.94] tracking-[-0.045em] text-white sm:text-[3rem] lg:text-[4.1rem]">
+            <h1 className="mt-4 font-display text-[2.35rem] font-semibold leading-[0.94] tracking-[-0.045em] text-slate-950 sm:text-[3rem] lg:text-[4.1rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/60">
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-600">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
-                  <span className="text-white/24">•</span>
+                  <span className="text-slate-300">•</span>
                   <span>{latestEpisodeValue}</span>
                 </>
               ) : null}
@@ -205,7 +219,7 @@ export default function SeriesHeader({
                 {visibleHighlights.map((item) => (
                   <span
                     key={`${item.tone}-${item.label}`}
-                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-white/72"
+                    className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-3 py-1 text-xs text-slate-600"
                   >
                     {item.label}
                   </span>
@@ -214,11 +228,12 @@ export default function SeriesHeader({
             ) : null}
 
             <div className="mt-6 space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Story
               </p>
-              <p className="max-w-3xl text-[15px] leading-7 text-white/72 sm:text-base sm:leading-8">
-                {series.description || "Open the first episode and see if it lands."}
+              <p className="max-w-3xl text-[15px] leading-7 text-slate-600 sm:text-base sm:leading-8">
+                {series.description ||
+                  "Open the first episode and see if it lands."}
               </p>
             </div>
 
@@ -228,30 +243,40 @@ export default function SeriesHeader({
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="rounded-[22px] border border-white/10 bg-white/[0.06] px-4 py-4 transition hover:border-white/16 hover:bg-white/[0.09]"
+                    className="rounded-[22px] border border-black/8 bg-white/80 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:border-black/12 hover:bg-white"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                       {item.label}
                     </p>
-                    <p className="mt-2 text-base font-semibold text-white">{item.value}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/60">{item.detail}</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">
+                      {item.value}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      {item.detail}
+                    </p>
                   </Link>
                 ) : (
                   <div
                     key={item.label}
-                    className="rounded-[22px] border border-white/10 bg-white/[0.06] px-4 py-4"
+                    className="rounded-[22px] border border-black/8 bg-white/80 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                       {item.label}
                     </p>
-                    <p className="mt-2 text-base font-semibold text-white">{item.value}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/60">{item.detail}</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">
+                      {item.value}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      {item.detail}
+                    </p>
                   </div>
                 ),
               )}
             </div>
 
-            {primaryActions ? <div className="mt-6 max-w-sm">{primaryActions}</div> : null}
+            {primaryActions ? (
+              <div className="mt-6 max-w-sm">{primaryActions}</div>
+            ) : null}
 
             <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (
@@ -260,12 +285,19 @@ export default function SeriesHeader({
                   onClick={onFollowToggle}
                   className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isFollowing
-                      ? "border border-pink-300/30 bg-pink-500/[0.12] text-white shadow-[0_18px_40px_rgba(236,72,153,0.12)]"
-                      : "border border-white/10 bg-white/[0.04] text-white/74 hover:border-pink-300/30 hover:bg-pink-500/[0.1] hover:text-white"
+                      ? "border border-pink-200 bg-pink-50 text-pink-700 shadow-[0_12px_28px_rgba(236,72,153,0.08)]"
+                      : "border border-black/8 bg-white/84 text-slate-600 hover:border-pink-200 hover:bg-pink-50 hover:text-pink-700"
                   }`}
-                  aria-label={isFollowing ? "Remove from library" : "Save to library"}
+                  aria-label={
+                    isFollowing ? "Remove from library" : "Save to library"
+                  }
                 >
-                  <Heart size={18} className={isFollowing ? "fill-current" : "group-hover:scale-110"} />
+                  <Heart
+                    size={18}
+                    className={
+                      isFollowing ? "fill-current" : "group-hover:scale-110"
+                    }
+                  />
                   <span>{isFollowing ? "Saved" : "Save"}</span>
                 </button>
               ) : null}
@@ -273,7 +305,7 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[44px] rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/74 transition-colors hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+                className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950"
               />
             </div>
           </div>

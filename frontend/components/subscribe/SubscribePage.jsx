@@ -7,7 +7,11 @@ import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
-import { getPlanCatalog, resolvePlanCatalog, setPlanCatalog } from "../../lib/subscriptions";
+import {
+  getPlanCatalog,
+  resolvePlanCatalog,
+  setPlanCatalog,
+} from "../../lib/subscriptions";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -39,7 +43,9 @@ function scrollToSection(id) {
     return;
   }
 
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById(id)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 const PLAN_FIT_GUIDE = {
@@ -77,8 +83,12 @@ export default function SubscribePage({
   const { isSignedIn } = useAuthStore();
   const [workingId, setWorkingId] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [planCatalog, setPlanCatalogState] = useState(() => resolvePlanCatalog(initialPlanCatalog || getPlanCatalog()));
-  const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
+  const [planCatalog, setPlanCatalogState] = useState(() =>
+    resolvePlanCatalog(initialPlanCatalog || getPlanCatalog()),
+  );
+  const [billingAvailability, setBillingAvailability] = useState(
+    initialBillingAvailability,
+  );
   const isActive = Boolean(subscription?.active);
   const returnTo = getSearchParam(initialSearchParams, "returnTo", "/account");
   const launchAccessLabel = isSignedIn ? "Open account" : "Sign in";
@@ -89,7 +99,10 @@ export default function SubscribePage({
     }
     openAuthPrompt();
   };
-  const routeSearchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
+  const routeSearchParams = useMemo(
+    () => toURLSearchParams(initialSearchParams),
+    [initialSearchParams],
+  );
 
   const routeAttribution = useMemo(
     () => readPaymentAttributionFromSearchParams(routeSearchParams),
@@ -97,10 +110,14 @@ export default function SubscribePage({
   );
   const attribution = useMemo(
     () =>
-      mergePaymentAttribution(loadPersistedPaymentAttribution(), routeAttribution, {
-        entryPoint: routeAttribution?.entryPoint || "SUBSCRIBE_PAGE",
-        returnTo,
-      }),
+      mergePaymentAttribution(
+        loadPersistedPaymentAttribution(),
+        routeAttribution,
+        {
+          entryPoint: routeAttribution?.entryPoint || "SUBSCRIBE_PAGE",
+          returnTo,
+        },
+      ),
     [returnTo, routeAttribution],
   );
 
@@ -142,7 +159,10 @@ export default function SubscribePage({
     }
   }, [attribution]);
 
-  const subscriptionMode = resolvePublicCommerceMode(billingAvailability, "subscriptionActionsEnabled");
+  const subscriptionMode = resolvePublicCommerceMode(
+    billingAvailability,
+    "subscriptionActionsEnabled",
+  );
   const subscriptionActionsEnabled = subscriptionMode.isRealCommerceLive;
   const subscriptionPrelaunch = subscriptionMode.isPrelaunch;
   const subscriptionAvailabilityLabel = isActive
@@ -165,7 +185,9 @@ export default function SubscribePage({
           title: plan.title,
           priceLabel,
           dailyFreeUnlocks: perks?.dailyFreeUnlocks ?? "-",
-          waitTimeLabel: perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-",
+          waitTimeLabel: perks?.ttfMultiplier
+            ? `${Math.round(perks.ttfMultiplier * 100)}%`
+            : "-",
           monthlyPoints: perks?.voucherPts ?? "-",
           savingsLabel: perks?.discountPct ? `${perks.discountPct}% off` : "-",
           bestFor: PLAN_FIT_GUIDE[key]?.title || "Recurring readers",
@@ -188,13 +210,17 @@ export default function SubscribePage({
 
   const handleSubscribe = async (planId) => {
     if (!isSignedIn) {
-      setFeedback("Sign in first so membership, receipts, and renewal history stay on one account.");
+      setFeedback(
+        "Sign in first so membership, receipts, and renewal history stay on one account.",
+      );
       openAuthPrompt();
       return;
     }
 
     if (!subscriptionActionsEnabled) {
-      setFeedback("Membership opens later. Sign in or contact billing support.");
+      setFeedback(
+        "Membership opens later. Sign in or contact billing support.",
+      );
       return;
     }
 
@@ -227,13 +253,21 @@ export default function SubscribePage({
     }
 
     setFeedback(
-      getFriendlyMessage(response.error, response.message || "We couldn't update membership right now."),
+      getFriendlyMessage(
+        response.error,
+        response.message || "We couldn't update membership right now.",
+      ),
     );
   };
 
   const handleCancel = async () => {
     if (!subscriptionActionsEnabled) {
-      router.push(buildSupportPath({ topic: "billing", context: "Membership cancellation help" }));
+      router.push(
+        buildSupportPath({
+          topic: "billing",
+          context: "Membership cancellation help",
+        }),
+      );
       return;
     }
 
@@ -243,7 +277,10 @@ export default function SubscribePage({
     setWorkingId("");
     if (!response.ok) {
       setFeedback(
-        getFriendlyMessage(response.error, response.message || "We couldn't update membership right now."),
+        getFriendlyMessage(
+          response.error,
+          response.message || "We couldn't update membership right now.",
+        ),
       );
     }
   };
@@ -257,7 +294,10 @@ export default function SubscribePage({
 
   const subscriptionHeroStats = useMemo(() => {
     const plans = Object.values(planCatalog || {});
-    const maxDiscount = plans.reduce((max, plan) => Math.max(max, plan?.discountPct || 0), 0);
+    const maxDiscount = plans.reduce(
+      (max, plan) => Math.max(max, plan?.discountPct || 0),
+      0,
+    );
 
     return [
       isActive || subscriptionActionsEnabled
@@ -293,25 +333,35 @@ export default function SubscribePage({
       <main className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="blue"
+            accent="amber"
+            appearance="light"
             eyebrow="Membership"
-            title={subscriptionActionsEnabled ? "Membership plans." : "Membership opens soon."}
-            description={
+            title={
               subscriptionActionsEnabled
-                ? "Monthly plans."
-                : "Plans preview."
+                ? "Membership plans."
+                : "Membership opens soon."
+            }
+            description={
+              subscriptionActionsEnabled ? "Monthly plans." : "Plans preview."
             }
             stats={subscriptionHeroStats}
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Membership
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
-                  {subscriptionActionsEnabled ? "Choose your plan." : "See the lineup."}
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                  {subscriptionActionsEnabled
+                    ? "Choose your plan."
+                    : "See the lineup."}
                 </h2>
               </div>
             </div>
@@ -319,15 +369,19 @@ export default function SubscribePage({
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
-                onClick={subscriptionActionsEnabled ? () => scrollToSection("membership-plans") : handleLaunchAccess}
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                onClick={
+                  subscriptionActionsEnabled
+                    ? () => scrollToSection("membership-plans")
+                    : handleLaunchAccess
+                }
+                className={primaryButtonClass}
               >
                 {subscriptionActionsEnabled ? "View Plans" : launchAccessLabel}
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/store")}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 {STOREFRONT_TERMS.viewPointPacks}
               </button>
@@ -335,7 +389,7 @@ export default function SubscribePage({
                 <button
                   type="button"
                   onClick={openAuthPrompt}
-                  className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
+                  className={secondaryButtonClass}
                 >
                   Sign in
                 </button>
@@ -346,13 +400,15 @@ export default function SubscribePage({
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {subscriptionActionsEnabled ? "Plan details" : "Before billing"}
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {subscriptionActionsEnabled ? "What happens next." : "Before you join."}
-                </h2>
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                {subscriptionActionsEnabled ? "Plan details" : "Before billing"}
+              </p>
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                {subscriptionActionsEnabled
+                  ? "What happens next."
+                  : "Before you join."}
+              </h2>
             </div>
           </div>
 
@@ -360,11 +416,15 @@ export default function SubscribePage({
             {[
               {
                 title: "Today",
-                body: subscriptionActionsEnabled ? "Billing starts at checkout." : "No monthly charge yet.",
+                body: subscriptionActionsEnabled
+                  ? "Billing starts at checkout."
+                  : "No monthly charge yet.",
               },
               {
                 title: "Billing",
-                body: subscriptionActionsEnabled ? "Renews monthly while active." : "Billing starts when membership goes live.",
+                body: subscriptionActionsEnabled
+                  ? "Renews monthly while active."
+                  : "Billing starts when membership goes live.",
               },
               {
                 title: "Receipts",
@@ -380,8 +440,12 @@ export default function SubscribePage({
                 className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
-                  <h3 className="text-sm font-semibold text-slate-950">{item.title}</h3>
-                  <p className="text-sm leading-6 text-slate-600">{item.body}</p>
+                  <h3 className="text-sm font-semibold text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm leading-6 text-slate-600">
+                    {item.body}
+                  </p>
                 </div>
               </div>
             ))}
@@ -390,7 +454,12 @@ export default function SubscribePage({
             <button
               type="button"
               onClick={() =>
-                router.push(buildSupportPath({ topic: "billing", context: "Membership launch or billing question" }))
+                router.push(
+                  buildSupportPath({
+                    topic: "billing",
+                    context: "Membership launch or billing question",
+                  }),
+                )
               }
               className={secondaryButtonClass}
             >
@@ -418,7 +487,11 @@ export default function SubscribePage({
                 </h2>
               </div>
               <div className="flex flex-wrap gap-3">
-                <button type="button" onClick={openAuthPrompt} className={primaryButtonClass}>
+                <button
+                  type="button"
+                  onClick={openAuthPrompt}
+                  className={primaryButtonClass}
+                >
                   {subscriptionActionsEnabled ? "Sign in" : "Sign in"}
                 </button>
                 <button
@@ -433,7 +506,12 @@ export default function SubscribePage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel id="membership-plans" className="space-y-6" appearance="light" accent="blue">
+        <SurfacePanel
+          id="membership-plans"
+          className="space-y-6"
+          appearance="light"
+          accent="blue"
+        >
           {feedback ? (
             <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {feedback}
@@ -450,7 +528,9 @@ export default function SubscribePage({
               </h2>
             </div>
             <p className="text-xs text-slate-500">
-              {isActive ? `Current: ${subscription?.planId}` : `${SUBSCRIPTION_OFFERS.length} tiers`}
+              {isActive
+                ? `Current: ${subscription?.planId}`
+                : `${SUBSCRIPTION_OFFERS.length} tiers`}
             </p>
           </div>
 
@@ -476,9 +556,9 @@ export default function SubscribePage({
                   key={plan.id}
                   className={`relative rounded-[30px] border p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 ${
                     isBest
-                      ? "border-[rgba(47,107,255,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]"
+                      ? "border-[rgba(134,98,69,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))]"
                       : "border-black/6 bg-white"
-                  } ${isCurrent ? "ring-2 ring-[rgba(47,107,255,0.22)]" : ""}`}
+                  } ${isCurrent ? "ring-2 ring-[rgba(134,98,69,0.18)]" : ""}`}
                 >
                   {isBest ? (
                     <div className="absolute -top-3 left-5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white">
@@ -492,7 +572,7 @@ export default function SubscribePage({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
                             isBest
-                              ? "bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]"
+                              ? "bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]"
                               : "bg-[#f8f9fc] text-slate-600"
                           }`}
                         >
@@ -508,12 +588,13 @@ export default function SubscribePage({
                             {plan.title}
                           </h3>
                           <p className="mt-3 max-w-xs text-sm leading-6 text-slate-600">
-                            {PLAN_FIT_GUIDE[key]?.description || "Built for readers who come back often."}
+                            {PLAN_FIT_GUIDE[key]?.description ||
+                              "Built for readers who come back often."}
                           </p>
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                        <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
                           Active
                         </span>
                       ) : null}
@@ -524,10 +605,12 @@ export default function SubscribePage({
                         <span className="font-display text-4xl font-semibold tracking-tight text-slate-950">
                           {priceLabel}
                         </span>
-                        <span className="pb-1 text-sm text-slate-500">/month</span>
+                        <span className="pb-1 text-sm text-slate-500">
+                          /month
+                        </span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                           <Zap className="h-3.5 w-3.5" />
                           Save {perks.discountPct}% on locked chapters
                         </div>
@@ -544,39 +627,45 @@ export default function SubscribePage({
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
-                        </div>
-                        <span>
-                          <span className="font-semibold text-slate-950">{perks?.dailyFreeUnlocks ?? "-"}</span> free reads a day
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
-                            {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-"}
+                            {perks?.dailyFreeUnlocks ?? "-"}
+                          </span>{" "}
+                          free reads a day
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
+                        </div>
+                        <span>
+                          <span className="font-semibold text-slate-950">
+                            {perks?.ttfMultiplier
+                              ? `${Math.round(perks.ttfMultiplier * 100)}%`
+                              : "-"}
                           </span>{" "}
                           of the normal wait
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
                         </div>
                         <span>
-                          <span className="font-semibold text-slate-950">{perks?.voucherPts ?? "-"}</span> monthly points
+                          <span className="font-semibold text-slate-950">
+                            {perks?.voucherPts ?? "-"}
+                          </span>{" "}
+                          monthly points
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(47,107,255,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent,#2f6bff)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(134,98,69,0.1)]">
+                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#63472f)]" />
                         </div>
-                        <span>
-                          Better value if you unlock often
-                        </span>
+                        <span>Better value if you unlock often</span>
                       </div>
                     </div>
 
@@ -584,7 +673,11 @@ export default function SubscribePage({
                       <button
                         type="button"
                         onClick={() => handleSubscribe(key)}
-                        disabled={workingId === key || isCurrent || !subscriptionActionsEnabled}
+                        disabled={
+                          workingId === key ||
+                          isCurrent ||
+                          !subscriptionActionsEnabled
+                        }
                         className={primaryButtonClass}
                       >
                         {isCurrent
@@ -596,7 +689,11 @@ export default function SubscribePage({
                               : "Pick this plan"}
                       </button>
                     ) : null}
-                    {planNote ? <p className="text-xs leading-5 text-slate-500">{planNote}</p> : null}
+                    {planNote ? (
+                      <p className="text-xs leading-5 text-slate-500">
+                        {planNote}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               );
@@ -610,10 +707,17 @@ export default function SubscribePage({
           </summary>
           <div className="space-y-3 border-t border-black/8 px-4 py-4">
             {planComparisonRows.map((plan) => (
-              <div key={plan.id} className="rounded-[20px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
+              <div
+                key={plan.id}
+                className="rounded-[20px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
+              >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-950">{plan.title}</p>
-                  <span className="text-sm font-semibold text-slate-950">{plan.priceLabel}</span>
+                  <p className="text-sm font-semibold text-slate-950">
+                    {plan.title}
+                  </p>
+                  <span className="text-sm font-semibold text-slate-950">
+                    {plan.priceLabel}
+                  </span>
                 </div>
                 <div className="mt-3 grid gap-2 text-sm text-slate-600">
                   <p>{plan.bestFor}</p>
@@ -627,15 +731,24 @@ export default function SubscribePage({
           </div>
         </details>
 
-        <SurfacePanel className="hidden sm:block" appearance="light" accent="blue">
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">See the difference</h3>
+        <SurfacePanel
+          className="hidden sm:block"
+          appearance="light"
+          accent="blue"
+        >
+          <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+            See the difference
+          </h3>
           <div className="mt-6 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-black/8 text-left text-slate-500">
                   <th className="pb-4 font-semibold">Feature</th>
                   {SUBSCRIPTION_OFFERS.map((plan) => (
-                    <th key={plan.id} className="pb-4 text-center font-semibold text-slate-950">
+                    <th
+                      key={plan.id}
+                      className="pb-4 text-center font-semibold text-slate-950"
+                    >
                       {plan.title}
                     </th>
                   ))}
@@ -648,7 +761,10 @@ export default function SubscribePage({
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog?.[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
+                      <td
+                        key={plan.id}
+                        className="py-4 text-center font-semibold text-slate-950"
+                      >
                         {perks?.dailyFreeUnlocks ?? "-"}
                       </td>
                     );
@@ -660,8 +776,13 @@ export default function SubscribePage({
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog?.[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
-                        {perks?.ttfMultiplier ? `${Math.round(perks.ttfMultiplier * 100)}%` : "-"}
+                      <td
+                        key={plan.id}
+                        className="py-4 text-center font-semibold text-slate-950"
+                      >
+                        {perks?.ttfMultiplier
+                          ? `${Math.round(perks.ttfMultiplier * 100)}%`
+                          : "-"}
                       </td>
                     );
                   })}
@@ -672,7 +793,10 @@ export default function SubscribePage({
                     const key = plan.id.replace("subscribe_", "");
                     const perks = planCatalog?.[key];
                     return (
-                      <td key={plan.id} className="py-4 text-center font-semibold text-slate-950">
+                      <td
+                        key={plan.id}
+                        className="py-4 text-center font-semibold text-slate-950"
+                      >
                         {perks?.voucherPts ?? "-"}
                       </td>
                     );
@@ -686,7 +810,9 @@ export default function SubscribePage({
                     return (
                       <td key={plan.id} className="py-4 text-center">
                         {perks?.discountPct ? (
-                          <span className="font-semibold text-[var(--gush-accent,#2f6bff)]">{perks.discountPct}%</span>
+                          <span className="font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                            {perks.discountPct}%
+                          </span>
                         ) : (
                           <span className="text-slate-400">-</span>
                         )}
@@ -700,7 +826,11 @@ export default function SubscribePage({
         </SurfacePanel>
 
         {isActive ? (
-          <SurfacePanel className="border-[rgba(47,107,255,0.16)]" appearance="light" accent="blue">
+          <SurfacePanel
+            className="border-[rgba(134,98,69,0.16)]"
+            appearance="light"
+            accent="blue"
+          >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">

@@ -75,15 +75,19 @@ export default function ActionModal({
         <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
 
         {type === "SHORTFALL" ? (
-          <div className="mt-4 rounded-[22px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-3 text-sm text-slate-700">
-            Need <span className="font-semibold text-slate-950">{shortfallPts}</span> more points to unlock this episode.
+          <div className="mt-4 rounded-[22px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-3 text-sm text-slate-700">
+            Need{" "}
+            <span className="font-semibold text-slate-950">{shortfallPts}</span>{" "}
+            more points to unlock this episode.
           </div>
         ) : null}
 
         {offer ? (
           <div className="mt-4 rounded-[24px] border border-black/6 bg-white/84 p-4 text-sm text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-semibold text-slate-950">{offer.title || offer.name}</span>
+              <span className="font-semibold text-slate-950">
+                {offer.title || offer.name}
+              </span>
               {offerBadge ? (
                 <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                   {offerBadge}
@@ -91,10 +95,12 @@ export default function ActionModal({
               ) : null}
             </div>
             {offer.pricePts ? (
-              <p className="mt-2 text-xs text-slate-500">{offer.pricePts} points</p>
+              <p className="mt-2 text-xs text-slate-500">
+                {offer.pricePts} points
+              </p>
             ) : null}
             {offerSavingsText ? (
-              <p className="mt-2 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+              <p className="mt-2 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                 {offerSavingsText}
               </p>
             ) : null}
@@ -107,7 +113,10 @@ export default function ActionModal({
               {compareTitle}
             </p>
             {compareItems.map((item) => (
-              <div key={item.label} className="flex items-center justify-between gap-3 py-1">
+              <div
+                key={item.label}
+                className="flex items-center justify-between gap-3 py-1"
+              >
                 <span>{item.label}</span>
                 <span className="text-right text-slate-500">{item.value}</span>
               </div>
@@ -122,7 +131,9 @@ export default function ActionModal({
             </p>
             {tips.map((tip) => (
               <div key={tip} className="flex gap-2">
-                <span className="text-[var(--gush-accent,#2f6bff)]">-</span>
+                <span className="text-[var(--gush-accent-strong,#63472f)]">
+                  -
+                </span>
                 <span>{tip}</span>
               </div>
             ))}

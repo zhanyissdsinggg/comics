@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { Link2, Share2, X } from "lucide-react";
 
-const ShareButton = React.memo(function ShareButton({ url, title, description, className = "" }) {
+const ShareButton = React.memo(function ShareButton({
+  url,
+  title,
+  description,
+  className = "",
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const buttonClassName = className
-    ? `flex items-center gap-2 ${className}`
-    : "flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700";
+    ? `inline-flex items-center gap-2 ${className}`
+    : "inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950";
 
   const platforms = useMemo(
     () => [
@@ -16,7 +21,8 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         id: "facebook",
         name: "Facebook",
         icon: "FB",
-        color: "bg-blue-600 hover:bg-blue-700",
+        badgeClass:
+          "border-[rgba(37,99,235,0.18)] bg-[rgba(37,99,235,0.08)] text-[#2563eb]",
         getUrl: (shareUrl) =>
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       },
@@ -24,7 +30,7 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         id: "twitter",
         name: "X",
         icon: "X",
-        color: "bg-neutral-800 hover:bg-neutral-700",
+        badgeClass: "border-black/10 bg-[rgba(15,23,42,0.06)] text-slate-700",
         getUrl: (shareUrl, shareTitle) =>
           `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`,
       },
@@ -32,7 +38,8 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         id: "reddit",
         name: "Reddit",
         icon: "RD",
-        color: "bg-orange-600 hover:bg-orange-700",
+        badgeClass:
+          "border-[rgba(234,88,12,0.16)] bg-[rgba(234,88,12,0.08)] text-[#ea580c]",
         getUrl: (shareUrl, shareTitle) =>
           `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareTitle)}`,
       },
@@ -40,7 +47,8 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         id: "whatsapp",
         name: "WhatsApp",
         icon: "WA",
-        color: "bg-green-600 hover:bg-green-700",
+        badgeClass:
+          "border-[rgba(22,163,74,0.16)] bg-[rgba(22,163,74,0.08)] text-[#16a34a]",
         getUrl: (shareUrl, shareTitle) =>
           `https://wa.me/?text=${encodeURIComponent(`${shareTitle} ${shareUrl}`)}`,
       },
@@ -48,12 +56,13 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         id: "telegram",
         name: "Telegram",
         icon: "TG",
-        color: "bg-cyan-600 hover:bg-cyan-700",
+        badgeClass:
+          "border-[rgba(8,145,178,0.16)] bg-[rgba(8,145,178,0.08)] text-[#0891b2]",
         getUrl: (shareUrl, shareTitle) =>
           `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`,
       },
     ],
-    []
+    [],
   );
 
   const handleClose = useCallback(() => {
@@ -64,10 +73,14 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
   const handleShare = useCallback(
     (platform) => {
       const shareUrl = platform.getUrl(url, title);
-      window.open(shareUrl, "_blank", "noopener,noreferrer,width=600,height=480");
+      window.open(
+        shareUrl,
+        "_blank",
+        "noopener,noreferrer,width=600,height=480",
+      );
       handleClose();
     },
-    [handleClose, title, url]
+    [handleClose, title, url],
   );
 
   const handleCopyLink = useCallback(async () => {
@@ -105,6 +118,7 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
         className={buttonClassName}
         aria-label="Share"
       >
+        <Share2 size={16} />
         <span>Share</span>
       </button>
 
@@ -122,7 +136,13 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Share
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-slate-950">Send this title</h3>
+                <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                  Send this title
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Copy the link or open a sharing app without leaving the page
+                  feeling noisy.
+                </p>
               </div>
               <button
                 type="button"
@@ -140,29 +160,36 @@ const ShareButton = React.memo(function ShareButton({ url, title, description, c
                   key={platform.id}
                   type="button"
                   onClick={() => handleShare(platform)}
-                  className={`flex flex-col items-center gap-2 rounded-xl p-4 text-white transition-all ${platform.color}`}
+                  className="flex flex-col items-center gap-2 rounded-[20px] border border-black/8 bg-white/92 p-4 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-black/12 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
                 >
-                  <span className="text-sm font-semibold">{platform.icon}</span>
+                  <span
+                    className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold ${platform.badgeClass}`}
+                  >
+                    {platform.icon}
+                  </span>
                   <span className="text-xs font-medium">{platform.name}</span>
                 </button>
               ))}
             </div>
 
             <div className="rounded-[22px] border border-black/6 bg-white/84 p-4">
-              <p className="mb-2 text-xs font-medium text-slate-500">Or copy link</p>
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+                <Link2 size={14} />
+                <span>Copy link</span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={url}
                   readOnly
-                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#2f6bff)]"
+                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#866245)]"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
                   className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
                     copied
-                      ? "bg-[var(--gush-accent,#2f6bff)] text-white"
+                      ? "bg-[var(--gush-accent,#866245)] text-white"
                       : "bg-slate-950 text-white hover:bg-slate-800"
                   }`}
                 >

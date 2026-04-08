@@ -49,11 +49,13 @@ function getLatestEpisode(episodes) {
     return null;
   }
 
-  return [...episodes].sort((left, right) => {
-    const leftNumber = Number(left?.number || 0);
-    const rightNumber = Number(right?.number || 0);
-    return rightNumber - leftNumber;
-  })[0] || null;
+  return (
+    [...episodes].sort((left, right) => {
+      const leftNumber = Number(left?.number || 0);
+      const rightNumber = Number(right?.number || 0);
+      return rightNumber - leftNumber;
+    })[0] || null
+  );
 }
 
 export default function SeriesTrustPanel({
@@ -86,8 +88,14 @@ export default function SeriesTrustPanel({
     return "";
   }, [sharePath]);
 
-  const leadGenre = Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres[0] : "";
-  const secondaryGenre = Array.isArray(series?.genres) && series.genres.length > 1 ? series.genres[1] : "";
+  const leadGenre =
+    Array.isArray(series?.genres) && series.genres.length > 0
+      ? series.genres[0]
+      : "";
+  const secondaryGenre =
+    Array.isArray(series?.genres) && series.genres.length > 1
+      ? series.genres[1]
+      : "";
   const creatorIdentity = resolveCreatorIdentity(series?.author);
   const followers = toNumber(series?.followers);
   const views = toNumber(series?.views);
@@ -105,7 +113,10 @@ export default function SeriesTrustPanel({
     },
     {
       label: "Reader pull",
-      value: followers > 0 ? formatCompactCount(followers) : formatCompactCount(Math.max(views, ratingCount)),
+      value:
+        followers > 0
+          ? formatCompactCount(followers)
+          : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0
           ? "Readers already keeping up with this series."
@@ -117,7 +128,11 @@ export default function SeriesTrustPanel({
     },
     {
       label: "Latest chapter",
-      value: latestEpisode ? formatEpisodeLabel(latestEpisode) : status === "completed" ? "Completed" : "Live",
+      value: latestEpisode
+        ? formatEpisodeLabel(latestEpisode)
+        : status === "completed"
+          ? "Completed"
+          : "Live",
       hint: latestEpisode
         ? `Most recent visible release. Updated ${formatDateLabel(series?.updatedAt)}.`
         : status === "completed"
@@ -153,14 +168,17 @@ export default function SeriesTrustPanel({
             Why this one feels worth the click.
           </h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            Creator, momentum, and update cadence should all be obvious before someone gives a story their time.
+            Creator, momentum, and update cadence should all be obvious before
+            someone gives a story their time.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Quick take
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-700">{trustNarrative}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            {trustNarrative}
+          </p>
         </div>
       </div>
 
@@ -179,8 +197,10 @@ export default function SeriesTrustPanel({
               <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{card.hint}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent,#2f6bff)]">
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {card.hint}
+              </p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#63472f)]">
                 More by this creator
               </p>
             </button>
@@ -195,7 +215,9 @@ export default function SeriesTrustPanel({
               <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{card.hint}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {card.hint}
+              </p>
             </div>
           ),
         )}
@@ -207,9 +229,11 @@ export default function SeriesTrustPanel({
             Best if you want
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            {series?.title || "This title"} is positioned best for readers who want
-            {" "}
-            {status === "completed" ? "a finished run with immediate payoff" : "a title they can return to regularly"}
+            {series?.title || "This title"} is positioned best for readers who
+            want{" "}
+            {status === "completed"
+              ? "a finished run with immediate payoff"
+              : "a title they can return to regularly"}
             {leadGenre ? `, especially inside ${leadGenre}` : ""}
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
@@ -219,7 +243,8 @@ export default function SeriesTrustPanel({
             Easy to share
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            This page is easier to share when it already shows the creator, latest update, reader interest, and a clear way to start reading.
+            This page is easier to share when it already shows the creator,
+            latest update, reader interest, and a clear way to start reading.
           </p>
         </div>
       </div>
@@ -242,7 +267,9 @@ export default function SeriesTrustPanel({
         {onFollowToggle ? (
           <button
             type="button"
-            onClick={isFollowing ? () => router.push("/library") : onFollowToggle}
+            onClick={
+              isFollowing ? () => router.push("/library") : onFollowToggle
+            }
             className={secondaryButtonClass}
           >
             {isFollowing ? "Open library" : "Save"}

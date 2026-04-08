@@ -41,9 +41,12 @@ const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
 const ActionModal = dynamic(() => import("../series/ActionModal"), {
   ssr: false,
 });
-const UnlockChapterModal = dynamic(() => import("../series/UnlockChapterModal"), {
-  ssr: false,
-});
+const UnlockChapterModal = dynamic(
+  () => import("../series/UnlockChapterModal"),
+  {
+    ssr: false,
+  },
+);
 const ReaderDrawer = dynamic(() => import("./ReaderDrawer"), {
   ssr: false,
 });
@@ -56,15 +59,21 @@ const AdultLoginModal = dynamic(() => import("../series/AdultLoginModal"), {
 const AdultAgeModal = dynamic(() => import("../series/AdultAgeModal"), {
   ssr: false,
 });
-const AdultGateBlockingPanel = dynamic(() => import("../series/AdultGateBlockingPanel"), {
-  ssr: false,
-});
+const AdultGateBlockingPanel = dynamic(
+  () => import("../series/AdultGateBlockingPanel"),
+  {
+    ssr: false,
+  },
+);
 const NetworkFallback = dynamic(() => import("../common/NetworkFallback"), {
   ssr: false,
 });
-const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"), {
-  ssr: false,
-});
+const CommerceSuccessBanner = dynamic(
+  () => import("../common/CommerceSuccessBanner"),
+  {
+    ssr: false,
+  },
+);
 const ReaderChapterNavBar = dynamic(() => import("./ReaderChapterNavBar"), {
   ssr: false,
 });
@@ -90,7 +99,9 @@ function createPricingFallback(basePrice = 0) {
 }
 
 function shouldPreserveDiscoveryAttribution(entryPoint) {
-  const normalized = String(entryPoint || "").trim().toLowerCase();
+  const normalized = String(entryPoint || "")
+    .trim()
+    .toLowerCase();
   return (
     normalized.startsWith("reader_") ||
     normalized.startsWith("store_") ||
@@ -111,7 +122,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [modalState, setModalState] = useState(null);
   const [imageQuality, setImageQuality] = useState(75);
-  const [imageSizes, setImageSizes] = useState("(max-width: 768px) 100vw, 768px");
+  const [imageSizes, setImageSizes] = useState(
+    "(max-width: 768px) 100vw, 768px",
+  );
   const [prefetchCount, setPrefetchCount] = useState(3);
   const [resumeMessage, setResumeMessage] = useState("");
   const [uiToast, setUiToast] = useState("");
@@ -198,7 +211,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
   );
 
   const { restoreProgress } = useAutoSaveProgress(seriesId, episodeId, {
-    enabled: isSignedIn, // 
+    enabled: isSignedIn, //
   });
 
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
@@ -250,9 +263,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
     commerceState.currentPricing ||
     createPricingFallback(episodeData?.pricePts || 0);
   const nextPricing =
-    commerceState.nextPricing || createPricingFallback(nextEpisode?.pricePts || 0);
+    commerceState.nextPricing ||
+    createPricingFallback(nextEpisode?.pricePts || 0);
   const packPricing = commerceState.packPricing;
-  const readerPath = useMemo(() => `/read/${seriesId}/${episodeId}`, [episodeId, seriesId]);
+  const readerPath = useMemo(
+    () => `/read/${seriesId}/${episodeId}`,
+    [episodeId, seriesId],
+  );
   const seriesPath = useMemo(() => `/series/${seriesId}`, [seriesId]);
   const discoveryContext = useMemo(
     () => buildDiscoveryContext(seriesData?.series, activeAttribution),
@@ -272,7 +289,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
         returnTo: targetPath,
       });
 
-      return attribution ? buildPathWithAttribution(targetPath, attribution) : targetPath;
+      return attribution
+        ? buildPathWithAttribution(targetPath, attribution)
+        : targetPath;
     },
     [activeAttribution, readerPath, seriesId],
   );
@@ -283,7 +302,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
       returnTo: seriesPath,
     });
 
-    return attribution ? buildPathWithAttribution(seriesPath, attribution) : seriesPath;
+    return attribution
+      ? buildPathWithAttribution(seriesPath, attribution)
+      : seriesPath;
   }, [activeAttribution, seriesId, seriesPath]);
 
   const buildReaderCommerceAttribution = useCallback(
@@ -353,7 +374,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
   ]);
 
   useEffect(() => {
-    const payload = consumeCommerceSuccessForPath(`/read/${seriesId}/${episodeId}`);
+    const payload = consumeCommerceSuccessForPath(
+      `/read/${seriesId}/${episodeId}`,
+    );
     setCommerceNotice(getCommerceSuccessPresentation(payload));
     setCommerceEntryPoint(String(payload?.entryPoint || ""));
   }, [episodeId, seriesId]);
@@ -430,10 +453,19 @@ export default function ReaderPage({ seriesId, episodeId }) {
             ? experimentsModule.getOrCreateUserId()
             : "guest";
         const bucketMap = {
-          unlock_offer_v1: experimentsModule.getBucket(userId, "unlock_offer_v1"),
+          unlock_offer_v1: experimentsModule.getBucket(
+            userId,
+            "unlock_offer_v1",
+          ),
           topup_offer_v1: experimentsModule.getBucket(userId, "topup_offer_v1"),
-          subscribe_upsell_v1: experimentsModule.getBucket(userId, "subscribe_upsell_v1"),
-          reader_paywall_v1: experimentsModule.getBucket(userId, "reader_paywall_v1"),
+          subscribe_upsell_v1: experimentsModule.getBucket(
+            userId,
+            "subscribe_upsell_v1",
+          ),
+          reader_paywall_v1: experimentsModule.getBucket(
+            userId,
+            "reader_paywall_v1",
+          ),
         };
 
         Object.entries(bucketMap).forEach(([experimentId, bucket]) => {
@@ -619,7 +651,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             reason: seriesResponse.data?.reason,
             requestId: seriesResponse.data?.requestId,
           },
-          "SERIES_ERROR"
+          "SERIES_ERROR",
         );
         return;
       }
@@ -653,7 +685,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 reason: freshResponse.data?.reason,
                 requestId: freshResponse.data?.requestId,
               },
-              "SERIES_ERROR"
+              "SERIES_ERROR",
             );
             return;
           }
@@ -662,7 +694,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         });
       }
     },
-    [forceDisableAdultMode, isAdultMode, episodeId, seriesId]
+    [forceDisableAdultMode, isAdultMode, episodeId, seriesId],
   );
 
   useEffect(() => {
@@ -678,11 +710,16 @@ export default function ReaderPage({ seriesId, episodeId }) {
     }
 
     const persistedAttribution = loadPersistedPaymentAttribution();
-    const attribution = shouldPreserveDiscoveryAttribution(routeAttribution?.entryPoint)
+    const attribution = shouldPreserveDiscoveryAttribution(
+      routeAttribution?.entryPoint,
+    )
       ? mergePaymentAttribution(routeAttribution, {
-          entryPoint: persistedAttribution?.entryPoint || routeAttribution?.entryPoint,
-          campaignId: persistedAttribution?.campaignId || routeAttribution?.campaignId,
-          sourcePath: persistedAttribution?.sourcePath || routeAttribution?.sourcePath,
+          entryPoint:
+            persistedAttribution?.entryPoint || routeAttribution?.entryPoint,
+          campaignId:
+            persistedAttribution?.campaignId || routeAttribution?.campaignId,
+          sourcePath:
+            persistedAttribution?.sourcePath || routeAttribution?.sourcePath,
         })
       : mergePaymentAttribution(persistedAttribution, routeAttribution);
     setActiveAttribution(attribution);
@@ -704,7 +741,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
       return;
     }
     const connection =
-      navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
     const update = () => {
       let quality = 75;
       let sizes = "(max-width: 768px) 100vw, 768px";
@@ -751,7 +790,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (typeof document === "undefined") {
       return;
     }
-    document.body.classList.toggle("reader-page-fullscreen", Boolean(fullscreen));
+    document.body.classList.toggle(
+      "reader-page-fullscreen",
+      Boolean(fullscreen),
+    );
   }, [fullscreen]);
 
   useEffect(() => {
@@ -763,7 +805,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
     };
     syncFullscreenState();
     document.addEventListener("fullscreenchange", syncFullscreenState);
-    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+    return () =>
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, [setFullscreen]);
 
   useEffect(() => {
@@ -782,7 +825,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
   }, [episodeData?.id, episodeId, seriesId]);
 
   useEffect(() => {
-    if (!isSignedIn || !episodeData?.id || !seriesData?.series?.title || historyLoggedRef.current) {
+    if (
+      !isSignedIn ||
+      !episodeData?.id ||
+      !seriesData?.series?.title ||
+      historyLoggedRef.current
+    ) {
       return;
     }
 
@@ -791,7 +839,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
       seriesId,
       episodeId,
       title: seriesData.series.title,
-      percent: Math.max(Number(getProgress(seriesId)?.percent || 0), Number(scrollRef.current || 0)),
+      percent: Math.max(
+        Number(getProgress(seriesId)?.percent || 0),
+        Number(scrollRef.current || 0),
+      ),
     });
   }, [
     addHistory,
@@ -888,7 +939,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (endRef.current) {
@@ -911,7 +962,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   useEffect(() => {
     if (showPaywall) {
-      trackEvent("paywall_impression", { seriesId, episodeId, source: "preview" });
+      trackEvent("paywall_impression", {
+        seriesId,
+        episodeId,
+        source: "preview",
+      });
     }
   }, [showPaywall, seriesId, episodeId]);
 
@@ -963,7 +1018,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setShowChapterNavigation(nextVisible);
     };
 
-    lastScrollYRef.current = typeof window !== "undefined" ? Math.max(window.scrollY, 0) : 0;
+    lastScrollYRef.current =
+      typeof window !== "undefined" ? Math.max(window.scrollY, 0) : 0;
     const onScroll = () => {
       if (scrollRafRef.current) {
         return;
@@ -971,7 +1027,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
       scrollRafRef.current = window.requestAnimationFrame(() => {
         scrollRafRef.current = null;
         const currentY = Math.max(window.scrollY, 0);
-        const total = document.documentElement.scrollHeight - window.innerHeight;
+        const total =
+          document.documentElement.scrollHeight - window.innerHeight;
         const percent = total > 0 ? currentY / total : 0;
         const next = Math.min(1, Math.max(0, percent));
         scrollRef.current = next;
@@ -1152,7 +1209,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     const response = await unlockEpisode(
       seriesId,
       targetEpisodeId,
-      createIdempotencyKey()
+      createIdempotencyKey(),
     );
     if (response.ok) {
       recordUnlock(seriesId, targetEpisodeId);
@@ -1181,7 +1238,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
       type: "UNLOCK",
       view: options.view || "confirm",
       targetEpisodeId,
-      chapterNumber: targetEpisode?.number || (targetEpisodeId === episodeId ? currentIndex + 1 : ""),
+      chapterNumber:
+        targetEpisode?.number ||
+        (targetEpisodeId === episodeId ? currentIndex + 1 : ""),
       pricePts: resolvedPrice,
       shortfallPts:
         options.shortfallPts ??
@@ -1237,7 +1296,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
       openUnlockModal(targetEpisodeId, {
         pricePts: modalState.pricePts,
         view: "packs",
-        shortfallPts: response.shortfallPts || Math.max(0, Number(modalState.pricePts || 0) - walletBalance),
+        shortfallPts:
+          response.shortfallPts ||
+          Math.max(0, Number(modalState.pricePts || 0) - walletBalance),
       });
       return;
     }
@@ -1302,14 +1363,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
     if (!packSize || currentIndex < 0 || !offer?.id) {
       return;
     }
-    const targets = episodes.slice(currentIndex + 1, currentIndex + 1 + packSize);
+    const targets = episodes.slice(
+      currentIndex + 1,
+      currentIndex + 1 + packSize,
+    );
     if (targets.length === 0) {
       return;
     }
     const response = await unlockPack(
       seriesId,
       targets.map((episode) => episode.id),
-      offer.id
+      offer.id,
     );
     if (!response.ok) {
       if (response.status === 402) {
@@ -1336,8 +1400,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       router.push(buildEpisodeHref(bookmark.episodeId));
       return;
     }
-    const total =
-      document.documentElement.scrollHeight - window.innerHeight;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
     if (total > 0) {
       window.scrollTo({
         top: total * (bookmark.percent || 0),
@@ -1379,10 +1442,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
           <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.24)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">Opening chapter</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Opening your chapter.</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+              Opening chapter
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Opening your chapter.
+            </h1>
             <p className="mt-3 text-sm leading-7 text-neutral-400">
-              Access, progress, and unlock checks are loading. If this takes too long, go back to the series page or ask support.
+              Access, progress, and unlock checks are loading. If this takes too
+              long, go back to the series page or ask support.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -1433,7 +1501,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           episodeLabel="..."
           onBack={() => router.push(buildSeriesHref())}
         />
-        <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
+        <AdultGateBlockingPanel
+          status={gateStatus}
+          onOpenModal={openGateModal}
+        />
         {activeModal === "login" ? (
           <AdultLoginModal
             open
@@ -1501,7 +1572,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
   }
 
   return (
-    <main className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-neutral-950 text-neutral-100"}`}>
+    <main
+      className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-neutral-950 text-neutral-100"}`}
+    >
       <ReaderTopBar
         title={seriesData?.series?.title || "Series"}
         episodeLabel={episodeData?.title || episodeId}
@@ -1510,7 +1583,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onAddBookmark={handleAddBookmark}
         onToggleNight={toggleNightMode}
         onToggleLayout={handleToggleLayout}
-        onOpenSettings={() => setSettingsPanelOpen(true)} // 
+        onOpenSettings={() => setSettingsPanelOpen(true)} //
         onToggleAutoScroll={handleToggleAutoScroll}
         autoScroll={autoScroll}
         nightMode={nightMode}
@@ -1536,13 +1609,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="mx-auto max-w-5xl px-4 pt-4">
           <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-left shadow-[0_20px_70px_rgba(0,0,0,0.18)] sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-300/85">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[rgba(216,183,140,0.88)]">
                 Opened from
               </p>
               <p className="mt-2 font-semibold text-white">
                 {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
               </p>
-              <p className="mt-1 text-sm leading-6 text-neutral-400">{discoveryContext.returnHint}</p>
+              <p className="mt-1 text-sm leading-6 text-neutral-400">
+                {discoveryContext.returnHint}
+              </p>
             </div>
             <button
               type="button"
@@ -1594,14 +1669,18 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
           <div className="w-full max-w-lg rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 text-center shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
             {commerceNotice ? (
-              <div className="mb-4 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
+              <div className="mb-4 rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4 text-left">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#2f6bff)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#63472f)]">
                       {commerceNotice.eyebrow}
                     </p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">{commerceNotice.title}</p>
-                    <p className="mt-2 text-xs leading-6 text-slate-600">{commerceNotice.description}</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">
+                      {commerceNotice.title}
+                    </p>
+                    <p className="mt-2 text-xs leading-6 text-slate-600">
+                      {commerceNotice.description}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -1613,7 +1692,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 </div>
               </div>
             ) : null}
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">Keep reading</h2>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Keep reading
+            </h2>
             <p className="mt-2 text-sm leading-7 text-slate-600">
               {previewCount || previewParagraphs
                 ? "Preview is over. Unlock this episode to continue."
@@ -1621,11 +1702,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
             </p>
             {previewCount ? (
               <p className="mt-2 text-xs text-slate-500">
-                Preview ended after {previewCount} page{previewCount === 1 ? "" : "s"}.
+                Preview ended after {previewCount} page
+                {previewCount === 1 ? "" : "s"}.
               </p>
             ) : previewParagraphs ? (
               <p className="mt-2 text-xs text-slate-500">
-                Preview ended after {previewParagraphs} section{previewParagraphs === 1 ? "" : "s"}.
+                Preview ended after {previewParagraphs} section
+                {previewParagraphs === 1 ? "" : "s"}.
               </p>
             ) : null}
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -1647,7 +1730,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   This episode
                 </p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">
-                  {currentPricing.finalPrice === 0 ? "Free" : `${currentPricing.finalPrice} points`}
+                  {currentPricing.finalPrice === 0
+                    ? "Free"
+                    : `${currentPricing.finalPrice} points`}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {currentPricing.appliedDailyFree
@@ -1668,15 +1753,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   {!isSignedIn
                     ? "Sign in first, then choose points or membership."
                     : isSubscriber
-                    ? "Members get free reads and lower prices."
-                    : "Use points now or pick a pack."}
+                      ? "Members get free reads and lower prices."
+                      : "Use points now or pick a pack."}
                 </p>
               </div>
             </div>
             {currentPricing.appliedDailyFree ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">Free now</p>
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                Free now
+              </p>
             ) : currentPricing.discountPct ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                 Member {currentPricing.discountPct}% off
               </p>
             ) : null}
@@ -1690,7 +1777,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       className="flex items-center justify-between gap-3 rounded-[20px] border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm"
                     >
                       <div>
-                        <p className="font-medium text-slate-950">{item.title}</p>
+                        <p className="font-medium text-slate-950">
+                          {item.title}
+                        </p>
                         <p className="mt-1 text-xs text-slate-500">
                           {item.unlocked
                             ? "Already unlocked"
@@ -1700,7 +1789,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         </p>
                       </div>
                       <span className="text-xs font-semibold text-slate-600">
-                        {item.unlocked ? "Ready" : item.pricePts ? `${item.pricePts} pts` : "Locked"}
+                        {item.unlocked
+                          ? "Ready"
+                          : item.pricePts
+                            ? `${item.pricePts} pts`
+                            : "Locked"}
                       </span>
                     </div>
                   ))}
@@ -1713,7 +1806,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               onClick={handleUnlockCurrent}
               className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
                 commerceNotice
-                  ? "bg-[rgba(47,107,255,0.12)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.18),0_24px_60px_rgba(47,107,255,0.18)] motion-safe:animate-pulse hover:bg-[rgba(47,107,255,0.16)] active:bg-[rgba(47,107,255,0.12)]"
+                  ? "bg-[rgba(216,183,140,0.16)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.2),0_24px_60px_rgba(216,183,140,0.16)] motion-safe:animate-pulse hover:bg-[rgba(216,183,140,0.2)] active:bg-[rgba(216,183,140,0.16)]"
                   : "bg-slate-950 text-white hover:bg-slate-800 active:bg-slate-900"
               }`}
               style={{ willChange: "transform" }}
@@ -1735,41 +1828,47 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <button
               type="button"
               onClick={() => {
-                trackEvent("click_subscribe_from_paywall", { seriesId, episodeId });
+                trackEvent("click_subscribe_from_paywall", {
+                  seriesId,
+                  episodeId,
+                });
                 router.push(
                   buildPathWithAttribution(
                     "/subscribe",
                     buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
-                  )
+                  ),
                 );
               }}
-               className="mt-3 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-             >
+              className="mt-3 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
               {STOREFRONT_TERMS.compareMembership}
             </button>
             <button
               type="button"
               onClick={() => {
-                trackEvent("offer_click", { offerId: "store_entry", entry: "READER_PAYWALL" });
+                trackEvent("offer_click", {
+                  offerId: "store_entry",
+                  entry: "READER_PAYWALL",
+                });
                 router.push(
                   buildPathWithAttribution(
                     "/store",
                     buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
-                    { returnTo: readerPath, focus: "auto" }
-                  )
+                    { returnTo: readerPath, focus: "auto" },
+                  ),
                 );
               }}
-               className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-             >
+              className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
               {STOREFRONT_TERMS.viewPointPacks}
             </button>
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-               className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-             >
-               Back to series
-             </button>
+              className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            >
+              Back to series
+            </button>
           </div>
         </div>
       ) : null}
@@ -1800,8 +1899,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
             router.push(
               buildPathWithAttribution(
                 "/subscribe",
-                buildReaderCommerceAttribution("READER_END", nextEpisode?.id || episodeId),
-              )
+                buildReaderCommerceAttribution(
+                  "READER_END",
+                  nextEpisode?.id || episodeId,
+                ),
+              ),
             );
           }}
           onClaim={handleClaimNext}
@@ -1816,9 +1918,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
             router.push(
               buildPathWithAttribution(
                 "/store",
-                buildReaderCommerceAttribution("READER_END", nextEpisode?.id || episodeId),
-                { returnTo: readerPath, focus: "auto" }
-              )
+                buildReaderCommerceAttribution(
+                  "READER_END",
+                  nextEpisode?.id || episodeId,
+                ),
+                { returnTo: readerPath, focus: "auto" },
+              ),
             )
           }
           onViewSeries={() => router.push(buildSeriesHref())}
@@ -1860,7 +1965,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               buildPathWithAttribution(
                 "/subscribe",
                 buildReaderCommerceAttribution("READER_DRAWER", episodeId),
-              )
+              ),
             )
           }
         />
@@ -1890,7 +1995,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onConfirmUnlock={handleConfirmUnlock}
           onBuyPack={async (packageId) => {
             const targetEpisodeId = modalState?.targetEpisodeId || episodeId;
-            const entryPoint = targetEpisodeId === nextEpisode?.id ? "READER_END" : "READER_PAYWALL";
+            const entryPoint =
+              targetEpisodeId === nextEpisode?.id
+                ? "READER_END"
+                : "READER_PAYWALL";
 
             setUnlockModalBusy(`topup:${packageId}`);
             trackEvent("offer_click", {
@@ -1898,9 +2006,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
               entry: entryPoint,
             });
             const topupResponse = await topup(packageId, {
-              attribution: buildReaderCommerceAttribution(entryPoint, targetEpisodeId, {
-                offerId: `points_pack_${packageId}`,
-              }),
+              attribution: buildReaderCommerceAttribution(
+                entryPoint,
+                targetEpisodeId,
+                {
+                  offerId: `points_pack_${packageId}`,
+                },
+              ),
             });
             if (topupResponse.ok) {
               const retry = await handleUnlock(targetEpisodeId);
@@ -1928,7 +2040,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   pricePts: modalState?.pricePts,
                   view: "packs",
                   shortfallPts:
-                    retry.shortfallPts || Math.max(0, Number(modalState?.pricePts || 0) - walletBalance),
+                    retry.shortfallPts ||
+                    Math.max(
+                      0,
+                      Number(modalState?.pricePts || 0) - walletBalance,
+                    ),
                 });
                 return;
               }
@@ -1959,7 +2075,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           }}
           onOpenStore={() => {
             const targetEpisodeId = modalState?.targetEpisodeId || episodeId;
-            const entryPoint = targetEpisodeId === nextEpisode?.id ? "READER_END" : "READER_PAYWALL";
+            const entryPoint =
+              targetEpisodeId === nextEpisode?.id
+                ? "READER_END"
+                : "READER_PAYWALL";
 
             trackEvent("offer_click", {
               offerId: "store_entry",
@@ -2000,7 +2119,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
               : offerDecision?.recommendedUnlockOffer?.tag
           }
           offerSavingsText={
-            modalState?.type !== "SHORTFALL" && offerDecision?.recommendedUnlockOffer?.savingsPct
+            modalState?.type !== "SHORTFALL" &&
+            offerDecision?.recommendedUnlockOffer?.savingsPct
               ? `You save ${offerDecision.recommendedUnlockOffer.savingsPct}%`
               : null
           }
@@ -2018,7 +2138,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   },
                   {
                     label: "Membership",
-                    value: isSubscriber ? "Already active" : "Free unlocks + lower prices",
+                    value: isSubscriber
+                      ? "Already active"
+                      : "Free unlocks + lower prices",
                   },
                 ]
               : []
@@ -2044,9 +2166,12 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       router.push(
                         buildPathWithAttribution(
                           "/store",
-                          buildReaderCommerceAttribution("READER_PAYWALL", episodeId),
-                          { returnTo: readerPath, focus: "auto" }
-                        )
+                          buildReaderCommerceAttribution(
+                            "READER_PAYWALL",
+                            episodeId,
+                          ),
+                          { returnTo: readerPath, focus: "auto" },
+                        ),
                       );
                       trackEvent("offer_click", {
                         offerId: "store_entry",
@@ -2070,7 +2195,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                             "READER_PAYWALL",
                             modalState?.targetEpisodeId || episodeId,
                           ),
-                        )
+                        ),
                       );
                       setModalState(null);
                     },
@@ -2084,21 +2209,32 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       const packageId =
                         offerDecision?.recommendedTopupOffer?.id?.replace(
                           "points_pack_",
-                          ""
+                          "",
                         ) || "starter";
                       trackEvent("offer_click", {
                         offerId: offerDecision?.recommendedTopupOffer?.id,
                         entry: "READER_PAYWALL",
                       });
                       const topupResponse = await topup(packageId, {
-                        attribution: buildReaderCommerceAttribution("READER_PAYWALL", episodeId, {
-                          offerId: offerDecision?.recommendedTopupOffer?.id || `points_pack_${packageId}`,
-                        }),
+                        attribution: buildReaderCommerceAttribution(
+                          "READER_PAYWALL",
+                          episodeId,
+                          {
+                            offerId:
+                              offerDecision?.recommendedTopupOffer?.id ||
+                              `points_pack_${packageId}`,
+                          },
+                        ),
                       });
                       if (topupResponse.ok) {
-                        const retryId = modalState?.targetEpisodeId || episodeId;
+                        const retryId =
+                          modalState?.targetEpisodeId || episodeId;
                         const retry = await handleUnlock(retryId);
-                        if (retry.ok && nextEpisode && retryId === nextEpisode.id) {
+                        if (
+                          retry.ok &&
+                          nextEpisode &&
+                          retryId === nextEpisode.id
+                        ) {
                           router.push(buildEpisodeHref(nextEpisode.id));
                           return;
                         }
@@ -2127,7 +2263,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       setModalState({
                         type: "ERROR",
                         title: "Couldn't add points",
-                        description: "We couldn't finish that purchase just now.",
+                        description:
+                          "We couldn't finish that purchase just now.",
                       });
                     },
                     variant: "primary",

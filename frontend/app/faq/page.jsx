@@ -5,12 +5,16 @@ import StructuredDataScript from "../../components/common/StructuredDataScript";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
-import { buildBreadcrumbStructuredData, buildFaqStructuredData } from "../../lib/structuredData";
+import {
+  buildBreadcrumbStructuredData,
+  buildFaqStructuredData,
+} from "../../lib/structuredData";
 import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
   title: "Help & FAQ",
-  description: "Quick answers on billing, access, membership, and 18+ settings.",
+  description:
+    "Quick answers on billing, access, membership, and 18+ settings.",
   path: "/faq",
 });
 
@@ -49,7 +53,8 @@ export default function FAQPage() {
     buildFaqStructuredData({
       path: "/faq",
       name: `Help & FAQ | ${siteConfig.siteName}`,
-      description: "Quick answers on billing, access, membership, and 18+ settings.",
+      description:
+        "Quick answers on billing, access, membership, and 18+ settings.",
       items: FAQ,
     }),
   ].filter(Boolean);
@@ -63,7 +68,7 @@ export default function FAQPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="Help"
             title="Quick answers first."
             description="Billing, account access, membership, and 18+ settings."
@@ -103,13 +108,18 @@ export default function FAQPage() {
             ]}
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Support
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   Start here.
                 </h2>
               </div>
@@ -118,13 +128,13 @@ export default function FAQPage() {
             <div className="flex flex-col gap-2.5">
               <Link
                 href="/support"
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Open Support
               </Link>
               <Link
                 href="/how-it-works"
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Open Guide
               </Link>
@@ -148,8 +158,12 @@ export default function FAQPage() {
                   key={item.q}
                   className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                 >
-                  <h3 className="text-base font-semibold text-slate-950">{item.q}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{item.a}</p>
+                  <h3 className="text-base font-semibold text-slate-950">
+                    {item.q}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    {item.a}
+                  </p>
                 </div>
               ))}
             </div>
@@ -157,12 +171,21 @@ export default function FAQPage() {
 
           <div className="grid gap-4">
             {QUICK_LINKS.map((item) => (
-              <SurfacePanel key={item.title} className="h-full" appearance="light" accent="blue">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Next</p>
+              <SurfacePanel
+                key={item.title}
+                className="h-full"
+                appearance="light"
+                accent="blue"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Next
+                </p>
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   {item.title}
                 </h2>
-                <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-600">
+                  {item.description}
+                </p>
                 <Link
                   href={item.href}
                   className="mt-6 inline-flex rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"

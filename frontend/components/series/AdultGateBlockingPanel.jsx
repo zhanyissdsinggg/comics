@@ -36,9 +36,11 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
             <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
               {title}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-neutral-300">{description}</p>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600 dark:text-neutral-300">
+              {description}
+            </p>
           </div>
-          <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
               Access
             </p>

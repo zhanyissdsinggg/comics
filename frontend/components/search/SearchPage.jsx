@@ -39,13 +39,22 @@ const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
 const NetworkFallback = dynamic(() => import("../common/NetworkFallback"), {
   ssr: false,
 });
-const SearchCreatorMatchesPanel = dynamic(() => import("./SearchCreatorMatchesPanel"), {
-  ssr: false,
-});
+const SearchCreatorMatchesPanel = dynamic(
+  () => import("./SearchCreatorMatchesPanel"),
+  {
+    ssr: false,
+  },
+);
 const PortraitCard = dynamic(() => import("../home/PortraitCard"));
-const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
-const StorefrontEventHub = dynamic(() => import("../common/StorefrontEventHub"));
-const StorefrontPathwaysGrid = dynamic(() => import("../common/StorefrontPathwaysGrid"));
+const CommerceSuccessBanner = dynamic(
+  () => import("../common/CommerceSuccessBanner"),
+);
+const StorefrontEventHub = dynamic(
+  () => import("../common/StorefrontEventHub"),
+);
+const StorefrontPathwaysGrid = dynamic(
+  () => import("../common/StorefrontPathwaysGrid"),
+);
 
 const SORT_OPTIONS = [
   { id: "relevance", label: "Relevance" },
@@ -108,13 +117,20 @@ function normalizeKeywordItem(item, index = 0) {
   }
 
   const labelSource =
-    item.keyword || item.term || item.label || item.name || item.query || item.title || "";
+    item.keyword ||
+    item.term ||
+    item.label ||
+    item.name ||
+    item.query ||
+    item.title ||
+    "";
   const label = String(labelSource).trim();
   if (!label) {
     return null;
   }
 
-  const hintSource = item.hint || item.context || item.genre || item.category || item.type || "";
+  const hintSource =
+    item.hint || item.context || item.genre || item.category || item.type || "";
   const badgeSource =
     item.badge ||
     item.trendLabel ||
@@ -137,22 +153,25 @@ function normalizeKeywordList(items) {
     return [];
   }
 
-  return items.map((item, index) => normalizeKeywordItem(item, index)).filter(Boolean);
+  return items
+    .map((item, index) => normalizeKeywordItem(item, index))
+    .filter(Boolean);
 }
 
 function formatSearchSeriesMeta(series) {
-  return [
-    series?.type || "Series",
-    series?.status || "Ongoing",
-  ]
+  return [series?.type || "Series", series?.status || "Ongoing"]
     .filter(Boolean)
     .join(" / ");
 }
 
 function summarizeSearchDescription(series) {
-  const description = String(series?.description || "").replace(/\s+/g, " ").trim();
+  const description = String(series?.description || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (description) {
-    return description.length > 96 ? `${description.slice(0, 93).trimEnd()}...` : description;
+    return description.length > 96
+      ? `${description.slice(0, 93).trimEnd()}...`
+      : description;
   }
 
   if (String(series?.status || "").toLowerCase() === "completed") {
@@ -173,11 +192,17 @@ function getSearchSeriesBadge(series) {
   }
 
   const updatedAt = Date.parse(series?.updatedAt || "");
-  if (!Number.isNaN(updatedAt) && updatedAt >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+  if (
+    !Number.isNaN(updatedAt) &&
+    updatedAt >= Date.now() - 14 * 24 * 60 * 60 * 1000
+  ) {
     return "Updated";
   }
 
-  if (Number(series?.episodeCount || 0) > 0 && Number(series?.episodeCount || 0) <= 12) {
+  if (
+    Number(series?.episodeCount || 0) > 0 &&
+    Number(series?.episodeCount || 0) <= 12
+  ) {
     return "Start here";
   }
 
@@ -231,7 +256,9 @@ export default function SearchPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/search")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/search")),
+    );
   }, []);
 
   const queryString = useMemo(() => {
@@ -309,9 +336,11 @@ export default function SearchPage() {
       if (!response.ok && (response.status === 0 || response.status >= 500)) {
         if (shouldRetry(`search_${queryString}`)) {
           retryTimer = setTimeout(() => {
-            apiGet(`/api/search?${queryString}`, { bust: true }).then((retryResponse) => {
-              applyResponse(retryResponse);
-            });
+            apiGet(`/api/search?${queryString}`, { bust: true }).then(
+              (retryResponse) => {
+                applyResponse(retryResponse);
+              },
+            );
           }, 600);
         }
       }
@@ -382,8 +411,12 @@ export default function SearchPage() {
     }
 
     parallelRequests2(
-      () => apiGet(`/api/search/keywords?adult=${adultFlag}`, { cacheMs: 300000 }),
-      () => apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, { cacheMs: 60000 }),
+      () =>
+        apiGet(`/api/search/keywords?adult=${adultFlag}`, { cacheMs: 300000 }),
+      () =>
+        apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, {
+          cacheMs: 60000,
+        }),
     ).then(([keywordsResponse, hotKeywordsResponse]) => {
       applyKeywords(keywordsResponse);
       applyHotKeywords(hotKeywordsResponse);
@@ -460,15 +493,23 @@ export default function SearchPage() {
 
     parallelRequests2(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
-      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
+      () =>
+        apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+          cacheMs: 60000,
+        }),
     ).then(([catalogResponse, homepageSlotsResponse]) => {
       if (!applyCatalog(catalogResponse)) {
-        if (!catalogResponse.ok && (catalogResponse.status === 0 || catalogResponse.status >= 500)) {
+        if (
+          !catalogResponse.ok &&
+          (catalogResponse.status === 0 || catalogResponse.status >= 500)
+        ) {
           if (shouldRetry(`search_catalog_${adultFlag}`)) {
             retryTimer = setTimeout(() => {
-              apiGet(`/api/series?adult=${adultFlag}`, { bust: true }).then((retryResponse) => {
-                applyCatalog(retryResponse);
-              });
+              apiGet(`/api/series?adult=${adultFlag}`, { bust: true }).then(
+                (retryResponse) => {
+                  applyCatalog(retryResponse);
+                },
+              );
             }, 600);
           }
         }
@@ -512,21 +553,22 @@ export default function SearchPage() {
     }
 
     const timer = setTimeout(() => {
-      apiGet(`/api/search/suggest?q=${encodeURIComponent(query)}&adult=${adultFlag}`, {
-        cacheMs: 30000,
-      }).then(
-        (response) => {
-          if (suggestRequestRef.current !== requestId) {
-            return;
-          }
-          if (response.ok) {
-            setSuggestions(response.data?.suggestions || []);
-          } else if (response.error === "ADULT_GATED") {
-            forceDisableAdultMode();
-            setSuggestions([]);
-          }
+      apiGet(
+        `/api/search/suggest?q=${encodeURIComponent(query)}&adult=${adultFlag}`,
+        {
+          cacheMs: 30000,
         },
-      );
+      ).then((response) => {
+        if (suggestRequestRef.current !== requestId) {
+          return;
+        }
+        if (response.ok) {
+          setSuggestions(response.data?.suggestions || []);
+        } else if (response.error === "ADULT_GATED") {
+          forceDisableAdultMode();
+          setSuggestions([]);
+        }
+      });
     }, 300);
 
     return () => clearTimeout(timer);
@@ -573,7 +615,11 @@ export default function SearchPage() {
       });
     }
     if (reco.trendingRail.length > 0) {
-      list.push({ id: "trending", title: "Popular now", items: reco.trendingRail });
+      list.push({
+        id: "trending",
+        title: "Popular now",
+        items: reco.trendingRail,
+      });
     }
     return list;
   }, [reco.becauseYouReadRail, reco.becauseYouReadTitle, reco.trendingRail]);
@@ -586,13 +632,20 @@ export default function SearchPage() {
           return;
         }
         recoImpressionRef.current.add(key);
-        trackEvent("reco_impression", { railName: rail.title, seriesId: item.id });
+        trackEvent("reco_impression", {
+          railName: rail.title,
+          seriesId: item.id,
+        });
       });
     });
   }, [recoRails]);
 
   const handleSeriesClick = useCallback(
-    (seriesId, entryPoint = "SEARCH_RESULTS", campaignId = query ? "search_result_grid" : "catalog_grid") => {
+    (
+      seriesId,
+      entryPoint = "SEARCH_RESULTS",
+      campaignId = query ? "search_result_grid" : "catalog_grid",
+    ) => {
       const targetPath = `/series/${seriesId}`;
       trackEvent("search_result_click", {
         seriesId,
@@ -647,11 +700,15 @@ export default function SearchPage() {
     [updateParams],
   );
 
-  const activeFilterCount = [type, status, genre, sort !== "relevance" ? sort : ""]
-    .filter(Boolean)
-    .length;
+  const activeFilterCount = [
+    type,
+    status,
+    genre,
+    sort !== "relevance" ? sort : "",
+  ].filter(Boolean).length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasSparseResults = Boolean(query) && !loading && results.length > 0 && results.length < 4;
+  const hasSparseResults =
+    Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
   const heroTitle = query ? `Results for "${query}"` : "Search.";
   const heroDescription = query
@@ -667,15 +724,16 @@ export default function SearchPage() {
     : results.length === 0
       ? "Try these."
       : "More picks.";
-  const lightCardAccentClass = "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
+  const lightCardAccentClass =
+    "border-black/6 bg-white/84 hover:border-black/10 hover:bg-white";
   const lightFeatureAccentClass =
-    "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
+    "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.08)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
   const accentButtonClass =
-    "rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-3 py-2 text-sm font-semibold text-slate-950 transition-colors hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.08)]";
+    "rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-3 py-2 text-sm font-semibold text-slate-950 transition-colors hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.08)]";
   const filterSelectClass =
-    "rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-[var(--gush-accent,#2f6bff)]";
+    "rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-[rgba(134,98,69,0.24)]";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -693,7 +751,12 @@ export default function SearchPage() {
                 ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} already live.`
                 : "A clear place to begin.",
             ctaLabel: `Open ${freeStartPick.title}`,
-            onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_PATH_FREE_START", "search_path_free_start"),
+            onClick: () =>
+              handleSeriesClick(
+                freeStartPick.id,
+                "SEARCH_PATH_FREE_START",
+                "search_path_free_start",
+              ),
             accentClass: lightFeatureAccentClass,
           }
         : {
@@ -712,7 +775,12 @@ export default function SearchPage() {
             title: `Read ${completedPick.title} straight through.`,
             description: "Completed and ready in one run.",
             ctaLabel: `Open ${completedPick.title}`,
-            onClick: () => handleSeriesClick(completedPick.id, "SEARCH_PATH_BINGE", "search_path_binge"),
+            onClick: () =>
+              handleSeriesClick(
+                completedPick.id,
+                "SEARCH_PATH_BINGE",
+                "search_path_binge",
+              ),
             accentClass: lightCardAccentClass,
           }
         : {
@@ -739,12 +807,16 @@ export default function SearchPage() {
             id: "breakout-watch-slot",
             eyebrow: "Breakout watch",
             title: `${breakoutPick.title} is picking up.`,
-            description:
-              leadHotKeyword?.label
-                ? `Showing up alongside "${leadHotLabel}".`
-                : "A fast-rising pick from the shelf.",
+            description: leadHotKeyword?.label
+              ? `Showing up alongside "${leadHotLabel}".`
+              : "A fast-rising pick from the shelf.",
             ctaLabel: `Open ${breakoutPick.title}`,
-            onClick: () => handleSeriesClick(breakoutPick.id, "SEARCH_PATH_BREAKOUT", "search_path_breakout"),
+            onClick: () =>
+              handleSeriesClick(
+                breakoutPick.id,
+                "SEARCH_PATH_BREAKOUT",
+                "search_path_breakout",
+              ),
             accentClass: lightCardAccentClass,
           }
         : {
@@ -798,7 +870,13 @@ export default function SearchPage() {
       appearance="light"
     />
   );
-  const leadSearchResult = results[0] || breakoutPick || freeStartPick || completedPick || recoRails[0]?.items?.[0] || null;
+  const leadSearchResult =
+    results[0] ||
+    breakoutPick ||
+    freeStartPick ||
+    completedPick ||
+    recoRails[0]?.items?.[0] ||
+    null;
   const visibleRecoRails = recoRails.slice(0, 1).map((rail) => ({
     ...rail,
     items: Array.isArray(rail.items) ? rail.items.slice(0, 4) : [],
@@ -810,16 +888,26 @@ export default function SearchPage() {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
     const leadHotValue = leadHotKeyword?.value || leadHotLabel;
-    const sortLabel = SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
+    const sortLabel =
+      SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
     const hasDirectMatch = Boolean(query) && results.length > 0;
-    const hasEditorialLead = Boolean(leadSearchResult) && (!query || results.length === 0);
+    const hasEditorialLead =
+      Boolean(leadSearchResult) && (!query || results.length === 0);
     const startHereEpisodeCount = Number(freeStartPick?.episodeCount || 0);
 
     return [
       leadSearchResult && (hasDirectMatch || hasEditorialLead)
         ? {
-            id: hasDirectMatch ? "lead-match" : query ? "lead-editorial-rescue" : "lead-editorial-push",
-            eyebrow: hasDirectMatch ? "Best match" : query ? "Try this next" : "Featured",
+            id: hasDirectMatch
+              ? "lead-match"
+              : query
+                ? "lead-editorial-rescue"
+                : "lead-editorial-push",
+            eyebrow: hasDirectMatch
+              ? "Best match"
+              : query
+                ? "Try this next"
+                : "Featured",
             title: hasDirectMatch
               ? `${leadSearchResult.title} is the closest match.`
               : query
@@ -834,19 +922,24 @@ export default function SearchPage() {
                 : "A strong pick from the catalog.",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
             signalValue: hasDirectMatch
-              ? (loading ? loadingResultLabel : total.toLocaleString())
+              ? loading
+                ? loadingResultLabel
+                : total.toLocaleString()
               : breakoutPick
                 ? "Popular"
                 : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
-              : leadHotKeyword?.hint || "Picked from one of the strongest home recommendations",
+              : leadHotKeyword?.hint ||
+                "Picked from one of the strongest home recommendations",
             ctaLabel: `Open ${leadSearchResult.title}`,
             onClick: () =>
               handleSeriesClick(
                 leadSearchResult.id,
                 "SEARCH_EVENT_HUB",
-                hasDirectMatch ? "search_lead_match" : "search_editorial_rescue",
+                hasDirectMatch
+                  ? "search_lead_match"
+                  : "search_editorial_rescue",
               ),
             accentClass: lightCardAccentClass,
           }
@@ -858,7 +951,10 @@ export default function SearchPage() {
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
-              leadHotKeyword?.hint || (hotWindow === "week" ? "Most searched this week" : "Most searched today"),
+              leadHotKeyword?.hint ||
+              (hotWindow === "week"
+                ? "Most searched this week"
+                : "Most searched today"),
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -883,10 +979,19 @@ export default function SearchPage() {
                 ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed.`
                 : "A lighter place to start.",
             signalLabel: "Episodes",
-            signalValue: startHereEpisodeCount > 0 ? String(startHereEpisodeCount) : "Live",
-            signalHint: "A lighter commitment than restarting your search from scratch",
+            signalValue:
+              startHereEpisodeCount > 0
+                ? String(startHereEpisodeCount)
+                : "Live",
+            signalHint:
+              "A lighter commitment than restarting your search from scratch",
             ctaLabel: `Open ${freeStartPick.title}`,
-            onClick: () => handleSeriesClick(freeStartPick.id, "SEARCH_EVENT_FREE_START", "search_event_free_start"),
+            onClick: () =>
+              handleSeriesClick(
+                freeStartPick.id,
+                "SEARCH_EVENT_FREE_START",
+                "search_event_free_start",
+              ),
             accentClass: lightFeatureAccentClass,
           }
         : {
@@ -906,27 +1011,33 @@ export default function SearchPage() {
             id: "binge-desk-slot",
             eyebrow: "Binge pick",
             title: `${completedPick.title} is ready for a full binge.`,
-            description:
-              `${completedPick.title} is complete, so it is easier to commit to than restarting your search from scratch.`,
+            description: `${completedPick.title} is complete, so it is easier to commit to than restarting your search from scratch.`,
             signalLabel: "Status",
             signalValue: "Completed",
-            signalHint: completedPick?.episodeCount ? `${completedPick.episodeCount} episodes ready` : "Ready for a full-session read",
+            signalHint: completedPick?.episodeCount
+              ? `${completedPick.episodeCount} episodes ready`
+              : "Ready for a full-session read",
             ctaLabel: `Open ${completedPick.title}`,
-            onClick: () => handleSeriesClick(completedPick.id, "SEARCH_EVENT_BINGE", "search_event_binge"),
+            onClick: () =>
+              handleSeriesClick(
+                completedPick.id,
+                "SEARCH_EVENT_BINGE",
+                "search_event_binge",
+              ),
             accentClass: lightCardAccentClass,
           }
         : {
             id: isAdultMode ? "protected-desk" : "binge-desk",
             eyebrow: isAdultMode ? "18+ read" : "Completed pick",
-            title: isAdultMode
-              ? "Open the 18+ shelf."
-              : "Browse completed.",
+            title: isAdultMode ? "Open the 18+ shelf." : "Browse completed.",
             description: isAdultMode
               ? "Browse from the protected shelf."
               : "Finished stories.",
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
-            signalHint: isAdultMode ? "18+ titles are available" : "Ready for a longer read",
+            signalHint: isAdultMode
+              ? "18+ titles are available"
+              : "Ready for a longer read",
             ctaLabel: isAdultMode ? "Open 18+ shelf" : "Browse Completed",
             onClick: () =>
               isAdultMode
@@ -939,8 +1050,8 @@ export default function SearchPage() {
                       status: "Completed",
                       sort: "popular",
                     },
-                      { resetPage: true },
-                    ),
+                    { resetPage: true },
+                  ),
             accentClass: lightCardAccentClass,
           },
     ];
@@ -972,23 +1083,28 @@ export default function SearchPage() {
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.26fr)_minmax(320px,0.74fr)]">
-          <SurfacePanel className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7" tone="highlight" accent="blue">
+          <SurfacePanel
+            className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
+            tone="highlight"
+            accent="amber"
+            appearance="light"
+          >
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Search
               </p>
-              <h1 className="mt-4 font-display text-[2.35rem] font-semibold tracking-[-0.045em] text-white sm:text-[3rem] xl:text-[3.8rem]">
+              <h1 className="mt-4 font-display text-[2.35rem] font-semibold tracking-[-0.045em] text-slate-950 sm:text-[3rem] xl:text-[3.8rem]">
                 {heroTitle}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[0.98rem]">
                 {heroDescription}
               </p>
               {heroSecondary ? (
-                <p className="mt-2 text-sm text-white/54">{heroSecondary}</p>
+                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
               ) : null}
             </div>
 
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.05] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)] sm:p-5">
+            <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(248,244,238,0.92))] p-4 shadow-[0_16px_34px_rgba(15,23,42,0.05)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1002,7 +1118,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white/74 transition-colors hover:border-white/16 hover:bg-white/[0.1] hover:text-white"
+                      className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm text-slate-600 transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950"
                     >
                       {item}
                     </button>
@@ -1013,14 +1129,19 @@ export default function SearchPage() {
           </SurfacePanel>
 
           <div className="grid gap-4">
-            <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/44">
+            <SurfacePanel
+              className="h-full space-y-5 rounded-[32px] p-5 sm:p-6"
+              tone="muted"
+              accent="amber"
+              appearance="light"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Overview
               </p>
-              <h2 className="mt-3 font-display text-[1.5rem] font-semibold tracking-tight text-white">
+              <h2 className="mt-3 font-display text-[1.5rem] font-semibold tracking-tight text-slate-950">
                 {query ? "Closest result." : "Start here."}
               </h2>
-              <p className="mt-3 text-sm leading-7 text-white/62">
+              <p className="mt-3 text-sm leading-7 text-slate-600">
                 {query
                   ? "Use filters to narrow."
                   : mastheadLeadKeyword
@@ -1029,36 +1150,41 @@ export default function SearchPage() {
               </p>
 
               <div className="mt-5 grid grid-cols-3 gap-2.5">
-                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
-                  <p className="text-lg font-semibold tracking-tight text-white">
-                    {query ? total.toLocaleString() : catalog.length.toLocaleString()}
+                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                  <p className="text-lg font-semibold tracking-tight text-slate-950">
+                    {query
+                      ? total.toLocaleString()
+                      : catalog.length.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     {query ? "Matches" : "Titles"}
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
-                  <p className="text-lg font-semibold tracking-tight text-white">
+                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                  <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {hotKeywords.length.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Hot
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3">
-                  <p className="text-lg font-semibold tracking-tight text-white">
+                <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                  <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {page}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Page
                   </p>
                 </div>
               </div>
-            </div>
+            </SurfacePanel>
           </div>
         </section>
 
-        {!query && (history.length > 0 || hotKeywords.length > 0 || keywords.length > 0) ? (
+        {!query &&
+        (history.length > 0 ||
+          hotKeywords.length > 0 ||
+          keywords.length > 0) ? (
           <SearchHistoryPanel
             onSearch={(keyword) => updateParam("q", keyword)}
             hotKeywords={hotKeywords}
@@ -1082,16 +1208,8 @@ export default function SearchPage() {
         {shouldShowEventHub ? (
           <StorefrontEventHub
             eyebrow={query ? "Search picks" : "Featured"}
-            title={
-              query
-                ? "Open the lead match."
-                : "Start here."
-            }
-            description={
-              query
-                ? "A few nearby picks."
-                : "A few strong picks."
-            }
+            title={query ? "Open the lead match." : "Start here."}
+            description={query ? "A few nearby picks." : "A few strong picks."}
             events={searchEventCards}
             appearance="light"
           />
@@ -1109,7 +1227,9 @@ export default function SearchPage() {
           <SurfacePanel className="space-y-8" appearance="light" accent="blue">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Next</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Next
+                </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
                 </h2>
@@ -1143,7 +1263,9 @@ export default function SearchPage() {
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
                 <section key={rail.id} className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-950">{rail.title}</h3>
+                  <h3 className="text-lg font-semibold text-slate-950">
+                    {rail.title}
+                  </h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {rail.items.map((item) => (
                       <PortraitCard
@@ -1151,7 +1273,10 @@ export default function SearchPage() {
                         item={item}
                         appearance="light"
                         onClick={() => {
-                          trackEvent("reco_click", { railName: rail.title, seriesId: item.id });
+                          trackEvent("reco_click", {
+                            railName: rail.title,
+                            seriesId: item.id,
+                          });
                           handleSeriesClick(item.id, "SEARCH_RECO", rail.id);
                         }}
                       />
@@ -1165,7 +1290,11 @@ export default function SearchPage() {
 
         {showResultSections ? (
           <>
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-5"
+              appearance="light"
+              accent="blue"
+            >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -1228,206 +1357,232 @@ export default function SearchPage() {
             </SurfacePanel>
 
             {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCard key={index} appearance="light" />
-            ))}
-          </div>
-        ) : error ? (
-          <NetworkFallback
-            compact
-            title="Search is unavailable right now."
-            description="Try that search again."
-            onRetry={retrySearch}
-          >
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className={secondaryButtonClass}
-            >
-              Back home
-            </button>
-          </NetworkFallback>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <SkeletonCard key={index} appearance="light" />
+                ))}
+              </div>
+            ) : error ? (
+              <NetworkFallback
+                compact
+                title="Search is unavailable right now."
+                description="Try that search again."
+                onRetry={retrySearch}
+              >
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className={secondaryButtonClass}
+                >
+                  Back home
+                </button>
+              </NetworkFallback>
             ) : results.length === 0 ? (
-          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                No direct match
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Try a broader search.
-              </h2>
-            </div>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {activeFilterCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateParams(
-                      {
-                        type: "",
-                        status: "",
-                        genre: "",
-                        sort: "relevance",
-                      },
-                      { resetPage: true },
-                    )
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Clear filters
-                </button>
-              ) : null}
-              {breakoutPick ? (
-                <button
-                  type="button"
-                  onClick={() => handleSeriesClick(breakoutPick.id, "SEARCH_ZERO_RESULTS", "search_zero_breakout")}
-                  className={secondaryButtonClass}
-                >
-                  Open {breakoutPick.title}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?view=featured")}
-                  className={secondaryButtonClass}
-                >
-                  Browse Series
-                </button>
-              )}
-              {completedPick ? (
-                <button
-                  type="button"
-                  onClick={() => handleSeriesClick(completedPick.id, "SEARCH_ZERO_RESULTS", "search_zero_completed")}
-                  className={secondaryButtonClass}
-                >
-                  Open {completedPick.title}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateParams(
-                      {
-                        q: "",
-                        type: "",
-                        genre: "",
-                        status: "Completed",
-                        sort: "latest",
-                      },
-                      { resetPage: true },
-                    )
-                  }
-                  className={secondaryButtonClass}
-                >
-                  Browse Completed
-                </button>
-              )}
-              {freeStartPick ? (
-                <button
-                  type="button"
-                  onClick={() => handleSeriesClick(freeStartPick.id, "SEARCH_ZERO_RESULTS", "search_zero_free_start")}
-                  className={accentButtonClass}
-                >
-                  Open {freeStartPick.title}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?view=start-here")}
-                  className={accentButtonClass}
-                >
-                  Browse Start Here
-                </button>
-              )}
-            </div>
-            <div className="pt-2">{browsePathGrid}</div>
-          </SurfacePanel>
+              <SurfacePanel
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    No direct match
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    Try a broader search.
+                  </h2>
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  {activeFilterCount > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateParams(
+                          {
+                            type: "",
+                            status: "",
+                            genre: "",
+                            sort: "relevance",
+                          },
+                          { resetPage: true },
+                        )
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                  {breakoutPick ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleSeriesClick(
+                          breakoutPick.id,
+                          "SEARCH_ZERO_RESULTS",
+                          "search_zero_breakout",
+                        )
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      Open {breakoutPick.title}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/rankings?view=featured")}
+                      className={secondaryButtonClass}
+                    >
+                      Browse Series
+                    </button>
+                  )}
+                  {completedPick ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleSeriesClick(
+                          completedPick.id,
+                          "SEARCH_ZERO_RESULTS",
+                          "search_zero_completed",
+                        )
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      Open {completedPick.title}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateParams(
+                          {
+                            q: "",
+                            type: "",
+                            genre: "",
+                            status: "Completed",
+                            sort: "latest",
+                          },
+                          { resetPage: true },
+                        )
+                      }
+                      className={secondaryButtonClass}
+                    >
+                      Browse Completed
+                    </button>
+                  )}
+                  {freeStartPick ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleSeriesClick(
+                          freeStartPick.id,
+                          "SEARCH_ZERO_RESULTS",
+                          "search_zero_free_start",
+                        )
+                      }
+                      className={accentButtonClass}
+                    >
+                      Open {freeStartPick.title}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/rankings?view=start-here")}
+                      className={accentButtonClass}
+                    >
+                      Browse Start Here
+                    </button>
+                  )}
+                </div>
+                <div className="pt-2">{browsePathGrid}</div>
+              </SurfacePanel>
             ) : (
-          <div className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
-              {results.map((series) => (
-                <Link
-                  key={series.id}
-                  href={buildPathWithAttribution(`/series/${series.id}`, {
-                    entryPoint: "SEARCH_RESULTS",
-                    campaignId: query ? "search_result_grid" : "catalog_grid",
-                    sourcePath: searchPath,
-                    sourceSeriesId: series.id,
-                    returnTo: `/series/${series.id}`,
-                  })}
-                  onClick={() =>
-                    trackEvent("search_result_click", {
-                      seriesId: series.id,
-                      entryPoint: "SEARCH_RESULTS",
-                      campaignId: query ? "search_result_grid" : "catalog_grid",
-                      query: query || undefined,
-                    })
-                  }
-                  className="group block rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,244,238,0.95))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
-                  aria-label={`Open ${series.title}`}
-                  >
-                    <div className="grid gap-4 sm:grid-cols-[126px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
-                      <Cover
-                        tone={series.coverTone}
-                        coverUrl={series.coverUrl}
-                        label={series.title}
-                        eyebrow=""
-                        badge={getSearchSeriesBadge(series)}
-                        genres={series.genres}
-                        seriesType={series.type}
-                        className="aspect-[3/4] w-full"
-                        sizes="(max-width: 640px) 112px, 160px"
-                      />
-                    </div>
-                    <div className="min-w-0 space-y-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Result
-                      </p>
-                      <h3 className="font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-slate-950">
-                        {highlight(series.title, query)}
-                      </h3>
-                      <p className="text-sm text-slate-500">
-                        {formatSearchSeriesMeta(series)}
-                      </p>
-                      <p className="line-clamp-2 text-sm leading-6 text-slate-600">
-                        {summarizeSearchDescription(series)}
-                      </p>
+              <div className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
+                  {results.map((series) => (
+                    <Link
+                      key={series.id}
+                      href={buildPathWithAttribution(`/series/${series.id}`, {
+                        entryPoint: "SEARCH_RESULTS",
+                        campaignId: query
+                          ? "search_result_grid"
+                          : "catalog_grid",
+                        sourcePath: searchPath,
+                        sourceSeriesId: series.id,
+                        returnTo: `/series/${series.id}`,
+                      })}
+                      onClick={() =>
+                        trackEvent("search_result_click", {
+                          seriesId: series.id,
+                          entryPoint: "SEARCH_RESULTS",
+                          campaignId: query
+                            ? "search_result_grid"
+                            : "catalog_grid",
+                          query: query || undefined,
+                        })
+                      }
+                      className="group block rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,244,238,0.95))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                      aria-label={`Open ${series.title}`}
+                    >
+                      <div className="grid gap-4 sm:grid-cols-[126px_minmax(0,1fr)]">
+                        <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+                          <Cover
+                            tone={series.coverTone}
+                            coverUrl={series.coverUrl}
+                            label={series.title}
+                            eyebrow=""
+                            badge={getSearchSeriesBadge(series)}
+                            genres={series.genres}
+                            seriesType={series.type}
+                            className="aspect-[3/4] w-full"
+                            sizes="(max-width: 640px) 112px, 160px"
+                          />
+                        </div>
+                        <div className="min-w-0 space-y-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                            Result
+                          </p>
+                          <h3 className="font-display text-[1.2rem] font-semibold leading-tight tracking-tight text-slate-950">
+                            {highlight(series.title, query)}
+                          </h3>
+                          <p className="text-sm text-slate-500">
+                            {formatSearchSeriesMeta(series)}
+                          </p>
+                          <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+                            {summarizeSearchDescription(series)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {total > PAGE_SIZE ? (
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-black/6 bg-white/84 px-4 py-3 text-sm text-slate-500">
+                    <span>
+                      Page {page} of {totalPages}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateParam("page", String(page - 1))}
+                        disabled={page <= 1}
+                        aria-label="Previous page"
+                        className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateParam("page", String(page + 1))}
+                        disabled={page >= totalPages}
+                        aria-label="Next page"
+                        className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Next page
+                      </button>
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
-
-            {total > PAGE_SIZE ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-black/6 bg-white/84 px-4 py-3 text-sm text-slate-500">
-                <span>
-                  Page {page} of {totalPages}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => updateParam("page", String(page - 1))}
-                    disabled={page <= 1}
-                    aria-label="Previous page"
-                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateParam("page", String(page + 1))}
-                    disabled={page >= totalPages}
-                    aria-label="Next page"
-                    className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Next page
-                  </button>
-                </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
             )}
           </>
         ) : null}
@@ -1440,7 +1595,10 @@ export default function SearchPage() {
           updateParams(
             {
               type: filters.types.join(","),
-              status: filters.status && filters.status !== "all" ? filters.status : "",
+              status:
+                filters.status && filters.status !== "all"
+                  ? filters.status
+                  : "",
               sort: filters.sortBy || "relevance",
               genre: filters.tags.join(","),
             },

@@ -88,7 +88,7 @@ export default function MatureContentPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="Mature content"
             title="18+ access."
             description="Mature titles stay hidden until you turn them on and complete the age check."
@@ -128,28 +128,38 @@ export default function MatureContentPage() {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            appearance="light"
+            accent="amber"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Access
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   Age gate and visibility.
                 </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  Keep 18+ titles hidden by default, confirm the regional age
+                  check once, and control whether mature history stays visible
+                  on this device.
+                </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-2.5">
               <Link
                 href="/adult-gate"
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Open age gate
               </Link>
               <Link
                 href="/account"
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Open account
               </Link>
@@ -159,17 +169,19 @@ export default function MatureContentPage() {
 
         <section className="grid gap-4 lg:grid-cols-2">
           {CONTROL_CARDS.map((card) => (
-            <SurfacePanel key={card.title} appearance="light" accent="blue">
+            <SurfacePanel key={card.title} appearance="light" accent="amber">
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {card.title}
               </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{card.body}</p>
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                {card.body}
+              </p>
             </SurfacePanel>
           ))}
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Checklist
@@ -181,13 +193,22 @@ export default function MatureContentPage() {
             <ul className="space-y-3 text-sm leading-7 text-slate-600">
               <li>Sign in if the gate asks for account access.</li>
               <li>Confirm the age check for your current region.</li>
-              <li>Review the region setting in Account if the threshold looks wrong.</li>
-              <li>Check whether Hide 18+ history is changing what appears in your account view.</li>
-              <li>If access still looks wrong, contact Support and name the page or title.</li>
+              <li>
+                Review the region setting in Account if the threshold looks
+                wrong.
+              </li>
+              <li>
+                Check whether Hide 18+ history is changing what appears in your
+                account view.
+              </li>
+              <li>
+                If access still looks wrong, contact Support and name the page
+                or title.
+              </li>
             </ul>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Related pages
@@ -219,15 +240,19 @@ export default function MatureContentPage() {
                   href={item.href}
                   className="block rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-[#fbfcff]"
                 >
-                  <h3 className="text-base font-semibold text-slate-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{item.body}</p>
+                  <h3 className="text-base font-semibold text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {item.body}
+                  </p>
                 </Link>
               ))}
             </div>
           </SurfacePanel>
         </section>
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+        <SurfacePanel className="space-y-5" appearance="light" accent="amber">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               FAQ
@@ -242,8 +267,12 @@ export default function MatureContentPage() {
                 key={item.question}
                 className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
-                <h3 className="text-base font-semibold text-slate-950">{item.question}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
+                <h3 className="text-base font-semibold text-slate-950">
+                  {item.question}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {item.answer}
+                </p>
               </div>
             ))}
           </div>

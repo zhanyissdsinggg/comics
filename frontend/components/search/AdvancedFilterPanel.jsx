@@ -43,7 +43,9 @@ function buildFilters(initialFilters = {}) {
     types: initialFilters.types || [],
     tags: initialFilters.tags || [],
     status: initialFilters.status || "all",
-    sortBy: VALID_SORT_OPTIONS.has(initialFilters.sortBy) ? initialFilters.sortBy : "relevance",
+    sortBy: VALID_SORT_OPTIONS.has(initialFilters.sortBy)
+      ? initialFilters.sortBy
+      : "relevance",
   };
 }
 
@@ -109,8 +111,12 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
       <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-4 pb-8 pt-6 shadow-[0_28px_90px_rgba(15,23,42,0.16)] md:left-auto md:right-0 md:top-0 md:max-h-none md:w-full md:max-w-md md:rounded-l-3xl md:rounded-tr-none md:border-l md:border-t-0 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-950 md:text-xl">Filters</h2>
-            <p className="mt-1 text-xs text-slate-500 md:text-sm">Refine the catalog.</p>
+            <h2 className="text-lg font-bold text-slate-950 md:text-xl">
+              Filters
+            </h2>
+            <p className="mt-1 text-xs text-slate-500 md:text-sm">
+              Refine the catalog.
+            </p>
           </div>
           <button
             type="button"
@@ -118,15 +124,27 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
             aria-label="Close advanced filters"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <div className="space-y-6">
           <section>
-            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">Content Type</label>
+            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">
+              Content Type
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {TYPE_OPTIONS.map((type) => (
                 <button
@@ -135,7 +153,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                   onClick={() => toggleType(type.value)}
                   className={`min-h-[44px] rounded-xl border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.types.includes(type.value)
-                      ? "border-[var(--gush-accent,#2f6bff)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                      ? "border-[var(--gush-accent,#866245)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]"
                       : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
                   }`}
                 >
@@ -149,7 +167,9 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
           </section>
 
           <section>
-            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">Genres</label>
+            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">
+              Genres
+            </label>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {TAG_OPTIONS.map((tag) => (
                 <button
@@ -158,7 +178,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                   onClick={() => toggleTag(tag.value)}
                   className={`min-h-[44px] rounded-lg border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.tags.includes(tag.value)
-                      ? "border-[var(--gush-accent,#2f6bff)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                      ? "border-[var(--gush-accent,#866245)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]"
                       : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
                   }`}
                 >
@@ -172,16 +192,20 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
           </section>
 
           <section>
-            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">Status</label>
+            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">
+              Status
+            </label>
             <div className="grid grid-cols-2 gap-3">
               {STATUS_OPTIONS.map((status) => (
                 <button
                   key={status.value}
                   type="button"
-                  onClick={() => setFilters((prev) => ({ ...prev, status: status.value }))}
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, status: status.value }))
+                  }
                   className={`min-h-[44px] rounded-lg border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.status === status.value
-                      ? "border-[var(--gush-accent,#2f6bff)] bg-[rgba(47,107,255,0.08)] text-[var(--gush-accent,#2f6bff)]"
+                      ? "border-[var(--gush-accent,#866245)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]"
                       : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
                   }`}
                 >
@@ -192,11 +216,15 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
           </section>
 
           <section>
-            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">Sort By</label>
+            <label className="mb-3 block text-sm font-medium text-slate-700 md:text-base">
+              Sort By
+            </label>
             <select
               value={filters.sortBy}
-              onChange={(event) => setFilters((prev) => ({ ...prev, sortBy: event.target.value }))}
-              className="w-full min-h-[44px] rounded-xl border border-black/8 bg-white/88 px-4 py-3 text-sm text-slate-900 focus:border-[var(--gush-accent,#2f6bff)] focus:outline-none md:text-base"
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, sortBy: event.target.value }))
+              }
+              className="w-full min-h-[44px] rounded-xl border border-black/8 bg-white/88 px-4 py-3 text-sm text-slate-900 focus:border-[var(--gush-accent,#866245)] focus:outline-none md:text-base"
             >
               {SORT_OPTIONS.map((sort) => (
                 <option key={sort.value} value={sort.value}>
@@ -226,26 +254,40 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
 
         {hasActiveFilters ? (
           <div className="mt-4 rounded-xl border border-black/6 bg-white/80 px-4 py-3">
-            <p className="text-xs font-medium text-slate-500">Active Filters:</p>
+            <p className="text-xs font-medium text-slate-500">
+              Active Filters:
+            </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {filters.types.map((type) => (
-                <span key={type} className="rounded-full bg-[rgba(47,107,255,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#2f6bff)]">
+                <span
+                  key={type}
+                  className="rounded-full bg-[rgba(134,98,69,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#866245)]"
+                >
                   {TYPE_OPTIONS.find((item) => item.value === type)?.label}
                 </span>
               ))}
               {filters.tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-[rgba(47,107,255,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#2f6bff)]">
+                <span
+                  key={tag}
+                  className="rounded-full bg-[rgba(134,98,69,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#866245)]"
+                >
                   {TAG_OPTIONS.find((item) => item.value === tag)?.label}
                 </span>
               ))}
               {filters.status !== "all" ? (
-                <span className="rounded-full bg-[rgba(47,107,255,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#2f6bff)]">
-                  {STATUS_OPTIONS.find((item) => item.value === filters.status)?.label}
+                <span className="rounded-full bg-[rgba(134,98,69,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#866245)]">
+                  {
+                    STATUS_OPTIONS.find((item) => item.value === filters.status)
+                      ?.label
+                  }
                 </span>
               ) : null}
               {filters.sortBy !== "relevance" ? (
-                <span className="rounded-full bg-[rgba(47,107,255,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#2f6bff)]">
-                  {SORT_OPTIONS.find((item) => item.value === filters.sortBy)?.label}
+                <span className="rounded-full bg-[rgba(134,98,69,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#866245)]">
+                  {
+                    SORT_OPTIONS.find((item) => item.value === filters.sortBy)
+                      ?.label
+                  }
                 </span>
               ) : null}
             </div>

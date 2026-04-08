@@ -21,20 +21,17 @@ const HOW_IT_WORKS_STEPS = [
   {
     eyebrow: "1. Browse",
     title: "Start free where a title allows it.",
-    body:
-      "Some titles open with free chapters or previews before you spend anything.",
+    body: "Some titles open with free chapters or previews before you spend anything.",
   },
   {
     eyebrow: "2. Unlock",
     title: "Use points to unlock more episodes.",
-    body:
-      "Locked chapters use points. Point packs are one-time purchases.",
+    body: "Locked chapters use points. Point packs are one-time purchases.",
   },
   {
     eyebrow: "3. Keep reading",
     title: "Keep progress and purchases on your account.",
-    body:
-      "Signing in keeps your library, progress, purchases, and settings in one place.",
+    body: "Signing in keeps your library, progress, purchases, and settings in one place.",
   },
 ];
 
@@ -56,8 +53,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is membership recurring?",
-    answer:
-      "Yes. Plans renew monthly unless the plan says otherwise.",
+    answer: "Yes. Plans renew monthly unless the plan says otherwise.",
   },
   {
     question: "How do I cancel membership?",
@@ -95,7 +91,7 @@ export default function HowItWorksPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="How it works"
             title="How it works."
             description="Start free where available. Use points or choose a plan."
@@ -135,13 +131,18 @@ export default function HowItWorksPage() {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Overview
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   Free reads, then points or plans.
                 </h2>
               </div>
@@ -150,13 +151,13 @@ export default function HowItWorksPage() {
             <div className="flex flex-col gap-2.5">
               <Link
                 href="/orders"
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 View Purchases
               </Link>
               <Link
                 href="/support"
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Open Support
               </Link>
@@ -173,7 +174,9 @@ export default function HowItWorksPage() {
               <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {step.title}
               </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{step.body}</p>
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                {step.body}
+              </p>
             </SurfacePanel>
           ))}
         </section>
@@ -190,13 +193,16 @@ export default function HowItWorksPage() {
             </div>
             <div className="space-y-4 text-sm leading-7 text-slate-600">
               <p>
-                Free access depends on the title. Some series open with free chapters or previews.
+                Free access depends on the title. Some series open with free
+                chapters or previews.
               </p>
               <p>
-                Locked episodes use points. Point packs are one-time purchases, and Purchases keeps the record.
+                Locked episodes use points. Point packs are one-time purchases,
+                and Purchases keeps the record.
               </p>
               <p>
-                Membership is a separate monthly plan. Benefits depend on the plan while it is active.
+                Membership is a separate monthly plan. Benefits depend on the
+                plan while it is active.
               </p>
             </div>
           </SurfacePanel>
@@ -211,9 +217,14 @@ export default function HowItWorksPage() {
               </h2>
             </div>
             <ul className="space-y-3 text-sm leading-7 text-slate-600">
-              <li>Open Purchases for point packs, memberships, and order IDs.</li>
+              <li>
+                Open Purchases for point packs, memberships, and order IDs.
+              </li>
               <li>Open Account to review or end an active plan.</li>
-              <li>If a charge looks wrong, contact Support and include the order ID.</li>
+              <li>
+                If a charge looks wrong, contact Support and include the order
+                ID.
+              </li>
               <li>Refunds depend on the purchase status.</li>
             </ul>
             <div className="flex flex-wrap gap-3">
@@ -248,8 +259,12 @@ export default function HowItWorksPage() {
                 key={item.question}
                 className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
-                <h3 className="text-base font-semibold text-slate-950">{item.question}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
+                <h3 className="text-base font-semibold text-slate-950">
+                  {item.question}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {item.answer}
+                </p>
               </div>
             ))}
           </div>

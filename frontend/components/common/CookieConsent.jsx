@@ -19,7 +19,10 @@ export default function CookieConsent() {
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
   const isHomeRoute = pathname === "/";
-  const useDocumentNavigation = shouldUseDocumentNavigation(pathname, "/privacy-policy");
+  const useDocumentNavigation = shouldUseDocumentNavigation(
+    pathname,
+    "/privacy-policy",
+  );
 
   useEffect(() => {
     if (isAdminRoute || isReaderRoute) {
@@ -29,9 +32,12 @@ export default function CookieConsent() {
 
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
-      const timer = setTimeout(() => {
-        setShowBanner(true);
-      }, isHomeRoute ? 4000 : 1200);
+      const timer = setTimeout(
+        () => {
+          setShowBanner(true);
+        },
+        isHomeRoute ? 4000 : 1200,
+      );
       return () => clearTimeout(timer);
     }
   }, [isAdminRoute, isHomeRoute, isReaderRoute]);
@@ -62,14 +68,20 @@ export default function CookieConsent() {
 
           <div className="flex items-start gap-4 pr-8">
             <div className="mt-0.5 flex-shrink-0">
-              <div className="rounded-2xl border border-[rgba(47,107,255,0.12)] bg-[rgba(47,107,255,0.06)] p-3">
-                <Cookie size={22} className="text-[var(--gush-accent,#2f6bff)]" />
+              <div className="rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-3">
+                <Cookie
+                  size={22}
+                  className="text-[var(--gush-accent,#866245)]"
+                />
               </div>
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <h3 className="text-base font-semibold text-slate-900">Cookies</h3>
+              <h3 className="text-base font-semibold text-slate-900">
+                Cookies
+              </h3>
               <p className="text-sm leading-6 text-slate-600">
-                We use cookies to remember sign-in, keep reading progress, and understand what people actually use.{" "}
+                We use cookies to keep sign-in, reading progress, and basic
+                preferences in place.{" "}
                 {useDocumentNavigation ? (
                   <a
                     href="/privacy-policy"
@@ -77,14 +89,14 @@ export default function CookieConsent() {
                       event.preventDefault();
                       navigateWithDocument("/privacy-policy");
                     }}
-                    className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
+                    className="font-semibold text-[var(--gush-accent,#866245)] underline-offset-4 transition hover:text-[var(--gush-accent-strong,#63472f)] hover:underline"
                   >
                     Learn more
                   </a>
                 ) : (
                   <Link
                     href="/privacy-policy"
-                    className="font-semibold text-[var(--gush-accent,#2f6bff)] underline-offset-4 transition hover:text-[#2158dd] hover:underline"
+                    className="font-semibold text-[var(--gush-accent,#866245)] underline-offset-4 transition hover:text-[var(--gush-accent-strong,#63472f)] hover:underline"
                   >
                     Learn more
                   </Link>
@@ -104,7 +116,7 @@ export default function CookieConsent() {
               onClick={handleAccept}
               className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              Accept
+              Okay
             </button>
           </div>
         </div>

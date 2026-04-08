@@ -54,7 +54,9 @@ function toTimestamp(value) {
 }
 
 function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getEpisodeCount(series) {
@@ -79,7 +81,9 @@ function getFeaturedScore(series) {
   return (
     toTimestamp(series?.updatedAt) +
     (hasReaderFriendlyStart(series) ? 12 * 24 * 60 * 60 * 1000 : 0) +
-    (normalizeStatus(series?.status) === "completed" ? 10 * 24 * 60 * 60 * 1000 : 0)
+    (normalizeStatus(series?.status) === "completed"
+      ? 10 * 24 * 60 * 60 * 1000
+      : 0)
   );
 }
 
@@ -143,11 +147,17 @@ function filterSeriesForView(seriesList = [], view = "featured") {
     case "start-here":
       return sorted.filter((series) => hasReaderFriendlyStart(series));
     case "completed":
-      return sorted.filter((series) => normalizeStatus(series?.status) === "completed");
+      return sorted.filter(
+        (series) => normalizeStatus(series?.status) === "completed",
+      );
     case "comics":
-      return sorted.filter((series) => String(series?.type || "").toLowerCase() === "comic");
+      return sorted.filter(
+        (series) => String(series?.type || "").toLowerCase() === "comic",
+      );
     case "novels":
-      return sorted.filter((series) => String(series?.type || "").toLowerCase() === "novel");
+      return sorted.filter(
+        (series) => String(series?.type || "").toLowerCase() === "novel",
+      );
     case "featured":
     default:
       return sorted;
@@ -199,10 +209,10 @@ function RankingsLoadingState() {
 function isModifiedEvent(event) {
   return Boolean(
     event.metaKey ||
-      event.altKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.button !== 0,
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.button !== 0,
   );
 }
 
@@ -212,7 +222,9 @@ export default function RankingsPage({
   hasInitialSeries = false,
 }) {
   const router = useRouter();
-  const [seriesList, setSeriesList] = useState(Array.isArray(initialSeries) ? initialSeries : []);
+  const [seriesList, setSeriesList] = useState(
+    Array.isArray(initialSeries) ? initialSeries : [],
+  );
   const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const { isAdultMode } = useAdultGateStore();
@@ -225,29 +237,41 @@ export default function RankingsPage({
       setLoading(true);
     }
     const adultFlag = isAdultMode ? "1" : "0";
-    apiGet(`/api/rankings?adult=${adultFlag}&view=${activeView.id}`).then((response) => {
-      if (response.ok) {
-        const rankings = Array.isArray(response.data?.rankings) ? response.data.rankings : [];
-        if (rankings.length > 0) {
-          setSeriesList(rankings);
-          setLoading(false);
-          return;
+    apiGet(`/api/rankings?adult=${adultFlag}&view=${activeView.id}`).then(
+      (response) => {
+        if (response.ok) {
+          const rankings = Array.isArray(response.data?.rankings)
+            ? response.data.rankings
+            : [];
+          if (rankings.length > 0) {
+            setSeriesList(rankings);
+            setLoading(false);
+            return;
+          }
         }
-      }
 
-      apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
-        if (fallbackResponse.ok) {
-          setSeriesList(Array.isArray(fallbackResponse.data?.series) ? fallbackResponse.data.series : []);
-        } else {
-          setSeriesList([]);
-        }
-        setLoading(false);
-      });
-    });
+        apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
+          if (fallbackResponse.ok) {
+            setSeriesList(
+              Array.isArray(fallbackResponse.data?.series)
+                ? fallbackResponse.data.series
+                : [],
+            );
+          } else {
+            setSeriesList([]);
+          }
+          setLoading(false);
+        });
+      },
+    );
   }, [activeView.id, hasInitialSeries, isAdultMode]);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/rankings")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(
+        consumeCommerceSuccessForPath("/rankings"),
+      ),
+    );
   }, []);
 
   const curatedSeries = useMemo(
@@ -321,39 +345,46 @@ export default function RankingsPage({
             secondary="Browse one strong shelf at a time."
             stats={heroStats}
             className="min-h-full"
+            appearance="light"
+            accent="amber"
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 This view
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                <p className="mt-3 text-sm leading-7 text-slate-600">
                   {activeView.description}
                 </p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/38">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Keep browsing
               </p>
               <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
                   onClick={() => router.push("/comics")}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Browse Comics
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/creators")}
-                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Meet the Creators
                 </button>
@@ -369,17 +400,22 @@ export default function RankingsPage({
           />
         ) : null}
 
-        <SurfacePanel tone="muted" accent="blue" className="space-y-4">
+        <SurfacePanel
+          tone="muted"
+          accent="amber"
+          appearance="light"
+          className="space-y-4"
+        >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/38">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 View switcher
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 Switch shelves.
               </h2>
             </div>
-            <p className="max-w-md text-sm leading-7 text-neutral-300">
+            <p className="max-w-md text-sm leading-7 text-slate-600">
               Each tab narrows the edit.
             </p>
           </div>
@@ -392,8 +428,8 @@ export default function RankingsPage({
                 className={[
                   "rounded-full border px-4 py-2.5 text-sm font-semibold transition",
                   activeView.id === item.id
-                    ? "border-white/14 bg-white text-slate-950"
-                    : "border-white/10 bg-white/[0.04] text-white/78 hover:border-white/16 hover:bg-white/[0.08] hover:text-white",
+                    ? "border-black/10 bg-slate-950 text-white"
+                    : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950",
                 ].join(" ")}
               >
                 {item.label}
@@ -406,7 +442,11 @@ export default function RankingsPage({
           <RankingsLoadingState />
         ) : curatedSeries.length === 0 ? (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-4"
+              appearance="light"
+              accent="blue"
+            >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Featured Series
@@ -436,7 +476,11 @@ export default function RankingsPage({
               </div>
             </SurfacePanel>
 
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-4"
+              appearance="light"
+              accent="blue"
+            >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Creators
@@ -463,7 +507,9 @@ export default function RankingsPage({
               {leadEntry ? (
                 <Link
                   href={`/series/${encodeURIComponent(leadEntry.id)}`}
-                  onClick={(event) => handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")}
+                  onClick={(event) =>
+                    handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
+                  }
                   className="group w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
                   aria-label={`Open ${leadEntry.title}`}
                 >
@@ -512,7 +558,13 @@ export default function RankingsPage({
                     <Link
                       key={series.id}
                       href={`/series/${encodeURIComponent(series.id)}`}
-                      onClick={(event) => handleSeriesLinkClick(event, series.id, "FEATURED_SUPPORTING")}
+                      onClick={(event) =>
+                        handleSeriesLinkClick(
+                          event,
+                          series.id,
+                          "FEATURED_SUPPORTING",
+                        )
+                      }
                       className="group rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
                       aria-label={`Open ${series.title}`}
                     >
@@ -526,7 +578,9 @@ export default function RankingsPage({
                         tone={series.coverTone}
                         coverUrl={series.coverUrl}
                         label={series.title}
-                        eyebrow={resolveSeriesCreatorName(series) || activeView.label}
+                        eyebrow={
+                          resolveSeriesCreatorName(series) || activeView.label
+                        }
                         badge={getSeriesBadge(series)}
                         genres={series.genres}
                         seriesType={series.type}
@@ -551,7 +605,11 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-5"
+                  appearance="light"
+                  accent="blue"
+                >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     More Series
                   </p>
@@ -561,7 +619,13 @@ export default function RankingsPage({
                       <Link
                         key={series.id}
                         href={`/series/${encodeURIComponent(series.id)}`}
-                        onClick={(event) => handleSeriesLinkClick(event, series.id, "FEATURED_LIST")}
+                        onClick={(event) =>
+                          handleSeriesLinkClick(
+                            event,
+                            series.id,
+                            "FEATURED_LIST",
+                          )
+                        }
                         className="flex w-full items-center gap-4 rounded-[24px] border border-black/6 bg-white/86 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
                         aria-label={`Open ${series.title}`}
                       >
@@ -569,18 +633,23 @@ export default function RankingsPage({
                           tone={series.coverTone}
                           coverUrl={series.coverUrl}
                           label={series.title}
-                          eyebrow={resolveSeriesCreatorName(series) || activeView.label}
+                          eyebrow={
+                            resolveSeriesCreatorName(series) || activeView.label
+                          }
                           badge={getSeriesBadge(series)}
                           genres={series.genres}
                           seriesType={series.type}
                           className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-base font-semibold text-slate-950">{series.title}</p>
+                          <p className="truncate text-base font-semibold text-slate-950">
+                            {series.title}
+                          </p>
                           <p className="mt-1 text-xs text-slate-500">
                             {getSeriesMeta(series).join(" / ")}
                           </p>
-                          {Array.isArray(series.genres) && series.genres.length > 0 ? (
+                          {Array.isArray(series.genres) &&
+                          series.genres.length > 0 ? (
                             <p className="mt-1 truncate text-xs text-slate-400">
                               {series.genres.slice(0, 2).join(" / ")}
                             </p>
@@ -609,7 +678,11 @@ export default function RankingsPage({
                 className="shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
               />
 
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Browse

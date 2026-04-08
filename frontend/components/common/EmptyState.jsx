@@ -37,13 +37,14 @@ export const EmptyState = memo(function EmptyState({
   appearance = "default",
 }) {
   const Icon = iconMap[icon] || Inbox;
-  const isLight = appearance === "light";
+  const isLight = appearance === "light" || appearance === "default";
   const resolvedAction =
     typeof action === "function"
       ? { onClick: action, label: actionText }
       : action && typeof action === "object"
         ? {
-            onClick: typeof action.onClick === "function" ? action.onClick : null,
+            onClick:
+              typeof action.onClick === "function" ? action.onClick : null,
             label: action.label || actionText,
           }
         : null;
@@ -53,7 +54,7 @@ export const EmptyState = memo(function EmptyState({
         ? "border-red-200 bg-red-50 text-red-500"
         : "border-red-400/20 bg-red-500/[0.08] text-red-200"
       : isLight
-        ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]"
+        ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]"
         : "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100";
 
   return (
@@ -68,7 +69,7 @@ export const EmptyState = memo(function EmptyState({
       <div
         className={`pointer-events-none absolute inset-0 ${
           isLight
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
             : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(16,185,129,0.12),transparent_24%)]"
         }`}
       />
@@ -82,16 +83,24 @@ export const EmptyState = memo(function EmptyState({
           <Icon size={28} strokeWidth={1.7} />
         </div>
 
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+        >
           {eyebrow}
         </p>
 
-        <h3 className={`mt-3 font-display text-2xl font-semibold tracking-tight ${isLight ? "text-slate-950" : "text-white"}`}>
+        <h3
+          className={`mt-3 font-display text-2xl font-semibold tracking-tight ${isLight ? "text-slate-950" : "text-white"}`}
+        >
           {title}
         </h3>
 
         {description ? (
-          <p className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-400"}`}>{description}</p>
+          <p
+            className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-400"}`}
+          >
+            {description}
+          </p>
         ) : null}
 
         {resolvedAction?.onClick && resolvedAction?.label ? (

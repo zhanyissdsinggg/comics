@@ -16,7 +16,10 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
-import { getCommerceJourneyGuide, STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import {
+  getCommerceJourneyGuide,
+  STOREFRONT_TERMS,
+} from "../../lib/storefrontCopy";
 import { buildSupportPath } from "../../lib/supportRouting";
 
 function formatOrderAmount(amount, currency) {
@@ -42,7 +45,9 @@ function formatOrderDate(value) {
 }
 
 function formatLabelWord(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (!normalized) {
     return "";
   }
@@ -53,12 +58,17 @@ function formatLabelWord(value) {
 }
 
 function normalizePackageId(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function isMembershipCharge(packageId) {
   const normalized = normalizePackageId(packageId);
-  return normalized.startsWith("subscribe_") || ["basic", "pro", "vip"].includes(normalized);
+  return (
+    normalized.startsWith("subscribe_") ||
+    ["basic", "pro", "vip"].includes(normalized)
+  );
 }
 
 function formatOrderPackageLabel(packageId) {
@@ -90,17 +100,16 @@ function formatOrderPackageLabel(packageId) {
     return `${formatLabelWord(normalized)} membership`;
   }
 
-  return normalized
-    .split(/[_-]+/)
-    .map(formatLabelWord)
-    .join(" ");
+  return normalized.split(/[_-]+/).map(formatLabelWord).join(" ");
 }
 
 function buildSupportHref(orderId, topic = "billing") {
   return buildSupportPath({
     topic,
     orderId,
-    context: orderId ? `Purchase issue for ${orderId}` : "Purchase or billing question",
+    context: orderId
+      ? `Purchase issue for ${orderId}`
+      : "Purchase or billing question",
   });
 }
 
@@ -164,24 +173,33 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   }, [hydrated, viewerSignedIn]);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/orders")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/orders")),
+    );
   }, []);
 
-  const refundActionsEnabled = billingAvailability?.refundActionsEnabled === true;
+  const refundActionsEnabled =
+    billingAvailability?.refundActionsEnabled === true;
   const refundPreviewOnly = billingAvailability?.refundActionsEnabled === false;
   const latestPaidOrder = useMemo(
     () => orders.find((order) => order.status === "PAID") || null,
     [orders],
   );
   const latestMembershipOrder = useMemo(
-    () => orders.find((order) => order.status === "PAID" && isMembershipCharge(order.packageId)) || null,
+    () =>
+      orders.find(
+        (order) =>
+          order.status === "PAID" && isMembershipCharge(order.packageId),
+      ) || null,
     [orders],
   );
   const scrollToSection = useCallback((id) => {
     if (typeof document === "undefined") {
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
   const signInToOrders = useCallback(() => {
     router.push("/signin?returnTo=/orders");
@@ -204,7 +222,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     } else {
       setFeedback({
         type: "error",
-        text: getFriendlyMessage(response.error, response.message || "Refresh failed."),
+        text: getFriendlyMessage(
+          response.error,
+          response.message || "Refresh failed.",
+        ),
       });
     }
     setWorkingId("");
@@ -218,7 +239,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
       },
       {
         id: "support",
@@ -241,7 +262,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
         accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
       },
       {
         id: "membership",
@@ -290,9 +311,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             : "Recent charges appear here."
           : "Receipts and renewals stay here.",
         cta: viewerSignedIn ? "View receipts" : "Sign in",
-        onClick: viewerSignedIn ? () => scrollToSection("purchase-history") : signInToOrders,
+        onClick: viewerSignedIn
+          ? () => scrollToSection("purchase-history")
+          : signInToOrders,
         accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
       },
       {
         id: "membership-charges",
@@ -303,7 +326,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           : viewerSignedIn
             ? "Membership receipts appear here."
             : "Membership receipts stay here.",
-        cta: latestMembershipOrder ? "See membership charges" : STOREFRONT_TERMS.compareMembership,
+        cta: latestMembershipOrder
+          ? "See membership charges"
+          : STOREFRONT_TERMS.compareMembership,
         onClick: latestMembershipOrder
           ? () => scrollToSection("purchase-history")
           : () =>
@@ -345,9 +370,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className="gush-home-shell overflow-hidden">
@@ -356,12 +381,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       <main className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="blue"
+            appearance="light"
+            accent="amber"
             eyebrow="Orders"
             title={
-              viewerSignedIn
-                ? "Receipts and billing."
-                : "Sign in for receipts."
+              viewerSignedIn ? "Receipts and billing." : "Sign in for receipts."
             }
             description={
               viewerSignedIn
@@ -370,13 +394,18 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Billing desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {viewerSignedIn ? "Receipts." : "Sign in first."}
                 </h2>
               </div>
@@ -388,14 +417,16 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   <button
                     type="button"
                     onClick={() => scrollToSection("purchase-history")}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                    className={primaryButtonClass}
                   >
                     View receipts
                   </button>
                   <button
                     type="button"
-                    onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    onClick={() =>
+                      router.push(buildSupportHref(latestPaidOrder?.orderId))
+                    }
+                    className={secondaryButtonClass}
                   >
                     Get billing help
                   </button>
@@ -405,14 +436,14 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   <button
                     type="button"
                     onClick={signInToOrders}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                    className={primaryButtonClass}
                   >
                     Sign in
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push(buildSupportHref("", "billing"))}
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    className={secondaryButtonClass}
                   >
                     Get billing help
                   </button>
@@ -432,29 +463,43 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         {feedback.text ? (
           <SurfacePanel
             appearance="light"
-            accent={feedback.type === "error" ? "rose" : "blue"}
+            accent={feedback.type === "error" ? "rose" : "amber"}
             className={
               feedback.type === "error"
                 ? "border border-red-200 bg-red-50 text-red-600"
-                : "border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-700"
+                : "border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-700"
             }
           >
-            <p className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-slate-700"}`}>{feedback.text}</p>
+            <p
+              className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-slate-700"}`}
+            >
+              {feedback.text}
+            </p>
           </SurfacePanel>
         ) : null}
 
         {viewerSignedIn && refundPreviewOnly ? (
-          <SurfacePanel className="border border-amber-200 bg-amber-50 text-amber-700" appearance="light" tone="warning" accent="amber">
+          <SurfacePanel
+            className="border border-amber-200 bg-amber-50 text-amber-700"
+            appearance="light"
+            tone="warning"
+            accent="amber"
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">Need help with a charge?</p>
+                <p className="text-sm font-semibold">
+                  Need help with a charge?
+                </p>
                 <p className="text-sm text-amber-700/85">
-                  You can still review purchases here. Include the order ID if something looks off.
+                  You can still review purchases here. Include the order ID if
+                  something looks off.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => router.push(buildSupportHref(latestPaidOrder?.orderId))}
+                onClick={() =>
+                  router.push(buildSupportHref(latestPaidOrder?.orderId))
+                }
                 className={secondaryButtonClass}
               >
                 Get billing help
@@ -465,7 +510,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && hydrated ? (
           <>
-            <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-5"
+              appearance="light"
+              accent="blue"
+            >
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Billing tasks
@@ -484,10 +533,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         ) : null}
 
         {!viewerSignedIn ? (
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Sign in for receipts.
-              </h2>
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              Sign in for receipts.
+            </h2>
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
               columnsClassName="md:grid-cols-2"
@@ -497,9 +546,18 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         ) : !hydrated || loading ? (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="space-y-2">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
-              <div className="h-9 w-72 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
-              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+              <div
+                className="h-4 w-28 animate-pulse rounded-full bg-slate-200"
+                aria-hidden="true"
+              />
+              <div
+                className="h-9 w-72 animate-pulse rounded-2xl bg-slate-200"
+                aria-hidden="true"
+              />
+              <div
+                className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200"
+                aria-hidden="true"
+              />
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, index) => (
@@ -516,13 +574,13 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             </div>
           </SurfacePanel>
         ) : orders.length === 0 ? (
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                No purchases yet.
-              </h2>
-              <p className="text-sm leading-6 text-slate-600">
-                Receipts appear here after checkout.
-              </p>
+          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              No purchases yet.
+            </h2>
+            <p className="text-sm leading-6 text-slate-600">
+              Receipts appear here after checkout.
+            </p>
             <StorefrontPathwaysGrid
               cards={emptyOrderActionCards}
               columnsClassName="md:grid-cols-2 xl:grid-cols-3"
@@ -530,7 +588,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             />
           </SurfacePanel>
         ) : (
-          <SurfacePanel id="purchase-history" className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel
+            id="purchase-history"
+            className="space-y-5"
+            appearance="light"
+            accent="blue"
+          >
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -541,14 +604,19 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs text-slate-500">{orders.length} purchase{orders.length === 1 ? "" : "s"} loaded</p>
+                <p className="text-xs text-slate-500">
+                  {orders.length} purchase{orders.length === 1 ? "" : "s"}{" "}
+                  loaded
+                </p>
                 <button
                   type="button"
                   onClick={refreshOrders}
                   className={secondaryButtonClass}
                   disabled={workingId === "refresh"}
                 >
-                  {workingId === "refresh" ? "Refreshing..." : "Refresh purchases"}
+                  {workingId === "refresh"
+                    ? "Refreshing..."
+                    : "Refresh purchases"}
                 </button>
               </div>
             </div>
@@ -564,9 +632,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">{formatOrderPackageLabel(order.packageId)}</p>
+                        <p className="text-sm font-semibold text-slate-950">
+                          {formatOrderPackageLabel(order.packageId)}
+                        </p>
                         <p className="mt-2 text-xs text-slate-500">
-                          {formatOrderAmount(order.amount, order.currency)} | Order ID {order.orderId}
+                          {formatOrderAmount(order.amount, order.currency)} |
+                          Order ID {order.orderId}
                         </p>
                       </div>
                       <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
@@ -581,7 +652,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{orderGuide.description}</p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                      {orderGuide.description}
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {order.status === "PAID" && refundActionsEnabled ? (
                         <button
@@ -592,20 +665,31 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                               return;
                             }
                             setWorkingId(order.orderId);
-                            const response = await apiPost("/api/payments/refund", {
-                              orderId: order.orderId,
-                            });
+                            const response = await apiPost(
+                              "/api/payments/refund",
+                              {
+                                orderId: order.orderId,
+                              },
+                            );
                             if (response.ok) {
                               setOrders((prev) =>
                                 prev.map((item) =>
-                                  item.orderId === order.orderId ? response.data?.order : item,
+                                  item.orderId === order.orderId
+                                    ? response.data?.order
+                                    : item,
                                 ),
                               );
-                              setFeedback({ type: "success", text: "Refund request sent." });
+                              setFeedback({
+                                type: "success",
+                                text: "Refund request sent.",
+                              });
                             } else {
                               setFeedback({
                                 type: "error",
-                                text: getFriendlyMessage(response.error, response.message || "Refund request failed."),
+                                text: getFriendlyMessage(
+                                  response.error,
+                                  response.message || "Refund request failed.",
+                                ),
                               });
                             }
                             setWorkingId("");
@@ -617,16 +701,20 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           }`}
                           disabled={workingId === order.orderId}
                         >
-                          {workingId === order.orderId ? "Requesting..." : "Request refund"}
+                          {workingId === order.orderId
+                            ? "Requesting..."
+                            : "Request refund"}
                         </button>
                       ) : order.status === "PAID" ? (
-                      <button
-                        type="button"
-                        onClick={() => router.push(buildSupportHref(order.orderId))}
-                        className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
-                      >
-                        Get billing help
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(buildSupportHref(order.orderId))
+                          }
+                          className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                        >
+                          Get billing help
+                        </button>
                       ) : null}
                       <button
                         type="button"

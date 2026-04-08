@@ -13,7 +13,8 @@ import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { notifications, unreadCount, loadNotifications, markRead } = useNotificationsStore();
+  const { notifications, unreadCount, loadNotifications, markRead } =
+    useNotificationsStore();
   const { isAdultMode } = useAdultGateStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,7 +48,9 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAllRead = async () => {
-    const unreadIds = notifications.filter((item) => !item.read).map((item) => item.id);
+    const unreadIds = notifications
+      .filter((item) => !item.read)
+      .map((item) => item.id);
     if (unreadIds.length === 0) {
       return;
     }
@@ -71,7 +74,10 @@ export default function NotificationsPage() {
         const targetPath = `/read/${item.seriesId}/${item.episodeId}`;
         router.push(
           buildPathWithAttribution(targetPath, {
-            entryPoint: item.type === "TTF_READY" ? "NOTIFICATION_TTF_READY" : "NOTIFICATION_EPISODE",
+            entryPoint:
+              item.type === "TTF_READY"
+                ? "NOTIFICATION_TTF_READY"
+                : "NOTIFICATION_EPISODE",
             sourcePath: "/notifications",
             sourceSeriesId: item.seriesId,
             sourceEpisodeId: item.episodeId,
@@ -98,12 +104,17 @@ export default function NotificationsPage() {
         const ctaType = item.ctaType || "STORE";
         const target = item.ctaTarget || "";
         const promotionId =
-          item.type === "PROMO" && typeof item.id === "string" && item.id.startsWith("PROMO_")
+          item.type === "PROMO" &&
+          typeof item.id === "string" &&
+          item.id.startsWith("PROMO_")
             ? item.id.replace(/^PROMO_/, "")
             : undefined;
         const attribution = {
           promotionId,
-          entryPoint: item.type === "PROMO" ? "NOTIFICATION_PROMO" : "NOTIFICATION_SUB_VOUCHER",
+          entryPoint:
+            item.type === "PROMO"
+              ? "NOTIFICATION_PROMO"
+              : "NOTIFICATION_SUB_VOUCHER",
           sourcePath: "/notifications",
           returnTo: "/notifications",
         };
@@ -142,7 +153,9 @@ export default function NotificationsPage() {
           window.location.href = target;
           return;
         }
-        router.push(buildPathWithAttribution("/store", attribution, { focus: "auto" }));
+        router.push(
+          buildPathWithAttribution("/store", attribution, { focus: "auto" }),
+        );
       }
     },
     [router],
@@ -150,8 +163,12 @@ export default function NotificationsPage() {
 
   const notificationStats = useMemo(() => {
     const total = notifications.length;
-    const promo = notifications.filter((item) => item.type === "PROMO" || item.type === "SUB_VOUCHER").length;
-    const episodes = notifications.filter((item) => item.type === "NEW_EPISODE" || item.type === "TTF_READY").length;
+    const promo = notifications.filter(
+      (item) => item.type === "PROMO" || item.type === "SUB_VOUCHER",
+    ).length;
+    const episodes = notifications.filter(
+      (item) => item.type === "NEW_EPISODE" || item.type === "TTF_READY",
+    ).length;
 
     return [
       {
@@ -172,7 +189,9 @@ export default function NotificationsPage() {
       {
         label: "Total",
         value: loading ? "--" : total.toLocaleString(),
-        hint: isAdultMode ? "18+ filtering is on." : "Standard catalog is showing.",
+        hint: isAdultMode
+          ? "18+ filtering is on."
+          : "Standard catalog is showing.",
       },
     ];
   }, [isAdultMode, loading, notifications, unreadCount]);
@@ -200,7 +219,7 @@ export default function NotificationsPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="Notifications"
             title="Reading updates."
             description="Chapters, offers, and free unlocks stay in one inbox."
@@ -218,7 +237,9 @@ export default function NotificationsPage() {
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  disabled={loading || unreadCount === 0 || workingId === "__all__"}
+                  disabled={
+                    loading || unreadCount === 0 || workingId === "__all__"
+                  }
                   className={secondaryButtonClass}
                 >
                   {workingId === "__all__" ? "Saving..." : "Mark all read"}
@@ -227,16 +248,21 @@ export default function NotificationsPage() {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Inbox desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {inboxDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                <p className="mt-3 text-sm leading-7 text-slate-600">
                   {inboxDeskCopy}
                 </p>
               </div>
@@ -246,14 +272,14 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 onClick={() => router.push("/library")}
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className={primaryButtonClass}
               >
                 Open library
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 Browse titles
               </button>
@@ -264,9 +290,18 @@ export default function NotificationsPage() {
         {loading ? (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="space-y-2">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
-              <div className="h-9 w-64 animate-pulse rounded-2xl bg-slate-200" aria-hidden="true" />
-              <div className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200" aria-hidden="true" />
+              <div
+                className="h-4 w-28 animate-pulse rounded-full bg-slate-200"
+                aria-hidden="true"
+              />
+              <div
+                className="h-9 w-64 animate-pulse rounded-2xl bg-slate-200"
+                aria-hidden="true"
+              />
+              <div
+                className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200"
+                aria-hidden="true"
+              />
             </div>
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, index) => (
@@ -289,11 +324,20 @@ export default function NotificationsPage() {
             <p className="text-sm text-slate-500">Loading your inbox.</p>
           </SurfacePanel>
         ) : error ? (
-          <SurfacePanel className="border border-red-200 bg-red-50 text-red-600" appearance="light" tone="danger" accent="rose">
+          <SurfacePanel
+            className="border border-red-200 bg-red-50 text-red-600"
+            appearance="light"
+            tone="danger"
+            accent="rose"
+          >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-red-600">Couldn't load notifications.</p>
-                <p className="mt-1 text-sm text-red-500">Try again to refresh your inbox.</p>
+                <p className="text-sm font-semibold text-red-600">
+                  Couldn't load notifications.
+                </p>
+                <p className="mt-1 text-sm text-red-500">
+                  Try again to refresh your inbox.
+                </p>
               </div>
               <button
                 type="button"
@@ -315,7 +359,9 @@ export default function NotificationsPage() {
                   Latest updates
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">{notifications.length} updates loaded</p>
+              <p className="text-xs text-slate-500">
+                {notifications.length} updates loaded
+              </p>
             </div>
             <NotificationList
               notifications={notifications}

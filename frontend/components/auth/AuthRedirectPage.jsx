@@ -8,11 +8,11 @@ export default function AuthRedirectPage({
     <div className="gush-home-shell relative min-h-screen overflow-hidden">
       <div className="gush-page-ambient" />
       <main className="gush-page-main flex min-h-screen items-center justify-center">
-        <div className="relative w-full max-w-md rounded-[32px] border border-[rgba(47,88,198,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,239,0.96))] px-8 py-8 text-center shadow-[0_26px_72px_rgba(15,23,42,0.08)]">
-          <div className="mx-auto inline-flex rounded-full border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="relative w-full max-w-md rounded-[32px] border border-[rgba(134,98,69,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,239,0.96))] px-8 py-8 text-center shadow-[0_26px_72px_rgba(15,23,42,0.08)]">
+          <div className="mx-auto inline-flex rounded-full border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.06)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Redirecting
           </div>
-          <div className="mx-auto mt-5 h-9 w-9 animate-spin rounded-full border-[3px] border-[var(--gush-accent,#2f6bff)] border-t-transparent" />
+          <div className="mx-auto mt-5 h-9 w-9 animate-spin rounded-full border-[3px] border-[var(--gush-accent-strong,#63472f)] border-t-transparent" />
           <h1 className="mt-5 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950">
             {title}
           </h1>

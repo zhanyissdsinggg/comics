@@ -15,11 +15,11 @@ export default function CommerceSuccessBanner({
 
   return (
     <div
-      className={`rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl ${className}`}
+      className={`rounded-[28px] border border-[rgba(134,98,69,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,243,236,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl ${className}`}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#866245)]">
             {notice.eyebrow}
           </p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">

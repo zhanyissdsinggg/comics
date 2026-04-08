@@ -23,7 +23,8 @@ const PAGE_CONFIG = {
     eyebrow: "Comics",
     heroTitle: "Original comics.",
     title: "Comics",
-    description: "Browse recent releases, finished runs, and stories worth keeping up with.",
+    description:
+      "Browse recent releases, finished runs, and stories worth keeping up with.",
     secondary: "",
     emptyIcon: "search",
     emptyTitle: "No comics match this filter set",
@@ -51,7 +52,8 @@ const PAGE_CONFIG = {
     eyebrow: "Novels",
     heroTitle: "Original novels.",
     title: "Novels",
-    description: "Browse serialized fiction, recent chapters, and finished stories.",
+    description:
+      "Browse serialized fiction, recent chapters, and finished stories.",
     secondary: "",
     emptyIcon: "book",
     emptyTitle: "No novels match this filter set",
@@ -73,12 +75,21 @@ const PAGE_CONFIG = {
         href: "/rankings?view=completed",
       },
     ],
-    fallbackGenres: ["Fantasy", "Romance", "Drama", "Mystery", "BL", "Historical"],
+    fallbackGenres: [
+      "Fantasy",
+      "Romance",
+      "Drama",
+      "Mystery",
+      "BL",
+      "Historical",
+    ],
   },
 };
 
 function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function toNumber(value) {
@@ -102,15 +113,25 @@ function getEpisodeCount(series) {
 function getEditorialScore(series) {
   const updatedAtScore = toTimestamp(series?.updatedAt);
   const startHereScore =
-    getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24 ? 12 * 24 * 60 * 60 * 1000 : 0;
+    getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24
+      ? 12 * 24 * 60 * 60 * 1000
+      : 0;
   const completedScore =
-    normalizeStatus(series?.status) === "completed" ? 10 * 24 * 60 * 60 * 1000 : 0;
+    normalizeStatus(series?.status) === "completed"
+      ? 10 * 24 * 60 * 60 * 1000
+      : 0;
   const coverScore = series?.coverUrl ? 3 * 24 * 60 * 60 * 1000 : 0;
   const descriptionScore = String(series?.description || "").trim()
     ? 2 * 24 * 60 * 60 * 1000
     : 0;
 
-  return updatedAtScore + startHereScore + completedScore + coverScore + descriptionScore;
+  return (
+    updatedAtScore +
+    startHereScore +
+    completedScore +
+    coverScore +
+    descriptionScore
+  );
 }
 
 function toTimestamp(value) {
@@ -176,17 +197,23 @@ export default function SeriesPage({
 }) {
   const router = useRouter();
   const { isAdultMode } = useAdultGateStore();
-  const [series, setSeries] = useState(Array.isArray(initialSeries) ? initialSeries : []);
+  const [series, setSeries] = useState(
+    Array.isArray(initialSeries) ? initialSeries : [],
+  );
   const [loading, setLoading] = useState(!hasInitialSeries);
   const config = PAGE_CONFIG[type] || PAGE_CONFIG.comic;
-  const searchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
+  const searchParams = useMemo(
+    () => toURLSearchParams(initialSearchParams),
+    [initialSearchParams],
+  );
 
   const selectedGenre = getSearchParam(initialSearchParams, "genre", "all");
   const sortBy = getSearchParam(initialSearchParams, "sort", "latest");
   const status = getSearchParam(initialSearchParams, "status", "all");
   const isComicPage = type === "comic";
   const isNovelPage = type === "novel";
-  const hasActiveFilters = selectedGenre !== "all" || sortBy !== "latest" || status !== "all";
+  const hasActiveFilters =
+    selectedGenre !== "all" || sortBy !== "latest" || status !== "all";
 
   useEffect(() => {
     async function loadSeries() {
@@ -194,14 +221,21 @@ export default function SeriesPage({
         if (!hasInitialSeries) {
           setLoading(true);
         }
-        const response = await apiGet(`/api/series?adult=${isAdultMode ? "1" : "0"}`, {
-          cacheMs: 300000,
-        });
+        const response = await apiGet(
+          `/api/series?adult=${isAdultMode ? "1" : "0"}`,
+          {
+            cacheMs: 300000,
+          },
+        );
         if (!response.ok) {
-          throw new Error(response.message || response.error || `Failed to load ${type}s`);
+          throw new Error(
+            response.message || response.error || `Failed to load ${type}s`,
+          );
         }
 
-        const filtered = (response.data?.series || []).filter((item) => item.type === type);
+        const filtered = (response.data?.series || []).filter(
+          (item) => item.type === type,
+        );
         setSeries(filtered);
       } catch (error) {
         console.error(`Failed to load ${type}s:`, error);
@@ -227,7 +261,9 @@ export default function SeriesPage({
       });
 
       const nextQuery = params.toString();
-      router.replace(nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname);
+      router.replace(
+        nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname,
+      );
     },
     [config.pathname, router, searchParams],
   );
@@ -241,7 +277,9 @@ export default function SeriesPage({
       }
     });
 
-    return Array.from(genreSet).sort((left, right) => left.localeCompare(right));
+    return Array.from(genreSet).sort((left, right) =>
+      left.localeCompare(right),
+    );
   }, [series]);
 
   const filteredAndSortedSeries = useMemo(() => {
@@ -250,7 +288,9 @@ export default function SeriesPage({
     if (selectedGenre !== "all") {
       result = result.filter((item) =>
         Array.isArray(item.genres)
-          ? item.genres.some((genre) => genre.toLowerCase() === selectedGenre.toLowerCase())
+          ? item.genres.some(
+              (genre) => genre.toLowerCase() === selectedGenre.toLowerCase(),
+            )
           : false,
       );
     }
@@ -278,7 +318,9 @@ export default function SeriesPage({
         case "latest":
           return new Date(right.updatedAt || 0) - new Date(left.updatedAt || 0);
         case "title":
-          return String(left?.title || "").localeCompare(String(right?.title || ""));
+          return String(left?.title || "").localeCompare(
+            String(right?.title || ""),
+          );
         default:
           return getEditorialScore(right) - getEditorialScore(left);
       }
@@ -305,7 +347,10 @@ export default function SeriesPage({
       .map(mapSeriesCardItem);
 
     const latest = [...series]
-      .sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt))
+      .sort(
+        (left, right) =>
+          toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+      )
       .slice(0, 4)
       .map((item) => ({
         ...mapSeriesCardItem(item),
@@ -372,7 +417,13 @@ export default function SeriesPage({
       title: config.emptyTitle,
       description: config.emptyDescription,
     };
-  }, [config.emptyDescription, config.emptyTitle, loading, series.length, type]);
+  }, [
+    config.emptyDescription,
+    config.emptyTitle,
+    loading,
+    series.length,
+    type,
+  ]);
 
   const handleSeriesClick = useCallback(
     (seriesId) => {
@@ -384,19 +435,28 @@ export default function SeriesPage({
     router.replace(config.pathname);
   }, [config.pathname, router]);
   const entrySpotlight = useMemo(() => {
-    const byFeatured = [...series].sort((left, right) => getEditorialScore(right) - getEditorialScore(left));
-    const byLatest = [...series].sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt));
-    const startHere = [...series]
-      .filter((item) => getEpisodeCount(item) > 0)
-      .sort((left, right) => {
-        const leftEpisodes = getEpisodeCount(left);
-        const rightEpisodes = getEpisodeCount(right);
-        if (leftEpisodes !== rightEpisodes) {
-          return leftEpisodes - rightEpisodes;
-        }
-        return getEditorialScore(right) - getEditorialScore(left);
-      })[0] || null;
-    const completed = byFeatured.find((item) => normalizeStatus(item?.status) === "completed") || null;
+    const byFeatured = [...series].sort(
+      (left, right) => getEditorialScore(right) - getEditorialScore(left),
+    );
+    const byLatest = [...series].sort(
+      (left, right) =>
+        toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+    );
+    const startHere =
+      [...series]
+        .filter((item) => getEpisodeCount(item) > 0)
+        .sort((left, right) => {
+          const leftEpisodes = getEpisodeCount(left);
+          const rightEpisodes = getEpisodeCount(right);
+          if (leftEpisodes !== rightEpisodes) {
+            return leftEpisodes - rightEpisodes;
+          }
+          return getEditorialScore(right) - getEditorialScore(left);
+        })[0] || null;
+    const completed =
+      byFeatured.find(
+        (item) => normalizeStatus(item?.status) === "completed",
+      ) || null;
     return type === "comic"
       ? startHere || byFeatured[0] || byLatest[0] || completed || null
       : byFeatured[0] || byLatest[0] || completed || startHere || null;
@@ -423,7 +483,9 @@ export default function SeriesPage({
     });
 
     return Array.from(genreCounts.entries())
-      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .sort(
+        (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+      )
       .slice(0, 6)
       .map(([genre, count]) => ({ genre, count }));
   }, [series]);
@@ -432,13 +494,17 @@ export default function SeriesPage({
       return genreQuickPicks;
     }
 
-    return (Array.isArray(config.fallbackGenres) ? config.fallbackGenres : []).map((genre) => ({
+    return (
+      Array.isArray(config.fallbackGenres) ? config.fallbackGenres : []
+    ).map((genre) => ({
       genre,
       count: null,
     }));
   }, [config.fallbackGenres, genreQuickPicks]);
   const completedSeriesCount = useMemo(
-    () => series.filter((item) => normalizeStatus(item?.status) === "completed").length,
+    () =>
+      series.filter((item) => normalizeStatus(item?.status) === "completed")
+        .length,
     [series],
   );
   const heroStats = useMemo(
@@ -465,10 +531,14 @@ export default function SeriesPage({
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
-  const showEntrySpotlight = Boolean(entrySpotlight) && !isComicPage && (!isNovelPage || !hasActiveFilters);
+  const showEntrySpotlight =
+    Boolean(entrySpotlight) &&
+    !isComicPage &&
+    (!isNovelPage || !hasActiveFilters);
   const showCatalogCount = !isComicPage;
   const oppositeFormatHref = type === "comic" ? "/novels" : "/comics";
-  const oppositeFormatLabel = type === "comic" ? "Browse Novels" : "Browse Comics";
+  const oppositeFormatLabel =
+    type === "comic" ? "Browse Novels" : "Browse Comics";
 
   return (
     <main className="gush-page-shell gush-home-shell overflow-hidden">
@@ -480,16 +550,17 @@ export default function SeriesPage({
           <SurfacePanel
             className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
             tone="highlight"
-            accent="blue"
+            accent="amber"
+            appearance="light"
           >
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
                 {config.eyebrow}
               </p>
-              <h1 className="mt-4 font-display text-[2.4rem] font-semibold leading-[0.95] tracking-[-0.045em] text-white sm:text-[3rem] xl:text-[3.7rem]">
+              <h1 className="mt-4 font-display text-[2.55rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[color:var(--gush-ink-strong)] sm:text-[3.1rem] xl:text-[4rem] dark:text-white">
                 {config.heroTitle}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--gush-ink-soft)] sm:text-[0.98rem] dark:text-white/68">
                 {config.description}
               </p>
             </div>
@@ -500,7 +571,7 @@ export default function SeriesPage({
                   key={`hero-genre-${item.genre}`}
                   type="button"
                   onClick={() => updateParams({ genre: item.genre })}
-                  className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/74 transition-colors hover:border-white/18 hover:bg-white/[0.09] hover:text-white"
+                  className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1.5 text-xs font-medium text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/68 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
                 >
                   {item.genre}
                 </button>
@@ -511,14 +582,14 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full bg-[var(--gush-home-accent)] px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-[#ffd6a0]"
+                className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
               >
                 Search the catalog
               </button>
               <button
                 type="button"
                 onClick={() => router.push(oppositeFormatHref)}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-white/74 transition hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+                className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
               >
                 {oppositeFormatLabel}
               </button>
@@ -528,10 +599,12 @@ export default function SeriesPage({
               {heroStats.map((stat) => (
                 <div
                   key={stat.id}
-                  className="rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-4"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-white/10 dark:bg-white/[0.04]"
                 >
-                  <p className="text-lg font-semibold tracking-tight text-white">{stat.value}</p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                  <p className="text-lg font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
                     {stat.label}
                   </p>
                 </div>
@@ -540,45 +613,52 @@ export default function SeriesPage({
           </SurfacePanel>
 
           {showEntrySpotlight ? (
-            <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.22)] sm:p-6">
+            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] p-5 shadow-[0_20px_48px_rgba(37,28,19,0.05)] sm:p-6 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
               <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                 <Cover
                   tone={entrySpotlight.coverTone}
                   coverUrl={entrySpotlight.coverUrl}
                   label={entrySpotlight.title}
-                  eyebrow={type === "comic" ? "Editors' pick" : "Featured novel"}
+                  eyebrow={
+                    type === "comic" ? "Editors' pick" : "Featured novel"
+                  }
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-white/10 bg-neutral-900 shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-neutral-900 shadow-[0_18px_36px_rgba(37,28,19,0.08)] dark:border-white/10 dark:shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
                 />
 
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/42">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
                     Featured title
                   </p>
-                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-white">
+                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
                     {entrySpotlight.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-white/60">
+                  <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)] dark:text-white/60">
                     {getSeriesSubtitle(entrySpotlight)}
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {(Array.isArray(entrySpotlight?.genres) ? entrySpotlight.genres : []).slice(0, 2).map((genre) => (
-                      <span
-                        key={`spotlight-${entrySpotlight.id}-${genre}`}
-                        className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/72"
-                      >
-                        {genre}
-                      </span>
-                    ))}
+                    {(Array.isArray(entrySpotlight?.genres)
+                      ? entrySpotlight.genres
+                      : []
+                    )
+                      .slice(0, 2)
+                      .map((genre) => (
+                        <span
+                          key={`spotlight-${entrySpotlight.id}-${genre}`}
+                          className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1 text-xs font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/72"
+                        >
+                          {genre}
+                        </span>
+                      ))}
                   </div>
 
                   <button
                     type="button"
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
-                    className="mt-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                    className="mt-5 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
                   >
                     View Series
                   </button>
@@ -591,7 +671,12 @@ export default function SeriesPage({
         {loading ? (
           <div className="grid gap-4 xl:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
-              <SurfacePanel key={index} className="space-y-5" appearance="light" accent="blue">
+              <SurfacePanel
+                key={index}
+                className="space-y-5"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="space-y-3">
                   <div className="h-3 w-24 rounded-full bg-slate-200" />
                   <div className="h-8 w-56 rounded-full bg-slate-200" />
@@ -609,7 +694,12 @@ export default function SeriesPage({
           <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
             <div className="grid gap-4 md:grid-cols-2">
               {config.emptyBrowseCards.map((card) => (
-                <SurfacePanel key={card.title} className="space-y-4" appearance="light" accent="blue">
+                <SurfacePanel
+                  key={card.title}
+                  className="space-y-4"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                       {card.eyebrow}
@@ -629,7 +719,11 @@ export default function SeriesPage({
               ))}
             </div>
 
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-4"
+              appearance="light"
+              accent="blue"
+            >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Browse
@@ -644,14 +738,17 @@ export default function SeriesPage({
                   <button
                     key={item.genre}
                     type="button"
-                    onClick={() => router.push(`/search?q=${encodeURIComponent(item.genre)}&sort=latest`)}
+                    onClick={() =>
+                      router.push(
+                        `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
+                      )
+                    }
                     className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
                   >
                     {item.genre}
                   </button>
                 ))}
               </div>
-
             </SurfacePanel>
           </section>
         ) : null}
@@ -666,7 +763,8 @@ export default function SeriesPage({
                 {config.title}
               </h2>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Filter by format, status, and genre without losing the shelf structure.
+                Filter by format, status, and genre without losing the shelf
+                structure.
               </p>
             </div>
             {showCatalogCount ? (
@@ -718,7 +816,9 @@ export default function SeriesPage({
               </button>
               <button
                 type="button"
-                onClick={() => router.push(type === "comic" ? "/novels" : "/comics")}
+                onClick={() =>
+                  router.push(type === "comic" ? "/novels" : "/comics")
+                }
                 className={primaryButtonClass}
               >
                 {type === "comic" ? "Browse Novels" : "Browse Comics"}
@@ -727,18 +827,18 @@ export default function SeriesPage({
           </SurfacePanel>
         ) : (
           <div className={catalogGridClassName}>
-              {filteredAndSortedSeries.map((item) => (
-                <PortraitCard
-                  key={item.id}
-                  item={item}
-                  tone={item.coverTone}
-                  appearance="light"
-                  density="compact"
-                  showActionLabel={false}
-                  coverFallbackVariant={isComicPage ? "minimal-card" : "default"}
-                  onClick={() => handleSeriesClick(item.id)}
-                />
-              ))}
+            {filteredAndSortedSeries.map((item) => (
+              <PortraitCard
+                key={item.id}
+                item={item}
+                tone={item.coverTone}
+                appearance="light"
+                density="compact"
+                showActionLabel={false}
+                coverFallbackVariant={isComicPage ? "minimal-card" : "default"}
+                onClick={() => handleSeriesClick(item.id)}
+              />
+            ))}
           </div>
         )}
       </div>

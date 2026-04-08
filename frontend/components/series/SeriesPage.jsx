@@ -51,7 +51,10 @@ function EpisodeListSkeleton() {
       </div>
       <div className="space-y-2">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={`episode-list-skeleton-${index}`} className="h-24 w-full rounded-[24px]" />
+          <Skeleton
+            key={`episode-list-skeleton-${index}`}
+            className="h-24 w-full rounded-[24px]"
+          />
         ))}
       </div>
     </section>
@@ -138,7 +141,9 @@ export default function SeriesPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasInitialSeriesPayload = hasSeriesPayload(initialSeriesPayload);
-  const [data, setData] = useState(() => (hasInitialSeriesPayload ? initialSeriesPayload : null));
+  const [data, setData] = useState(() =>
+    hasInitialSeriesPayload ? initialSeriesPayload : null,
+  );
   const [loading, setLoading] = useState(() =>
     getInitialSeriesLoading(hasInitialSeriesPayload, initialSeriesState),
   );
@@ -146,7 +151,9 @@ export default function SeriesPage({
     getInitialSeriesError(hasInitialSeriesPayload, initialSeriesState),
   );
   const [gateStatus, setGateStatus] = useState(() =>
-    initialSeriesState === "adult-gated" ? initialGateStatus || "NEED_LOGIN" : "OK",
+    initialSeriesState === "adult-gated"
+      ? initialGateStatus || "NEED_LOGIN"
+      : "OK",
   );
   const [activeModal, setActiveModal] = useState(null);
   const [showSecondarySections, setShowSecondarySections] = useState(false);
@@ -164,7 +171,8 @@ export default function SeriesPage({
   const { bySeriesId, loadEntitlement, unlockEpisode, claimTTF } =
     useEntitlementStore();
   const { report } = useRewardsStore();
-  const { followedSeriesIds, loadFollowed, follow, unfollow } = useFollowStore();
+  const { followedSeriesIds, loadFollowed, follow, unfollow } =
+    useFollowStore();
   const { viewSeries, followSeries } = useBehaviorStore();
   const { signIn, isSignedIn, hydrated } = useAuthStore();
   const { coupons, loadCoupons } = useCouponStore();
@@ -177,7 +185,11 @@ export default function SeriesPage({
     confirmAge: confirmAdultAge,
     forceDisableAdultMode,
   } = useAdultGateStore();
-  const { bySeriesId: progressBySeriesId, getProgress, loadProgress } = useProgressStore();
+  const {
+    bySeriesId: progressBySeriesId,
+    getProgress,
+    loadProgress,
+  } = useProgressStore();
   const routeAttribution = useMemo(
     () => readPaymentAttributionFromSearchParams(searchParams),
     [searchParams],
@@ -190,20 +202,20 @@ export default function SeriesPage({
   );
   const episodes = useMemo(
     () => (Array.isArray(data?.episodes) ? data.episodes : []),
-    [data?.episodes]
+    [data?.episodes],
   );
   const creatorPresentation = useMemo(
     () => resolveSeriesCreatorIdentity(series),
     [series],
   );
-  const entitlement = bySeriesId[seriesId] || { seriesId, unlockedEpisodeIds: [] };
-  const firstEpisodeId = useMemo(
-    () => getFirstEpisodeId(episodes),
-    [episodes]
-  );
+  const entitlement = bySeriesId[seriesId] || {
+    seriesId,
+    unlockedEpisodeIds: [],
+  };
+  const firstEpisodeId = useMemo(() => getFirstEpisodeId(episodes), [episodes]);
   const progress = useMemo(
     () => progressBySeriesId?.[seriesId] || getProgress(seriesId),
-    [progressBySeriesId, getProgress, seriesId]
+    [progressBySeriesId, getProgress, seriesId],
   );
 
   useEffect(() => {
@@ -220,9 +232,17 @@ export default function SeriesPage({
     }
 
     setData(null);
-    setLoading(getInitialSeriesLoading(hasInitialSeriesPayload, initialSeriesState));
-    setError(getInitialSeriesError(hasInitialSeriesPayload, initialSeriesState));
-    setGateStatus(initialSeriesState === "adult-gated" ? initialGateStatus || "NEED_LOGIN" : "OK");
+    setLoading(
+      getInitialSeriesLoading(hasInitialSeriesPayload, initialSeriesState),
+    );
+    setError(
+      getInitialSeriesError(hasInitialSeriesPayload, initialSeriesState),
+    );
+    setGateStatus(
+      initialSeriesState === "adult-gated"
+        ? initialGateStatus || "NEED_LOGIN"
+        : "OK",
+    );
   }, [
     hasInitialSeriesPayload,
     initialGateStatus,
@@ -251,7 +271,11 @@ export default function SeriesPage({
 
         const hasVisibleData = Boolean(dataRef.current?.series?.id);
 
-        if (!showLoading && hasVisibleData && response.error !== "ADULT_GATED") {
+        if (
+          !showLoading &&
+          hasVisibleData &&
+          response.error !== "ADULT_GATED"
+        ) {
           setLoading(false);
           return true;
         }
@@ -347,12 +371,15 @@ export default function SeriesPage({
         });
       }
     },
-    [forceDisableAdultMode, isAdultMode, seriesId]
+    [forceDisableAdultMode, isAdultMode, seriesId],
   );
 
   useEffect(() => {
     fetchSeries({
-      showLoading: getInitialSeriesLoading(hasInitialSeriesPayload, initialSeriesState),
+      showLoading: getInitialSeriesLoading(
+        hasInitialSeriesPayload,
+        initialSeriesState,
+      ),
     });
   }, [fetchSeries, hasInitialSeriesPayload, initialSeriesState]);
 
@@ -425,7 +452,9 @@ export default function SeriesPage({
 
   useEffect(() => {
     setCommerceNotice(
-      getCommerceSuccessPresentation(consumeCommerceSuccessForPath(`/series/${seriesId}`)),
+      getCommerceSuccessPresentation(
+        consumeCommerceSuccessForPath(`/series/${seriesId}`),
+      ),
     );
   }, [seriesId]);
 
@@ -439,7 +468,9 @@ export default function SeriesPage({
         typeof window !== "undefined" &&
         typeof window.matchMedia === "function" &&
         window.matchMedia("(min-width: 640px)").matches;
-      return prefersDesktop ? desktopPrimaryActionRef.current : mobilePrimaryActionRef.current;
+      return prefersDesktop
+        ? desktopPrimaryActionRef.current
+        : mobilePrimaryActionRef.current;
     });
   }, [commerceNotice]);
 
@@ -459,7 +490,7 @@ export default function SeriesPage({
           observer.disconnect();
         }
       },
-      { rootMargin: "260px 0px" }
+      { rootMargin: "260px 0px" },
     );
     observer.observe(target);
     return () => observer.disconnect();
@@ -516,34 +547,43 @@ export default function SeriesPage({
     fetchSeries({ bust: true });
   };
 
-  const handleRead = useCallback((seriesIdValue, episodeId) => {
-    trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
-    router.push(`/read/${seriesIdValue}/${episodeId}`);
-  }, [router]);
+  const handleRead = useCallback(
+    (seriesIdValue, episodeId) => {
+      trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
+      router.push(`/read/${seriesIdValue}/${episodeId}`);
+    },
+    [router],
+  );
 
   const handleUnlock = useCallback(
     (seriesIdValue, episodeId, idempotencyKey) =>
       unlockEpisode(seriesIdValue, episodeId, idempotencyKey),
-    [unlockEpisode]
+    [unlockEpisode],
   );
 
   const handleClaim = useCallback(
     (seriesIdValue, episodeId) => claimTTF(seriesIdValue, episodeId),
-    [claimTTF]
+    [claimTTF],
   );
 
-  const handleSubscribe = useCallback((seriesIdValue, episodeId) => {
-    trackEvent("click_subscribe_from_ttf", { seriesId: seriesIdValue, episodeId });
-    router.push(
-      buildPathWithAttribution("/subscribe", {
-        entryPoint: "SERIES_TTF",
-        sourcePath: `/series/${seriesIdValue}`,
-        sourceSeriesId: seriesIdValue,
-        sourceEpisodeId: episodeId || undefined,
-        returnTo: `/series/${seriesIdValue}`,
-      })
-    );
-  }, [router]);
+  const handleSubscribe = useCallback(
+    (seriesIdValue, episodeId) => {
+      trackEvent("click_subscribe_from_ttf", {
+        seriesId: seriesIdValue,
+        episodeId,
+      });
+      router.push(
+        buildPathWithAttribution("/subscribe", {
+          entryPoint: "SERIES_TTF",
+          sourcePath: `/series/${seriesIdValue}`,
+          sourceSeriesId: seriesIdValue,
+          sourceEpisodeId: episodeId || undefined,
+          returnTo: `/series/${seriesIdValue}`,
+        }),
+      );
+    },
+    [router],
+  );
 
   const handleOpenStore = useCallback(() => {
     router.push(
@@ -590,13 +630,22 @@ export default function SeriesPage({
       sourceSeriesId: seriesId,
       returnTo: `/series/${seriesId}`,
     });
-  }, [creatorPresentation.hasPublicCredit, creatorPresentation.href, creatorPresentation.slug, seriesId]);
+  }, [
+    creatorPresentation.hasPublicCredit,
+    creatorPresentation.href,
+    creatorPresentation.slug,
+    seriesId,
+  ]);
   const latestEpisode = useMemo(() => {
     if (!Array.isArray(episodes) || episodes.length === 0) {
       return null;
     }
 
-    return [...episodes].sort((left, right) => Number(right?.number || 0) - Number(left?.number || 0))[0] || null;
+    return (
+      [...episodes].sort(
+        (left, right) => Number(right?.number || 0) - Number(left?.number || 0),
+      )[0] || null
+    );
   }, [episodes]);
   const primaryReadAction = useMemo(
     () =>
@@ -634,7 +683,10 @@ export default function SeriesPage({
       return;
     }
 
-    if (primaryReadAction.actionKind === "read" || primaryReadAction.actionKind === "preview") {
+    if (
+      primaryReadAction.actionKind === "read" ||
+      primaryReadAction.actionKind === "preview"
+    ) {
       handleRead(seriesId, targetEpisodeId);
       return;
     }
@@ -658,7 +710,11 @@ export default function SeriesPage({
     if (primaryReadAction.actionKind === "unlock") {
       let response;
       try {
-        response = await handleUnlock(seriesId, targetEpisodeId, createIdempotencyKey());
+        response = await handleUnlock(
+          seriesId,
+          targetEpisodeId,
+          createIdempotencyKey(),
+        );
       } catch {
         response = { ok: false, status: 500, error: "UNLOCK_FAILED" };
       }
@@ -725,7 +781,10 @@ export default function SeriesPage({
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <Skeleton key={`series-header-skeleton-${index}`} className="h-28 rounded-[22px]" />
+                    <Skeleton
+                      key={`series-header-skeleton-${index}`}
+                      className="h-28 rounded-[22px]"
+                    />
                   ))}
                 </div>
               </div>
@@ -744,7 +803,10 @@ export default function SeriesPage({
             </div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
-                <Skeleton key={`episode-${index}`} className="h-20 w-full rounded-[24px]" />
+                <Skeleton
+                  key={`episode-${index}`}
+                  className="h-20 w-full rounded-[24px]"
+                />
               ))}
             </div>
           </section>
@@ -808,7 +870,11 @@ export default function SeriesPage({
         <div className="gush-page-main">
           <NetworkFallback
             compact
-            title={isUnavailable ? "This title is unavailable right now." : "We couldn't load this title yet."}
+            title={
+              isUnavailable
+                ? "This title is unavailable right now."
+                : "We couldn't load this title yet."
+            }
             description={
               isUnavailable
                 ? "Try again or browse another title."
@@ -825,7 +891,9 @@ export default function SeriesPage({
             </button>
             <button
               type="button"
-              onClick={() => router.push(isUnavailable ? "/support" : "/search")}
+              onClick={() =>
+                router.push(isUnavailable ? "/support" : "/search")
+              }
               className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
             >
               {isUnavailable ? "Get Help" : "Search"}
@@ -842,7 +910,10 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="home" />
 
-        <AdultGateBlockingPanel status={gateStatus} onOpenModal={openGateModal} />
+        <AdultGateBlockingPanel
+          status={gateStatus}
+          onOpenModal={openGateModal}
+        />
         {activeModal === "login" ? (
           <AdultLoginModal
             open
@@ -883,10 +954,10 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-6 rounded-[28px] border border-[rgba(47,107,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
+          <div className="mb-6 rounded-[28px] border border-[rgba(134,98,69,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
                   {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                 </p>
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
@@ -942,7 +1013,11 @@ export default function SeriesPage({
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}
-              author={creatorPresentation.hasPublicCredit ? creatorPresentation.displayName : ""}
+              author={
+                creatorPresentation.hasPublicCredit
+                  ? creatorPresentation.displayName
+                  : ""
+              }
               status={series.status}
               genres={series.genres}
               isFollowing={isFollowing}

@@ -36,7 +36,10 @@ function PanelLoadingSkeleton({ rows = 3 }) {
   return (
     <SurfacePanel className="space-y-3" appearance="light" accent="blue">
       {Array.from({ length: rows }).map((_, index) => (
-        <Skeleton key={`panel-loading-${rows}-${index}`} className="h-12 w-full rounded-2xl" />
+        <Skeleton
+          key={`panel-loading-${rows}-${index}`}
+          className="h-12 w-full rounded-2xl"
+        />
       ))}
     </SurfacePanel>
   );
@@ -137,7 +140,12 @@ function formatBookmarkCountLabel(value) {
   return `${count} bookmark${count === 1 ? "" : "s"}`;
 }
 
-function getReadingState({ progressPercent, hasProgress = false, hasRecent = false, isSaved = false }) {
+function getReadingState({
+  progressPercent,
+  hasProgress = false,
+  hasRecent = false,
+  isSaved = false,
+}) {
   const normalized = normalizeReadingPercent(progressPercent);
 
   if ((hasProgress || hasRecent) && normalized >= 0.98) {
@@ -195,13 +203,18 @@ export default function LibraryPage({ initialSignedIn = false }) {
     if (typeof document === "undefined") {
       return;
     }
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
     [seriesList],
   );
-  const followedSet = useMemo(() => new Set(followedSeriesIds), [followedSeriesIds]);
+  const followedSet = useMemo(
+    () => new Set(followedSeriesIds),
+    [followedSeriesIds],
+  );
   const progressEntries = useMemo(
     () =>
       Object.entries(bySeriesId).sort(
@@ -284,7 +297,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
             return null;
           }
           const currentProgress = bySeriesId[entry.seriesId];
-          const progressPercent = normalizeReadingPercent(currentProgress?.percent);
+          const progressPercent = normalizeReadingPercent(
+            currentProgress?.percent,
+          );
           const readingState = getReadingState({
             progressPercent,
             hasProgress: Boolean(currentProgress?.lastEpisodeId),
@@ -320,7 +335,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
   }, []);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/library")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/library")),
+    );
   }, []);
 
   useEffect(() => {
@@ -331,13 +348,23 @@ export default function LibraryPage({ initialSignedIn = false }) {
       loadMissions();
       loadFollowed();
     }
-  }, [viewerSignedIn, loadFollowed, loadMissions, loadRewards, loadProgress, loadHistory]);
+  }, [
+    viewerSignedIn,
+    loadFollowed,
+    loadMissions,
+    loadRewards,
+    loadProgress,
+    loadHistory,
+  ]);
 
   useEffect(() => {
     const adultFlag = isAdultMode ? "1" : "0";
     parallelRequests2(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
-      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
+      () =>
+        apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+          cacheMs: 60000,
+        }),
     ).then(([seriesCatalogResponse, storefrontSlotsResponse]) => {
       setSeriesResponse(seriesCatalogResponse);
       if (seriesCatalogResponse.ok) {
@@ -354,17 +381,21 @@ export default function LibraryPage({ initialSignedIn = false }) {
             }
           });
         }
-      } else if (seriesCatalogResponse.status === 0 || seriesCatalogResponse.status >= 500) {
+      } else if (
+        seriesCatalogResponse.status === 0 ||
+        seriesCatalogResponse.status >= 500
+      ) {
         if (shouldRetry(`library_series_${adultFlag}`)) {
           setTimeout(() => {
-            apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000, bust: true }).then(
-              (retryResponse) => {
-                setSeriesResponse(retryResponse);
-                if (retryResponse.ok) {
-                  setSeriesList(retryResponse.data?.series || []);
-                }
-              },
-            );
+            apiGet(`/api/series?adult=${adultFlag}`, {
+              cacheMs: 30000,
+              bust: true,
+            }).then((retryResponse) => {
+              setSeriesResponse(retryResponse);
+              if (retryResponse.ok) {
+                setSeriesList(retryResponse.data?.series || []);
+              }
+            });
           }, 600);
         }
       }
@@ -506,7 +537,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
         if (!progress?.lastEpisodeId && bookmarkCount > 0) {
           detailItems.push(formatBookmarkCountLabel(bookmarkCount));
         }
-        if (!progress?.lastEpisodeId && !historySeriesIds.has(seriesId) && !latestBookmark?.label && series.status) {
+        if (
+          !progress?.lastEpisodeId &&
+          !historySeriesIds.has(seriesId) &&
+          !latestBookmark?.label &&
+          series.status
+        ) {
           detailItems.push(series.status);
         }
         if (isFollowed) {
@@ -539,12 +575,21 @@ export default function LibraryPage({ initialSignedIn = false }) {
         }
         return left.title.localeCompare(right.title);
       });
-  }, [bookmarksBySeries, bySeriesId, followedSeriesIds, followedSet, historySeriesIds, progressEntries, seriesById]);
+  }, [
+    bookmarksBySeries,
+    bySeriesId,
+    followedSeriesIds,
+    followedSet,
+    historySeriesIds,
+    progressEntries,
+    seriesById,
+  ]);
 
   const bookmarkCountTotal = useMemo(
     () =>
       Object.values(bookmarksBySeries || {}).reduce(
-        (total, entries) => total + (Array.isArray(entries) ? entries.length : 0),
+        (total, entries) =>
+          total + (Array.isArray(entries) ? entries.length : 0),
         0,
       ),
     [bookmarksBySeries],
@@ -561,7 +606,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
         seriesId: series.id,
         title: series.title,
         eyebrow: sourceLabel || "",
-        subtitle: sourceLabel || series.genres?.slice(0, 2).join(" | ") || series.badge || series.status,
+        subtitle:
+          sourceLabel ||
+          series.genres?.slice(0, 2).join(" | ") ||
+          series.badge ||
+          series.status,
         coverTone: series.coverTone,
         coverUrl: series.coverUrl,
         badge: series.badge,
@@ -590,7 +639,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
   );
   const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
-    continueRailItems.length > 0 || historyRail.length > 0 || visibleLibraryItems.length > 0;
+    continueRailItems.length > 0 ||
+    historyRail.length > 0 ||
+    visibleLibraryItems.length > 0;
   const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
   const resumeSpotlightReadHref =
     resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
@@ -636,7 +687,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
               value: continueRailItems.length.toLocaleString(),
               hint:
                 continueRailItems.length > 0
-                  ? formatReadingPercentLabel(continueRailItems[0]?.progressPercent) ||
+                  ? formatReadingPercentLabel(
+                      continueRailItems[0]?.progressPercent,
+                    ) ||
                     continueRailItems[0]?.statusLabel ||
                     "Ready to resume"
                   : "Your next chapter stays here",
@@ -657,13 +710,17 @@ export default function LibraryPage({ initialSignedIn = false }) {
             {
               label: "Bookmarks",
               value: bookmarkCountTotal.toLocaleString(),
-              hint: bookmarkCountTotal > 0 ? "Saved moments" : "No bookmarks yet",
+              hint:
+                bookmarkCountTotal > 0 ? "Saved moments" : "No bookmarks yet",
             },
           ]
         : [
             {
               label: "On This Device",
-              value: continueRailItems.length > 0 ? continueRailItems.length.toLocaleString() : "Ready",
+              value:
+                continueRailItems.length > 0
+                  ? continueRailItems.length.toLocaleString()
+                  : "Ready",
               hint:
                 continueRailItems.length > 0
                   ? "Continue on this device"
@@ -699,7 +756,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
         description:
           continueRailItems.length > 0
             ? [
-                formatReadingPercentLabel(continueRailItems[0]?.progressPercent),
+                formatReadingPercentLabel(
+                  continueRailItems[0]?.progressPercent,
+                ),
                 continueRailItems[0]?.statusLabel,
               ]
                 .filter(Boolean)
@@ -716,10 +775,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
         value: historyRail.length.toLocaleString(),
         description:
           historyRail.length > 0
-            ? historyRail[0]?.statusLabel || historyRail[0]?.subtitle || "Opened recently"
+            ? historyRail[0]?.statusLabel ||
+              historyRail[0]?.subtitle ||
+              "Opened recently"
             : "Recent reads stay close",
         onClick: () =>
-          historyRail.length > 0 ? scrollToSection("recent-activity") : router.push("/search"),
+          historyRail.length > 0
+            ? scrollToSection("recent-activity")
+            : router.push("/search"),
       },
       {
         id: "saved-series",
@@ -753,7 +816,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
     const commonAccentClass =
       "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
     const primaryAccentClass =
-      "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]";
+      "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]";
 
     return [
       {
@@ -775,10 +838,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         accentClass: commonAccentClass,
       },
     ];
-  }, [
-    openAuthPrompt,
-    router,
-  ]);
+  }, [openAuthPrompt, router]);
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
@@ -844,12 +904,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 ? "Your next read."
                 : "Your reading shelf."
             }
-            description={
-              signedInHeroDescription
-            }
+            description={signedInHeroDescription}
             secondary=""
             stats={libraryStats}
             appearance="light"
+            accent="amber"
             actions={
               <>
                 {resumeSpotlightReadHref ? (
@@ -904,16 +963,21 @@ export default function LibraryPage({ initialSignedIn = false }) {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Reading desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {libraryDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                <p className="mt-3 text-sm leading-7 text-slate-600">
                   {libraryDeskCopy}
                 </p>
               </div>
@@ -924,7 +988,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={() => router.push(resumeSpotlightReadHref)}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Resume now
                 </button>
@@ -932,7 +996,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={() => scrollToSection("saved-series")}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Open saved series
                 </button>
@@ -940,9 +1004,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={() =>
-                    viewerSignedIn ? router.push("/search") : router.push("/rankings?type=ttf&window=all")
+                    viewerSignedIn
+                      ? router.push("/search")
+                      : router.push("/rankings?type=ttf&window=all")
                   }
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   {viewerSignedIn ? "Browse titles" : "Read free"}
                 </button>
@@ -961,7 +1027,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   }
                   router.push("/search");
                 }}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 {viewerSignedIn
                   ? showCollectionManager || !visibleLibraryItems.length
@@ -998,29 +1064,40 @@ export default function LibraryPage({ initialSignedIn = false }) {
           <>
             {viewerSignedIn ? (
               hasLibrarySignals ? (
-                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-5"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
-                        {resumeSpotlightReadHref ? "Continue Reading" : "Your Shelf"}
+                    <div className="rounded-[28px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.07)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
+                        {resumeSpotlightReadHref
+                          ? "Continue Reading"
+                          : "Your Shelf"}
                       </p>
                       <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
                         {resumeSpotlight?.title || "Your shelf is ready."}
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
-                        {resumeSpotlightMeta || "Recent reads and saves stay close."}
+                        {resumeSpotlightMeta ||
+                          "Recent reads and saves stay close."}
                       </p>
 
                       {resumeSpotlightProgressWidth > 0 ? (
                         <div className="mt-5 space-y-2.5">
                           <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
-                            <span>{resumeSpotlight?.subtitle || "Progress"}</span>
+                            <span>
+                              {resumeSpotlight?.subtitle || "Progress"}
+                            </span>
                             <span>{resumeSpotlightProgressLabel}</span>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-white/85">
                             <div
-                              className="h-full rounded-full bg-[var(--gush-accent,#2f6bff)]"
-                              style={{ width: `${Math.round(resumeSpotlightProgressWidth)}%` }}
+                              className="h-full rounded-full bg-[var(--gush-accent-strong,#63472f)]"
+                              style={{
+                                width: `${Math.round(resumeSpotlightProgressWidth)}%`,
+                              }}
                             />
                           </div>
                         </div>
@@ -1046,7 +1123,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         ) : !resumeSpotlightReadHref ? (
                           <button
                             type="button"
-                            onClick={() => router.push("/rankings?type=ttf&window=all")}
+                            onClick={() =>
+                              router.push("/rankings?type=ttf&window=all")
+                            }
                             className={primaryButtonClass}
                           >
                             Read Free
@@ -1056,7 +1135,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         {resumeSpotlightSeriesHref ? (
                           <button
                             type="button"
-                            onClick={() => router.push(resumeSpotlightSeriesHref)}
+                            onClick={() =>
+                              router.push(resumeSpotlightSeriesHref)
+                            }
                             className={secondaryButtonClass}
                           >
                             View Series
@@ -1077,10 +1158,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   </div>
                 </SurfacePanel>
               ) : (
-                <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-5"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.06)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                    <div className="rounded-[28px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.07)] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#63472f)]">
                         Your Shelf
                       </p>
                       <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
@@ -1092,7 +1177,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       <div className="mt-6 flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => router.push("/rankings?type=ttf&window=all")}
+                          onClick={() =>
+                            router.push("/rankings?type=ttf&window=all")
+                          }
                           className={primaryButtonClass}
                         >
                           Read Free
@@ -1106,10 +1193,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setShowCollectionManager((value) => !value)}
+                          onClick={() =>
+                            setShowCollectionManager((value) => !value)
+                          }
                           className={secondaryButtonClass}
                         >
-                          {showCollectionManager ? "Hide Collections" : "Collections"}
+                          {showCollectionManager
+                            ? "Hide Collections"
+                            : "Collections"}
                         </button>
                       </div>
                     </div>
@@ -1119,7 +1210,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 </SurfacePanel>
               )
             ) : (
-              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-5"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="space-y-2">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     Library
@@ -1141,7 +1236,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <div id="continue-reading">
                   <Rail
                     eyebrow={viewerSignedIn ? "Continue" : "On This Device"}
-                    title={viewerSignedIn ? "Continue Reading" : "Continue on this device"}
+                    title={
+                      viewerSignedIn
+                        ? "Continue Reading"
+                        : "Continue on this device"
+                    }
                     railName="continue"
                     items={continueRailItems}
                     appearance="light"
@@ -1236,7 +1335,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
               {showCollectionManager ? (
                 <SurfacePanel appearance="light" accent="blue">
-                  <CollectionManager onClose={() => setShowCollectionManager(false)} />
+                  <CollectionManager
+                    onClose={() => setShowCollectionManager(false)}
+                  />
                 </SurfacePanel>
               ) : null}
 
@@ -1259,7 +1360,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
               {recommendedItems.length > 0 ? (
                 <Rail
                   eyebrow={viewerSignedIn ? "Next" : "Recommended"}
-                  title={viewerSignedIn || hasCuratedLibraryEntry ? "Recommended for You" : "Recommended"}
+                  title={
+                    viewerSignedIn || hasCuratedLibraryEntry
+                      ? "Recommended for You"
+                      : "Recommended"
+                  }
                   railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}
@@ -1333,7 +1438,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     setMakeupModal({
                       type: "ERROR",
                       title: "Couldn't top up",
-                      description: "We couldn't top up the starter pack and restore today's streak.",
+                      description:
+                        "We couldn't top up the starter pack and restore today's streak.",
                     });
                   },
                   variant: "primary",

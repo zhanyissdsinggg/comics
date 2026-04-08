@@ -58,7 +58,9 @@ export default function LoginGateModal({
       return;
     }
     const region =
-      (typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null) ||
+      (typeof window !== "undefined"
+        ? window.localStorage.getItem("mn_region")
+        : null) ||
       getCookie("mn_region") ||
       "global";
     const regionMap = {
@@ -150,7 +152,9 @@ export default function LoginGateModal({
       onClose?.();
       return;
     }
-    setSocialError("Google sign-in succeeded, but session refresh failed. Please try again.");
+    setSocialError(
+      "Google sign-in succeeded, but session refresh failed. Please try again.",
+    );
   }, [onClose, refresh]);
 
   const handleSocialError = useCallback((message) => {
@@ -162,181 +166,185 @@ export default function LoginGateModal({
       <form onSubmit={handleSubmit}>
         <p className="text-slate-500 dark:text-neutral-300">{description}</p>
         <div className="mt-6 space-y-4">
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email"
-          autoComplete="email"
-          className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
-        />
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Email"
+            autoComplete="email"
+            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+          />
+
+          {step === "otp" ? (
+            <div className="flex items-center gap-3 text-xs">
+              <button
+                type="button"
+                onClick={() => setOtpChannel("email")}
+                className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+                  otpChannel === "email"
+                    ? "bg-slate-950 text-white"
+                    : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                }`}
+              >
+                Email OTP
+              </button>
+              <button
+                type="button"
+                onClick={() => setOtpChannel("sms")}
+                className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+                  otpChannel === "sms"
+                    ? "bg-slate-950 text-white"
+                    : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                }`}
+              >
+                SMS OTP
+              </button>
+            </div>
+          ) : null}
+
+          {step !== "otp" ? (
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Password"
+              autoComplete={
+                mode === "register" ? "new-password" : "current-password"
+              }
+              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+            />
+          ) : (
+            <>
+              {otpChannel === "sms" ? (
+                <div className="flex items-center gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(event) => setCountryCode(event.target.value)}
+                    className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
+                  >
+                    {(
+                      config?.countryCodes || [
+                        { code: "+1", label: "US" },
+                        { code: "+82", label: "KR" },
+                        { code: "+86", label: "CN" },
+                        { code: "+81", label: "JP" },
+                        { code: "+65", label: "SG" },
+                      ]
+                    ).map((item) => (
+                      <option key={item.code} value={item.code}>
+                        {item.code} {item.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={phone}
+                    onChange={(event) => {
+                      const next = event.target.value.replace(/[^0-9]/g, "");
+                      setPhone(next);
+                    }}
+                    placeholder="Phone number"
+                    autoComplete="tel-national"
+                    className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+                  />
+                </div>
+              ) : null}
+              <input
+                value={otpCode}
+                onChange={(event) => setOtpCode(event.target.value)}
+                placeholder="6-digit code"
+                autoComplete="one-time-code"
+                className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#866245)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+              />
+            </>
+          )}
+
+          {step !== "otp" && googleAuthEnabled ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-neutral-500">
+                <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
+                <span>or continue with</span>
+                <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
+              </div>
+              <SocialAuthButton
+                provider="google"
+                onSuccess={handleSocialSuccess}
+                onError={handleSocialError}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        {errorMessage ? (
+          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
+            {errorMessage}
+          </p>
+        ) : null}
+
+        {socialError ? (
+          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
+            {socialError}
+          </p>
+        ) : null}
 
         {step === "otp" ? (
-          <div className="flex items-center gap-3 text-xs">
+          <div className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+            {otpStatus}
             <button
               type="button"
-              onClick={() => setOtpChannel("email")}
-              className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-                otpChannel === "email"
-                  ? "bg-slate-950 text-white"
-                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-              }`}
+              onClick={handleResendOtp}
+              className="ml-2 font-semibold text-[var(--gush-accent,#866245)] transition-colors duration-300 hover:text-[var(--gush-accent-strong,#63472f)]"
             >
-              Email OTP
-            </button>
-            <button
-              type="button"
-              onClick={() => setOtpChannel("sms")}
-              className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-                otpChannel === "sms"
-                  ? "bg-slate-950 text-white"
-                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-              }`}
-            >
-              SMS OTP
+              Resend
             </button>
           </div>
         ) : null}
 
-        {step !== "otp" ? (
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Password"
-            autoComplete={mode === "register" ? "new-password" : "current-password"}
-            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
-          />
-        ) : (
-          <>
-            {otpChannel === "sms" ? (
-              <div className="flex items-center gap-2">
-                <select
-                  value={countryCode}
-                  onChange={(event) => setCountryCode(event.target.value)}
-                  className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
-                >
-                  {(config?.countryCodes || [
-                    { code: "+1", label: "US" },
-                    { code: "+82", label: "KR" },
-                    { code: "+86", label: "CN" },
-                    { code: "+81", label: "JP" },
-                    { code: "+65", label: "SG" },
-                  ]).map((item) => (
-                    <option key={item.code} value={item.code}>
-                      {item.code} {item.label}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  value={phone}
-                  onChange={(event) => {
-                    const next = event.target.value.replace(/[^0-9]/g, "");
-                    setPhone(next);
-                  }}
-                  placeholder="Phone number"
-                  autoComplete="tel-national"
-                  className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
-                />
-              </div>
-            ) : null}
-            <input
-              value={otpCode}
-              onChange={(event) => setOtpCode(event.target.value)}
-              placeholder="6-digit code"
-              autoComplete="one-time-code"
-              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#2f6bff)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
-            />
-          </>
-        )}
-
-        {step !== "otp" && googleAuthEnabled ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-neutral-500">
-              <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
-              <span>or continue with</span>
-              <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
-            </div>
-            <SocialAuthButton
-              provider="google"
-              onSuccess={handleSocialSuccess}
-              onError={handleSocialError}
-            />
+        {allowRegister ? (
+          <div className="mt-6 flex items-center gap-3 text-xs">
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+                mode === "login"
+                  ? "bg-slate-950 text-white"
+                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              }`}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("register")}
+              className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+                mode === "register"
+                  ? "bg-slate-950 text-white"
+                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              }`}
+            >
+              Register
+            </button>
           </div>
         ) : null}
-      </div>
 
-      {errorMessage ? (
-        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
-          {errorMessage}
+        <div className="mt-4 text-xs">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#866245)] dark:text-neutral-400"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        {resetStatus ? (
+          <div className="mt-3 rounded-lg border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.07)] px-4 py-2 text-xs text-slate-600">
+            {resetStatus}
+          </div>
+        ) : null}
+
+        <p className="mt-4 text-[11px] text-slate-400 dark:text-neutral-500">
+          If your email is not verified yet, use the link in your inbox first.
         </p>
-      ) : null}
-
-      {socialError ? (
-        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
-          {socialError}
-        </p>
-      ) : null}
-
-      {step === "otp" ? (
-        <div className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
-          {otpStatus}
-          <button
-            type="button"
-            onClick={handleResendOtp}
-            className="ml-2 font-semibold text-[var(--gush-accent,#2f6bff)] transition-colors duration-300 hover:text-[#255af0]"
-          >
-            Resend
-          </button>
-        </div>
-      ) : null}
-
-      {allowRegister ? (
-        <div className="mt-6 flex items-center gap-3 text-xs">
-          <button
-            type="button"
-            onClick={() => setMode("login")}
-            className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-              mode === "login"
-                ? "bg-slate-950 text-white"
-                : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-            }`}
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("register")}
-            className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-              mode === "register"
-                ? "bg-slate-950 text-white"
-                : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
-            }`}
-          >
-            Register
-          </button>
-        </div>
-      ) : null}
-
-      <div className="mt-4 text-xs">
-        <button
-          type="button"
-          onClick={handleReset}
-          className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#2f6bff)] dark:text-neutral-400"
-        >
-          Forgot password?
-        </button>
-      </div>
-
-      {resetStatus ? (
-        <div className="mt-3 rounded-lg border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-2 text-xs text-slate-600">
-          {resetStatus}
-        </div>
-      ) : null}
-
-      <p className="mt-4 text-[11px] text-slate-400 dark:text-neutral-500">
-        If your email is not verified yet, use the link in your inbox first.
-      </p>
 
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -357,5 +365,3 @@ export default function LoginGateModal({
     </ModalBase>
   );
 }
-
-

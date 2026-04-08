@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 
 function EventCard({ event, priority = "secondary", appearance = "default" }) {
-  const isLight = appearance === "light";
+  const isLight = appearance === "light" || appearance === "default";
 
   return (
     <Card
@@ -32,7 +32,9 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               variant="outline"
               className={cn(
                 "rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
-                isLight ? "border-black/8 bg-white/82" : "border-white/10 bg-black/20",
+                isLight
+                  ? "border-black/8 bg-white/82"
+                  : "border-white/10 bg-black/20",
               )}
             >
               {event.eyebrow}
@@ -49,18 +51,40 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               {event.title}
             </CardTitle>
             {priority === "lead" ? (
-              <CardDescription className={cn("mt-3 max-w-3xl text-sm leading-6", isLight ? "text-slate-600" : "text-neutral-200/90")}>
+              <CardDescription
+                className={cn(
+                  "mt-3 max-w-3xl text-sm leading-6",
+                  isLight ? "text-slate-600" : "text-neutral-200/90",
+                )}
+              >
                 {event.description}
               </CardDescription>
             ) : null}
           </div>
 
           {event.signalValue ? (
-            <div className={cn("min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left", isLight ? "border-black/8 bg-white/80" : "border-white/10 bg-black/25")}>
-              <p className={cn("text-[10px] font-semibold uppercase tracking-[0.22em]", isLight ? "text-slate-500" : "text-neutral-400")}>
+            <div
+              className={cn(
+                "min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left",
+                isLight
+                  ? "border-black/8 bg-white/80"
+                  : "border-white/10 bg-black/25",
+              )}
+            >
+              <p
+                className={cn(
+                  "text-[10px] font-semibold uppercase tracking-[0.22em]",
+                  isLight ? "text-slate-500" : "text-neutral-400",
+                )}
+              >
                 {event.signalLabel || "Signal"}
               </p>
-              <p className={cn("mt-1.5 font-display text-xl font-semibold tracking-tight", isLight ? "text-slate-950" : "text-white")}>
+              <p
+                className={cn(
+                  "mt-1.5 font-display text-xl font-semibold tracking-tight",
+                  isLight ? "text-slate-950" : "text-white",
+                )}
+              >
                 {event.signalValue}
               </p>
             </div>
@@ -73,7 +97,9 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           onClick={event.onClick}
           className={cn(
             "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold hover:bg-transparent",
-            isLight ? "text-slate-900 hover:text-[var(--gush-accent,#2f6bff)]" : "text-white hover:text-emerald-200",
+            isLight
+              ? "text-slate-900 hover:text-[var(--gush-accent,#866245)]"
+              : "text-white hover:text-[var(--gush-accent)]",
           )}
         >
           {event.ctaLabel}
@@ -97,7 +123,7 @@ export default function StorefrontEventHub({
   }
 
   const [leadEvent, ...secondaryEvents] = events;
-  const isLight = appearance === "light";
+  const isLight = appearance === "light" || appearance === "default";
 
   return (
     <section className={className}>
@@ -113,34 +139,52 @@ export default function StorefrontEventHub({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]",
           )}
         />
         <CardHeader className="relative p-5 pb-0 sm:p-6 sm:pb-0">
           <div className="max-w-3xl">
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-emerald-300/85"}`}>
+            <p
+              className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-[var(--gush-accent)]/85"}`}
+            >
               {eyebrow}
             </p>
-            <h2 className={`mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl ${isLight ? "text-slate-950" : "text-white"}`}>
+            <h2
+              className={`mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl ${isLight ? "text-slate-950" : "text-white"}`}
+            >
               {title}
             </h2>
-            <p className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}>{description}</p>
+            <p
+              className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}
+            >
+              {description}
+            </p>
           </div>
         </CardHeader>
 
         <CardContent className="relative p-5 pt-5 sm:p-6 sm:pt-5">
           <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-            <EventCard event={leadEvent} priority="lead" appearance={appearance} />
+            <EventCard
+              event={leadEvent}
+              priority="lead"
+              appearance={appearance}
+            />
             {secondaryEvents.length > 0 ? (
               <div
                 className={cn(
                   "grid gap-4",
-                  secondaryEvents.length > 1 ? "md:grid-cols-2 xl:grid-cols-1" : "",
+                  secondaryEvents.length > 1
+                    ? "md:grid-cols-2 xl:grid-cols-1"
+                    : "",
                 )}
               >
                 {secondaryEvents.map((event) => (
-                  <EventCard key={event.id} event={event} appearance={appearance} />
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    appearance={appearance}
+                  />
                 ))}
               </div>
             ) : null}

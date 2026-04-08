@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowRight, BookOpen, BookOpenText, CircleHelp, Users } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  BookOpenText,
+  CircleHelp,
+  Users,
+} from "lucide-react";
 import PortraitCard from "./PortraitCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,22 +24,28 @@ function HomeSectionHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 border-b border-[rgba(36,30,20,0.08)] pb-5 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-5 border-b border-[color:var(--gush-border)] pb-7 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
       <div className="max-w-2xl">
         {eyebrow ? (
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-            {Icon ? <Icon className="size-3.5" /> : null}
+          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
+            {Icon ? (
+              <span className="inline-flex size-6 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.88)] text-[color:var(--gush-accent)] dark:bg-white/[0.04]">
+                <Icon className="size-3.5" />
+              </span>
+            ) : null}
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-3 font-display text-[1.72rem] font-semibold tracking-tight text-slate-950 sm:text-[2.1rem]">
+        <h2 className="mt-4 font-display text-[1.95rem] font-semibold tracking-[-0.05em] text-[color:var(--gush-ink-strong)] sm:text-[2.55rem]">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{description}</p>
+          <p className="mt-3 max-w-[42rem] text-sm leading-7 text-[color:var(--gush-ink-soft)]">
+            {description}
+          </p>
         ) : null}
       </div>
 
@@ -42,7 +54,7 @@ function HomeSectionHeader({
           type="button"
           variant="ghost"
           onClick={onCtaClick}
-          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-600 hover:bg-transparent hover:text-slate-950"
+          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
         >
           {ctaLabel}
           <ArrowRight className="size-4" />
@@ -52,26 +64,34 @@ function HomeSectionHeader({
   );
 }
 
-function FallbackDiscoveryCard({ eyebrow, title, description, label, onClick }) {
+function FallbackDiscoveryCard({
+  eyebrow,
+  title,
+  description,
+  label,
+  onClick,
+}) {
   return (
-    <Card className="overflow-hidden rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,244,238,0.95))] py-0 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
-      <CardContent className="p-6 sm:p-7">
+    <Card className="overflow-hidden rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(245,238,229,0.96))] py-0 shadow-[0_16px_34px_rgba(37,28,19,0.04)]">
+      <CardContent className="p-7 sm:p-8">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-slate-950">
+        <h2 className="mt-3 font-display text-[1.85rem] font-semibold tracking-[-0.045em] text-[color:var(--gush-ink-strong)]">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">{description}</p>
+          <p className="mt-3 max-w-xl text-sm leading-7 text-[color:var(--gush-ink-soft)]">
+            {description}
+          </p>
         ) : null}
         <Button
           type="button"
           variant="ghost"
           onClick={onClick}
-          className="mt-5 h-auto rounded-full px-0 py-0 text-sm font-semibold text-slate-700 hover:bg-transparent hover:text-slate-950"
+          className="mt-6 h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
         >
           {label}
           <ArrowRight className="size-4" />
@@ -97,7 +117,7 @@ function HomeShelfSection({
   }
 
   return (
-    <section className="space-y-6 md:space-y-7">
+    <section className="space-y-8 md:space-y-9">
       <HomeSectionHeader
         icon={Icon}
         eyebrow={eyebrow}
@@ -126,27 +146,38 @@ function HomeShelfSection({
   );
 }
 
-function HomeGuideCard({ icon: Icon, eyebrow, title, description, ctaLabel, onClick }) {
+function HomeGuideCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+  ctaLabel,
+  onClick,
+}) {
   return (
-    <Card className="h-full overflow-hidden rounded-[28px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(248,244,238,0.95))] py-0 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-      <CardContent className="flex h-full flex-col p-5 sm:p-6">
-        <div className="flex size-11 items-center justify-center rounded-[18px] border border-black/6 bg-white/90 text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+    <Card className="h-full overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.98),rgba(247,241,233,0.96))] py-0 shadow-[0_12px_28px_rgba(37,28,19,0.03)]">
+      <CardContent className="flex h-full flex-col p-6 sm:p-7">
+        <div className="flex size-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] dark:bg-white/[0.06]">
           <Icon className="size-5" />
         </div>
-        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
           {eyebrow}
         </p>
-        <h3 className="mt-2 font-display text-[1.3rem] font-semibold tracking-tight text-slate-950">
+        <h3 className="mt-2 font-display text-[1.48rem] font-semibold tracking-[-0.045em] text-[color:var(--gush-ink-strong)]">
           {title}
         </h3>
         <div className="mt-3 flex-1">
-          {description ? <p className="text-sm leading-7 text-slate-600">{description}</p> : null}
+          {description ? (
+            <p className="text-sm leading-7 text-[color:var(--gush-ink-soft)]">
+              {description}
+            </p>
+          ) : null}
         </div>
         <Button
           type="button"
           variant="ghost"
           onClick={onClick}
-          className="mt-5 h-auto justify-start rounded-full px-0 py-0 text-sm font-semibold text-slate-700 hover:bg-transparent hover:text-slate-950"
+          className="mt-6 h-auto justify-start rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
         >
           {ctaLabel}
           <ArrowRight className="size-4" />
@@ -162,6 +193,7 @@ const GUIDE_CARDS = [
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
+    description: "Serialized panels with a faster, more visual reading rhythm.",
     ctaLabel: "Browse Comics",
     href: "/comics",
   },
@@ -170,14 +202,17 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
+    description: "Longer-form chapters for readers who want a slower pace.",
     ctaLabel: "Browse Novels",
     href: "/novels",
   },
   {
     id: "guide-creators",
     icon: Users,
-    eyebrow: "Creators",
-    title: "Meet the Creators",
+    eyebrow: "Credits",
+    title: "Creators",
+    description:
+      "Follow the writers, artists, teams, and studios behind each title.",
     ctaLabel: "View Creators",
     href: "/creators",
   },
@@ -185,7 +220,8 @@ const GUIDE_CARDS = [
     id: "guide-help",
     icon: CircleHelp,
     eyebrow: "Support",
-    title: "Support",
+    title: "Need Help?",
+    description: "Find help with your account, library, and reading flow.",
     ctaLabel: "Open Support",
     href: "/support",
   },
@@ -203,7 +239,7 @@ export default function HomeContentSections({
   onGuideClick,
 }) {
   return (
-    <div className="space-y-14 md:space-y-[4.75rem]">
+    <div className="space-y-16 md:space-y-[5.25rem]">
       {showCatalogFallback ? (
         <section className="grid gap-5 md:grid-cols-2">
           {homepageFallbackCards.map((card) => (
@@ -220,8 +256,11 @@ export default function HomeContentSections({
       ) : (
         <>
           <HomeShelfSection
+            icon={BookOpenText}
+            eyebrow="Editorial Shelf"
             title="Featured Series"
-            ctaLabel="Browse Series"
+            description="A small selection of standout reads chosen for tone, pacing, and staying power."
+            ctaLabel="See All Stories"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
             actionLabel="Open Series"
@@ -229,8 +268,10 @@ export default function HomeContentSections({
           />
 
           <HomeShelfSection
-            icon={BookOpenText}
+            icon={BookOpen}
+            eyebrow="Starting Points"
             title="Start Here"
+            description="A calmer place to begin if you're new to Gush or just want an easier first pick."
             items={startHereItems}
             actionLabel="Read Chapter 1"
             onItemClick={onStartHereItemClick}
@@ -238,9 +279,11 @@ export default function HomeContentSections({
         </>
       )}
 
-      <section className="space-y-6 md:space-y-7">
+      <section className="space-y-7 md:space-y-8">
         <HomeSectionHeader
+          eyebrow="Ways To Read"
           title="Browse by format"
+          description="Choose the reading rhythm that fits your mood, then keep exploring from there."
         />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

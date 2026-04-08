@@ -30,7 +30,9 @@ export default function SocialAuthButton({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             token: response?.credential || "",
-            ...(requestPayload && typeof requestPayload === "object" ? requestPayload : {}),
+            ...(requestPayload && typeof requestPayload === "object"
+              ? requestPayload
+              : {}),
           }),
         });
 
@@ -50,9 +52,14 @@ export default function SocialAuthButton({
         }
         onError?.(message);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Google callback error";
+        const message =
+          error instanceof Error ? error.message : "Google callback error";
         console.error("Google callback error:", error);
-        trackEvent("social_login_error", { provider: "google", action, error: message });
+        trackEvent("social_login_error", {
+          provider: "google",
+          action,
+          error: message,
+        });
         onError?.(message);
       } finally {
         setLoading(false);
@@ -148,7 +155,8 @@ export default function SocialAuthButton({
         const error = await result.json();
         onError?.(error?.message || "Apple login failed");
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Apple callback error";
+        const message =
+          error instanceof Error ? error.message : "Apple callback error";
         console.error("Apple callback error:", error);
         onError?.(message);
       }
@@ -183,7 +191,8 @@ export default function SocialAuthButton({
       const response = await window.AppleID.auth.signIn();
       await handleAppleCallback(response);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Apple login error";
+      const message =
+        error instanceof Error ? error.message : "Apple login error";
       console.error("Apple login error:", error);
       trackEvent("social_login_error", { provider: "apple", error: message });
       onError?.(message);
@@ -199,14 +208,16 @@ export default function SocialAuthButton({
 
     return (
       <div className="w-full space-y-2">
-        <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[12px] border border-white/10 bg-white px-2 py-1">
+        <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[16px] border border-black/8 bg-white px-2 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
         {GOOGLE_CLIENT_ID && !googleReady ? (
-          <p className="text-center text-xs text-neutral-400">Loading Google Sign-In...</p>
+          <p className="text-center text-xs text-slate-400">
+            Loading Google Sign-In...
+          </p>
         ) : null}
         {loading || isLoading ? (
-          <p className="text-center text-xs text-neutral-400">Signing in...</p>
+          <p className="text-center text-xs text-slate-400">Signing in...</p>
         ) : null}
       </div>
     );
@@ -218,7 +229,7 @@ export default function SocialAuthButton({
         type="button"
         onClick={handleAppleLogin}
         disabled={loading || isLoading}
-        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[12px] border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-400/20 hover:bg-neutral-400/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[16px] border border-black/8 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Apple"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

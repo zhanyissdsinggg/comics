@@ -12,13 +12,20 @@ import { useWalletStore } from "../../store/useWalletStore";
 import { useCouponStore } from "../../store/useCouponStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { trackEvent } from "../../lib/trackEvent";
-import { POINTS_PACKS, OFFERS, SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
+import {
+  POINTS_PACKS,
+  OFFERS,
+  SUBSCRIPTION_OFFERS,
+} from "../../lib/offers/catalog";
 import { getRegionConfig } from "../../lib/region/config";
 import { getCookie } from "../../lib/cookies";
 import { apiGet } from "../../lib/apiClient";
 import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
-import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
+import {
+  formatUSDisplayCurrency,
+  formatUSNumber,
+} from "../../lib/localization";
 import {
   buildPathWithAttribution,
   mergePaymentAttribution,
@@ -85,7 +92,9 @@ function scrollToSection(id) {
     return;
   }
 
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .getElementById(id)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 export default function StorePage({
@@ -105,11 +114,21 @@ export default function StorePage({
   const [couponCode, setCouponCode] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
   const [promotions, setPromotions] = useState([]);
-  const [topupCatalog, setTopupCatalog] = useState(Array.isArray(initialTopupCatalog) ? initialTopupCatalog : []);
-  const [billingAvailability, setBillingAvailability] = useState(initialBillingAvailability);
+  const [topupCatalog, setTopupCatalog] = useState(
+    Array.isArray(initialTopupCatalog) ? initialTopupCatalog : [],
+  );
+  const [billingAvailability, setBillingAvailability] = useState(
+    initialBillingAvailability,
+  );
   const [isNewPayer, setIsNewPayer] = useState(true);
-  const routeSearchParams = useMemo(() => toURLSearchParams(initialSearchParams), [initialSearchParams]);
-  const planCatalog = useMemo(() => resolvePlanCatalog(initialPlanCatalog), [initialPlanCatalog]);
+  const routeSearchParams = useMemo(
+    () => toURLSearchParams(initialSearchParams),
+    [initialSearchParams],
+  );
+  const planCatalog = useMemo(
+    () => resolvePlanCatalog(initialPlanCatalog),
+    [initialPlanCatalog],
+  );
 
   const returnTo = getSearchParam(initialSearchParams, "returnTo", "/");
   const focus = getSearchParam(initialSearchParams, "focus");
@@ -144,7 +163,10 @@ export default function StorePage({
   }, [campaignId, focus, promotionId, sourceEntry]);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
+    const stored =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("mn_region")
+        : null;
     const cookieRegion = getCookie("mn_region");
     setRegion(stored || cookieRegion || "us");
   }, []);
@@ -168,8 +190,14 @@ export default function StorePage({
       if (!mounted || !response.ok) {
         return;
       }
-      const list = Array.isArray(response.data?.promotions) ? response.data.promotions : [];
-      setPromotions(list.filter((promo) => ["FIRST_PURCHASE", "HOLIDAY", "RETURNING"].includes(promo.type)));
+      const list = Array.isArray(response.data?.promotions)
+        ? response.data.promotions
+        : [];
+      setPromotions(
+        list.filter((promo) =>
+          ["FIRST_PURCHASE", "HOLIDAY", "RETURNING"].includes(promo.type),
+        ),
+      );
     });
     return () => {
       mounted = false;
@@ -203,23 +231,38 @@ export default function StorePage({
     }
 
     return {
-      maxDiscount: plans.reduce((max, plan) => Math.max(max, plan.discountPct || 0), 0),
-      maxDailyFree: plans.reduce((max, plan) => Math.max(max, plan.dailyFreeUnlocks || 0), 0),
+      maxDiscount: plans.reduce(
+        (max, plan) => Math.max(max, plan.discountPct || 0),
+        0,
+      ),
+      maxDailyFree: plans.reduce(
+        (max, plan) => Math.max(max, plan.dailyFreeUnlocks || 0),
+        0,
+      ),
       bestTtf: plans.reduce(
-        (best, plan) => (plan.ttfMultiplier && plan.ttfMultiplier < best ? plan.ttfMultiplier : best),
+        (best, plan) =>
+          plan.ttfMultiplier && plan.ttfMultiplier < best
+            ? plan.ttfMultiplier
+            : best,
         1,
       ),
     };
   }, [planCatalog]);
 
   const membershipStartingPrice = useMemo(() => {
-    const plans = Object.values(planCatalog).filter((plan) => plan && typeof plan === "object");
+    const plans = Object.values(planCatalog).filter(
+      (plan) => plan && typeof plan === "object",
+    );
     if (plans.length > 0) {
       const cheapestPlan = [...plans].sort(
-        (left, right) => Number(left?.price || Infinity) - Number(right?.price || Infinity),
+        (left, right) =>
+          Number(left?.price || Infinity) - Number(right?.price || Infinity),
       )[0];
       if (cheapestPlan?.price !== undefined && cheapestPlan?.price !== null) {
-        return formatPriceLabel(cheapestPlan.price, cheapestPlan.currency || "USD");
+        return formatPriceLabel(
+          cheapestPlan.price,
+          cheapestPlan.currency || "USD",
+        );
       }
     }
     return SUBSCRIPTION_OFFERS[0]?.price?.replace("/mo", "") || "";
@@ -283,7 +326,10 @@ export default function StorePage({
     return [selected, ...packages.filter((pkg) => pkg.id !== focusId)];
   }, [focusId, region, topupCatalog]);
 
-  const purchaseMode = resolvePublicCommerceMode(billingAvailability, "purchaseActionsEnabled");
+  const purchaseMode = resolvePublicCommerceMode(
+    billingAvailability,
+    "purchaseActionsEnabled",
+  );
   const purchaseActionsEnabled = purchaseMode.isRealCommerceLive;
   const purchasePrelaunch = purchaseMode.isPrelaunch;
   const purchaseAvailabilityLabel = purchaseActionsEnabled
@@ -294,7 +340,9 @@ export default function StorePage({
       orderedPackages.map((pkg) => {
         const totalPts = Number(pkg.paidPts || 0) + Number(pkg.bonusPts || 0);
         const bonusPct = pkg.paidPts
-          ? Math.round((Number(pkg.bonusPts || 0) / Number(pkg.paidPts || 1)) * 100)
+          ? Math.round(
+              (Number(pkg.bonusPts || 0) / Number(pkg.paidPts || 1)) * 100,
+            )
           : 0;
 
         return {
@@ -305,7 +353,7 @@ export default function StorePage({
           bonusLabel: bonusPct > 0 ? `${bonusPct}% extra` : "No bonus",
           bestFor: PACKAGE_FIT_GUIDE[pkg.id] || "Flexible one-time reading.",
         };
-    }),
+      }),
     [orderedPackages],
   );
   const handleBuy = async (packageId) => {
@@ -325,7 +373,9 @@ export default function StorePage({
       return;
     }
 
-    const selectedPackage = orderedPackages.find((item) => item.id === packageId);
+    const selectedPackage = orderedPackages.find(
+      (item) => item.id === packageId,
+    );
     const attribution = mergePaymentAttribution(routeAttribution, {
       promotionId: promotionId || undefined,
       offerId: `points_pack_${packageId}`,
@@ -381,7 +431,12 @@ export default function StorePage({
     }
 
     setRetryPackageId(packageId);
-    setErrorMessage(getFriendlyMessage(response.error, response.message || "Top up failed. Please try again."));
+    setErrorMessage(
+      getFriendlyMessage(
+        response.error,
+        response.message || "Top up failed. Please try again.",
+      ),
+    );
   };
 
   const retryFailedPurchase = useCallback(() => {
@@ -411,8 +466,14 @@ export default function StorePage({
       return;
     }
 
-    trackEvent("coupon_claim_fail", { code, status: response.status, errorCode: response.error });
-    setCouponMessage(response.data?.message || response.error || "Invalid coupon.");
+    trackEvent("coupon_claim_fail", {
+      code,
+      status: response.status,
+      errorCode: response.error,
+    });
+    setCouponMessage(
+      response.data?.message || response.error || "Invalid coupon.",
+    );
   };
 
   const regionConfig = getRegionConfig(region);
@@ -433,7 +494,9 @@ export default function StorePage({
         },
         {
           label: "Membership",
-          value: membershipStartingPrice ? `${membershipStartingPrice}/mo` : "Monthly option",
+          value: membershipStartingPrice
+            ? `${membershipStartingPrice}/mo`
+            : "Monthly option",
           hint: subscriptionStats
             ? `Up to ${subscriptionStats.maxDiscount}% off unlocks.`
             : "Recurring monthly option.",
@@ -449,11 +512,11 @@ export default function StorePage({
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const fieldClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[rgba(134,98,69,0.24)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
@@ -472,16 +535,22 @@ export default function StorePage({
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
-            accent="blue"
+            accent="amber"
+            appearance="light"
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Checkout
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {purchaseActionsEnabled ? "Pick a pack." : "See the packs."}
                 </h2>
               </div>
@@ -490,8 +559,12 @@ export default function StorePage({
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
-                onClick={purchaseActionsEnabled ? () => scrollToSection("point-packs") : handleLaunchAccess}
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                onClick={
+                  purchaseActionsEnabled
+                    ? () => scrollToSection("point-packs")
+                    : handleLaunchAccess
+                }
+                className={primaryButtonClass}
               >
                 {purchaseActionsEnabled ? "Buy point packs" : launchAccessLabel}
               </button>
@@ -511,7 +584,7 @@ export default function StorePage({
                       }),
                     )
                   }
-                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   {STOREFRONT_TERMS.compareMembership}
                 </button>
@@ -519,7 +592,7 @@ export default function StorePage({
               <button
                 type="button"
                 onClick={() => router.push(returnTo)}
-                className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
+                className={secondaryButtonClass}
               >
                 {returnLabel}
               </button>
@@ -587,8 +660,12 @@ export default function StorePage({
                 className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
-                  <p className="text-sm font-semibold text-slate-950">{item.label}</p>
-                  <p className="text-sm leading-6 text-slate-600">{item.detail}</p>
+                  <p className="text-sm font-semibold text-slate-950">
+                    {item.label}
+                  </p>
+                  <p className="text-sm leading-6 text-slate-600">
+                    {item.detail}
+                  </p>
                 </div>
               </div>
             ))}
@@ -597,7 +674,12 @@ export default function StorePage({
             <button
               type="button"
               onClick={() =>
-                router.push(buildSupportPath({ topic: "billing", context: "Point-pack launch or billing question" }))
+                router.push(
+                  buildSupportPath({
+                    topic: "billing",
+                    context: "Point-pack launch or billing question",
+                  }),
+                )
               }
               className={secondaryButtonClass}
             >
@@ -626,7 +708,11 @@ export default function StorePage({
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
             {!isSignedIn ? (
-              <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
                 <div>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                     Sign in
@@ -658,7 +744,11 @@ export default function StorePage({
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-4"
+              appearance="light"
+              accent="blue"
+            >
               <div>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Pick the model that fits.
@@ -666,13 +756,17 @@ export default function StorePage({
               </div>
               <div className="grid gap-3">
                 <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">Point packs</p>
+                  <p className="text-sm font-semibold text-slate-950">
+                    Point packs
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     Buy once.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">Membership</p>
+                <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4">
+                  <p className="text-sm font-semibold text-slate-950">
+                    Membership
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
                       ? `From ${membershipStartingPrice || "the current plan price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
@@ -713,7 +807,12 @@ export default function StorePage({
             </SurfacePanel>
 
             {purchaseActionsEnabled ? (
-              <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
+              <SurfacePanel
+                id="wallet-codes"
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -723,7 +822,9 @@ export default function StorePage({
                       Redeem a code
                     </h2>
                   </div>
-                  <span className="text-xs text-slate-500">{coupons.length} available</span>
+                  <span className="text-xs text-slate-500">
+                    {coupons.length} available
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <input
@@ -740,11 +841,16 @@ export default function StorePage({
                     {isSignedIn ? "Redeem" : "Sign in to redeem"}
                   </button>
                 </div>
-                {couponMessage ? <p className="text-xs text-slate-500">{couponMessage}</p> : null}
+                {couponMessage ? (
+                  <p className="text-xs text-slate-500">{couponMessage}</p>
+                ) : null}
                 {coupons.length > 0 ? (
                   <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
                     {coupons.map((coupon) => (
-                      <span key={coupon.id} className="rounded-full border border-black/8 bg-white/84 px-3 py-1">
+                      <span
+                        key={coupon.id}
+                        className="rounded-full border border-black/8 bg-white/84 px-3 py-1"
+                      >
                         {coupon.label || coupon.code}
                       </span>
                     ))}
@@ -752,7 +858,12 @@ export default function StorePage({
                 ) : null}
               </SurfacePanel>
             ) : (
-              <SurfacePanel id="wallet-codes" className="space-y-4" appearance="light" accent="blue">
+              <SurfacePanel
+                id="wallet-codes"
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
                 <div>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                     Promo codes
@@ -769,7 +880,12 @@ export default function StorePage({
                   <button
                     type="button"
                     onClick={() =>
-                      router.push(buildSupportPath({ topic: "billing", context: "Promo code or launch code question" }))
+                      router.push(
+                        buildSupportPath({
+                          topic: "billing",
+                          context: "Promo code or launch code question",
+                        }),
+                      )
                     }
                     className={secondaryButtonClass}
                   >
@@ -780,7 +896,12 @@ export default function StorePage({
             )}
           </div>
 
-          <SurfacePanel id="point-packs" className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel
+            id="point-packs"
+            className="space-y-5"
+            appearance="light"
+            accent="blue"
+          >
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
@@ -789,9 +910,7 @@ export default function StorePage({
                     : "Browse the packs"}
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">
-                {packCountLabel}
-              </p>
+              <p className="text-xs text-slate-500">{packCountLabel}</p>
             </div>
 
             {packageComparisonRows.length > 0 ? (
@@ -802,10 +921,17 @@ export default function StorePage({
                   </summary>
                   <div className="space-y-3 border-t border-black/8 px-4 py-4">
                     {packageComparisonRows.map((pkg) => (
-                      <div key={pkg.id} className="rounded-[20px] border border-black/8 bg-white px-4 py-4">
+                      <div
+                        key={pkg.id}
+                        className="rounded-[20px] border border-black/8 bg-white px-4 py-4"
+                      >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-slate-950">{pkg.name}</p>
-                          <span className="text-sm font-semibold text-slate-950">{pkg.priceLabel}</span>
+                          <p className="text-sm font-semibold text-slate-950">
+                            {pkg.name}
+                          </p>
+                          <span className="text-sm font-semibold text-slate-950">
+                            {pkg.priceLabel}
+                          </span>
                         </div>
                         <div className="mt-3 grid gap-2 text-sm text-slate-600">
                           <p>{formatUSNumber(pkg.totalPts)} total points</p>
@@ -823,7 +949,9 @@ export default function StorePage({
                         <tr className="border-b border-black/8 text-left text-slate-500">
                           <th className="px-4 py-3 font-semibold">Pack</th>
                           <th className="px-4 py-3 font-semibold">Price</th>
-                          <th className="px-4 py-3 font-semibold">Total points</th>
+                          <th className="px-4 py-3 font-semibold">
+                            Total points
+                          </th>
                           <th className="px-4 py-3 font-semibold">Bonus</th>
                           <th className="px-4 py-3 font-semibold">Best for</th>
                         </tr>
@@ -831,11 +959,21 @@ export default function StorePage({
                       <tbody className="divide-y divide-black/8 bg-white/84">
                         {packageComparisonRows.map((pkg) => (
                           <tr key={pkg.id}>
-                            <td className="px-4 py-3 font-semibold text-slate-950">{pkg.name}</td>
-                            <td className="px-4 py-3 text-slate-600">{pkg.priceLabel}</td>
-                            <td className="px-4 py-3 text-slate-600">{formatUSNumber(pkg.totalPts)} pts</td>
-                            <td className="px-4 py-3 text-slate-600">{pkg.bonusLabel}</td>
-                            <td className="px-4 py-3 text-slate-600">{pkg.bestFor}</td>
+                            <td className="px-4 py-3 font-semibold text-slate-950">
+                              {pkg.name}
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {pkg.priceLabel}
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {formatUSNumber(pkg.totalPts)} pts
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {pkg.bonusLabel}
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">
+                              {pkg.bestFor}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -847,7 +985,10 @@ export default function StorePage({
 
             <div className="grid gap-4 md:grid-cols-2">
               {orderedPackages.map((pkg) => (
-                <div key={pkg.id} className={busyId === pkg.id ? "opacity-70" : ""}>
+                <div
+                  key={pkg.id}
+                  className={busyId === pkg.id ? "opacity-70" : ""}
+                >
                   <PackageCard
                     pkg={pkg}
                     highlighted={pkg.id === focusId}
@@ -857,9 +998,7 @@ export default function StorePage({
                     statusLabel=""
                     statusNote=""
                     ctaLabel={
-                      isSignedIn
-                        ? "Get this pack"
-                        : "Sign in to get it"
+                      isSignedIn ? "Get this pack" : "Sign in to get it"
                     }
                   />
                 </div>
@@ -878,7 +1017,12 @@ export default function StorePage({
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(buildSupportPath({ topic: "billing", context: "Point-pack purchase history help" }))
+                    router.push(
+                      buildSupportPath({
+                        topic: "billing",
+                        context: "Point-pack purchase history help",
+                      }),
+                    )
                   }
                   className={secondaryButtonClass}
                 >
@@ -892,5 +1036,3 @@ export default function StorePage({
     </div>
   );
 }
-
-

@@ -14,7 +14,10 @@ const PWAInstallPrompt = React.memo(() => {
   const isAdminRoute = pathname?.startsWith("/admin");
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       setIsMobileViewport(false);
       return undefined;
     }
@@ -55,7 +58,8 @@ const PWAInstallPrompt = React.memo(() => {
       return;
     }
 
-    const dismissed = localStorage.getItem("mn_pwa_prompt_dismissed") === "true";
+    const dismissed =
+      localStorage.getItem("mn_pwa_prompt_dismissed") === "true";
     const isIOSDevice =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -84,7 +88,10 @@ const PWAInstallPrompt = React.memo(() => {
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, [isAdminRoute, isMobileViewport]);
@@ -113,10 +120,10 @@ const PWAInstallPrompt = React.memo(() => {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
       <div className="pointer-events-auto mx-auto max-w-4xl rounded-[28px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[0_22px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent,#866245)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
             <div>
@@ -125,12 +132,17 @@ const PWAInstallPrompt = React.memo(() => {
               </h3>
               {isIOS ? (
                 <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">
-                  On iPhone, tap <span className="font-semibold text-slate-900">Share</span> and then{" "}
-                  <span className="font-semibold text-slate-900">Add to Home Screen</span>.
+                  On iPhone, open{" "}
+                  <span className="font-semibold text-slate-900">Share</span>,
+                  then choose{" "}
+                  <span className="font-semibold text-slate-900">
+                    Add to Home Screen
+                  </span>
+                  .
                 </p>
               ) : (
                 <p className="mt-1 text-xs leading-6 text-slate-600 sm:text-sm">
-                  Add Gush to your home screen for faster launches, cleaner reading, and a more app-like feel.
+                  Add Gush for faster launch and cleaner reading.
                 </p>
               )}
             </div>
@@ -143,7 +155,7 @@ const PWAInstallPrompt = React.memo(() => {
                 onClick={handleInstall}
                 className="min-h-[44px] rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Install app
+                Install
               </button>
             ) : null}
             <button

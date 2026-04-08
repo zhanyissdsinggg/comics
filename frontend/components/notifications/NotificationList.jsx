@@ -57,13 +57,21 @@ export default function NotificationList({
     return (
       <section
         className={`rounded-[24px] border p-6 ${
-          isLight ? "border-black/8 bg-white text-slate-600" : "border-white/10 bg-black/10"
+          isLight
+            ? "border-black/8 bg-white text-slate-600"
+            : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+        >
           Inbox
         </p>
-        <p className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>Loading your inbox.</p>
+        <p
+          className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
+        >
+          Loading your inbox.
+        </p>
       </section>
     );
   }
@@ -75,11 +83,19 @@ export default function NotificationList({
           isLight ? "border-black/8 bg-white" : "border-white/10 bg-black/10"
         }`}
       >
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+        >
           Inbox
         </p>
-        <p className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}>You're caught up.</p>
-        <p className={`mt-2 text-xs leading-5 ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+        <p
+          className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
+        >
+          You're caught up.
+        </p>
+        <p
+          className={`mt-2 text-xs leading-5 ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+        >
           New chapters, offers, and free unlocks land here.
         </p>
       </section>
@@ -98,31 +114,43 @@ export default function NotificationList({
                 ? "border-black/8 bg-white"
                 : "border-white/10 bg-black/10"
               : isLight
-                ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]"
-                : "border-emerald-400/20 bg-emerald-500/[0.06]",
+                ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
+                : "border-amber-400/20 bg-amber-500/[0.06]",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className={`text-sm font-semibold ${isLight ? "text-slate-950" : "text-white"}`}>{item.title}</p>
+                <p
+                  className={`text-sm font-semibold ${isLight ? "text-slate-950" : "text-white"}`}
+                >
+                  {item.title}
+                </p>
                 {!item.read ? (
                   <span
                     className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${
                       isLight
-                        ? "border-[rgba(47,107,255,0.14)] bg-white text-[var(--gush-accent,#2f6bff)]"
-                        : "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+                        ? "border-[rgba(134,98,69,0.14)] bg-white text-[var(--gush-accent-strong,#63472f)]"
+                        : "border-amber-400/30 bg-amber-400/10 text-amber-200"
                     }`}
                   >
                     Unread
                   </span>
                 ) : null}
               </div>
-              <p className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}>{item.message}</p>
-              <div className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] ${isLight ? "text-slate-500" : "text-neutral-500"}`}>
+              <p
+                className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}
+              >
+                {item.message}
+              </p>
+              <div
+                className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+              >
                 <span>{getMeta(item)}</span>
                 <span>{formatTimestamp(item.createdAt)}</span>
-                {item.expiresAt ? <span>Expires {formatTimestamp(item.expiresAt)}</span> : null}
+                {item.expiresAt ? (
+                  <span>Expires {formatTimestamp(item.expiresAt)}</span>
+                ) : null}
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -134,11 +162,19 @@ export default function NotificationList({
                     ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
                     : "border-white/10 bg-black/10 text-neutral-200 hover:border-white/20 hover:bg-white/10"
                 }`}
-                disabled={item.read || workingId === item.id || workingId === "__all__"}
+                disabled={
+                  item.read || workingId === item.id || workingId === "__all__"
+                }
               >
-                {item.read ? "Read" : workingId === item.id ? "Saving..." : "Mark read"}
+                {item.read
+                  ? "Read"
+                  : workingId === item.id
+                    ? "Saving..."
+                    : "Mark read"}
               </button>
-              {item.seriesId || item.type === "PROMO" || item.type === "SUB_VOUCHER" ? (
+              {item.seriesId ||
+              item.type === "PROMO" ||
+              item.type === "SUB_VOUCHER" ? (
                 <button
                   type="button"
                   onClick={() => onNavigate?.(item)}

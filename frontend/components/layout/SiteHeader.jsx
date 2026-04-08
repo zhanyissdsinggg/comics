@@ -15,7 +15,9 @@ import HeaderSearch from "./HeaderSearch";
 
 const HeaderActions = dynamic(() => import("./HeaderActionsRuntime"), {
   ssr: false,
-  loading: () => <div className="hidden h-10 w-[10.5rem] sm:block" aria-hidden="true" />,
+  loading: () => (
+    <div className="hidden h-10 w-[10.5rem] sm:block" aria-hidden="true" />
+  ),
 });
 const HeaderModals = dynamic(() => import("./HeaderModalsRuntime"), {
   ssr: false,
@@ -37,10 +39,16 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const isLight = variant === "light";
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem("mn_region") : null;
+    const stored =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("mn_region")
+        : null;
     const cookieRegion = getCookie("mn_region");
     if (typeof window !== "undefined" && stored !== cookieRegion) {
-      window.localStorage.setItem("mn_region", stored || cookieRegion || "global");
+      window.localStorage.setItem(
+        "mn_region",
+        stored || cookieRegion || "global",
+      );
     }
   }, []);
 
@@ -78,12 +86,16 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
 
     const params = new URLSearchParams(window.location.search);
     const shouldOpenLogin =
-      params.get("openLogin") === "1" || window.sessionStorage.getItem("mn_open_login") === "1";
+      params.get("openLogin") === "1" ||
+      window.sessionStorage.getItem("mn_open_login") === "1";
     if (!shouldOpenLogin) {
       return;
     }
 
-    const returnTo = window.sessionStorage.getItem("mn_return_to") || params.get("returnTo") || "/";
+    const returnTo =
+      window.sessionStorage.getItem("mn_return_to") ||
+      params.get("returnTo") ||
+      "/";
     window.sessionStorage.removeItem("mn_open_login");
     window.sessionStorage.setItem("mn_return_to", returnTo);
     setPendingAdultToggle(false);
@@ -95,7 +107,9 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     const wasAdultMode = isAdultMode;
     trackEvent("adult_toggle_attempt", { isAdultMode });
     const cookieSignedIn = getCookie("mn_is_signed_in") === "1";
-    const signedInForAdult = hydrated ? isSignedIn : isSignedIn || cookieSignedIn;
+    const signedInForAdult = hydrated
+      ? isSignedIn
+      : isSignedIn || cookieSignedIn;
     const status = requestAdultToggle(signedInForAdult);
 
     if (status === "NEED_LOGIN") {
@@ -155,30 +169,30 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           isHome
             ? scrolled
-              ? "border-white/10 bg-[rgba(8,12,18,0.88)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
-              : "border-white/6 bg-[rgba(8,12,18,0.56)] backdrop-blur-xl"
+              ? "border-[color:var(--gush-border)] bg-[rgba(251,247,241,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.9)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
+              : "border-transparent bg-[rgba(251,247,241,0.68)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.66)]"
             : isLight
               ? scrolled
-                ? "border-[color:var(--gush-border-strong)] bg-[rgba(251,247,240,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.88)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
-                : "border-transparent bg-[rgba(251,247,240,0.6)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.6)]"
-            : scrolled
-              ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
-              : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
+                ? "border-[color:var(--gush-border)] bg-[rgba(251,247,241,0.9)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.88)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.32)]"
+                : "border-transparent bg-[rgba(251,247,241,0.62)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(14,18,27,0.6)]"
+              : scrolled
+                ? "border-white/10 bg-[rgba(17,16,15,0.92)] shadow-[0_20px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
+                : "border-white/6 bg-[rgba(17,16,15,0.72)] backdrop-blur-xl"
         }`}
       >
         <div
           className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
             isHome
               ? scrolled
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(134,98,69,0.18),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(242,207,155,0.18),transparent)]"
                 : ""
               : isLight
                 ? scrolled
-                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(36,30,20,0.12),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
+                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(134,98,69,0.18),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
                   : ""
-              : scrolled
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
-                : ""
+                : scrolled
+                  ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] before:content-['']"
+                  : ""
           }`}
         >
           <div className="flex min-h-[58px] items-center gap-2 py-2 sm:min-h-[64px] sm:gap-4 sm:py-2.5 lg:gap-6">

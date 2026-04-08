@@ -5,7 +5,13 @@ import { AlertTriangle, ChevronRight, ShieldAlert } from "lucide-react";
 import { AGE_RULES } from "../../lib/ageRules";
 import { Button } from "@/components/ui/button";
 
-export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, legalAge }) {
+export default function AgeGateModal({
+  open,
+  onClose,
+  onConfirm,
+  ageRuleKey,
+  legalAge,
+}) {
   useEffect(() => {
     if (!open || typeof document === "undefined") {
       return undefined;
@@ -49,9 +55,9 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
         aria-labelledby="adult-gate-title"
         aria-describedby="adult-gate-description"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(244,63,94,0.08),transparent_24%)]" />
         <div className="relative">
-          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(168,85,247,0.14)] bg-[rgba(168,85,247,0.08)] text-[var(--gush-accent,#6d28d9)]">
+          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent,#866245)]">
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
@@ -59,14 +65,20 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
             <AlertTriangle className="size-3.5" />
             18+ access
           </p>
-          <h2 id="adult-gate-title" className="mt-3 font-display text-[2rem] font-semibold tracking-tight text-slate-950 dark:text-white sm:text-[2.35rem]">
-            Adult Content Warning
+          <h2
+            id="adult-gate-title"
+            className="mt-3 font-display text-[2rem] font-semibold tracking-tight text-slate-950 dark:text-white sm:text-[2.35rem]"
+          >
+            Adult Access Check
           </h2>
-          <p id="adult-gate-description" className="mt-4 text-sm leading-7 text-slate-600 dark:text-neutral-300 sm:text-[15px]">
-            This section contains material meant for adults only. Are you {currentAge} years of age or older?
+          <p
+            id="adult-gate-description"
+            className="mt-4 text-sm leading-7 text-slate-600 dark:text-neutral-300 sm:text-[15px]"
+          >
+            This catalog is for adults only. Are you {currentAge} or older?
           </p>
 
-          <div className="mt-5 rounded-[24px] border border-[rgba(109,40,217,0.12)] bg-[rgba(109,40,217,0.06)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="mt-5 rounded-[24px] border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.06)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
               Region check
             </p>
@@ -74,7 +86,8 @@ export default function AgeGateModal({ open, onClose, onConfirm, ageRuleKey, leg
               {regionLabel} requires {currentAge}+ access for this catalog.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-neutral-300">
-              We remember this choice on this device so you do not need to confirm again during future visits.
+              We remember this on this device, so you should not need to confirm
+              again next time.
             </p>
           </div>
 

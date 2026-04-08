@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, BookMarked, BookOpen, Bookmark, LockKeyhole } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookMarked,
+  BookOpen,
+  Bookmark,
+  LockKeyhole,
+} from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
@@ -131,7 +137,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
       style={{
         background:
           coverTone ||
-          "linear-gradient(160deg, rgba(47,107,255,0.18) 0%, rgba(15,23,42,0.08) 100%)",
+          "linear-gradient(160deg, rgba(134,98,69,0.18) 0%, rgba(36,28,22,0.08) 100%)",
       }}
     >
       <span className="line-clamp-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-900/75">
@@ -142,32 +148,51 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 }
 
 function LibraryRow({ item, mode, onOpenSeries, onResume }) {
-  const actionLabel = mode === "continue" ? "Resume" : item.resumeEpisodeId ? "Resume" : "View Series";
-  const metaLine = [item.summary, item.updatedLabel].filter(Boolean).join(" | ");
+  const actionLabel =
+    mode === "continue"
+      ? "Resume"
+      : item.resumeEpisodeId
+        ? "Resume"
+        : "View Series";
+  const metaLine = [item.summary, item.updatedLabel]
+    .filter(Boolean)
+    .join(" | ");
 
   return (
     <article className="rounded-[26px] border border-black/8 bg-white/88 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition-colors hover:border-black/12 hover:bg-white">
       <div className="flex items-start gap-4">
-        <CoverThumb title={item.title} coverUrl={item.coverUrl} coverTone={item.coverTone} />
+        <CoverThumb
+          title={item.title}
+          coverUrl={item.coverUrl}
+          coverTone={item.coverTone}
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="truncate text-base font-semibold tracking-tight text-slate-950">{item.title}</h3>
+                <h3 className="truncate text-base font-semibold tracking-tight text-slate-950">
+                  {item.title}
+                </h3>
                 {item.badge ? (
-                  <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent,#2f6bff)]">
+                  <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent-strong,#63472f)]">
                     {item.badge}
                   </span>
                 ) : null}
               </div>
               <p className="mt-1 text-sm text-slate-600">{item.primaryLine}</p>
-              {metaLine ? <p className="mt-1 text-xs text-slate-500">{metaLine}</p> : null}
+              {metaLine ? (
+                <p className="mt-1 text-xs text-slate-500">{metaLine}</p>
+              ) : null}
             </div>
 
             <button
               type="button"
-              onClick={item.resumeEpisodeId ? () => onResume(item) : () => onOpenSeries(item)}
+              onClick={
+                item.resumeEpisodeId
+                  ? () => onResume(item)
+                  : () => onOpenSeries(item)
+              }
               className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-black/12 hover:bg-white"
             >
               {actionLabel}
@@ -183,8 +208,10 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-black/6">
                 <div
-                  className="h-full rounded-full bg-[var(--gush-accent,#2f6bff)]"
-                  style={{ width: `${Math.max(8, Math.round(item.progressPercent * 100))}%` }}
+                  className="h-full rounded-full bg-[var(--gush-accent-strong,#63472f)]"
+                  style={{
+                    width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
+                  }}
                 />
               </div>
             </div>
@@ -259,9 +286,12 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
           return;
         }
 
-        setSeriesList(seriesResponse.ok ? seriesResponse.data?.series || [] : []);
+        setSeriesList(
+          seriesResponse.ok ? seriesResponse.data?.series || [] : [],
+        );
         setEntitlements(
-          entitlementsResponse.ok && Array.isArray(entitlementsResponse.data?.entitlements)
+          entitlementsResponse.ok &&
+            Array.isArray(entitlementsResponse.data?.entitlements)
             ? entitlementsResponse.data.entitlements
             : [],
         );
@@ -290,7 +320,10 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         return;
       }
       const current = next.get(entry.seriesId);
-      if (!current || toTimestamp(entry.createdAt) >= toTimestamp(current.createdAt)) {
+      if (
+        !current ||
+        toTimestamp(entry.createdAt) >= toTimestamp(current.createdAt)
+      ) {
         next.set(entry.seriesId, entry);
       }
     });
@@ -302,7 +335,11 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     const progressEntries = Object.entries(progressMap || {})
       .map(([seriesId, progress]) => ({ seriesId, progress }))
       .filter(({ progress }) => progress?.lastEpisodeId)
-      .sort((left, right) => toTimestamp(right.progress?.updatedAt) - toTimestamp(left.progress?.updatedAt));
+      .sort(
+        (left, right) =>
+          toTimestamp(right.progress?.updatedAt) -
+          toTimestamp(left.progress?.updatedAt),
+      );
 
     return sortByUpdatedAt(
       progressEntries
@@ -326,7 +363,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             badge: progressPercent >= 0.98 ? "Read" : "In Progress",
             primaryLine: formatProgressLabel(currentChapter, totalChapters),
             summary: series.type ? `${series.type} series` : "",
-            updatedLabel: formatRelativeTime(progress.updatedAt || historyEntry?.createdAt),
+            updatedLabel: formatRelativeTime(
+              progress.updatedAt || historyEntry?.createdAt,
+            ),
             progressPercent,
             progressLabel: `Resume Chapter ${currentChapter || "?"}`,
             progressPercentLabel: `${Math.round(progressPercent * 100)}%`,
@@ -358,7 +397,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             return null;
           }
 
-          const bookmarks = Array.isArray(bookmarksBySeries?.[seriesId]) ? bookmarksBySeries[seriesId] : [];
+          const bookmarks = Array.isArray(bookmarksBySeries?.[seriesId])
+            ? bookmarksBySeries[seriesId]
+            : [];
           const latestBookmark = bookmarks[0];
           const progress = progressMap?.[seriesId];
           const historyEntry = historyBySeriesId.get(seriesId);
@@ -369,7 +410,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             title: series.title,
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
-            badge: followedSeriesIds.includes(seriesId) ? "Saved" : "Bookmarked",
+            badge: followedSeriesIds.includes(seriesId)
+              ? "Saved"
+              : "Bookmarked",
             primaryLine:
               followedSeriesIds.includes(seriesId) && bookmarks.length > 0
                 ? `Saved to your shelf with ${formatBookmarkSummary(bookmarks.length)}`
@@ -378,10 +421,15 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   : formatBookmarkSummary(bookmarks.length),
             summary: latestBookmark?.label || series.status || "",
             updatedLabel: formatRelativeTime(
-              latestBookmark?.createdAt || progress?.updatedAt || historyEntry?.createdAt,
+              latestBookmark?.createdAt ||
+                progress?.updatedAt ||
+                historyEntry?.createdAt,
             ),
-            resumeEpisodeId: progress?.lastEpisodeId || historyEntry?.episodeId || null,
-            genreLine: Array.isArray(series.genres) ? series.genres.slice(0, 3) : [],
+            resumeEpisodeId:
+              progress?.lastEpisodeId || historyEntry?.episodeId || null,
+            genreLine: Array.isArray(series.genres)
+              ? series.genres.slice(0, 3)
+              : [],
             updatedAt: Math.max(
               toTimestamp(latestBookmark?.createdAt),
               toTimestamp(progress?.updatedAt),
@@ -391,21 +439,32 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         })
         .filter(Boolean),
     );
-  }, [bookmarksBySeries, followedSeriesIds, historyBySeriesId, progressMap, seriesById]);
+  }, [
+    bookmarksBySeries,
+    followedSeriesIds,
+    historyBySeriesId,
+    progressMap,
+    seriesById,
+  ]);
 
   const unlockedItems = useMemo(() => {
     return sortByUpdatedAt(
       (Array.isArray(entitlements) ? entitlements : [])
         .map((entry) => {
           const series = seriesById.get(entry?.seriesId);
-          if (!series || !Array.isArray(entry?.unlockedEpisodeIds) || entry.unlockedEpisodeIds.length === 0) {
+          if (
+            !series ||
+            !Array.isArray(entry?.unlockedEpisodeIds) ||
+            entry.unlockedEpisodeIds.length === 0
+          ) {
             return null;
           }
 
           const progress = progressMap?.[entry.seriesId];
           const historyEntry = historyBySeriesId.get(entry.seriesId);
           const latestUnlockedChapter = entry.unlockedEpisodeIds.reduce(
-            (highest, episodeId) => Math.max(highest, parseEpisodeNumber(episodeId)),
+            (highest, episodeId) =>
+              Math.max(highest, parseEpisodeNumber(episodeId)),
             0,
           );
 
@@ -416,15 +475,23 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: entry.unlockedEpisodeIds.length > 1 ? "Unlocked" : "Open",
-            primaryLine: formatUnlockedSummary(entry.unlockedEpisodeIds.length, latestUnlockedChapter),
+            primaryLine: formatUnlockedSummary(
+              entry.unlockedEpisodeIds.length,
+              latestUnlockedChapter,
+            ),
             summary: progress?.lastEpisodeId
               ? `Resume Chapter ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
               : series.type
                 ? `${series.type} series`
                 : "",
-            updatedLabel: formatRelativeTime(progress?.updatedAt || historyEntry?.createdAt),
-            resumeEpisodeId: progress?.lastEpisodeId || historyEntry?.episodeId || null,
-            genreLine: Array.isArray(series.genres) ? series.genres.slice(0, 3) : [],
+            updatedLabel: formatRelativeTime(
+              progress?.updatedAt || historyEntry?.createdAt,
+            ),
+            resumeEpisodeId:
+              progress?.lastEpisodeId || historyEntry?.episodeId || null,
+            genreLine: Array.isArray(series.genres)
+              ? series.genres.slice(0, 3)
+              : [],
             updatedAt: Math.max(
               toTimestamp(progress?.updatedAt),
               toTimestamp(historyEntry?.createdAt),
@@ -441,7 +508,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       continue: {
         items: continueItems,
         emptyTitle: "Nothing in progress yet",
-        emptyDescription: "Start a series and your next chapter will show up here.",
+        emptyDescription:
+          "Start a series and your next chapter will show up here.",
       },
       bookmarks: {
         items: bookmarkItems,
@@ -451,7 +519,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       unlocked: {
         items: unlockedItems,
         emptyTitle: "No unlocked series yet",
-        emptyDescription: "Unlocked chapters will collect here once you open them.",
+        emptyDescription:
+          "Unlocked chapters will collect here once you open them.",
       },
     }),
     [bookmarkItems, continueItems, unlockedItems],
@@ -489,13 +558,16 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       }
 
       router.push(
-        buildPathWithAttribution(`/read/${item.seriesId}/${item.resumeEpisodeId}`, {
-          entryPoint: "ACCOUNT_LIBRARY_RESUME",
-          sourcePath: "/account",
-          sourceSeriesId: item.seriesId,
-          sourceEpisodeId: item.resumeEpisodeId,
-          returnTo: `/read/${item.seriesId}/${item.resumeEpisodeId}`,
-        }),
+        buildPathWithAttribution(
+          `/read/${item.seriesId}/${item.resumeEpisodeId}`,
+          {
+            entryPoint: "ACCOUNT_LIBRARY_RESUME",
+            sourcePath: "/account",
+            sourceSeriesId: item.seriesId,
+            sourceEpisodeId: item.resumeEpisodeId,
+            returnTo: `/read/${item.seriesId}/${item.resumeEpisodeId}`,
+          },
+        ),
       );
     },
     [openSeries, router],
@@ -531,15 +603,21 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[26px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] p-5">
+        <div className="rounded-[26px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-950">Sign in to unlock your shelf</p>
+              <p className="text-sm font-semibold text-slate-950">
+                Sign in to unlock your shelf
+              </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Bring progress, saves, and unlocked chapters into one account.
               </p>
             </div>
-            <button type="button" onClick={onOpenAuth} className={buttonBaseClass}>
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className={buttonBaseClass}
+            >
               Sign in
             </button>
           </div>
@@ -565,7 +643,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     isActive
-                      ? "border-[rgba(47,107,255,0.18)] bg-[rgba(47,107,255,0.09)] text-slate-950"
+                      ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.09)] text-slate-950"
                       : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
                   }`}
                 >
@@ -600,7 +678,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               </div>
             ) : (
               <div className="rounded-[26px] border border-dashed border-black/10 bg-[#f8f9fc] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--gush-accent,#2f6bff)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.08)] text-[var(--gush-accent-strong,#63472f)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-semibold text-slate-950">
@@ -617,4 +695,3 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     </SurfacePanel>
   );
 }
-

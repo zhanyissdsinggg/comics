@@ -126,8 +126,14 @@ export default function SeriesFitPanel({
     "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
 
   const fitModel = useMemo(() => {
-    const leadGenre = Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres[0] : "";
-    const secondaryGenre = Array.isArray(series?.genres) && series.genres.length > 1 ? series.genres[1] : "";
+    const leadGenre =
+      Array.isArray(series?.genres) && series.genres.length > 0
+        ? series.genres[0]
+        : "";
+    const secondaryGenre =
+      Array.isArray(series?.genres) && series.genres.length > 1
+        ? series.genres[1]
+        : "";
     const episodeCount = getEpisodeCount(series, episodes);
     const freeEpisodeCount = toNumber(series?.freeEpisodeCount);
     const status = String(series?.status || "").toLowerCase();
@@ -148,7 +154,11 @@ export default function SeriesFitPanel({
       cadence,
       readerProof,
       starterLane,
-      primaryAction: getPrimaryAction({ continueHref, startHref, freeEpisodeCount }),
+      primaryAction: getPrimaryAction({
+        continueHref,
+        startHref,
+        freeEpisodeCount,
+      }),
       bestFor:
         status === "completed"
           ? `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()}-driven` : "story-driven"} payoff without release gaps.`
@@ -158,7 +168,9 @@ export default function SeriesFitPanel({
         readerProof > 0
           ? `${formatCompactCount(readerProof)} visible reader signals and an update trail from ${formatDateLabel(series?.updatedAt)}.`
           : `Updated as recently as ${formatDateLabel(series?.updatedAt)}.`,
-      genrePath: leadGenre ? `/search?genre=${encodeURIComponent(leadGenre)}&sort=popular` : "/search?sort=popular",
+      genrePath: leadGenre
+        ? `/search?genre=${encodeURIComponent(leadGenre)}&sort=popular`
+        : "/search?sort=popular",
     };
   }, [continueHref, episodes, series, startHref]);
 
@@ -179,7 +191,10 @@ export default function SeriesFitPanel({
     },
     {
       label: "Reader signals",
-      value: fitModel.readerProof > 0 ? formatCompactCount(fitModel.readerProof) : "New",
+      value:
+        fitModel.readerProof > 0
+          ? formatCompactCount(fitModel.readerProof)
+          : "New",
       body: fitModel.socialProof,
     },
   ];
@@ -195,15 +210,19 @@ export default function SeriesFitPanel({
             Is this your kind of read?
           </h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            The best title pages make it easy to feel the vibe, the commitment, and the easiest way in.
+            The best title pages make it easy to feel the vibe, the commitment,
+            and the easiest way in.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best way in
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            <span className="font-semibold text-slate-950">{fitModel.starterLane.label}.</span> {fitModel.starterLane.body}
+            <span className="font-semibold text-slate-950">
+              {fitModel.starterLane.label}.
+            </span>{" "}
+            {fitModel.starterLane.body}
           </p>
         </div>
       </div>
@@ -232,8 +251,13 @@ export default function SeriesFitPanel({
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
             {series?.title || "This title"} works best when the reader wants{" "}
-            {fitModel.status === "completed" ? "continuity and payoff in a longer session" : "a title worth saving and revisiting over time"}
-            {fitModel.leadGenre ? `, especially if ${fitModel.leadGenre.toLowerCase()} is already part of the browsing intent` : ""}.
+            {fitModel.status === "completed"
+              ? "continuity and payoff in a longer session"
+              : "a title worth saving and revisiting over time"}
+            {fitModel.leadGenre
+              ? `, especially if ${fitModel.leadGenre.toLowerCase()} is already part of the browsing intent`
+              : ""}
+            .
           </p>
         </div>
         <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
@@ -249,7 +273,7 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4">
+        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Recommended next step
           </p>
@@ -273,9 +297,7 @@ export default function SeriesFitPanel({
           type="button"
           onClick={() => router.push(fitModel.genrePath)}
           className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
-            fitModel.primaryAction
-              ? secondaryButtonClass
-              : primaryButtonClass
+            fitModel.primaryAction ? secondaryButtonClass : primaryButtonClass
           }`}
         >
           {fitModel.leadGenre ? `More ${fitModel.leadGenre}` : "More like this"}

@@ -18,8 +18,12 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
-      {title ? <p className="text-sm font-semibold text-slate-950">{title}</p> : null}
+    <div
+      className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
+    >
+      {title ? (
+        <p className="text-sm font-semibold text-slate-950">{title}</p>
+      ) : null}
       {message ? <p className="mt-1 text-sm leading-6">{message}</p> : null}
     </div>
   );
@@ -34,7 +38,7 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]";
+    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.18)] focus:ring-4 focus:ring-[rgba(134,98,69,0.08)]";
   const primaryButtonClass =
     "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
@@ -54,14 +58,17 @@ function VerifyPageContent() {
       setStatus({
         tone: "error",
         title: "Enter a valid email",
-        message: "Use the email on your account so we can send the newest verification link.",
+        message:
+          "Use the email on your account so we can send the newest verification link.",
       });
       return;
     }
 
     setSubmitting(true);
     setStatus(null);
-    const response = await apiPost("/api/auth/request-verify", { email: normalizedEmail });
+    const response = await apiPost("/api/auth/request-verify", {
+      email: normalizedEmail,
+    });
     if (response.ok) {
       setStatus({
         tone: "success",
@@ -93,7 +100,8 @@ function VerifyPageContent() {
     setStatus({
       tone: "neutral",
       title: "Verifying your email",
-      message: "This usually takes a moment, then we will send you to your account.",
+      message:
+        "This usually takes a moment, then we will send you to your account.",
     });
 
     const response = await apiPost("/api/auth/verify", { token });
@@ -105,11 +113,14 @@ function VerifyPageContent() {
       });
       setTimeout(() => router.push("/account"), 1100);
     } else {
-      const message = response.error || "This verification link is no longer valid.";
+      const message =
+        response.error || "This verification link is no longer valid.";
       const shouldRefreshLink = /expired|invalid/i.test(message);
       setStatus({
         tone: "error",
-        title: shouldRefreshLink ? "This link has expired" : "We could not verify this email",
+        title: shouldRefreshLink
+          ? "This link has expired"
+          : "We could not verify this email",
         message: shouldRefreshLink
           ? "Request a fresh verification email below and open the newest link."
           : message,
@@ -148,7 +159,9 @@ function VerifyPageContent() {
             Account confirmation
           </p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            {hasToken ? "Verifying your email link" : "Need another verification email?"}
+            {hasToken
+              ? "Verifying your email link"
+              : "Need another verification email?"}
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             {hasToken
@@ -159,7 +172,7 @@ function VerifyPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-3 text-sm text-slate-700">
+            <div className="rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-3 text-sm text-slate-700">
               Verification link loaded from your email. No code field required.
             </div>
             <button
@@ -203,15 +216,25 @@ function VerifyPageContent() {
           </div>
         )}
 
-        <StatusNotice tone={status?.tone} title={status?.title} message={status?.message} />
+        <StatusNotice
+          tone={status?.tone}
+          title={status?.title}
+          message={status?.message}
+        />
 
         <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600">
           Already confirmed? Go to{" "}
-          <Link href="/account" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
+          <Link
+            href="/account"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+          >
             your account
           </Link>
           . Need help with a missing email? Contact{" "}
-          <Link href="/support" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
+          <Link
+            href="/support"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+          >
             us
           </Link>
           .
@@ -223,7 +246,13 @@ function VerifyPageContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div className="gush-home-shell min-h-screen overflow-hidden"><div className="gush-page-ambient" /></div>}>
+    <Suspense
+      fallback={
+        <div className="gush-home-shell min-h-screen overflow-hidden">
+          <div className="gush-page-ambient" />
+        </div>
+      }
+    >
       <VerifyPageContent />
     </Suspense>
   );

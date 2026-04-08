@@ -82,7 +82,11 @@ export default function AdultGatePage() {
   };
 
   useEffect(() => {
-    trackEvent("adult_gate_blocked", { source: "adult-gate-page", reason, returnTo });
+    trackEvent("adult_gate_blocked", {
+      source: "adult-gate-page",
+      reason,
+      returnTo,
+    });
   }, [reason, returnTo]);
 
   return (
@@ -109,14 +113,17 @@ export default function AdultGatePage() {
             <h1 className="mt-5 font-display text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.6rem]">
               {titleMap[reason]}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{descriptionMap[reason]}</p>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+              {descriptionMap[reason]}
+            </p>
 
-            <div className="mt-5 rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] px-4 py-4 text-left">
+            <div className="mt-5 rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-4 py-4 text-left">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 What happens next
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                Sign in if needed, confirm your age once, then return to the page you came from.
+                Sign in if needed, confirm your age once, then return to the
+                page you came from.
               </p>
             </div>
 
@@ -139,38 +146,50 @@ export default function AdultGatePage() {
 
             {isSignedIn && reason === "NEED_LOGIN" ? (
               <p className="mt-4 text-xs text-slate-500">
-                You're already signed in on this device. Continue to finish the 18+ check.
+                You're already signed in on this device. Continue to finish the
+                18+ check.
               </p>
             ) : null}
           </section>
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Access desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   18+ titles stay separate until you ask for them.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
-                  This gate keeps mature reading private by default. Sign in if needed, confirm age once, then return right back to the page you meant to open.
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  This gate keeps mature reading private by default. Sign in if
+                  needed, confirm age once, then return right back to the page
+                  you meant to open.
                 </p>
               </div>
             </div>
 
-            <div className="space-y-3 text-sm text-neutral-300">
-              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/46">
+            <div className="space-y-3 text-sm text-slate-600">
+              <div className="rounded-[22px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Return target
                 </p>
-                <p className="mt-2 break-all text-sm text-white/86">{returnTo}</p>
+                <p className="mt-2 break-all text-sm text-slate-800">
+                  {returnTo}
+                </p>
               </div>
-              <div className="rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/46">
+              <div className="rounded-[22px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Current reason
                 </p>
-                <p className="mt-2 text-sm text-white/86">{reason.replaceAll("_", " ")}</p>
+                <p className="mt-2 text-sm text-slate-800">
+                  {reason.replaceAll("_", " ")}
+                </p>
               </div>
             </div>
           </SurfacePanel>

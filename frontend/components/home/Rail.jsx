@@ -11,12 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
-    lightAccent: "text-[var(--gush-accent,#2f6bff)]",
-    lightPanel: "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#866245)]",
+    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
   },
   continue: {
-    lightAccent: "text-[var(--gush-accent,#2f6bff)]",
-    lightPanel: "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#866245)]",
+    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
   },
   trending: {
     lightAccent: "text-rose-500",
@@ -43,12 +43,12 @@ const RAIL_THEME_BY_ID = {
     lightPanel: "border-black/8 bg-[#f8f9fc]",
   },
   starter: {
-    lightAccent: "text-[var(--gush-accent,#2f6bff)]",
-    lightPanel: "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#866245)]",
+    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
   },
   "ai-recommended": {
-    lightAccent: "text-[var(--gush-accent,#2f6bff)]",
-    lightPanel: "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]",
+    lightAccent: "text-[var(--gush-accent,#866245)]",
+    lightPanel: "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]",
   },
   recommended: {
     lightAccent: "text-slate-700",
@@ -69,10 +69,8 @@ const RAIL_SURFACE_BY_ID = {
     "bg-[linear-gradient(180deg,rgba(24,15,20,0.94),rgba(9,12,18,0.98))] border-rose-400/15",
   completed:
     "bg-[linear-gradient(180deg,rgba(14,22,21,0.94),rgba(8,12,18,0.98))] border-teal-400/15",
-  new:
-    "bg-[linear-gradient(180deg,rgba(20,19,28,0.94),rgba(8,12,18,0.98))] border-violet-400/15",
-  ttf:
-    "bg-[linear-gradient(180deg,rgba(17,24,24,0.94),rgba(8,12,18,0.98))] border-emerald-400/15",
+  new: "bg-[linear-gradient(180deg,rgba(20,19,28,0.94),rgba(8,12,18,0.98))] border-violet-400/15",
+  ttf: "bg-[linear-gradient(180deg,rgba(17,24,24,0.94),rgba(8,12,18,0.98))] border-emerald-400/15",
   default:
     "bg-[linear-gradient(180deg,rgba(14,18,28,0.94),rgba(8,12,18,0.98))] border-white/10",
 };
@@ -99,7 +97,8 @@ export default function Rail({
 }) {
   const router = useRouter();
   const safeItems = ensureArray(items);
-  const railSurface = RAIL_SURFACE_BY_ID[railName] || RAIL_SURFACE_BY_ID.default;
+  const railSurface =
+    RAIL_SURFACE_BY_ID[railName] || RAIL_SURFACE_BY_ID.default;
   const railTheme = RAIL_THEME_BY_ID[railName] || RAIL_THEME_BY_ID.default;
   const isLight = appearance === "light";
 
@@ -117,7 +116,7 @@ export default function Rail({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.04),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.4),transparent)]"
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.04),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.4),transparent)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]",
           )}
         />
@@ -134,10 +133,24 @@ export default function Rail({
                   {eyebrow || railName.replace(/-/g, " ")}
                 </p>
               ) : null}
-              <h2 className={cn("font-display text-2xl font-semibold tracking-tight md:text-[1.95rem]", isLight ? "text-slate-950" : "text-white")}>
+              <h2
+                className={cn(
+                  "font-display text-2xl font-semibold tracking-tight md:text-[1.95rem]",
+                  isLight ? "text-slate-950" : "text-white",
+                )}
+              >
                 {title}
               </h2>
-              {reason ? <p className={cn("max-w-2xl text-sm leading-7", isLight ? "text-slate-500" : "text-neutral-400")}>{reason}</p> : null}
+              {reason ? (
+                <p
+                  className={cn(
+                    "max-w-2xl text-sm leading-7",
+                    isLight ? "text-slate-500" : "text-neutral-400",
+                  )}
+                >
+                  {reason}
+                </p>
+              ) : null}
             </div>
 
             {href ? (
@@ -191,7 +204,12 @@ export default function Rail({
               )}
             >
               <CardContent className="p-8 text-center">
-                <p className={cn("text-sm", isLight ? "text-slate-500" : "text-neutral-500")}>
+                <p
+                  className={cn(
+                    "text-sm",
+                    isLight ? "text-slate-500" : "text-neutral-500",
+                  )}
+                >
                   Nothing is ready here yet.
                 </p>
               </CardContent>
@@ -199,7 +217,10 @@ export default function Rail({
           ) : (
             <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 no-scrollbar">
               {safeItems.map((item) => (
-                <div key={item.id} className="w-[164px] shrink-0 sm:w-[188px] lg:w-[208px]">
+                <div
+                  key={item.id}
+                  className="w-[164px] shrink-0 sm:w-[188px] lg:w-[208px]"
+                >
                   <PortraitCard
                     item={item}
                     tone={tone}

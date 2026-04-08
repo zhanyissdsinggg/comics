@@ -2,19 +2,30 @@
 
 export default function LibraryError({ error, reset }) {
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-      <div className="w-full rounded-3xl border border-neutral-900 bg-neutral-900/60 p-6 text-center">
-        <h1 className="text-2xl font-semibold">Library error</h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          {error?.message || "Please try again."}
-        </p>
-        <button
-          type="button"
-          onClick={() => reset()}
-          className="mt-6 rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-900"
-        >
-          Retry
-        </button>
+    <main className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
+      <div className="gush-page-ambient" />
+      <div className="gush-page-main flex min-h-screen items-center justify-center px-6">
+        <div className="relative w-full max-w-3xl rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-8 text-center shadow-[0_26px_70px_rgba(15,23,42,0.08)]">
+          <span className="inline-flex rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Library
+          </span>
+          <h1 className="mt-5 font-display text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.7rem]">
+            Library error
+          </h1>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+            We could not load your library cleanly right now. Please try again.
+          </p>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-slate-500">
+            {error?.message || "Please try again."}
+          </p>
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="mt-6 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     </main>
   );

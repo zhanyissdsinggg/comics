@@ -23,7 +23,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
     <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#2f6bff)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
             From
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
@@ -52,7 +52,7 @@ function MetaPill({ children, accent = false }) {
     <span
       className={`rounded-full border px-3 py-1 text-xs font-semibold ${
         accent
-          ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.06)] text-[var(--gush-accent,#2f6bff)]"
+          ? "border-[rgba(216,183,140,0.22)] bg-[rgba(216,183,140,0.08)] text-[var(--gush-accent,#d8b78c)]"
           : "border-black/8 bg-white/84 text-slate-600"
       }`}
     >
@@ -87,7 +87,9 @@ export default function EndOfEpisodeOverlay({
   highlightPrimaryAction = false,
   onReturnToSource,
 }) {
-  const readyAtMs = nextEpisode?.ttfReadyAt ? Date.parse(nextEpisode.ttfReadyAt) : null;
+  const readyAtMs = nextEpisode?.ttfReadyAt
+    ? Date.parse(nextEpisode.ttfReadyAt)
+    : null;
   const { isReady, formatted } = useCountdown(readyAtMs);
 
   if (!open || !nextEpisode) {
@@ -119,7 +121,9 @@ export default function EndOfEpisodeOverlay({
       ? "Just the next episode"
       : `Just the next episode (${formatPointsLabel(singlePrice)})`
     : `${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`;
-  const packSavingsText = packOffer?.savingsPct ? `Save ${packOffer.savingsPct}% with the pack` : "";
+  const packSavingsText = packOffer?.savingsPct
+    ? `Save ${packOffer.savingsPct}% with the pack`
+    : "";
   const pricingNote = pricing?.appliedDailyFree
     ? "Free now"
     : pricing?.appliedCoupon?.label ||
@@ -127,7 +131,8 @@ export default function EndOfEpisodeOverlay({
   const packNote =
     packPricing?.appliedCoupon?.label ||
     (packPricing?.discountPct ? `Member ${packPricing.discountPct}% off` : "");
-  const subscriptionNote = "Members get free unlocks, shorter waits, and better prices.";
+  const subscriptionNote =
+    "Members get free unlocks, shorter waits, and better prices.";
   const upsellBadge = showSubscribe ? "Recommended" : "";
   const nextEpisodeStatusLabel = nextUnlocked
     ? "Ready to read now"
@@ -165,7 +170,9 @@ export default function EndOfEpisodeOverlay({
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-slate-500">Keep reading</p>
-            <p className="text-lg font-semibold text-slate-950">{nextEpisode.title}</p>
+            <p className="text-lg font-semibold text-slate-950">
+              {nextEpisode.title}
+            </p>
             {seriesTitle ? (
               <p className="mt-1 text-xs text-slate-500">{seriesTitle}</p>
             ) : null}
@@ -188,13 +195,19 @@ export default function EndOfEpisodeOverlay({
             <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#2f6bff)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
                     Next up
                   </p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-950">{nextEpisode.title}</h3>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {nextEpisode.title}
+                  </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
-                    <MetaPill>{isSubscriber ? "Member perks active" : "Ready when you are"}</MetaPill>
+                    <MetaPill>
+                      {isSubscriber
+                        ? "Member perks active"
+                        : "Ready when you are"}
+                    </MetaPill>
                   </div>
                 </div>
 
@@ -205,7 +218,7 @@ export default function EndOfEpisodeOverlay({
                     onClick={onNext}
                     className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                       highlightPrimaryAction
-                        ? "border-[rgba(47,107,255,0.3)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.12),0_20px_50px_rgba(47,107,255,0.16)] motion-safe:animate-pulse"
+                        ? "border-[rgba(216,183,140,0.3)] bg-[rgba(216,183,140,0.1)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.12),0_20px_50px_rgba(216,183,140,0.14)] motion-safe:animate-pulse"
                         : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
                     }`}
                   >
@@ -227,10 +240,12 @@ export default function EndOfEpisodeOverlay({
             <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#2f6bff)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
                     Keep going
                   </p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-950">{nextEpisode.title}</h3>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                    {nextEpisode.title}
+                  </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
                     <MetaPill>{formatPointsLabel(walletBalance)}</MetaPill>
@@ -275,7 +290,7 @@ export default function EndOfEpisodeOverlay({
                     onClick={handlePrimary}
                     className={`w-full rounded-full border px-4 py-2 text-sm font-semibold transition ${
                       highlightPrimaryAction
-                        ? "border-[rgba(47,107,255,0.3)] bg-[rgba(47,107,255,0.08)] text-slate-950 shadow-[0_0_0_1px_rgba(47,107,255,0.12),0_20px_50px_rgba(47,107,255,0.16)] motion-safe:animate-pulse"
+                        ? "border-[rgba(216,183,140,0.3)] bg-[rgba(216,183,140,0.1)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.12),0_20px_50px_rgba(216,183,140,0.14)] motion-safe:animate-pulse"
                         : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
                     }`}
                   >
@@ -283,7 +298,9 @@ export default function EndOfEpisodeOverlay({
                   </button>
 
                   {showPackPrimary && packSavingsText ? (
-                    <p className="text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">{packSavingsText}</p>
+                    <p className="text-xs font-semibold text-[var(--gush-accent,#d8b78c)]">
+                      {packSavingsText}
+                    </p>
                   ) : null}
 
                   {showSubscribe ? (
@@ -298,10 +315,14 @@ export default function EndOfEpisodeOverlay({
                       >
                         {STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
-                          <span className="ml-2 text-[10px] text-[var(--gush-accent,#2f6bff)]">{upsellBadge}</span>
+                          <span className="ml-2 text-[10px] text-[var(--gush-accent,#d8b78c)]">
+                            {upsellBadge}
+                          </span>
                         ) : null}
                       </button>
-                      <p className="text-xs text-slate-500">{subscriptionNote}</p>
+                      <p className="text-xs text-slate-500">
+                        {subscriptionNote}
+                      </p>
                     </>
                   ) : (
                     <>

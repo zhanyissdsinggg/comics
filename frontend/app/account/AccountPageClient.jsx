@@ -9,7 +9,11 @@ import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
 import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
-import { LANGUAGE_OPTIONS, REGION_KEYS, getRegionConfig } from "../../lib/region/config";
+import {
+  LANGUAGE_OPTIONS,
+  REGION_KEYS,
+  getRegionConfig,
+} from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
 import { formatUSDisplayCurrency } from "../../lib/localization";
@@ -65,7 +69,8 @@ function formatOrderDate(value) {
 export default function AccountPage({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn, user } = useAuthStore();
-  const { plan, subscription, loadWallet, cancelSubscription } = useWalletStore();
+  const { plan, subscription, loadWallet, cancelSubscription } =
+    useWalletStore();
   const [region, setRegion] = useState("global");
   const [language, setLanguage] = useState("en");
   const [hideAdultHistory, setHideAdultHistory] = useState(false);
@@ -79,7 +84,10 @@ export default function AccountPage({ initialSignedIn = false }) {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [verifyStatus, setVerifyStatus] = useState("");
   const [securityStatus, setSecurityStatus] = useState("");
-  const [providers, setProviders] = useState({ google: false, password: false });
+  const [providers, setProviders] = useState({
+    google: false,
+    password: false,
+  });
   const [providersLoading, setProvidersLoading] = useState(false);
   const [providerStatus, setProviderStatus] = useState("");
   const [providerBusy, setProviderBusy] = useState(false);
@@ -196,7 +204,9 @@ export default function AccountPage({ initialSignedIn = false }) {
     }
 
     setProvidersLoading(true);
-    const response = await apiGet("/api/auth/providers", { suppressAuthModal: true });
+    const response = await apiGet("/api/auth/providers", {
+      suppressAuthModal: true,
+    });
     if (response.ok) {
       const payload = response.data?.providers || {};
       setProviders({
@@ -212,18 +222,35 @@ export default function AccountPage({ initialSignedIn = false }) {
   }, [loadAuthProviders]);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/account")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/account")),
+    );
   }, []);
 
-  const applySetting = (nextRegion, nextLang, nextHide, nextName, nextNotify) => {
+  const applySetting = (
+    nextRegion,
+    nextLang,
+    nextHide,
+    nextName,
+    nextNotify,
+  ) => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem(REGION_KEY, nextRegion);
       window.localStorage.setItem(LANG_KEY, nextLang);
       window.localStorage.setItem(HIDE_ADULT_KEY, nextHide ? "1" : "0");
       window.localStorage.setItem(DISPLAY_NAME_KEY, nextName || "");
-      window.localStorage.setItem(NOTIFY_NEW_KEY, nextNotify.newEpisode ? "1" : "0");
-      window.localStorage.setItem(NOTIFY_TTF_KEY, nextNotify.ttfReady ? "1" : "0");
-      window.localStorage.setItem(NOTIFY_PROMO_KEY, nextNotify.promo ? "1" : "0");
+      window.localStorage.setItem(
+        NOTIFY_NEW_KEY,
+        nextNotify.newEpisode ? "1" : "0",
+      );
+      window.localStorage.setItem(
+        NOTIFY_TTF_KEY,
+        nextNotify.ttfReady ? "1" : "0",
+      );
+      window.localStorage.setItem(
+        NOTIFY_PROMO_KEY,
+        nextNotify.promo ? "1" : "0",
+      );
       window.dispatchEvent(
         new CustomEvent("mn-region-change", {
           detail: { region: nextRegion },
@@ -342,7 +369,13 @@ export default function AccountPage({ initialSignedIn = false }) {
       },
       {
         label: "Recent charges",
-        value: !hydrated ? "Loading" : ordersLoading ? "Loading" : orders.length > 0 ? orders.length.toLocaleString() : "None yet",
+        value: !hydrated
+          ? "Loading"
+          : ordersLoading
+            ? "Loading"
+            : orders.length > 0
+              ? orders.length.toLocaleString()
+              : "None yet",
         hint: ordersLoading
           ? "Recent charges and receipts show up below."
           : "Latest packs and memberships stay close to the rest of your account tools.",
@@ -373,7 +406,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
-            "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+            "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
         },
         {
           id: "recover",
@@ -390,8 +423,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           id: "membership",
           eyebrow: "Membership",
           title: "See monthly plans first.",
-          description:
-            "Review the plans first, then start when ready.",
+          description: "Review the plans first, then start when ready.",
           cta: "View Plans",
           onClick: () =>
             router.push(
@@ -408,8 +440,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           id: "store",
           eyebrow: "Point packs",
           title: "See point packs.",
-          description:
-            "Use point packs when you want one-off unlocks.",
+          description: "Use point packs when you want one-off unlocks.",
           cta: "View point packs",
           onClick: () => router.push("/store"),
           accentClass:
@@ -422,10 +453,14 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "membership",
         eyebrow: "Membership",
-        title: subscription?.active ? "Manage renewal and plan." : "See membership before your next purchase.",
+        title: subscription?.active
+          ? "Manage renewal and plan."
+          : "See membership before your next purchase.",
         description: subscription?.active
           ? subscription?.renewAt
-            ? `Your plan renews on ${new Date(subscription.renewAt).toLocaleDateString("en-US", {
+            ? `Your plan renews on ${new Date(
+                subscription.renewAt,
+              ).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
@@ -442,15 +477,19 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
       },
       {
         id: "purchases",
         eyebrow: "Purchases",
-        title: orders.length > 0 ? "Find receipts fast." : "Keep charges easy to find.",
-        description: orders.length > 0
-          ? "Latest packs, renewals, and billing records stay here."
-          : "Pack receipts, membership charges, and order IDs show up here after checkout.",
+        title:
+          orders.length > 0
+            ? "Find receipts fast."
+            : "Keep charges easy to find.",
+        description:
+          orders.length > 0
+            ? "Latest packs, renewals, and billing records stay here."
+            : "Pack receipts, membership charges, and order IDs show up here after checkout.",
         cta: "View purchases",
         onClick: () => router.push("/orders"),
         accentClass:
@@ -460,8 +499,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         id: "library",
         eyebrow: "Reading",
         title: "Open your library.",
-        description:
-          "Saved titles, recent reading, and progress stay close.",
+        description: "Saved titles, recent reading, and progress stay close.",
         cta: "Open library",
         onClick: () => router.push("/library"),
         accentClass:
@@ -474,7 +512,13 @@ export default function AccountPage({ initialSignedIn = false }) {
         description:
           "Use Support for sign-in trouble, wrong charges, missing points, or 18+ access issues.",
         cta: "Get help",
-        onClick: () => router.push(buildSupportPath({ topic: "account", context: "Account help from account page" })),
+        onClick: () =>
+          router.push(
+            buildSupportPath({
+              topic: "account",
+              context: "Account help from account page",
+            }),
+          ),
         accentClass:
           "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
       },
@@ -488,18 +532,21 @@ export default function AccountPage({ initialSignedIn = false }) {
     viewerSignedIn,
   ]);
 
-  const sectionEyebrowClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
-  const sectionTitleClass = "font-display text-2xl font-semibold tracking-tight text-slate-950";
+  const sectionEyebrowClass =
+    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+  const sectionTitleClass =
+    "font-display text-2xl font-semibold tracking-tight text-slate-950";
   const mutedCopyClass = "text-sm leading-6 text-slate-600";
-  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+  const fieldLabelClass =
+    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.35)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.28)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
-    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent,#2f6bff)] focus:ring-[rgba(47,107,255,0.22)]";
+    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent-strong,#63472f)] focus:ring-[rgba(134,98,69,0.18)]";
   const checkboxCardClass =
     "flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700";
   const messageIsError = /failed|couldn't|not found/i.test(message);
@@ -520,9 +567,13 @@ export default function AccountPage({ initialSignedIn = false }) {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="Account"
-            title={viewerSignedIn ? "Your account." : "Save this device now. Sign in later."}
+            title={
+              viewerSignedIn
+                ? "Your account."
+                : "Save this device now. Sign in later."
+            }
             description={
               viewerSignedIn
                 ? "Keep reading, billing, and security easy to reach."
@@ -572,16 +623,21 @@ export default function AccountPage({ initialSignedIn = false }) {
             }
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Account desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {accountDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-300">
+                <p className="mt-3 text-sm leading-7 text-slate-600">
                   {accountDeskCopy}
                 </p>
               </div>
@@ -593,14 +649,21 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <button
                     type="button"
                     onClick={() => router.push("/library")}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                    className={primaryButtonClass}
                   >
                     Open library
                   </button>
                   <button
                     type="button"
-                    onClick={() => router.push(buildSupportPath({ topic: "account", context: "Account help from account hero desk" }))}
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    onClick={() =>
+                      router.push(
+                        buildSupportPath({
+                          topic: "account",
+                          context: "Account help from account hero desk",
+                        }),
+                      )
+                    }
+                    className={secondaryButtonClass}
                   >
                     Get help
                   </button>
@@ -610,7 +673,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <button
                     type="button"
                     onClick={openAuthPrompt}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                    className={primaryButtonClass}
                   >
                     Sign in
                   </button>
@@ -625,7 +688,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         }),
                       )
                     }
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    className={secondaryButtonClass}
                   >
                     View membership
                   </button>
@@ -643,14 +706,19 @@ export default function AccountPage({ initialSignedIn = false }) {
         ) : null}
 
         {!viewerSignedIn ? (
-          <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
+          <SurfacePanel
+            className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            appearance="light"
+            accent="blue"
+          >
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 Sign in to keep everything on one account.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Local settings still work here. Sign in when you want purchases and progress on one account.
+                Local settings still work here. Sign in when you want purchases
+                and progress on one account.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -670,7 +738,14 @@ export default function AccountPage({ initialSignedIn = false }) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push(buildSupportPath({ topic: "account", context: "Signed-out account help" }))}
+                onClick={() =>
+                  router.push(
+                    buildSupportPath({
+                      topic: "account",
+                      context: "Signed-out account help",
+                    }),
+                  )
+                }
                 className={secondaryButtonClass}
               >
                 Get help
@@ -682,14 +757,18 @@ export default function AccountPage({ initialSignedIn = false }) {
         {message ? (
           <SurfacePanel
             appearance="light"
-            accent={messageIsError ? "rose" : "blue"}
+            accent={messageIsError ? "rose" : "amber"}
             className={
               messageIsError
                 ? "border border-red-200 bg-red-50"
-                : "border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]"
+                : "border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
             }
           >
-            <p className={`text-sm ${messageIsError ? "text-red-600" : "text-slate-700"}`}>{message}</p>
+            <p
+              className={`text-sm ${messageIsError ? "text-red-600" : "text-slate-700"}`}
+            >
+              {message}
+            </p>
           </SurfacePanel>
         ) : null}
 
@@ -698,20 +777,33 @@ export default function AccountPage({ initialSignedIn = false }) {
             <p className={sectionEyebrowClass}>Start here</p>
             <h2 className={sectionTitleClass}>Pick a task.</h2>
           </div>
-          <StorefrontPathwaysGrid cards={accountActionCards} columnsClassName="md:grid-cols-2 xl:grid-cols-4" appearance="light" />
+          <StorefrontPathwaysGrid
+            cards={accountActionCards}
+            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+            appearance="light"
+          />
         </SurfacePanel>
 
-        <MyLibraryPanel viewerSignedIn={viewerSignedIn} onOpenAuth={openAuthPrompt} />
+        <MyLibraryPanel
+          viewerSignedIn={viewerSignedIn}
+          onOpenAuth={openAuthPrompt}
+        />
 
         {hydrated && isSignedIn ? <ReadingStats /> : null}
 
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
             {viewerSignedIn ? null : (
-              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-5"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Local reading setup</p>
-                  <h2 className={sectionTitleClass}>Save device settings now.</h2>
+                  <h2 className={sectionTitleClass}>
+                    Save device settings now.
+                  </h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -737,7 +829,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs text-slate-500">Legal age: {regionConfig.legalAge}+</p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Legal age: {regionConfig.legalAge}+
+                    </p>
                   </div>
                   <div>
                     <label className={fieldLabelClass}>Language</label>
@@ -759,7 +853,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <input
                     type="checkbox"
                     checked={hideAdultHistory}
-                    onChange={(event) => setHideAdultHistory(event.target.checked)}
+                    onChange={(event) =>
+                      setHideAdultHistory(event.target.checked)
+                    }
                     className={checkboxClass}
                   />
                   Hide 18+ history on this device
@@ -777,10 +873,16 @@ export default function AccountPage({ initialSignedIn = false }) {
             )}
 
             {viewerSignedIn ? (
-              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-5"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Account basics</p>
-                  <h2 className={sectionTitleClass}>Name, email, and quick help</h2>
+                  <h2 className={sectionTitleClass}>
+                    Name, email, and quick help
+                  </h2>
                   <p className={mutedCopyClass}>
                     Keep the basics easy to scan.
                   </p>
@@ -799,7 +901,10 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <div>
                     <label className={fieldLabelClass}>Account</label>
                     {!hydrated ? (
-                      <div className={`${fieldClass} flex flex-col justify-center gap-2`} aria-hidden="true">
+                      <div
+                        className={`${fieldClass} flex flex-col justify-center gap-2`}
+                        aria-hidden="true"
+                      >
                         <div className="h-3 w-28 animate-pulse rounded-full bg-slate-200" />
                         <div className="h-3 w-40 animate-pulse rounded-full bg-slate-100" />
                       </div>
@@ -812,7 +917,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 {hydrated && isSignedIn ? (
-                  <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-4 text-sm text-slate-700">
+                  <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-4 text-sm text-slate-700">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         Email status:{" "}
@@ -825,22 +930,28 @@ export default function AccountPage({ initialSignedIn = false }) {
                         disabled={Boolean(user?.emailVerified)}
                         onClick={() => {
                           setVerifyStatus("");
-                          apiPost("/api/auth/request-verify", { email: user?.email || "" }).then(
-                            (response) => {
-                              if (response.ok) {
-                                setVerifyStatus("Verification email sent.");
-                              } else {
-                                setVerifyStatus(response.error || "Request failed.");
-                              }
-                            },
-                          );
+                          apiPost("/api/auth/request-verify", {
+                            email: user?.email || "",
+                          }).then((response) => {
+                            if (response.ok) {
+                              setVerifyStatus("Verification email sent.");
+                            } else {
+                              setVerifyStatus(
+                                response.error || "Request failed.",
+                              );
+                            }
+                          });
                         }}
                         className={secondaryButtonClass}
                       >
                         Send another email
                       </button>
                     </div>
-                    {verifyStatus ? <div className="mt-2 text-xs text-slate-600">{verifyStatus}</div> : null}
+                    {verifyStatus ? (
+                      <div className="mt-2 text-xs text-slate-600">
+                        {verifyStatus}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -868,7 +979,14 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => router.push(buildSupportPath({ topic: "account", context: "Account help from account page" }))}
+                    onClick={() =>
+                      router.push(
+                        buildSupportPath({
+                          topic: "account",
+                          context: "Account help from account page",
+                        }),
+                      )
+                    }
                     className={secondaryButtonClass}
                   >
                     Get help
@@ -878,10 +996,16 @@ export default function AccountPage({ initialSignedIn = false }) {
             ) : null}
 
             {viewerSignedIn ? (
-              <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+              <SurfacePanel
+                className="space-y-5"
+                appearance="light"
+                accent="blue"
+              >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Reading setup</p>
-                  <h2 className={sectionTitleClass}>Region, language, and 18+ history</h2>
+                  <h2 className={sectionTitleClass}>
+                    Region, language, and 18+ history
+                  </h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -898,7 +1022,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs text-slate-500">Legal age: {regionConfig.legalAge}+</p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Legal age: {regionConfig.legalAge}+
+                    </p>
                   </div>
 
                   <div>
@@ -921,7 +1047,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <input
                     type="checkbox"
                     checked={hideAdultHistory}
-                    onChange={(event) => setHideAdultHistory(event.target.checked)}
+                    onChange={(event) =>
+                      setHideAdultHistory(event.target.checked)
+                    }
                     className={checkboxClass}
                   />
                   Hide 18+ history
@@ -938,11 +1066,17 @@ export default function AccountPage({ initialSignedIn = false }) {
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+            <SurfacePanel
+              className="space-y-4"
+              appearance="light"
+              accent="blue"
+            >
               <div className="space-y-2">
                 <p className={sectionEyebrowClass}>Notifications</p>
                 <h2 className={sectionTitleClass}>
-                  {viewerSignedIn ? "Only keep the alerts that matter" : "Keep only the alerts you want on this device"}
+                  {viewerSignedIn
+                    ? "Only keep the alerts that matter"
+                    : "Keep only the alerts you want on this device"}
                 </h2>
               </div>
 
@@ -979,7 +1113,11 @@ export default function AccountPage({ initialSignedIn = false }) {
           <div className="space-y-6">
             {!viewerSignedIn ? (
               <>
-                <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -997,18 +1135,27 @@ export default function AccountPage({ initialSignedIn = false }) {
               </>
             ) : (
               <>
-                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-4"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Membership & billing</p>
-                    <h2 className={sectionTitleClass}>Plan, renewal, and cancellation</h2>
+                    <h2 className={sectionTitleClass}>
+                      Plan, renewal, and cancellation
+                    </h2>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600">
                     <div>
                       <div className={fieldLabelClass}>Current plan</div>
-                      <div className="mt-1 text-sm font-semibold text-slate-950">{subscriptionLabel}</div>
+                      <div className="mt-1 text-sm font-semibold text-slate-950">
+                        {subscriptionLabel}
+                      </div>
                       {subscription?.renewAt ? (
                         <div className="mt-1 text-xs text-slate-500">
-                          Renews on {new Date(subscription.renewAt).toLocaleDateString()}
+                          Renews on{" "}
+                          {new Date(subscription.renewAt).toLocaleDateString()}
                         </div>
                       ) : null}
                     </div>
@@ -1037,7 +1184,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                           if (response.ok) {
                             setMessage("Membership ended.");
                           } else {
-                            setMessage(response.error || "Couldn't end the membership.");
+                            setMessage(
+                              response.error || "Couldn't end the membership.",
+                            );
                           }
                           setWorking("");
                         }}
@@ -1049,10 +1198,16 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                 </SurfacePanel>
 
-                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-4"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Security</p>
-                    <h2 className={sectionTitleClass}>Sign-in methods and recovery</h2>
+                    <h2 className={sectionTitleClass}>
+                      Sign-in methods and recovery
+                    </h2>
                     <p className={mutedCopyClass}>
                       See connected sign-in methods and send a reset email.
                     </p>
@@ -1062,7 +1217,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                     <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-700">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span>Email/password</span>
-                        <span className={providers.password ? "text-[var(--gush-accent,#2f6bff)]" : "text-amber-600"}>
+                        <span
+                          className={
+                            providers.password
+                              ? "text-[var(--gush-accent-strong,#63472f)]"
+                              : "text-amber-600"
+                          }
+                        >
                           {providers.password ? "Ready" : "Not set"}
                         </span>
                       </div>
@@ -1074,7 +1235,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                             className="inline-flex h-2 w-16 animate-pulse rounded-full bg-slate-200"
                           />
                         ) : (
-                          <span className={providers.google ? "text-[var(--gush-accent,#2f6bff)]" : "text-slate-500"}>
+                          <span
+                            className={
+                              providers.google
+                                ? "text-[var(--gush-accent-strong,#63472f)]"
+                                : "text-slate-500"
+                            }
+                          >
                             {providers.google ? "Connected" : "Not connected"}
                           </span>
                         )}
@@ -1091,12 +1258,18 @@ export default function AccountPage({ initialSignedIn = false }) {
                           onClick={async () => {
                             setProviderStatus("");
                             setProviderBusy(true);
-                            const response = await apiPost("/api/auth/google/unlink");
+                            const response = await apiPost(
+                              "/api/auth/google/unlink",
+                            );
                             if (response.ok) {
                               setProviderStatus("Google sign-in removed.");
                               await loadAuthProviders();
                             } else {
-                              setProviderStatus(response.message || response.error || "Failed to disconnect Google.");
+                              setProviderStatus(
+                                response.message ||
+                                  response.error ||
+                                  "Failed to disconnect Google.",
+                              );
                             }
                             setProviderBusy(false);
                           }}
@@ -1115,7 +1288,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                               await loadAuthProviders();
                             }}
                             onError={(nextMessage) => {
-                              setProviderStatus(nextMessage || "Failed to connect Google.");
+                              setProviderStatus(
+                                nextMessage || "Failed to connect Google.",
+                              );
                             }}
                             isLoading={providerBusy}
                           />
@@ -1125,7 +1300,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                   ) : null}
 
                   {hydrated && isSignedIn && !googleAuthEnabled ? (
-                    <div className="text-xs text-slate-500">Google login is not configured.</div>
+                    <div className="text-xs text-slate-500">
+                      Google login is not configured.
+                    </div>
                   ) : null}
 
                   <button
@@ -1136,22 +1313,43 @@ export default function AccountPage({ initialSignedIn = false }) {
                   >
                     Send password reset email
                   </button>
-                  {securityStatus ? <div className="text-xs text-slate-600">{securityStatus}</div> : null}
-                  {providerStatus ? <div className="text-xs text-slate-600">{providerStatus}</div> : null}
+                  {securityStatus ? (
+                    <div className="text-xs text-slate-600">
+                      {securityStatus}
+                    </div>
+                  ) : null}
+                  {providerStatus ? (
+                    <div className="text-xs text-slate-600">
+                      {providerStatus}
+                    </div>
+                  ) : null}
                 </SurfacePanel>
 
-                <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="space-y-4"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Purchases</p>
-                    <h2 className={sectionTitleClass}>Recent receipts and charges</h2>
+                    <h2 className={sectionTitleClass}>
+                      Recent receipts and charges
+                    </h2>
                     <p className={mutedCopyClass}>
-                      Check the latest charge, then jump into billing help if something looks off.
+                      Check the latest charge, then jump into billing help if
+                      something looks off.
                     </p>
                   </div>
                   {!hydrated || ordersLoading ? (
-                    <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4" aria-hidden="true">
+                    <div
+                      className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4"
+                      aria-hidden="true"
+                    >
                       {Array.from({ length: 2 }).map((_, index) => (
-                        <div key={index} className="rounded-[20px] border border-black/6 bg-white px-4 py-4">
+                        <div
+                          key={index}
+                          className="rounded-[20px] border border-black/6 bg-white px-4 py-4"
+                        >
                           <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
                           <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
                           <div className="mt-3 h-3 w-full animate-pulse rounded-full bg-slate-100" />
@@ -1160,7 +1358,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </div>
                   ) : orders.length === 0 ? (
                     <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
-                      <p>No purchases yet. Charges show up here after checkout.</p>
+                      <p>
+                        No purchases yet. Charges show up here after checkout.
+                      </p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -1171,7 +1371,15 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => router.push(buildSupportPath({ topic: "billing", context: "Billing help from account purchases panel" }))}
+                          onClick={() =>
+                            router.push(
+                              buildSupportPath({
+                                topic: "billing",
+                                context:
+                                  "Billing help from account purchases panel",
+                              }),
+                            )
+                          }
                           className={secondaryButtonClass}
                         >
                           Billing help
@@ -1186,11 +1394,17 @@ export default function AccountPage({ initialSignedIn = false }) {
                           className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-950">{order.packageId}</p>
-                            <p className="text-xs text-slate-500">{order.status}</p>
+                            <p className="text-sm font-semibold text-slate-950">
+                              {order.packageId}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {order.status}
+                            </p>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
-                            <span>{formatOrderAmount(order.amount, order.currency)}</span>
+                            <span>
+                              {formatOrderAmount(order.amount, order.currency)}
+                            </span>
                             <span>{formatOrderDate(order.createdAt)}</span>
                             <span>{order.orderId}</span>
                           </div>
@@ -1208,7 +1422,15 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => router.push(buildSupportPath({ topic: "billing", context: "Billing help from account purchases panel" }))}
+                      onClick={() =>
+                        router.push(
+                          buildSupportPath({
+                            topic: "billing",
+                            context:
+                              "Billing help from account purchases panel",
+                          }),
+                        )
+                      }
                       className={secondaryButtonClass}
                     >
                       Billing help
@@ -1216,7 +1438,11 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                 </SurfacePanel>
 
-                <SurfacePanel className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" appearance="light" accent="blue">
+                <SurfacePanel
+                  className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                  appearance="light"
+                  accent="blue"
+                >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">

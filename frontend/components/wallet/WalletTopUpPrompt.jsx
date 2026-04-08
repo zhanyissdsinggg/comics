@@ -2,7 +2,10 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Sparkles, Wallet, X, Zap } from "lucide-react";
-import { formatUSDisplayCurrency, formatUSNumber } from "../../lib/localization";
+import {
+  formatUSDisplayCurrency,
+  formatUSNumber,
+} from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import NetworkFallback from "../common/NetworkFallback";
 
@@ -100,36 +103,40 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   const displayPackages = useMemo(() => {
     return [...packages]
       .filter((pkg) => getPackageId(pkg))
-      .sort((left, right) => Number(left?.price || 0) - Number(right?.price || 0))
+      .sort(
+        (left, right) => Number(left?.price || 0) - Number(right?.price || 0),
+      )
       .slice(0, 3);
   }, [packages]);
 
   const highlightedPackageId = useMemo(() => {
-    const tagged = displayPackages.find((pkg) =>
-      Array.isArray(pkg?.tags) && pkg.tags.some((tag) => /popular|best|value/i.test(String(tag))),
+    const tagged = displayPackages.find(
+      (pkg) =>
+        Array.isArray(pkg?.tags) &&
+        pkg.tags.some((tag) => /popular|best|value/i.test(String(tag))),
     );
     if (tagged) {
       return getPackageId(tagged);
     }
 
-    return displayPackages.reduce(
-      (bestId, pkg) => {
-        const packageId = getPackageId(pkg);
-        const paidPts = Number(pkg?.paidPts || 0);
-        const bonusPts = Number(pkg?.bonusPts || 0);
-        const bestPackage = displayPackages.find((item) => getPackageId(item) === bestId);
-        const bestPaidPts = Number(bestPackage?.paidPts || 0);
-        const bestBonusPts = Number(bestPackage?.bonusPts || 0);
-        const pkgBonusRatio = paidPts > 0 ? bonusPts / paidPts : 0;
-        const bestBonusRatio = bestPaidPts > 0 ? bestBonusPts / bestPaidPts : 0;
+    return displayPackages.reduce((bestId, pkg) => {
+      const packageId = getPackageId(pkg);
+      const paidPts = Number(pkg?.paidPts || 0);
+      const bonusPts = Number(pkg?.bonusPts || 0);
+      const bestPackage = displayPackages.find(
+        (item) => getPackageId(item) === bestId,
+      );
+      const bestPaidPts = Number(bestPackage?.paidPts || 0);
+      const bestBonusPts = Number(bestPackage?.bonusPts || 0);
+      const pkgBonusRatio = paidPts > 0 ? bonusPts / paidPts : 0;
+      const bestBonusRatio = bestPaidPts > 0 ? bestBonusPts / bestPaidPts : 0;
 
-        return pkgBonusRatio > bestBonusRatio ? packageId : bestId;
-      },
-      getPackageId(displayPackages[0]),
-    );
+      return pkgBonusRatio > bestBonusRatio ? packageId : bestId;
+    }, getPackageId(displayPackages[0]));
   }, [displayPackages]);
 
-  const purchaseActionsEnabled = billingAvailability?.purchaseActionsEnabled === true;
+  const purchaseActionsEnabled =
+    billingAvailability?.purchaseActionsEnabled === true;
 
   const handleClose = () => {
     setIsAnimating(false);
@@ -173,7 +180,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           borderTopRightRadius: "1.75rem",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,107,255,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(134,98,69,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
 
         <div className="relative flex justify-center pb-2 pt-3 sm:hidden">
           <div className="h-1 w-10 rounded-full bg-slate-300" />
@@ -191,7 +198,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]">
                 <Wallet size={30} />
               </div>
             </div>
@@ -200,7 +207,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </h2>
             <p className="text-sm text-slate-500">
               Balance:{" "}
-              <span className="font-semibold text-[var(--gush-accent,#2f6bff)]">
+              <span className="font-semibold text-[var(--gush-accent-strong,#63472f)]">
                 {formatUSNumber(currentPoints)} points
               </span>
             </p>
@@ -232,10 +239,12 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                   <button
                     key={packageId}
                     type="button"
-                    onClick={() => handleSelectPackage({ ...pkg, id: packageId })}
+                    onClick={() =>
+                      handleSelectPackage({ ...pkg, id: packageId })
+                    }
                     className={`relative w-full rounded-[24px] border p-4 text-left shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] active:scale-[0.99] ${
                       isHighlighted
-                        ? "border-[rgba(47,107,255,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))]"
+                        ? "border-[rgba(134,98,69,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,242,235,0.98))]"
                         : "border-black/8 bg-white"
                     }`}
                   >
@@ -250,7 +259,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
                             isHighlighted
-                              ? "bg-[rgba(47,107,255,0.1)] text-[var(--gush-accent,#2f6bff)]"
+                              ? "bg-[rgba(134,98,69,0.1)] text-[var(--gush-accent-strong,#63472f)]"
                               : "bg-[#f8f9fc] text-slate-500"
                           }`}
                         >
@@ -262,18 +271,21 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                               {getPackageTitle(pkg)}
                             </span>
                             {bonusPts > 0 ? (
-                              <span className="flex items-center gap-1 rounded-full bg-[rgba(47,107,255,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
-                                <Gift size={12} />
-                                +{formatUSNumber(bonusPts)}
+                              <span className="flex items-center gap-1 rounded-full bg-[rgba(134,98,69,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
+                                <Gift size={12} />+{formatUSNumber(bonusPts)}
                               </span>
                             ) : null}
                           </div>
-                          <p className="text-xs text-slate-500">{packageSummary}</p>
+                          <p className="text-xs text-slate-500">
+                            {packageSummary}
+                          </p>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <div className="text-xl font-semibold text-slate-950">{formatPackagePrice(pkg)}</div>
+                        <div className="text-xl font-semibold text-slate-950">
+                          {formatPackagePrice(pkg)}
+                        </div>
                         <div className="text-xs text-slate-500">
                           {purchaseActionsEnabled ? "Continue" : "Open store"}
                         </div>
@@ -308,14 +320,16 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           )}
 
-          <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] p-4">
+          <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent,#2f6bff)]">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent-strong,#63472f)]">
                 <Sparkles size={16} />
               </div>
               <div>
                 <p className="mb-1 text-sm font-semibold text-slate-950">
-                  {purchaseActionsEnabled ? "Finish in store" : "Open the store"}
+                  {purchaseActionsEnabled
+                    ? "Finish in store"
+                    : "Open the store"}
                 </p>
                 <p className="text-xs leading-6 text-slate-600">
                   {purchaseActionsEnabled

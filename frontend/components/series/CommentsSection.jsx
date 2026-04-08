@@ -49,7 +49,10 @@ function getCommentLikedByUser(entry) {
 
 function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
   const safeTitle = seriesTitle || "this series";
-  const leadGenre = Array.isArray(genres) && genres.length > 0 ? genres[0] : "character-driven stories";
+  const leadGenre =
+    Array.isArray(genres) && genres.length > 0
+      ? genres[0]
+      : "character-driven stories";
   const isCompleted = String(status || "").toLowerCase() === "completed";
 
   return [
@@ -153,7 +156,7 @@ export default function CommentsSection({
     if (response.ok) {
       setComments((prev) =>
         prev.map((comment) =>
-          comment.id === commentId ? response.data.comment : comment
+          comment.id === commentId ? response.data.comment : comment,
         ),
       );
     }
@@ -177,7 +180,7 @@ export default function CommentsSection({
     if (response.ok) {
       setComments((prev) =>
         prev.map((comment) =>
-          comment.id === commentId ? response.data.comment : comment
+          comment.id === commentId ? response.data.comment : comment,
         ),
       );
       setReplyDrafts((prev) => ({ ...prev, [commentId]: "" }));
@@ -193,7 +196,9 @@ export default function CommentsSection({
       );
     }
     return list.sort(
-      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
+      (a, b) =>
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime(),
     );
   }, [comments, sortKey]);
 
@@ -238,16 +243,21 @@ export default function CommentsSection({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const inputClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
 
   return (
-    <section data-comments-section className="mt-8 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,240,232,0.94))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+    <section
+      data-comments-section
+      className="mt-8 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,240,232,0.94))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             Reader notes
           </p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-950">Comments</h3>
+          <h3 className="mt-2 text-lg font-semibold text-slate-950">
+            Comments
+          </h3>
           <p className="mt-2 text-sm text-slate-500">
             Share a quick take on the story or latest episode.
           </p>
@@ -259,7 +269,7 @@ export default function CommentsSection({
               onClick={onFollowToggle}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 isFollowing
-                  ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-950 hover:border-[rgba(47,107,255,0.22)] hover:bg-[rgba(47,107,255,0.09)]"
+                  ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] text-slate-950 hover:border-[rgba(134,98,69,0.22)] hover:bg-[rgba(134,98,69,0.09)]"
                   : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
               }`}
             >
@@ -325,7 +335,8 @@ export default function CommentsSection({
               Start the conversation
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Keep it short. Mention a favorite moment, a recent chapter, or who should read it.
+              Keep it short. Mention a favorite moment, a recent chapter, or who
+              should read it.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -364,8 +375,12 @@ export default function CommentsSection({
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
           <div className="rounded-[24px] border border-black/6 bg-white/84 p-5">
-            <p className="text-sm font-semibold text-slate-950">No comments yet.</p>
-            <p className="mt-2 text-sm leading-6 text-slate-500">Start the first note.</p>
+            <p className="text-sm font-semibold text-slate-950">
+              No comments yet.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Start the first note.
+            </p>
           </div>
         ) : (
           sortedComments.map((comment) => (
@@ -393,11 +408,14 @@ export default function CommentsSection({
                 <button
                   type="button"
                   onClick={() =>
-                    setReplyOpenId((prev) => (prev === comment.id ? "" : comment.id))
+                    setReplyOpenId((prev) =>
+                      prev === comment.id ? "" : comment.id,
+                    )
                   }
                   className="rounded-full border border-black/8 bg-white px-3 py-1 text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
                 >
-                  Reply {Array.isArray(comment.replies) ? comment.replies.length : 0}
+                  Reply{" "}
+                  {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
@@ -408,7 +426,9 @@ export default function CommentsSection({
                         <span>{getCommentAuthor(reply)}</span>
                         <span>{formatDate(reply.createdAt)}</span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-700">{reply.text}</p>
+                      <p className="mt-1 text-xs text-slate-700">
+                        {reply.text}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -424,7 +444,7 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]"
+                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]"
                   />
                   <button
                     type="button"

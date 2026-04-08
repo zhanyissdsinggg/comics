@@ -80,14 +80,16 @@ function LegalSection({
   children = null,
 }) {
   return (
-    <SurfacePanel className={className} appearance="light" accent="blue">
-      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">{title}</h2>
+    <SurfacePanel className={className} appearance="light" accent="amber">
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+        {title}
+      </h2>
       <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#2f6bff)]">
+          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent,#866245)]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -106,14 +108,15 @@ function ContactCard() {
         <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
-          className="text-[var(--gush-accent,#2f6bff)] transition hover:text-[rgba(47,107,255,0.8)]"
+          className="text-[var(--gush-accent,#866245)] transition hover:text-[var(--gush-accent-strong,#63472f)]"
         >
           {siteConfig.privacyEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
         <p className="mt-3 text-sm text-slate-600">
-          <span className="font-semibold text-slate-950">Address:</span> {siteConfig.companyAddress}
+          <span className="font-semibold text-slate-950">Address:</span>{" "}
+          {siteConfig.companyAddress}
         </p>
       ) : null}
     </div>
@@ -129,7 +132,7 @@ export default function PrivacyPolicyPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             appearance="light"
-            accent="blue"
+            accent="amber"
             eyebrow="Privacy"
             title="Privacy."
             description={`What data ${siteConfig.companyName} collects, why we need it, and how to contact us about it.`}
@@ -153,13 +156,18 @@ export default function PrivacyPolicyPage() {
             ]}
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Contact
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   Privacy contact.
                 </h2>
               </div>
@@ -168,13 +176,13 @@ export default function PrivacyPolicyPage() {
             <div className="flex flex-col gap-2.5">
               <a
                 href={`mailto:${siteConfig.privacyEmail}`}
-                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Email privacy
               </a>
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
               >
                 Open Support
               </a>
@@ -187,10 +195,7 @@ export default function PrivacyPolicyPage() {
             <LegalSection key={section.title} {...section} />
           ))}
 
-          <LegalSection
-            title="Privacy requests"
-            className="xl:col-span-2"
-          >
+          <LegalSection title="Privacy requests" className="xl:col-span-2">
             <ContactCard />
           </LegalSection>
         </div>

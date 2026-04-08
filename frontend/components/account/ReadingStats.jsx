@@ -21,8 +21,10 @@ const ReadingStats = React.memo(() => {
     const progressValues = Object.values(progressData);
     const avgProgress =
       progressValues.length > 0
-        ? progressValues.reduce((sum, progress) => sum + (progress.percent || 0), 0) /
-          progressValues.length
+        ? progressValues.reduce(
+            (sum, progress) => sum + (progress.percent || 0),
+            0,
+          ) / progressValues.length
         : 0;
 
     return {
@@ -105,7 +107,9 @@ const ReadingStats = React.memo(() => {
             A quick look at your reading rhythm.
           </h2>
         </div>
-        <p className="text-sm text-slate-500">Built from your reading history, progress, and follows.</p>
+        <p className="text-sm text-slate-500">
+          Built from your reading history, progress, and follows.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -114,7 +118,7 @@ const ReadingStats = React.memo(() => {
             key={card.label}
             className={`rounded-[24px] border px-4 py-4 ${
               card.highlighted || index === 0
-                ? "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)]"
+                ? "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)]"
                 : "border-black/8 bg-[#f8f9fc]"
             }`}
           >
@@ -152,7 +156,7 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] p-4">
+        <div className="rounded-[24px] border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             What stands out
           </p>

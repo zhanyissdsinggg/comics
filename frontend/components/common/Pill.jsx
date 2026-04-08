@@ -8,7 +8,7 @@ const palette = {
   light: {
     default: "border-black/8 bg-white text-slate-600",
     accent:
-      "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.07)] text-[var(--gush-accent,#3157d6)]",
+      "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.07)] text-[var(--gush-accent,#866245)]",
     success: "border-emerald-200 bg-emerald-50 text-emerald-700",
     subtle: "border-black/6 bg-[rgba(246,243,237,0.92)] text-slate-500",
   },

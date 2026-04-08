@@ -6,87 +6,89 @@
 
 :root {
   color-scheme: light;
-  --font-body: var(--font-ui-body), "SF Pro Text", "Segoe UI", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+  --font-body:
+    var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
   --font-display: var(--font-ui-display), var(--font-body);
-  --gush-accent: #3657b7;
-  --gush-accent-strong: #24439a;
-  --gush-page-bg: #f5f0e8;
-  --gush-page-bg-elevated: #fcf8f2;
-  --gush-page-bg-muted: #ebe4d8;
-  --gush-surface: rgba(255, 252, 247, 0.9);
-  --gush-surface-strong: #ffffff;
-  --gush-surface-muted: rgba(249, 244, 236, 0.94);
-  --gush-surface-accent: rgba(54, 87, 183, 0.06);
-  --gush-border: rgba(36, 30, 20, 0.08);
-  --gush-border-strong: rgba(36, 30, 20, 0.14);
-  --gush-border-faint: rgba(36, 30, 20, 0.04);
-  --gush-ink-strong: #171412;
-  --gush-ink: #302924;
-  --gush-ink-soft: #645b54;
-  --gush-ink-faint: #90857c;
+  --gush-accent: #866245;
+  --gush-accent-strong: #63472f;
+  --gush-page-bg: #f3eee6;
+  --gush-page-bg-elevated: #fbf8f2;
+  --gush-page-bg-muted: #ebe3d7;
+  --gush-surface: rgba(255, 251, 245, 0.9);
+  --gush-surface-strong: #fffdf9;
+  --gush-surface-muted: rgba(247, 240, 232, 0.96);
+  --gush-surface-accent: rgba(134, 98, 69, 0.07);
+  --gush-border: rgba(44, 35, 24, 0.08);
+  --gush-border-strong: rgba(44, 35, 24, 0.14);
+  --gush-border-faint: rgba(44, 35, 24, 0.04);
+  --gush-ink-strong: #1b1613;
+  --gush-ink: #302722;
+  --gush-ink-soft: #685d54;
+  --gush-ink-faint: #95887b;
   --gush-success: #0f766e;
   --gush-warning: #a16207;
   --gush-danger: #b42318;
-  --gush-shadow-soft: 0 10px 28px rgba(32, 25, 18, 0.045);
-  --gush-shadow-panel: 0 18px 40px rgba(32, 25, 18, 0.05);
-  --gush-shadow-floating: 0 12px 24px rgba(32, 25, 18, 0.065);
-  --gush-shadow-button: 0 10px 22px rgba(17, 20, 28, 0.12);
-  --gush-shadow-card: 0 16px 32px rgba(32, 25, 18, 0.035);
-  --gush-shadow-header: 0 16px 34px rgba(32, 25, 18, 0.07);
-  --gush-radius-sm: 12px;
-  --gush-radius-md: 18px;
-  --gush-radius-lg: 24px;
-  --gush-radius-xl: 32px;
-  --gush-home-bg: #0d1118;
-  --gush-home-surface: #121925;
-  --gush-home-surface-strong: #192232;
-  --gush-home-border: rgba(255, 255, 255, 0.1);
-  --gush-home-ink: #f5f1ea;
-  --gush-home-ink-soft: rgba(232, 224, 214, 0.76);
-  --gush-home-accent: #f4c98a;
+  --gush-shadow-soft: 0 10px 24px rgba(37, 28, 19, 0.04);
+  --gush-shadow-panel: 0 22px 48px rgba(37, 28, 19, 0.05);
+  --gush-shadow-floating: 0 14px 30px rgba(37, 28, 19, 0.07);
+  --gush-shadow-button: 0 16px 32px rgba(22, 19, 16, 0.14);
+  --gush-shadow-card: 0 14px 30px rgba(37, 28, 19, 0.03);
+  --gush-shadow-header: 0 18px 40px rgba(37, 28, 19, 0.08);
+  --gush-radius-sm: 14px;
+  --gush-radius-md: 20px;
+  --gush-radius-lg: 28px;
+  --gush-radius-xl: 36px;
+  --gush-home-bg: #f7f0e5;
+  --gush-home-surface: rgba(255, 252, 246, 0.9);
+  --gush-home-surface-strong: #fffdf9;
+  --gush-home-border: rgba(44, 35, 24, 0.08);
+  --gush-home-ink: #1b1613;
+  --gush-home-ink-soft: rgba(74, 60, 46, 0.72);
+  --gush-home-accent: #d7b182;
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
-  --gush-section-gap: clamp(1.5rem, 3vw, 2.4rem);
-  --gush-text-display-xl: clamp(2.35rem, 5.4vw, 4.8rem);
-  --gush-text-display-lg: clamp(1.9rem, 3.8vw, 3.25rem);
-  --gush-text-title-lg: clamp(1.35rem, 2.5vw, 1.9rem);
-  --gush-text-title-md: clamp(1.1rem, 1.8vw, 1.35rem);
-  --gush-text-body-lg: 1.05rem;
-  --gush-text-body: 0.96rem;
+  --gush-section-gap: clamp(2rem, 4vw, 3.5rem);
+  --gush-text-display-xl: clamp(2.75rem, 6.1vw, 5.6rem);
+  --gush-text-display-lg: clamp(2.1rem, 4.2vw, 3.7rem);
+  --gush-text-title-lg: clamp(1.42rem, 2.8vw, 2rem);
+  --gush-text-title-md: clamp(1.12rem, 1.9vw, 1.42rem);
+  --gush-text-body-lg: 1.08rem;
+  --gush-text-body: 0.98rem;
   --gush-text-body-sm: 0.875rem;
-  --gush-leading-display: 0.98;
-  --gush-leading-copy: 1.72;
+  --gush-leading-display: 0.94;
+  --gush-leading-copy: 1.7;
   --gush-mobile-bottom-nav-height: 5.4rem;
 }
 
 html.dark {
   color-scheme: dark;
-  --gush-accent: #89a7ff;
-  --gush-accent-strong: #bed0ff;
-  --gush-page-bg: #0b1119;
-  --gush-page-bg-elevated: #121924;
-  --gush-page-bg-muted: #18202d;
-  --gush-surface: rgba(16, 22, 31, 0.88);
-  --gush-surface-strong: rgba(21, 28, 39, 0.96);
-  --gush-surface-muted: rgba(18, 24, 34, 0.92);
-  --gush-surface-accent: rgba(137, 167, 255, 0.1);
+  --gush-accent: #d8b78c;
+  --gush-accent-strong: #eed3ad;
+  --gush-page-bg: #0d1219;
+  --gush-page-bg-elevated: #121923;
+  --gush-page-bg-muted: #19212d;
+  --gush-surface: rgba(18, 24, 34, 0.9);
+  --gush-surface-strong: rgba(22, 29, 40, 0.97);
+  --gush-surface-muted: rgba(20, 27, 37, 0.94);
+  --gush-surface-accent: rgba(216, 183, 140, 0.08);
   --gush-border: rgba(255, 255, 255, 0.08);
   --gush-border-strong: rgba(255, 255, 255, 0.14);
   --gush-border-faint: rgba(255, 255, 255, 0.05);
-  --gush-ink-strong: #f5efe7;
-  --gush-ink: #e1d8cf;
-  --gush-ink-soft: #b4aa9f;
-  --gush-ink-faint: #887f76;
+  --gush-ink-strong: #f7efe7;
+  --gush-ink: #e7ddd4;
+  --gush-ink-soft: #b8ad9f;
+  --gush-ink-faint: #8d8278;
   --gush-success: #4dd4b0;
   --gush-warning: #f2b84b;
   --gush-danger: #ff897c;
-  --gush-shadow-soft: 0 16px 34px rgba(0, 0, 0, 0.22);
-  --gush-shadow-panel: 0 24px 54px rgba(0, 0, 0, 0.26);
-  --gush-shadow-floating: 0 18px 36px rgba(0, 0, 0, 0.26);
-  --gush-shadow-button: 0 14px 28px rgba(0, 0, 0, 0.28);
-  --gush-shadow-card: 0 18px 38px rgba(0, 0, 0, 0.24);
-  --gush-shadow-header: 0 20px 48px rgba(0, 0, 0, 0.32);
+  --gush-shadow-soft: 0 18px 36px rgba(0, 0, 0, 0.22);
+  --gush-shadow-panel: 0 28px 58px rgba(0, 0, 0, 0.28);
+  --gush-shadow-floating: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --gush-shadow-button: 0 18px 34px rgba(0, 0, 0, 0.32);
+  --gush-shadow-card: 0 18px 36px rgba(0, 0, 0, 0.22);
+  --gush-shadow-header: 0 22px 46px rgba(0, 0, 0, 0.34);
 }
 
 html.light {
@@ -100,27 +102,41 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 0%, rgba(54, 87, 183, 0.07), transparent 22%),
-    radial-gradient(circle at 88% 4%, rgba(255, 255, 255, 0.68), transparent 18%),
-    linear-gradient(180deg, #f8f4ee 0%, #f2ece3 22%, #ebe5db 100%);
+    radial-gradient(circle at 12% 0%, rgba(134, 98, 69, 0.08), transparent 24%),
+    radial-gradient(
+      circle at 88% 4%,
+      rgba(255, 255, 255, 0.78),
+      transparent 18%
+    ),
+    linear-gradient(180deg, #faf6ef 0%, #f3eee5 24%, #ece3d7 100%);
   color: var(--gush-ink-strong);
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
   line-height: var(--gush-leading-copy);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 220ms ease, color 220ms ease;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
 }
 
 html.dark body {
   background:
-    radial-gradient(circle at 12% 0%, rgba(91, 121, 236, 0.18), transparent 24%),
-    radial-gradient(circle at 86% 3%, rgba(244, 201, 138, 0.08), transparent 18%),
-    linear-gradient(180deg, #0c1118 0%, #0f141d 28%, #141a25 100%);
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(216, 183, 140, 0.12),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 86% 3%,
+      rgba(107, 126, 175, 0.12),
+      transparent 18%
+    ),
+    linear-gradient(180deg, #0c1117 0%, #101722 28%, #151d29 100%);
 }
 
 * {
@@ -148,7 +164,9 @@ main {
   }
 
   body.has-mobile-bottom-nav {
-    padding-bottom: calc(var(--gush-mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(
+      var(--gush-mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px)
+    );
   }
 
   body.reader-page {
@@ -168,9 +186,9 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  font-weight: 600;
   font-optical-sizing: auto;
   text-wrap: balance;
 }
@@ -287,16 +305,32 @@ textarea {
 
 .gush-home-shell {
   background:
-    radial-gradient(circle at 12% 0%, rgba(58, 89, 199, 0.18), transparent 22%),
-    radial-gradient(circle at 86% 4%, rgba(244, 201, 138, 0.09), transparent 18%),
-    linear-gradient(180deg, #111620 0%, #0f141d 16%, #171c28 34%, #f2ece3 34.1%, #ebe5db 100%);
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(215, 177, 130, 0.18),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 88% 5%,
+      rgba(255, 255, 255, 0.74),
+      transparent 18%
+    ),
+    linear-gradient(180deg, #fbf7f1 0%, #f5eee4 28%, #efe5d8 64%, #eadfce 100%);
 }
 
 html.dark .gush-home-shell {
   background:
-    radial-gradient(circle at 12% 0%, rgba(82, 115, 236, 0.24), transparent 24%),
-    radial-gradient(circle at 86% 5%, rgba(244, 201, 138, 0.1), transparent 16%),
-    linear-gradient(180deg, #0b1017 0%, #0f141d 18%, #151c28 58%, #10161f 100%);
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(216, 183, 140, 0.14),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 86% 4%,
+      rgba(105, 123, 171, 0.14),
+      transparent 16%
+    ),
+    linear-gradient(180deg, #0c1117 0%, #101722 30%, #141b26 66%, #0f151e 100%);
 }
 
 .gush-page-ambient {
@@ -306,43 +340,92 @@ html.dark .gush-home-shell {
   top: 0;
   height: clamp(19rem, 36vw, 30rem);
   background:
-    radial-gradient(circle at 14% 2%, rgba(54, 87, 183, 0.08), transparent 22%),
-    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.7), transparent 18%),
-    linear-gradient(180deg, rgba(250, 246, 239, 0.95) 0%, rgba(245, 240, 232, 0.06) 100%);
+    radial-gradient(circle at 14% 2%, rgba(134, 98, 69, 0.08), transparent 22%),
+    radial-gradient(
+      circle at 84% 0%,
+      rgba(255, 255, 255, 0.72),
+      transparent 18%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(251, 247, 241, 0.96) 0%,
+      rgba(245, 239, 230, 0.08) 100%
+    );
 }
 
 html.dark .gush-page-ambient {
   background:
-    radial-gradient(circle at 14% 2%, rgba(98, 128, 246, 0.18), transparent 22%),
-    radial-gradient(circle at 84% 0%, rgba(244, 201, 138, 0.08), transparent 18%),
-    linear-gradient(180deg, rgba(16, 22, 31, 0.94) 0%, rgba(11, 15, 23, 0.08) 100%);
+    radial-gradient(
+      circle at 14% 2%,
+      rgba(98, 128, 246, 0.18),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 84% 0%,
+      rgba(244, 201, 138, 0.08),
+      transparent 18%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(16, 22, 31, 0.94) 0%,
+      rgba(11, 15, 23, 0.08) 100%
+    );
 }
 
 .gush-home-shell .gush-page-ambient {
-  height: clamp(24rem, 42vw, 36rem);
+  height: clamp(24rem, 40vw, 35rem);
   background:
-    radial-gradient(circle at 12% 2%, rgba(82, 115, 236, 0.22), transparent 20%),
-    radial-gradient(circle at 82% 0%, rgba(244, 201, 138, 0.12), transparent 16%),
-    linear-gradient(180deg, rgba(11, 15, 23, 0.96) 0%, rgba(11, 15, 23, 0.7) 34%, rgba(11, 15, 23, 0.04) 100%);
+    radial-gradient(
+      circle at 12% 2%,
+      rgba(215, 177, 130, 0.2),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 84% 0%,
+      rgba(255, 255, 255, 0.84),
+      transparent 16%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 250, 244, 0.98) 0%,
+      rgba(248, 241, 231, 0.68) 36%,
+      rgba(248, 241, 231, 0.06) 100%
+    );
 }
 
 html.dark .gush-home-shell .gush-page-ambient {
   background:
-    radial-gradient(circle at 12% 2%, rgba(96, 127, 247, 0.28), transparent 20%),
-    radial-gradient(circle at 82% 0%, rgba(244, 201, 138, 0.14), transparent 16%),
-    linear-gradient(180deg, rgba(8, 12, 19, 0.98) 0%, rgba(11, 15, 23, 0.8) 34%, rgba(11, 15, 23, 0.08) 100%);
+    radial-gradient(
+      circle at 12% 2%,
+      rgba(216, 183, 140, 0.16),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 82% 0%,
+      rgba(105, 123, 171, 0.16),
+      transparent 16%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(15, 20, 29, 0.96) 0%,
+      rgba(17, 23, 34, 0.76) 36%,
+      rgba(17, 23, 34, 0.08) 100%
+    );
 }
 
 .gush-page-main {
   position: relative;
   width: min(var(--gush-page-max), calc(100% - (var(--gush-page-gutter) * 2)));
   margin-inline: auto;
-  padding-top: clamp(1rem, 1.8vw, 1.75rem);
-  padding-bottom: clamp(3rem, 7vw, 5rem);
+  padding-top: clamp(1.2rem, 2vw, 2rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6rem);
 }
 
 .gush-page-main--wide {
-  width: min(var(--gush-page-max-wide), calc(100% - (var(--gush-page-gutter) * 2)));
+  width: min(
+    var(--gush-page-max-wide),
+    calc(100% - (var(--gush-page-gutter) * 2))
+  );
 }
 
 .gush-section-stack {
@@ -367,7 +450,7 @@ html.dark .skeleton {
   font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--gush-ink-faint);
 }

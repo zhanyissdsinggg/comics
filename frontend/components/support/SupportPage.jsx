@@ -51,7 +51,9 @@ function isAutofilledSupportMessage(value) {
     return true;
   }
 
-  return SUPPORT_TOPICS.some((preset) => String(preset?.draft || "").trim() === trimmed);
+  return SUPPORT_TOPICS.some(
+    (preset) => String(preset?.draft || "").trim() === trimmed,
+  );
 }
 
 export default function SupportPage() {
@@ -63,13 +65,20 @@ export default function SupportPage() {
   const [message, setMessage] = useState("");
   const [activeTopic, setActiveTopic] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState({ type: "", text: "", mode: "inline" });
+  const [feedback, setFeedback] = useState({
+    type: "",
+    text: "",
+    mode: "inline",
+  });
   const [successState, setSuccessState] = useState(null);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const orderIdInputRef = useRef(null);
   const lastRequestRef = useRef(null);
   const signedInReader = hydrated && isSignedIn;
-  const activePreset = useMemo(() => getSupportTopicPreset(activeTopic), [activeTopic]);
+  const activePreset = useMemo(
+    () => getSupportTopicPreset(activeTopic),
+    [activeTopic],
+  );
   const quickIssueCards = [
     {
       id: "billing",
@@ -114,7 +123,10 @@ export default function SupportPage() {
     }
   }, [hydrated, isSignedIn, user?.email]);
 
-  const applyTopicPreset = (preset, { preserveMessage = false, forceSubject = false } = {}) => {
+  const applyTopicPreset = (
+    preset,
+    { preserveMessage = false, forceSubject = false } = {},
+  ) => {
     if (!preset) {
       return;
     }
@@ -184,7 +196,9 @@ export default function SupportPage() {
   }, []);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/support")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/support")),
+    );
   }, []);
 
   useEffect(() => {
@@ -200,8 +214,20 @@ export default function SupportPage() {
   const trimmedMessage = message.trim();
   const trimmedOrderId = orderId.trim();
   const supportBody = useMemo(
-    () => buildSupportBody(trimmedMessage, activePreset?.title || activePreset?.label, trimmedEmail, trimmedOrderId),
-    [activePreset?.label, activePreset?.title, trimmedEmail, trimmedMessage, trimmedOrderId],
+    () =>
+      buildSupportBody(
+        trimmedMessage,
+        activePreset?.title || activePreset?.label,
+        trimmedEmail,
+        trimmedOrderId,
+      ),
+    [
+      activePreset?.label,
+      activePreset?.title,
+      trimmedEmail,
+      trimmedMessage,
+      trimmedOrderId,
+    ],
   );
 
   const resetForAnotherRequest = () => {
@@ -262,22 +288,38 @@ export default function SupportPage() {
     event.preventDefault();
 
     if (!activePreset) {
-      setFeedback({ type: "error", text: "Choose an issue type so we can route this faster.", mode: "inline" });
+      setFeedback({
+        type: "error",
+        text: "Choose an issue type so we can route this faster.",
+        mode: "inline",
+      });
       return;
     }
 
     if (!trimmedEmail) {
-      setFeedback({ type: "error", text: "Add the best reply email so we know where to answer.", mode: "inline" });
+      setFeedback({
+        type: "error",
+        text: "Add the best reply email so we know where to answer.",
+        mode: "inline",
+      });
       return;
     }
 
     if (!isValidEmail(trimmedEmail)) {
-      setFeedback({ type: "error", text: "Enter a valid reply email address.", mode: "inline" });
+      setFeedback({
+        type: "error",
+        text: "Enter a valid reply email address.",
+        mode: "inline",
+      });
       return;
     }
 
     if (!trimmedSubject || !trimmedMessage) {
-      setFeedback({ type: "error", text: "Please add both a subject and a message.", mode: "inline" });
+      setFeedback({
+        type: "error",
+        text: "Please add both a subject and a message.",
+        mode: "inline",
+      });
       return;
     }
 
@@ -304,9 +346,10 @@ export default function SupportPage() {
     void submitSupportRequest(lastRequestRef.current);
   };
 
-  const fieldLabelClass = "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+  const fieldLabelClass =
+    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#2f6bff)] focus:ring-2 focus:ring-[rgba(47,107,255,0.12)]";
+    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#866245)] focus:ring-2 focus:ring-[rgba(134,98,69,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
   const primaryButtonClass =
@@ -333,14 +376,21 @@ export default function SupportPage() {
             title="Get help."
             description="Choose an issue and send one request."
             stats={supportHeroStats}
+            appearance="light"
+            accent="amber"
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="space-y-4">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="space-y-4"
+          >
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Quick topics
               </p>
-              <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-white">
+              <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950">
                 Pick one.
               </h2>
             </div>
@@ -354,10 +404,15 @@ export default function SupportPage() {
                     type="button"
                     onClick={() => {
                       const preset = getSupportTopicPreset(item.topic);
-                      applyTopicPreset(preset, { preserveMessage: true, forceSubject: true });
+                      applyTopicPreset(preset, {
+                        preserveMessage: true,
+                        forceSubject: true,
+                      });
                       setSubject(item.subject);
                       setMessage((current) =>
-                        isAutofilledSupportMessage(current) ? `Context: ${item.context}` : current,
+                        isAutofilledSupportMessage(current)
+                          ? `Context: ${item.context}`
+                          : current,
                       );
                       setFeedback({ type: "", text: "", mode: "inline" });
                       setSuccessState(null);
@@ -365,12 +420,14 @@ export default function SupportPage() {
                     className={[
                       "rounded-[22px] border px-4 py-3 text-left transition",
                       isActive
-                        ? "border-white/16 bg-white text-slate-950"
-                        : "border-white/10 bg-white/[0.04] text-white/86 hover:border-white/16 hover:bg-white/[0.08]",
+                        ? "border-black/10 bg-slate-950 text-white"
+                        : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
-                    <p className={`mt-1 text-xs leading-5 ${isActive ? "text-slate-600" : "text-white/58"}`}>
+                    <p
+                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/72" : "text-slate-500"}`}
+                    >
                       {item.context}
                     </p>
                   </button>
@@ -388,18 +445,22 @@ export default function SupportPage() {
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="light" accent="amber">
             {successState ? (
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#2f6bff)]">
+                <div className="rounded-[28px] border border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#866245)]">
                     Request received
                   </p>
                   <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
                     Request sent.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                    We will reply at <span className="font-semibold text-slate-900">{successState.replyEmail}</span>.
+                    We will reply at{" "}
+                    <span className="font-semibold text-slate-900">
+                      {successState.replyEmail}
+                    </span>
+                    .
                   </p>
                 </div>
 
@@ -451,7 +512,7 @@ export default function SupportPage() {
                       className={[
                         "rounded-[24px] border px-4 py-3 text-sm",
                         feedback.type === "success"
-                          ? "border-[rgba(47,107,255,0.16)] bg-[rgba(47,107,255,0.06)] text-slate-700"
+                          ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.06)] text-slate-700"
                           : "border-red-200 bg-red-50 text-red-600",
                       ].join(" ")}
                     >
@@ -469,7 +530,9 @@ export default function SupportPage() {
                       id="support-topic"
                       value={activeTopic}
                       onChange={(event) => {
-                        const nextPreset = getSupportTopicPreset(event.target.value);
+                        const nextPreset = getSupportTopicPreset(
+                          event.target.value,
+                        );
                         setSuccessState(null);
                         applyTopicPreset(nextPreset, { forceSubject: true });
                       }}
@@ -501,7 +564,10 @@ export default function SupportPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="support-order-id" className={fieldLabelClass}>
+                    <label
+                      htmlFor="support-order-id"
+                      className={fieldLabelClass}
+                    >
                       Order ID
                     </label>
                     <input
@@ -516,7 +582,10 @@ export default function SupportPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="support-subject" className={fieldLabelClass}>
+                    <label
+                      htmlFor="support-subject"
+                      className={fieldLabelClass}
+                    >
                       Subject
                     </label>
                     <input
@@ -545,7 +614,11 @@ export default function SupportPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <button type="submit" disabled={submitting} className={primaryButtonClass}>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className={primaryButtonClass}
+                  >
                     {submitting ? "Sending..." : "Send Request"}
                   </button>
                   {!signedInReader ? (
@@ -592,7 +665,10 @@ export default function SupportPage() {
                 Contact
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Reply email: <span className="font-semibold text-slate-900">{siteConfig.supportEmail}</span>
+                Reply email:{" "}
+                <span className="font-semibold text-slate-900">
+                  {siteConfig.supportEmail}
+                </span>
               </p>
             </div>
 

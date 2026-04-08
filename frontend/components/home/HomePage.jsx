@@ -8,10 +8,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -34,16 +31,20 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), { ssr: false });
-const CommerceSuccessBanner = dynamic(() => import("../common/CommerceSuccessBanner"));
+const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
+  ssr: false,
+});
+const CommerceSuccessBanner = dynamic(
+  () => import("../common/CommerceSuccessBanner"),
+);
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
   loading: () => (
-    <div className="sticky top-0 z-40 border-b border-white/6 bg-[rgba(8,12,18,0.56)] backdrop-blur-xl">
+    <div className="sticky top-0 z-40 border-b border-[color:var(--gush-border)] bg-[rgba(251,247,241,0.68)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgba(14,18,27,0.66)]">
       <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 rounded-full border border-white/10 bg-white/[0.05] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
-        <div className="hidden h-10 flex-1 rounded-full border border-white/8 bg-white/[0.04] md:block" />
-        <div className="h-10 w-24 rounded-full border border-white/10 bg-white/[0.05] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
+        <div className="h-10 w-28 rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.92)] shadow-[0_10px_24px_rgba(15,23,42,0.035)] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
+        <div className="hidden h-10 flex-1 rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.84)] md:block dark:border-white/10 dark:bg-white/[0.04]" />
+        <div className="h-10 w-24 rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.92)] shadow-[0_10px_24px_rgba(15,23,42,0.035)] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
       </div>
     </div>
   ),
@@ -56,12 +57,12 @@ const HomeContentSections = dynamic(() => import("./HomeContentSections"), {
   ssr: false,
   loading: () => (
     <div className="space-y-8 md:space-y-10">
-      <div className="h-56 rounded-[28px] bg-white/80 shadow-[0_18px_40px_rgba(15,23,42,0.05)]" />
+      <div className="h-56 rounded-[28px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.84)] shadow-[0_18px_40px_rgba(37,28,19,0.04)]" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`home-section-skeleton-${index}`}
-            className="h-72 rounded-[26px] bg-white/78 shadow-[0_18px_40px_rgba(15,23,42,0.05)]"
+            className="h-72 rounded-[26px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] shadow-[0_18px_40px_rgba(37,28,19,0.04)]"
           />
         ))}
       </div>
@@ -129,12 +130,17 @@ function formatDisplayLabel(value) {
 
   return normalized
     .split(/\s+/)
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase())
+    .map(
+      (segment) =>
+        segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase(),
+    )
     .join(" ");
 }
 
 function buildHeroCoverAltText(series) {
-  const title = String(series?.title || "").replace(/\s+/g, " ").trim();
+  const title = String(series?.title || "")
+    .replace(/\s+/g, " ")
+    .trim();
   const seriesType = String(series?.type || series?.seriesType || "")
     .replace(/\s+/g, " ")
     .trim()
@@ -156,7 +162,11 @@ function buildHeroCoverAltText(series) {
 }
 
 function buildSeriesMetaLabel(series, creatorName) {
-  return [creatorName, formatDisplayLabel(series?.type || series?.seriesType || ""), getReadingState(series)]
+  return [
+    creatorName,
+    formatDisplayLabel(series?.type || series?.seriesType || ""),
+    getReadingState(series),
+  ]
     .filter(Boolean)
     .join(" · ");
 }
@@ -182,7 +192,10 @@ function buildHomeShelfItem(series) {
     subtitle: "",
     eyebrow: creatorName,
     statusLabel: "",
-    metaLabel: buildSeriesMetaLabel(series, creatorName),
+    metaLabel: buildSeriesMetaLabel(series, creatorName).replace(
+      /\s\u8DEF\s/g,
+      " • ",
+    ),
     badge: "",
   };
 }
@@ -193,7 +206,7 @@ function HeroCoverPreview({ series, eyebrow }) {
   const coverAltText = buildHeroCoverAltText(series);
 
   return (
-    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-black/6 bg-neutral-900">
+    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.98),rgba(243,236,227,0.94))] shadow-[0_18px_38px_rgba(37,28,19,0.08)] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_26px_60px_rgba(0,0,0,0.28)]">
       {coverUrl ? (
         <img
           src={coverUrl}
@@ -209,12 +222,12 @@ function HeroCoverPreview({ series, eyebrow }) {
           aria-label={coverAltText}
         />
       )}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,15,28,0.16),rgba(10,15,28,0.62))]" />
-      <div className="absolute left-3 top-3 rounded-full border border-white/16 bg-[rgba(12,18,30,0.46)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/90 backdrop-blur-sm">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,18,24,0.08),rgba(14,18,24,0.44))]" />
+      <div className="absolute left-3 top-3 rounded-full border border-white/65 bg-[rgba(255,253,249,0.88)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(37,28,19,0.08)] backdrop-blur-sm dark:border-white/12 dark:bg-[rgba(12,17,26,0.55)] dark:text-white/80">
         {badgeLabel}
       </div>
       <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-        <p className="line-clamp-2 font-display text-lg font-semibold tracking-tight">
+        <p className="line-clamp-2 font-display text-lg font-semibold tracking-tight text-white drop-shadow-[0_8px_20px_rgba(0,0,0,0.4)]">
           {series?.title || "Story"}
         </p>
       </div>
@@ -231,9 +244,9 @@ function HomeQuickPickCard({ item, eyebrow, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 text-left transition-all duration-300 hover:border-white/16 hover:bg-[rgba(255,255,255,0.07)]"
+      className="group flex w-full items-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.8)] p-3 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)] hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-white/16 dark:hover:bg-white/[0.07]"
     >
-      <div className="relative aspect-[3/4] w-[72px] shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-neutral-900">
+      <div className="relative aspect-[3/4] w-[72px] shrink-0 overflow-hidden rounded-[18px] border border-[color:var(--gush-border)] bg-neutral-900 dark:border-white/10">
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -249,22 +262,24 @@ function HomeQuickPickCard({ item, eyebrow, onClick }) {
             aria-label={coverAltText}
           />
         )}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.04),rgba(8,12,18,0.54))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.04),rgba(8,12,18,0.42))]" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/42">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
           {eyebrow}
         </p>
-        <p className="mt-2 line-clamp-2 text-sm font-semibold leading-5 text-white">
+        <p className="mt-2 line-clamp-2 text-sm font-semibold leading-5 text-[color:var(--gush-ink-strong)] dark:text-white">
           {item?.title || "Story"}
         </p>
         {metaLine ? (
-          <p className="mt-1 line-clamp-1 text-xs text-white/56">{metaLine}</p>
+          <p className="mt-1 line-clamp-1 text-xs text-[color:var(--gush-ink-soft)] dark:text-white/56">
+            {metaLine}
+          </p>
         ) : null}
       </div>
 
-      <ArrowRight className="size-4 shrink-0 text-white/46 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white/82" />
+      <ArrowRight className="size-4 shrink-0 text-[color:var(--gush-ink-faint)] transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[color:var(--gush-ink-strong)] dark:text-white/46 dark:group-hover:text-white/82" />
     </button>
   );
 }
@@ -310,11 +325,17 @@ function HomeContent({ initialSearchParams = {} }) {
   }, []);
 
   useEffect(() => {
-    setCommerceNotice(getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/")));
+    setCommerceNotice(
+      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/")),
+    );
   }, []);
 
   const heroItems = useMemo(
-    () => buildHomeHeroItems(seriesList, { bannerUrl: branding?.homeBannerUrl, homepageSlots }),
+    () =>
+      buildHomeHeroItems(seriesList, {
+        bannerUrl: branding?.homeBannerUrl,
+        homepageSlots,
+      }),
     [branding?.homeBannerUrl, homepageSlots, seriesList],
   );
 
@@ -338,12 +359,16 @@ function HomeContent({ initialSearchParams = {} }) {
     null;
 
   const featuredBannerUrl =
-    featuredHero?.bannerUrl || branding?.homeBannerUrl || featuredSeries?.bannerUrl || null;
+    featuredHero?.bannerUrl ||
+    branding?.homeBannerUrl ||
+    featuredSeries?.bannerUrl ||
+    null;
 
   const progressEntries = useMemo(
     () =>
       Object.entries(progressMap || {}).sort(
-        ([, left], [, right]) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+        ([, left], [, right]) =>
+          toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
       ),
     [progressMap],
   );
@@ -384,15 +409,24 @@ function HomeContent({ initialSearchParams = {} }) {
   );
 
   const resumeSpotlight = continueItems[0] || recentHistoryItems[0] || null;
-  const resumeSeries = resumeSpotlight ? seriesById.get(resumeSpotlight.seriesId) || null : null;
+  const resumeSeries = resumeSpotlight
+    ? seriesById.get(resumeSpotlight.seriesId) || null
+    : null;
   const heroSeries = resumeSeries || featuredSeries || null;
-  const heroGenrePills = useMemo(() => getPrimaryGenres(heroSeries?.genres, 2), [heroSeries?.genres]);
+  const heroGenrePills = useMemo(
+    () => getPrimaryGenres(heroSeries?.genres, 2),
+    [heroSeries?.genres],
+  );
   const heroCreatorName = useMemo(
     () => (heroSeries ? resolveSeriesCreatorName(heroSeries) : ""),
     [heroSeries],
   );
   const heroMetaLine = useMemo(
-    () => buildSeriesMetaLabel(heroSeries, heroCreatorName),
+    () =>
+      buildSeriesMetaLabel(heroSeries, heroCreatorName).replace(
+        /\s\u8DEF\s/g,
+        " • ",
+      ),
     [heroCreatorName, heroSeries],
   );
 
@@ -432,7 +466,11 @@ function HomeContent({ initialSearchParams = {} }) {
         editorialSnapshot.completedPick,
         ...editorialSnapshot.safeCatalog,
       ])
-        .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
+        .filter(
+          (series) =>
+            String(series?.id || "").trim() !==
+            String(heroSeries?.id || "").trim(),
+        )
         .slice(0, 4)
         .map((series) => buildHomeShelfItem(series))
         .filter(Boolean),
@@ -447,7 +485,11 @@ function HomeContent({ initialSearchParams = {} }) {
           ? editorialSnapshot.startHereSeries
           : []),
       ])
-        .filter((series) => String(series?.id || "").trim() !== String(heroSeries?.id || "").trim())
+        .filter(
+          (series) =>
+            String(series?.id || "").trim() !==
+            String(heroSeries?.id || "").trim(),
+        )
         .slice(0, 4)
         .map((series) => buildHomeShelfItem(series))
         .filter(Boolean),
@@ -456,14 +498,20 @@ function HomeContent({ initialSearchParams = {} }) {
 
   const heroRailItems = useMemo(() => {
     const seen = new Set();
-    return [...featuredSeriesItems, ...startHereItems].filter((item) => {
-      const itemId = String(item?.id || "").trim();
-      if (!itemId || itemId === String(heroSeries?.id || "").trim() || seen.has(itemId)) {
-        return false;
-      }
-      seen.add(itemId);
-      return true;
-    }).slice(0, 3);
+    return [...featuredSeriesItems, ...startHereItems]
+      .filter((item) => {
+        const itemId = String(item?.id || "").trim();
+        if (
+          !itemId ||
+          itemId === String(heroSeries?.id || "").trim() ||
+          seen.has(itemId)
+        ) {
+          return false;
+        }
+        seen.add(itemId);
+        return true;
+      })
+      .slice(0, 3);
   }, [featuredSeriesItems, heroSeries?.id, startHereItems]);
 
   const heroMetrics = useMemo(
@@ -481,10 +529,16 @@ function HomeContent({ initialSearchParams = {} }) {
       {
         id: "completed",
         label: "Finished",
-        value: Number(editorialSnapshot?.completedSeriesCount || 0).toLocaleString(),
+        value: Number(
+          editorialSnapshot?.completedSeriesCount || 0,
+        ).toLocaleString(),
       },
     ],
-    [editorialSnapshot?.completedSeriesCount, editorialSnapshot?.genreCount, editorialSnapshot?.seriesCount],
+    [
+      editorialSnapshot?.completedSeriesCount,
+      editorialSnapshot?.genreCount,
+      editorialSnapshot?.seriesCount,
+    ],
   );
 
   const showCatalogFallback = !loading && !featuredSeries;
@@ -493,13 +547,19 @@ function HomeContent({ initialSearchParams = {} }) {
     () => [
       {
         id: "featured-series",
+        eyebrow: "Browse",
         title: "Featured Series",
+        description:
+          "Open the current editorial shelf and start with what is being surfaced right now.",
         label: "Browse Series",
         href: "/search",
       },
       {
         id: "browse-comics",
+        eyebrow: "Formats",
         title: "Comics and Novels",
+        description:
+          "Jump into the format that fits how you like to read, then keep exploring from there.",
         label: "Browse Comics",
         href: "/comics",
       },
@@ -554,14 +614,23 @@ function HomeContent({ initialSearchParams = {} }) {
     return "/search";
   }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
 
-  const heroEyebrow = resumeSeries ? "Continue Reading" : "Featured";
-  const heroSummary = resumeSeries
+  const heroEyebrow = resumeSeries ? "Continue Reading" : "Original Stories";
+  const heroHeading = resumeSeries
     ? "Pick up where you left off."
-    : clampText(heroSeries?.description, 170);
+    : "A calmer home for comics and novels.";
+  const heroSummary = resumeSeries
+    ? "Your library stays in sync, so the next episode is always close at hand."
+    : "Editorial picks, cleaner shelves, and stories worth staying with.";
+  const heroFeatureEyebrow = resumeSeries ? "Current Read" : "Now Featuring";
+  const heroFeatureSummary =
+    clampText(heroSeries?.description, 150) ||
+    (resumeSeries
+      ? "Your next chapter is already waiting in the library."
+      : "A focused place to start, stay, or browse more slowly.");
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue Reading"
     : heroSeries?.id
-      ? "Read Now"
+      ? "Start Reading"
       : "Browse Stories";
 
   return (
@@ -572,65 +641,40 @@ function HomeContent({ initialSearchParams = {} }) {
       <main className="gush-page-main gush-page-main--wide">
         <section className="pb-10 pt-2 md:pb-12">
           {loading ? (
-            <div className="aspect-[5/6] w-full animate-pulse rounded-[36px] bg-white/80 shadow-[0_20px_44px_rgba(15,23,42,0.06)] sm:aspect-[21/11] lg:aspect-[21/8]" />
+            <div className="aspect-[5/6] w-full animate-pulse rounded-[38px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.84)] shadow-[0_24px_54px_rgba(37,28,19,0.05)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.46fr)_minmax(320px,0.64fr)] xl:items-stretch">
-              <Card className="relative min-h-[420px] overflow-hidden rounded-[38px] border border-white/10 bg-[linear-gradient(180deg,#111723,#0c1018)] py-0 text-white shadow-[0_32px_90px_rgba(0,0,0,0.3)] ring-0">
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)] xl:items-stretch">
+              <Card className="relative min-h-[420px] overflow-hidden rounded-[40px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(245,238,229,0.97))] py-0 shadow-[0_28px_68px_rgba(37,28,19,0.08)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.94),rgba(11,16,24,0.98))] dark:shadow-[0_32px_90px_rgba(0,0,0,0.28)]">
                 {featuredBannerUrl ? (
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-[0.44]"
+                    className="absolute inset-y-0 right-0 hidden w-[44%] bg-cover bg-center opacity-[0.14] xl:block dark:opacity-[0.18]"
                     style={{ backgroundImage: `url(${featuredBannerUrl})` }}
                   />
                 ) : null}
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,20,0.92)_0%,rgba(9,13,20,0.84)_44%,rgba(9,13,20,0.54)_74%,rgba(9,13,20,0.24)_100%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(77,106,215,0.28),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(244,201,138,0.16),transparent_24%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.12),transparent_24%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.18),transparent_22%)]" />
 
-                <CardContent className="relative grid h-full gap-8 p-5 sm:p-7 xl:min-h-[520px] xl:grid-cols-[minmax(0,1.02fr)_220px] xl:p-10">
-                  <div className="flex flex-col justify-end">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/50">
+                <CardContent className="relative flex h-full min-h-[420px] flex-col justify-between p-6 sm:p-8 xl:min-h-[520px] xl:p-12">
+                  <div className="max-w-[44rem]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
                       {heroEyebrow}
                     </p>
-                    <h1 className="mt-4 max-w-3xl font-display text-[2.5rem] font-semibold leading-[0.94] tracking-[-0.045em] text-white sm:text-[3.2rem] xl:text-[4.45rem]">
-                      {heroSeries?.title || "Original comics and novels"}
+                    <h1 className="mt-4 max-w-4xl font-display text-[2.8rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[color:var(--gush-ink-strong)] sm:text-[3.4rem] xl:text-[5rem] dark:text-white">
+                      {heroHeading}
                     </h1>
-
-                    {heroMetaLine ? (
-                      <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/56">
-                        {heroMetaLine}
-                      </p>
-                    ) : null}
-
                     {heroSummary ? (
-                      <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-[0.98rem]">
+                      <p className="mt-5 max-w-2xl text-[0.98rem] leading-8 text-[color:var(--gush-ink-soft)] dark:text-white/68">
                         {heroSummary}
                       </p>
                     ) : null}
+                  </div>
 
-                    <div className="mt-5 flex flex-wrap gap-2.5">
-                      {heroGenrePills.map((genre) => (
-                        <span
-                          key={`hero-genre-${genre}`}
-                          className="inline-flex items-center whitespace-nowrap rounded-full border border-white/12 bg-white/[0.08] px-3 py-1 text-xs font-medium text-white/74 backdrop-blur-sm"
-                        >
-                          {genre}
-                        </span>
-                      ))}
-                      {heroSignals.slice(0, 2).map((signal) => (
-                        <span
-                          key={signal.id}
-                          className="rounded-full border border-white/10 bg-black/16 px-3 py-1 text-xs font-medium text-white/68"
-                        >
-                          {signal.content}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <div className="mt-10 space-y-6">
+                    <div className="flex flex-wrap items-center gap-3">
                       <Link
                         href={primaryHeroHref}
                         className={cn(
                           buttonVariants({ size: "lg" }),
-                          "h-12 rounded-full bg-[var(--gush-home-accent)] px-6 text-sm font-semibold text-slate-950 shadow-[0_18px_34px_rgba(0,0,0,0.22)] hover:bg-[#ffd6a0]",
+                          "h-12 rounded-full bg-[color:var(--gush-ink-strong)] px-6 text-sm font-semibold text-white shadow-[var(--gush-shadow-button)] hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200",
                         )}
                       >
                         {primaryHeroCtaLabel}
@@ -638,92 +682,90 @@ function HomeContent({ initialSearchParams = {} }) {
                       </Link>
                     </div>
 
-                  </div>
-
-                  {heroSeries ? (
-                    <div className="hidden xl:flex xl:items-end xl:justify-end">
-                      <div className="w-full max-w-[210px]">
-                        <HeroCoverPreview
-                          series={heroSeries}
-                          eyebrow={resumeSeries ? "Continue Reading" : "Featured"}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-4">
-                <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.88))] py-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] ring-0">
-                  <CardContent className="p-5 sm:p-6">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
-                          Overview
-                        </p>
-                      </div>
-                      <span className="inline-flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-[var(--gush-home-accent)]">
-                        <Sparkles className="size-4" />
-                      </span>
-                    </div>
-
-                    <div className="mt-5 grid grid-cols-3 gap-2.5">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       {heroMetrics.map((metric) => (
                         <div
                           key={metric.id}
-                          className="rounded-[20px] border border-white/10 bg-white/[0.05] px-3 py-3"
+                          className="rounded-[22px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.7)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] dark:border-white/10 dark:bg-white/[0.04]"
                         >
-                          <p className="text-lg font-semibold tracking-tight text-white">
+                          <p className="text-[1.2rem] font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
                             {metric.value}
                           </p>
-                          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/46">
+                          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
                             {metric.label}
                           </p>
                         </div>
                       ))}
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.push("/comics")}
-                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
-                      >
-                        Browse Comics
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.push("/novels")}
-                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
-                      >
-                        Browse Novels
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.push("/creators")}
-                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/62 hover:bg-transparent hover:text-white"
-                      >
-                        View Creators
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid gap-4">
+                {heroSeries ? (
+                  <Card className="overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] py-0 shadow-[0_20px_48px_rgba(37,28,19,0.05)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
+                    <CardContent className="p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                        {heroFeatureEyebrow}
+                      </p>
+                      <div className="mt-4 grid gap-4 sm:grid-cols-[136px_minmax(0,1fr)]">
+                        <div className="max-w-[136px]">
+                          <HeroCoverPreview
+                            series={heroSeries}
+                            eyebrow={resumeSeries ? "Continue" : "Featured"}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-[color:var(--gush-ink-strong)] dark:text-white">
+                            {heroSeries?.title || "Featured story"}
+                          </h2>
+
+                          {heroMetaLine ? (
+                            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
+                              {heroMetaLine}
+                            </p>
+                          ) : null}
+
+                          <p className="mt-4 text-sm leading-7 text-[color:var(--gush-ink-soft)] dark:text-white/68">
+                            {heroFeatureSummary}
+                          </p>
+
+                          <div className="mt-4 flex flex-wrap gap-2.5">
+                            {heroGenrePills.map((genre) => (
+                              <span
+                                key={`hero-genre-${genre}`}
+                                className="inline-flex items-center whitespace-nowrap rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/68"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                            {heroSignals.slice(0, 2).map((signal) => (
+                              <span
+                                key={signal.id}
+                                className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/66"
+                              >
+                                {signal.content}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null}
 
                 {heroRailItems.length > 0 ? (
-                  <Card className="overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(12,17,26,0.95),rgba(12,17,26,0.9))] py-0 text-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] ring-0">
+                  <Card className="overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] py-0 shadow-[0_20px_48px_rgba(37,28,19,0.05)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
                     <CardContent className="p-5 sm:p-6">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/46">
-                          Next Up
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                          Read Next
                         </p>
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => router.push("/search")}
-                          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-white/56 hover:bg-transparent hover:text-white"
+                          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)] dark:text-white/56 dark:hover:text-white"
                         >
                           Browse
                           <ArrowRight className="size-4" />
@@ -735,9 +777,19 @@ function HomeContent({ initialSearchParams = {} }) {
                           <HomeQuickPickCard
                             key={`hero-rail-${item.id}`}
                             item={item}
-                            eyebrow={index === 0 ? "Featured" : index === 1 ? "Continue" : "Next"}
+                            eyebrow={
+                              index === 0
+                                ? "Featured"
+                                : index === 1
+                                  ? "Continue"
+                                  : "Next"
+                            }
                             onClick={() =>
-                              openHomeSeries(item.id, "HOME_HERO_RAIL", `home_hero_rail_${item.id}`)
+                              openHomeSeries(
+                                item.id,
+                                "HOME_HERO_RAIL",
+                                `home_hero_rail_${item.id}`,
+                              )
                             }
                           />
                         ))}
@@ -767,10 +819,18 @@ function HomeContent({ initialSearchParams = {} }) {
           onFallbackClick={(href) => router.push(href)}
           onBrowseAllSeries={() => router.push("/search")}
           onFeaturedItemClick={(item) =>
-            openHomeSeries(item.id, "HOME_FEATURED_SERIES", `home_featured_series_${item.id}`)
+            openHomeSeries(
+              item.id,
+              "HOME_FEATURED_SERIES",
+              `home_featured_series_${item.id}`,
+            )
           }
           onStartHereItemClick={(item) =>
-            openHomeSeries(item.id, "HOME_START_HERE", `home_start_here_${item.id}`)
+            openHomeSeries(
+              item.id,
+              "HOME_START_HERE",
+              `home_start_here_${item.id}`,
+            )
           }
           onGuideClick={(href) => router.push(href)}
         />
@@ -798,7 +858,10 @@ function HomeContent({ initialSearchParams = {} }) {
   );
 }
 
-export default function HomePage({ initialSearchParams = {}, initialHomeData = null }) {
+export default function HomePage({
+  initialSearchParams = {},
+  initialHomeData = null,
+}) {
   return (
     <HomeDataProvider initialData={initialHomeData}>
       <HomeContent initialSearchParams={initialSearchParams} />

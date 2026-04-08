@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
@@ -7,18 +7,18 @@ import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
 
-const bodyFont = Plus_Jakarta_Sans({
+const bodyFont = Manrope({
   subsets: ["latin"],
   variable: "--font-ui-body",
   display: "swap",
   weight: ["400", "500", "600", "700"],
 });
 
-const displayFont = Outfit({
+const displayFont = Fraunces({
   subsets: ["latin"],
   variable: "--font-ui-display",
   display: "swap",
-  weight: ["500", "600", "700", "800"],
+  weight: ["500", "600", "700"],
 });
 
 const CookieConsent = dynamic(() => import("../components/common/CookieConsent"));

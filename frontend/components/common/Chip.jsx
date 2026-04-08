@@ -10,7 +10,7 @@ export default function Chip({
 }) {
   const isClickable = typeof onClick === "function";
   const content = children ?? label;
-  const isLight = appearance === "light";
+  const isLight = appearance === "light" || appearance === "default";
 
   if (!content) {
     return null;
@@ -23,7 +23,7 @@ export default function Chip({
           "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold",
           active
             ? isLight
-              ? "border-[rgba(49,87,214,0.18)] bg-[rgba(49,87,214,0.08)] text-slate-950"
+              ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.08)] text-slate-950"
               : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
             : isLight
               ? "border-black/8 bg-white text-slate-600"
@@ -44,7 +44,7 @@ export default function Chip({
         "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-200",
         active
           ? isLight
-            ? "border-[rgba(49,87,214,0.18)] bg-[rgba(49,87,214,0.08)] text-slate-950 shadow-[0_10px_20px_rgba(49,87,214,0.08)]"
+            ? "border-[rgba(134,98,69,0.18)] bg-[rgba(134,98,69,0.08)] text-slate-950 shadow-[0_10px_20px_rgba(134,98,69,0.08)]"
             : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
           : isLight
             ? "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-950"

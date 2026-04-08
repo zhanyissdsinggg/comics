@@ -1,14 +1,7 @@
 "use client";
 
-import { memo, useEffect, useState, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-
-/**
- * 老王注释：通用Modal弹窗组件 - iOS风格
- * 功能：显示模态对话框，支持多种尺寸和样式
- * 遵循KISS原则：简洁的弹窗实现
- * 遵循DRY原则：可复用的Modal组件
- */
 
 export const Modal = memo(function Modal({
   isOpen = false,
@@ -20,7 +13,7 @@ export const Modal = memo(function Modal({
   showCloseButton = true,
   closeOnOverlayClick = true,
   closeOnEsc = true,
-  className = ""
+  className = "",
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const modalRef = useRef(null);
@@ -32,33 +25,27 @@ export const Modal = memo(function Modal({
     lg: "max-w-lg",
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
-    full: "max-w-full mx-4"
+    full: "mx-4 max-w-full",
   };
 
-  // 老王注释：焦点管理 - 打开时保存当前焦点，关闭时恢复
   useEffect(() => {
     if (isOpen) {
       previousActiveElement.current = document.activeElement;
-      // 延迟聚焦，等待动画完成
       setTimeout(() => {
-        if (modalRef.current) {
-          const firstFocusable = modalRef.current.querySelector(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          if (firstFocusable) {
-            firstFocusable.focus();
-          }
+        if (!modalRef.current) {
+          return;
         }
+        const firstFocusable = modalRef.current.querySelector(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        firstFocusable?.focus?.();
       }, 100);
-    } else {
-      // 恢复之前的焦点
-      if (previousActiveElement.current && previousActiveElement.current.focus) {
-        previousActiveElement.current.focus();
-      }
+      return;
     }
+
+    previousActiveElement.current?.focus?.();
   }, [isOpen]);
 
-  // 老王注释：控制动画和body滚动
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -73,12 +60,13 @@ export const Modal = memo(function Modal({
     };
   }, [isOpen]);
 
-  // 老王注释：ESC键关闭
   useEffect(() => {
-    if (!closeOnEsc || !isOpen) return;
+    if (!closeOnEsc || !isOpen) {
+      return undefined;
+    }
 
-    const handleEsc = (e) => {
-      if (e.key === "Escape") {
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
         handleClose();
       }
     };
@@ -101,8 +89,8 @@ export const Modal = memo(function Modal({
     }
   };
 
-  const handleContentClick = (e) => {
-    e.stopPropagation();
+  const handleContentClick = (event) => {
+    event.stopPropagation();
   };
 
   if (!isOpen) {
@@ -111,7 +99,7 @@ export const Modal = memo(function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
         isAnimating ? "bg-black/60 backdrop-blur-sm" : "bg-black/0"
       }`}
       onClick={handleOverlayClick}
@@ -120,61 +108,56 @@ export const Modal = memo(function Modal({
       aria-modal="true"
       aria-labelledby={title ? "modal-title" : undefined}
     >
-      {/* iOS风格弹窗 */}
       <div
         ref={modalRef}
         onClick={handleContentClick}
-        className={`relative w-full ${sizeClasses[size]} bg-neutral-900/95 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 sm:rounded-3xl ${
+        className={`relative w-full ${sizeClasses[size]} border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] shadow-[0_34px_90px_rgba(15,23,42,0.18)] transition-all duration-300 sm:rounded-3xl ${
           isAnimating
-            ? "translate-y-0 opacity-100 scale-100"
-            : "translate-y-full sm:translate-y-0 opacity-0 sm:scale-95"
+            ? "translate-y-0 scale-100 opacity-100"
+            : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
         } ${className}`}
         style={{
           borderTopLeftRadius: "1.5rem",
-          borderTopRightRadius: "1.5rem"
+          borderTopRightRadius: "1.5rem",
         }}
       >
-        {/* 老王注释：移动端拖动指示器 */}
-        <div className="flex justify-center pt-3 pb-2 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-neutral-700" />
+        <div className="flex justify-center pb-2 pt-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-black/12" />
         </div>
 
-        {/* 老王注释：头部 */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
-            {title && (
-              <h2 id="modal-title" className="text-lg font-semibold text-white">{title}</h2>
-            )}
-            {showCloseButton && (
+          <div className="flex items-center justify-between border-b border-black/6 px-6 py-4">
+            {title ? (
+              <h2
+                id="modal-title"
+                className="font-display text-xl font-semibold tracking-tight text-slate-950"
+              >
+                {title}
+              </h2>
+            ) : null}
+            {showCloseButton ? (
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full p-2 text-neutral-400 transition-all duration-300 hover:bg-white/10 hover:text-white active:scale-95"
+                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-slate-400 transition-all duration-300 hover:bg-black/5 hover:text-slate-700 active:scale-95"
                 aria-label="Close dialog"
               >
                 <X size={20} />
               </button>
-            )}
+            ) : null}
           </div>
         )}
 
-        {/* 老王注释：内容 */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
-          {children}
-        </div>
+        <div className="max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
 
-        {/* 老王注释：底部 */}
-        {footer && (
-          <div className="border-t border-white/5 px-6 py-4">
-            {footer}
-          </div>
-        )}
+        {footer ? (
+          <div className="border-t border-black/6 px-6 py-4">{footer}</div>
+        ) : null}
       </div>
     </div>
   );
 });
 
-// 确认对话框
 export const ConfirmModal = memo(function ConfirmModal({
   isOpen,
   onClose,
@@ -183,12 +166,12 @@ export const ConfirmModal = memo(function ConfirmModal({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  variant = "default"
+  variant = "default",
 }) {
   const variantClasses = {
-    default: "bg-emerald-500 hover:bg-emerald-600",
-    danger: "bg-red-500 hover:bg-red-600",
-    warning: "bg-yellow-500 hover:bg-yellow-600"
+    default: "bg-slate-950 hover:bg-slate-800",
+    danger: "bg-red-600 hover:bg-red-700",
+    warning: "bg-amber-500 hover:bg-amber-600",
   };
 
   const handleConfirm = () => {
@@ -207,7 +190,7 @@ export const ConfirmModal = memo(function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-neutral-700 px-6 py-3 text-sm font-medium text-neutral-200 transition-all duration-300 hover:border-neutral-600 hover:bg-white/5 active:scale-95"
+            className="flex-1 rounded-full border border-black/8 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95"
           >
             {cancelText}
           </button>
@@ -221,7 +204,7 @@ export const ConfirmModal = memo(function ConfirmModal({
         </div>
       }
     >
-      <p className="text-sm text-neutral-300">{message}</p>
+      <p className="text-sm leading-7 text-slate-600">{message}</p>
     </Modal>
   );
 });

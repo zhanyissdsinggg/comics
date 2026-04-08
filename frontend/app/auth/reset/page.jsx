@@ -18,8 +18,12 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
-      {title ? <p className="text-sm font-semibold text-slate-950">{title}</p> : null}
+    <div
+      className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
+    >
+      {title ? (
+        <p className="text-sm font-semibold text-slate-950">{title}</p>
+      ) : null}
       {message ? <p className="mt-1 text-sm leading-6">{message}</p> : null}
     </div>
   );
@@ -41,7 +45,7 @@ function ResetPageContent() {
 
   const hasToken = Boolean(token);
   const inputClassName =
-    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(47,107,255,0.18)] focus:ring-4 focus:ring-[rgba(47,107,255,0.08)]";
+    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(134,98,69,0.18)] focus:ring-4 focus:ring-[rgba(134,98,69,0.08)]";
   const primaryButtonClass =
     "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
@@ -53,14 +57,17 @@ function ResetPageContent() {
       setStatus({
         tone: "error",
         title: "Enter a valid email",
-        message: "Use the address attached to your account so we can send a fresh password reset link.",
+        message:
+          "Use the address attached to your account so we can send a fresh password reset link.",
       });
       return;
     }
 
     setSubmitting(true);
     setStatus(null);
-    const response = await apiPost("/api/auth/request-reset", { email: normalizedEmail });
+    const response = await apiPost("/api/auth/request-reset", {
+      email: normalizedEmail,
+    });
     if (response.ok) {
       setStatus({
         tone: "success",
@@ -83,7 +90,8 @@ function ResetPageContent() {
       setStatus({
         tone: "error",
         title: "This reset link is missing",
-        message: "Request a fresh password reset email and reopen the newest link.",
+        message:
+          "Request a fresh password reset email and reopen the newest link.",
       });
       return;
     }
@@ -104,7 +112,8 @@ function ResetPageContent() {
       setStatus({
         tone: "success",
         title: "Password updated",
-        message: "Redirecting you to sign in so you can jump straight back into your library.",
+        message:
+          "Redirecting you to sign in so you can jump straight back into your library.",
       });
       setTimeout(() => router.push("/?openLogin=1"), 1100);
     } else {
@@ -112,7 +121,9 @@ function ResetPageContent() {
       const shouldRefreshLink = /expired|invalid/i.test(message);
       setStatus({
         tone: "error",
-        title: shouldRefreshLink ? "This link has expired" : "We could not reset the password",
+        title: shouldRefreshLink
+          ? "This link has expired"
+          : "We could not reset the password",
         message: shouldRefreshLink
           ? "Request a fresh email below and open the newest reset link."
           : message,
@@ -154,7 +165,7 @@ function ResetPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-4 py-3 text-sm text-slate-700">
+            <div className="rounded-2xl border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-4 py-3 text-sm text-slate-700">
               Reset link loaded from your email. No code field required.
             </div>
             <input
@@ -207,15 +218,25 @@ function ResetPageContent() {
           </div>
         )}
 
-        <StatusNotice tone={status?.tone} title={status?.title} message={status?.message} />
+        <StatusNotice
+          tone={status?.tone}
+          title={status?.title}
+          message={status?.message}
+        />
 
         <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600">
           Signed in already? Head back to{" "}
-          <Link href="/account" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
+          <Link
+            href="/account"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+          >
             your account
           </Link>
           . Need help with a missing email? Contact{" "}
-          <Link href="/support" className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#2f6bff)]">
+          <Link
+            href="/support"
+            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#866245)]"
+          >
             us
           </Link>
           .
@@ -227,7 +248,13 @@ function ResetPageContent() {
 
 export default function ResetPage() {
   return (
-    <Suspense fallback={<div className="gush-home-shell min-h-screen overflow-hidden"><div className="gush-page-ambient" /></div>}>
+    <Suspense
+      fallback={
+        <div className="gush-home-shell min-h-screen overflow-hidden">
+          <div className="gush-page-ambient" />
+        </div>
+      }
+    >
       <ResetPageContent />
     </Suspense>
   );

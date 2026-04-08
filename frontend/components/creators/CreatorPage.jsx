@@ -81,7 +81,10 @@ function getCreatorShelfBadge(series) {
   }
 
   const updatedAtMs = Date.parse(series?.updatedAt || 0);
-  if (!Number.isNaN(updatedAtMs) && updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000) {
+  if (
+    !Number.isNaN(updatedAtMs) &&
+    updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000
+  ) {
     return "Updated";
   }
 
@@ -107,7 +110,9 @@ function getTopGenres(items) {
   });
 
   return [...counts.entries()]
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+    )
     .map(([genre]) => genre);
 }
 
@@ -115,7 +120,8 @@ function buildCreatorItems(seriesList, creatorSlug) {
   return seriesList
     .filter((item) => item?.id && seriesMatchesCreatorSlug(item, creatorSlug))
     .sort((left, right) => {
-      const popularityDelta = getCatalogPriority(right) - getCatalogPriority(left);
+      const popularityDelta =
+        getCatalogPriority(right) - getCatalogPriority(left);
       if (popularityDelta !== 0) {
         return popularityDelta;
       }
@@ -191,18 +197,23 @@ function CreatorPageSkeleton() {
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel accent="blue" className="space-y-6">
+          <SurfacePanel appearance="light" accent="amber" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-white/10" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/10" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/8" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-100" />
             </div>
           </SurfacePanel>
-          <SurfacePanel tone="muted" accent="blue" className="space-y-3">
+          <SurfacePanel
+            tone="muted"
+            appearance="light"
+            accent="amber"
+            className="space-y-3"
+          >
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-white/10 bg-white/[0.05]"
+                className="h-24 animate-pulse rounded-[24px] border border-black/6 bg-white/84"
               />
             ))}
           </SurfacePanel>
@@ -229,7 +240,10 @@ function CreatorPageSkeleton() {
 
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 10 }).map((_, index) => (
-            <SkeletonCard key={`creator-grid-skeleton-${index}`} appearance="light" />
+            <SkeletonCard
+              key={`creator-grid-skeleton-${index}`}
+              appearance="light"
+            />
           ))}
         </div>
       </div>
@@ -245,7 +259,9 @@ export default function CreatorPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
-  const [catalog, setCatalog] = useState(Array.isArray(initialCatalog) ? initialCatalog : []);
+  const [catalog, setCatalog] = useState(
+    Array.isArray(initialCatalog) ? initialCatalog : [],
+  );
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
@@ -280,7 +296,9 @@ export default function CreatorPage({
 
   useEffect(() => {
     setCommerceNotice(
-      getCommerceSuccessPresentation(consumeCommerceSuccessForPath(creatorPath)),
+      getCommerceSuccessPresentation(
+        consumeCommerceSuccessForPath(creatorPath),
+      ),
     );
   }, [creatorPath]);
 
@@ -313,40 +331,47 @@ export default function CreatorPage({
         return true;
       }
 
-      setCatalog(Array.isArray(response.data?.series) ? response.data.series : []);
+      setCatalog(
+        Array.isArray(response.data?.series) ? response.data.series : [],
+      );
       setError("");
       return true;
     };
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then((response) => {
-      if (!applyResponse(response)) {
-        return;
-      }
+    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then(
+      (response) => {
+        if (!applyResponse(response)) {
+          return;
+        }
 
-      if (isCurrentRequest()) {
-        setLoading(false);
-      }
+        if (isCurrentRequest()) {
+          setLoading(false);
+        }
 
-      if (response.ok && response.stale) {
-        apiGet(`/api/series?adult=${adultFlag}`, {
-          cacheMs: 30000,
-          bust: true,
-          dedupeMs: 0,
-        }).then((freshResponse) => {
-          if (!isCurrentRequest()) {
-            return;
-          }
-          applyResponse(freshResponse);
-        });
-      }
-    });
+        if (response.ok && response.stale) {
+          apiGet(`/api/series?adult=${adultFlag}`, {
+            cacheMs: 30000,
+            bust: true,
+            dedupeMs: 0,
+          }).then((freshResponse) => {
+            if (!isCurrentRequest()) {
+              return;
+            }
+            applyResponse(freshResponse);
+          });
+        }
+      },
+    );
   }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode, retryTick]);
 
   const creatorItems = useMemo(
     () => buildCreatorItems(catalog, creatorSlug),
     [catalog, creatorSlug],
   );
-  const routeCreatorName = useMemo(() => humanizeCreatorSlug(creatorSlug), [creatorSlug]);
+  const routeCreatorName = useMemo(
+    () => humanizeCreatorSlug(creatorSlug),
+    [creatorSlug],
+  );
   const creatorIdentity = useMemo(() => {
     if (creatorItems.length > 0) {
       return resolveSeriesCreatorIdentity(creatorItems[0]);
@@ -358,7 +383,8 @@ export default function CreatorPage({
     ? creatorIdentity.displayName
     : routeCreatorName || creatorIdentity.displayName;
   const creatorSlugKey = useMemo(
-    () => creatorIdentity.slug || creatorSlug || slugifyCreatorName(creatorName),
+    () =>
+      creatorIdentity.slug || creatorSlug || slugifyCreatorName(creatorName),
     [creatorIdentity.slug, creatorName, creatorSlug],
   );
   const topGenres = useMemo(() => getTopGenres(creatorItems), [creatorItems]);
@@ -373,7 +399,8 @@ export default function CreatorPage({
   );
 
   const heroCopy = useMemo(
-    () => getCreatorHeroCopy(creatorName, creatorIdentity.creditType, topGenres),
+    () =>
+      getCreatorHeroCopy(creatorName, creatorIdentity.creditType, topGenres),
     [creatorIdentity.creditType, creatorName, topGenres],
   );
 
@@ -382,15 +409,16 @@ export default function CreatorPage({
       (item) => String(item?.status || "").toLowerCase() === "completed",
     ).length;
     const strongestGenre = topGenres[0] || "Mixed";
-    const formatLabel = Array.from(
-      new Set(
-        creatorItems
-          .map((item) => String(item?.type || "").trim())
-          .filter(Boolean),
-      ),
-    )
-      .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
-      .join(" / ") || "Series";
+    const formatLabel =
+      Array.from(
+        new Set(
+          creatorItems
+            .map((item) => String(item?.type || "").trim())
+            .filter(Boolean),
+        ),
+      )
+        .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+        .join(" / ") || "Series";
     const latestUpdatedAt = creatorItems[0]?.updatedAt;
 
     return [
@@ -404,7 +432,8 @@ export default function CreatorPage({
       },
       {
         label: "Status",
-        value: completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
+        value:
+          completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
       },
       {
         label: "Latest",
@@ -422,11 +451,15 @@ export default function CreatorPage({
       return [];
     }
 
-    const isCompleted = String(spotlightSeries?.status || "").toLowerCase() === "completed";
+    const isCompleted =
+      String(spotlightSeries?.status || "").toLowerCase() === "completed";
 
     return [
-      isCompleted ? "Completed" : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
-      Array.isArray(spotlightSeries?.genres) && spotlightSeries.genres.length > 0
+      isCompleted
+        ? "Completed"
+        : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
+      Array.isArray(spotlightSeries?.genres) &&
+      spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
         : "Lead title on this page",
     ].filter(Boolean);
@@ -464,7 +497,9 @@ export default function CreatorPage({
       return;
     }
 
-    router.push(`/search?genre=${encodeURIComponent(primaryGenre)}&sort=latest`);
+    router.push(
+      `/search?genre=${encodeURIComponent(primaryGenre)}&sort=latest`,
+    );
   }, [router, topGenres]);
 
   const handleReturn = useCallback(() => {
@@ -494,38 +529,48 @@ export default function CreatorPage({
     [creatorItems],
   );
   const creatorPathways = useMemo(
-    () => [
-      spotlightSeries
-        ? {
-            id: "lead-title",
-            eyebrow: "Spotlight",
-            title: `View ${spotlightSeries.title}.`,
-            cta: "View Series",
-            onClick: () => handleOpenTitle(spotlightSeries),
-            accentClass:
-              "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
-          }
-        : null,
-      {
-        id: "genre",
-        eyebrow: "Genres",
-        title: topGenres[0] ? `Explore ${topGenres[0]}.` : "Explore similar reads.",
-        cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
-        onClick: handleBrowseGenre,
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-      {
-        id: "return",
-        eyebrow: "Back",
-        title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
-        cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
-        onClick: handleReturn,
-        accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
-      },
-    ].filter(Boolean),
-    [handleBrowseGenre, handleOpenTitle, handleReturn, originSeries, spotlightSeries, topGenres],
+    () =>
+      [
+        spotlightSeries
+          ? {
+              id: "lead-title",
+              eyebrow: "Spotlight",
+              title: `View ${spotlightSeries.title}.`,
+              cta: "View Series",
+              onClick: () => handleOpenTitle(spotlightSeries),
+              accentClass:
+                "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
+            }
+          : null,
+        {
+          id: "genre",
+          eyebrow: "Genres",
+          title: topGenres[0]
+            ? `Explore ${topGenres[0]}.`
+            : "Explore similar reads.",
+          cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
+          onClick: handleBrowseGenre,
+          accentClass:
+            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+        },
+        {
+          id: "return",
+          eyebrow: "Back",
+          title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
+          cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
+          onClick: handleReturn,
+          accentClass:
+            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+        },
+      ].filter(Boolean),
+    [
+      handleBrowseGenre,
+      handleOpenTitle,
+      handleReturn,
+      originSeries,
+      spotlightSeries,
+      topGenres,
+    ],
   );
   const emptyCreatorPathways = useMemo(
     () => [
@@ -534,9 +579,12 @@ export default function CreatorPage({
         eyebrow: "Search",
         title: `Search ${creatorName}.`,
         cta: "Search",
-        onClick: () => router.push(`/search?q=${encodeURIComponent(creatorName)}&sort=latest`),
+        onClick: () =>
+          router.push(
+            `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
+          ),
         accentClass:
-          "border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] text-slate-900 hover:border-[rgba(47,107,255,0.2)] hover:bg-[rgba(47,107,255,0.12)]",
+          "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] text-slate-900 hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.12)]",
       },
       {
         id: "featured-series",
@@ -606,13 +654,16 @@ export default function CreatorPage({
         <div className="gush-page-main gush-section-stack">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
-              accent="blue"
+              accent="amber"
+              appearance="light"
               eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
               title={`${creatorName} is not live here yet.`}
               description="Search or browse for now."
               stats={[
                 {
-                  label: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
+                  label: formatCreatorCreditTypeLabel(
+                    creatorIdentity.creditType,
+                  ),
                   value: creatorName,
                 },
                 {
@@ -622,13 +673,18 @@ export default function CreatorPage({
               ]}
             />
 
-            <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+            <SurfacePanel
+              tone="muted"
+              accent="amber"
+              appearance="light"
+              className="flex h-full flex-col justify-between space-y-6"
+            >
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                   Next step
                 </p>
                 <div>
-                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                     Keep browsing.
                   </h2>
                 </div>
@@ -638,14 +694,14 @@ export default function CreatorPage({
                 <button
                   type="button"
                   onClick={() => router.push("/search")}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Search
                 </button>
                 <button
                   type="button"
                   onClick={handleReturn}
-                  className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                  className={secondaryButtonClass}
                 >
                   Go back
                 </button>
@@ -667,13 +723,13 @@ export default function CreatorPage({
           </SurfacePanel>
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-                  Next
-                </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Keep browsing.
-                </h2>
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+                Next
+              </p>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                Keep browsing.
+              </h2>
             </div>
             <StorefrontPathwaysGrid
               cards={emptyCreatorPathways}
@@ -694,7 +750,8 @@ export default function CreatorPage({
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            accent="blue"
+            accent="amber"
+            appearance="light"
             eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
             title={heroCopy.title}
             description={heroCopy.description}
@@ -702,13 +759,18 @@ export default function CreatorPage({
             stats={creatorStats}
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Overview
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {creatorName}
                 </h2>
               </div>
@@ -719,7 +781,7 @@ export default function CreatorPage({
                 <button
                   type="button"
                   onClick={() => handleOpenTitle(spotlightSeries)}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Open {spotlightSeries.title}
                 </button>
@@ -727,7 +789,7 @@ export default function CreatorPage({
                 <button
                   type="button"
                   onClick={() => router.push("/rankings?view=featured")}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Browse Series
                 </button>
@@ -735,14 +797,14 @@ export default function CreatorPage({
               <button
                 type="button"
                 onClick={handleBrowseGenre}
-                className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                className={secondaryButtonClass}
               >
                 {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
               </button>
               <button
                 type="button"
                 onClick={handleReturn}
-                className="rounded-full border border-white/12 bg-transparent px-4 py-2.5 text-sm font-semibold text-white/72 transition hover:border-white/16 hover:bg-white/[0.05] hover:text-white"
+                className={secondaryButtonClass}
               >
                 {originSeries ? `Back to ${originSeries.title}` : "Go back"}
               </button>
@@ -786,7 +848,10 @@ export default function CreatorPage({
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-                  {(Array.isArray(spotlightSeries?.genres) ? spotlightSeries.genres : []).map((genre) => (
+                  {(Array.isArray(spotlightSeries?.genres)
+                    ? spotlightSeries.genres
+                    : []
+                  ).map((genre) => (
                     <span
                       key={genre}
                       className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-xs font-semibold text-slate-600"
@@ -795,7 +860,7 @@ export default function CreatorPage({
                     </span>
                   ))}
                   {spotlightSeries?.status ? (
-                    <span className="rounded-full border border-[rgba(47,107,255,0.14)] bg-[rgba(47,107,255,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#2f6bff)]">
+                    <span className="rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#63472f)]">
                       {spotlightSeries.status}
                     </span>
                   ) : null}

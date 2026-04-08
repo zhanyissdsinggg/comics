@@ -11,7 +11,7 @@ function MascotPlaceholder() {
     >
       <div className="absolute inset-0 rounded-[30px] border border-amber-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,247,237,0.96))] shadow-[0_18px_40px_rgba(15,23,42,0.08)]" />
       <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-amber-300/80" />
-      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-sky-200/90" />
+      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-stone-200/90" />
       <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-rose-200/90" />
       <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-slate-200/80 bg-white/90" />
       <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.1)]">
@@ -45,7 +45,9 @@ export default function NetworkFallback({
       aria-live="polite"
       className={cn(
         "flex w-full flex-col items-center justify-center px-4 py-8 sm:px-6",
-        compact ? "min-h-[18rem] sm:min-h-[20rem]" : "min-h-[42vh] sm:min-h-[48vh]",
+        compact
+          ? "min-h-[18rem] sm:min-h-[20rem]"
+          : "min-h-[42vh] sm:min-h-[48vh]",
         className,
       )}
     >
@@ -55,7 +57,7 @@ export default function NetworkFallback({
           cardClassName,
         )}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(59,130,246,0.08),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(134,98,69,0.08),transparent_24%)]" />
 
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
@@ -64,7 +66,12 @@ export default function NetworkFallback({
             Connection issue
           </p>
 
-          <h2 className={cn("max-w-md text-balance font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]", showIllustration ? "mt-3" : "mt-0")}>
+          <h2
+            className={cn(
+              "max-w-md text-balance font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]",
+              showIllustration ? "mt-3" : "mt-0",
+            )}
+          >
             {title}
           </h2>
 

@@ -24,7 +24,7 @@ export default function FilterBar({
   const [showAllGenres, setShowAllGenres] = useState(false);
   const [showGenrePicker, setShowGenrePicker] = useState(false);
   const genreMenuRef = useRef(null);
-  const isLight = appearance === "light";
+  const isLight = appearance === "light" || appearance === "default";
   const isQuiet = density === "quiet";
 
   const sortOptions = [
@@ -38,7 +38,9 @@ export default function FilterBar({
     { id: "completed", label: "Completed" },
   ];
 
-  const displayedGenres = showAllGenres ? genres : genres.slice(0, isQuiet ? 5 : 8);
+  const displayedGenres = showAllGenres
+    ? genres
+    : genres.slice(0, isQuiet ? 5 : 8);
   const activeFilterCount = [
     selectedGenre !== "all" ? selectedGenre : "",
     sortBy !== "latest" ? sortBy : "",
@@ -94,12 +96,11 @@ export default function FilterBar({
     };
   }, [isQuiet, showGenrePicker]);
 
-  const filterShellClass =
-    isLight
-      ? isQuiet
-        ? "rounded-[18px] border border-black/5 bg-white/50 px-3 py-2.5 shadow-none backdrop-blur-[2px]"
-        : "rounded-[22px] border border-black/6 bg-white/78 px-4 py-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-      : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
+  const filterShellClass = isLight
+    ? isQuiet
+      ? "rounded-[18px] border border-black/5 bg-white/50 px-3 py-2.5 shadow-none backdrop-blur-[2px]"
+      : "rounded-[22px] border border-black/6 bg-white/78 px-4 py-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+    : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
   const labelClass = isLight ? "text-slate-500" : "text-neutral-400";
   const subtleButtonClass = isLight
     ? "border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
@@ -119,7 +120,12 @@ export default function FilterBar({
         <div className="flex flex-wrap items-center justify-between gap-3">
           {!isQuiet ? (
             <div className="flex flex-wrap items-center gap-2.5">
-              <p className={cn("text-[11px] font-semibold uppercase tracking-[0.24em]", labelClass)}>
+              <p
+                className={cn(
+                  "text-[11px] font-semibold uppercase tracking-[0.24em]",
+                  labelClass,
+                )}
+              >
                 Refine
               </p>
               {activeFilterCount > 0 ? (
@@ -155,7 +161,9 @@ export default function FilterBar({
               type="button"
               onClick={onReset}
               className={`inline-flex items-center gap-2 rounded-full border ${
-                isQuiet ? "px-3 py-1.5 text-[11px]" : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
+                isQuiet
+                  ? "px-3 py-1.5 text-[11px]"
+                  : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
                   ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
@@ -169,9 +177,19 @@ export default function FilterBar({
         </div>
       ) : null}
 
-      <div className={cn(showHeaderRow ? "mt-3" : "", isQuiet ? "space-y-2.5" : "space-y-3")}>
+      <div
+        className={cn(
+          showHeaderRow ? "mt-3" : "",
+          isQuiet ? "space-y-2.5" : "space-y-3",
+        )}
+      >
         <div className="flex flex-col gap-2.5 xl:flex-row xl:items-start xl:justify-between">
-          <div className={cn("flex flex-wrap items-center", isQuiet ? "gap-2" : "gap-2.5")}>
+          <div
+            className={cn(
+              "flex flex-wrap items-center",
+              isQuiet ? "gap-2" : "gap-2.5",
+            )}
+          >
             <span className={visibleSectionLabelClass}>Sort</span>
             {sortOptions.map((option) => (
               <Chip
@@ -189,7 +207,12 @@ export default function FilterBar({
             ))}
           </div>
 
-          <div className={cn("flex flex-wrap items-center", isQuiet ? "gap-2" : "gap-2.5")}>
+          <div
+            className={cn(
+              "flex flex-wrap items-center",
+              isQuiet ? "gap-2" : "gap-2.5",
+            )}
+          >
             <span className={visibleSectionLabelClass}>Status</span>
             {statusOptions.map((option) => (
               <Chip
@@ -227,14 +250,17 @@ export default function FilterBar({
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-[rgba(49,87,214,0.16)] bg-[rgba(49,87,214,0.06)] text-slate-900"
+                          ? "border-[rgba(134,98,69,0.16)] bg-[rgba(134,98,69,0.07)] text-slate-900"
                           : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
                     )}
                   >
                     <span>Genres</span>
                     <ChevronDown
                       size={14}
-                      className={cn("transition-transform", showGenrePicker ? "rotate-180" : "")}
+                      className={cn(
+                        "transition-transform",
+                        showGenrePicker ? "rotate-180" : "",
+                      )}
                     />
                   </button>
 
@@ -307,7 +333,9 @@ export default function FilterBar({
                         subtleButtonClass,
                       )}
                     >
-                      {showAllGenres ? "Show less" : `Show all ${genres.length}`}
+                      {showAllGenres
+                        ? "Show less"
+                        : `Show all ${genres.length}`}
                     </button>
                   ) : null}
                 </div>

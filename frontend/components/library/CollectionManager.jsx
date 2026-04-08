@@ -20,7 +20,9 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
   const [message, setMessage] = useState("");
 
   const currentCollections = seriesId ? getCollectionsForSeries(seriesId) : [];
-  const currentCollectionIds = currentCollections.map((collection) => collection.id);
+  const currentCollectionIds = currentCollections.map(
+    (collection) => collection.id,
+  );
 
   const handleCreate = useCallback(() => {
     if (!newCollectionName.trim()) {
@@ -106,7 +108,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       </div>
 
       {message ? (
-        <div className="rounded-xl border border-[rgba(47,107,255,0.12)] bg-[rgba(47,107,255,0.06)] p-3 text-sm text-slate-700">
+        <div className="rounded-xl border border-[rgba(134,98,69,0.12)] bg-[rgba(134,98,69,0.06)] p-3 text-sm text-slate-700">
           {message}
         </div>
       ) : null}
@@ -120,7 +122,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
             onChange={(event) => setNewCollectionName(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && handleCreate()}
             placeholder="Collection name"
-            className="flex-1 rounded-lg border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 focus:border-[var(--gush-accent,#2f6bff)] focus:outline-none"
+            className="flex-1 rounded-lg border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 focus:border-[rgba(134,98,69,0.24)] focus:outline-none"
           />
           <button
             type="button"
@@ -135,7 +137,12 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       <div className="space-y-2">
         <h4 className="text-sm font-semibold text-slate-700">My Collections</h4>
         {collections.map((collection) => {
-          const isDefault = ["default", "reading", "completed", "wishlist"].includes(collection.id);
+          const isDefault = [
+            "default",
+            "reading",
+            "completed",
+            "wishlist",
+          ].includes(collection.id);
           const isInCollection = currentCollectionIds.includes(collection.id);
           const isEditing = editingId === collection.id;
 
@@ -149,7 +156,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                   type="checkbox"
                   checked={isInCollection}
                   onChange={() => handleToggleCollection(collection.id)}
-                  className="h-4 w-4 rounded border-black/10 bg-white text-[var(--gush-accent,#2f6bff)] focus:ring-[var(--gush-accent,#2f6bff)]"
+                  className="h-4 w-4 rounded border-black/10 bg-white text-[var(--gush-accent-strong,#63472f)] focus:ring-[rgba(134,98,69,0.18)]"
                 />
               ) : null}
 
@@ -159,14 +166,20 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     type="text"
                     value={editingName}
                     onChange={(event) => setEditingName(event.target.value)}
-                    onKeyDown={(event) => event.key === "Enter" && handleSaveEdit()}
-                    className="w-full rounded-lg border border-black/8 bg-white px-2 py-1 text-sm text-slate-700 focus:border-[var(--gush-accent,#2f6bff)] focus:outline-none"
+                    onKeyDown={(event) =>
+                      event.key === "Enter" && handleSaveEdit()
+                    }
+                    className="w-full rounded-lg border border-black/8 bg-white px-2 py-1 text-sm text-slate-700 focus:border-[rgba(134,98,69,0.24)] focus:outline-none"
                     autoFocus
                   />
                 ) : (
                   <div>
-                    <div className="text-sm font-medium text-slate-900">{collection.name}</div>
-                    <div className="text-xs text-slate-500">{collection.seriesIds.length} series</div>
+                    <div className="text-sm font-medium text-slate-900">
+                      {collection.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {collection.seriesIds.length} series
+                    </div>
                   </div>
                 )}
               </div>
@@ -216,7 +229,8 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       </div>
 
       <div className="rounded-xl border border-black/6 bg-white/80 p-3 text-xs text-slate-500">
-        Default collections like Favorites, Reading, Completed, and Wishlist can be renamed but not deleted.
+        Default collections like Favorites, Reading, Completed, and Wishlist can
+        be renamed but not deleted.
       </div>
     </div>
   );

@@ -235,21 +235,21 @@ export default function SiteFooter({
       <footer
         className={`mt-16 border-t ${
           isHome
-            ? "border-black/8 bg-[rgba(246,243,237,0.82)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.92)] dark:text-white"
+            ? "border-[color:var(--gush-border)] bg-[rgba(250,246,239,0.84)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.92)] dark:text-white"
             : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
         }`}
       >
-        <div className="mx-auto max-w-[1280px] px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-md space-y-2">
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className={`font-display text-2xl font-semibold tracking-tight ${isHome ? "text-slate-950" : "text-white"}`}
+                className={`font-display text-[1.95rem] font-semibold tracking-[-0.045em] ${isHome ? "text-slate-950" : "text-white"}`}
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
               {showTagline && footerTagline ? (
-                <p className={`text-sm leading-6 ${isHome ? "text-slate-600" : "text-neutral-300"}`}>
+                <p className={`text-sm leading-6 ${isHome ? "text-[color:var(--gush-ink-soft)]" : "text-neutral-300"}`}>
                   {footerTagline}
                 </p>
               ) : null}
@@ -260,7 +260,7 @@ export default function SiteFooter({
                 renderInternalLink(
                   link,
                   isHome
-                    ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white"
+                    ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
                     : "text-neutral-300 transition-colors hover:text-white",
                 ),
               )}
@@ -275,7 +275,7 @@ export default function SiteFooter({
             <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
+                className={isHome ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
               >
                 {siteConfig.supportEmail}
               </a>
@@ -284,7 +284,7 @@ export default function SiteFooter({
                   renderInternalLink(
                     link,
                     isHome
-                      ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
+                      ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white"
                       : "text-neutral-400 transition-colors hover:text-white",
                   )
                 ))}
@@ -305,27 +305,27 @@ export default function SiteFooter({
 
   return (
     <footer
-      className={`mt-16 border-t ${
-        isHome
-          ? "border-black/8 bg-[rgba(246,243,237,0.86)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.94)] dark:text-white"
+        className={`mt-16 border-t ${
+          isHome
+          ? "border-[color:var(--gush-border)] bg-[rgba(250,246,239,0.88)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.94)] dark:text-white"
           : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
       }`}
       >
-      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
-              <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400 dark:text-neutral-500" : "text-emerald-300/75"}`}>
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-[color:var(--gush-ink-faint)] dark:text-neutral-500" : "text-[rgba(242,207,155,0.7)]"}`}>
                 Stories
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className={`font-display text-3xl font-semibold tracking-tight ${isHome ? "text-slate-950 dark:text-white" : "text-white"}`}
+                className={`font-display text-[2.45rem] font-semibold tracking-[-0.05em] ${isHome ? "text-slate-950 dark:text-white" : "text-white"}`}
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
               {showTagline && footerTagline ? (
-                <p className={`text-sm leading-6 ${isHome ? "text-slate-600 dark:text-neutral-300" : "text-neutral-300"}`}>
+                <p className={`text-sm leading-6 ${isHome ? "text-[color:var(--gush-ink-soft)] dark:text-neutral-300" : "text-neutral-300"}`}>
                   {footerTagline}
                 </p>
               ) : null}
@@ -334,7 +334,7 @@ export default function SiteFooter({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={isHome ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
+                className={isHome ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 transition-colors hover:text-white"}
               >
                 {siteConfig.supportEmail}
               </a>
@@ -351,7 +351,7 @@ export default function SiteFooter({
                   renderInternalLink(
                     item,
                     isHome
-                      ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white"
+                      ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
                       : "text-neutral-300 transition-colors hover:text-white",
                   )
                 )
@@ -362,7 +362,7 @@ export default function SiteFooter({
           <div className="grid gap-6 sm:grid-cols-3">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
-                <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-slate-400 dark:text-neutral-500" : "text-neutral-400"}`}>
+                <h4 className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-[color:var(--gush-ink-faint)] dark:text-neutral-500" : "text-neutral-400"}`}>
                   {section.title}
                 </h4>
                 <ul className="space-y-2.5">
@@ -370,7 +370,7 @@ export default function SiteFooter({
                     <li key={link.href}>
                       {renderInternalLink(
                         link,
-                        `text-sm transition-colors ${isHome ? "text-slate-600 hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`,
+                        `text-sm transition-colors ${isHome ? "text-[color:var(--gush-ink-soft)] hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`,
                       )}
                     </li>
                   ))}
@@ -391,7 +391,7 @@ export default function SiteFooter({
                 renderInternalLink(
                   link,
                   isHome
-                    ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
+                    ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white"
                     : "text-neutral-400 transition-colors hover:text-white",
                 )
               ))}
@@ -404,7 +404,7 @@ export default function SiteFooter({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={isHome ? "text-slate-500 transition-colors hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
+                  className={isHome ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white" : "text-neutral-400 transition-colors hover:text-white"}
                 >
                   {item.label}
                 </a>

@@ -134,7 +134,10 @@ export default function AdultHubPage() {
     if (gateReportedRef.current) {
       return;
     }
-    trackEvent("adult_gate_blocked", { source: "adult-hub", reason: panelStatus });
+    trackEvent("adult_gate_blocked", {
+      source: "adult-hub",
+      reason: panelStatus,
+    });
     gateReportedRef.current = true;
   }, [isAdultMode, panelStatus]);
 
@@ -152,7 +155,9 @@ export default function AdultHubPage() {
     const applyResponse = (response) => {
       setSeriesResponse(response);
       if (response.ok) {
-        const adultSeries = (response.data?.series || []).filter((series) => series.adult);
+        const adultSeries = (response.data?.series || []).filter(
+          (series) => series.adult,
+        );
         setSeriesList(adultSeries);
         return true;
       }
@@ -182,9 +187,11 @@ export default function AdultHubPage() {
       if (!response.ok && (response.status === 0 || response.status >= 500)) {
         if (shouldRetry("adult_hub_series")) {
           retryTimer = setTimeout(() => {
-            apiGet("/api/series?adult=1", { bust: true }).then((retryResponse) => {
-              applyResponse(retryResponse);
-            });
+            apiGet("/api/series?adult=1", { bust: true }).then(
+              (retryResponse) => {
+                applyResponse(retryResponse);
+              },
+            );
           }, 600);
         }
       }
@@ -200,16 +207,25 @@ export default function AdultHubPage() {
   const spotlightItems = useMemo(
     () =>
       [...seriesList]
-        .sort((left, right) => getPopularityScore(right) - getPopularityScore(left))
+        .sort(
+          (left, right) => getPopularityScore(right) - getPopularityScore(left),
+        )
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, series.genres?.slice(0, 2).join(" | ") || "Adult pick")),
+        .map((series) =>
+          mapAdultItem(
+            series,
+            series.genres?.slice(0, 2).join(" | ") || "Adult pick",
+          ),
+        ),
     [seriesList],
   );
 
   const completedItems = useMemo(
     () =>
       seriesList
-        .filter((series) => String(series.status || "").toLowerCase() === "completed")
+        .filter(
+          (series) => String(series.status || "").toLowerCase() === "completed",
+        )
         .slice(0, 10)
         .map((series) => mapAdultItem(series, "Completed")),
     [seriesList],
@@ -243,9 +259,19 @@ export default function AdultHubPage() {
         value: isAdultMode ? "18+ enabled" : "Gate locked",
       },
     ],
-    [completedItems.length, freeUnlockItems.length, isAdultMode, loading, seriesList.length],
+    [
+      completedItems.length,
+      freeUnlockItems.length,
+      isAdultMode,
+      loading,
+      seriesList.length,
+    ],
   );
   const adultModeActionLabel = isAdultMode ? "18+ is on." : "18+ is off.";
+  const primaryButtonClass =
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -258,21 +284,25 @@ export default function AdultHubPage() {
             title="18+ shelf."
             description="Private by default."
             secondary={
-              isAdultMode
-                ? "Access is on."
-                : "Sign in and confirm access."
+              isAdultMode ? "Access is on." : "Sign in and confirm access."
             }
             stats={adultStats}
-            accent="blue"
+            accent="amber"
+            appearance="light"
           />
 
-          <SurfacePanel tone="muted" accent="blue" className="flex h-full flex-col justify-between space-y-6">
+          <SurfacePanel
+            tone="muted"
+            accent="amber"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
+          >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/42">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Access
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-white">
+                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {adultModeActionLabel}
                 </h2>
               </div>
@@ -283,15 +313,17 @@ export default function AdultHubPage() {
                 <>
                   <button
                     type="button"
-                    onClick={() => router.push("/rankings?type=popular&window=week")}
-                    className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                    onClick={() =>
+                      router.push("/rankings?type=popular&window=week")
+                    }
+                    className={primaryButtonClass}
                   >
                     Top series
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/88 transition hover:border-white/18 hover:bg-white/[0.08]"
+                    className={secondaryButtonClass}
                   >
                     Free unlocks
                   </button>
@@ -300,7 +332,7 @@ export default function AdultHubPage() {
                 <button
                   type="button"
                   onClick={handleGate}
-                  className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/92"
+                  className={primaryButtonClass}
                 >
                   Unlock 18+ access
                 </button>
@@ -311,7 +343,8 @@ export default function AdultHubPage() {
 
         {showStale ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-            Showing cached 18+ catalog data. Reconnect to refresh the latest titles.
+            Showing cached 18+ catalog data. Reconnect to refresh the latest
+            titles.
           </div>
         ) : null}
 
@@ -334,7 +367,8 @@ export default function AdultHubPage() {
               description="Check back later or browse the standard catalog."
               action={{
                 label: "Open Top Series",
-                onClick: () => router.push("/rankings?type=popular&window=week"),
+                onClick: () =>
+                  router.push("/rankings?type=popular&window=week"),
               }}
               appearance="light"
             />
@@ -349,7 +383,9 @@ export default function AdultHubPage() {
                 href="/rankings?type=popular&window=week"
                 ctaLabel="Open Top Series"
                 appearance="light"
-                onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
+                onItemClick={(item) =>
+                  router.push(`/series/${item.seriesId || item.id}`)
+                }
               />
             </SurfacePanel>
 
@@ -362,7 +398,9 @@ export default function AdultHubPage() {
                   href="/rankings?type=completed&window=all"
                   ctaLabel="Browse completed"
                   appearance="light"
-                  onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
+                  onItemClick={(item) =>
+                    router.push(`/series/${item.seriesId || item.id}`)
+                  }
                 />
               </SurfacePanel>
             ) : null}
@@ -376,7 +414,9 @@ export default function AdultHubPage() {
                   href="/rankings?type=ttf&window=all"
                   ctaLabel="See free unlocks"
                   appearance="light"
-                  onItemClick={(item) => router.push(`/series/${item.seriesId || item.id}`)}
+                  onItemClick={(item) =>
+                    router.push(`/series/${item.seriesId || item.id}`)
+                  }
                 />
               </SurfacePanel>
             ) : null}
