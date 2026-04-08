@@ -32,7 +32,7 @@ function HomeSectionHeader({
         {eyebrow ? (
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
             {Icon ? (
-              <span className="inline-flex size-6 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.88)] text-[color:var(--gush-accent)] dark:bg-white/[0.04]">
+              <span className="inline-flex size-7 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.92)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] dark:bg-white/[0.04]">
                 <Icon className="size-3.5" />
               </span>
             ) : null}
@@ -54,7 +54,7 @@ function HomeSectionHeader({
           type="button"
           variant="ghost"
           onClick={onCtaClick}
-          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
+          className="h-10 rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-4 text-sm font-semibold text-[color:var(--gush-ink-soft)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
         >
           {ctaLabel}
           <ArrowRight className="size-4" />
@@ -117,30 +117,32 @@ function HomeShelfSection({
   }
 
   return (
-    <section className="space-y-8 md:space-y-9">
-      <HomeSectionHeader
-        icon={Icon}
-        eyebrow={eyebrow}
-        title={title}
-        description={description}
-        ctaLabel={ctaLabel}
-        onCtaClick={onCtaClick}
-      />
+    <section className="rounded-[36px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.98),rgba(246,239,231,0.95))] p-5 shadow-[0_18px_44px_rgba(37,28,19,0.04)] sm:p-6 xl:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.9),rgba(10,15,24,0.96))] dark:shadow-[0_22px_68px_rgba(0,0,0,0.2)]">
+      <div className="space-y-8 md:space-y-9">
+        <HomeSectionHeader
+          icon={Icon}
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          ctaLabel={ctaLabel}
+          onCtaClick={onCtaClick}
+        />
 
-      <div className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.id}>
-            <PortraitCard
-              item={item}
-              tone={item.coverTone}
-              appearance="light"
-              density="compact"
-              showActionLabel={false}
-              actionLabel={actionLabel}
-              onClick={() => onItemClick?.(item)}
-            />
-          </div>
-        ))}
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 xl:grid-cols-4">
+          {items.map((item) => (
+            <div key={item.id}>
+              <PortraitCard
+                item={item}
+                tone={item.coverTone}
+                appearance="light"
+                density="compact"
+                showActionLabel={false}
+                actionLabel={actionLabel}
+                onClick={() => onItemClick?.(item)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -279,25 +281,27 @@ export default function HomeContentSections({
         </>
       )}
 
-      <section className="space-y-7 md:space-y-8">
-        <HomeSectionHeader
-          eyebrow="Ways To Read"
-          title="Browse by format"
-          description="Choose the reading rhythm that fits your mood, then keep exploring from there."
-        />
+      <section className="rounded-[36px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.98),rgba(246,239,231,0.95))] p-5 shadow-[0_18px_44px_rgba(37,28,19,0.04)] sm:p-6 xl:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.9),rgba(10,15,24,0.96))] dark:shadow-[0_22px_68px_rgba(0,0,0,0.2)]">
+        <div className="space-y-7 md:space-y-8">
+          <HomeSectionHeader
+            eyebrow="Ways To Read"
+            title="Browse by format"
+            description="Choose the reading rhythm that fits your mood, then keep exploring from there."
+          />
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {GUIDE_CARDS.map((card) => (
-            <HomeGuideCard
-              key={card.id}
-              icon={card.icon}
-              eyebrow={card.eyebrow}
-              title={card.title}
-              description={card.description}
-              ctaLabel={card.ctaLabel}
-              onClick={() => onGuideClick?.(card.href)}
-            />
-          ))}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {GUIDE_CARDS.map((card) => (
+              <HomeGuideCard
+                key={card.id}
+                icon={card.icon}
+                eyebrow={card.eyebrow}
+                title={card.title}
+                description={card.description}
+                ctaLabel={card.ctaLabel}
+                onClick={() => onGuideClick?.(card.href)}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </div>

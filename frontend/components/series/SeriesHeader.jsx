@@ -130,8 +130,8 @@ export default function SeriesHeader({
   const primaryActionClassName = [
     "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-colors",
     highlightPrimaryAction
-      ? "border-[rgba(183,129,64,0.24)] bg-[linear-gradient(180deg,rgba(255,232,202,0.98),rgba(248,214,168,0.98))] text-slate-950 shadow-[0_16px_36px_rgba(183,129,64,0.14)]"
-      : "border-[rgba(183,129,64,0.2)] bg-[linear-gradient(180deg,rgba(255,236,210,0.98),rgba(247,221,184,0.98))] text-slate-950 shadow-[0_14px_34px_rgba(183,129,64,0.12)] hover:border-[rgba(183,129,64,0.28)] hover:bg-[linear-gradient(180deg,rgba(255,240,220,1),rgba(248,226,194,1))]",
+      ? "border-[rgba(183,129,64,0.22)] bg-[linear-gradient(180deg,rgba(255,236,210,0.98),rgba(248,219,180,0.98))] text-slate-950 shadow-[0_16px_36px_rgba(183,129,64,0.14)]"
+      : "border-[rgba(183,129,64,0.18)] bg-[linear-gradient(180deg,rgba(255,241,221,0.98),rgba(248,227,196,0.98))] text-slate-950 shadow-[0_14px_34px_rgba(183,129,64,0.12)] hover:border-[rgba(183,129,64,0.26)] hover:bg-[linear-gradient(180deg,rgba(255,244,228,1),rgba(249,231,202,1))]",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
@@ -160,34 +160,17 @@ export default function SeriesHeader({
 
   return (
     <header className="py-4 sm:py-6">
-      <section className="relative overflow-hidden rounded-[38px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,244,238,0.96))] shadow-[0_28px_72px_rgba(15,23,42,0.08)]">
+      <section className="relative overflow-hidden rounded-[42px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.985),rgba(247,242,235,0.96))] shadow-[0_30px_84px_rgba(15,23,42,0.09)]">
         {coverBackdropUrl ? (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.08]"
+            className="absolute inset-0 bg-cover bg-center opacity-[0.1]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.97)_0%,rgba(255,249,240,0.92)_42%,rgba(250,245,236,0.82)_72%,rgba(246,239,230,0.72)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(183,129,64,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(134,98,69,0.08),transparent_28%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,247,0.98)_0%,rgba(255,249,240,0.95)_40%,rgba(250,245,236,0.84)_72%,rgba(246,239,230,0.72)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(183,129,64,0.14),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(134,98,69,0.08),transparent_28%)]" />
 
-        <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8 xl:p-8">
-          <div className="space-y-4">
-            <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/82 shadow-[0_24px_54px_rgba(15,23,42,0.08)]">
-              <div className="aspect-[3/4] w-full overflow-hidden">
-                <Cover
-                  tone={series.coverTone}
-                  coverUrl={series.coverUrl}
-                  label={series.title}
-                  eyebrow={creatorPresentation.eyebrow}
-                  badge=""
-                  genres={series.genres}
-                  seriesType={series.type}
-                  className="h-full w-full"
-                />
-              </div>
-            </div>
-          </div>
-
+        <div className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.1fr)_280px] lg:gap-10 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-black/8 bg-white/78 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600">
@@ -200,7 +183,10 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
-            <h1 className="mt-4 font-display text-[2.35rem] font-semibold leading-[0.94] tracking-[-0.045em] text-slate-950 sm:text-[3rem] lg:text-[4.1rem]">
+            <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Story Page
+            </p>
+            <h1 className="mt-4 max-w-4xl font-display text-[2.55rem] font-semibold leading-[0.9] tracking-[-0.055em] text-slate-950 sm:text-[3.3rem] lg:text-[4.5rem]">
               {series.title || "Series"}
             </h1>
 
@@ -210,6 +196,17 @@ export default function SeriesHeader({
                 <>
                   <span className="text-slate-300">•</span>
                   <span>{latestEpisodeValue}</span>
+                </>
+              ) : null}
+              {creatorHref ? (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <Link
+                    href={creatorHref}
+                    className="font-medium text-slate-700 transition-colors hover:text-slate-950"
+                  >
+                    View creator
+                  </Link>
                 </>
               ) : null}
             </div>
@@ -227,55 +224,18 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-7 max-w-3xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Story
               </p>
-              <p className="max-w-3xl text-[15px] leading-7 text-slate-600 sm:text-base sm:leading-8">
+              <p className="text-[15px] leading-8 text-slate-600 sm:text-base">
                 {series.description ||
                   "Open the first episode and see if it lands."}
               </p>
             </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-              {heroFacts.map((item) =>
-                item.href ? (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="rounded-[22px] border border-black/8 bg-white/80 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:border-black/12 hover:bg-white"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">
-                      {item.value}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      {item.detail}
-                    </p>
-                  </Link>
-                ) : (
-                  <div
-                    key={item.label}
-                    className="rounded-[22px] border border-black/8 bg-white/80 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">
-                      {item.value}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      {item.detail}
-                    </p>
-                  </div>
-                ),
-              )}
-            </div>
-
             {primaryActions ? (
-              <div className="mt-6 max-w-sm">{primaryActions}</div>
+              <div className="mt-8 max-w-sm">{primaryActions}</div>
             ) : null}
 
             <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
@@ -308,6 +268,73 @@ export default function SeriesHeader({
                 className="min-h-[44px] rounded-full border border-black/8 bg-white/84 px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950"
               />
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-[32px] border border-black/8 bg-white/84 shadow-[0_24px_60px_rgba(15,23,42,0.09)]">
+              <div className="aspect-[3/4] w-full overflow-hidden">
+                <Cover
+                  tone={series.coverTone}
+                  coverUrl={series.coverUrl}
+                  label={series.title}
+                  eyebrow={creatorPresentation.eyebrow}
+                  badge=""
+                  genres={series.genres}
+                  seriesType={series.type}
+                  className="h-full w-full"
+                />
+              </div>
+            </div>
+            <div className="rounded-[28px] border border-black/8 bg-white/78 p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Credits
+              </p>
+              <p className="mt-3 text-base font-semibold text-slate-950">
+                {creatorPresentation.value}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {creatorHref
+                  ? "Public creator details are available from the credit page."
+                  : creatorPresentation.detail}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-2 xl:grid-cols-5">
+            {heroFacts.map((item) =>
+              item.href ? (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="rounded-[24px] border border-black/8 bg-white/82 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:border-black/12 hover:bg-white"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-slate-950">
+                    {item.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {item.detail}
+                  </p>
+                </Link>
+              ) : (
+                <div
+                  key={item.label}
+                  className="rounded-[24px] border border-black/8 bg-white/82 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-slate-950">
+                    {item.value}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {item.detail}
+                  </p>
+                </div>
+              ),
+            )}
           </div>
         </div>
       </section>

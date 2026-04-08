@@ -616,11 +616,11 @@ function HomeContent({ initialSearchParams = {} }) {
 
   const heroEyebrow = resumeSeries ? "Continue Reading" : "Original Stories";
   const heroHeading = resumeSeries
-    ? "Pick up where you left off."
-    : "A calmer home for comics and novels.";
+    ? "Return to the story without losing the thread."
+    : "A quieter home for comics and novels.";
   const heroSummary = resumeSeries
-    ? "Your library stays in sync, so the next episode is always close at hand."
-    : "Editorial picks, cleaner shelves, and stories worth staying with.";
+    ? "Your place stays saved, so the next episode is already waiting."
+    : "One strong lead, calmer shelves, and more room to stay with a story.";
   const heroFeatureEyebrow = resumeSeries ? "Current Read" : "Now Featuring";
   const heroFeatureSummary =
     clampText(heroSeries?.description, 150) ||
@@ -632,6 +632,8 @@ function HomeContent({ initialSearchParams = {} }) {
     : heroSeries?.id
       ? "Start Reading"
       : "Browse Stories";
+  const heroSupportLabel = resumeSeries ? "Reading Notes" : "Lead Story";
+  const heroSupportTitle = heroSeries?.title || "Featured story";
 
   return (
     <div className="gush-page-shell gush-home-shell overflow-hidden">
@@ -643,79 +645,130 @@ function HomeContent({ initialSearchParams = {} }) {
           {loading ? (
             <div className="aspect-[5/6] w-full animate-pulse rounded-[38px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.84)] shadow-[0_24px_54px_rgba(37,28,19,0.05)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)] xl:items-stretch">
-              <Card className="relative min-h-[420px] overflow-hidden rounded-[40px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(245,238,229,0.97))] py-0 shadow-[0_28px_68px_rgba(37,28,19,0.08)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.94),rgba(11,16,24,0.98))] dark:shadow-[0_32px_90px_rgba(0,0,0,0.28)]">
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_minmax(320px,0.72fr)] xl:items-stretch">
+              <Card className="relative min-h-[440px] overflow-hidden rounded-[42px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.995),rgba(244,236,226,0.97))] py-0 shadow-[0_34px_88px_rgba(37,28,19,0.09)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.94),rgba(11,16,24,0.98))] dark:shadow-[0_34px_96px_rgba(0,0,0,0.28)]">
                 {featuredBannerUrl ? (
                   <div
-                    className="absolute inset-y-0 right-0 hidden w-[44%] bg-cover bg-center opacity-[0.14] xl:block dark:opacity-[0.18]"
+                    className="absolute inset-y-0 right-0 hidden w-[46%] bg-cover bg-center opacity-[0.16] xl:block dark:opacity-[0.2]"
                     style={{ backgroundImage: `url(${featuredBannerUrl})` }}
                   />
                 ) : null}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.12),transparent_24%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.18),transparent_22%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.2),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.12),transparent_24%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(215,177,130,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(109,123,171,0.18),transparent_22%)]" />
 
-                <CardContent className="relative flex h-full min-h-[420px] flex-col justify-between p-6 sm:p-8 xl:min-h-[520px] xl:p-12">
-                  <div className="max-w-[44rem]">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
-                      {heroEyebrow}
-                    </p>
-                    <h1 className="mt-4 max-w-4xl font-display text-[2.8rem] font-semibold leading-[0.92] tracking-[-0.055em] text-[color:var(--gush-ink-strong)] sm:text-[3.4rem] xl:text-[5rem] dark:text-white">
-                      {heroHeading}
-                    </h1>
-                    {heroSummary ? (
-                      <p className="mt-5 max-w-2xl text-[0.98rem] leading-8 text-[color:var(--gush-ink-soft)] dark:text-white/68">
-                        {heroSummary}
-                      </p>
-                    ) : null}
-                  </div>
+                <CardContent className="relative grid h-full min-h-[440px] gap-8 p-6 sm:p-8 xl:min-h-[560px] xl:grid-cols-[minmax(0,1.12fr)_minmax(250px,0.72fr)] xl:gap-10 xl:p-12">
+                  <div className="flex h-full flex-col justify-between">
+                    <div className="max-w-[46rem]">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <p className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.78)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/46">
+                          {heroEyebrow}
+                        </p>
+                        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                          Editorial shelves, clearer starts
+                        </p>
+                      </div>
 
-                  <div className="mt-10 space-y-6">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Link
-                        href={primaryHeroHref}
-                        className={cn(
-                          buttonVariants({ size: "lg" }),
-                          "h-12 rounded-full bg-[color:var(--gush-ink-strong)] px-6 text-sm font-semibold text-white shadow-[var(--gush-shadow-button)] hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200",
-                        )}
-                      >
-                        {primaryHeroCtaLabel}
-                        <ArrowRight className="size-4" />
-                      </Link>
+                      <h1 className="mt-5 max-w-4xl font-display text-[3rem] font-semibold leading-[0.9] tracking-[-0.06em] text-[color:var(--gush-ink-strong)] sm:text-[3.8rem] xl:text-[5.6rem] dark:text-white">
+                        {heroHeading}
+                      </h1>
+                      {heroSummary ? (
+                        <p className="mt-5 max-w-2xl text-[0.98rem] leading-8 text-[color:var(--gush-ink-soft)] dark:text-white/68">
+                          {heroSummary}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-8 flex flex-wrap items-center gap-3">
+                        <Link
+                          href={primaryHeroHref}
+                          className={cn(
+                            buttonVariants({ size: "lg" }),
+                            "h-12 rounded-full bg-[color:var(--gush-ink-strong)] px-6 text-sm font-semibold text-white shadow-[var(--gush-shadow-button)] hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200",
+                          )}
+                        >
+                          {primaryHeroCtaLabel}
+                          <ArrowRight className="size-4" />
+                        </Link>
+                      </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {heroMetrics.map((metric) => (
-                        <div
-                          key={metric.id}
-                          className="rounded-[22px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.7)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] dark:border-white/10 dark:bg-white/[0.04]"
-                        >
-                          <p className="text-[1.2rem] font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
-                            {metric.value}
+                    <div className="mt-10 rounded-[32px] border border-[color:var(--gush-border)] bg-[rgba(255,252,247,0.74)] p-5 shadow-[0_18px_42px_rgba(37,28,19,0.05)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+                      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-[30rem]">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                            {heroSupportLabel}
                           </p>
-                          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
-                            {metric.label}
+                          <h2 className="mt-3 font-display text-[2rem] font-semibold tracking-[-0.05em] text-[color:var(--gush-ink-strong)] dark:text-white">
+                            {heroSupportTitle}
+                          </h2>
+                          {heroMetaLine ? (
+                            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
+                              {heroMetaLine}
+                            </p>
+                          ) : null}
+                          <p className="mt-4 text-sm leading-7 text-[color:var(--gush-ink-soft)] dark:text-white/68">
+                            {heroFeatureSummary}
                           </p>
                         </div>
-                      ))}
+
+                        <div className="grid w-full gap-3 sm:grid-cols-3 lg:max-w-[22rem] lg:grid-cols-1">
+                          {heroMetrics.map((metric) => (
+                            <div
+                              key={metric.id}
+                              className="rounded-[22px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.74)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] dark:border-white/10 dark:bg-white/[0.04]"
+                            >
+                              <p className="text-[1.24rem] font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
+                                {metric.value}
+                              </p>
+                              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                                {metric.label}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap gap-2.5">
+                        {heroGenrePills.map((genre) => (
+                          <span
+                            key={`hero-genre-${genre}`}
+                            className="inline-flex items-center whitespace-nowrap rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.7)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/68"
+                          >
+                            {genre}
+                          </span>
+                        ))}
+                        {heroSignals.slice(0, 2).map((signal) => (
+                          <span
+                            key={signal.id}
+                            className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/66"
+                          >
+                            {signal.content}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="flex h-full flex-col gap-4 xl:items-end">
+                    {heroSeries ? (
+                      <div className="w-full max-w-[310px]">
+                        <HeroCoverPreview
+                          series={heroSeries}
+                          eyebrow={resumeSeries ? "Continue" : "Featured"}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>
 
               <div className="grid gap-4">
                 {heroSeries ? (
-                  <Card className="overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] py-0 shadow-[0_20px_48px_rgba(37,28,19,0.05)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
+                  <Card className="overflow-hidden rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] py-0 shadow-[0_20px_48px_rgba(37,28,19,0.05)] ring-0 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
                     <CardContent className="p-5 sm:p-6">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
-                        {heroFeatureEyebrow}
+                        On The Desk
                       </p>
-                      <div className="mt-4 grid gap-4 sm:grid-cols-[136px_minmax(0,1fr)]">
-                        <div className="max-w-[136px]">
-                          <HeroCoverPreview
-                            series={heroSeries}
-                            eyebrow={resumeSeries ? "Continue" : "Featured"}
-                          />
-                        </div>
-                        <div className="min-w-0">
+                      <div className="mt-4 space-y-4">
+                        <div>
                           <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-[color:var(--gush-ink-strong)] dark:text-white">
                             {heroSeries?.title || "Featured story"}
                           </h2>
@@ -725,29 +778,21 @@ function HomeContent({ initialSearchParams = {} }) {
                               {heroMetaLine}
                             </p>
                           ) : null}
+                        </div>
 
-                          <p className="mt-4 text-sm leading-7 text-[color:var(--gush-ink-soft)] dark:text-white/68">
+                        <p className="text-sm leading-7 text-[color:var(--gush-ink-soft)] dark:text-white/68">
+                          {resumeSeries
+                            ? "Your saved place, the latest chapter, and the next calm step all stay in one lane."
+                            : "A single lead to open first, then a cleaner handoff into the rest of the shelf."}
+                        </p>
+
+                        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] p-4 dark:border-white/10 dark:bg-white/[0.04]">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                            {heroFeatureEyebrow}
+                          </p>
+                          <p className="mt-2 text-sm leading-7 text-[color:var(--gush-ink-soft)] dark:text-white/66">
                             {heroFeatureSummary}
                           </p>
-
-                          <div className="mt-4 flex flex-wrap gap-2.5">
-                            {heroGenrePills.map((genre) => (
-                              <span
-                                key={`hero-genre-${genre}`}
-                                className="inline-flex items-center whitespace-nowrap rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/68"
-                              >
-                                {genre}
-                              </span>
-                            ))}
-                            {heroSignals.slice(0, 2).map((signal) => (
-                              <span
-                                key={signal.id}
-                                className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/66"
-                              >
-                                {signal.content}
-                              </span>
-                            ))}
-                          </div>
                         </div>
                       </div>
                     </CardContent>

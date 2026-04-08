@@ -168,7 +168,7 @@ function RankingsLoadingState() {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
       <div className="space-y-6">
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+        <SurfacePanel className="space-y-5" appearance="light" accent="amber">
           <div className="space-y-3">
             <div className="h-3 w-28 rounded-full bg-slate-200" />
             <div className="h-10 w-72 rounded-full bg-slate-200" />
@@ -189,7 +189,7 @@ function RankingsLoadingState() {
         </SurfacePanel>
       </div>
 
-      <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+      <SurfacePanel className="space-y-4" appearance="light" accent="amber">
         <div className="h-3 w-24 rounded-full bg-slate-200" />
         <div className="h-8 w-48 rounded-full bg-slate-200" />
         <div className="h-4 w-full rounded-full bg-slate-100" />
@@ -445,7 +445,7 @@ export default function RankingsPage({
             <SurfacePanel
               className="space-y-4"
               appearance="light"
-              accent="blue"
+              accent="amber"
             >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -479,7 +479,7 @@ export default function RankingsPage({
             <SurfacePanel
               className="space-y-4"
               appearance="light"
-              accent="blue"
+              accent="amber"
             >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -608,7 +608,7 @@ export default function RankingsPage({
                 <SurfacePanel
                   className="space-y-5"
                   appearance="light"
-                  accent="blue"
+                  accent="amber"
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                     More Series
@@ -681,7 +681,7 @@ export default function RankingsPage({
               <SurfacePanel
                 className="space-y-4"
                 appearance="light"
-                accent="blue"
+                accent="amber"
               >
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">

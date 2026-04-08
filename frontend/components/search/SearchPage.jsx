@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
+import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import Cover from "../common/Cover";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
@@ -710,12 +710,12 @@ export default function SearchPage() {
   const hasSparseResults =
     Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search.";
+  const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
   const heroDescription = query
     ? loading
-      ? "Updating results."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
-    : "Titles, creators, and genres.";
+      ? "Refreshing the closest matches."
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across titles, creators, and nearby shelves.`
+    : "Find a title, follow a creator, or start from a live keyword.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
@@ -729,11 +729,11 @@ export default function SearchPage() {
   const lightFeatureAccentClass =
     "border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.08)]";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-colors hover:border-black/12 hover:bg-[#fcfbf8]";
   const accentButtonClass =
-    "rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.06)] px-3 py-2 text-sm font-semibold text-slate-950 transition-colors hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.08)]";
+    "rounded-full border border-[rgba(134,98,69,0.14)] bg-[rgba(134,98,69,0.08)] px-3 py-2 text-sm font-semibold text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.74)] transition-colors hover:border-[rgba(134,98,69,0.2)] hover:bg-[rgba(134,98,69,0.1)]";
   const filterSelectClass =
-    "rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm text-slate-700 outline-none transition-colors focus:border-[rgba(134,98,69,0.24)]";
+    "rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm text-slate-700 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors focus:border-[rgba(134,98,69,0.24)]";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -1084,34 +1084,61 @@ export default function SearchPage() {
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.26fr)_minmax(320px,0.74fr)]">
           <SurfacePanel
-            className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
+            className="space-y-6 rounded-[40px] px-5 py-5 sm:px-7 sm:py-7"
             tone="highlight"
             accent="amber"
             appearance="light"
           >
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Search
-              </p>
-              <h1 className="mt-4 font-display text-[2.35rem] font-semibold tracking-[-0.045em] text-slate-950 sm:text-[3rem] xl:text-[3.8rem]">
-                {heroTitle}
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[0.98rem]">
-                {heroDescription}
-              </p>
-              {heroSecondary ? (
-                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
-              ) : null}
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(260px,0.7fr)] xl:items-end">
+              <div className="max-w-3xl">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <p className="rounded-full border border-black/8 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                    Search
+                  </p>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
+                    Titles, creators, and shelves
+                  </p>
+                </div>
+                <h1 className="mt-5 font-display text-[2.6rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[3.4rem] xl:text-[4.35rem]">
+                  {heroTitle}
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[1rem]">
+                  {heroDescription}
+                </p>
+                {heroSecondary ? (
+                  <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+                ) : null}
+              </div>
+
+              <div className="rounded-[30px] border border-black/6 bg-[rgba(255,252,247,0.72)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.05)] backdrop-blur-sm sm:p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  {query ? "Closest lane" : "Search cues"}
+                </p>
+                <p className="mt-3 text-base font-semibold tracking-tight text-slate-950">
+                  {query
+                    ? leadSearchResult?.title || "Results are updating."
+                    : mastheadLeadKeyword?.label
+                      ? `"${mastheadLeadKeyword.label}" is active right now.`
+                      : "Start with a title, genre, or creator."}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {query
+                    ? leadSearchResult
+                      ? summarizeSearchDescription(leadSearchResult)
+                      : "Use filters to narrow the shelf."
+                    : "Live keywords, saved searches, and creator matches all stay in the same lane."}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(248,244,238,0.92))] p-4 shadow-[0_16px_34px_rgba(15,23,42,0.05)] sm:p-5">
+            <div className="rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(248,244,238,0.94))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
                 showShortcut={false}
                 initialValue={query}
               />
-              {suggestions.length > 0 ? (
+              {query && suggestions.length > 0 ? (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {suggestions.slice(0, 6).map((item) => (
                     <button
@@ -1124,13 +1151,31 @@ export default function SearchPage() {
                     </button>
                   ))}
                 </div>
+              ) : !query && (hotKeywords.length > 0 || keywords.length > 0) ? (
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  {normalizeKeywordList([
+                    ...hotKeywords.slice(0, 3),
+                    ...keywords.slice(0, 3),
+                  ])
+                    .slice(0, 6)
+                    .map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => updateParam("q", item.value)}
+                        className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm text-slate-600 transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                </div>
               ) : null}
             </div>
           </SurfacePanel>
 
           <div className="grid gap-4">
             <SurfacePanel
-              className="h-full space-y-5 rounded-[32px] p-5 sm:p-6"
+              className="h-full space-y-5 rounded-[34px] p-5 sm:p-6"
               tone="muted"
               accent="amber"
               appearance="light"
@@ -1138,18 +1183,68 @@ export default function SearchPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Overview
               </p>
-              <h2 className="mt-3 font-display text-[1.5rem] font-semibold tracking-tight text-slate-950">
-                {query ? "Closest result." : "Start here."}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                {query
-                  ? "Use filters to narrow."
-                  : mastheadLeadKeyword
-                    ? `"${mastheadLeadKeyword.label}" is active right now.`
-                    : "Browse titles and creators."}
-              </p>
 
-              <div className="mt-5 grid grid-cols-3 gap-2.5">
+              {leadSearchResult ? (
+                <div className="rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,245,239,0.94))] p-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]">
+                  <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
+                    <div className="overflow-hidden rounded-[18px] border border-black/6 bg-neutral-900 shadow-[0_14px_28px_rgba(15,23,42,0.08)]">
+                      <Cover
+                        tone={leadSearchResult.coverTone}
+                        coverUrl={leadSearchResult.coverUrl}
+                        label={leadSearchResult.title}
+                        eyebrow=""
+                        badge={getSearchSeriesBadge(leadSearchResult)}
+                        genres={leadSearchResult.genres}
+                        seriesType={leadSearchResult.type}
+                        className="aspect-[3/4] w-full"
+                        sizes="88px"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
+                        {leadSearchResult.title}
+                      </h2>
+                      <p className="mt-2 text-sm text-slate-500">
+                        {formatSearchSeriesMeta(leadSearchResult)}
+                      </p>
+                      <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600">
+                        {summarizeSearchDescription(leadSearchResult)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleSeriesClick(
+                            leadSearchResult.id,
+                            "SEARCH_MASTHEAD",
+                            query
+                              ? "search_masthead_result"
+                              : "search_masthead_featured",
+                          )
+                        }
+                        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-slate-950"
+                      >
+                        Open title
+                        <ArrowRight className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,245,239,0.94))] p-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]">
+                  <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
+                    {query ? "Closest result." : "Start here."}
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    {query
+                      ? "Use filters to narrow."
+                      : mastheadLeadKeyword
+                        ? `"${mastheadLeadKeyword.label}" is active right now.`
+                        : "Browse titles and creators."}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-2.5">
                 <div className="rounded-[20px] border border-black/6 bg-white/84 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
                   <p className="text-lg font-semibold tracking-tight text-slate-950">
                     {query
@@ -1224,11 +1319,15 @@ export default function SearchPage() {
         />
 
         {shouldShowReco ? (
-          <SurfacePanel className="space-y-8" appearance="light" accent="blue">
+          <SurfacePanel
+            className="space-y-8 rounded-[36px]"
+            appearance="light"
+            accent="amber"
+          >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Next
+                  Discovery
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
@@ -1291,9 +1390,9 @@ export default function SearchPage() {
         {showResultSections ? (
           <>
             <SurfacePanel
-              className="space-y-5"
+              className="space-y-5 rounded-[36px]"
               appearance="light"
-              accent="blue"
+              accent="amber"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -1381,7 +1480,7 @@ export default function SearchPage() {
               <SurfacePanel
                 className="space-y-4"
                 appearance="light"
-                accent="blue"
+                accent="amber"
               >
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -1519,11 +1618,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,244,238,0.95))] p-4 text-left shadow-[0_18px_42px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
+                      className="group block overflow-hidden rounded-[34px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(247,242,235,0.95))] p-5 text-left shadow-[0_20px_52px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-black/10"
                       aria-label={`Open ${series.title}`}
                     >
-                      <div className="grid gap-4 sm:grid-cols-[126px_minmax(0,1fr)]">
-                        <div className="overflow-hidden rounded-[20px] border border-black/6 bg-neutral-900 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+                      <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
+                        <div className="overflow-hidden rounded-[22px] border border-black/6 bg-neutral-900 shadow-[0_14px_32px_rgba(15,23,42,0.08)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1536,7 +1635,7 @@ export default function SearchPage() {
                             sizes="(max-width: 640px) 112px, 160px"
                           />
                         </div>
-                        <div className="min-w-0 space-y-3">
+                        <div className="min-w-0 space-y-3.5">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                             Result
                           </p>
@@ -1549,6 +1648,12 @@ export default function SearchPage() {
                           <p className="line-clamp-2 text-sm leading-6 text-slate-600">
                             {summarizeSearchDescription(series)}
                           </p>
+                          <div className="flex items-center justify-between border-t border-black/6 pt-3">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Open title
+                            </span>
+                            <ArrowRight className="size-4 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-700" />
+                          </div>
                         </div>
                       </div>
                     </Link>
