@@ -656,7 +656,7 @@ export default function AdminRevenuePage() {
               description="把活动结果和归因限制同时说明白，避免看起来像后台自己编出了完整效果。"
             >
               {!promotionsRoiAvailable || promotionsAttributionModel ? (
-                <div className="mb-5 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
+                <div className="mb-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
                   {promotionsAttributionCopy}
                 </div>
               ) : null}

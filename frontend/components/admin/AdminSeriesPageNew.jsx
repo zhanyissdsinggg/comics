@@ -229,20 +229,20 @@ function SeriesCard(props) {
   return (
     <article
       className={`rounded-[28px] border bg-white/92 p-4 shadow-[var(--gush-shadow-soft)] transition ${
-        isSelected ? "border-[rgba(47,88,198,0.24)] ring-1 ring-[rgba(47,88,198,0.18)]" : "border-black/8"
+        isSelected ? "border-[color:var(--gush-border-strong)] ring-1 ring-slate-200/70" : "border-[color:var(--gush-border)]"
       }`}
     >
       <div className={`grid gap-4 ${isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""}`}>
-        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[rgba(250,247,241,0.92)]">
+        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[color:var(--gush-page-bg-muted)]">
           <input
             type="checkbox"
             checked={isSelected}
             onChange={() => onSelect(series.id)}
-            className="h-4 w-4 cursor-pointer rounded border-black/20 bg-transparent text-[var(--gush-accent,#2f58c6)]"
+            className="h-4 w-4 cursor-pointer rounded border-black/20 bg-transparent text-slate-950"
           />
         </label>
         <div
-          className={`${isList ? "h-24 w-16" : "aspect-[2/3] w-full"} overflow-hidden rounded-[24px] bg-[rgba(250,247,241,0.92)]`}
+          className={`${isList ? "h-24 w-16" : "aspect-[2/3] w-full"} overflow-hidden rounded-[24px] bg-[color:var(--gush-page-bg-muted)]`}
         >
           {series.coverUrl ? (
             <img src={series.coverUrl} alt={`${series.title}封面`} className="h-full w-full object-cover" />
@@ -254,10 +254,10 @@ function SeriesCard(props) {
         </div>
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-700">
+            <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-700">
               {formatSeriesTypeLabel(series.type)}
             </span>
-            <span className="rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-2.5 py-1 text-[var(--gush-accent,#2f58c6)]">
+            <span className="rounded-full border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-950">
               {formatSeriesStatusLabel(series.status)}
             </span>
             <span className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}>
@@ -275,27 +275,27 @@ function SeriesCard(props) {
             ) : null}
           </div>
           {isEditing ? (
-            <div className="space-y-3 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.76)] p-4">
+            <div className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <input
                 value={editDraft?.title || ""}
                 onChange={(event) => onEditDraftChange({ ...editDraft, title: event.target.value })}
-                className="w-full rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                className="w-full rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
                 placeholder="作品标题"
               />
               <div className="grid gap-3 md:grid-cols-2">
                 <select
                   value={editDraft?.status || "Ongoing"}
                   onChange={(event) => onEditDraftChange({ ...editDraft, status: event.target.value })}
-                  className="rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                  className="rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
                 >
                   {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatSeriesStatusLabel(option)}</option>)}
                 </select>
-                <label className="flex items-center gap-3 rounded-[18px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
+                <label className="flex items-center gap-3 rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700">
                   <input
                     type="checkbox"
                     checked={Boolean(editDraft?.adult)}
                     onChange={(event) => onEditDraftChange({ ...editDraft, adult: event.target.checked })}
-                    className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]"
+                    className="h-4 w-4 rounded border-black/20 bg-white text-slate-950"
                   />
                   <span>18+ 作品</span>
                 </label>
@@ -306,7 +306,7 @@ function SeriesCard(props) {
               <button
                 type="button"
                 onClick={() => onOpenDetails(series.id)}
-                className="text-left text-lg font-semibold text-slate-950 transition hover:text-[var(--gush-accent,#2f58c6)]"
+                className="text-left text-lg font-semibold text-slate-950 transition hover:text-slate-700"
               >
                 {series.title}
               </button>
@@ -331,7 +331,7 @@ function SeriesCard(props) {
                   : " · 已可进入前台发现流"}
               </p>
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
-                <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
                   {series.episodeCount > 0 ? `${series.episodeCount} 章` : "还没有章节"}
                 </span>
                 {!series.creatorLabel ? (
@@ -345,12 +345,12 @@ function SeriesCard(props) {
                   </span>
                 ) : null}
                 {!series.description?.trim() ? (
-                  <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
                     仍需补简介
                   </span>
                 ) : null}
                 {!series.genres.length ? (
-                  <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2.5 py-1 text-slate-600">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
                     仍需补标签
                   </span>
                 ) : null}
@@ -362,7 +362,7 @@ function SeriesCard(props) {
                 {series.genres.slice(0, 3).map((genre) => (
                   <span
                     key={`${series.id}-${genre}`}
-                    className="rounded-full border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] px-2.5 py-1 text-[var(--gush-accent,#2f58c6)]"
+                    className="rounded-full border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-950"
                   >
                     {genre}
                   </span>
@@ -371,7 +371,7 @@ function SeriesCard(props) {
             </div>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-3 rounded-[24px] bg-[rgba(250,247,241,0.76)] p-4 text-sm lg:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 rounded-[24px] bg-[color:var(--gush-page-bg-muted)] p-4 text-sm lg:grid-cols-2">
           <div><p className="text-slate-500">章节数</p><p className="mt-1 font-semibold text-slate-950">{series.episodeCount || 0}</p></div>
           <div><p className="text-slate-500">最近更新</p><p className="mt-1 font-semibold text-slate-950">{formatUpdatedAt(series.updatedAt, true)}</p></div>
           <div><p className="text-slate-500">封面</p><p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "已补齐" : "待补充"}</p></div>
@@ -772,19 +772,19 @@ export default function AdminSeriesPageNew() {
     resetCreateForm();
   };
 
-  if (isLoading || loading) return <section className="rounded-[28px] border border-black/8 bg-white/88 p-8 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">正在加载作品工作台...</section>;
-  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-black/8 bg-white/88 p-10 text-center text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">需要管理员权限才能查看此页面。</section>;
+  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-8 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">正在加载作品工作台...</section>;
+  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white/88 p-10 text-center text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">需要管理员权限才能查看此页面。</section>;
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-black/8 bg-white/92 p-6 shadow-[var(--gush-shadow-soft)]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 p-6 shadow-[var(--gush-shadow-soft)]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
             <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
             <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理。</p>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-black/8 bg-[rgba(250,247,241,0.72)] p-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-1.5">
             <Button
               type="button"
               variant="secondary"
@@ -812,7 +812,7 @@ export default function AdminSeriesPageNew() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesStats.map((item) => (
-          <article key={item.label} className="rounded-[24px] border border-black/8 bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
             <p className="mt-2 text-sm text-slate-600">{item.hint}</p>
@@ -820,7 +820,7 @@ export default function AdminSeriesPageNew() {
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-black/8 bg-white/92 p-5 shadow-[var(--gush-shadow-soft)]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 p-5 shadow-[var(--gush-shadow-soft)]">
         <div className="flex flex-col gap-4">
           {hasScopedCreatorFilter ? (
             <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
@@ -832,7 +832,7 @@ export default function AdminSeriesPageNew() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/series")}
-                className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
                 清除创作者筛选
               </button>
@@ -840,12 +840,12 @@ export default function AdminSeriesPageNew() {
           ) : null}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="flex flex-wrap gap-2">
-              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>{tab.label}</button>)}
+              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}>{tab.label}</button>)}
             </div>
 
             <div className="flex flex-1 flex-col gap-3 xl:items-end">
               <div className="flex w-full flex-col gap-3 xl:max-w-3xl xl:flex-row xl:justify-end">
-                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3">
+                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                   <Search size={16} className="text-slate-400" />
                   <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
                 </label>
@@ -861,7 +861,7 @@ export default function AdminSeriesPageNew() {
                       key={filter.value}
                       type="button"
                       onClick={() => setQuickFilter(filter.value)}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}
                     >
                       {filter.label}
                     </button>
@@ -875,9 +875,9 @@ export default function AdminSeriesPageNew() {
                   <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
                     {allVisibleSelected ? "清空选择" : "全选"}
                   </Button>
-                  <div className="flex items-center overflow-hidden rounded-full border border-black/8 bg-white">
-                    <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-2.5 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="网格视图"><Grid size={16} /></button>
-                    <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-2.5 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`} title="列表视图"><List size={16} /></button>
+                  <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-white">
+                    <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-2.5 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`} title="网格视图"><Grid size={16} /></button>
+                    <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-2.5 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`} title="列表视图"><List size={16} /></button>
                   </div>
                 </div>
               </div>
@@ -889,7 +889,7 @@ export default function AdminSeriesPageNew() {
       <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-black/8 bg-white/88 p-12 text-center shadow-[var(--gush-shadow-soft)]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
+        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white/88 p-12 text-center shadow-[var(--gush-shadow-soft)]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
       ) : (
         <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
           {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
@@ -898,27 +898,27 @@ export default function AdminSeriesPageNew() {
 
       {showCreateModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] p-4 backdrop-blur-sm" onClick={closeCreateModal}>
-          <div className="w-full max-w-2xl rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
+          <div className="w-full max-w-2xl rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-slate-950">新增作品</h3>
                 <p className="mt-1 text-sm text-slate-600">先补齐标题、署名和封面，再决定下一步去详情页还是章节管理。</p>
               </div>
-              <button type="button" onClick={closeCreateModal} className="rounded-full border border-black/8 bg-white p-2 text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"><X size={18} /></button>
+              <button type="button" onClick={closeCreateModal} className="rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"><X size={18} /></button>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[1fr,1.1fr]">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">封面图片</label>
-                <div onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleCoverInput(event.dataTransfer.files?.[0]); }} className={`rounded-[28px] border border-dashed p-4 transition ${isDragging ? "border-[var(--gush-accent,#2f58c6)] bg-[rgba(47,88,198,0.08)]" : "border-black/8 bg-[rgba(250,247,241,0.76)]"}`}>
+                <div onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleCoverInput(event.dataTransfer.files?.[0]); }} className={`rounded-[28px] border border-dashed p-4 transition ${isDragging ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"}`}>
                   {createForm.coverPreviewUrl ? (
                     <div className="space-y-3">
                       <img src={createForm.coverPreviewUrl} alt="封面预览" className="aspect-[2/3] w-full rounded-[24px] object-cover" />
-                      <button type="button" onClick={() => setCreateForm((current) => { revokeObjectUrl(current.coverPreviewUrl); return { ...current, coverFile: null, coverPreviewUrl: "" }; })} className="w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">移除封面</button>
+                      <button type="button" onClick={() => setCreateForm((current) => { revokeObjectUrl(current.coverPreviewUrl); return { ...current, coverFile: null, coverPreviewUrl: "" }; })} className="w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]">移除封面</button>
                     </div>
                   ) : (
-                    <label className="flex min-h-[320px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-black/8 bg-white px-6 text-center text-slate-500">
-                      <Upload size={28} className="text-[var(--gush-accent,#2f58c6)]" />
+                    <label className="flex min-h-[320px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-6 text-center text-slate-500">
+                      <Upload size={28} className="text-slate-950" />
                       <div><p className="text-sm font-semibold text-slate-950">把图片拖到这里，或点击上传</p><p className="mt-1 text-xs text-slate-500">支持 JPG、PNG、GIF，大小不超过 10MB。</p></div>
                       <input type="file" accept="image/*" className="hidden" onChange={(event) => handleCoverInput(event.target.files?.[0])} />
                     </label>
@@ -929,7 +929,7 @@ export default function AdminSeriesPageNew() {
               <div className="space-y-4">
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold text-slate-700">作品标题 *</span>
-                  <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="例如：午夜契约" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
+                  <input value={createForm.title} onChange={(event) => setCreateForm((current) => ({ ...current, title: event.target.value }))} placeholder="例如：午夜契约" className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]" />
                   <span className="text-xs text-slate-500">建议作品 ID：{suggestedSeriesId}</span>
                 </label>
 
@@ -939,7 +939,7 @@ export default function AdminSeriesPageNew() {
                     value={createForm.author}
                     onChange={(event) => setCreateForm((current) => ({ ...current, author: event.target.value }))}
                     placeholder="例如：Studio LICO"
-                    className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+                    className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
                   />
                   <span className="text-xs text-slate-500">尽早补上公开署名，创作者页和作品页才会保持一致。</span>
                 </label>
@@ -947,25 +947,25 @@ export default function AdminSeriesPageNew() {
                 <div className="space-y-2">
                   <span className="text-sm font-semibold text-slate-700">作品形式</span>
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "comic" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "comic" ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>漫画</button>
-                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "novel" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "novel" ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}>小说</button>
+                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "comic" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "comic" ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}>漫画</button>
+                    <button type="button" onClick={() => setCreateForm((current) => ({ ...current, type: "novel" }))} className={`rounded-[20px] border px-4 py-3 text-sm font-semibold transition ${createForm.type === "novel" ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}>小说</button>
                   </div>
                 </div>
 
-                <label className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
-                  <input type="checkbox" checked={createForm.adult} onChange={(event) => setCreateForm((current) => ({ ...current, adult: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]" />
+                <label className="flex items-center gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700">
+                  <input type="checkbox" checked={createForm.adult} onChange={(event) => setCreateForm((current) => ({ ...current, adult: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-slate-950" />
                   <span>18+ 作品</span>
                 </label>
 
-                <label className="flex items-center gap-3 rounded-[20px] border border-black/8 bg-white px-4 py-3 text-sm text-slate-700">
-                  <input type="checkbox" checked={createForm.isPublished} onChange={(event) => setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-[var(--gush-accent,#2f58c6)]" />
+                <label className="flex items-center gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700">
+                  <input type="checkbox" checked={createForm.isPublished} onChange={(event) => setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-white text-slate-950" />
                   <span>创建后立即发布</span>
                 </label>
 
                 <div className="grid gap-3">
                   <label className="block space-y-2">
                     <span className="text-sm font-semibold text-slate-700">连载状态</span>
-                    <select value={createForm.status} onChange={(event) => setCreateForm((current) => ({ ...current, status: event.target.value }))} className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]">
+                    <select value={createForm.status} onChange={(event) => setCreateForm((current) => ({ ...current, status: event.target.value }))} className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]">
                       {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{formatSeriesStatusLabel(option)}</option>)}
                     </select>
                   </label>
@@ -973,12 +973,12 @@ export default function AdminSeriesPageNew() {
 
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold text-slate-700">作品简介</span>
-                  <textarea value={createForm.description} onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))} placeholder="写一段清楚、克制的作品简介。" rows={4} className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
+                  <textarea value={createForm.description} onChange={(event) => setCreateForm((current) => ({ ...current, description: event.target.value }))} placeholder="写一段清楚、克制的作品简介。" rows={4} className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]" />
                 </label>
 
                 <label className="block space-y-2">
                   <span className="text-sm font-semibold text-slate-700">题材与标签</span>
-                  <input value={createForm.genres} onChange={(event) => setCreateForm((current) => ({ ...current, genres: event.target.value }))} placeholder="动作、恋爱、奇幻" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
+                  <input value={createForm.genres} onChange={(event) => setCreateForm((current) => ({ ...current, genres: event.target.value }))} placeholder="动作、恋爱、奇幻" className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]" />
                 </label>
 
                 <div className="space-y-2">
@@ -989,7 +989,7 @@ export default function AdminSeriesPageNew() {
                         key={option.value}
                         type="button"
                         onClick={() => setCreateForm((current) => ({ ...current, openAfterCreate: option.value }))}
-                        className={`rounded-[20px] border px-4 py-3 text-left transition ${createForm.openAfterCreate === option.value ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-slate-950" : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"}`}
+                        className={`rounded-[20px] border px-4 py-3 text-left transition ${createForm.openAfterCreate === option.value ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}
                       >
                         <p className="text-sm font-semibold">{option.label}</p>
                         <p className="mt-1 text-xs text-slate-500">{option.helper}</p>
@@ -999,7 +999,7 @@ export default function AdminSeriesPageNew() {
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={closeCreateModal} className="flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">取消</button>
+                  <button type="button" onClick={closeCreateModal} className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]">取消</button>
                   <button type="button" onClick={handleCreate} disabled={isCreating} className="flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isCreating ? "创建中..." : "创建"}</button>
                 </div>
               </div>
@@ -1010,15 +1010,15 @@ export default function AdminSeriesPageNew() {
 
       {duplicateDialog.isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,27,36,0.28)] p-4 backdrop-blur-sm" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })}>
-          <div className="w-full max-w-lg rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
+          <div className="w-full max-w-lg rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 p-6 shadow-[var(--gush-shadow-panel)]" onClick={(event) => event.stopPropagation()}>
             <h3 className="text-xl font-semibold text-slate-950">复制作品</h3>
             <p className="mt-1 text-sm text-slate-600">基于当前作品生成一个新的草稿副本。</p>
             <label className="mt-5 block space-y-2">
               <span className="text-sm font-semibold text-slate-700">新的作品 ID *</span>
-              <input value={duplicateDialog.newId} onChange={(event) => setDuplicateDialog((current) => ({ ...current, newId: event.target.value }))} placeholder="请输入新的作品 ID" className="w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]" />
+              <input value={duplicateDialog.newId} onChange={(event) => setDuplicateDialog((current) => ({ ...current, newId: event.target.value }))} placeholder="请输入新的作品 ID" className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]" />
             </label>
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })} className="flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]">取消</button>
+              <button type="button" onClick={() => setDuplicateDialog({ isOpen: false, series: null, newId: "" })} className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]">取消</button>
               <button type="button" onClick={handleDuplicate} disabled={isDuplicating} className="flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{isDuplicating ? "复制中..." : "复制"}</button>
             </div>
           </div>

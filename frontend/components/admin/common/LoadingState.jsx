@@ -4,12 +4,10 @@ import SharedEmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 
 const DEFAULT_EMPTY_TITLE = "暂时没有内容";
-const DEFAULT_EMPTY_DESCRIPTION =
-  "当前视图下还没有可显示的记录。";
+const DEFAULT_EMPTY_DESCRIPTION = "当前视图下还没有可显示的记录。";
 const DEFAULT_LOADING_TEXT = "正在加载后台内容";
 const DEFAULT_ERROR_TITLE = "这个页面暂时无法加载";
-const DEFAULT_ERROR_MESSAGE =
-  "这次请求没有正常完成，请稍后再试。";
+const DEFAULT_ERROR_MESSAGE = "这次请求没有正常完成，请稍后再试。";
 const RETRY_LABEL = "重新加载";
 
 export const SkeletonLoader = React.memo(function SkeletonLoader({
@@ -21,7 +19,7 @@ export const SkeletonLoader = React.memo(function SkeletonLoader({
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className={`${height} skeleton rounded-[20px] border border-black/6 bg-white/70`}
+          className={`${height} skeleton rounded-[20px] border border-[color:var(--gush-border)] bg-white/70`}
         />
       ))}
     </div>
@@ -41,10 +39,8 @@ export const Spinner = React.memo(function Spinner({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-black/6 bg-white/80 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
-      <RefreshCw
-        className={`${sizeClasses[size]} animate-spin text-[var(--gush-accent,#2f58c6)]`}
-      />
+    <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
+      <RefreshCw className={`${sizeClasses[size]} animate-spin text-slate-900`} />
       {text ? <p className="text-sm text-slate-500">{text}</p> : null}
     </div>
   );
@@ -104,9 +100,7 @@ export const ErrorState = React.memo(function ErrorState({ error, onRetry }) {
   return (
     <div className="rounded-[28px] border border-red-200 bg-red-50/90 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
       <h3 className="text-lg font-semibold text-red-700">{DEFAULT_ERROR_TITLE}</h3>
-      <p className="mt-2 text-sm leading-6 text-red-600">
-        {error || DEFAULT_ERROR_MESSAGE}
-      </p>
+      <p className="mt-2 text-sm leading-6 text-red-600">{error || DEFAULT_ERROR_MESSAGE}</p>
       {onRetry ? (
         <div className="mt-5 flex justify-center">
           <Button type="button" variant="destructive" onClick={onRetry}>

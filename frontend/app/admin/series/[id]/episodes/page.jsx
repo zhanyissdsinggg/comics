@@ -629,7 +629,7 @@ export default function AdminEpisodesPage() {
       subtitle="按内容优先方式维护章节号、标题、试看页数和发布时间；旧商业设置保留在次级入口。"
       actions={
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/78 p-1.5">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/78 p-1.5">
             <Button type="button" variant="ghost" onClick={() => router.push(`/admin/series/${seriesId}`)}>
               <ArrowLeft className="size-4" />
               返回作品详情
@@ -640,7 +640,7 @@ export default function AdminEpisodesPage() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <Button type="button" variant="secondary" onClick={() => setIsUploadModalOpen(true)}>
               <Upload className="size-4" />
               批量上传
@@ -677,7 +677,7 @@ export default function AdminEpisodesPage() {
             </div>
           }
         >
-          <div className="mb-6 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4">
+          <div className="mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div className="grid gap-3 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_220px_180px]">
                 <input
@@ -699,7 +699,7 @@ export default function AdminEpisodesPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                <span className="rounded-full border border-black/8 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs font-semibold text-slate-600">
                   已选 {selectedIds.length} 章
                 </span>
                 <Button
@@ -722,8 +722,8 @@ export default function AdminEpisodesPage() {
                 onClick={() => handleQuickFilter(filter)}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   quickFilterId === filter.id
-                    ? 'border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
-                    : 'border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950'
+                    ? 'border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950'
+                    : 'border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950'
                 }`}
               >
                 {filter.label}
@@ -736,7 +736,7 @@ export default function AdminEpisodesPage() {
           ) : episodes.length === 0 ? (
             <AdminPageSection title="当前视图下还没有章节" description="换一个筛选条件，或者先新增第一章开始处理。" />
           ) : (
-            <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
+            <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 shadow-[var(--gush-shadow-soft)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <AdminTableHeader>
@@ -839,7 +839,7 @@ export default function AdminEpisodesPage() {
                 </table>
               </div>
 
-              <div className="flex flex-col gap-4 border-t border-black/6 bg-[rgba(250,247,241,0.72)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   第 <span className="font-medium text-slate-950">{pagination.page}</span> 页，共 {pagination.totalPages} 页，
                   当前共 <span className="font-medium text-slate-950">{pagination.total}</span> 章
@@ -848,7 +848,7 @@ export default function AdminEpisodesPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-2">
                     <span>每页</span>
-                    <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-10 rounded-full border border-black/8 bg-white px-3 text-sm text-slate-700 outline-none">
+                    <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} className="h-10 rounded-full border border-[color:var(--gush-border)] bg-white px-3 text-sm text-slate-700 outline-none">
                       {[20, 50, 100].map((size) => (
                         <option key={size} value={size}>
                           {size}
@@ -889,17 +889,17 @@ export default function AdminEpisodesPage() {
           <button
             type="button"
             onClick={() => setShowCreateCommercialFields((current) => !current)}
-            className="rounded-full border border-black/8 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+            className="rounded-full border border-[color:var(--gush-border)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             {showCreateCommercialFields ? '收起次级发行设置' : '显示次级发行设置'}
           </button>
 
           {showCreateCommercialFields ? (
-            <div className="grid gap-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4 md:grid-cols-2">
+            <div className="grid gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 md:grid-cols-2">
               <AdminFormField label="点数价格">
                 <input id="new-episode-price-pts" type="number" min="0" value={newEpisode.pricePts} onChange={(event) => setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
               </AdminFormField>
-              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-white px-4 py-4 text-sm text-slate-700">
+              <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700">
                 <span>启用免费券</span>
                 <input id="new-episode-ttf-eligible" type="checkbox" checked={newEpisode.ttfEligible} onChange={(event) => setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))} className="h-4 w-4 rounded border-black/20 bg-transparent" />
               </label>
@@ -923,13 +923,13 @@ export default function AdminEpisodesPage() {
           <button
             type="button"
             onClick={() => setShowBulkCommercialFields((current) => !current)}
-            className="rounded-full border border-black/8 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+            className="rounded-full border border-[color:var(--gush-border)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             {showBulkCommercialFields ? '收起次级发行设置' : '显示次级发行设置'}
           </button>
 
           {showBulkCommercialFields ? (
-            <div className="grid gap-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] p-4 md:grid-cols-2">
+            <div className="grid gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 md:grid-cols-2">
               <AdminFormField label="批量点数价格">
                 <input id="bulk-price-pts" type="number" min="0" value={bulkForm.pricePts} onChange={(event) => setBulkForm((current) => ({ ...current, pricePts: event.target.value }))} className={adminInputClassName} />
               </AdminFormField>

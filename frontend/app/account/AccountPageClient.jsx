@@ -378,7 +378,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               : "None yet",
         hint: ordersLoading
           ? "Recent charges and receipts show up below."
-          : "Latest packs and memberships stay close to the rest of your account tools.",
+          : "Recent charges.",
       },
     ];
   }, [
@@ -406,7 +406,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
-            "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
+            "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
         },
         {
           id: "recover",
@@ -417,14 +417,14 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Reset password",
           onClick: () => router.push("/auth/reset"),
           accentClass:
-            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
         },
         {
           id: "membership",
           eyebrow: "Membership",
           title: "See monthly plans first.",
           description: "Review the plans first, then start when ready.",
-          cta: "View Plans",
+          cta: "Plans",
           onClick: () =>
             router.push(
               buildPathWithAttribution("/subscribe", {
@@ -434,17 +434,17 @@ export default function AccountPage({ initialSignedIn = false }) {
               }),
             ),
           accentClass:
-            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
         },
         {
           id: "store",
           eyebrow: "Point packs",
-          title: "See point packs.",
+          title: "Open point packs.",
           description: "Use point packs when you want one-off unlocks.",
-          cta: "View point packs",
+          cta: "Point packs",
           onClick: () => router.push("/store"),
           accentClass:
-            "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
         },
       ];
     }
@@ -467,7 +467,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               })}. Renewal and cancellation stay in one place.`
             : "Open membership to review renewal timing and cancellation."
           : "If you keep topping up, membership may fit better next time.",
-        cta: subscription?.active ? "Manage membership" : "View Plans",
+        cta: subscription?.active ? "Membership" : "Plans",
         onClick: () =>
           router.push(
             buildPathWithAttribution("/subscribe", {
@@ -477,7 +477,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
+          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
       },
       {
         id: "purchases",
@@ -488,30 +488,30 @@ export default function AccountPage({ initialSignedIn = false }) {
             : "Keep charges easy to find.",
         description:
           orders.length > 0
-            ? "Latest packs, renewals, and billing records stay here."
-            : "Pack receipts, membership charges, and order IDs show up here after checkout.",
-        cta: "View purchases",
+            ? "Recent charges."
+            : "Receipts and order IDs show here.",
+        cta: "Orders",
         onClick: () => router.push("/orders"),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
       {
         id: "library",
         eyebrow: "Reading",
         title: "Open your library.",
-        description: "Saved titles, recent reading, and progress stay close.",
+        description: "Saved titles, recent reading, and progress.",
         cta: "Open library",
         onClick: () => router.push("/library"),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
       {
         id: "support",
         eyebrow: "Support",
-        title: "Get help fast.",
+        title: "Get support.",
         description:
-          "Use Support for sign-in trouble, wrong charges, missing points, or 18+ access issues.",
-        cta: "Get help",
+          "Sign-in trouble, wrong charges, missing points, or 18+ access.",
+        cta: "Support",
         onClick: () =>
           router.push(
             buildSupportPath({
@@ -520,7 +520,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
     ];
   }, [
@@ -540,24 +540,24 @@ export default function AccountPage({ initialSignedIn = false }) {
   const fieldLabelClass =
     "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.28)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
+    "mt-2 w-full rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
-    "h-4 w-4 rounded border-black/12 bg-white text-[var(--gush-accent-strong,#0058cc)] focus:ring-[rgba(0,113,227,0.18)]";
+    "h-4 w-4 rounded border-black/12 bg-white text-slate-950 focus:ring-slate-200/80";
   const checkboxCardClass =
-    "flex items-center gap-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-700";
+    "flex items-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700";
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn
-    ? "Reading, billing, and help stay together."
-    : "Start on this device. Sign in when you're ready.";
+    ? "Your account."
+    : "Start on this device.";
   const accountDeskCopy = viewerSignedIn
     ? orders.length > 0
-      ? "Jump straight to receipts, membership, or support without digging through settings."
-      : "Save preferences now. Purchases and recovery will stay close later."
-    : "Local reading preferences work here now. Sign in when you want purchases and progress on one account.";
+      ? "Jump to orders, membership, or support."
+      : "Save preferences now. Orders appear later."
+    : "Device settings save here now. Sign in when you want sync.";
 
   return (
     <div className="gush-home-shell overflow-hidden">
@@ -569,20 +569,16 @@ export default function AccountPage({ initialSignedIn = false }) {
             appearance="light"
             accent="blue"
             eyebrow="Account"
-            title={
-              viewerSignedIn
-                ? "Your account."
-                : "Save this device now. Sign in later."
-            }
+            title={viewerSignedIn ? "Your account." : "This device, for now."}
             description={
               viewerSignedIn
-                ? "Keep reading, billing, and security easy to reach."
-                : "Local settings save here first. Sign in when you want purchases and progress on one account."
+                ? "Reading, orders, and security."
+                : "Device settings save here first."
             }
             secondary={
               viewerSignedIn
                 ? ""
-                : "Preferences stay on this browser until you connect an account."
+                : "Sign in later to keep orders and progress together."
             }
             stats={accountHeroStats}
             actions={
@@ -598,7 +594,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   }}
                   className={primaryButtonClass}
                 >
-                  {viewerSignedIn ? "View purchases" : "Sign in"}
+                  {viewerSignedIn ? "Orders" : "Sign in"}
                 </button>
                 <button
                   type="button"
@@ -665,7 +661,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     }
                     className={secondaryButtonClass}
                   >
-                    Get help
+                    Support
                   </button>
                 </>
               ) : (
@@ -690,7 +686,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     }
                     className={secondaryButtonClass}
                   >
-                    View membership
+                    Plans
                   </button>
                 </>
               )}
@@ -714,11 +710,11 @@ export default function AccountPage({ initialSignedIn = false }) {
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Sign in to keep everything on one account.
+                Keep this on one account.
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Local settings still work here. Sign in when you want purchases
-                and progress on one account.
+                Device settings work here now. Sign in when you want orders and
+                progress together.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -748,7 +744,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 }
                 className={secondaryButtonClass}
               >
-                Get help
+                Support
               </button>
             </div>
           </SurfacePanel>
@@ -761,7 +757,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             className={
               messageIsError
                 ? "border border-red-200 bg-red-50"
-                : "border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
+                : "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
             }
           >
             <p
@@ -774,8 +770,8 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="space-y-2">
-            <p className={sectionEyebrowClass}>Start here</p>
-            <h2 className={sectionTitleClass}>Pick a task.</h2>
+            <p className={sectionEyebrowClass}>Quick actions</p>
+            <h2 className={sectionTitleClass}>Choose a task.</h2>
           </div>
           <StorefrontPathwaysGrid
             cards={accountActionCards}
@@ -801,9 +797,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Local reading setup</p>
-                  <h2 className={sectionTitleClass}>
-                    Save device settings now.
-                  </h2>
+                  <h2 className={sectionTitleClass}>Save on this device.</h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -883,9 +877,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <h2 className={sectionTitleClass}>
                     Name, email, and quick help
                   </h2>
-                  <p className={mutedCopyClass}>
-                    Keep the basics easy to scan.
-                  </p>
+                  <p className={mutedCopyClass}>Basics only.</p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -917,7 +909,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 {hydrated && isSignedIn ? (
-                  <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-sm text-slate-700">
+                  <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         Email status:{" "}
@@ -961,7 +953,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     onClick={() => router.push("/orders")}
                     className={secondaryButtonClass}
                   >
-                    View purchases
+                    Orders
                   </button>
                   <button
                     type="button"
@@ -989,7 +981,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     }
                     className={secondaryButtonClass}
                   >
-                    Get help
+                    Support
                   </button>
                 </div>
               </SurfacePanel>
@@ -1214,13 +1206,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
 
                   {hydrated && isSignedIn ? (
-                    <div className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm text-slate-700">
+                    <div className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span>Email/password</span>
                         <span
                           className={
                             providers.password
-                              ? "text-[var(--gush-accent-strong,#0058cc)]"
+                              ? "text-slate-950"
                               : "text-slate-500"
                           }
                         >
@@ -1238,7 +1230,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                           <span
                             className={
                               providers.google
-                                ? "text-[var(--gush-accent-strong,#0058cc)]"
+                                ? "text-slate-950"
                                 : "text-slate-500"
                             }
                           >
@@ -1342,13 +1334,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                   {!hydrated || ordersLoading ? (
                     <div
-                      className="space-y-3 rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4"
+                      className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4"
                       aria-hidden="true"
                     >
                       {Array.from({ length: 2 }).map((_, index) => (
                         <div
                           key={index}
-                          className="rounded-[20px] border border-black/6 bg-white px-4 py-4"
+                          className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
                         >
                           <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
                           <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
@@ -1357,7 +1349,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       ))}
                     </div>
                   ) : orders.length === 0 ? (
-                    <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4 text-sm text-slate-500">
+                    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 text-sm text-slate-500">
                       <p>
                         No purchases yet. Charges show up here after checkout.
                       </p>
@@ -1367,7 +1359,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                           onClick={() => router.push("/store")}
                           className={secondaryButtonClass}
                         >
-                          See point packs
+                          Point packs
                         </button>
                         <button
                           type="button"
@@ -1376,13 +1368,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                               buildSupportPath({
                                 topic: "billing",
                                 context:
-                                  "Billing help from account purchases panel",
+                                  "Billing support from account purchases panel",
                               }),
                             )
                           }
                           className={secondaryButtonClass}
                         >
-                          Billing help
+                          Billing support
                         </button>
                       </div>
                     </div>
@@ -1391,7 +1383,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       {orders.slice(0, 5).map((order) => (
                         <div
                           key={order.orderId}
-                          className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                          className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <p className="text-sm font-semibold text-slate-950">
@@ -1418,7 +1410,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       onClick={() => router.push("/orders")}
                       className={secondaryButtonClass}
                     >
-                      View all purchases
+                      All orders
                     </button>
                     <button
                       type="button"
@@ -1427,13 +1419,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                           buildSupportPath({
                             topic: "billing",
                             context:
-                              "Billing help from account purchases panel",
+                              "Billing support from account purchases panel",
                           }),
                         )
                       }
                       className={secondaryButtonClass}
                     >
-                      Billing help
+                      Billing support
                     </button>
                   </div>
                 </SurfacePanel>
@@ -1446,7 +1438,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Save these choices to your device and account.
+                      Save these choices here and to your account.
                     </p>
                   </div>
                   <button

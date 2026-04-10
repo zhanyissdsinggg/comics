@@ -325,7 +325,7 @@ export default function AdminRegionsPage() {
         }
       >
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
@@ -339,7 +339,7 @@ export default function AdminRegionsPage() {
             </div>
 
             {countryCodes.length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-6 text-sm text-slate-500">
                 还没有添加任何国际区号。
               </div>
             ) : (
@@ -347,7 +347,7 @@ export default function AdminRegionsPage() {
                 {countryCodes.map((item, index) => (
                   <div
                     key={`${item.code || "new"}-${index}`}
-                    className="grid gap-3 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.52)] p-4 md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
+                    className="grid gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
                   >
                     <AdminFormField label="区号">
                       <input
@@ -376,7 +376,7 @@ export default function AdminRegionsPage() {
             )}
           </div>
 
-          <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <div>
               <h3 className="text-base font-semibold text-slate-950">本地号码长度</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -385,7 +385,7 @@ export default function AdminRegionsPage() {
             </div>
 
             {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-6 text-sm text-slate-500">
                 请先添加至少一个国际区号，再编辑号码长度规则。
               </div>
             ) : (

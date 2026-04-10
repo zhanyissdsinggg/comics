@@ -6,7 +6,9 @@ function toNumber(value) {
 }
 
 function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getEpisodeCount(series) {
@@ -56,7 +58,7 @@ function getCatalogSignalLabel(series) {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "Start here";
+    return "First picks";
   }
   return "";
 }
@@ -79,12 +81,15 @@ function getBadgeTokens(series) {
 
 function getVisibleCatalog(seriesList) {
   return (Array.isArray(seriesList) ? seriesList : []).filter(
-    (series) => series && typeof series === "object" && series.isPublished !== false,
+    (series) =>
+      series && typeof series === "object" && series.isPublished !== false,
   );
 }
 
 function normalizeSlotToken(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function dedupeSeries(seriesList) {
@@ -117,20 +122,31 @@ function buildHomepageSlotMap(homepageSlots) {
     slotMap.set(
       slotId,
       Array.isArray(slot?.seriesIds)
-        ? slot.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+        ? slot.seriesIds
+            .map((item) => String(item || "").trim())
+            .filter(Boolean)
         : [],
     );
   });
   return slotMap;
 }
 
-function resolveHomepageSlotSeries(seriesPool, homepageSlots, slotId, limit = Infinity) {
-  const slotIds = buildHomepageSlotMap(homepageSlots).get(normalizeSlotToken(slotId)) || [];
+function resolveHomepageSlotSeries(
+  seriesPool,
+  homepageSlots,
+  slotId,
+  limit = Infinity,
+) {
+  const slotIds =
+    buildHomepageSlotMap(homepageSlots).get(normalizeSlotToken(slotId)) || [];
   if (slotIds.length === 0) {
     return [];
   }
   const seriesById = buildSeriesById(seriesPool);
-  return slotIds.map((seriesId) => seriesById.get(seriesId)).filter(Boolean).slice(0, limit);
+  return slotIds
+    .map((seriesId) => seriesById.get(seriesId))
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 function getEditorialSeriesScore(series) {
@@ -155,7 +171,9 @@ function getBreakoutScore(series) {
   return (
     getEditorialSeriesScore(series) +
     (isRecentlyUpdated(series, 14) ? 10 * DAY_MS : 0) +
-    (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24 ? 4 * DAY_MS : 0)
+    (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24
+      ? 4 * DAY_MS
+      : 0)
   );
 }
 
@@ -254,15 +272,18 @@ export function getLibraryReturnCandidates(seriesList, options = {}) {
   const slotCandidates = LIBRARY_RETURN_SLOT_PRIORITIES.filter(
     (source) => includeLibraryReturnSlot || source.slotId !== "library-return",
   ).flatMap((source) =>
-    resolveHomepageSlotSeries(visibleCatalog, options.homepageSlots, source.slotId, source.limit).map(
-      (series) => ({
-        series,
-        sourceSlot: source.slotId,
-        sourceLabel: source.sourceLabel,
-        entryPoint: source.entryPoint,
-        campaignId: source.campaignId,
-      }),
-    ),
+    resolveHomepageSlotSeries(
+      visibleCatalog,
+      options.homepageSlots,
+      source.slotId,
+      source.limit,
+    ).map((series) => ({
+      series,
+      sourceSlot: source.slotId,
+      sourceLabel: source.sourceLabel,
+      entryPoint: source.entryPoint,
+      campaignId: source.campaignId,
+    })),
   );
 
   const prioritizedEntries = slotCandidates.filter((entry) => {
@@ -275,7 +296,10 @@ export function getLibraryReturnCandidates(seriesList, options = {}) {
   });
 
   const fallbackEntries = [...visibleCatalog]
-    .sort((left, right) => getLibraryReturnScore(right) - getLibraryReturnScore(left))
+    .sort(
+      (left, right) =>
+        getLibraryReturnScore(right) - getLibraryReturnScore(left),
+    )
     .filter((series) => {
       const seriesId = String(series?.id || "").trim();
       if (!seriesId || excludedIds.has(seriesId) || seenIds.has(seriesId)) {
@@ -311,11 +335,14 @@ export function buildHomeHeroItems(seriesList, options = {}) {
   const featured = dedupeSeries([
     ...slotDrivenHeroSeries,
     ...[...visibleCatalog].sort(
-      (left, right) => getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
+      (left, right) =>
+        getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
     ),
   ])
     .slice(0, 6)
-    .map((series, index) => mapHeroSeries(series, index, index === 0 ? bannerUrl : null));
+    .map((series, index) =>
+      mapHeroSeries(series, index, index === 0 ? bannerUrl : null),
+    );
 
   if (featured.length > 0) {
     if (bannerUrl && featured[0]) {
@@ -324,7 +351,9 @@ export function buildHomeHeroItems(seriesList, options = {}) {
     return featured;
   }
 
-  return visibleCatalog.slice(0, 4).map((series, index) => mapHeroSeries(series, index));
+  return visibleCatalog
+    .slice(0, 4)
+    .map((series, index) => mapHeroSeries(series, index));
 }
 
 export function getHomeEditorialSnapshot(seriesList, options = {}) {
@@ -348,7 +377,9 @@ export function getHomeEditorialSnapshot(seriesList, options = {}) {
     }
   });
 
-  const completedSeries = safeCatalog.filter((series) => isCompletedSeries(series));
+  const completedSeries = safeCatalog.filter((series) =>
+    isCompletedSeries(series),
+  );
   const startHereSeries = [...safeCatalog]
     .filter((series) => getEpisodeCount(series) > 0)
     .sort((left, right) => getStartHereScore(right) - getStartHereScore(left));
@@ -358,16 +389,32 @@ export function getHomeEditorialSnapshot(seriesList, options = {}) {
 
   const completedPick =
     [...completedSeries].sort(
-      (left, right) => getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
+      (left, right) =>
+        getEditorialSeriesScore(right) - getEditorialSeriesScore(left),
     )[0] || null;
   const freeStartPick = startHereSeries[0] || null;
   const breakoutPick = breakoutSeries[0] || null;
   const slotDrivenFreeStartPick =
-    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-free-start", 1)[0] || null;
+    resolveHomepageSlotSeries(
+      safeCatalog,
+      options.homepageSlots,
+      "home-free-start",
+      1,
+    )[0] || null;
   const slotDrivenCompletedPick =
-    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-binge-ready", 1)[0] || null;
+    resolveHomepageSlotSeries(
+      safeCatalog,
+      options.homepageSlots,
+      "home-binge-ready",
+      1,
+    )[0] || null;
   const slotDrivenBreakoutPick =
-    resolveHomepageSlotSeries(safeCatalog, options.homepageSlots, "home-breakout", 1)[0] || null;
+    resolveHomepageSlotSeries(
+      safeCatalog,
+      options.homepageSlots,
+      "home-breakout",
+      1,
+    )[0] || null;
 
   return {
     visibleCatalog,
@@ -391,7 +438,11 @@ export function getHomeEditorialStats(seriesList, options = {}) {
     return [
       { label: "Series live", value: "--", hint: "Across comics and novels" },
       { label: "Fresh drops", value: "--", hint: "Recently updated titles" },
-      { label: "Genres", value: "--", hint: "Browse without losing your place" },
+      {
+        label: "Genres",
+        value: "--",
+        hint: "Browse without losing your place",
+      },
       { label: "18+ catalog", value: "--", hint: "Protected behind sign-in" },
     ];
   }
@@ -423,7 +474,9 @@ export function getHomeEditorialStats(seriesList, options = {}) {
 
 export function getHomeHeroCandidates(seriesList, options = {}) {
   const limit = Math.max(1, Number(options.limit || 8));
-  const visibleCatalog = getVisibleCatalog(seriesList).filter((series) => !series?.adult);
+  const visibleCatalog = getVisibleCatalog(seriesList).filter(
+    (series) => !series?.adult,
+  );
 
   return visibleCatalog
     .filter((series) => series?.id && series?.title)
@@ -440,7 +493,10 @@ export function getHomeHeroCandidates(seriesList, options = {}) {
       if (episodeCount > 0 && episodeCount <= 24) {
         reasons.push("适合从这里开始");
       }
-      if (Array.isArray(series?.creatorCredits) && series.creatorCredits.length > 0) {
+      if (
+        Array.isArray(series?.creatorCredits) &&
+        series.creatorCredits.length > 0
+      ) {
         reasons.push("署名已齐");
       }
 

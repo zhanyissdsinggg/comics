@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { BookOpen, Heart } from "lucide-react";
@@ -31,6 +31,22 @@ function formatSeriesKind(value) {
 
 function getCreatorPresentation(series) {
   return resolveSeriesCreatorIdentity(series);
+}
+
+function summarizeSeriesDescription(text, fallback) {
+  const source = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!source) {
+    return fallback;
+  }
+
+  if (source.length <= 180) {
+    return source;
+  }
+
+  return `${source.slice(0, 177).trimEnd()}...`;
 }
 
 function formatUpdateLabel(value) {
@@ -96,28 +112,19 @@ export default function SeriesHeader({
       detail:
         Array.isArray(genres) && genres.length > 0
           ? genres.slice(0, 2).join(" / ")
-          : "Series",
+          : "Story format",
     },
     {
       label: "Status",
       value: isCompleted
         ? "Completed"
         : capitalize(series.status || "updating"),
-      detail: isCompleted ? "Completed run." : "Still updating.",
+      detail: isCompleted ? "Full run" : "Updating",
     },
     {
       label: "Episodes",
-      value: episodeCount > 0 ? `${episodeCount}` : "Coming soon",
-      detail:
-        episodeCount > 0
-          ? `${episodeCount} listed.`
-          : "No episodes listed yet.",
-    },
-    {
-      label: "Creator",
-      value: creatorPresentation.value,
-      detail: creatorHref ? "Open credit page." : creatorPresentation.detail,
-      href: creatorHref,
+      value: episodeCount > 0 ? `${episodeCount}` : "Soon",
+      detail: episodeCount > 0 ? "Listed now" : "No episodes yet",
     },
     {
       label: "Latest",
@@ -130,8 +137,8 @@ export default function SeriesHeader({
   const primaryActionClassName = [
     "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
     highlightPrimaryAction
-      ? "border-[rgba(0,113,227,0.22)] bg-[linear-gradient(180deg,rgba(41,151,255,1),rgba(0,113,227,0.94))] text-white shadow-[0_18px_36px_rgba(0,113,227,0.28)]"
-      : "border-[rgba(0,113,227,0.18)] bg-[linear-gradient(180deg,rgba(41,151,255,0.96),rgba(0,113,227,0.9))] text-white shadow-[0_16px_34px_rgba(0,113,227,0.24)] hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.28)] hover:bg-[linear-gradient(180deg,rgba(64,164,255,1),rgba(0,113,227,0.94))] hover:shadow-[0_20px_40px_rgba(0,113,227,0.3)]",
+      ? "border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_18px_38px_rgba(15,23,42,0.14)]"
+      : "border-slate-950 bg-slate-950 text-white shadow-[0_16px_34px_rgba(15,23,42,0.14)] hover:bg-slate-800 hover:shadow-[0_18px_36px_rgba(15,23,42,0.16)]",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
@@ -155,49 +162,53 @@ export default function SeriesHeader({
 
   return (
     <header className="py-4 sm:py-6">
-      <section className="relative overflow-hidden rounded-[46px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,10,12,0.98),rgba(18,18,20,0.94))] shadow-[0_40px_110px_rgba(0,0,0,0.28)] backdrop-blur-[30px]">
+      <section className="relative overflow-hidden rounded-[40px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_44px_rgba(15,23,42,0.06)]">
         {coverBackdropUrl ? (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.14]"
+            className="absolute inset-0 bg-cover bg-center opacity-[0.05]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,8,10,0.94)_0%,rgba(8,8,10,0.88)_40%,rgba(8,8,10,0.58)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(41,151,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_28%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.985)_0%,rgba(255,255,255,0.965)_48%,rgba(255,255,255,0.92)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(248,250,252,0.72),transparent)]" />
 
         <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_300px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72">
+              <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)]">
                 {formatSeriesKind(series.type)}
               </span>
               {isAdult ? (
-                <span className="rounded-full border border-[rgba(255,126,92,0.26)] bg-[rgba(255,126,92,0.14)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd4ca]">
+                <span className="rounded-full border border-[rgba(198,40,40,0.14)] bg-[rgba(255,241,242,0.96)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#9f1239]">
                   18+
                 </span>
               ) : null}
             </div>
 
-            <h1 className="mt-5 max-w-4xl text-[2.7rem] font-semibold leading-[0.88] tracking-[-0.06em] text-white sm:text-[3.5rem] lg:text-[4.7rem]">
+            <h1 className="mt-5 max-w-4xl text-[2.7rem] font-semibold leading-[0.9] tracking-[-0.06em] text-[color:var(--gush-ink-strong)] sm:text-[3.4rem] lg:text-[4.35rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/66">
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-[color:var(--gush-ink-soft)]">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
-                  <span className="text-white/24">•</span>
+                  <span className="text-[color:var(--gush-border-strong)]">
+                    /
+                  </span>
                   <span>{latestEpisodeValue}</span>
                 </>
               ) : null}
               {creatorHref ? (
                 <>
-                  <span className="text-white/24">•</span>
+                  <span className="text-[color:var(--gush-border-strong)]">
+                    /
+                  </span>
                   <Link
                     href={creatorHref}
-                    className="font-medium text-white/78 transition-colors hover:text-white"
+                    className="font-medium text-[color:var(--gush-ink)] transition-colors hover:text-[color:var(--gush-accent)]"
                   >
-                    View creator
+                    Creator page
                   </Link>
                 </>
               ) : null}
@@ -208,7 +219,7 @@ export default function SeriesHeader({
                 {visibleHighlights.map((item) => (
                   <span
                     key={`${item.tone}-${item.label}`}
-                    className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs text-white/66"
+                    className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-[color:var(--gush-ink-soft)]"
                   >
                     {item.label}
                   </span>
@@ -217,14 +228,16 @@ export default function SeriesHeader({
             ) : null}
 
             <div className="mt-8 max-w-3xl">
-              <p className="text-[15px] leading-8 text-white/66 sm:text-base">
-                {series.description ||
-                  "Open the first episode and see if it lands."}
+              <p className="text-[15px] leading-8 text-[color:var(--gush-ink-soft)] sm:text-base">
+                {summarizeSeriesDescription(
+                  series.description,
+                  "Open the first episode and see if it lands.",
+                )}
               </p>
             </div>
 
             {primaryActions ? (
-              <div className="mt-8 max-w-sm">{primaryActions}</div>
+              <div className="mt-8 max-w-xs">{primaryActions}</div>
             ) : null}
 
             <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
@@ -234,8 +247,8 @@ export default function SeriesHeader({
                   onClick={onFollowToggle}
                   className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isFollowing
-                      ? "border border-[rgba(0,113,227,0.28)] bg-[rgba(0,113,227,0.16)] text-white shadow-[0_12px_28px_rgba(0,113,227,0.16)]"
-                      : "border border-white/10 bg-white/[0.04] text-white/72 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)] hover:text-white"
+                      ? "border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
+                      : "border border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
                   }`}
                   aria-label={
                     isFollowing ? "Remove from library" : "Save to library"
@@ -254,13 +267,13 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[44px] rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/72 transition-colors hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+                className="min-h-[44px] rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.04] shadow-[0_30px_80px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
               <div className="aspect-[3/4] w-full overflow-hidden">
                 <Cover
                   tone={series.coverTone}
@@ -274,53 +287,53 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
-                Credits
+            <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
+                Public credit
               </p>
-              <p className="mt-3 text-base font-semibold text-white">
+              <p className="mt-3 text-base font-semibold text-[color:var(--gush-ink-strong)]">
                 {creatorPresentation.value}
               </p>
-              <p className="mt-3 text-sm leading-6 text-white/62">
+              <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                 {creatorHref
-                  ? "Open the credit page for public details."
+                  ? "Open the creator page."
                   : creatorPresentation.detail}
               </p>
             </div>
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.04] px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {heroFacts.map((item) =>
                   item.href ? (
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="xl:border-l xl:border-white/10 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                      className="xl:border-l xl:border-[color:var(--gush-border)] xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-base font-semibold text-white">
+                      <p className="mt-2 text-base font-semibold text-[color:var(--gush-ink-strong)]">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-white/62">
+                      <p className="mt-2 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                         {item.detail}
                       </p>
                     </Link>
                   ) : (
                     <div
                       key={item.label}
-                      className="xl:border-l xl:border-white/10 xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
+                      className="xl:border-l xl:border-[color:var(--gush-border)] xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
                     >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/42">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-base font-semibold text-white">
+                      <p className="mt-2 text-base font-semibold text-[color:var(--gush-ink-strong)]">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-white/62">
+                      <p className="mt-2 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                         {item.detail}
                       </p>
                     </div>

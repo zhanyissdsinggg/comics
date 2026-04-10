@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
@@ -90,7 +90,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-[rgba(0,113,227,0.16)] px-1 text-slate-950">
+      <mark className="rounded bg-[rgba(255,255,255,0.98)] px-1 text-slate-950">
         {match}
       </mark>
       {after}
@@ -205,7 +205,7 @@ function getSearchSeriesBadge(series) {
     Number(series?.episodeCount || 0) > 0 &&
     Number(series?.episodeCount || 0) <= 12
   ) {
-    return "Start here";
+    return "First picks";
   }
 
   return "";
@@ -715,27 +715,27 @@ export default function SearchPage() {
   const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
   const heroDescription = query
     ? loading
-      ? "Refreshing the closest matches."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across titles, creators, and nearby shelves.`
-    : "Find a title, follow a creator, or start from a live keyword.";
+      ? "Refreshing the shelf."
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across titles and creators.`
+    : "Titles, creators, and genres.";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
   const recoPanelTitle = !query
-    ? "Next reads."
+    ? "Popular now."
     : results.length === 0
-      ? "Try these."
-      : "More picks.";
+      ? "Try these next."
+      : "Browse next.";
   const lightCardAccentClass =
-    "border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,248,250,0.96))] hover:border-[color:var(--gush-border-strong)] hover:bg-white";
+    "border-[color:var(--gush-border)] bg-white hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const lightFeatureAccentClass =
-    "border-[rgba(0,113,227,0.14)] bg-[linear-gradient(180deg,rgba(0,113,227,0.06),rgba(255,255,255,0.92))] hover:border-[rgba(0,113,227,0.22)] hover:bg-[linear-gradient(180deg,rgba(0,113,227,0.08),rgba(255,255,255,0.96))]";
+    "border-[color:var(--gush-border)] bg-white hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const accentButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] px-3 py-2 text-sm font-semibold text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.74)] transition-colors hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)]";
+    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const filterSelectClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/90 px-4 py-2 text-sm text-[color:var(--gush-ink)] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors focus:border-[rgba(0,113,227,0.24)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm text-[color:var(--gush-ink)] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -746,7 +746,7 @@ export default function SearchPage() {
       freeStartPick
         ? {
             id: "free-unlock-slot",
-            eyebrow: "Start here",
+            eyebrow: "First picks",
             title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
@@ -763,10 +763,10 @@ export default function SearchPage() {
           }
         : {
             id: "free-unlock",
-            eyebrow: "Start here",
+            eyebrow: "First picks",
             title: "Open a strong first pick.",
             description: "Start with an editorial pick.",
-            ctaLabel: "Browse Start Here",
+            ctaLabel: "Browse First Picks",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
@@ -974,7 +974,7 @@ export default function SearchPage() {
       freeStartPick
         ? {
             id: "free-start-desk-slot",
-            eyebrow: "Start here",
+            eyebrow: "First picks",
             title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
@@ -998,13 +998,13 @@ export default function SearchPage() {
           }
         : {
             id: "free-start-desk",
-            eyebrow: "Start here",
+            eyebrow: "First picks",
             title: "Try an editorial first pick.",
             description: "A lighter place to start.",
             signalLabel: "Shelf",
-            signalValue: "Start Here",
+            signalValue: "First Picks",
             signalHint: "Editorial picks with a cleaner first step",
-            ctaLabel: "Browse Start Here",
+            ctaLabel: "Browse First Picks",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
@@ -1097,9 +1097,6 @@ export default function SearchPage() {
                   <p className="rounded-full border border-[color:var(--gush-border)] bg-white/72 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
                     Search
                   </p>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
-                    Titles, creators, and shelves
-                  </p>
                 </div>
                 <h1 className="mt-5 font-display text-[2.6rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[3.4rem] xl:text-[4.35rem]">
                   {heroTitle}
@@ -1112,9 +1109,9 @@ export default function SearchPage() {
                 ) : null}
               </div>
 
-              <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,248,250,0.92))] p-5 shadow-[0_20px_48px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+              <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  {query ? "Closest lane" : "Search cues"}
+                  {query ? "Lead result" : "First picks"}
                 </p>
                 <p className="mt-3 text-base font-semibold tracking-tight text-slate-950">
                   {query
@@ -1123,17 +1120,17 @@ export default function SearchPage() {
                       ? `"${mastheadLeadKeyword.label}" is active right now.`
                       : "Start with a title, genre, or creator."}
                 </p>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-slate-600">
                   {query
                     ? leadSearchResult
                       ? summarizeSearchDescription(leadSearchResult)
-                      : "Use filters to narrow the shelf."
-                    : "Live keywords, saved searches, and creator matches all stay in the same lane."}
+                      : "Use filters to narrow."
+                    : "Use a live keyword or a saved search."}
                 </p>
               </div>
             </div>
 
-            <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,248,250,0.96))] p-4 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:p-5">
+            <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1147,7 +1144,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-[color:var(--gush-border)] bg-white/86 px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
+                      className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
                     >
                       {item}
                     </button>
@@ -1165,7 +1162,7 @@ export default function SearchPage() {
                         key={item.id}
                         type="button"
                         onClick={() => updateParam("q", item.value)}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white/86 px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
+                        className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
                       >
                         {item.label}
                       </button>
@@ -1183,13 +1180,13 @@ export default function SearchPage() {
               appearance="light"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Overview
+                Search view
               </p>
 
               {leadSearchResult ? (
-                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,248,250,0.94))] p-4 shadow-[0_18px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
                   <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-neutral-900 shadow-[0_14px_28px_rgba(15,23,42,0.08)]">
+                    <div className="overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_14px_28px_rgba(15,23,42,0.08)]">
                       <Cover
                         tone={leadSearchResult.coverTone}
                         coverUrl={leadSearchResult.coverUrl}
@@ -1232,16 +1229,16 @@ export default function SearchPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(248,248,250,0.94))] p-4 shadow-[0_18px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
                   <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
-                    {query ? "Closest result." : "Start here."}
+                    {query ? "Closest result." : "Popular now."}
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
                     {query
                       ? "Use filters to narrow."
                       : mastheadLeadKeyword
-                        ? `"${mastheadLeadKeyword.label}" is active right now.`
-                        : "Browse titles and creators."}
+                        ? `"${mastheadLeadKeyword.label}" is trending.`
+                        : "Titles and creators."}
                   </p>
                 </div>
               )}
@@ -1262,7 +1259,7 @@ export default function SearchPage() {
                     {hotKeywords.length.toLocaleString()}
                   </p>
                   <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Hot
+                    Hot terms
                   </p>
                 </div>
                 <div className="sm:border-l sm:border-[color:var(--gush-border)] sm:pl-4">
@@ -1297,7 +1294,7 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-[24px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.06)] px-4 py-3 text-sm text-[color:var(--gush-ink)]">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-[color:var(--gush-ink)]">
             Showing saved results. Reconnect to refresh.
           </div>
         ) : null}
@@ -1305,8 +1302,8 @@ export default function SearchPage() {
         {shouldShowEventHub ? (
           <StorefrontEventHub
             eyebrow={query ? "Search picks" : "Featured"}
-            title={query ? "Open the lead match." : "Start here."}
-            description={query ? "A few nearby picks." : "A few strong picks."}
+            title={query ? "Open the lead match." : "Popular now."}
+            description={query ? "Nearby picks." : "A few picks."}
             events={searchEventCards}
             appearance="light"
           />
@@ -1329,7 +1326,7 @@ export default function SearchPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Discovery
+                  Browse
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {recoPanelTitle}
@@ -1341,7 +1338,7 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("day")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "day"
-                      ? "border-[rgba(0,113,227,0.18)] bg-[var(--gush-accent)] text-white shadow-[0_10px_20px_rgba(0,113,227,0.2)]"
+                      ? "border-slate-950 bg-slate-950 text-white"
                       : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
                   }`}
                 >
@@ -1352,7 +1349,7 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("week")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "week"
-                      ? "border-[rgba(0,113,227,0.18)] bg-[var(--gush-accent)] text-white shadow-[0_10px_20px_rgba(0,113,227,0.2)]"
+                      ? "border-slate-950 bg-slate-950 text-white"
                       : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
                   }`}
                 >
@@ -1402,7 +1399,7 @@ export default function SearchPage() {
                     Results
                   </p>
                   <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
-                    {query ? `Results for "${query}"` : "Catalog search"}
+                    {query ? `Results for "${query}"` : "Catalog"}
                   </h2>
                 </div>
                 <p className="text-sm font-medium text-slate-500">
@@ -1467,7 +1464,7 @@ export default function SearchPage() {
               <NetworkFallback
                 compact
                 title="Search is unavailable right now."
-                description="Try that search again."
+                description="Try again."
                 onRetry={retrySearch}
               >
                 <button
@@ -1489,7 +1486,7 @@ export default function SearchPage() {
                     No direct match
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Try a broader search.
+                    Try a wider search.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -1589,7 +1586,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=start-here")}
                       className={accentButtonClass}
                     >
-                      Browse Start Here
+                      Browse First Picks
                     </button>
                   )}
                 </div>
@@ -1620,11 +1617,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden rounded-[38px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(248,248,250,0.96))] p-5 text-left shadow-[0_24px_58px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-transform duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)]"
+                      className="group block overflow-hidden rounded-[38px] border border-[color:var(--gush-border)] bg-white p-5 text-left shadow-[0_12px_28px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
                       aria-label={`Open ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <div className="overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-neutral-900 shadow-[0_14px_32px_rgba(15,23,42,0.08)]">
+                        <div className="overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_14px_32px_rgba(15,23,42,0.08)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1639,7 +1636,7 @@ export default function SearchPage() {
                         </div>
                         <div className="min-w-0 space-y-3.5">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)]">
-                            Result
+                            {series.type || "Series"}
                           </p>
                           <h3 className="font-display text-[1.28rem] font-semibold leading-tight tracking-[-0.04em] text-slate-950">
                             {highlight(series.title, query)}
@@ -1650,7 +1647,7 @@ export default function SearchPage() {
                           <p className="line-clamp-2 text-sm leading-6 text-slate-600">
                             {summarizeSearchDescription(series)}
                           </p>
-                          <div className="flex items-center justify-between border-t border-black/6 pt-3">
+                          <div className="flex items-center justify-between border-t border-[color:var(--gush-border-faint)] pt-3">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
                               Open title
                             </span>
@@ -1665,7 +1662,7 @@ export default function SearchPage() {
                 </div>
 
                 {total > PAGE_SIZE ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white/86 px-4 py-3 text-sm text-[color:var(--gush-ink-soft)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-[color:var(--gush-ink-soft)]">
                     <span>
                       Page {page} of {totalPages}
                     </span>

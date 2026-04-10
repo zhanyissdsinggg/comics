@@ -14,7 +14,9 @@ function parseLatestNumber(value) {
 }
 
 function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getEpisodeCount(series) {
@@ -41,7 +43,7 @@ function getSeriesBadge(series, override = "") {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "Start here";
+    return "First picks";
   }
   return "";
 }
@@ -75,17 +77,25 @@ function scoreSeries(targetGenres, series) {
       ? series.genres.filter((genre) => targetGenres.includes(genre)).length
       : 0;
   const episodeCount = getEpisodeCount(series);
-  const completionBonus = normalizeStatus(series?.status) === "completed" ? 2 : 0;
+  const completionBonus =
+    normalizeStatus(series?.status) === "completed" ? 2 : 0;
   const recencyBonus = isRecentlyUpdated(series, 21) ? 2 : 0;
 
-  return overlap * 3 + Math.min(episodeCount, 24) / 6 + completionBonus + recencyBonus;
+  return (
+    overlap * 3 +
+    Math.min(episodeCount, 24) / 6 +
+    completionBonus +
+    recencyBonus
+  );
 }
 
 function getEditorialScore(series) {
   const updatedAt = Date.parse(series?.updatedAt || "");
   const updatedAtScore = Number.isNaN(updatedAt) ? 0 : updatedAt;
   const startHereBonus =
-    getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24 ? 10 * DAY_MS : 0;
+    getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24
+      ? 10 * DAY_MS
+      : 0;
   const completionBonus =
     normalizeStatus(series?.status) === "completed" ? 8 * DAY_MS : 0;
 
@@ -96,7 +106,7 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
   const events = behavior?.events || [];
   const isAdultMode = Boolean(options.isAdultMode);
   const safeCatalog = (catalog || []).filter((series) =>
-    isAdultMode ? series.adult : !series.adult
+    isAdultMode ? series.adult : !series.adult,
   );
 
   const continueRail = Object.entries(progressMap || {})
@@ -106,13 +116,22 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
         return null;
       }
       const lastEpisodeId = progress?.lastEpisodeId || "";
-      return mapSeriesCard(series, lastEpisodeId ? `Episode ${lastEpisodeId}` : "Continue reading", "Continue", {
-        progressPercent: progress?.percent || 0,
-        resumeEpisodeId: lastEpisodeId || null,
-      });
+      return mapSeriesCard(
+        series,
+        lastEpisodeId ? `Episode ${lastEpisodeId}` : "Continue reading",
+        "Continue",
+        {
+          progressPercent: progress?.percent || 0,
+          resumeEpisodeId: lastEpisodeId || null,
+        },
+      );
     })
     .filter(Boolean)
-    .sort((a, b) => (progressMap[b.id]?.updatedAt || 0) - (progressMap[a.id]?.updatedAt || 0));
+    .sort(
+      (a, b) =>
+        (progressMap[b.id]?.updatedAt || 0) -
+        (progressMap[a.id]?.updatedAt || 0),
+    );
 
   const lastRead = getLastInteraction(events, ["read_episode", "view_series"]);
   const seedSeries = safeCatalog.find((item) => item.id === lastRead?.seriesId);
@@ -134,7 +153,10 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
     .sort((a, b) => getEditorialScore(b) - getEditorialScore(a))
     .slice(0, 10)
     .map((series) =>
-      mapSeriesCard(series, isRecentlyUpdated(series, 14) ? "Recently updated" : "Worth a look"),
+      mapSeriesCard(
+        series,
+        isRecentlyUpdated(series, 14) ? "Recently updated" : "Worth a look",
+      ),
     );
 
   const newRail = [...safeCatalog]
@@ -148,9 +170,15 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
     .map((series) => mapSeriesCard(series, "Finished run", "Completed"));
 
   const ttfRail = safeCatalog
-    .filter((series) => getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24)
-    .sort((a, b) => getEpisodeCount(a) - getEpisodeCount(b) || getEditorialScore(b) - getEditorialScore(a))
-    .map((series) => mapSeriesCard(series, "Start here", "Start here"));
+    .filter(
+      (series) => getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 24,
+    )
+    .sort(
+      (a, b) =>
+        getEpisodeCount(a) - getEpisodeCount(b) ||
+        getEditorialScore(b) - getEditorialScore(a),
+    )
+    .map((series) => mapSeriesCard(series, "First picks", "First picks"));
 
   const adultRail = isAdultMode
     ? safeCatalog
@@ -161,7 +189,9 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
   return {
     continueRail,
     becauseYouReadRail,
-    becauseYouReadTitle: seedSeries ? `Because you read ${seedSeries.title}` : "",
+    becauseYouReadTitle: seedSeries
+      ? `Because you read ${seedSeries.title}`
+      : "",
     trendingRail,
     newRail,
     completedRail,

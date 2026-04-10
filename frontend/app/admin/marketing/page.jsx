@@ -545,7 +545,7 @@ export default function AdminMarketingPage() {
                 {segments.map((segment) => (
                   <div
                     key={segment.segment || 'unknown'}
-                    className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>

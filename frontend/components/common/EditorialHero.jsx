@@ -17,14 +17,14 @@ export default function EditorialHero({
   const hasStats = Array.isArray(stats) && stats.length > 0;
   const resolvedAppearance = appearance === "default" ? "light" : appearance;
   const isLight = resolvedAppearance === "light";
-  const leadStatClass = isLight
+  const statClass = isLight
     ? accent === "rose"
-      ? "border-[rgba(199,40,40,0.12)] bg-[rgba(199,40,40,0.05)] dark:border-white/10 dark:bg-white/[0.05]"
+      ? "border-[rgba(199,40,40,0.12)] bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
       : accent === "emerald"
-        ? "border-emerald-200 bg-emerald-50/70 dark:border-white/10 dark:bg-white/[0.05]"
+        ? "border-emerald-200 bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
         : accent === "cyan"
-          ? "border-cyan-200 bg-cyan-50/70 dark:border-white/10 dark:bg-white/[0.05]"
-          : "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] dark:border-white/10 dark:bg-white/[0.05]"
+          ? "border-cyan-200 bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
+          : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
     : "border-white/10 bg-white/[0.04] shadow-none";
 
   return (
@@ -34,8 +34,8 @@ export default function EditorialHero({
       accent={accent}
       appearance={resolvedAppearance}
     >
-      <div className="relative grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)] xl:items-start">
-        <div className="max-w-3xl">
+      <div className="relative px-5 py-5 sm:px-6 sm:py-6">
+        <div className="max-w-4xl">
           {eyebrow ? (
             <p
               className={cn(
@@ -89,57 +89,53 @@ export default function EditorialHero({
               {actions}
             </div>
           ) : null}
-        </div>
 
-        {hasStats ? (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 xl:gap-3 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:block">
-            {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                title={stat.hint || ""}
-                className={cn(
-                  "rounded-[20px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
-                  isLight
-                    ? index === 0
-                      ? leadStatClass
-                      : "border-black/6 bg-white/76 dark:border-white/8 dark:bg-white/[0.04]"
-                    : leadStatClass,
-                )}
-              >
-                <p
+          {hasStats ? (
+            <div className="mt-6 flex flex-wrap gap-3">
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  title={stat.hint || ""}
                   className={cn(
-                    "text-[11px] font-semibold uppercase tracking-[0.22em]",
-                    isLight
-                      ? "text-slate-500 dark:text-neutral-400"
-                      : "text-neutral-400",
+                    "min-w-[10rem] rounded-[20px] border px-4 py-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
+                    statClass,
                   )}
                 >
-                  {stat.label}
-                </p>
-                <p
-                  className={cn(
-                    "mt-2 font-display text-[1.55rem] font-semibold tracking-tight",
-                    isLight ? "text-slate-950 dark:text-white" : "text-white",
-                  )}
-                >
-                  {stat.value}
-                </p>
-                {stat.hint ? (
                   <p
                     className={cn(
-                      "mt-2 text-sm leading-6",
+                      "text-[11px] font-semibold uppercase tracking-[0.22em]",
                       isLight
                         ? "text-slate-500 dark:text-neutral-400"
                         : "text-neutral-400",
                     )}
                   >
-                    {stat.hint}
+                    {stat.label}
                   </p>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        ) : null}
+                  <p
+                    className={cn(
+                      "mt-2 font-display text-[1.32rem] font-semibold tracking-tight",
+                      isLight ? "text-slate-950 dark:text-white" : "text-white",
+                    )}
+                  >
+                    {stat.value}
+                  </p>
+                  {stat.hint ? (
+                    <p
+                      className={cn(
+                        "mt-1.5 max-w-[16rem] text-[13px] leading-5",
+                        isLight
+                          ? "text-slate-500 dark:text-neutral-400"
+                          : "text-neutral-400",
+                      )}
+                    >
+                      {stat.hint}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
     </SurfacePanel>
   );

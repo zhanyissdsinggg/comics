@@ -54,7 +54,7 @@ export const EmptyState = memo(function EmptyState({
         ? "border-red-200 bg-red-50 text-red-500"
         : "border-red-400/20 bg-red-500/[0.08] text-red-200"
       : isLight
-        ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]"
+        ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[var(--gush-accent,#0071e3)]"
         : "border-sky-400/20 bg-sky-400/[0.08] text-sky-100";
 
   return (
@@ -62,21 +62,21 @@ export const EmptyState = memo(function EmptyState({
       className={cn(
         "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         isLight &&
-          "border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] shadow-[0_18px_42px_rgba(15,23,42,0.06)]",
+          "border-[color:var(--gush-border)] bg-white shadow-[0_16px_36px_rgba(15,23,42,0.05)]",
         className,
       )}
     >
       <div
         className={`pointer-events-none absolute inset-0 ${
           isLight
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.7),transparent_24%)]"
+            ? "bg-transparent"
             : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_82%_0%,rgba(41,151,255,0.14),transparent_24%)]"
         }`}
       />
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
-            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_16px_32px_rgba(0,0,0,0.12)]",
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_10px_24px_rgba(15,23,42,0.05)]",
             accentClass,
           )}
         >
@@ -111,7 +111,7 @@ export const EmptyState = memo(function EmptyState({
               isLight
                 ? icon === "alert"
                   ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-                  : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
+                  : "border-slate-950 bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
                 : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/16"
             }`}
           >

@@ -35,6 +35,8 @@ type SupportTicketListRow = {
   topic?: string | null;
   subject: string;
   message: string;
+  adminReply?: string | null;
+  adminRepliedAt?: Date | null;
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -93,6 +95,8 @@ export class AdminSupportController {
       topic: ticket.topic || null,
       subject: ticket.subject,
       message: ticket.message,
+      adminReply: ticket.adminReply || null,
+      adminRepliedAt: ticket.adminRepliedAt || null,
       status: ticket.status,
       userEmail: ticket.user?.email || ticket.replyEmail || null,
       createdAt: ticket.createdAt,
@@ -116,9 +120,14 @@ export class AdminSupportController {
     }
 
     const nextStatus = ticket.status.toLowerCase() === "closed" ? "closed" : "in_progress";
+    const repliedAt = new Date();
     const updated = await this.prisma.supportTicket.update({
       where: { id },
-      data: { status: nextStatus },
+      data: {
+        status: nextStatus,
+        adminReply: message,
+        adminRepliedAt: repliedAt,
+      },
     });
 
     return {
@@ -126,7 +135,7 @@ export class AdminSupportController {
       ticket: updated,
       reply: {
         message,
-        repliedAt: new Date().toISOString(),
+        repliedAt: repliedAt.toISOString(),
       },
     };
   }
@@ -173,6 +182,7 @@ export class AdminSupportController {
         { topic: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
         { subject: { contains: search, mode: "insensitive" } },
         { message: { contains: search, mode: "insensitive" } },
+        { adminReply: { contains: search, mode: "insensitive" } },
         {
           user: {
             is: {
@@ -198,6 +208,8 @@ export class AdminSupportController {
       topic: true,
       subject: true,
       message: true,
+      adminReply: true,
+      adminRepliedAt: true,
       status: true,
       createdAt: true,
       updatedAt: true,

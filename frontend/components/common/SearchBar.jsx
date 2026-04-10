@@ -30,7 +30,7 @@ const DEFAULT_DISCOVERY_LANES = [
   },
   {
     id: "start-here",
-    label: "Start Here",
+    label: "First Picks",
     hint: "Reader picks",
     href: "/rankings?view=start-here",
   },
@@ -95,22 +95,22 @@ const SearchBar = memo(function SearchBar({
   const discoveryHeading = "Browse";
   const shellClass = isHome
     ? isFocused
-      ? "border-[rgba(0,113,227,0.22)] bg-white shadow-[0_0_0_4px_rgba(0,113,227,0.12)] dark:border-white/14 dark:bg-white/[0.08] dark:shadow-[0_0_0_4px_rgba(41,151,255,0.14)]"
+      ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_0_0_4px_rgba(15,23,42,0.06)] dark:border-white/14 dark:bg-white/[0.08] dark:shadow-[0_0_0_4px_rgba(255,255,255,0.08)]"
       : "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.92)] shadow-[0_10px_22px_rgba(0,0,0,0.045)] hover:border-[color:var(--gush-border-strong)] hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_14px_30px_rgba(0,0,0,0.22)] dark:hover:border-white/18 dark:hover:bg-white/[0.08]"
     : isLight
       ? isFocused
-        ? "border-[rgba(0,113,227,0.22)] bg-white shadow-[0_0_0_4px_rgba(0,113,227,0.12)] dark:border-white/14 dark:bg-white/[0.08] dark:shadow-[0_0_0_4px_rgba(41,151,255,0.14)]"
-        : "border-black/8 bg-white/92 shadow-[0_10px_22px_rgba(0,0,0,0.045)] hover:border-black/12 hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_14px_30px_rgba(0,0,0,0.22)] dark:hover:border-white/18 dark:hover:bg-white/[0.08]"
+        ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_0_0_4px_rgba(15,23,42,0.06)] dark:border-white/14 dark:bg-white/[0.08] dark:shadow-[0_0_0_4px_rgba(255,255,255,0.08)]"
+        : "border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(0,0,0,0.045)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.06] dark:shadow-[0_14px_30px_rgba(0,0,0,0.22)] dark:hover:border-white/18 dark:hover:bg-white/[0.08]"
       : isFocused
         ? "border-[rgba(41,151,255,0.38)] bg-white/[0.08] shadow-[0_0_0_4px_rgba(41,151,255,0.14)]"
         : "border-white/10 bg-white/[0.04] hover:border-white/16 hover:bg-white/[0.06]";
   const searchIconClass = isHome
     ? isFocused
-      ? "text-[var(--gush-accent)] dark:text-[var(--gush-home-accent)]"
+      ? "text-slate-700 dark:text-white"
       : "text-[color:var(--gush-ink-faint)] dark:text-neutral-500"
     : isLight
       ? isFocused
-        ? "text-[var(--gush-accent,#3157d6)] dark:text-[var(--gush-accent,#89a7ff)]"
+        ? "text-slate-700 dark:text-white"
         : "text-slate-400 dark:text-neutral-500"
       : isFocused
         ? "text-[var(--gush-home-accent)]"
@@ -277,9 +277,9 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "animate-spin",
               isHome
-                ? "text-[var(--gush-accent)] dark:text-[var(--gush-home-accent)]"
+                ? "text-slate-700 dark:text-white"
                 : isLight
-                  ? "text-[var(--gush-accent,#3157d6)]"
+                  ? "text-slate-700"
                   : "text-[var(--gush-home-accent)]",
             )}
           />
@@ -342,7 +342,7 @@ const SearchBar = memo(function SearchBar({
               isHome
                 ? "border border-[color:var(--gush-border)] bg-[rgba(248,248,250,0.96)] text-[color:var(--gush-ink-faint)] dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-500"
                 : isLight
-                  ? "border border-black/8 bg-[rgba(248,248,250,0.96)] text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-500"
+                  ? "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-500"
                   : "border border-white/10 bg-black/20 text-neutral-400",
             )}
           >
@@ -359,7 +359,7 @@ const SearchBar = memo(function SearchBar({
             isHome
               ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.96)] shadow-[0_18px_38px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-[rgba(12,12,14,0.96)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.34)]"
               : isLight
-                ? "border-black/8 bg-[rgba(255,255,255,0.95)] shadow-[0_18px_38px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-[rgba(12,12,14,0.96)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.34)]"
+                ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.95)] shadow-[0_18px_38px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-[rgba(12,12,14,0.96)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.34)]"
                 : "border-white/10 bg-neutral-950/95 shadow-[0_24px_80px_rgba(0,0,0,0.28)]",
           )}
         >
@@ -372,9 +372,9 @@ const SearchBar = memo(function SearchBar({
                       size={14}
                       className={cn(
                         isHome
-                          ? "text-[var(--gush-accent)] dark:text-[var(--gush-home-accent)]"
+                          ? "text-slate-700 dark:text-white"
                           : isLight
-                            ? "text-[var(--gush-accent,#3157d6)]"
+                            ? "text-slate-700"
                             : "text-[var(--gush-home-accent)]",
                       )}
                     />
@@ -476,9 +476,9 @@ const SearchBar = memo(function SearchBar({
               className={cn(
                 searchHistory.length > 0
                   ? isHome
-                    ? "mt-2 border-t border-black/6 pt-2 dark:border-white/8"
+                    ? "mt-2 border-t border-[color:var(--gush-border)] pt-2 dark:border-white/8"
                     : isLight
-                      ? "mt-2 border-t border-black/6 pt-2"
+                      ? "mt-2 border-t border-[color:var(--gush-border)] pt-2"
                       : "mt-2 border-t border-white/8 pt-2"
                   : "",
               )}

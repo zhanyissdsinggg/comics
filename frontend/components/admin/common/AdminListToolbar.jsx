@@ -13,13 +13,13 @@ export function AdminListToolbar({
   extraActions = null,
   className = "",
   filtersLabel = "筛选",
-  ascendingLabel = "最早优先",
+  ascendingLabel = "较早优先",
   descendingLabel = "最新优先",
 }) {
   return (
     <div
       className={cn(
-        "mb-6 rounded-[24px] border border-black/8 bg-white/88 p-4 shadow-[var(--gush-shadow-soft)]",
+        "mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 p-4 shadow-[var(--gush-shadow-soft)]",
         className,
       )}
     >
@@ -31,7 +31,7 @@ export function AdminListToolbar({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}
-            className="h-11 w-full rounded-full border border-black/8 bg-[rgba(250,247,241,0.8)] py-2 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+            className="h-11 w-full rounded-full border border-[color:var(--gush-border)] bg-white py-2 pl-10 pr-4 text-sm text-slate-900 outline-none transition-[border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70"
           />
         </label>
 

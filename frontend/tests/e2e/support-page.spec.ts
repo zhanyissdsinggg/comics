@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 test.describe("Support page", () => {
-  test("guest support flow submits in-page without opening mail", async ({ page }) => {
+  test("guest support flow submits in-page without opening mail", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     let submittedPayload: Record<string, unknown> | null = null;
 
@@ -11,7 +13,10 @@ test.describe("Support page", () => {
     });
 
     await page.route("**/api/support", async (route) => {
-      submittedPayload = route.request().postDataJSON() as Record<string, unknown>;
+      submittedPayload = route.request().postDataJSON() as Record<
+        string,
+        unknown
+      >;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -19,19 +24,26 @@ test.describe("Support page", () => {
       });
     });
 
-    const response = await page.goto("/support", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/support", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Send a request." })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Send a request." }),
+    ).toBeVisible();
     await expect(page.locator("#support-topic")).toBeVisible();
     await expect(page.locator("#support-email")).toBeVisible();
     await expect(page.locator("#support-order-id")).toBeVisible();
-    await expect(page.getByText("Replies usually take 1 to 2 business days.")).toBeVisible();
+    await expect(page.getByText("1-2 days")).toBeVisible();
 
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-email", "reader@example.com");
     await expect(page.locator("#support-subject")).toHaveValue("Billing issue");
-    await page.fill("#support-message", "Need a receipt for yesterday's purchase.");
+    await page.fill(
+      "#support-message",
+      "Need a receipt for yesterday's purchase.",
+    );
     await page.click("button[type='submit']");
 
     await expect(page.getByText("Request received")).toBeVisible();
@@ -40,12 +52,16 @@ test.describe("Support page", () => {
       replyEmail: "reader@example.com",
       subject: "Billing issue",
     });
-    expect(String(submittedPayload?.message || "")).toContain("Reply email: reader@example.com");
+    expect(String(submittedPayload?.message || "")).toContain(
+      "Reply email: reader@example.com",
+    );
     await expectNoRuntimeIssues("/support", runtimeIssues);
   });
 
   test("order id query preloads the support form", async ({ page }) => {
-    const response = await page.goto("/support?orderId=ord_12345", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/support?orderId=ord_12345", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.locator("#support-order-id")).toHaveValue("ord_12345");

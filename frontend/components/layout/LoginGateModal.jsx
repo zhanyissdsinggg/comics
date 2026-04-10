@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import ModalBase from "../common/ModalBase";
@@ -36,6 +36,14 @@ export default function LoginGateModal({
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
+  const inputClass =
+    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]";
+  const secondaryPillClass =
+    "border border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white";
+  const dividerClass =
+    "h-px flex-1 bg-[color:var(--gush-border)] dark:bg-white/10";
 
   useEffect(() => {
     if (open) {
@@ -172,7 +180,7 @@ export default function LoginGateModal({
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
             autoComplete="email"
-            className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+            className={inputClass}
           />
 
           {step === "otp" ? (
@@ -183,7 +191,7 @@ export default function LoginGateModal({
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                   otpChannel === "email"
                     ? "bg-slate-950 text-white"
-                    : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    : secondaryPillClass
                 }`}
               >
                 Email OTP
@@ -194,7 +202,7 @@ export default function LoginGateModal({
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                   otpChannel === "sms"
                     ? "bg-slate-950 text-white"
-                    : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    : secondaryPillClass
                 }`}
               >
                 SMS OTP
@@ -211,7 +219,7 @@ export default function LoginGateModal({
               autoComplete={
                 mode === "register" ? "new-password" : "current-password"
               }
-              className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+              className={inputClass}
             />
           ) : (
             <>
@@ -220,7 +228,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm text-slate-700 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
+                    className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm text-slate-700 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
                   >
                     {(
                       config?.countryCodes || [
@@ -244,7 +252,7 @@ export default function LoginGateModal({
                     }}
                     placeholder="Phone number"
                     autoComplete="tel-national"
-                    className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+                    className={inputClass}
                   />
                 </div>
               ) : null}
@@ -253,7 +261,7 @@ export default function LoginGateModal({
                 onChange={(event) => setOtpCode(event.target.value)}
                 placeholder="6-digit code"
                 autoComplete="one-time-code"
-                className="w-full rounded-xl border border-black/8 bg-[#f8f9fc] px-4 py-3 text-sm text-slate-800 placeholder-slate-400 transition-all duration-300 focus:border-[var(--gush-accent,#0071e3)] focus:bg-white focus:outline-none dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]"
+                className={inputClass}
               />
             </>
           )}
@@ -261,9 +269,9 @@ export default function LoginGateModal({
           {step !== "otp" && googleAuthEnabled ? (
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-neutral-500">
-                <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
+                <div className={dividerClass} />
                 <span>or continue with</span>
-                <div className="h-px flex-1 bg-black/8 dark:bg-white/10" />
+                <div className={dividerClass} />
               </div>
               <SocialAuthButton
                 provider="google"
@@ -307,7 +315,7 @@ export default function LoginGateModal({
               className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "login"
                   ? "bg-slate-950 text-white"
-                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  : secondaryPillClass
               }`}
             >
               Sign in
@@ -318,7 +326,7 @@ export default function LoginGateModal({
               className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "register"
                   ? "bg-slate-950 text-white"
-                  : "border border-black/8 bg-white text-slate-500 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  : secondaryPillClass
               }`}
             >
               Register
@@ -330,14 +338,14 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-            className="font-semibold text-slate-500 transition-colors duration-300 hover:text-[var(--gush-accent,#0071e3)] dark:text-neutral-400"
+              className="font-semibold text-slate-500 transition-colors duration-300 hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
           >
             Forgot password?
           </button>
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-lg border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.07)] px-4 py-2 text-xs text-slate-600">
+          <div className="mt-3 rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-xs text-slate-600">
             {resetStatus}
           </div>
         ) : null}
@@ -350,7 +358,7 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-black/8 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+            className={secondaryButtonClass}
           >
             Cancel
           </button>

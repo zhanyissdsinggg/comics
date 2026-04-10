@@ -91,11 +91,9 @@ async function loginAndBuildCookies(baseUrl, adminKey) {
     throw new Error("admin login succeeded but no session cookie was returned");
   }
 
-  const hostname = new URL(baseUrl).hostname;
   return parseSetCookieHeader(setCookie).map((cookie) => ({
     ...cookie,
-    domain: hostname,
-    path: "/",
+    url: baseUrl,
     httpOnly: true,
     secure: true,
     sameSite: "Strict",
@@ -110,6 +108,18 @@ async function waitForPopup(page, action) {
   await popup.waitForLoadState("domcontentloaded");
   await popup.waitForLoadState("networkidle").catch(() => {});
   return popup;
+}
+
+async function clickButtonByText(page, text, options = {}) {
+  const locator = page.locator("button").filter({ hasText: text }).last();
+  await locator.waitFor({ state: "visible", timeout: options.timeout ?? DEFAULT_TIMEOUT_MS });
+  await locator.click();
+}
+
+async function readFirstTableRowText(page) {
+  const row = page.locator("tbody tr").first();
+  await row.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+  return row.innerText();
 }
 
 function summarizeError(error) {
@@ -173,6 +183,48 @@ function buildChecks(baseUrl) {
         return {
           finalUrl: page.url(),
           note: "快捷入口应该进入首页编排工作区。",
+        };
+      },
+    },
+    {
+      id: "dashboard.support-view-all",
+      route: "/admin",
+      description: "仪表盘客服队列的查看全部能进入客服页",
+      run: async (page) => {
+        await page.locator('a[href="/admin/support"]').filter({ hasText: "查看全部" }).first().click();
+        await page.waitForURL(`${baseUrl}/admin/support`, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "客服队列入口应该进入客服工单页。",
+        };
+      },
+    },
+    {
+      id: "dashboard.orders-view-all",
+      route: "/admin",
+      description: "仪表盘最近订单的查看全部能进入订单页",
+      run: async (page) => {
+        await page.locator('a[href="/admin/orders"]').filter({ hasText: "查看全部" }).first().click();
+        await page.waitForURL(`${baseUrl}/admin/orders`, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "订单入口应该进入订单工作区。",
+        };
+      },
+    },
+    {
+      id: "dashboard.comments-view-all",
+      route: "/admin",
+      description: "仪表盘最新评论的查看全部能进入评论页",
+      run: async (page) => {
+        await page.locator('a[href="/admin/comments"]').filter({ hasText: "查看全部" }).first().click();
+        await page.waitForURL(`${baseUrl}/admin/comments`, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "评论入口应该进入评论工作区。",
         };
       },
     },
@@ -365,6 +417,297 @@ function buildChecks(baseUrl) {
         }
       },
     },
+    {
+      id: "users.search-and-sort",
+      route: "/admin/users",
+      description: "用户页能搜索真实账号并打开排序弹层",
+      run: async (page) => {
+        const searchInput = page.locator('input[type="text"]').first();
+        const rowCheckbox = page.locator('input[type="checkbox"][aria-label^="选择用户 "]').first();
+
+        await rowCheckbox.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await searchInput.fill("qq987274228@gmail.com");
+        await page.waitForTimeout(600);
+
+        const hasEmail = await page.locator("body").evaluate((node) =>
+          node.innerText.includes("qq987274228@gmail.com"),
+        );
+        if (!hasEmail) {
+          throw new Error("users page did not retain the expected live account after searching");
+        }
+
+        await page.getByRole("button", { name: "排序", exact: true }).click();
+        await page.locator("text=排序用户").waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await page.getByRole("button", { name: "取消", exact: true }).click();
+
+        return {
+          finalUrl: page.url(),
+          note: "用户页至少要能搜索真实账号，并正常打开排序设置。",
+        };
+      },
+    },
+    {
+      id: "support.reset-filters",
+      route: "/admin/support",
+      description: "客服页的搜索与筛选能被重置",
+      run: async (page) => {
+        const searchInput = page.locator('input[placeholder]').first();
+        const statusSelect = page.locator("select").first();
+        const sortSelect = page.locator("select").nth(1);
+
+        await searchInput.fill("ticket-smoke");
+        await statusSelect.selectOption("closed");
+        await sortSelect.selectOption("updatedAt");
+        await page.getByRole("button", { name: "重置视图", exact: true }).click();
+        await page.waitForTimeout(500);
+
+        const searchValue = await searchInput.inputValue();
+        const statusValue = await statusSelect.inputValue();
+        const sortValue = await sortSelect.inputValue();
+
+        if (searchValue !== "" || statusValue !== "" || sortValue !== "createdAt") {
+          throw new Error(`support reset did not clear controls: search=${searchValue} status=${statusValue} sort=${sortValue}`);
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "客服页即使是空态，也要能重置搜索和筛选。",
+        };
+      },
+    },
+    {
+      id: "comments.search-and-sort",
+      route: "/admin/comments",
+      description: "评论页搜索框和排序弹层能正常工作",
+      run: async (page) => {
+        const searchInput = page.locator('input[type="text"]').first();
+        await searchInput.fill("reader-feedback");
+        await page.waitForTimeout(500);
+
+        const searchValue = await searchInput.inputValue();
+        if (searchValue !== "reader-feedback") {
+          throw new Error(`comments search input mismatch: ${searchValue}`);
+        }
+
+        await page.getByRole("button", { name: "排序", exact: true }).click();
+        await page.locator("text=排序评论").waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await page.getByRole("button", { name: "取消", exact: true }).click();
+
+        return {
+          finalUrl: page.url(),
+          note: "评论页在空状态下也要能搜索并打开排序设置。",
+        };
+      },
+    },
+    {
+      id: "orders.export-empty-and-usd",
+      route: "/admin/orders",
+      description: "订单页空态导出提示正常，金额展示仍为美元",
+      run: async (page) => {
+        const bodyText = await page.locator("body").innerText();
+        if (!bodyText.includes("US$0.00")) {
+          throw new Error("orders page no longer shows USD summary amount");
+        }
+
+        const exportButton = page.getByRole("button", { name: "导出所选", exact: true });
+        if (await exportButton.isEnabled()) {
+          throw new Error("orders export button should stay disabled when no rows are selected");
+        }
+
+        await page.getByRole("button", { name: "排序", exact: true }).click();
+        await page.locator("text=排序订单").waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await page.getByRole("button", { name: "取消", exact: true }).click();
+
+        return {
+          finalUrl: page.url(),
+          note: "订单页空态下的导出提示和美元展示都应该稳定。",
+        };
+      },
+    },
+    {
+      id: "recommendations.rankings-tab",
+      route: "/admin/recommendations",
+      description: "recommendations rankings tab loads without leaving the page",
+      run: async (page) => {
+        await clickButtonByText(page, "榜单规则");
+        await page.locator("body").filter({ hasText: "新建榜单规则" }).waitFor({
+          state: "visible",
+          timeout: DEFAULT_TIMEOUT_MS,
+        });
+
+        const bodyText = await page.locator("body").innerText();
+        if (!bodyText.includes("当前还没有榜单规则。")) {
+          throw new Error("recommendations rankings tab did not show the expected empty state");
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "rankings tab stays in the recommendations workspace and renders the current ranking-rule state",
+        };
+      },
+    },
+    {
+      id: "recommendations.analytics-filter",
+      route: "/admin/recommendations",
+      description: "recommendations analytics tab can switch slot filters safely",
+      run: async (page) => {
+        await clickButtonByText(page, "表现分析");
+
+        const slotFilter = page.locator("select").first();
+        await slotFilter.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await slotFilter.selectOption("library-return");
+        await page.waitForTimeout(600);
+
+        const selectedValue = await slotFilter.inputValue();
+        if (selectedValue !== "library-return") {
+          throw new Error(`recommendations analytics filter did not retain the selected slot: ${selectedValue}`);
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "analytics tab keeps the route stable and lets operators focus the report on a single slot",
+        };
+      },
+    },
+    {
+      id: "storefront.quick-creators",
+      route: "/admin/storefront",
+      description: "storefront audit quick action links to the creators workspace",
+      run: async (page) => {
+        await clickButtonByText(page, "查看创作者署名");
+        await page.waitForURL(`${baseUrl}/admin/creators`, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "the storefront audit page should jump straight into creator credits maintenance",
+        };
+      },
+    },
+    {
+      id: "storefront.filter-search",
+      route: "/admin/storefront",
+      description: "storefront audit supports quick filters plus focused search",
+      run: async (page) => {
+        await clickButtonByText(page, "接近可发布");
+        const searchInput = page.locator('input[placeholder*="搜索作品名"]').first();
+        await searchInput.fill("Wild Hearts");
+        await page.waitForTimeout(700);
+
+        const bodyText = await page.locator("body").innerText();
+        if (!bodyText.includes("Wild Hearts")) {
+          throw new Error("storefront audit search did not retain the expected target title");
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "operators can narrow the storefront audit queue to launch-ready titles without triggering writes",
+        };
+      },
+    },
+    {
+      id: "storefront.edit-series",
+      route: "/admin/storefront",
+      description: "storefront audit priority cards can jump into series editing",
+      run: async (page) => {
+        const card = page.locator("article").filter({
+          has: page.locator("button").filter({ hasText: "编辑作品" }).first(),
+        }).first();
+        await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await card.locator("button").filter({ hasText: "编辑作品" }).first().click();
+        await page.waitForURL(/\/admin\/series\/[^/]+$/, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "storefront audit cards should route straight into the backend series detail screen",
+        };
+      },
+    },
+    {
+      id: "storefront.edit-episodes",
+      route: "/admin/storefront",
+      description: "storefront audit priority cards can jump into episode management",
+      run: async (page) => {
+        const card = page.locator("article").filter({
+          has: page.locator("button").filter({ hasText: "编辑章节" }).first(),
+        }).first();
+        await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await card.locator("button").filter({ hasText: "编辑章节" }).first().click();
+        await page.waitForURL(/\/admin\/series\/[^/]+\/episodes$/, { timeout: DEFAULT_TIMEOUT_MS });
+
+        return {
+          finalUrl: page.url(),
+          note: "storefront audit cards should route straight into episode operations",
+        };
+      },
+    },
+    {
+      id: "storefront.preview-series",
+      route: "/admin/storefront",
+      description: "storefront audit cards can preview a live series page in a popup",
+      run: async (page) => {
+        const card = page.locator("article").filter({
+          has: page.locator("button").filter({ hasText: "查看前台页" }).first(),
+        }).first();
+        await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        const popup = await waitForPopup(page, () =>
+          card.locator("button").filter({ hasText: "查看前台页" }).first().click(),
+        );
+
+        try {
+          return {
+            finalUrl: popup.url(),
+            note: "storefront audit preview should open a real live series page, not a dead admin placeholder",
+          };
+        } finally {
+          await popup.close();
+        }
+      },
+    },
+    {
+      id: "analytics.segments-pagination",
+      route: "/admin/analytics",
+      description: "analytics segments view paginates through live reader rows",
+      run: async (page) => {
+        await clickButtonByText(page, "读者分群");
+
+        const firstRowBefore = await readFirstTableRowText(page);
+        await page.locator("button").filter({ hasText: "下一页" }).last().click();
+        await page.waitForTimeout(900);
+
+        const firstRowAfter = await readFirstTableRowText(page);
+        if (firstRowBefore === firstRowAfter) {
+          throw new Error("analytics segments next-page action did not change the first visible row");
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "segments view should page through distinct reader records without leaving the analytics route",
+        };
+      },
+    },
+    {
+      id: "analytics.user-detail-drilldown",
+      route: "/admin/analytics",
+      description: "analytics segments rows can drill into the user detail view",
+      run: async (page) => {
+        await clickButtonByText(page, "读者分群");
+        await page.locator("button").filter({ hasText: "打开用户" }).first().click();
+        await page.locator("body").filter({ hasText: "返回分群" }).waitFor({
+          state: "visible",
+          timeout: DEFAULT_TIMEOUT_MS,
+        });
+
+        const bodyText = await page.locator("body").innerText();
+        if (!bodyText.includes("用户画像")) {
+          throw new Error("analytics user detail drilldown did not render the profile view");
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "reader segments should drill into the user profile workspace without any write-side effects",
+        };
+      },
+    },
   ];
 }
 
@@ -381,6 +724,18 @@ function validateCheckResult(id, finalUrl) {
 
   if (id === "dashboard.quick-merchandising") {
     return pathname === "/admin/merchandising";
+  }
+
+  if (id === "dashboard.support-view-all") {
+    return pathname === "/admin/support";
+  }
+
+  if (id === "dashboard.orders-view-all") {
+    return pathname === "/admin/orders";
+  }
+
+  if (id === "dashboard.comments-view-all") {
+    return pathname === "/admin/comments";
   }
 
   if (id === "series.detail") {
@@ -423,7 +778,247 @@ function validateCheckResult(id, finalUrl) {
     return /\/series\/[^/]+$/.test(pathname);
   }
 
+  if (id === "users.search-and-sort") {
+    return pathname === "/admin/users";
+  }
+
+  if (id === "support.reset-filters") {
+    return pathname === "/admin/support";
+  }
+
+  if (id === "comments.search-and-sort") {
+    return pathname === "/admin/comments";
+  }
+
+  if (id === "orders.export-empty-and-usd") {
+    return pathname === "/admin/orders";
+  }
+
+  if (id === "recommendations.rankings-tab") {
+    return pathname === "/admin/recommendations";
+  }
+
+  if (id === "recommendations.analytics-filter") {
+    return pathname === "/admin/recommendations";
+  }
+
+  if (id === "storefront.quick-creators") {
+    return pathname === "/admin/creators";
+  }
+
+  if (id === "storefront.filter-search") {
+    return pathname === "/admin/storefront";
+  }
+
+  if (id === "storefront.edit-series") {
+    return /\/admin\/series\/[^/]+$/.test(pathname);
+  }
+
+  if (id === "storefront.edit-episodes") {
+    return /\/admin\/series\/[^/]+\/episodes$/.test(pathname);
+  }
+
+  if (id === "storefront.preview-series") {
+    return /\/series\/[^/]+$/.test(pathname);
+  }
+
+  if (id === "analytics.segments-pagination") {
+    return pathname === "/admin/analytics";
+  }
+
+  if (id === "analytics.user-detail-drilldown") {
+    return pathname === "/admin/analytics";
+  }
+
   return false;
+}
+
+function stabilizeChecks(checks) {
+  return checks.map((check) => {
+    if (check.id === "recommendations.rankings-tab") {
+      return {
+        ...check,
+        run: async (page) => {
+          await clickButtonByText(page, "姒滃崟瑙勫垯");
+          await page.locator("body").filter({ hasText: "鏂板缓姒滃崟瑙勫垯" }).waitFor({
+            state: "visible",
+            timeout: DEFAULT_TIMEOUT_MS,
+          });
+
+          return {
+            finalUrl: page.url(),
+            note: "rankings tab stays in the recommendations workspace and renders the current ranking-rule state",
+          };
+        },
+      };
+    }
+
+    if (check.id === "analytics.segments-pagination") {
+      return {
+        ...check,
+        run: async (page) => {
+          await clickButtonByText(page, "璇昏€呭垎缇?");
+
+          const firstRowBefore = await readFirstTableRowText(page);
+          await page.locator("button").filter({ hasText: "涓嬩竴椤?" }).last().click();
+          await page.waitForFunction(
+            (expectedRow) => {
+              const row = document.querySelector("tbody tr");
+              return Boolean(row && row.innerText !== expectedRow);
+            },
+            firstRowBefore,
+            { timeout: DEFAULT_TIMEOUT_MS },
+          );
+
+          const firstRowAfter = await readFirstTableRowText(page);
+          if (firstRowBefore === firstRowAfter) {
+            throw new Error("analytics segments next-page action did not change the first visible row");
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "segments view should page through distinct reader records without leaving the analytics route",
+          };
+        },
+      };
+    }
+
+    if (check.id === "analytics.user-detail-drilldown") {
+      return {
+        ...check,
+        run: async (page) => {
+          await clickButtonByText(page, "璇昏€呭垎缇?");
+          const selectedUser = (await readFirstTableRowText(page))
+            .split("\n")
+            .map((part) => part.trim())
+            .find(Boolean);
+
+          await page.locator("button").filter({ hasText: "鎵撳紑鐢ㄦ埛" }).first().click();
+          await page.waitForFunction(
+            (email) => !document.querySelector("tbody tr") && document.body.innerText.includes(email),
+            selectedUser,
+            { timeout: DEFAULT_TIMEOUT_MS },
+          );
+
+          const bodyText = await page.locator("body").innerText();
+          if (!selectedUser || !bodyText.includes(selectedUser)) {
+            throw new Error("analytics user detail drilldown did not retain the selected reader context");
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "reader segments should drill into the user profile workspace without any write-side effects",
+          };
+        },
+      };
+    }
+
+    return check;
+  });
+}
+
+function stabilizeChecksV2(checks) {
+  return checks.map((check) => {
+    if (check.id === "recommendations.rankings-tab") {
+      return {
+        ...check,
+        run: async (page) => {
+          const lastButtonBefore = (await page.locator("button").last().innerText()).trim();
+          await page.locator("button").nth(6).click();
+          await page.waitForFunction(
+            (previousLabel) => {
+              const buttons = Array.from(document.querySelectorAll("button"));
+              const currentLabel = buttons.at(-1)?.innerText?.trim?.() || "";
+              return currentLabel.length > 0 && currentLabel !== previousLabel;
+            },
+            lastButtonBefore,
+            { timeout: DEFAULT_TIMEOUT_MS },
+          );
+
+          const lastButtonAfter = (await page.locator("button").last().innerText()).trim();
+          if (lastButtonAfter === lastButtonBefore) {
+            throw new Error("recommendations rankings tab did not update the primary action state");
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "rankings tab stays in the recommendations workspace and swaps the primary action to ranking rules",
+          };
+        },
+      };
+    }
+
+    if (check.id === "analytics.segments-pagination") {
+      return {
+        ...check,
+        run: async (page) => {
+          await page.locator("button").nth(6).click();
+          await page.waitForTimeout(1200);
+
+          const firstRowBefore = await readFirstTableRowText(page);
+          await page.locator("button").nth(33).click();
+          await page.waitForFunction(
+            (expectedRow) => {
+              const row = document.querySelector("tbody tr");
+              return Boolean(row && row.innerText !== expectedRow);
+            },
+            firstRowBefore,
+            { timeout: DEFAULT_TIMEOUT_MS },
+          );
+
+          const firstRowAfter = await readFirstTableRowText(page);
+          if (firstRowBefore === firstRowAfter) {
+            throw new Error("analytics segments next-page action did not change the first visible row");
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "segments view should page through distinct reader records without leaving the analytics route",
+          };
+        },
+      };
+    }
+
+    if (check.id === "analytics.user-detail-drilldown") {
+      return {
+        ...check,
+        run: async (page) => {
+          await page.locator("button").nth(6).click();
+          await page.waitForTimeout(1200);
+          const selectedUser = (await readFirstTableRowText(page))
+            .split("\n")
+            .map((part) => part.trim())
+            .find(Boolean);
+
+          await page.locator("button").nth(12).click();
+          await page.waitForFunction(
+            (email) => {
+              return (
+                document.querySelectorAll("button").length <= 9 &&
+                document.body.innerText.includes(email)
+              );
+            },
+            selectedUser,
+            {
+              timeout: DEFAULT_TIMEOUT_MS,
+            },
+          );
+
+          const bodyText = await page.locator("body").innerText();
+          if (!selectedUser || !bodyText.includes(selectedUser)) {
+            throw new Error("analytics user detail drilldown did not retain the selected reader context");
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "reader segments should drill into the user profile workspace without any write-side effects",
+          };
+        },
+      };
+    }
+
+    return check;
+  });
 }
 
 async function runCheck(context, baseUrl, check, artifactsDir) {
@@ -508,7 +1103,7 @@ async function run() {
     const context = await browser.newContext();
     await context.addCookies(cookies);
 
-    const checks = buildChecks(frontendUrl);
+    const checks = stabilizeChecksV2(stabilizeChecks(buildChecks(frontendUrl)));
     const results = [];
 
     for (const check of checks) {

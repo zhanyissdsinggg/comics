@@ -9,14 +9,6 @@ import { normalizeCreatorName } from "../../lib/creators";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 
-function formatCompactCount(value) {
-  const safeValue = Math.max(0, Number(value) || 0);
-  return new Intl.NumberFormat("en-US", {
-    notation: safeValue >= 1000 ? "compact" : "standard",
-    maximumFractionDigits: safeValue >= 1000 ? 1 : 0,
-  }).format(safeValue);
-}
-
 function normalizeSearchValue(value) {
   return normalizeCreatorName(String(value || "")).toLowerCase();
 }
@@ -49,7 +41,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-[rgba(0,113,227,0.14)] px-1 text-slate-950">
+      <mark className="rounded bg-[rgba(255,255,255,0.98)] px-1 text-slate-950">
         {match}
       </mark>
       {after}
@@ -226,11 +218,7 @@ export default function SearchCreatorMatchesPanel({
 
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
-    resultsLength === 0
-      ? "Open the creator page."
-      : resultsLength > 0 && resultsLength < 4
-        ? "Try the creator page."
-        : "Creator shelf.";
+    resultsLength === 0 ? "No title match." : "Creator matches.";
 
   return (
     <SurfacePanel className="space-y-4" appearance="light" accent="blue">
@@ -247,9 +235,9 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border border-black/8 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
-            View Creator
+            Open creator
           </Link>
         ) : null}
       </div>
@@ -260,12 +248,12 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[26px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-4 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+            className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
               coverUrl={creator.spotlightSeries?.coverUrl}
-              className="h-48 rounded-[20px]"
+              className="h-48 rounded-[22px]"
             />
             <div className="mt-4 space-y-3">
               <div>
@@ -296,9 +284,11 @@ export default function SearchCreatorMatchesPanel({
                   {creator.titleCount} title
                   {creator.titleCount === 1 ? "" : "s"}
                 </span>
-                <span>{formatCompactCount(creator.readerProof)} readers</span>
                 {creator.completedCount > 0 ? (
                   <span>{creator.completedCount} completed</span>
+                ) : null}
+                {creator.matchedGenres?.[0] ? (
+                  <span>{creator.matchedGenres[0]}</span>
                 ) : null}
               </div>
 
@@ -306,9 +296,9 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border border-black/8 bg-white/84 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-white"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
-                  View Creator
+                  Open creator
                 </Link>
               </div>
             </div>

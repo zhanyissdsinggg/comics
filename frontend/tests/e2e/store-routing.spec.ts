@@ -4,19 +4,27 @@ test.describe("Store routing", () => {
   test("store upsell should preserve the store source path when opening membership", async ({
     page,
   }) => {
-    const response = await page.goto("/store", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/store", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Point packs open soon.", exact: true }),
+      page.getByRole("heading", {
+        name: /Point packs preview\.|Buy points\./,
+      }),
     ).toBeVisible();
 
-    const upsellButton = page.getByRole("button", { name: "View Plans", exact: true }).first();
+    const upsellButton = page
+      .getByRole("button", { name: "Plans", exact: true })
+      .first();
 
     await expect(upsellButton).toBeVisible();
     await Promise.all([
       page.waitForURL(
-        (url) => url.pathname === "/subscribe" && url.searchParams.get("entry") === "STORE_UPSELL",
+        (url) =>
+          url.pathname === "/subscribe" &&
+          url.searchParams.get("entry") === "STORE_UPSELL",
       ),
       upsellButton.click(),
     ]);

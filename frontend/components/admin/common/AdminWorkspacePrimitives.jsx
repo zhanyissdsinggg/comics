@@ -4,17 +4,17 @@ import SurfacePanel from "@/components/common/SurfacePanel";
 import { cn } from "@/lib/utils";
 
 export const adminInputClassName =
-  "h-11 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)] disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
 
 export const adminTextareaClassName =
-  "w-full rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)] disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
 
 export const adminSelectClassName =
-  "h-11 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)] disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
 
 const badgeToneClasses = {
-  default: "border-black/8 bg-[rgba(250,247,241,0.9)] text-slate-600",
-  accent: "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]",
+  default: "border-[color:var(--gush-border)] bg-white text-slate-600",
+  accent: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950",
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
   warning: "border-amber-200 bg-amber-50 text-amber-700",
   danger: "border-red-200 bg-red-50 text-red-700",
@@ -31,7 +31,7 @@ export function AdminPageSection({
 }) {
   return (
     <SurfacePanel appearance="light" tone={tone} accent={accent} className={className}>
-      {(title || description || action) ? (
+      {title || description || action ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             {title ? (
@@ -53,20 +53,14 @@ export function AdminPageSection({
   );
 }
 
-export function AdminMetricCard({
-  label,
-  value,
-  detail,
-  tone = "default",
-  className = "",
-}) {
+export function AdminMetricCard({ label, value, detail, tone = "default", className = "" }) {
   return (
     <div
       className={cn(
         "rounded-[24px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
         tone === "accent"
-          ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)]"
-          : "border-black/6 bg-white/76",
+          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]"
+          : "border-[color:var(--gush-border)] bg-white/92",
         className,
       )}
     >
@@ -107,7 +101,7 @@ export function AdminKeyValueList({ items, className = "" }) {
       {items.map((item) => (
         <div
           key={item.label}
-          className="flex items-center justify-between gap-4 border-b border-black/6 py-3 last:border-b-0 last:pb-0"
+          className="flex items-center justify-between gap-4 border-b border-[color:var(--gush-border)] py-3 last:border-b-0 last:pb-0"
         >
           <span className="text-sm text-slate-500">{item.label}</span>
           <span className="text-sm font-medium text-slate-950">{item.value}</span>
@@ -130,8 +124,8 @@ export function AdminTabs({ items, value, onChange, className = "" }) {
             className={cn(
               "rounded-full border px-4 py-2 text-sm font-semibold transition",
               isActive
-                ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
-                : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
             )}
           >
             {item.label}
@@ -144,7 +138,12 @@ export function AdminTabs({ items, value, onChange, className = "" }) {
 
 export function AdminDataTable({ className = "", children }) {
   return (
-    <div className={cn("overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]", className)}>
+    <div
+      className={cn(
+        "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 shadow-[var(--gush-shadow-soft)]",
+        className,
+      )}
+    >
       <div className="overflow-x-auto">{children}</div>
     </div>
   );
@@ -152,7 +151,7 @@ export function AdminDataTable({ className = "", children }) {
 
 export function AdminTableHeader({ children }) {
   return (
-    <thead className="bg-[rgba(250,247,241,0.9)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
+    <thead className="bg-[color:var(--gush-page-bg-muted)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
       {children}
     </thead>
   );
@@ -160,7 +159,12 @@ export function AdminTableHeader({ children }) {
 
 export function AdminTableRow({ children, className = "" }) {
   return (
-    <tr className={cn("border-t border-black/6 align-top text-sm text-slate-700 transition hover:bg-[rgba(250,247,241,0.52)]", className)}>
+    <tr
+      className={cn(
+        "border-t border-[color:var(--gush-border)] align-top text-sm text-slate-700 transition hover:bg-[color:var(--gush-page-bg-muted)]",
+        className,
+      )}
+    >
       {children}
     </tr>
   );

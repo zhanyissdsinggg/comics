@@ -38,8 +38,8 @@ import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b border-black/6 pb-4">
+    <section className="mt-6 rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-[color:var(--gush-border)] pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-4 w-10 rounded-full" />
@@ -648,9 +648,9 @@ export default function SeriesPage({
     );
   }, [episodes]);
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_18px_34px_rgba(0,113,227,0.22)]";
+    "rounded-full border border-slate-950 bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.12)] transition-all duration-200 hover:bg-slate-800 hover:shadow-[0_18px_34px_rgba(15,23,42,0.14)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -764,7 +764,7 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="home" />
         <div className="gush-page-main">
-          <section className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:p-7">
+          <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
               <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
               <div className="space-y-4">
@@ -794,8 +794,8 @@ export default function SeriesPage({
               </div>
             </div>
           </section>
-          <section className="mt-6 rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,248,252,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
-            <div className="mb-4 flex items-center justify-between border-b border-black/6 pb-4">
+          <section className="mt-6 rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+            <div className="mb-4 flex items-center justify-between border-b border-[color:var(--gush-border)] pb-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-28 rounded-full" />
                 <Skeleton className="h-4 w-12 rounded-full" />
@@ -825,7 +825,7 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="home" />
         <div className="gush-page-main max-w-[960px]">
-          <div className="rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-6 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+          <div className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               Series unavailable
             </p>
@@ -841,7 +841,7 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?view=featured")}
                 className={primaryButtonClass}
               >
-                Browse Series
+                Open series
               </button>
               <button
                 type="button"
@@ -900,7 +900,7 @@ export default function SeriesPage({
               }
               className={secondaryButtonClass}
             >
-              {isUnavailable ? "Get Help" : "Search"}
+              {isUnavailable ? "Support" : "Search"}
             </button>
           </NetworkFallback>
         </div>
@@ -958,16 +958,16 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-6 rounded-[30px] border border-[rgba(0,113,227,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))] px-5 py-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:px-6">
+          <div className="mb-6 rounded-[30px] border border-[color:var(--gush-border)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:px-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent)]">
-                  {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                  {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
                 </p>
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
                   {discoveryContext.title}
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
                   {discoveryContext.returnHint}
                 </p>
               </div>
@@ -1013,7 +1013,7 @@ export default function SeriesPage({
         {showSecondarySections ? (
           <>
             <SimilarSeriesSection seriesId={seriesId} series={series} />
-            <div className="mt-8 border-t border-black/6 pt-6" />
+            <div className="mt-8 border-t border-[color:var(--gush-border)] pt-6" />
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}

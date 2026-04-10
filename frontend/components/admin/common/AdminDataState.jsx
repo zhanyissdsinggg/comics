@@ -2,7 +2,7 @@ import React from "react";
 import { LoadingState } from "./LoadingState";
 
 const DEFAULT_CONTAINER_CLASS =
-  "rounded-[24px] border border-black/8 bg-white/88 p-4 shadow-[var(--gush-shadow-soft)]";
+  "rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 p-4 shadow-[var(--gush-shadow-soft)]";
 
 export function AdminDataState({
   isLoading,

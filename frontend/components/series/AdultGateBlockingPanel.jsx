@@ -27,7 +27,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
 
   return (
     <section className="flex min-h-[50vh] items-center justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(18,24,35,0.98),rgba(12,18,28,0.98))] dark:shadow-[0_30px_72px_rgba(0,0,0,0.34)]">
+      <div className="w-full max-w-2xl rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_38px_rgba(15,23,42,0.1)] sm:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(18,24,35,0.98),rgba(12,18,28,0.98))] dark:shadow-[0_30px_72px_rgba(0,0,0,0.34)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-neutral-400">
@@ -40,7 +40,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
               {description}
             </p>
           </div>
-          <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
               Access
             </p>
@@ -54,7 +54,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="rounded-full border border-black/8 bg-white/84 px-3 py-1.5 text-xs text-slate-600 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300"
+              className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5 text-xs text-slate-600 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300"
             >
               {item}
             </span>
@@ -76,14 +76,14 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
                 event.preventDefault();
                 navigateWithDocument("/");
               }}
-              className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
             >
               Browse standard catalog
             </a>
           ) : (
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
             >
               Browse standard catalog
             </Link>

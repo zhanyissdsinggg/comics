@@ -37,7 +37,7 @@ import { canAccessAdminRoute, getAdminRoleLabel } from "../../lib/adminAccess";
 
 const NAV_GROUPS = [
   {
-    label: "工作区",
+    label: "工作台",
     items: [
       { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
       { label: "数据分析", href: "/admin/analytics", icon: BarChart3, match: ["/admin/analytics"] },
@@ -74,7 +74,7 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "商业",
+    label: "商业与收入",
     items: [
       { label: "活动", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
       { label: "营销", href: "/admin/marketing", icon: Megaphone, match: ["/admin/marketing"] },
@@ -187,7 +187,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
       ),
     );
 
-    return group?.label || "工作区";
+    return group?.label || "工作台";
   }, [pathname, visibleNavGroups]);
 
   const toggleMenu = (href) => {
@@ -232,21 +232,21 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
   return (
     <div className="admin-theme relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-[var(--gush-ink-strong)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_12%_0%,rgba(47,88,198,0.09),transparent_22%),radial-gradient(circle_at_88%_2%,rgba(255,255,255,0.8),transparent_18%),linear-gradient(180deg,rgba(248,245,239,0.96),rgba(244,241,234,0.18))]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] bg-[radial-gradient(circle_at_12%_0%,rgba(15,23,42,0.06),transparent_24%),radial-gradient(circle_at_88%_2%,rgba(15,23,42,0.045),transparent_20%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.55),transparent_100%)]" />
 
       <div className="relative flex min-h-screen">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-black/6 bg-[rgba(248,245,239,0.94)] shadow-[var(--gush-shadow-soft)] backdrop-blur-xl transition-all duration-300 lg:relative",
+            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white/94 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl transition-all duration-300 lg:relative",
             isCollapsed ? "w-[92px]" : "w-[284px]",
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           )}
         >
           <div className="flex h-full flex-col">
-            <div className="border-b border-black/6 px-4 py-5">
+            <div className="border-b border-[color:var(--gush-border)] px-4 py-5">
               <div className="flex items-start justify-between gap-3">
                 <Link href={effectiveHomePath} className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.08)] text-sm font-semibold text-[var(--gush-accent,#2f58c6)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-slate-950 text-sm font-semibold tracking-[0.18em] text-white">
                     TT
                   </div>
                   {!isCollapsed ? (
@@ -264,7 +264,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsCollapsed((current) => !current)}
-                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 lg:flex"
+                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 lg:flex"
                   aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
                 >
                   {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -272,13 +272,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               </div>
 
               {!isCollapsed ? (
-                <div className="mt-4 rounded-[24px] border border-black/8 bg-white/76 px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     当前分区
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    用更安静的方式处理作品、署名、前台编排和日常运营动作。
+                    把作品、署名、前台编排和日常运营动作收在一个安静、好用的后台里。
                   </p>
                 </div>
               ) : null}
@@ -289,7 +289,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
                 className={cn(
-                  "flex h-11 w-full items-center gap-3 rounded-full border border-black/8 bg-white px-4 text-left text-sm text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+                  "flex h-11 w-full items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-left text-sm text-slate-700",
                   isCollapsed ? "justify-center px-0" : "",
                 )}
               >
@@ -297,7 +297,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 {!isCollapsed ? (
                   <>
                     <span className="flex-1">搜索后台页面</span>
-                    <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                    <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                       Ctrl+K
                     </span>
                   </>
@@ -326,9 +326,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                       const baseClass =
                         "group flex w-full items-center gap-3 rounded-[20px] border px-4 py-3 text-sm font-medium transition-all duration-200";
                       const activeClass =
-                        "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.03)]";
+                        "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.03)]";
                       const idleClass =
-                        "border-transparent text-slate-600 hover:border-black/6 hover:bg-white/70 hover:text-slate-950";
+                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-white hover:text-slate-950";
 
                       return (
                         <div key={item.label}>
@@ -341,10 +341,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                             >
                               <Icon
                                 size={18}
-                                className={cn(
-                                  "shrink-0",
-                                  isActive ? "text-[var(--gush-accent,#2f58c6)]" : "text-slate-400",
-                                )}
+                                className={cn("shrink-0", isActive ? "text-slate-950" : "text-slate-400")}
                               />
                               {!isCollapsed ? (
                                 <span className="flex-1 truncate text-left">{item.label}</span>
@@ -367,20 +364,17 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                             >
                               <Icon
                                 size={18}
-                                className={cn(
-                                  "shrink-0",
-                                  isActive ? "text-[var(--gush-accent,#2f58c6)]" : "text-slate-400",
-                                )}
+                                className={cn("shrink-0", isActive ? "text-slate-950" : "text-slate-400")}
                               />
                               {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
                               {isActive && !isCollapsed ? (
-                                <span className="ml-auto h-2 w-2 rounded-full bg-[var(--gush-accent,#2f58c6)]" />
+                                <span className="ml-auto h-2 w-2 rounded-full bg-slate-950" />
                               ) : null}
                             </Link>
                           )}
 
                           {hasChildren && isExpanded && !isCollapsed ? (
-                            <div className="mt-1 ml-6 space-y-1 border-l border-black/6 pl-3">
+                            <div className="mt-1 ml-6 space-y-1 border-l border-[color:var(--gush-border)] pl-3">
                               {item.children.map((child) => {
                                 const childIsActive = isChildLinkActive(pathname, searchParams, child.href);
 
@@ -391,13 +385,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                     className={cn(
                                       "group flex items-center gap-2 rounded-[16px] px-3 py-2 text-xs font-medium transition-all duration-200",
                                       childIsActive
-                                        ? "bg-[rgba(47,88,198,0.06)] text-[var(--gush-accent,#2f58c6)]"
-                                        : "text-slate-500 hover:bg-white/70 hover:text-slate-950",
+                                        ? "bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                                        : "text-slate-500 hover:bg-white hover:text-slate-950",
                                     )}
                                   >
                                     <span className="truncate">{child.label}</span>
                                     {childIsActive ? (
-                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--gush-accent,#2f58c6)]" />
+                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-slate-950" />
                                     ) : null}
                                   </Link>
                                 );
@@ -413,10 +407,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
             </nav>
 
             {!isCollapsed ? (
-              <div className="border-t border-black/6 p-4">
-                <div className="rounded-[24px] border border-black/8 bg-white/76 px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+              <div className="border-t border-[color:var(--gush-border)] p-4">
+                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    会话
+                    当前会话
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-950">
                     {session?.adminName || roleLabel}
@@ -425,20 +419,20 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     {session?.adminEmail || roleLabel}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-                    <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                    <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
                       {visibleNavGroups.length} 个工作分区
                     </span>
-                    <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                    <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
                       {permissions.length} 项权限
                     </span>
                     {session?.keySlot ? (
-                      <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.88)] px-2.5 py-1">
+                      <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
                         密钥槽位 {session.keySlot}
                       </span>
                     ) : null}
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    当前菜单和搜索结果已经按角色收口。拿到什么权限，就只看到对应的工作区。
+                    菜单和搜索结果会按角色自动收口。拿到什么权限，就只看到对应的工作区。
                   </p>
                 </div>
               </div>
@@ -454,13 +448,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-black/6 bg-[rgba(244,241,234,0.84)] backdrop-blur-xl">
+          <header className="sticky top-0 z-30 border-b border-[color:var(--gush-border)] bg-white/86 backdrop-blur-xl">
             <div className="mx-auto flex w-[min(var(--gush-page-max-wide),calc(100%-2rem))] flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex items-start gap-4">
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-black/8 bg-white text-slate-600 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 lg:hidden"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600 lg:hidden"
                   aria-label="打开导航"
                 >
                   <Menu size={20} />
@@ -485,11 +479,11 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="hidden h-11 items-center gap-2 rounded-full border border-black/8 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950 md:flex"
+                  className="hidden h-11 items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm font-medium text-slate-700 md:flex"
                 >
                   <Search size={16} className="text-slate-500" />
                   <span>搜索</span>
-                  <kbd className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                  <kbd className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                     Ctrl+K
                   </kbd>
                 </button>

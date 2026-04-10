@@ -103,7 +103,7 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.03)]">
       <p className="text-sm text-slate-600">
         <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
@@ -125,9 +125,9 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+    "rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -148,14 +148,6 @@ export default function PrivacyPolicyPage() {
               {
                 label: "Covers",
                 value: "Account + reading",
-              },
-              {
-                label: "Your options",
-                value: "Access / delete",
-              },
-              {
-                label: "Contact",
-                value: siteConfig.privacyEmail,
               },
             ]}
           />
@@ -188,7 +180,7 @@ export default function PrivacyPolicyPage() {
                 href={`mailto:${siteConfig.supportEmail}`}
                 className={secondaryButtonClass}
               >
-                Open Support
+                Support
               </a>
             </div>
           </SurfacePanel>

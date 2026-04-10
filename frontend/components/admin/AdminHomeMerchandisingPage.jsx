@@ -173,7 +173,7 @@ function ActionButton({ children, className = "", ...props }) {
       type="button"
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+        "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
       {...props}
@@ -185,7 +185,7 @@ function ActionButton({ children, className = "", ...props }) {
 
 function MetricCard({ label, value, hint, tone = "blue" }) {
   const toneClasses = {
-    blue: "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)]",
+    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]",
     emerald: "border-emerald-200 bg-emerald-50/90",
     cyan: "border-sky-200 bg-sky-50/90",
     amber: "border-amber-200 bg-amber-50/90",
@@ -208,7 +208,7 @@ function MetricCard({ label, value, hint, tone = "blue" }) {
 
 function MiniMetric({ label, value, hint }) {
   return (
-    <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+    <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
       {hint ? <p className="mt-1 text-xs leading-6 text-slate-500">{hint}</p> : null}
@@ -218,7 +218,7 @@ function MiniMetric({ label, value, hint }) {
 
 function EmptyState({ title, description }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.72)] px-5 py-10 text-center">
+    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-10 text-center">
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>
@@ -875,7 +875,7 @@ export default function AdminHomeMerchandisingPage() {
           </ActionButton>
           <ActionButton
             onClick={() => router.push("/admin/recommendations")}
-            className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+            className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
           >
             <Sparkles className="h-4 w-4" />
             打开发现配置
@@ -931,7 +931,7 @@ export default function AdminHomeMerchandisingPage() {
               <div className="mt-5 flex flex-wrap gap-2">
                 <ActionButton
                   onClick={() => void handleRefreshSlots()}
-                  className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                 >
                   <RefreshCw className={cn("h-4 w-4", refreshing ? "animate-spin" : "")} />
                   {refreshing ? "刷新中..." : "刷新推荐位"}
@@ -964,7 +964,7 @@ export default function AdminHomeMerchandisingPage() {
             {slotCards.map((slot) => (
               <article
                 key={slot.id}
-                className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -982,7 +982,7 @@ export default function AdminHomeMerchandisingPage() {
                         <div className="mt-2 flex flex-wrap gap-2">
                       {slot.recommendedSeries.length > 0 ? (
                         slot.recommendedSeries.map((series) => (
-                          <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-700">
                             {series.title}
                           </span>
                         ))
@@ -1001,12 +1001,12 @@ export default function AdminHomeMerchandisingPage() {
                     <div className="mt-2 flex flex-wrap gap-2">
                       {slot.currentSeries.length > 0 ? (
                         slot.currentSeries.map((series) => (
-                          <span key={`${slot.id}-current-${series.id}`} className="inline-flex items-center rounded-full border border-black/8 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          <span key={`${slot.id}-current-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
                             {series.title}
                           </span>
                         ))
                       ) : (
-                        <span className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-500">
+                        <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-500">
                           尚未配置
                         </span>
                       )}
@@ -1019,7 +1019,7 @@ export default function AdminHomeMerchandisingPage() {
                     onClick={() => void handleApplyRecommendation(slot)}
                     className={cn(
                       slot.canApplyRecommendation
-                        ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                        ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                         : "opacity-60",
                     )}
                     disabled={!slot.canApplyRecommendation || savingSlot === slot.id || slot.aligned}
@@ -1057,9 +1057,9 @@ export default function AdminHomeMerchandisingPage() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.id} className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                  <div key={item.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-black/8 bg-[rgba(250,247,241,0.92)] text-[var(--gush-accent,#2f58c6)]">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-950">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -1101,7 +1101,7 @@ export default function AdminHomeMerchandisingPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {hotSignals.map((signal) => (
-                  <div key={signal.id} className="rounded-[24px] border border-black/8 bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                  <div key={signal.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
                     <p className="text-sm font-semibold text-slate-950">{signal.label}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{signal.detail}</p>
                   </div>
@@ -1126,7 +1126,7 @@ export default function AdminHomeMerchandisingPage() {
                 <ActionButton
                   key={window.id}
                   onClick={() => setPerformanceWindow(window.id)}
-                  className={performanceWindow === window.id ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]" : ""}
+                  className={performanceWindow === window.id ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : ""}
                 >
                   {window.label}
                 </ActionButton>
@@ -1169,7 +1169,7 @@ export default function AdminHomeMerchandisingPage() {
                   return (
                     <article
                       key={`${slot.id}-performance`}
-                      className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                      className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -1217,7 +1217,7 @@ export default function AdminHomeMerchandisingPage() {
             {slotOptimizationCards.map((slot) => (
               <article
                 key={`${slot.id}-optimization`}
-                className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -1242,7 +1242,7 @@ export default function AdminHomeMerchandisingPage() {
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {slot.plan.replacementCandidates.map((series) => (
-                        <span key={`${slot.id}-replacement-${series.id}`} className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        <span key={`${slot.id}-replacement-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-700">
                           {series.title}
                         </span>
                       ))}
@@ -1254,7 +1254,7 @@ export default function AdminHomeMerchandisingPage() {
                   {slot.plan.actionType === "apply" ? (
                     <ActionButton
                       onClick={() => void handleApplyRecommendation(slot)}
-                      className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                      className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                       disabled={savingSlot === slot.id || !slot.canApplyRecommendation}
                     >
                       <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
@@ -1306,14 +1306,14 @@ export default function AdminHomeMerchandisingPage() {
                 return (
                   <article
                     key={series.id}
-                    className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-[1.25rem] font-semibold tracking-tight text-slate-950">{series.title}</h3>
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(readiness.tone)}`}>
                         {readiness.statusLabel}
                       </span>
-                      <span className="inline-flex items-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.92)] px-2.5 py-1 text-xs font-semibold text-slate-600">
+                      <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-600">
                         候选分 {Math.round(score)}
                       </span>
                     </div>

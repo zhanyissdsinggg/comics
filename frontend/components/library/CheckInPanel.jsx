@@ -10,28 +10,37 @@ export default function CheckInPanel({
 }) {
   if (!rewards) {
     return (
-      <section className="rounded-[28px] border border-black/6 bg-white/86 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
         <div className="space-y-3" aria-hidden="true">
           <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
           <div className="h-7 w-48 animate-pulse rounded-2xl bg-slate-200" />
           <div className="h-4 w-full max-w-sm animate-pulse rounded-full bg-slate-100" />
         </div>
-        <p className="mt-4 text-sm text-slate-500">Today's check-in is getting ready.</p>
+        <p className="mt-4 text-sm text-slate-500">
+          Today's check-in is getting ready.
+        </p>
       </section>
     );
   }
 
   return (
-    <section className="rounded-[28px] border border-black/6 bg-white/90 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+    <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Pill appearance="light" tone="subtle">Streak</Pill>
-            <Pill appearance="light" tone="accent">{rewards.streakCount}-day run</Pill>
+            <Pill appearance="light" tone="subtle">
+              Streak
+            </Pill>
+            <Pill appearance="light" tone="accent">
+              {rewards.streakCount}-day run
+            </Pill>
           </div>
-          <h2 className="mt-3 text-xl font-semibold text-slate-950">Today's check-in</h2>
+          <h2 className="mt-3 text-xl font-semibold text-slate-950">
+            Today's check-in
+          </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Pick up +{rewards.todayReward} bonus points and keep the streak going.
+            Pick up +{rewards.todayReward} bonus points and keep the streak
+            going.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -47,7 +56,7 @@ export default function CheckInPanel({
             type="button"
             onClick={onMakeUp}
             disabled={rewards.makeUpUsedToday || working}
-            className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 disabled:opacity-50"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs text-slate-700 disabled:opacity-50"
           >
             Restore streak
           </button>

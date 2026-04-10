@@ -123,7 +123,7 @@ export default function SeriesFitPanel({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   const fitModel = useMemo(() => {
     const leadGenre =
@@ -214,7 +214,7 @@ export default function SeriesFitPanel({
             and the easiest way in.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best way in
           </p>
@@ -231,7 +231,7 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
+            className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {card.label}
@@ -245,7 +245,7 @@ export default function SeriesFitPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best if you want
           </p>
@@ -260,7 +260,7 @@ export default function SeriesFitPanel({
             .
           </p>
         </div>
-        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             What to compare next
           </p>
@@ -273,7 +273,7 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Recommended next step
           </p>

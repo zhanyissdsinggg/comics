@@ -40,11 +40,11 @@ const CommerceSuccessBanner = dynamic(
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
   loading: () => (
-    <div className="sticky top-0 z-40 border-b border-white/10 bg-[rgba(9,9,11,0.66)] backdrop-blur-xl">
+    <div className="sticky top-0 z-40 border-b border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.94)] backdrop-blur-lg">
       <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 rounded-full border border-white/10 bg-white/[0.06] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
-        <div className="hidden h-10 flex-1 rounded-full border border-white/10 bg-white/[0.04] md:block" />
-        <div className="h-10 w-24 rounded-full border border-white/10 bg-white/[0.06] shadow-[0_16px_32px_rgba(0,0,0,0.18)]" />
+        <div className="h-10 w-28 rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]" />
+        <div className="hidden h-10 flex-1 rounded-full border border-[color:var(--gush-border)] bg-white md:block" />
+        <div className="h-10 w-24 rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]" />
       </div>
     </div>
   ),
@@ -57,12 +57,12 @@ const HomeContentSections = dynamic(() => import("./HomeContentSections"), {
   ssr: false,
   loading: () => (
     <div className="space-y-8 md:space-y-10">
-      <div className="h-56 rounded-[28px] border border-black/8 bg-white/86 shadow-[0_18px_40px_rgba(0,0,0,0.05)]" />
+      <div className="h-56 rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(0,0,0,0.05)]" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`home-section-skeleton-${index}`}
-            className="h-72 rounded-[26px] border border-black/8 bg-white/84 shadow-[0_18px_40px_rgba(0,0,0,0.05)]"
+            className="h-72 rounded-[26px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(0,0,0,0.05)]"
           />
         ))}
       </div>
@@ -85,17 +85,6 @@ function formatPercent(value) {
   return !Number.isFinite(numeric) || numeric <= 0
     ? "0%"
     : `${Math.round((numeric <= 1 ? numeric : numeric / 100) * 100)}%`;
-}
-
-function clampText(value, limit = 180) {
-  const text = String(value || "").trim();
-  if (!text) {
-    return "";
-  }
-  if (text.length <= limit) {
-    return text;
-  }
-  return `${text.slice(0, limit).trimEnd()}...`;
 }
 
 function getReadingState(series) {
@@ -137,6 +126,13 @@ function formatDisplayLabel(value) {
     .join(" ");
 }
 
+function getSeriesFormat(series) {
+  return String(series?.type || series?.seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
 function buildHeroCoverAltText(series) {
   const title = String(series?.title || "")
     .replace(/\s+/g, " ")
@@ -175,46 +171,6 @@ function buildCleanSeriesMetaLabel(series, creatorName) {
   return buildSeriesMetaLabel(series, creatorName);
 }
 
-function buildHeroFactRows(series, creatorName, spotlightEpisodeId) {
-  const rows = [];
-
-  if (creatorName) {
-    rows.push({
-      id: "creator",
-      label: "Creator",
-      value: creatorName,
-    });
-  }
-
-  const formatLabel = formatDisplayLabel(
-    series?.type || series?.seriesType || "",
-  );
-  if (formatLabel) {
-    rows.push({
-      id: "format",
-      label: "Format",
-      value: formatLabel,
-    });
-  }
-
-  const stateLabel = getReadingState(series);
-  if (spotlightEpisodeId) {
-    rows.push({
-      id: "chapter",
-      label: "Current",
-      value: formatEpisodeLabel(spotlightEpisodeId),
-    });
-  } else if (stateLabel) {
-    rows.push({
-      id: "status",
-      label: "Status",
-      value: stateLabel,
-    });
-  }
-
-  return rows.slice(0, 3);
-}
-
 function buildHomeShelfItem(series) {
   if (!series?.id) {
     return null;
@@ -247,7 +203,7 @@ function HeroCoverPreview({ series, eyebrow }) {
   const coverAltText = buildHeroCoverAltText(series);
 
   return (
-    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(180deg,rgba(20,20,24,0.98),rgba(6,6,8,0.98))] shadow-[0_28px_70px_rgba(0,0,0,0.3)]">
+    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
       {coverUrl ? (
         <img
           src={coverUrl}
@@ -258,14 +214,13 @@ function HeroCoverPreview({ series, eyebrow }) {
         />
       ) : (
         <div
-          className="absolute inset-0 bg-[linear-gradient(135deg,rgba(17,24,39,0.92),rgba(49,87,214,0.38),rgba(245,158,11,0.18))]"
+          className="absolute inset-0 bg-[linear-gradient(135deg,rgba(243,244,246,1),rgba(228,232,238,1),rgba(248,248,250,1))]"
           role="img"
           aria-label={coverAltText}
         />
       )}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,6,8,0.04),rgba(6,6,8,0.58))]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(41,151,255,0.18),transparent_30%)]" />
-      <div className="absolute left-3 top-3 rounded-full border border-white/12 bg-[rgba(255,255,255,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/72 shadow-[0_10px_24px_rgba(0,0,0,0.2)] backdrop-blur-sm">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(15,23,42,0.54))]" />
+      <div className="absolute left-3 top-3 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)] shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
         {badgeLabel}
       </div>
       <div className="absolute inset-x-0 bottom-0 p-4 text-white">
@@ -277,32 +232,87 @@ function HeroCoverPreview({ series, eyebrow }) {
   );
 }
 
-function HeroVisualStack({ series, eyebrow, isResume = false }) {
+function HeroMiniCover({ series, className = "" }) {
+  if (!series) {
+    return null;
+  }
+
+  const coverUrl = String(series?.coverUrl || "").trim();
+  const coverAltText = buildHeroCoverAltText(series);
+
+  return (
+    <div
+      className={cn(
+        "relative aspect-[3/4] overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.06)]",
+        className,
+      )}
+    >
+      {coverUrl ? (
+        <img
+          src={coverUrl}
+          alt={coverAltText}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 bg-[linear-gradient(135deg,rgba(243,244,246,1),rgba(228,232,238,1),rgba(248,248,250,1))]"
+          role="img"
+          aria-label={coverAltText}
+        />
+      )}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(15,23,42,0.32))]" />
+      <div className="absolute inset-[1px] rounded-[23px] border border-white/30" />
+    </div>
+  );
+}
+
+function HeroVisualStack({
+  series,
+  eyebrow,
+  isResume = false,
+  companionItems = [],
+}) {
   const hasSeries = Boolean(series);
+  const leftCompanion = companionItems[0] || null;
+  const rightCompanion = companionItems[1] || null;
 
   return (
     <div className="relative mx-auto hidden min-h-[25rem] w-full max-w-[372px] xl:block">
-      <div className="absolute right-2 top-4 h-[14rem] w-[10rem] rounded-[34px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_24px_60px_rgba(0,0,0,0.24)] backdrop-blur-xl" />
-      <div className="absolute left-6 top-16 h-[11.5rem] w-[8.2rem] rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(41,151,255,0.22),rgba(255,255,255,0.04))] opacity-90 shadow-[0_24px_54px_rgba(0,0,0,0.24)]" />
-      <div className="absolute inset-x-10 top-0 h-32 rounded-full bg-[radial-gradient(circle,rgba(41,151,255,0.24),transparent_68%)] blur-3xl" />
-      <div className="absolute bottom-6 left-12 h-[9.6rem] w-[7.2rem] rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] shadow-[0_18px_42px_rgba(0,0,0,0.18)] backdrop-blur-xl" />
+      <div className="absolute inset-x-12 top-2 h-24 rounded-full bg-[radial-gradient(circle,rgba(15,23,42,0.05),transparent_72%)] blur-3xl" />
+
+      {leftCompanion ? (
+        <div className="absolute left-2 top-[4.6rem] w-[8.7rem] -rotate-[8deg]">
+          <HeroMiniCover series={leftCompanion} />
+        </div>
+      ) : (
+        <div className="absolute left-6 top-16 h-[11.5rem] w-[8.2rem] rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(247,247,249,1),rgba(255,255,255,1))] shadow-[0_18px_40px_rgba(15,23,42,0.05)]" />
+      )}
+
+      {rightCompanion ? (
+        <div className="absolute bottom-7 left-11 w-[7.7rem] rotate-[8deg]">
+          <HeroMiniCover series={rightCompanion} />
+        </div>
+      ) : (
+        <div className="absolute bottom-6 left-12 h-[9.6rem] w-[7.2rem] rounded-[26px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.05)]" />
+      )}
 
       {hasSeries ? (
-        <div className="absolute right-10 top-8 w-[15.8rem]">
+        <div className="absolute right-8 top-7 w-[16.2rem]">
           <HeroCoverPreview
             series={series}
             eyebrow={isResume ? "Continue" : eyebrow}
           />
         </div>
       ) : (
-        <div className="absolute right-10 top-8 flex h-[21rem] w-[15.8rem] items-end overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,20,0.96),rgba(8,8,10,0.98))] p-5 shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(41,151,255,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_28%)]" />
+        <div className="absolute right-10 top-8 flex h-[21rem] w-[15.8rem] items-end overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(247,247,249,1))] p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
           <div className="relative">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/44">
-              Editorial shelf
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
+              Lead shelf
             </p>
-            <p className="mt-3 max-w-[10rem] text-[1.8rem] font-semibold leading-[0.96] tracking-[-0.05em] text-white">
-              Featured stories settle here.
+            <p className="mt-3 max-w-[10rem] text-[1.8rem] font-semibold leading-[0.96] tracking-[-0.05em] text-[color:var(--gush-ink-strong)]">
+              A story worth opening.
             </p>
           </div>
         </div>
@@ -323,7 +333,14 @@ function HomeQuickPickCard({ item, eyebrow, onClick, tone = "dark" }) {
       onClick={onClick}
       className="group flex w-full items-center gap-3 rounded-[24px] px-1 py-3 text-left transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[3/4] w-[76px] shrink-0 overflow-hidden rounded-[20px] border border-white/10 bg-neutral-900 shadow-[0_18px_28px_rgba(0,0,0,0.22)]">
+      <div
+        className={cn(
+          "relative aspect-[3/4] w-[76px] shrink-0 overflow-hidden rounded-[20px] shadow-[0_14px_28px_rgba(15,23,42,0.08)]",
+          isLight
+            ? "border border-[color:var(--gush-border)] bg-white"
+            : "border border-white/10 bg-neutral-900 shadow-[0_18px_28px_rgba(0,0,0,0.22)]",
+        )}
+      >
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -334,13 +351,23 @@ function HomeQuickPickCard({ item, eyebrow, onClick, tone = "dark" }) {
           />
         ) : (
           <div
-            className="absolute inset-0 bg-[linear-gradient(135deg,rgba(11,17,30,0.96),rgba(73,96,171,0.48),rgba(244,201,138,0.22))]"
+            className={cn(
+              "absolute inset-0",
+              isLight
+                ? "bg-[linear-gradient(135deg,rgba(243,244,246,1),rgba(228,232,238,1),rgba(248,248,250,1))]"
+                : "bg-[linear-gradient(135deg,rgba(11,17,30,0.96),rgba(73,96,171,0.48),rgba(244,201,138,0.22))]",
+            )}
             role="img"
             aria-label={coverAltText}
           />
         )}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.04),rgba(8,12,18,0.42))]" />
-        <div className="absolute inset-[1px] rounded-[19px] border border-white/10" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.04),rgba(8,12,18,0.32))]" />
+        <div
+          className={cn(
+            "absolute inset-[1px] rounded-[19px]",
+            isLight ? "border border-white/30" : "border border-white/10",
+          )}
+        />
       </div>
 
       <div className="min-w-0 flex-1">
@@ -382,10 +409,6 @@ function HomeQuickPickCard({ item, eyebrow, onClick, tone = "dark" }) {
       />
     </button>
   );
-}
-
-function isPositiveCount(value) {
-  return Number.isFinite(Number(value)) && Number(value) > 0;
 }
 
 function HomeContent({ initialSearchParams = {} }) {
@@ -529,15 +552,6 @@ function HomeContent({ initialSearchParams = {} }) {
     () => buildCleanSeriesMetaLabel(heroSeries, heroCreatorName),
     [heroCreatorName, heroSeries],
   );
-  const heroFactRows = useMemo(
-    () =>
-      buildHeroFactRows(
-        heroSeries,
-        heroCreatorName,
-        resumeSpotlight?.episodeId || "",
-      ),
-    [heroCreatorName, heroSeries, resumeSpotlight?.episodeId],
-  );
 
   const heroSignals = useMemo(() => {
     if (!heroSeries) {
@@ -565,7 +579,7 @@ function HomeContent({ initialSearchParams = {} }) {
       });
     }
 
-    return signals.filter(Boolean).slice(0, 3);
+    return signals.filter(Boolean).slice(0, 2);
   }, [heroSeries, resumeSpotlight]);
 
   const featuredSeriesItems = useMemo(
@@ -624,42 +638,52 @@ function HomeContent({ initialSearchParams = {} }) {
   }, [featuredSeriesItems, heroSeries?.id, startHereItems]);
   const hasHeroRailItems = heroRailItems.length > 0;
 
-  const heroMetrics = useMemo(
-    () => [
-      {
-        id: "series",
-        label: "Series",
-        value: Number(editorialSnapshot?.seriesCount || 0).toLocaleString(),
-      },
-      {
-        id: "genres",
-        label: "Genres",
-        value: Number(editorialSnapshot?.genreCount || 0).toLocaleString(),
-      },
-      {
-        id: "completed",
-        label: "Finished",
-        value: Number(
-          editorialSnapshot?.completedSeriesCount || 0,
-        ).toLocaleString(),
-      },
-    ],
-    [
-      editorialSnapshot?.completedSeriesCount,
-      editorialSnapshot?.genreCount,
-      editorialSnapshot?.seriesCount,
-    ],
-  );
-  const showHeroMetrics = useMemo(
+  const excludedShelfIds = useMemo(
     () =>
-      isPositiveCount(editorialSnapshot?.seriesCount) ||
-      isPositiveCount(editorialSnapshot?.genreCount) ||
-      isPositiveCount(editorialSnapshot?.completedSeriesCount),
-    [
-      editorialSnapshot?.completedSeriesCount,
-      editorialSnapshot?.genreCount,
-      editorialSnapshot?.seriesCount,
-    ],
+      new Set(
+        [
+          heroSeries?.id,
+          ...featuredSeriesItems.map((item) => item.id),
+          ...startHereItems.map((item) => item.id),
+        ]
+          .map((value) => String(value || "").trim())
+          .filter(Boolean),
+      ),
+    [featuredSeriesItems, heroSeries?.id, startHereItems],
+  );
+
+  const comicSpotlightItems = useMemo(
+    () =>
+      dedupeSeries([...editorialSnapshot.safeCatalog, ...seriesList])
+        .filter((series) => {
+          const seriesId = String(series?.id || "").trim();
+          return (
+            seriesId &&
+            !excludedShelfIds.has(seriesId) &&
+            getSeriesFormat(series) === "comic"
+          );
+        })
+        .slice(0, 4)
+        .map((series) => buildHomeShelfItem(series))
+        .filter(Boolean),
+    [editorialSnapshot.safeCatalog, excludedShelfIds, seriesList],
+  );
+
+  const novelSpotlightItems = useMemo(
+    () =>
+      dedupeSeries([...editorialSnapshot.safeCatalog, ...seriesList])
+        .filter((series) => {
+          const seriesId = String(series?.id || "").trim();
+          return (
+            seriesId &&
+            !excludedShelfIds.has(seriesId) &&
+            getSeriesFormat(series) === "novel"
+          );
+        })
+        .slice(0, 4)
+        .map((series) => buildHomeShelfItem(series))
+        .filter(Boolean),
+    [editorialSnapshot.safeCatalog, excludedShelfIds, seriesList],
   );
 
   const showCatalogFallback = !loading && !featuredSeries;
@@ -669,17 +693,16 @@ function HomeContent({ initialSearchParams = {} }) {
       {
         id: "featured-series",
         eyebrow: "Browse",
-        title: "Featured Series",
-        description:
-          "Open the current editorial shelf and start with what is surfaced right now.",
-        label: "Browse Series",
+        title: "Featured Stories",
+        description: "Go straight to the strongest live shelf.",
+        label: "Browse Stories",
         href: "/search",
       },
       {
         id: "browse-comics",
         eyebrow: "Formats",
         title: "Comics and Novels",
-        description: "Choose a format first, then keep exploring from there.",
+        description: "Choose a format, then keep reading.",
         label: "Browse Comics",
         href: "/comics",
       },
@@ -734,26 +757,18 @@ function HomeContent({ initialSearchParams = {} }) {
     return "/search";
   }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
 
-  const heroEyebrow = resumeSeries ? "Continue Reading" : "Original Stories";
+  const heroEyebrow = resumeSeries ? "Continue" : "Lead Story";
   const heroHeading = resumeSeries
-    ? "Pick the story back up without losing the thread."
-    : "Comics and novels, with less noise around them.";
+    ? "Pick up where you left off."
+    : "Start with a story worth opening.";
   const heroSummary = resumeSeries
-    ? "Your next episode is already waiting."
-    : "One lead title. Calmer shelves. More room to read.";
-  const heroFeatureEyebrow = resumeSeries ? "Current Read" : "Now Featuring";
-  const heroFeatureSummary =
-    clampText(heroSeries?.description, 150) ||
-    (resumeSeries
-      ? "Your next chapter is already waiting in the library."
-      : "A focused place to start, stay, or browse more slowly.");
+    ? "Jump back in and keep moving."
+    : "One strong lead pick, then a cleaner shelf of comics, novels, and creators.";
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue Reading"
     : heroSeries?.id
       ? "Start Reading"
       : "Browse Stories";
-  const heroSupportLabel = resumeSeries ? "Reading Notes" : "Lead Story";
-  const heroSupportTitle = heroSeries?.title || "Editorial shelf";
 
   return (
     <div className="gush-page-shell gush-home-shell overflow-hidden">
@@ -763,197 +778,170 @@ function HomeContent({ initialSearchParams = {} }) {
       <main className="gush-page-main gush-page-main--wide">
         <section className="pb-12 pt-2 md:pb-14">
           {loading ? (
-            <div className="aspect-[5/6] w-full animate-pulse rounded-[38px] border border-white/10 bg-[rgba(10,10,12,0.88)] shadow-[0_30px_70px_rgba(0,0,0,0.24)] sm:aspect-[21/11] lg:aspect-[21/8]" />
+            <div className="aspect-[5/6] w-full animate-pulse rounded-[38px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <div
-              className={cn(
-                "grid gap-6",
-                hasHeroRailItems &&
-                  "xl:grid-cols-[minmax(0,1.24fr)_minmax(280px,0.76fr)] xl:items-start",
-              )}
-            >
-              <Card className="relative min-h-[470px] overflow-hidden rounded-[48px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,10,12,0.98),rgba(18,18,20,0.94))] py-0 text-white shadow-[0_42px_110px_rgba(0,0,0,0.32)] ring-0 backdrop-blur-[30px]">
-                {featuredBannerUrl ? (
-                  <div
-                    className="absolute inset-y-0 right-0 hidden w-[46%] bg-cover bg-center opacity-[0.22] xl:block"
-                    style={{ backgroundImage: `url(${featuredBannerUrl})` }}
-                  />
-                ) : null}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(41,151,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.08),transparent_22%)]" />
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,8,10,0.95)_0%,rgba(8,8,10,0.88)_50%,rgba(8,8,10,0.56)_100%)]" />
+            <Card className="relative min-h-[470px] overflow-hidden rounded-[48px] border border-[color:var(--gush-border)] bg-white py-0 text-[color:var(--gush-ink-strong)] shadow-[0_24px_60px_rgba(15,23,42,0.08)] ring-0">
+              {featuredBannerUrl ? (
+                <div
+                  className="absolute inset-y-0 right-0 hidden w-[46%] bg-cover bg-center opacity-[0.12] xl:block"
+                  style={{ backgroundImage: `url(${featuredBannerUrl})` }}
+                />
+              ) : null}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.05),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(148,163,184,0.08),transparent_22%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.94)_52%,rgba(255,255,255,0.82)_100%)]" />
 
-                <CardContent className="relative grid h-full min-h-[470px] gap-8 p-6 sm:p-8 xl:min-h-[590px] xl:grid-cols-[minmax(0,0.98fr)_minmax(320px,0.8fr)] xl:gap-10 xl:p-12">
-                  <div className="flex h-full flex-col justify-between">
-                    <div className="max-w-[46rem] xl:pr-4">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <p className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/54 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                          {heroEyebrow}
-                        </p>
-                      </div>
-
-                      <h1 className="mt-6 max-w-[8.1ch] text-[3.2rem] font-semibold leading-[0.84] tracking-[-0.074em] text-white sm:text-[4.25rem] xl:text-[6.28rem]">
-                        {heroHeading}
-                      </h1>
-                      {heroSummary ? (
-                        <p className="mt-5 max-w-[26rem] text-[0.98rem] leading-8 text-white/66">
-                          {heroSummary}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-9 flex flex-wrap items-center gap-4">
-                        <Link
-                          href={primaryHeroHref}
-                          className={cn(
-                            buttonVariants({ size: "lg" }),
-                            "h-12 rounded-full px-6 text-sm font-semibold shadow-[0_20px_40px_rgba(0,113,227,0.22)]",
-                          )}
-                        >
-                          {primaryHeroCtaLabel}
-                          <ArrowRight className="size-4" />
-                        </Link>
-                      </div>
-
-                      {showHeroMetrics ? (
-                        <div className="mt-10 flex max-w-[33rem] flex-wrap divide-x divide-white/10 overflow-hidden rounded-full border border-white/10 bg-white/[0.04] px-2 py-2 shadow-[0_18px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl">
-                          {heroMetrics.map((metric) => (
-                            <div
-                              key={`hero-inline-${metric.id}`}
-                              className="min-w-[6.8rem] px-3 py-2 first:pl-3"
-                            >
-                              <p className="text-[1.14rem] font-semibold tracking-tight text-white">
-                                {metric.value}
-                              </p>
-                              <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/38">
-                                {metric.label}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
+              <CardContent className="relative grid h-full min-h-[470px] gap-8 p-6 sm:p-8 xl:min-h-[590px] xl:grid-cols-[minmax(0,0.98fr)_minmax(320px,0.8fr)] xl:gap-10 xl:p-12">
+                <div className="flex h-full flex-col justify-between">
+                  <div className="max-w-[46rem] xl:pr-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        {heroEyebrow}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex h-full flex-col justify-between gap-6 xl:items-end">
-                    <HeroVisualStack
-                      series={heroSeries}
-                      eyebrow="Featured"
-                      isResume={resumeSeries}
-                    />
+                    <h1 className="mt-6 max-w-[9.1ch] text-[3.2rem] font-semibold leading-[0.84] tracking-[-0.074em] text-[color:var(--gush-ink-strong)] sm:text-[4.25rem] xl:text-[6.1rem]">
+                      {heroHeading}
+                    </h1>
 
-                    <div className="w-full rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.04))] p-5 shadow-[0_24px_54px_rgba(0,0,0,0.18)] backdrop-blur-xl xl:max-w-[360px]">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/42">
-                        {heroSupportLabel}
+                    {heroSummary ? (
+                      <p className="mt-5 max-w-[29rem] text-[0.96rem] leading-7 text-[color:var(--gush-ink-soft)]">
+                        {heroSummary}
                       </p>
-                      <h2 className="mt-3 text-[1.95rem] font-semibold tracking-[-0.055em] text-white">
-                        {heroSupportTitle}
-                      </h2>
-                      {heroMetaLine ? (
-                        <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
-                          {heroMetaLine}
-                        </p>
-                      ) : null}
-                      <p className="mt-4 text-sm leading-7 text-white/64">
-                        {heroFeatureSummary}
-                      </p>
+                    ) : null}
 
+                    {heroMetaLine ? (
+                      <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
+                        {heroMetaLine}
+                      </p>
+                    ) : null}
+
+                    {heroGenrePills.length > 0 || heroSignals.length > 0 ? (
                       <div className="mt-5 flex flex-wrap gap-2.5">
                         {heroGenrePills.map((genre) => (
                           <span
                             key={`hero-genre-${genre}`}
-                            className="inline-flex items-center whitespace-nowrap rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white/66"
+                            className="inline-flex items-center whitespace-nowrap rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)]"
                           >
                             {genre}
                           </span>
                         ))}
-                        {heroSignals.slice(0, 2).map((signal) => (
+                        {heroSignals.map((signal) => (
                           <span
                             key={signal.id}
-                            className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white/66"
+                            className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[11px] font-medium text-[color:var(--gush-ink-soft)]"
                           >
                             {signal.content}
                           </span>
                         ))}
                       </div>
+                    ) : null}
 
-                      {heroFactRows.length > 0 ? (
-                        <div className="mt-6 border-t border-white/10 pt-5">
-                          <div className="grid gap-3">
-                            {heroFactRows.map((row) => (
-                              <div
-                                key={row.id}
-                                className="flex items-center justify-between gap-4"
-                              >
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/38">
-                                  {row.label}
-                                </span>
-                                <span className="text-sm font-medium text-right text-white/78">
-                                  {row.value}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {hasHeroRailItems ? (
-                <div className="grid gap-5 xl:pt-6">
-                  <div className="rounded-[36px] border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.82)] p-5 shadow-[0_20px_44px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
-                          Read Next
-                        </p>
-                        <p className="mt-2 text-sm text-[color:var(--gush-ink-soft)]">
-                          A quieter short list when you want the next strong
-                          pick.
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.push("/search")}
-                        className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
+                    <div className="mt-9 flex flex-wrap items-center gap-4">
+                      <Link
+                        href={primaryHeroHref}
+                        className={cn(
+                          buttonVariants({ size: "lg" }),
+                          "h-12 rounded-full px-6 text-sm font-semibold shadow-[0_14px_30px_rgba(15,23,42,0.12)]",
+                        )}
                       >
-                        Browse
+                        {primaryHeroCtaLabel}
                         <ArrowRight className="size-4" />
-                      </Button>
+                      </Link>
                     </div>
 
-                    <div className="mt-5 divide-y divide-[color:var(--gush-border-faint)]">
-                      {heroRailItems.map((item, index) => (
-                        <div
-                          key={`hero-rail-${item.id}`}
-                          className="py-1.5 first:pt-0 last:pb-0"
-                        >
-                          <HomeQuickPickCard
-                            item={item}
-                            eyebrow={
-                              index === 0
-                                ? "Featured"
-                                : index === 1
-                                  ? "Start Here"
-                                  : "Later"
-                            }
-                            tone="light"
-                            onClick={() =>
-                              openHomeSeries(
-                                item.id,
-                                "HOME_HERO_RAIL",
-                                `home_hero_rail_${item.id}`,
-                              )
-                            }
-                          />
-                        </div>
-                      ))}
+                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[color:var(--gush-ink-soft)]">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/comics")}
+                        className="font-medium transition hover:text-[color:var(--gush-ink-strong)]"
+                      >
+                        Comics
+                      </button>
+                      <span
+                        aria-hidden="true"
+                        className="h-1 w-1 rounded-full bg-[color:var(--gush-border-strong)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => router.push("/novels")}
+                        className="font-medium transition hover:text-[color:var(--gush-ink-strong)]"
+                      >
+                        Novels
+                      </button>
+                      <span
+                        aria-hidden="true"
+                        className="h-1 w-1 rounded-full bg-[color:var(--gush-border-strong)]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => router.push("/creators")}
+                        className="font-medium transition hover:text-[color:var(--gush-ink-strong)]"
+                      >
+                        Creators
+                      </button>
                     </div>
                   </div>
                 </div>
-              ) : null}
-            </div>
+
+                <div className="flex h-full flex-col justify-between gap-6 xl:items-end">
+                  <HeroVisualStack
+                    series={heroSeries}
+                    eyebrow="Featured"
+                    isResume={resumeSeries}
+                    companionItems={heroRailItems}
+                  />
+
+                  {hasHeroRailItems ? (
+                    <div className="w-full rounded-[32px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] xl:max-w-[360px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
+                            Next on the shelf
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => router.push("/search")}
+                          className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
+                        >
+                          View all
+                          <ArrowRight className="size-4" />
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 divide-y divide-[color:var(--gush-border-faint)]">
+                        {heroRailItems.map((item, index) => (
+                          <div
+                            key={`hero-rail-${item.id}`}
+                            className="py-1.5 first:pt-0 last:pb-0"
+                          >
+                            <HomeQuickPickCard
+                              item={item}
+                              eyebrow={
+                                index === 0
+                                  ? "Featured"
+                                  : index === 1
+                                    ? "Comics"
+                                    : "Novels"
+                              }
+                              tone="light"
+                              onClick={() =>
+                                openHomeSeries(
+                                  item.id,
+                                  "HOME_HERO_RAIL",
+                                  `home_hero_rail_${item.id}`,
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </section>
 
@@ -971,6 +959,8 @@ function HomeContent({ initialSearchParams = {} }) {
           homepageFallbackCards={homepageFallbackCards}
           featuredSeriesItems={featuredSeriesItems}
           startHereItems={startHereItems}
+          comicSpotlightItems={comicSpotlightItems}
+          novelSpotlightItems={novelSpotlightItems}
           onFallbackClick={(href) => router.push(href)}
           onBrowseAllSeries={() => router.push("/search")}
           onFeaturedItemClick={(item) =>
@@ -985,6 +975,20 @@ function HomeContent({ initialSearchParams = {} }) {
               item.id,
               "HOME_START_HERE",
               `home_start_here_${item.id}`,
+            )
+          }
+          onComicSpotlightItemClick={(item) =>
+            openHomeSeries(
+              item.id,
+              "HOME_COMIC_SPOTLIGHT",
+              `home_comic_spotlight_${item.id}`,
+            )
+          }
+          onNovelSpotlightItemClick={(item) =>
+            openHomeSeries(
+              item.id,
+              "HOME_NOVEL_SPOTLIGHT",
+              `home_novel_spotlight_${item.id}`,
             )
           }
           onGuideClick={(href) => router.push(href)}

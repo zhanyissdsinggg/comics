@@ -224,7 +224,7 @@ export default function AdminEmailJobsPage() {
         </div>
 
         {jobs.length === 0 ? (
-          <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-8 text-center text-sm text-slate-500">
+          <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-8 text-center text-sm text-slate-500">
             当前视图下还没有匹配的邮件任务。
           </div>
         ) : (

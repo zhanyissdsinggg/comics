@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 import dynamicImport from "next/dynamic";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminAuth } from "../../components/admin/AuthContext";
+
 import AdminShell from "../../components/admin/AdminShell";
+import { useAdminAuth } from "../../components/admin/AuthContext";
 import Skeleton from "../../components/common/Skeleton";
 
-const AdminDashboardNew = dynamicImport(
-  () => import("../../components/admin/AdminDashboardNew"),
+const AdminDashboardClean = dynamicImport(
+  () => import("../../components/admin/AdminDashboardClean"),
   {
     loading: () => (
       <div className="space-y-6">
@@ -54,7 +55,7 @@ export default function AdminPage() {
       title="仪表盘"
       subtitle="先看待处理事项，再看作品、读者、订单和评论这些真实后台数据。"
     >
-      <AdminDashboardNew />
+      <AdminDashboardClean />
     </AdminShell>
   );
 }

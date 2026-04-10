@@ -19,9 +19,9 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <Link
           href="/search"
           aria-label="Open search"
-          className={`inline-flex h-10 w-full items-center gap-2 rounded-full border px-3.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[rgba(0,113,227,0.16)] ${
+          className={`inline-flex h-10 w-full items-center gap-2 rounded-full border px-3.5 transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-200/80 ${
             isLight
-              ? "border-[color:var(--gush-border)] bg-white/88 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.2)] dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              ? "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.2)] dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white"
               : "border-white/10 bg-white/[0.04] text-white/72 hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
           }`}
           title={placeholder}

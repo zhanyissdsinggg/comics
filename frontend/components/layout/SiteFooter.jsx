@@ -284,7 +284,7 @@ export default function SiteFooter({
           <div
             className={`mt-4 flex flex-col gap-3 border-t pt-3 text-sm lg:flex-row lg:items-center lg:justify-between ${
               isHome
-                ? "border-black/8 text-slate-400 dark:border-white/10 dark:text-neutral-500"
+                ? "border-[color:var(--gush-border)] text-slate-400 dark:border-white/10 dark:text-neutral-500"
                 : "border-white/10 text-neutral-500"
             }`}
           >
@@ -417,7 +417,7 @@ export default function SiteFooter({
         <div
           className={`mt-6 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${
             isHome
-              ? "border-black/8 text-slate-400 dark:border-white/10 dark:text-neutral-500"
+              ? "border-[color:var(--gush-border)] text-slate-400 dark:border-white/10 dark:text-neutral-500"
               : "border-white/10 text-neutral-500"
           }`}
         >

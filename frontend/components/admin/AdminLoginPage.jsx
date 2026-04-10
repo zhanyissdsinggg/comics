@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
         router.push("/admin");
       }
     } else {
-      setError(result.error || "登录失败。");
+      setError(result.error || "登录失败，请检查后台密钥和验证码。");
     }
 
     setIsLoading(false);
@@ -38,11 +38,11 @@ export default function AdminLoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--gush-page-bg)] px-4 py-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_14%_0%,rgba(47,88,198,0.08),transparent_22%),radial-gradient(circle_at_86%_4%,rgba(255,255,255,0.7),transparent_18%),linear-gradient(180deg,rgba(248,245,239,0.96),rgba(244,241,234,0.2))]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_16%_0%,rgba(15,23,42,0.06),transparent_24%),radial-gradient(circle_at_84%_4%,rgba(15,23,42,0.045),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.52),transparent_100%)]" />
 
-      <div className="relative w-full max-w-md rounded-[32px] border border-black/8 bg-white/92 p-8 shadow-[var(--gush-shadow-panel)]">
+      <div className="relative w-full max-w-md rounded-[32px] border border-[color:var(--gush-border)] bg-white/96 p-8 shadow-[0_28px_64px_rgba(15,23,42,0.08)]">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-[rgba(47,88,198,0.12)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] bg-slate-950 text-white">
             <ShieldCheck className="size-8" />
           </div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
             登录内容管理后台
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            使用后台密钥进入运营面板。成员身份、角色和二次验证配置会从后台成员目录里读取。
+            使用后台密钥进入运营面板。成员身份、角色和二次验证设置会从后台成员目录里读取。
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
               value={adminKey}
               onChange={(event) => setAdminKey(event.target.value)}
               autoComplete="current-password"
-              className="h-12 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+              className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition"
               placeholder="输入后台密钥"
               required
               disabled={isLoading}
@@ -98,8 +98,8 @@ export default function AdminLoginPage() {
                 setTotpCode(next);
               }}
               autoComplete="one-time-code"
-              className="h-12 w-full rounded-[20px] border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-950 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
-              placeholder="如果启用了 2FA，请输入验证码"
+              className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition"
+              placeholder="如果启用了 2FA，请输入最新的 6 位验证码"
               disabled={isLoading}
             />
           </label>
@@ -115,7 +115,7 @@ export default function AdminLoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
+        <div className="mt-6 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
           后台会话会通过安全 Cookie 保存。如果当前成员启用了二次验证，请继续输入最新的 6 位验证码。
         </div>
       </div>

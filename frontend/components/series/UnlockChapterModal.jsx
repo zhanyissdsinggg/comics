@@ -396,7 +396,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full bg-[var(--gush-accent,#0071e3)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(0,113,227,0.28)] transition hover:bg-[var(--gush-accent-strong,#0058cc)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(15,23,42,0.16)] transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {primaryButtonLabel}
                 </button>
@@ -450,7 +450,7 @@ export default function UnlockChapterModal({
                       key={pkg.id}
                       className={`rounded-[24px] border px-4 py-4 transition ${
                         isHighlighted
-                          ? "border-[rgba(0,113,227,0.4)] bg-[rgba(0,113,227,0.14)] shadow-[0_18px_42px_rgba(0,83,194,0.2)]"
+                          ? "border-[color:var(--gush-border-strong)] bg-[rgba(255,255,255,0.98)] shadow-[0_18px_42px_rgba(15,23,42,0.1)]"
                           : "border-white/10 bg-white/6"
                       }`}
                     >

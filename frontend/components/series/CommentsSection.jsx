@@ -239,16 +239,16 @@ export default function CommentsSection({
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const inputClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
+    "flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
 
   return (
     <section
       data-comments-section
-      className="mt-8 rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,240,232,0.94))] p-6 shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+      className="mt-8 rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -269,8 +269,8 @@ export default function CommentsSection({
               onClick={onFollowToggle}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 isFollowing
-                  ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] text-slate-950 hover:border-[rgba(0,113,227,0.22)] hover:bg-[rgba(0,113,227,0.09)]"
-                  : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
+                  ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 hover:border-[color:var(--gush-border-strong)] hover:bg-white"
+                  : "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               }`}
             >
               {isFollowing ? "Saved" : "Save"}
@@ -300,7 +300,7 @@ export default function CommentsSection({
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "latest"
                 ? "border-black/10 bg-slate-950 text-white"
-                : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
+                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             }`}
           >
             Latest
@@ -311,7 +311,7 @@ export default function CommentsSection({
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "top"
                 ? "border-black/10 bg-slate-950 text-white"
-                : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
+                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             }`}
           >
             Top
@@ -321,14 +321,14 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setActiveModal(true)}
-            className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-xs text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             Sign in to comment
           </button>
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-[26px] border border-black/6 bg-white/82 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+      <div className="mt-5 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -345,7 +345,7 @@ export default function CommentsSection({
                 key={prompt.id}
                 type="button"
                 onClick={() => focusComposer(prompt.text)}
-                className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
                 {prompt.label}
               </button>
@@ -374,7 +374,7 @@ export default function CommentsSection({
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-[24px] border border-black/6 bg-white/84 p-5">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-5">
             <p className="text-sm font-semibold text-slate-950">
               No comments yet.
             </p>
@@ -386,7 +386,7 @@ export default function CommentsSection({
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-[24px] border border-black/6 bg-white/84 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
             >
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>{getCommentAuthor(comment)}</span>
@@ -399,8 +399,8 @@ export default function CommentsSection({
                   onClick={() => handleLike(comment.id)}
                   className={`rounded-full border px-3 py-1 transition ${
                     getCommentLikedByUser(comment)
-                      ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent-strong,#0058cc)]"
-                      : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc]"
+                      ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
+                      : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                   }`}
                 >
                   Like {getCommentLikeCount(comment)}
@@ -412,14 +412,14 @@ export default function CommentsSection({
                       prev === comment.id ? "" : comment.id,
                     )
                   }
-                  className="rounded-full border border-black/8 bg-white px-3 py-1 text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
                   Reply{" "}
                   {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 rounded-[18px] border border-black/6 bg-[#f8f9fc] p-3 text-xs text-slate-600">
+                <div className="mt-3 space-y-2 rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-3 text-xs text-slate-600">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-center justify-between text-[10px] text-slate-400">
@@ -444,7 +444,7 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-black/8 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]"
+                    className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80"
                   />
                   <button
                     type="button"

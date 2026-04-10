@@ -4,7 +4,7 @@ import {
   ArrowRight,
   BookOpen,
   BookOpenText,
-  CircleHelp,
+  Compass,
   Users,
 } from "lucide-react";
 import PortraitCard from "./PortraitCard";
@@ -32,7 +32,7 @@ function HomeSectionHeader({
         {eyebrow ? (
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
             {Icon ? (
-              <span className="inline-flex size-7 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-[color:var(--gush-accent)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:bg-white/[0.04]">
+              <span className="inline-flex size-7 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.86)] dark:bg-white/[0.04]">
                 <Icon className="size-3.5" />
               </span>
             ) : null}
@@ -43,7 +43,7 @@ function HomeSectionHeader({
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-[34rem] text-sm leading-7 text-[color:var(--gush-ink-soft)]">
+          <p className="mt-3 max-w-[30rem] text-sm leading-6 text-[color:var(--gush-ink-soft)]">
             {description}
           </p>
         ) : null}
@@ -72,7 +72,7 @@ function FallbackDiscoveryCard({
   onClick,
 }) {
   return (
-    <Card className="overflow-hidden rounded-[36px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.96))] py-0 shadow-[0_18px_38px_rgba(0,0,0,0.05)]">
+    <Card className="overflow-hidden rounded-[36px] border border-[color:var(--gush-border)] bg-white py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
       <CardContent className="p-7 sm:p-8">
         {eyebrow ? (
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
@@ -110,14 +110,14 @@ function HomeShelfSection({
   onCtaClick,
   items,
   onItemClick,
-  actionLabel = "View Series",
+  actionLabel = "Open series",
 }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
 
   return (
-    <section className="rounded-[40px] border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.74)] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.045)] backdrop-blur-xl sm:p-8 md:space-y-9">
+    <section className="rounded-[40px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.04)] sm:p-8 md:space-y-9">
       <HomeSectionHeader
         icon={Icon}
         eyebrow={eyebrow}
@@ -155,9 +155,9 @@ function HomeGuideCard({
   onClick,
 }) {
   return (
-    <Card className="h-full overflow-hidden rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,247,249,0.96))] py-0 shadow-[0_18px_42px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+    <Card className="h-full overflow-hidden rounded-[34px] border border-[color:var(--gush-border)] bg-white py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
       <CardContent className="flex h-full flex-col p-6 sm:p-7">
-        <div className="flex size-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-accent)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] dark:bg-white/[0.06]">
+        <div className="flex size-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] dark:bg-white/[0.06]">
           <Icon className="size-5" />
         </div>
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
@@ -177,7 +177,7 @@ function HomeGuideCard({
           type="button"
           variant="ghost"
           onClick={onClick}
-          className="mt-6 h-auto justify-start border-t border-[color:var(--gush-border-faint)] rounded-none px-0 pt-4 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
+          className="mt-6 h-auto justify-start rounded-none border-t border-[color:var(--gush-border-faint)] px-0 pt-4 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
         >
           {ctaLabel}
           <ArrowRight className="size-4" />
@@ -189,11 +189,20 @@ function HomeGuideCard({
 
 const GUIDE_CARDS = [
   {
+    id: "guide-featured",
+    icon: Compass,
+    eyebrow: "Shelf",
+    title: "Featured",
+    description: "Go straight to the lead shelf.",
+    ctaLabel: "Open Featured",
+    href: "/rankings",
+  },
+  {
     id: "guide-comics",
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
-    description: "Serialized panels for a faster, more visual reading rhythm.",
+    description: "Panel-led stories first.",
     ctaLabel: "Browse Comics",
     href: "/comics",
   },
@@ -202,7 +211,7 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
-    description: "Longer chapters for readers who want a slower pace.",
+    description: "Longer chapter-led reads.",
     ctaLabel: "Browse Novels",
     href: "/novels",
   },
@@ -211,19 +220,9 @@ const GUIDE_CARDS = [
     icon: Users,
     eyebrow: "Credits",
     title: "Creators",
-    description:
-      "Follow the writers, artists, teams, and studios behind each title.",
-    ctaLabel: "View Creators",
+    description: "Follow the names behind each title.",
+    ctaLabel: "Open creators",
     href: "/creators",
-  },
-  {
-    id: "guide-help",
-    icon: CircleHelp,
-    eyebrow: "Support",
-    title: "Need Help?",
-    description: "Find help with your account, library, and reading flow.",
-    ctaLabel: "Open Support",
-    href: "/support",
   },
 ];
 
@@ -232,12 +231,20 @@ export default function HomeContentSections({
   homepageFallbackCards,
   featuredSeriesItems,
   startHereItems,
+  comicSpotlightItems,
+  novelSpotlightItems,
   onFallbackClick,
   onBrowseAllSeries,
   onFeaturedItemClick,
   onStartHereItemClick,
+  onComicSpotlightItemClick,
+  onNovelSpotlightItemClick,
   onGuideClick,
 }) {
+  const hasFormatShelves =
+    (Array.isArray(comicSpotlightItems) && comicSpotlightItems.length > 0) ||
+    (Array.isArray(novelSpotlightItems) && novelSpotlightItems.length > 0);
+
   return (
     <div className="space-y-[4.5rem] md:space-y-[5.5rem]">
       {showCatalogFallback ? (
@@ -257,33 +264,63 @@ export default function HomeContentSections({
         <>
           <HomeShelfSection
             icon={BookOpenText}
-            eyebrow="Editorial Shelf"
-            title="Featured Series"
-            description="Standout reads chosen for tone, pacing, and staying power."
-            ctaLabel="See All Stories"
+            eyebrow="Lead Shelf"
+            title="Featured"
+            description="Lead titles worth opening first."
+            ctaLabel="Browse all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
             actionLabel="Open Series"
             onItemClick={onFeaturedItemClick}
           />
 
-          <HomeShelfSection
-            icon={BookOpen}
-            eyebrow="Starting Points"
-            title="Start Here"
-            description="An easier first pick when you want to start with less risk."
-            items={startHereItems}
-            actionLabel="Read Chapter 1"
-            onItemClick={onStartHereItemClick}
-          />
+          {Array.isArray(comicSpotlightItems) &&
+          comicSpotlightItems.length > 0 ? (
+            <HomeShelfSection
+              icon={BookOpenText}
+              eyebrow="Comics"
+              title="Comics"
+              description="Panel-led picks for a faster read."
+              items={comicSpotlightItems}
+              actionLabel="Open Comic"
+              onItemClick={onComicSpotlightItemClick}
+            />
+          ) : null}
+
+          {Array.isArray(novelSpotlightItems) &&
+          novelSpotlightItems.length > 0 ? (
+            <HomeShelfSection
+              icon={BookOpen}
+              eyebrow="Novels"
+              title="Novels"
+              description="Longer reads with a quieter pace."
+              items={novelSpotlightItems}
+              actionLabel="Open Novel"
+              onItemClick={onNovelSpotlightItemClick}
+            />
+          ) : null}
+
+          {!hasFormatShelves &&
+          Array.isArray(startHereItems) &&
+          startHereItems.length > 0 ? (
+            <HomeShelfSection
+              icon={BookOpen}
+              eyebrow="Starting Points"
+              title="First Picks"
+              description="Easy first picks."
+              items={startHereItems}
+              actionLabel="Read Chapter 1"
+              onItemClick={onStartHereItemClick}
+            />
+          ) : null}
         </>
       )}
 
-      <section className="rounded-[40px] border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.74)] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.045)] backdrop-blur-xl sm:p-8 md:space-y-8">
+      <section className="rounded-[40px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_14px_32px_rgba(15,23,42,0.05)] sm:p-8 md:space-y-8">
         <HomeSectionHeader
-          eyebrow="Ways To Read"
-          title="Browse by format"
-          description="Choose the reading rhythm that fits your mood, then keep going from there."
+          eyebrow="Browse"
+          title="Browse sections"
+          description="Jump straight to the part you want."
         />
 
         <div className="grid gap-4 pt-7 md:grid-cols-2 xl:grid-cols-4">

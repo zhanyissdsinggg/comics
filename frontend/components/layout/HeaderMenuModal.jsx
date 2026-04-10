@@ -58,7 +58,10 @@ export default function HeaderMenuModal({
   const isHome = variant === "home";
   const menuLinks = variant === "home" ? HOME_MENU_LINKS : MENU_LINKS;
   const renderMenuLink = (item, className, content) => {
-    const useDocumentNavigation = shouldUseDocumentNavigation(pathname, item.href);
+    const useDocumentNavigation = shouldUseDocumentNavigation(
+      pathname,
+      item.href,
+    );
     if (useDocumentNavigation) {
       return (
         <a
@@ -77,7 +80,12 @@ export default function HeaderMenuModal({
     }
 
     return (
-      <Link key={item.href} href={item.href} onClick={onClose} className={className}>
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onClose}
+        className={className}
+      >
         {content}
       </Link>
     );
@@ -96,27 +104,27 @@ export default function HeaderMenuModal({
         className="absolute inset-x-0 top-0 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mx-auto max-w-[30rem] rounded-[28px] border border-black/8 bg-[rgba(255,255,255,0.94)] p-4 shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
+        <div className="mx-auto max-w-[30rem] rounded-[28px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                 Menu
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {isHome ? "Browse stories." : "Browse without the header taking over."}
+                Quick links.
               </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/8 bg-white text-slate-600 transition hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)] hover:text-slate-950"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
               aria-label="Close menu"
             >
               <ChevronRight className="size-5 rotate-45" />
             </button>
           </div>
 
-          <div className="mt-5 rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+          <div className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -125,7 +133,9 @@ export default function HeaderMenuModal({
                       Account
                     </p>
                     <p className="mt-2 text-lg font-semibold text-slate-950">
-                      {isHome ? "Signed in and ready to keep reading." : "Signed in and ready to pick up fast."}
+                      {isHome
+                        ? "Signed in and ready to keep reading."
+                        : "Signed in and ready to pick up fast."}
                     </p>
                   </div>
                   <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent,#3157d6)]">
@@ -136,29 +146,37 @@ export default function HeaderMenuModal({
                   {[
                     { label: "Account", href: "/account", icon: User },
                     { label: "Purchases", href: "/orders", icon: ShoppingBag },
-                    { label: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : String(unreadCount)) : "" },
+                    {
+                      label: "Notifications",
+                      href: "/notifications",
+                      icon: Bell,
+                      badge:
+                        unreadCount > 0
+                          ? unreadCount > 99
+                            ? "99+"
+                            : String(unreadCount)
+                          : "",
+                    },
                   ].map((item) => {
                     const Icon = item.icon;
-                    return (
-                      renderMenuLink(
-                        item,
-                        "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border border-black/8 bg-[rgba(246,243,237,0.92)] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-black/10 hover:bg-white",
-                        <>
-                          <span className="flex items-center gap-3">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-white text-slate-600">
-                              <Icon className="size-4" />
-                            </span>
-                            {item.label}
+                    return renderMenuLink(
+                      item,
+                      "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+                      <>
+                        <span className="flex items-center gap-3">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600">
+                            <Icon className="size-4" />
                           </span>
-                          {item.badge ? (
-                            <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                              {item.badge}
-                            </span>
-                          ) : (
-                            <ChevronRight className="size-4 text-slate-400" />
-                          )}
-                        </>,
-                      )
+                          {item.label}
+                        </span>
+                        {item.badge ? (
+                          <span className="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                            {item.badge}
+                          </span>
+                        ) : (
+                          <ChevronRight className="size-4 text-slate-400" />
+                        )}
+                      </>,
                     );
                   })}
                 </div>
@@ -170,8 +188,8 @@ export default function HeaderMenuModal({
                 </p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">
                   {isHome
-                    ? "Sign in to keep your library and reading progress together."
-                    : "Sign in to keep your library and reading progress in one place."}
+                    ? "Sign in to keep your library and progress together."
+                    : "Sign in to keep your library and progress in one place."}
                 </p>
                 <div className="mt-4 flex gap-2">
                   <button
@@ -186,7 +204,7 @@ export default function HeaderMenuModal({
                   </button>
                   {renderMenuLink(
                     { label: "Get Help", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/8 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(246,243,237,0.92)]",
+                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
                     "Get Help",
                   )}
                 </div>
@@ -202,27 +220,25 @@ export default function HeaderMenuModal({
               {menuLinks.map((item) => {
                 const isActive = isActivePath(pathname, item.href);
                 const Icon = item.icon;
-                return (
-                  renderMenuLink(
-                    item,
-                    cn(
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition",
-                      isActive
-                        ? "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] text-slate-950"
-                        : "border-black/8 bg-white text-slate-800 hover:border-black/10 hover:bg-[rgba(246,243,237,0.92)]",
-                    ),
-                    <>
-                      <span className="flex items-center gap-3">
-                        {Icon ? (
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/6 bg-[rgba(246,243,237,0.92)] text-slate-600">
-                            <Icon className="size-4" />
-                          </span>
-                        ) : null}
-                        {item.label}
-                      </span>
-                      <ChevronRight className="size-4 text-slate-400" />
-                    </>,
-                  )
+                return renderMenuLink(
+                  item,
+                  cn(
+                    "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border px-4 py-3 text-sm font-semibold transition",
+                    isActive
+                      ? "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] text-slate-950"
+                      : "border-[color:var(--gush-border)] bg-white text-slate-800 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+                  ),
+                  <>
+                    <span className="flex items-center gap-3">
+                      {Icon ? (
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600">
+                          <Icon className="size-4" />
+                        </span>
+                      ) : null}
+                      {item.label}
+                    </span>
+                    <ChevronRight className="size-4 text-slate-400" />
+                  </>,
                 );
               })}
             </div>

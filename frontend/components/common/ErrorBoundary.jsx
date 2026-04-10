@@ -100,7 +100,8 @@ class ErrorBoundary extends Component {
                         "An unexpected error occurred. Please try again."}
                     </p>
 
-                    {process.env.NODE_ENV === "development" && this.state.error ? (
+                    {process.env.NODE_ENV === "development" &&
+                    this.state.error ? (
                       <details className="mt-4">
                         <summary className="cursor-pointer text-xs text-red-500 hover:text-red-600">
                           Error details (dev only)
@@ -122,7 +123,7 @@ class ErrorBoundary extends Component {
                       </button>
                       <button
                         onClick={() => window.location.reload()}
-                        className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                       >
                         Reload page
                       </button>

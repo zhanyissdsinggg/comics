@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -113,7 +113,7 @@ function getCreatorStoryBadge(series) {
 
   const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "Start here";
+    return "First picks";
   }
 
   return "";
@@ -220,14 +220,6 @@ function buildCreatorWorksSummary(creator) {
   return "Live work in the catalog.";
 }
 
-function buildCreatorStartLabel(creator) {
-  const leadSeries = getCreatorLeadSeries(creator);
-  if (leadSeries?.title) {
-    return `Start with ${leadSeries.title}.`;
-  }
-  return "Start with the lead title.";
-}
-
 function CreatorDirectorySkeleton() {
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -251,7 +243,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-hero-stat-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-black/6 bg-white/84"
+                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
               />
             ))}
           </SurfacePanel>
@@ -263,7 +255,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-filter-skeleton-${index}`}
-                className="h-11 animate-pulse rounded-full border border-black/6 bg-white/84"
+                className="h-11 animate-pulse rounded-full border border-[color:var(--gush-border)] bg-white"
               />
             ))}
           </div>
@@ -273,7 +265,7 @@ function CreatorDirectorySkeleton() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`creators-card-skeleton-${index}`}
-              className="h-[360px] animate-pulse rounded-[28px] border border-black/6 bg-white/85 shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+              className="h-[360px] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
             />
           ))}
         </div>
@@ -539,43 +531,49 @@ export default function CreatorsHubPage({
       {
         label: "Profiles",
         value: creators.length.toLocaleString(),
-        hint: "Live public creator pages.",
       },
       {
         label: "Teams",
         value: collectiveCreatorCount.toLocaleString(),
-        hint: "Studios and team credits.",
       },
       {
-        label: "Credited titles",
+        label: "Titles",
         value: creditedSeriesCount.toLocaleString(),
-        hint: "Titles with public credits.",
       },
     ],
     [collectiveCreatorCount, creators.length, creditedSeriesCount],
   );
 
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const filterButtonClass = (isActive) =>
     `rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
       isActive
-        ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
-        : "border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] hover:text-[color:var(--gush-ink)]"
+        ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)]"
+        : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink)]"
     }`;
   const creatorCardClass =
-    "block w-full rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] p-4 text-left shadow-[0_20px_46px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:shadow-[0_24px_52px_rgba(15,23,42,0.08)]";
+    "block w-full rounded-[30px] border border-[color:var(--gush-border)] bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]";
   const neutralChipClass =
     "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1 text-xs text-[color:var(--gush-ink-soft)]";
-  const accentChipClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-strong)]";
   const jumpToGenreBrowse = (genre) => {
     setQuery("");
     setCreditFilter("all");
     setActiveGenre(genre || "All");
 
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("creator-list")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+  const jumpToCreatorList = () => {
     if (typeof document === "undefined") {
       return;
     }
@@ -763,11 +761,11 @@ export default function CreatorsHubPage({
 
   if (error || !creators.length) {
     const fallbackDescription = error
-      ? "Browse stories while public creator pages catch up."
-      : "Live titles do not yet expose a full public creator directory.";
+      ? "Creator pages are unavailable right now."
+      : "A full creator directory is not live yet.";
     const fallbackDeskTitle = error
-      ? "Browse stories for now."
-      : "No live creator directory yet.";
+      ? "Try again or browse titles."
+      : "Browse titles.";
 
     return (
       <main className="gush-home-shell overflow-hidden">
@@ -779,7 +777,11 @@ export default function CreatorsHubPage({
               accent="blue"
               appearance="light"
               eyebrow="Creator credits"
-              title="Browse stories for now."
+              title={
+                error
+                  ? "Creator pages are unavailable."
+                  : "Creator directory is not live yet."
+              }
               description={fallbackDescription}
               stats={[
                 {
@@ -844,8 +846,11 @@ export default function CreatorsHubPage({
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                First picks
+              </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Start with These Stories
+                Start with these titles.
               </h2>
             </div>
 
@@ -861,7 +866,7 @@ export default function CreatorsHubPage({
                     className={`group overflow-hidden ${creatorCardClass}`}
                     aria-label={`Open ${series.title}`}
                   >
-                    <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[color:var(--gush-page-bg-muted)]">
                       <Cover
                         tone={series.coverTone}
                         coverUrl={series.coverUrl}
@@ -894,8 +899,11 @@ export default function CreatorsHubPage({
               className="space-y-5"
             >
               <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  Browse
+                </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Browse by Genre
+                  Start from a genre.
                 </h2>
               </div>
 
@@ -939,8 +947,8 @@ export default function CreatorsHubPage({
             accent="blue"
             appearance="light"
             eyebrow="Creators"
-            title="Meet the credited creators."
-            description="Writers, artists, studios, and teams on live titles."
+            title="Browse creators."
+            description="Writers, artists, studios, and teams behind live titles."
             stats={creatorHeroStats}
           />
 
@@ -952,24 +960,24 @@ export default function CreatorsHubPage({
           >
             <div>
               <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                Move between creators and titles.
+                Open the directory.
               </h2>
             </div>
 
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
-                onClick={() => router.push("/comics")}
+                onClick={jumpToCreatorList}
                 className={primaryButtonClass}
               >
-                Browse Comics
+                Open directory
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                Browse Stories
+                Browse titles
               </button>
             </div>
           </SurfacePanel>
@@ -985,8 +993,11 @@ export default function CreatorsHubPage({
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Search
+              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Search creators
+                Find creators.
               </h2>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (
@@ -1009,7 +1020,7 @@ export default function CreatorsHubPage({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search creators, studios, or titles"
-              className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.2)] focus:ring-4 focus:ring-[rgba(0,113,227,0.08)]"
+              className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-colors placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-4 focus:ring-slate-200/80"
             />
 
             <div className="flex flex-wrap gap-2.5">
@@ -1053,8 +1064,11 @@ export default function CreatorsHubPage({
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Featured
+            </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Featured Creators
+              Featured creators.
             </h2>
           </div>
 
@@ -1112,9 +1126,6 @@ export default function CreatorsHubPage({
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className={accentChipClass}>
-                          {buildCreatorStartLabel(creator)}
-                        </span>
                         {creatorGenres.map((genre) => (
                           <span
                             key={`${creator.slug}-featured-${genre}`}
@@ -1125,9 +1136,11 @@ export default function CreatorsHubPage({
                         ))}
                       </div>
 
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent)]">
-                        View Creator
-                      </p>
+                      {leadSeries?.title ? (
+                        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--gush-ink-faint)]">
+                          Lead title: {leadSeries.title}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </Link>
@@ -1139,8 +1152,11 @@ export default function CreatorsHubPage({
         {guidedDiscoveryEntries.length > 0 ? (
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                First picks
+              </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Start with These Stories
+                Start with these titles.
               </h2>
             </div>
 
@@ -1154,7 +1170,7 @@ export default function CreatorsHubPage({
                 }) => (
                   <div
                     key={id}
-                    className="rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] p-4 shadow-[0_20px_46px_rgba(15,23,42,0.06)]"
+                    className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
                   >
                     <Link
                       href={
@@ -1276,7 +1292,7 @@ export default function CreatorsHubPage({
                           }}
                           className={primaryButtonClass}
                         >
-                          {hasOpeningChapter ? "Read Chapter 1" : "View Series"}
+                          {hasOpeningChapter ? "Read Chapter 1" : "Open series"}
                         </Link>
                       </div>
                     </div>
@@ -1289,8 +1305,11 @@ export default function CreatorsHubPage({
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Browse
+            </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Browse by Genre
+              Browse genres.
             </h2>
           </div>
 
@@ -1322,8 +1341,11 @@ export default function CreatorsHubPage({
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Directory
+              </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                All Creators
+                All creators
               </h2>
             </div>
             <p className="text-sm text-slate-500">
@@ -1398,9 +1420,6 @@ export default function CreatorsHubPage({
                         </p>
 
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className={accentChipClass}>
-                            {buildCreatorStartLabel(creator)}
-                          </span>
                           {creatorGenres.map((genre) => (
                             <span
                               key={`${creator.slug}-grid-${genre}`}

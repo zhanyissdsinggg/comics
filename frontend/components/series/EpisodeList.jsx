@@ -34,9 +34,9 @@ export default function EpisodeList({
 }) {
   const { getProgress } = useProgressStore();
   const neutralChipClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1.5 text-xs text-[color:var(--gush-ink-soft)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5 text-xs text-[color:var(--gush-ink-soft)]";
   const filterControlClass =
-    "min-h-[44px] rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm text-[color:var(--gush-ink)] outline-none transition-colors focus:border-[rgba(0,113,227,0.22)]";
+    "min-h-[44px] rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2.5 text-sm text-[color:var(--gush-ink)] outline-none transition-colors focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filter, setFilter] = useState("all");
   const unlockedEpisodeIds = useMemo(
@@ -146,7 +146,7 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-6 overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,248,250,0.96))] shadow-[0_22px_52px_rgba(15,23,42,0.06)] backdrop-blur-md sm:mt-8"
+      className="mt-6 overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-white shadow-[0_12px_30px_rgba(15,23,42,0.05)] sm:mt-8"
       data-wallet-total={walletTotal}
     >
       <div className="border-b border-[color:var(--gush-border)] px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
@@ -154,17 +154,19 @@ export default function EpisodeList({
           <div className="max-w-3xl space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
               <span>Episodes</span>
-              <span className="rounded-full border border-[color:var(--gush-border)] bg-white/82 px-2.5 py-1 text-[10px] tracking-[0.2em] text-slate-600">
+              <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[10px] tracking-[0.2em] text-slate-600">
                 {totalEpisodes.toLocaleString()}
               </span>
             </div>
             <div className="space-y-2">
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {availabilitySummary.entryLabel || "Read the story in order."}
+                Episode list
               </h2>
-              {availabilitySummary.entryHint ? (
+              {availabilitySummary.entryHint ||
+              availabilitySummary.entryLabel ? (
                 <p className="max-w-2xl text-sm leading-7 text-slate-600">
-                  {availabilitySummary.entryHint}
+                  {availabilitySummary.entryHint ||
+                    availabilitySummary.entryLabel}
                 </p>
               ) : null}
             </div>
@@ -219,7 +221,7 @@ export default function EpisodeList({
 
       <div className="px-5 py-5 sm:px-6 sm:py-6">
         {sortedEpisodes.length === 0 ? (
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/84 p-6 text-sm text-slate-600">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-6 text-sm text-slate-600">
             <p className="text-base font-semibold text-slate-950">
               No episodes yet.
             </p>
@@ -230,7 +232,7 @@ export default function EpisodeList({
             </p>
           </div>
         ) : (
-          <ul className="space-y-2.5">
+          <ul className="space-y-3">
             {sortedEpisodes.map((episode, index) => {
               const key = episode?.id || `${series.id || "series"}-${index}`;
               const unlocked = unlockedEpisodeIds.includes(episode?.id);

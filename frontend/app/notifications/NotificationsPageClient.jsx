@@ -199,17 +199,17 @@ export default function NotificationsPage() {
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
   const inboxDeskTitle = loading
     ? "Inbox is loading."
     : unreadCount > 0
       ? "Unread updates are waiting."
       : "You're caught up.";
   const inboxDeskCopy = loading
-    ? "Recent updates are loading now."
+    ? "Recent updates are loading."
     : unreadCount > 0
-      ? "Clear a few updates, then jump back in."
-      : "New chapters, offers, and free unlocks land here.";
+      ? "Clear a few, then jump back in."
+      : "New chapters and offers land here.";
 
   return (
     <div className="gush-home-shell overflow-hidden">
@@ -221,8 +221,8 @@ export default function NotificationsPage() {
             appearance="light"
             accent="blue"
             eyebrow="Notifications"
-            title="Reading updates."
-            description="Chapters, offers, and free unlocks stay in one inbox."
+            title="Inbox."
+            description="Chapter alerts, offers, and free unlocks."
             secondary=""
             stats={notificationStats}
             actions={
@@ -232,7 +232,7 @@ export default function NotificationsPage() {
                   onClick={() => router.push("/library")}
                   className={primaryButtonClass}
                 >
-                  Open Library
+                  Library
                 </button>
                 <button
                   type="button"
@@ -274,7 +274,7 @@ export default function NotificationsPage() {
                 onClick={() => router.push("/library")}
                 className={primaryButtonClass}
               >
-                Open library
+                Library
               </button>
               <button
                 type="button"
@@ -307,7 +307,7 @@ export default function NotificationsPage() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                   aria-hidden="true"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -321,7 +321,7 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-            <p className="text-sm text-slate-500">Loading your inbox.</p>
+            <p className="text-sm text-slate-500">Loading inbox.</p>
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel
@@ -353,10 +353,10 @@ export default function NotificationsPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Latest activity
+                  Inbox
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Latest updates
+                  Latest
                 </h2>
               </div>
               <p className="text-xs text-slate-500">

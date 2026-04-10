@@ -208,7 +208,7 @@ export default function SocialAuthButton({
 
     return (
       <div className="w-full space-y-2">
-        <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[16px] border border-black/8 bg-white px-2 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+        <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[16px] border border-[color:var(--gush-border)] bg-white px-2 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
         {GOOGLE_CLIENT_ID && !googleReady ? (
@@ -229,7 +229,7 @@ export default function SocialAuthButton({
         type="button"
         onClick={handleAppleLogin}
         disabled={loading || isLoading}
-        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[16px] border border-black/8 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[16px] border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Apple"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

@@ -6,7 +6,15 @@ import {
   slugifyCreatorName,
 } from "./creators";
 
-const TEAM_TOKENS = ["team", "works", "lab", "labs", "collective", "house", "project"];
+const TEAM_TOKENS = [
+  "team",
+  "works",
+  "lab",
+  "labs",
+  "collective",
+  "house",
+  "project",
+];
 const STUDIO_TOKENS = ["studio"];
 const PUBLIC_CREATOR_TYPES = new Set(["person", "team", "studio"]);
 const GENERIC_CREATOR_PLACEHOLDER_PATTERNS = [
@@ -21,7 +29,8 @@ const GENERIC_CREATOR_PLACEHOLDER_PATTERNS = [
 ];
 
 export const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
-export const CREATOR_FALLBACK_DETAIL = "Public creator names have not been listed on this title yet.";
+export const CREATOR_FALLBACK_DETAIL =
+  "Public creator names have not been listed on this title yet.";
 
 export function isGenericCreatorPlaceholder(name) {
   const normalized = normalizeCreatorName(name);
@@ -29,7 +38,9 @@ export function isGenericCreatorPlaceholder(name) {
     return true;
   }
 
-  return GENERIC_CREATOR_PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(normalized));
+  return GENERIC_CREATOR_PLACEHOLDER_PATTERNS.some((pattern) =>
+    pattern.test(normalized),
+  );
 }
 
 export function inferCreatorCreditType(name) {
@@ -50,7 +61,9 @@ export function inferCreatorCreditType(name) {
 }
 
 function normalizeCreatorType(type, fallbackName = "") {
-  const normalizedType = String(type || "").trim().toLowerCase();
+  const normalizedType = String(type || "")
+    .trim()
+    .toLowerCase();
   if (PUBLIC_CREATOR_TYPES.has(normalizedType)) {
     return normalizedType;
   }
@@ -62,7 +75,7 @@ function normalizeCreatorType(type, fallbackName = "") {
 function createCreatorIdentity(source) {
   const hasObjectSource = Boolean(source && typeof source === "object");
   const rawName = hasObjectSource
-    ? source?.label ?? source?.name ?? ""
+    ? (source?.label ?? source?.name ?? "")
     : source;
   const normalizedName = normalizeCreatorName(rawName);
   const rawSlug = hasObjectSource ? String(source?.slug || "").trim() : "";
@@ -88,7 +101,10 @@ function createCreatorIdentity(source) {
   }
 
   const slug = rawSlug || slugifyCreatorName(normalizedName);
-  const creditType = normalizeCreatorType(hasObjectSource ? source?.type : "", normalizedName);
+  const creditType = normalizeCreatorType(
+    hasObjectSource ? source?.type : "",
+    normalizedName,
+  );
 
   return {
     hasPublicCredit: true,
@@ -96,10 +112,12 @@ function createCreatorIdentity(source) {
     displayName: normalizedName,
     value: normalizedName,
     slug,
-    href: slug ? buildCreatorPathFromSlug(slug) : buildCreatorHref(normalizedName),
+    href: slug
+      ? buildCreatorPathFromSlug(slug)
+      : buildCreatorHref(normalizedName),
     creditType,
     eyebrow: normalizedName,
-    detail: "View Creator",
+    detail: "Open creator",
   };
 }
 
@@ -118,10 +136,14 @@ function extractPrimarySeriesCreator(series) {
     };
   }
 
-  const credits = Array.isArray(series?.creatorCredits) ? series.creatorCredits : [];
+  const credits = Array.isArray(series?.creatorCredits)
+    ? series.creatorCredits
+    : [];
   const primaryCredit =
-    credits.find((credit) => Boolean(credit?.isPrimary) && normalizeCreatorName(credit?.name)) ||
-    credits.find((credit) => normalizeCreatorName(credit?.name));
+    credits.find(
+      (credit) =>
+        Boolean(credit?.isPrimary) && normalizeCreatorName(credit?.name),
+    ) || credits.find((credit) => normalizeCreatorName(credit?.name));
   if (primaryCredit) {
     const creditIdentity = createCreatorIdentity({
       label: primaryCredit.name,
@@ -167,7 +189,9 @@ function collectSeriesCreatorAliases(series) {
     aliases.push(directCreator.displayName, directCreator.slug);
   }
 
-  const credits = Array.isArray(series?.creatorCredits) ? series.creatorCredits : [];
+  const credits = Array.isArray(series?.creatorCredits)
+    ? series.creatorCredits
+    : [];
   credits.forEach((credit) => {
     const normalizedName = normalizeCreatorName(credit?.name);
     if (normalizedName) {
@@ -181,11 +205,7 @@ function collectSeriesCreatorAliases(series) {
   });
 
   return Array.from(
-    new Set(
-      aliases
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
-    ),
+    new Set(aliases.map((value) => String(value || "").trim()).filter(Boolean)),
   );
 }
 
@@ -208,5 +228,7 @@ export function seriesMatchesCreatorSlug(series, slug) {
     return false;
   }
 
-  return collectSeriesCreatorAliases(series).some((alias) => creatorMatchesSlug(alias, normalizedSlug));
+  return collectSeriesCreatorAliases(series).some((alias) =>
+    creatorMatchesSlug(alias, normalizedSlug),
+  );
 }

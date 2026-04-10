@@ -51,19 +51,19 @@ function formatDate(value) {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.06)] text-[var(--gush-accent,#3157d6)]";
+    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700";
   }
   if (tone === "preview") {
-    return "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] text-[var(--gush-accent,#3157d6)]";
-  }
-  if (tone === "points") {
     return "border-[color:var(--gush-border)] bg-white text-slate-700";
   }
+  if (tone === "points") {
+    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700";
+  }
   if (tone === "locked") {
-    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-slate-500";
+    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500";
   }
 
-  return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-slate-500";
+  return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500";
 }
 
 function EpisodeRow({
@@ -379,7 +379,7 @@ function EpisodeRow({
       ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
       : accessState.actionKind === "subscribe"
         ? "min-h-[44px] w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-all hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : "min-h-[44px] w-full rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,113,227,0.18)] transition-all hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_16px_28px_rgba(0,113,227,0.22)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
+        : "min-h-[44px] w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_22px_rgba(15,23,42,0.06)] transition-all hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
 
   const actionNode = (
     <button
@@ -398,10 +398,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,248,250,0.94))] p-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)]"
+      className="group overflow-hidden rounded-[22px] border border-[color:var(--gush-border)] bg-white p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:shadow-[0_12px_26px_rgba(15,23,42,0.07)]"
     >
       <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:h-[108px]">
+        <div className="relative h-24 overflow-hidden rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_8px_18px_rgba(15,23,42,0.04)] sm:h-[108px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -412,7 +412,7 @@ function EpisodeRow({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f4f7fb_0%,#e9eef6_100%)] text-slate-400">
+            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f8fafc_0%,#eef2f7_100%)] text-slate-400">
               <span className="text-lg font-semibold tracking-tight">
                 Ep {episode?.number}
               </span>
@@ -437,7 +437,7 @@ function EpisodeRow({
                   </span>
                 ) : null}
                 {progress?.lastEpisodeId === episode?.id ? (
-                  <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent,#3157d6)]">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                     Last read
                   </span>
                 ) : null}
@@ -459,7 +459,7 @@ function EpisodeRow({
                 </span>
               ) : null}
               {progress?.lastEpisodeId === episode?.id ? (
-                <span className="rounded-full border border-[rgba(49,87,214,0.14)] bg-[rgba(49,87,214,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent,#3157d6)]">
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                   Last read
                 </span>
               ) : null}
@@ -478,7 +478,7 @@ function EpisodeRow({
           ) : null}
 
           {progress?.lastEpisodeId === episode?.id ? (
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/6">
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
               <div
                 className="h-full rounded-full bg-[var(--gush-accent,#3157d6)]"
                 style={{

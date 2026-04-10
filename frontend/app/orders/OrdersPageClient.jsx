@@ -239,16 +239,16 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
-          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
+          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
       },
       {
         id: "support",
-        eyebrow: "Billing help",
-        title: "Need billing help?",
-        cta: "Get billing help",
+        eyebrow: "Billing",
+        title: "Billing support.",
+        cta: "Billing support",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
     ],
     [router],
@@ -262,7 +262,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
         accentClass:
-          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
+          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
       },
       {
         id: "membership",
@@ -278,16 +278,16 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
       {
         id: "support",
-        eyebrow: "Billing help",
-        title: "Need billing help?",
-        cta: "Get billing help",
+        eyebrow: "Billing",
+        title: "Billing support.",
+        cta: "Billing support",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
     ],
     [router],
@@ -309,13 +309,13 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? latestPaidOrder
             ? `Latest: ${latestPaidOrder.orderId}.`
             : "Recent charges appear here."
-          : "Receipts and renewals stay here.",
+          : "Receipts show here.",
         cta: viewerSignedIn ? "View receipts" : "Sign in",
         onClick: viewerSignedIn
           ? () => scrollToSection("purchase-history")
           : signInToOrders,
         accentClass:
-          "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]",
+          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
       },
       {
         id: "membership-charges",
@@ -325,7 +325,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? `${formatOrderPackageLabel(latestMembershipOrder.packageId)} was charged on ${formatOrderDate(latestMembershipOrder.createdAt)} for ${formatOrderAmount(latestMembershipOrder.amount, latestMembershipOrder.currency)}.`
           : viewerSignedIn
             ? "Membership receipts appear here."
-            : "Membership receipts stay here.",
+            : "Membership receipts appear here.",
         cta: latestMembershipOrder
           ? "See membership charges"
           : STOREFRONT_TERMS.compareMembership,
@@ -340,21 +340,19 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 }),
               ),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
       {
         id: "purchase-issue",
         eyebrow: "Missing points?",
-        title: latestPaidOrder
-          ? "Report a charge issue."
-          : "Need billing help?",
+        title: latestPaidOrder ? "Report a charge issue." : "Billing support.",
         description: refundActionsEnabled
           ? "Refund-eligible purchases can still be requested here."
           : "Missing receipt, missing points, or wrong charge.",
-        cta: "Get billing help",
+        cta: "Billing support",
         onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
         accentClass:
-          "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]",
+          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
       },
     ],
     [
@@ -370,7 +368,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -385,12 +383,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent="blue"
             eyebrow="Orders"
             title={
-              viewerSignedIn ? "Receipts and billing." : "Sign in for receipts."
+              viewerSignedIn ? "Orders and receipts." : "Sign in for receipts."
             }
             description={
               viewerSignedIn
-                ? "Receipts and charge help in one place."
-                : "Billing history stays here."
+                ? "Charges and help in one place."
+                : "Billing history appears here."
             }
           />
 
@@ -428,7 +426,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                     }
                     className={secondaryButtonClass}
                   >
-                    Get billing help
+                    Billing support
                   </button>
                 </>
               ) : (
@@ -445,7 +443,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                     onClick={() => router.push(buildSupportHref("", "billing"))}
                     className={secondaryButtonClass}
                   >
-                    Get billing help
+                    Billing support
                   </button>
                 </>
               )}
@@ -467,7 +465,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             className={
               feedback.type === "error"
                 ? "border border-red-200 bg-red-50 text-red-600"
-                : "border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-700"
+                : "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
             }
           >
             <p
@@ -480,7 +478,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel
-            className="border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-700"
+            className="border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
             appearance="light"
             tone="warning"
             accent="blue"
@@ -502,7 +500,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 }
                 className={secondaryButtonClass}
               >
-                Get billing help
+                Billing support
               </button>
             </div>
           </SurfacePanel>
@@ -520,7 +518,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   Billing tasks
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Receipts or help.
+                  Orders or support.
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -563,7 +561,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                   aria-hidden="true"
                 >
                   <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
@@ -628,7 +626,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 return (
                   <div
                     key={order.orderId}
-                    className="rounded-[24px] border border-black/8 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -640,15 +638,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           Order ID {order.orderId}
                         </p>
                       </div>
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
+                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
                         {order.status}
                       </span>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1">
                         {orderGuide.eyebrow}
                       </span>
-                      <span className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1">
+                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1">
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
                     </div>
@@ -711,15 +709,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           onClick={() =>
                             router.push(buildSupportHref(order.orderId))
                           }
-                          className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                          className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                         >
-                          Get billing help
+                          Billing support
                         </button>
                       ) : null}
                       <button
                         type="button"
                         onClick={() => router.push(orderGuide.nextHref)}
-                        className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                       >
                         {orderGuide.nextCta}
                       </button>

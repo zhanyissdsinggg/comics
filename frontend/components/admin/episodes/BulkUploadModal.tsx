@@ -198,11 +198,11 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               onDrop={handleDrop}
               className={`rounded-[28px] border-2 border-dashed p-8 text-center transition ${
                 isDragging
-                  ? 'border-[var(--gush-accent,#2f58c6)] bg-[rgba(47,88,198,0.08)]'
-                  : 'border-black/10 bg-[rgba(250,247,241,0.76)]'
+                  ? 'border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]'
+                  : 'border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]'
               }`}
             >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-black/8 bg-white text-[var(--gush-accent,#2f58c6)]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[color:var(--gush-border)] bg-white text-slate-950">
                 <UploadCloud className="h-7 w-7" />
               </div>
               <p className="mt-5 text-sm font-semibold text-slate-950">
@@ -237,7 +237,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-black/8 bg-white/80 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/80 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             <p className="text-sm font-semibold text-slate-950">上传前确认</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
               <li>每个 ZIP 文件会对应创建一话章节。</li>
@@ -245,7 +245,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               <li>上传完成后，当前章节列表会自动刷新。</li>
             </ul>
 
-            <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
+            <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 当前队列
               </p>
@@ -274,7 +274,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               {uploadProgress.map((item, index) => (
                 <div
                   key={`${item.fileName}-${index}`}
-                  className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] p-4"
+                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">

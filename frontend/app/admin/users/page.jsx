@@ -356,19 +356,19 @@ export default function AdminUsersPage() {
           accent="amber"
         >
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-sm font-semibold text-slate-950">先看账号状态</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 封禁和恢复按钮保持可见，但不过度抢戏，让处理动作不至于压过账号信息本身。
               </p>
             </div>
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-sm font-semibold text-slate-950">不要做成 CRM</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 这里不做销售控制台，只保留账号身份、钱包状态和访问状态这些真正有用的信息。
               </p>
             </div>
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-sm font-semibold text-slate-950">只在真省事时批量处理</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 批量操作只在选中后出现，默认页面先保持安静、清楚、好扫一眼。

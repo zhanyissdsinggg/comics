@@ -236,7 +236,7 @@ export default function AdultHubPage() {
       seriesList
         .filter((series) => series.ttf?.enabled)
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, "Free unlocks available")),
+        .map((series) => mapAdultItem(series, "Timed access available")),
     [seriesList],
   );
 
@@ -251,7 +251,7 @@ export default function AdultHubPage() {
         value: loading ? "--" : completedItems.length.toLocaleString(),
       },
       {
-        label: "Free unlocks",
+        label: "Timed opens",
         value: loading ? "--" : freeUnlockItems.length.toLocaleString(),
       },
       {
@@ -267,11 +267,11 @@ export default function AdultHubPage() {
       seriesList.length,
     ],
   );
-  const adultModeActionLabel = isAdultMode ? "18+ is on." : "18+ is off.";
+  const adultModeLabel = isAdultMode ? "18+ on." : "18+ off.";
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+    "rounded-full border border-slate-950 bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(15,23,42,0.12)] transition-all duration-200 hover:bg-slate-800 hover:shadow-[0_20px_38px_rgba(15,23,42,0.14)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -283,9 +283,7 @@ export default function AdultHubPage() {
             eyebrow="18+ catalog"
             title="18+ shelf."
             description="Private by default."
-            secondary={
-              isAdultMode ? "Access is on." : "Sign in and confirm access."
-            }
+            secondary={isAdultMode ? "Access on." : "Sign in and confirm."}
             stats={adultStats}
             accent="blue"
             appearance="light"
@@ -303,7 +301,7 @@ export default function AdultHubPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                  {adultModeActionLabel}
+                  {adultModeLabel}
                 </h2>
               </div>
             </div>
@@ -318,14 +316,14 @@ export default function AdultHubPage() {
                     }
                     className={primaryButtonClass}
                   >
-                    Top series
+                    Browse rankings
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className={secondaryButtonClass}
                   >
-                    Free unlocks
+                    Timed opens
                   </button>
                 </>
               ) : (
@@ -334,7 +332,7 @@ export default function AdultHubPage() {
                   onClick={handleGate}
                   className={primaryButtonClass}
                 >
-                  Unlock 18+ access
+                  Enable 18+ mode
                 </button>
               )}
             </div>
@@ -342,9 +340,8 @@ export default function AdultHubPage() {
         </section>
 
         {showStale ? (
-          <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-3 text-sm text-[color:var(--gush-ink)]">
-            Showing cached 18+ catalog data. Reconnect to refresh the latest
-            titles.
+          <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-[color:var(--gush-ink)]">
+            Showing saved 18+ titles while reconnecting.
           </div>
         ) : null}
 
@@ -363,10 +360,10 @@ export default function AdultHubPage() {
           <SurfacePanel appearance="light" accent="blue">
             <EmptyState
               icon="search"
-              title="No adult titles are currently available"
-              description="Check back later or browse the standard catalog."
+              title="No 18+ titles yet."
+              description="Browse the main catalog for now."
               action={{
-                label: "Open Top Series",
+                label: "Open rankings",
                 onClick: () =>
                   router.push("/rankings?type=popular&window=week"),
               }}
@@ -377,11 +374,11 @@ export default function AdultHubPage() {
           <div className="space-y-6">
             <SurfacePanel appearance="light" accent="blue">
               <Rail
-                title="18+ Spotlight"
+                title="18+ picks"
                 items={spotlightItems}
-                reason="Start here."
+                reason="Current picks."
                 href="/rankings?type=popular&window=week"
-                ctaLabel="Open Top Series"
+                ctaLabel="Open rankings"
                 appearance="light"
                 onItemClick={(item) =>
                   router.push(`/series/${item.seriesId || item.id}`)
@@ -392,11 +389,11 @@ export default function AdultHubPage() {
             {completedItems.length > 0 ? (
               <SurfacePanel appearance="light" accent="blue">
                 <Rail
-                  title="Completed 18+ Series"
+                  title="Completed"
                   items={completedItems}
                   reason="Finished stories."
                   href="/rankings?type=completed&window=all"
-                  ctaLabel="Browse completed"
+                  ctaLabel="Completed"
                   appearance="light"
                   onItemClick={(item) =>
                     router.push(`/series/${item.seriesId || item.id}`)
@@ -408,11 +405,11 @@ export default function AdultHubPage() {
             {freeUnlockItems.length > 0 ? (
               <SurfacePanel appearance="light" accent="blue">
                 <Rail
-                  title="Free Unlock 18+ Picks"
+                  title="Timed opens"
                   items={freeUnlockItems}
-                  reason="Free unlocks."
+                  reason="Opens on a timer."
                   href="/rankings?type=ttf&window=all"
-                  ctaLabel="See free unlocks"
+                  ctaLabel="Timed opens"
                   appearance="light"
                   onItemClick={(item) =>
                     router.push(`/series/${item.seriesId || item.id}`)

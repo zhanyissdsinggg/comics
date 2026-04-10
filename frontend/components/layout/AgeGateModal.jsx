@@ -44,20 +44,19 @@ export default function AgeGateModal({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex min-h-screen items-center justify-center bg-[rgba(15,23,42,0.58)] px-4 py-6 backdrop-blur-md dark:bg-[rgba(2,6,12,0.72)]"
+      className="fixed inset-0 z-[90] flex min-h-screen items-center justify-center bg-[rgba(15,23,42,0.44)] px-4 py-6 backdrop-blur-sm dark:bg-[rgba(2,6,12,0.72)]"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl overflow-hidden rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_32px_120px_rgba(15,23,42,0.28)] sm:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(18,24,35,0.98),rgba(12,18,28,0.98))] dark:shadow-[0_34px_120px_rgba(0,0,0,0.36)]"
+        className="relative w-full max-w-xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_22px_56px_rgba(15,23,42,0.1)] sm:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(18,24,35,0.98),rgba(12,18,28,0.98))] dark:shadow-[0_34px_120px_rgba(0,0,0,0.36)]"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="adult-gate-title"
         aria-describedby="adult-gate-description"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(41,151,255,0.08),transparent_24%)]" />
         <div className="relative">
-          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]">
+          <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[var(--gush-accent,#0071e3)] shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
@@ -75,10 +74,10 @@ export default function AgeGateModal({
             id="adult-gate-description"
             className="mt-4 text-sm leading-7 text-slate-600 dark:text-neutral-300 sm:text-[15px]"
           >
-            This catalog is for adults only. Are you {currentAge} or older?
+            Adults only. Are you {currentAge} or older?
           </p>
 
-          <div className="mt-5 rounded-[24px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.06)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
+          <div className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
               Region check
             </p>
@@ -86,8 +85,7 @@ export default function AgeGateModal({
               {regionLabel} requires {currentAge}+ access for this catalog.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-neutral-300">
-              We remember this on this device, so you should not need to confirm
-              again next time.
+              Saved on this device after you confirm.
             </p>
           </div>
 
@@ -103,7 +101,7 @@ export default function AgeGateModal({
             <Button
               type="button"
               onClick={() => onConfirm?.(normalizedRule)}
-              className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white hover:bg-slate-800"
+              className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
             >
               Yes, I am {currentAge} or older
               <ChevronRight className="size-4" />

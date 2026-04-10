@@ -9,12 +9,12 @@ function MascotPlaceholder() {
       aria-hidden="true"
       className="relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32"
     >
-      <div className="absolute inset-0 rounded-[30px] border border-[rgba(0,113,227,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.96))] shadow-[0_18px_40px_rgba(15,23,42,0.08)]" />
-      <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-sky-300/80" />
-      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-slate-200/90" />
-      <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-blue-200/90" />
-      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-slate-200/80 bg-white/90" />
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.1)]">
+      <div className="absolute inset-0 rounded-[30px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_36px_rgba(15,23,42,0.06)]" />
+      <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-[#d9ecff]" />
+      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-slate-200/80" />
+      <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-[#e8f2ff]" />
+      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-slate-200/70 bg-white" />
+      <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
           <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
@@ -53,12 +53,10 @@ export default function NetworkFallback({
     >
       <div
         className={cn(
-          "relative w-full max-w-xl overflow-hidden rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-6 py-8 text-center shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10",
+          "relative w-full max-w-xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white px-6 py-8 text-center shadow-[0_22px_52px_rgba(15,23,42,0.06)] sm:px-8 sm:py-10",
           cardClassName,
         )}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.72),transparent_24%)]" />
-
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
@@ -86,8 +84,8 @@ export default function NetworkFallback({
             className={cn(
               "mt-6 inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
               canRetry
-                ? "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
-                : "cursor-not-allowed border-black/6 bg-slate-200 text-slate-500",
+                ? "border-slate-950 bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
+                : "cursor-not-allowed border-[color:var(--gush-border)] bg-slate-200 text-slate-500",
             )}
           >
             <RefreshCw className="size-4" />

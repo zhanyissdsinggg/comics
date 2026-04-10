@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -138,6 +138,10 @@ function formatBookmarkCountLabel(value) {
   }
 
   return `${count} bookmark${count === 1 ? "" : "s"}`;
+}
+
+function joinMetaParts(parts) {
+  return parts.filter(Boolean).join(" / ");
 }
 
 function getReadingState({
@@ -562,7 +566,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           genres: Array.isArray(series?.genres) ? series.genres : [],
           seriesType: series?.type || "",
           progressPercent,
-          statusLabel: detailItems.filter(Boolean).join(" • "),
+          statusLabel: joinMetaParts(detailItems),
           badge: readingState.badge,
           isAdult: Boolean(series.adult),
           updatedAt: latestShelfTouch,
@@ -662,13 +666,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const resumeSpotlightProgressLabel = formatReadingPercentLabel(
     resumeSpotlight?.progressPercent,
   );
-  const resumeSpotlightMeta = [
+  const resumeSpotlightMeta = joinMetaParts([
     resumeSpotlight?.subtitle,
     resumeSpotlightProgressLabel,
     resumeSpotlight?.statusLabel,
-  ]
-    .filter(Boolean)
-    .join(" • ");
+  ]);
   const resumeSpotlightProgressWidth = Math.max(
     0,
     Math.min(
@@ -692,12 +694,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     ) ||
                     continueRailItems[0]?.statusLabel ||
                     "Ready to resume"
-                  : "Your next chapter stays here",
+                  : "Your next chapter",
             },
             {
               label: "Recent",
               value: historyRail.length.toLocaleString(),
-              hint: historyRail[0]?.statusLabel || "Latest opens stay close",
+              hint: historyRail[0]?.statusLabel || "Opened recently",
             },
             {
               label: "Saved Series",
@@ -705,7 +707,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               hint:
                 bookmarkCountTotal > 0
                   ? `${formatBookmarkCountLabel(bookmarkCountTotal)} saved`
-                  : "Saved titles stay here",
+                  : "Saved titles",
             },
             {
               label: "Bookmarks",
@@ -755,15 +757,13 @@ export default function LibraryPage({ initialSignedIn = false }) {
         value: continueRailItems.length.toLocaleString(),
         description:
           continueRailItems.length > 0
-            ? [
+            ? joinMetaParts([
                 formatReadingPercentLabel(
                   continueRailItems[0]?.progressPercent,
                 ),
                 continueRailItems[0]?.statusLabel,
-              ]
-                .filter(Boolean)
-                .join(" • ") || "Ready to resume"
-            : "Your next read stays here",
+              ]) || "Ready to resume"
+            : "Your next read",
         onClick: () =>
           continueRailItems.length > 0
             ? scrollToSection("continue-reading")
@@ -778,7 +778,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             ? historyRail[0]?.statusLabel ||
               historyRail[0]?.subtitle ||
               "Opened recently"
-            : "Recent reads stay close",
+            : "Recent reads",
         onClick: () =>
           historyRail.length > 0
             ? scrollToSection("recent-activity")
@@ -793,7 +793,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             ? bookmarkCountTotal > 0
               ? `${formatBookmarkCountLabel(bookmarkCountTotal)} across your shelf`
               : visibleLibraryItems[0]?.statusLabel || "Saved to your shelf"
-            : "Saved titles stay here",
+            : "Saved titles",
         onClick: () =>
           visibleLibraryItems.length > 0
             ? scrollToSection("saved-series")
@@ -814,17 +814,17 @@ export default function LibraryPage({ initialSignedIn = false }) {
   ]);
   const signedOutActionCards = useMemo(() => {
     const commonAccentClass =
-      "border-black/8 bg-white text-slate-900 hover:border-black/12 hover:bg-[#f8f9fc]";
+      "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
     const primaryAccentClass =
-      "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.2)] hover:bg-[rgba(0,113,227,0.12)]";
+      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white";
 
     return [
       {
         id: "start-free",
-        eyebrow: "Read Free",
-        title: "Open a title.",
+        eyebrow: "First picks",
+        title: "Start with a title.",
         description: "",
-        cta: "Read Free",
+        cta: "Browse first picks",
         onClick: () => router.push("/rankings?type=ttf&window=all"),
         accentClass: primaryAccentClass,
       },
@@ -842,26 +842,26 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const signedInHeroDescription = viewerSignedIn
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
-        ? "Pick up where you left off. Recent opens and saves stay close."
+        ? "Pick up where you left off."
         : "Recent opens and saves stay together here."
       : "Your next read and saves land here."
     : "Sign in to keep your shelf and progress together.";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
-      ? "Your next chapter is ready."
+      ? "Your next chapter."
       : hasLibrarySignals
-        ? "Shelf, saves, and recent reads stay together."
+        ? "Shelf, saves, and recent reads."
         : "Start your shelf."
-    : "Start a shelf worth keeping.";
+    : "Start a shelf.";
   const libraryDeskCopy = viewerSignedIn
     ? visibleLibraryItems.length > 0
-      ? "Resume fast, open saved series, or browse something new."
-      : "Start free, save a few titles, and this becomes your shelf."
-    : "Read here first, then sign in when you want your shelf to follow you.";
+      ? "Resume fast, open saved series, or browse next."
+      : "Start with a few titles and this becomes your shelf."
+    : "Open a few titles, then sign in when you want your shelf to follow you.";
   const readingSnapshotCardsPanel =
     viewerSignedIn && readingSnapshotCards.length > 0 ? (
       <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -870,7 +870,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             key={card.id}
             type="button"
             onClick={card.onClick}
-            className="group rounded-[24px] border border-black/8 bg-white/82 p-4 text-left transition-colors hover:border-black/12 hover:bg-white"
+            className="group rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 text-left transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
               {card.label}
@@ -901,8 +901,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
             eyebrow="Library"
             title={
               viewerSignedIn || hasCuratedLibraryEntry
-                ? "Your next read."
-                : "Your reading shelf."
+                ? "Your shelf."
+                : "Your shelf starts here."
             }
             description={signedInHeroDescription}
             secondary=""
@@ -933,7 +933,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
                     className={primaryButtonClass}
                   >
-                    Read Free
+                    First picks
                   </button>
                 )}
                 <button
@@ -971,7 +971,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           >
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Reading desk
+                Shelf
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
@@ -1010,7 +1010,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   }
                   className={primaryButtonClass}
                 >
-                  {viewerSignedIn ? "Browse titles" : "Read free"}
+                  {viewerSignedIn ? "Browse titles" : "First picks"}
                 </button>
               )}
 
@@ -1049,8 +1049,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
         ) : null}
 
         {showLibraryStale ? (
-          <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-3 text-sm text-slate-700">
-            Reconnecting. Showing saved data.
+          <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
+            Showing saved data while reconnecting.
           </div>
         ) : null}
 
@@ -1070,18 +1070,17 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.07)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
+                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
                           : "Your Shelf"}
                       </p>
                       <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                        {resumeSpotlight?.title || "Your shelf is ready."}
+                        {resumeSpotlight?.title || "Your shelf."}
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
-                        {resumeSpotlightMeta ||
-                          "Recent reads and saves stay close."}
+                        {resumeSpotlightMeta || "Recent reads."}
                       </p>
 
                       {resumeSpotlightProgressWidth > 0 ? (
@@ -1094,7 +1093,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-white/85">
                             <div
-                              className="h-full rounded-full bg-[var(--gush-accent-strong,#0058cc)]"
+                              className="h-full rounded-full bg-slate-950"
                               style={{
                                 width: `${Math.round(resumeSpotlightProgressWidth)}%`,
                               }}
@@ -1128,7 +1127,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             }
                             className={primaryButtonClass}
                           >
-                            Read Free
+                            First picks
                           </button>
                         ) : null}
 
@@ -1140,7 +1139,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             }
                             className={secondaryButtonClass}
                           >
-                            View Series
+                            Open series
                           </button>
                         ) : (
                           <button
@@ -1164,12 +1163,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.07)] p-5 sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
+                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))] p-5 sm:p-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         Your Shelf
                       </p>
                       <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
-                        Your shelf is ready.
+                        Your shelf.
                       </h2>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
                         Your next read and saves land here.
@@ -1182,7 +1181,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                           }
                           className={primaryButtonClass}
                         >
-                          Read Free
+                          First picks
                         </button>
                         <button
                           type="button"
@@ -1276,7 +1275,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <div id="recent-activity">
                   <Rail
                     eyebrow="Recent"
-                    title="Recent Activity"
+                    title="Recent"
                     railName="history"
                     items={historyRail}
                     appearance="light"
@@ -1360,11 +1359,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               {recommendedItems.length > 0 ? (
                 <Rail
                   eyebrow={viewerSignedIn ? "Next" : "Recommended"}
-                  title={
-                    viewerSignedIn || hasCuratedLibraryEntry
-                      ? "Recommended for You"
-                      : "Recommended"
-                  }
+                  title="Recommended"
                   railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}
@@ -1398,7 +1393,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           makeupModal
             ? [
                 {
-                  label: "View point packs",
+                  label: "Point packs",
                   onClick: () => {
                     router.push(
                       buildPathWithAttribution(

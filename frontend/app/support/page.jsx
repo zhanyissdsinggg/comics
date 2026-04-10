@@ -3,7 +3,8 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "Support",
-  description: "Get help with billing, sign-in, reading issues, mature-content access, and purchase questions.",
+  description:
+    "Billing, sign-in, reading, mature-content, and purchase support.",
   path: "/support",
 });
 

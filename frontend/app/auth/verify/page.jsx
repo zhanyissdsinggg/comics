@@ -12,7 +12,8 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   }
 
   const toneMap = {
-    neutral: "border-black/8 bg-[#f8f9fc] text-slate-600",
+    neutral:
+      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
     success: "border-emerald-200 bg-emerald-50 text-emerald-700",
     error: "border-red-200 bg-red-50 text-red-600",
   };
@@ -38,11 +39,11 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(0,113,227,0.18)] focus:ring-4 focus:ring-[rgba(0,113,227,0.08)]";
+    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-4 focus:ring-slate-200/80";
   const primaryButtonClass =
     "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
-    "w-full rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-60";
 
   useEffect(() => {
     const queryToken = String(searchParams.get("token") || "").trim();
@@ -172,7 +173,7 @@ function VerifyPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-3 text-sm text-slate-700">
+            <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
               Verification link loaded from your email. No code field required.
             </div>
             <button
@@ -222,18 +223,18 @@ function VerifyPageContent() {
           message={status?.message}
         />
 
-        <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-4 text-sm leading-6 text-slate-600">
+        <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
           Already confirmed? Go to{" "}
           <Link
             href="/account"
-            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#0071e3)]"
+            className="font-semibold text-slate-950 hover:text-slate-700"
           >
             your account
           </Link>
           . Need help with a missing email? Contact{" "}
           <Link
             href="/support"
-            className="font-semibold text-slate-950 hover:text-[var(--gush-accent,#0071e3)]"
+            className="font-semibold text-slate-950 hover:text-slate-700"
           >
             us
           </Link>

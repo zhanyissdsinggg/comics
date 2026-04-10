@@ -21,7 +21,7 @@ export function AdminSortModal({
       onClose={onClose}
     >
       <div className="space-y-5">
-        <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
           <label className="text-sm font-semibold text-slate-700">{label}</label>
           <select
             value={sortBy}

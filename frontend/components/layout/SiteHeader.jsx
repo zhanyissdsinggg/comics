@@ -169,8 +169,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           isLight
             ? scrolled
-              ? "border-black/8 bg-[rgba(255,255,255,0.84)] shadow-[0_18px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(15,15,18,0.86)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.28)]"
-              : "border-transparent bg-[rgba(255,255,255,0.68)] backdrop-blur-xl dark:border-transparent dark:bg-[rgba(15,15,18,0.72)]"
+              ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.94)] shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgba(15,15,18,0.86)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.28)]"
+              : "border-transparent bg-[rgba(255,255,255,0.88)] backdrop-blur-lg dark:border-transparent dark:bg-[rgba(15,15,18,0.72)]"
             : scrolled
               ? "border-white/10 bg-[rgba(9,9,11,0.84)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
               : "border-transparent bg-[rgba(9,9,11,0.66)] backdrop-blur-xl"
@@ -180,7 +180,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
             scrolled
               ? isLight
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.1),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
+                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.08),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
                 : "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] before:content-['']"
               : ""
           }`}

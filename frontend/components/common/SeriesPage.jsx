@@ -152,7 +152,7 @@ function getSeriesBadge(series) {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "Start here";
+    return "First picks";
   }
   return "";
 }
@@ -368,8 +368,8 @@ export default function SeriesPage({
     return [
       {
         id: "start-free",
-        eyebrow: "Start Here",
-        title: "Start Here",
+        eyebrow: "First Picks",
+        title: "First Picks",
         description: "Reader-friendly stories to begin with.",
         ctaLabel: "Browse Series",
         href: "/rankings?view=start-here",
@@ -530,7 +530,7 @@ export default function SeriesPage({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const showEntrySpotlight =
     Boolean(entrySpotlight) &&
     !isComicPage &&
@@ -589,7 +589,7 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push(oppositeFormatHref)}
-                className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.82)] px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
               >
                 {oppositeFormatLabel}
               </button>
@@ -599,7 +599,7 @@ export default function SeriesPage({
               {heroStats.map((stat) => (
                 <div
                   key={stat.id}
-                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[rgba(255,253,249,0.72)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-white/10 dark:bg-white/[0.04]"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-white/10 dark:bg-white/[0.04]"
                 >
                   <p className="text-lg font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
                     {stat.value}
@@ -613,7 +613,7 @@ export default function SeriesPage({
           </SurfacePanel>
 
           {showEntrySpotlight ? (
-            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,253,249,0.99),rgba(246,240,231,0.96))] p-5 shadow-[0_20px_48px_rgba(37,28,19,0.05)] sm:p-6 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
+            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-6 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
               <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                 <Cover
                   tone={entrySpotlight.coverTone}
@@ -625,7 +625,7 @@ export default function SeriesPage({
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-neutral-900 shadow-[0_18px_36px_rgba(37,28,19,0.08)] dark:border-white/10 dark:shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_32px_rgba(15,23,42,0.08)] dark:border-white/10 dark:shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
                 />
 
                 <div className="min-w-0">
@@ -660,7 +660,7 @@ export default function SeriesPage({
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
                     className="mt-5 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
                   >
-                    View Series
+                    Open series
                   </button>
                 </div>
               </div>
@@ -743,7 +743,7 @@ export default function SeriesPage({
                         `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
                       )
                     }
-                    className="rounded-full border border-black/8 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                    className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
                   >
                     {item.genre}
                   </button>

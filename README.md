@@ -55,6 +55,37 @@ npm run build
 Builds the frontend first, then the backend.
 
 ```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+OPS_ADMIN_KEY=<production-admin-key> \
+OPS_ADMIN_WRITE_ALLOWED=1 \
+npm run ops:admin-write-smoke
+```
+
+Runs the reversible admin QA-user write smoke:
+
+- logs into the live admin backend
+- finds an allowlisted QA account under `@example.com`
+- blocks the QA account, verifies the state change, then restores the original state
+- creates one QA-only notification, verifies it appears in the admin list, then deletes it
+- refuses to run unless `OPS_ADMIN_WRITE_ALLOWED=1` is set
+
+Optional after the support reply migration/runtime is deployed:
+
+```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+OPS_ADMIN_KEY=<production-admin-key> \
+OPS_ADMIN_WRITE_ALLOWED=1 \
+OPS_ADMIN_WRITE_SUPPORT=1 \
+npm run ops:admin-write-smoke
+```
+
+That adds one disposable QA support roundtrip:
+
+- creates a guest support ticket under `@example.com`
+- verifies the ticket appears in admin support with `includeTestData=1`
+- replies to it, verifies the saved admin reply, closes it, then deletes it
+
+```bash
 npm run check:all
 ```
 

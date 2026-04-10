@@ -100,7 +100,9 @@ export const Modal = memo(function Modal({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating ? "bg-black/60 backdrop-blur-sm" : "bg-black/0"
+        isAnimating
+          ? "bg-[rgba(15,23,42,0.34)] backdrop-blur-md"
+          : "bg-black/0"
       }`}
       onClick={handleOverlayClick}
       style={{ WebkitTapHighlightColor: "transparent" }}
@@ -111,7 +113,7 @@ export const Modal = memo(function Modal({
       <div
         ref={modalRef}
         onClick={handleContentClick}
-        className={`relative w-full ${sizeClasses[size]} border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] shadow-[0_34px_90px_rgba(15,23,42,0.18)] transition-all duration-300 sm:rounded-3xl ${
+        className={`relative w-full ${sizeClasses[size]} border border-[color:var(--gush-border)] bg-white shadow-[0_20px_48px_rgba(15,23,42,0.12)] transition-all duration-300 sm:rounded-3xl ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
@@ -122,11 +124,11 @@ export const Modal = memo(function Modal({
         }}
       >
         <div className="flex justify-center pb-2 pt-3 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-black/12" />
+          <div className="h-1 w-10 rounded-full bg-black/8" />
         </div>
 
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-black/6 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-[color:var(--gush-border)] px-6 py-4">
             {title ? (
               <h2
                 id="modal-title"
@@ -139,7 +141,7 @@ export const Modal = memo(function Modal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-slate-400 transition-all duration-300 hover:bg-black/5 hover:text-slate-700 active:scale-95"
+                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-400 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-700 active:scale-95"
                 aria-label="Close dialog"
               >
                 <X size={20} />
@@ -151,7 +153,9 @@ export const Modal = memo(function Modal({
         <div className="max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
 
         {footer ? (
-          <div className="border-t border-black/6 px-6 py-4">{footer}</div>
+          <div className="border-t border-[color:var(--gush-border)] px-6 py-4">
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>
@@ -171,7 +175,7 @@ export const ConfirmModal = memo(function ConfirmModal({
   const variantClasses = {
     default: "bg-slate-950 hover:bg-slate-800",
     danger: "bg-red-600 hover:bg-red-700",
-    warning: "bg-amber-500 hover:bg-amber-600",
+    warning: "bg-slate-800 hover:bg-slate-700",
   };
 
   const handleConfirm = () => {
@@ -190,7 +194,7 @@ export const ConfirmModal = memo(function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-black/8 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-black/12 hover:bg-[#f8f9fc] active:scale-95"
+            className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95"
           >
             {cancelText}
           </button>

@@ -290,7 +290,7 @@ export default function AdminEmailSettingsPage() {
             {secretFields.map((field) => (
               <div
                 key={field.key}
-                className="rounded-[24px] border border-black/8 bg-white/86 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/86 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
               >
                 <AdminFormField
                   label={field.label}

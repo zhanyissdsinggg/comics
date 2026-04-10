@@ -218,7 +218,7 @@ function getRecommendedAction(series, readiness) {
 
 function getReadinessToneClasses(tone) {
   if (tone === "blue") {
-    return "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]";
+    return "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
   }
 
   if (tone === "emerald") {
@@ -242,7 +242,7 @@ function ActionButton({ children, className = "", ...props }) {
       type="button"
       className={cn(
         "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+        "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
       {...props}
@@ -259,8 +259,8 @@ function PillButton({ active = false, children, className = "", ...props }) {
       className={cn(
         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         active
-          ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
-          : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+          : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
       {...props}
@@ -272,7 +272,7 @@ function PillButton({ active = false, children, className = "", ...props }) {
 
 function MetricCard({ label, value, hint, tone = "blue" }) {
   const toneClasses = {
-    blue: "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)]",
+    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]",
     emerald: "border-emerald-200 bg-emerald-50/90",
     amber: "border-amber-200 bg-amber-50/90",
     rose: "border-rose-200 bg-rose-50/90",
@@ -295,7 +295,7 @@ function MetricCard({ label, value, hint, tone = "blue" }) {
 
 function EmptyState({ title, description }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.72)] px-5 py-10 text-center">
+    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-10 text-center">
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>
@@ -307,7 +307,7 @@ function StatusPill({ children, tone = "slate" }) {
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
-        tone === "slate" ? "border-black/8 bg-[rgba(250,247,241,0.92)] text-slate-600" : getReadinessToneClasses(tone),
+        tone === "slate" ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600" : getReadinessToneClasses(tone),
       )}
     >
       {children}
@@ -586,7 +586,7 @@ export default function AdminStorefrontAuditPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-white/86 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-white/96 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 平均就绪分
               </p>
@@ -643,7 +643,7 @@ export default function AdminStorefrontAuditPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="搜索作品名、ID、创作者、题材或建议动作"
-              className="w-full rounded-full border border-black/8 bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+              className="w-full rounded-full border border-[color:var(--gush-border)] bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
             />
           </label>
         </SurfacePanel>
@@ -672,7 +672,7 @@ export default function AdminStorefrontAuditPage() {
                 {topPriority.map((series) => (
                   <article
                     key={series.id}
-                    className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="space-y-3">
@@ -705,13 +705,13 @@ export default function AdminStorefrontAuditPage() {
                       </div>
 
                       <div className="grid min-w-[220px] gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             章节规模
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">{series.episodeCount}</p>
                         </div>
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             内容基础
                           </p>
@@ -768,7 +768,7 @@ export default function AdminStorefrontAuditPage() {
                   {topGaps.map((item) => (
                     <div
                       key={item.key}
-                      className="flex items-center justify-between rounded-[22px] border border-black/8 bg-white px-4 py-4"
+                      className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
                     >
                       <div>
                         <p className="text-sm font-semibold text-slate-950">{item.label}</p>
@@ -804,7 +804,7 @@ export default function AdminStorefrontAuditPage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-4 text-sm leading-7 text-slate-700"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-7 text-slate-700"
                 >
                   {item}
                 </div>

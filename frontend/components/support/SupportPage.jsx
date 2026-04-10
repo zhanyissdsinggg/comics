@@ -349,9 +349,9 @@ export default function SupportPage() {
   const fieldLabelClass =
     "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-black/8 bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[var(--gush-accent,#0071e3)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
+    "mt-2 w-full rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const supportHeroStats = [
@@ -373,8 +373,8 @@ export default function SupportPage() {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <EditorialHero
             eyebrow="Support"
-            title="Get help."
-            description="Choose an issue and send one request."
+            title="Support."
+            description="Pick a topic and send one note."
             stats={supportHeroStats}
             appearance="light"
             accent="blue"
@@ -388,10 +388,10 @@ export default function SupportPage() {
           >
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Quick topics
+                Topics
               </p>
               <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950">
-                Pick one.
+                Choose a topic.
               </h2>
             </div>
 
@@ -421,7 +421,7 @@ export default function SupportPage() {
                       "rounded-[22px] border px-4 py-3 text-left transition",
                       isActive
                         ? "border-black/10 bg-slate-950 text-white"
-                        : "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]",
+                        : "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
@@ -448,7 +448,7 @@ export default function SupportPage() {
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             {successState ? (
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] p-5">
+                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#0071e3)]">
                     Request received
                   </p>
@@ -470,29 +470,32 @@ export default function SupportPage() {
                     onClick={resetForAnotherRequest}
                     className={primaryButtonClass}
                   >
-                    Send another request
+                    Send another
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/orders")}
                     className={secondaryButtonClass}
                   >
-                    View purchases
+                    Orders
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/faq")}
                     className={secondaryButtonClass}
                   >
-                    Browse FAQ
+                    FAQ
                   </button>
                 </div>
               </div>
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    Form
+                  </p>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Send your request.
+                    Send a request.
                   </h2>
                 </div>
 
@@ -512,7 +515,7 @@ export default function SupportPage() {
                       className={[
                         "rounded-[24px] border px-4 py-3 text-sm",
                         feedback.type === "success"
-                          ? "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.06)] text-slate-700"
+                          ? "border-[color:var(--gush-border-strong)] bg-white text-slate-700"
                           : "border-red-200 bg-red-50 text-red-600",
                       ].join(" ")}
                     >
@@ -641,26 +644,29 @@ export default function SupportPage() {
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Tips
+              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Before you send
+                Keep it simple.
               </h2>
             </div>
 
             <div className="space-y-3">
               {[
-                "Pick the closest issue.",
+                "Pick the closest issue type.",
                 "Add any page, title, episode, or order ID.",
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-black/6 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm leading-6 text-slate-600"
                 >
                   {item}
                 </div>
               ))}
             </div>
 
-            <div className="rounded-[24px] border border-black/6 bg-[#f8f9fc] px-4 py-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 Contact
               </p>
@@ -678,14 +684,14 @@ export default function SupportPage() {
                 onClick={() => router.push("/faq")}
                 className={secondaryButtonClass}
               >
-                Browse FAQ
+                FAQ
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
                 className={secondaryButtonClass}
               >
-                View purchases
+                Orders
               </button>
             </div>
           </SurfacePanel>

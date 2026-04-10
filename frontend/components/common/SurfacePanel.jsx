@@ -8,20 +8,20 @@ const toneClasses = {
     muted: "border-white/8 bg-[rgba(14,14,16,0.88)] text-white",
     highlight:
       "border-white/12 bg-[linear-gradient(180deg,rgba(12,12,14,0.96),rgba(8,8,10,0.94))] text-white",
-    warning: "border-amber-400/20 bg-[rgba(59,41,13,0.9)] text-white",
-    danger: "border-red-400/20 bg-[rgba(64,20,26,0.9)] text-white",
+    warning: "border-white/10 bg-[rgba(22,18,14,0.9)] text-white",
+    danger: "border-white/10 bg-[rgba(24,16,18,0.9)] text-white",
   },
   light: {
     default:
-      "border-black/[0.055] bg-[rgba(255,255,255,0.82)] text-slate-900 backdrop-blur-2xl dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
+      "border-black/[0.055] bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
     muted:
-      "border-black/[0.05] bg-[rgba(248,248,250,0.9)] text-slate-900 backdrop-blur-[28px] dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
+      "border-black/[0.055] bg-[color:var(--gush-surface-strong)] text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
-      "border-black/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,247,249,0.96))] text-slate-900 backdrop-blur-[30px] dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
+      "border-black/[0.06] bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
-      "border-amber-200 bg-[rgba(255,251,235,0.94)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
+      "border-[rgba(176,95,0,0.16)] bg-white text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
-      "border-red-200 bg-[rgba(255,241,242,0.94)] text-slate-900 dark:border-red-300/20 dark:bg-[rgba(66,24,30,0.9)] dark:text-white",
+      "border-[rgba(197,40,40,0.16)] bg-white text-slate-900 dark:border-red-300/20 dark:bg-[rgba(66,24,30,0.9)] dark:text-white",
   },
 };
 
@@ -34,11 +34,11 @@ const accentEdgeClasses = {
     blue: "bg-sky-300/55",
   },
   light: {
-    emerald: "bg-emerald-500/42",
-    cyan: "bg-cyan-500/38",
-    amber: "bg-amber-500/42",
-    rose: "bg-rose-500/42",
-    blue: "bg-[rgba(0,113,227,0.42)]",
+    emerald: "bg-transparent",
+    cyan: "bg-transparent",
+    amber: "bg-transparent",
+    rose: "bg-transparent",
+    blue: "bg-transparent",
   },
 };
 
@@ -53,13 +53,11 @@ const accentWashClasses = {
     rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_34%)]",
   },
   light: {
-    blue: "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_30%)]",
-    emerald:
-      "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.06),transparent_30%)]",
-    cyan: "bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.06),transparent_30%)]",
-    amber:
-      "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.06),transparent_30%)]",
-    rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.06),transparent_30%)]",
+    blue: "bg-transparent",
+    emerald: "bg-transparent",
+    cyan: "bg-transparent",
+    amber: "bg-transparent",
+    rose: "bg-transparent",
   },
 };
 
@@ -85,7 +83,8 @@ export default function SurfacePanel({
     >
       <div
         className={cn(
-          "pointer-events-none absolute left-5 top-5 h-16 w-16 rounded-full blur-2xl sm:left-6 sm:top-6 sm:h-20 sm:w-20",
+          "pointer-events-none absolute left-5 top-5 h-12 w-12 rounded-full blur-2xl sm:left-6 sm:top-6 sm:h-14 sm:w-14",
+          isLight && "hidden",
           accentEdgeClasses[resolvedAppearance]?.[accent] ||
             accentEdgeClasses[resolvedAppearance].blue,
         )}
@@ -101,7 +100,7 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.52),rgba(255,255,255,0.12)_28%,transparent_56%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0)_20%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
             : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
         )}
       />
@@ -109,7 +108,7 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-[1px] rounded-[calc(var(--gush-radius-xl)-2px)]",
           isLight
-            ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
+            ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
             : "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
         )}
       />

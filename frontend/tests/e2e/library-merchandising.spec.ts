@@ -219,10 +219,14 @@ test.describe("Library merchandising", () => {
     expect(response?.ok()).toBeTruthy();
 
     const recommendedRail = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Recommended for You" }),
+      has: page.getByRole("heading", { name: "Recommended" }),
     });
 
-    await expect(page.getByRole("heading", { name: "Your next read." })).toBeVisible({
+    await expect(
+      page.getByRole("heading", {
+        name: /Your shelf\.|Your shelf starts here\./,
+      }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(recommendedRail.getByRole("button", { name: /Midnight Ledger/i })).toBeVisible({

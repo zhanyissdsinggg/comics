@@ -13,7 +13,7 @@ const ShareButton = React.memo(function ShareButton({
   const [copied, setCopied] = useState(false);
   const buttonClassName = className
     ? `inline-flex items-center gap-2 ${className}`
-    : "inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/88 px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-black/12 hover:bg-white hover:text-slate-950";
+    : "inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
 
   const platforms = useMemo(
     () => [
@@ -128,7 +128,7 @@ const ShareButton = React.memo(function ShareButton({
           onClick={handleClose}
         >
           <div
-            className="w-full max-w-md rounded-[28px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.18)]"
+            className="w-full max-w-md rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_18px_44px_rgba(15,23,42,0.1)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
@@ -147,7 +147,7 @@ const ShareButton = React.memo(function ShareButton({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full border border-black/8 p-2 text-slate-500 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950"
+                className="rounded-full border border-[color:var(--gush-border)] p-2 text-slate-500 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
                 aria-label="Close"
               >
                 <X size={16} />
@@ -160,7 +160,7 @@ const ShareButton = React.memo(function ShareButton({
                   key={platform.id}
                   type="button"
                   onClick={() => handleShare(platform)}
-                  className="flex flex-col items-center gap-2 rounded-[20px] border border-black/8 bg-white/92 p-4 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-black/12 hover:bg-white hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
+                  className="flex flex-col items-center gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-4 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
                 >
                   <span
                     className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold ${platform.badgeClass}`}
@@ -172,7 +172,7 @@ const ShareButton = React.memo(function ShareButton({
               ))}
             </div>
 
-            <div className="rounded-[22px] border border-black/6 bg-white/84 p-4">
+            <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
                 <Link2 size={14} />
                 <span>Copy link</span>
@@ -182,7 +182,7 @@ const ShareButton = React.memo(function ShareButton({
                   type="text"
                   value={url}
                   readOnly
-                  className="flex-1 rounded-xl border border-black/8 bg-[#f8f9fc] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#0071e3)]"
+                  className="flex-1 rounded-xl border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#0071e3)]"
                 />
                 <button
                   type="button"

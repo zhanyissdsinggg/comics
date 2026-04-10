@@ -19,7 +19,7 @@ const PUBLISH_OPTIONS = [
 const ADULT_OPTIONS = [
   { value: "all", label: "全部分级" },
   { value: "adult", label: "18+" },
-  { value: "general", label: "普通向" },
+  { value: "general", label: "常规向" },
 ];
 
 const SORT_OPTIONS = [
@@ -45,10 +45,10 @@ function FilterChip({ active, onClick, children }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+      className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
         active
-          ? "border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
-          : "border border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+          : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
       }`}
     >
       {children}
@@ -93,14 +93,14 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
         onClick={() => setIsOpen((current) => !current)}
         className={`flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${
           activeFiltersCount > 0
-            ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
-            : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+            ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+            : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
         }`}
       >
         <Filter size={14} />
         <span>筛选</span>
         {activeFiltersCount > 0 ? (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--gush-accent,#2f58c6)] text-[10px] text-white">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-950 text-[10px] text-white">
             {activeFiltersCount}
           </span>
         ) : null}
@@ -111,18 +111,18 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-full z-50 mt-2 w-[22rem]">
-            <div className="rounded-[28px] border border-black/8 bg-white/96 p-6 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
+            <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/98 p-6 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-semibold text-slate-950">进一步筛选</h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    只保留真正需要处理的作品，列表会更清爽。
+                    只保留真正需要处理的作品，让列表更清楚。
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] text-slate-500 transition hover:border-black/12 hover:bg-white hover:text-slate-950"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
                 >
                   <X size={16} />
                 </button>
@@ -187,7 +187,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                   <select
                     value={resolvedFilters.sortBy}
                     onChange={(event) => handleFilterChange("sortBy", event.target.value)}
-                    className="h-11 w-full rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-4 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+                    className="h-11 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-900 outline-none transition-[border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70"
                   >
                     {SORT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -202,7 +202,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="flex-1 rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)]"
+                  className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
                   重置
                 </button>

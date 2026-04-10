@@ -109,7 +109,7 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.03)]">
       <p className="text-sm text-slate-600">
         <span className="font-semibold text-slate-950">Email:</span>{" "}
         <a
@@ -163,14 +163,6 @@ export default function TermsOfServicePage() {
                 label: "Covers",
                 value: "Browsing + purchases",
               },
-              {
-                label: "Purchases",
-                value: "Personal access",
-              },
-              {
-                label: "Contact",
-                value: siteConfig.legalEmail,
-              },
             ]}
           />
 
@@ -200,7 +192,7 @@ export default function TermsOfServicePage() {
               </a>
               <Link
                 href="/privacy-policy"
-                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
                 View privacy
               </Link>

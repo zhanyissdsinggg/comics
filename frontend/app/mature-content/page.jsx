@@ -47,11 +47,11 @@ const FAQ_ITEMS = [
 
 const CONTROL_CARDS = [
   {
-    title: "Turn mature content on or off",
+    title: "Turn 18+ on or off",
     body: "Use the 18+ toggle in the site header when you want access.",
   },
   {
-    title: "Confirm age for your region",
+    title: "Confirm age once",
     body: "The site may ask for a one-time age check for your region.",
   },
   {
@@ -59,7 +59,7 @@ const CONTROL_CARDS = [
     body: "Use the account setting to hide mature history on that device.",
   },
   {
-    title: "Get help when access looks wrong",
+    title: "Get support",
     body: "Support can help if access still looks wrong.",
   },
 ];
@@ -91,7 +91,7 @@ export default function MatureContentPage() {
             accent="blue"
             eyebrow="Mature content"
             title="18+ access."
-            description="Mature titles stay hidden until you turn them on and complete the age check."
+            description="Mature titles stay hidden until you turn them on."
             stats={[
               {
                 label: "Default",
@@ -116,13 +116,13 @@ export default function MatureContentPage() {
                   href="/adult-gate"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  View 18+ access
+                  18+ access
                 </Link>
                 <Link
                   href="/support"
-                  className="rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
-                  Open Support
+                  Support
                 </Link>
               </>
             }
@@ -140,12 +140,11 @@ export default function MatureContentPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                  Age gate and visibility.
+                  Age gate and privacy.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Keep 18+ titles hidden by default, confirm the regional age
-                  check once, and control whether mature history stays visible
-                  on this device.
+                  Keep 18+ hidden by default, confirm the age check once, and
+                  control whether mature history stays visible on this device.
                 </p>
               </div>
             </div>
@@ -155,11 +154,11 @@ export default function MatureContentPage() {
                 href="/adult-gate"
                 className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Open age gate
+                18+ gate
               </Link>
               <Link
                 href="/account"
-                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
                 Open account
               </Link>
@@ -187,7 +186,7 @@ export default function MatureContentPage() {
                 Checklist
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                If a title stays hidden.
+                If 18+ stays hidden.
               </h2>
             </div>
             <ul className="space-y-3 text-sm leading-7 text-slate-600">
@@ -214,7 +213,7 @@ export default function MatureContentPage() {
                 Related pages
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Next steps.
+                Related.
               </h2>
             </div>
             <div className="space-y-3">
@@ -238,7 +237,7 @@ export default function MatureContentPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-black/12 hover:bg-[#fbfcff]"
+                  className="block rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
                   <h3 className="text-base font-semibold text-slate-950">
                     {item.title}
@@ -258,14 +257,14 @@ export default function MatureContentPage() {
               FAQ
             </p>
             <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Quick answers.
+              Answers.
             </h2>
           </div>
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <div
                 key={item.question}
-                className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
               >
                 <h3 className="text-base font-semibold text-slate-950">
                   {item.question}

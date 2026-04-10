@@ -322,7 +322,7 @@ export default function AdminMembersPage() {
       setTotpSheet(data);
       setFeedback({
         type: 'success',
-        message: '新的 2FA Secret 已生成，请马上保存到验证器。',
+        message: '新的 2FA 密钥已生成，请马上保存到验证器。',
       });
       refetch();
     },
@@ -509,7 +509,7 @@ export default function AdminMembersPage() {
                             {member.totpEnabled ? '已启用' : '未启用'}
                           </AdminBadge>
                           <p className="text-xs text-slate-500">
-                            {member.hasTotpSecret ? '已生成 Secret' : '未生成 Secret'}
+                            {member.hasTotpSecret ? '已生成密钥' : '未生成密钥'}
                           </p>
                         </div>
                       </td>
@@ -581,22 +581,22 @@ export default function AdminMembersPage() {
           accent="amber"
         >
           <div className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-sm font-semibold text-slate-950">先同步密钥槽位</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 把环境里的 ADMIN_KEYS 槽位同步进成员目录，再补齐姓名、邮箱和真实角色。
               </p>
             </div>
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
               <p className="text-sm font-semibold text-slate-950">角色和状态在这里维护</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                菜单可见范围和权限继续吃统一 RBAC，但成员身份不再只有一串环境变量。
+                菜单可见范围和权限继续走统一 RBAC，但成员身份不再只有一串环境变量。
               </p>
             </div>
-            <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
-              <p className="text-sm font-semibold text-slate-950">2FA Secret 只在重置后展示一次</p>
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+              <p className="text-sm font-semibold text-slate-950">2FA 密钥只在重置后展示一次</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                重置后请立刻把 Secret 或 otpauth 链接加入验证器，页面不会替你长期明文保留。
+                重置后请立刻把密钥或 otpauth 链接加入验证器，页面不会替你长期明文保留。
               </p>
             </div>
           </div>
@@ -736,27 +736,27 @@ export default function AdminMembersPage() {
       <Modal
         isOpen={Boolean(totpSheet)}
         onClose={() => setTotpSheet(null)}
-        title="新的 2FA Secret"
-        subtitle="请把下面的 Secret 或 otpauth 链接立刻加入 Google Authenticator、1Password 或其他验证器。"
+        title="新的 2FA 密钥"
+        subtitle="请把下面的密钥或 otpauth 链接立刻加入 Google Authenticator、1Password 或其他验证器。"
         size="lg"
       >
         <div className="space-y-4">
-          <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.86)] p-4">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
             <p className="text-sm font-semibold text-slate-950">
               {totpSheet?.member?.name || '后台成员'}
             </p>
             <p className="mt-1 text-sm text-slate-600">
-              新 Secret 只会在这里展示一次，关闭后不会再以明文形式返回。
+              新密钥只会在这里展示一次，关闭后不会再以明文形式返回。
             </p>
           </div>
 
-          <AdminFormField label="Base32 Secret" helperText="手动添加验证器时直接粘贴这一串。">
+          <AdminFormField label="Base32 密钥" helperText="手动添加验证器时直接粘贴这一串。">
             <div className="flex gap-2">
               <input className={adminInputClassName} readOnly value={totpSheet?.secret || ''} />
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => copyToClipboard(totpSheet?.secret || '', 'Secret')}
+                onClick={() => copyToClipboard(totpSheet?.secret || '', '密钥')}
               >
                 <Copy className="size-4" />
                 复制

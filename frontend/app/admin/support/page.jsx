@@ -478,7 +478,7 @@ export default function AdminSupportPage() {
         <div className="space-y-4">
           {selectedTicket ? (
             <div className="space-y-3">
-              <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
+              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-600">
                 <p className="font-semibold text-slate-950">原始消息</p>
                 <p className="mt-2 leading-6">{selectedTicket.message || '未附带消息内容。'}</p>
               </div>

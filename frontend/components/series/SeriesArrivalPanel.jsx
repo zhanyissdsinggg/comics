@@ -13,14 +13,21 @@ export default function SeriesArrivalPanel({
   className = "",
 }) {
   const router = useRouter();
-  const context = useMemo(() => buildDiscoveryContext(series, attribution), [attribution, series]);
+  const context = useMemo(
+    () => buildDiscoveryContext(series, attribution),
+    [attribution, series],
+  );
 
   if (!context) {
     return null;
   }
 
   return (
-    <SurfacePanel className={`mt-8 space-y-5 ${className}`.trim()} appearance="light" accent="blue">
+    <SurfacePanel
+      className={`mt-8 space-y-5 ${className}`.trim()}
+      appearance="light"
+      accent="blue"
+    >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
@@ -29,18 +36,22 @@ export default function SeriesArrivalPanel({
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
             {context.title}
           </h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">{context.description}</p>
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            {context.description}
+          </p>
         </div>
-        <div className="rounded-[24px] border border-black/6 bg-white/84 px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Back to source
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-600">{context.returnHint}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            {context.returnHint}
+          </p>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             From
           </p>
@@ -51,7 +62,7 @@ export default function SeriesArrivalPanel({
             Where this visit began before you landed here.
           </p>
         </div>
-        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Why it stood out
           </p>
@@ -62,14 +73,16 @@ export default function SeriesArrivalPanel({
             The signal that made this title stand out.
           </p>
         </div>
-        <div className="rounded-[22px] border border-black/6 bg-white/84 px-4 py-4">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Keep browsing
           </p>
           <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
             {context.returnTitle}
           </p>
-          <p className="mt-2 text-sm leading-6 text-slate-500">{context.returnHint}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {context.returnHint}
+          </p>
         </div>
       </div>
 
@@ -100,7 +113,7 @@ export default function SeriesArrivalPanel({
               });
               router.push(creatorHref);
             }}
-            className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             More by this creator
           </button>
@@ -108,7 +121,7 @@ export default function SeriesArrivalPanel({
         <button
           type="button"
           onClick={() => router.push("/rankings?view=featured")}
-          className="rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+          className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
         >
           Browse Series
         </button>

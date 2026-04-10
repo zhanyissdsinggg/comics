@@ -119,11 +119,10 @@ const PWAInstallPrompt = React.memo(() => {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
-      <div className="pointer-events-auto mx-auto max-w-4xl rounded-[28px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[0_22px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.76),transparent_24%)]" />
+      <div className="pointer-events-auto mx-auto max-w-4xl rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent,#0071e3)]">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[var(--gush-accent,#0071e3)] shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
             <div>
@@ -153,7 +152,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="min-h-[44px] rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition hover:bg-slate-800"
               >
                 Install
               </button>
@@ -161,14 +160,14 @@ const PWAInstallPrompt = React.memo(() => {
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className="min-h-[44px] rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
             >
               Not now
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/8 bg-white/80 text-slate-500 transition hover:bg-white hover:text-slate-900"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-900"
               aria-label="Close"
             >
               <X size={16} />

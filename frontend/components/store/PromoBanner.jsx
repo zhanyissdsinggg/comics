@@ -18,7 +18,8 @@ function getPromoCopy(promotion, offer) {
       tag: "Welcome Back",
       title: promotion.title || "Returning Reward",
       description:
-        promotion.description || "Claim your welcome back bonus and keep reading.",
+        promotion.description ||
+        "Claim your welcome back bonus and keep reading.",
     };
   }
   if (promotion?.type === "HOLIDAY") {
@@ -51,19 +52,23 @@ export default function PromoBanner({ offer, promotion }) {
   const badge = promotion?.coupon?.label || offer?.tag || copy.tag;
 
   return (
-    <section className="rounded-[30px] border border-black/6 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(242,246,255,0.98))] p-6 shadow-[0_20px_48px_rgba(15,23,42,0.07)]">
+    <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_20px_48px_rgba(15,23,42,0.07)]">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2">
-            <Pill appearance="light" tone="accent">{copy.tag}</Pill>
+            <Pill appearance="light" tone="accent">
+              {copy.tag}
+            </Pill>
             <Pill appearance="light">{badge}</Pill>
           </div>
           <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950">
             {copy.title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{copy.description}</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+            {copy.description}
+          </p>
         </div>
-        <div className="rounded-[24px] border border-black/6 bg-white/84 px-5 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] lg:min-w-[220px]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] lg:min-w-[220px]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Ends in
           </p>

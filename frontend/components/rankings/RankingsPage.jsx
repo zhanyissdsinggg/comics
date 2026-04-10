@@ -28,7 +28,7 @@ const VIEWS = [
   },
   {
     id: "start-here",
-    label: "Start Here",
+    label: "First Picks",
     description: "Strong first reads.",
   },
   {
@@ -95,7 +95,7 @@ function getSeriesBadge(series) {
     return "Updated";
   }
   if (hasReaderFriendlyStart(series)) {
-    return "Start here";
+    return "First picks";
   }
   return "";
 }
@@ -178,7 +178,7 @@ function RankingsLoadingState() {
             {Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
-                className="rounded-[26px] border border-black/6 bg-white/88 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)]"
+                className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)]"
               >
                 <div className="h-44 rounded-[20px] bg-slate-200" />
                 <div className="mt-4 h-6 w-40 rounded-full bg-slate-200" />
@@ -197,7 +197,7 @@ function RankingsLoadingState() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="h-20 rounded-[20px] border border-black/6 bg-white/86"
+              className="h-20 rounded-[20px] border border-[color:var(--gush-border)] bg-white"
             />
           ))}
         </div>
@@ -330,7 +330,7 @@ export default function RankingsPage({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -340,9 +340,9 @@ export default function RankingsPage({
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Editor's shelf"
-            title={`${activeView.label} picks.`}
+            title={`${activeView.label}.`}
             description={activeView.description}
-            secondary="Browse one strong shelf at a time."
+            secondary=""
             stats={heroStats}
             className="min-h-full"
             appearance="light"
@@ -357,7 +357,7 @@ export default function RankingsPage({
           >
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                This view
+                View
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
@@ -371,7 +371,7 @@ export default function RankingsPage({
 
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Keep browsing
+                Next
               </p>
               <div className="flex flex-col gap-2.5">
                 <button
@@ -386,7 +386,7 @@ export default function RankingsPage({
                   onClick={() => router.push("/creators")}
                   className={secondaryButtonClass}
                 >
-                  Meet the Creators
+                  Open creators
                 </button>
               </div>
             </div>
@@ -409,14 +409,14 @@ export default function RankingsPage({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                View switcher
+                Views
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Switch shelves.
+                Browse views.
               </h2>
             </div>
             <p className="max-w-md text-sm leading-7 text-slate-600">
-              Each tab narrows the edit.
+              Featured, first picks, completed, comics, and novels.
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
@@ -429,7 +429,7 @@ export default function RankingsPage({
                   "rounded-full border px-4 py-2.5 text-sm font-semibold transition",
                   activeView.id === item.id
                     ? "border-black/10 bg-slate-950 text-white"
-                    : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-950",
+                    : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
                 ].join(" ")}
               >
                 {item.label}
@@ -449,10 +449,10 @@ export default function RankingsPage({
             >
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Featured Series
+                  View
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Nothing is featured here yet.
+                  Nothing is live here yet.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
                   Browse the catalog or switch views.
@@ -486,10 +486,10 @@ export default function RankingsPage({
                   Creators
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Meet the Creators
+                  Open creators.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the people and teams behind these stories.
+                  Browse the names behind these stories.
                 </p>
               </div>
               <button
@@ -497,7 +497,7 @@ export default function RankingsPage({
                 onClick={() => router.push("/creators")}
                 className={secondaryButtonClass}
               >
-                View Creators
+                Open creators
               </button>
             </SurfacePanel>
           </div>
@@ -510,7 +510,7 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full rounded-[32px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 text-left shadow-[0_22px_52px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-black/10"
+                  className="group w-full rounded-[34px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(249,249,251,0.98))] p-5 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)]"
                   aria-label={`Open ${leadEntry.title}`}
                 >
                   <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -526,7 +526,7 @@ export default function RankingsPage({
                     />
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Featured
+                        Lead pick
                       </p>
                       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                         {leadEntry.title}
@@ -538,14 +538,14 @@ export default function RankingsPage({
                         {getSeriesMeta(leadEntry).map((item) => (
                           <span
                             key={`${leadEntry.id}-lead-meta-${item}`}
-                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
+                            className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5"
                           >
                             {item}
                           </span>
                         ))}
                       </div>
-                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--gush-accent,#3157d6)]">
-                        Open story page
+                      <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                        Open story
                       </p>
                     </div>
                   </div>
@@ -565,7 +565,7 @@ export default function RankingsPage({
                           "FEATURED_SUPPORTING",
                         )
                       }
-                      className="group rounded-[26px] border border-black/6 bg-white/88 p-4 text-left shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-black/10"
+                      className="group rounded-[28px] border border-[color:var(--gush-border)] bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)]"
                       aria-label={`Open ${series.title}`}
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -590,13 +590,13 @@ export default function RankingsPage({
                         {getSeriesMeta(series).map((item) => (
                           <span
                             key={`${series.id}-support-meta-${item}`}
-                            className="rounded-full border border-black/8 bg-[#f8f9fc] px-3 py-1.5"
+                            className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5"
                           >
                             {item}
                           </span>
                         ))}
                       </div>
-                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#3157d6)]">
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                         Open story
                       </p>
                     </Link>
@@ -611,7 +611,7 @@ export default function RankingsPage({
                   accent="blue"
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    More Series
+                    More titles
                   </p>
 
                   <div className="space-y-3">
@@ -626,7 +626,7 @@ export default function RankingsPage({
                             "FEATURED_LIST",
                           )
                         }
-                        className="flex w-full items-center gap-4 rounded-[24px] border border-black/6 bg-white/86 p-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-black/10"
+                        className="flex w-full items-center gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-3 text-left shadow-[0_8px_18px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)]"
                         aria-label={`Open ${series.title}`}
                       >
                         <Cover
@@ -655,7 +655,7 @@ export default function RankingsPage({
                             </p>
                           ) : null}
                         </div>
-                        <span className="hidden rounded-full border border-black/8 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
+                        <span className="hidden rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5 text-[11px] font-semibold text-slate-500 sm:inline-flex">
                           Open
                         </span>
                       </Link>
@@ -671,7 +671,7 @@ export default function RankingsPage({
                 entryPoint="FEATURED_CREATOR_CHIP"
                 campaignId={`featured_${activeView.id}_creator`}
                 sourcePath={featuredPath}
-                label="Meet the Creators"
+                label="Creators"
                 maxCreators={6}
                 compact
                 appearance="light"
@@ -688,7 +688,7 @@ export default function RankingsPage({
                     Browse
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Keep browsing
+                    Browse next.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">

@@ -36,10 +36,12 @@ describe("AdminSupportController", () => {
         topic: "billing",
         subject: "Checkout help",
         message: "Need refund",
+        adminReply: null,
+        adminRepliedAt: null,
         status: "open",
         createdAt: new Date("2026-03-10T08:00:00.000Z"),
         updatedAt: new Date("2026-03-11T08:00:00.000Z"),
-        user: { email: "reader@example.com" },
+        user: { email: "reader@supportmail.com" },
       },
     ]);
     prisma.supportTicket.count.mockResolvedValue(1);
@@ -48,7 +50,7 @@ describe("AdminSupportController", () => {
       query: {
         page: "2",
         pageSize: "10",
-        search: "reader@example.com",
+        search: "reader@supportmail.com",
         status: "open",
         sortBy: "updatedAt",
         sortOrder: "asc",
@@ -62,41 +64,51 @@ describe("AdminSupportController", () => {
           replyEmail: true,
           orderId: true,
           topic: true,
+          adminReply: true,
+          adminRepliedAt: true,
         }),
         orderBy: { updatedAt: "asc" },
         skip: 10,
         take: 10,
-        where: {
-          status: "open",
-          OR: expect.arrayContaining([
-            {
-              user: {
-                is: {
-                  email: { contains: "reader@example.com", mode: "insensitive" },
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({
+              status: "open",
+              OR: expect.arrayContaining([
+                {
+                  user: {
+                    is: {
+                      email: { contains: "reader@supportmail.com", mode: "insensitive" },
+                    },
+                  },
                 },
-              },
-            },
-            {
-              replyEmail: { contains: "reader@example.com", mode: "insensitive" },
-            },
+                {
+                  replyEmail: { contains: "reader@supportmail.com", mode: "insensitive" },
+                },
+              ]),
+            }),
           ]),
-        },
+        }),
       }),
     );
 
     expect(prisma.supportTicket.count).toHaveBeenCalledWith({
-      where: {
-        status: "open",
-        OR: expect.arrayContaining([
-          {
-            user: {
-              is: {
-                email: { contains: "reader@example.com", mode: "insensitive" },
+      where: expect.objectContaining({
+        AND: expect.arrayContaining([
+          expect.objectContaining({
+            status: "open",
+            OR: expect.arrayContaining([
+              {
+                user: {
+                  is: {
+                    email: { contains: "reader@supportmail.com", mode: "insensitive" },
+                  },
+                },
               },
-            },
-          },
+            ]),
+          }),
         ]),
-      },
+      }),
     });
 
     expect(result).toEqual(
@@ -104,7 +116,7 @@ describe("AdminSupportController", () => {
         data: [
           expect.objectContaining({
             id: "ticket-1",
-            userEmail: "reader@example.com",
+            userEmail: "reader@supportmail.com",
           }),
         ],
         pagination: expect.objectContaining({
@@ -162,6 +174,8 @@ describe("AdminSupportController", () => {
         topic: "technical",
         subject: "Reader issue",
         message: "Chapter will not open",
+        adminReply: "Please clear the cache and try again.",
+        adminRepliedAt: new Date("2026-03-12T10:00:00.000Z"),
         status: "open",
         createdAt: new Date("2026-03-12T08:00:00.000Z"),
         updatedAt: new Date("2026-03-12T08:00:00.000Z"),
@@ -173,18 +187,19 @@ describe("AdminSupportController", () => {
     const result = await controller.list({
       query: {
         search: "guest@example.com",
+        includeTestData: "1",
       },
     } as never);
 
     expect(prisma.supportTicket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
+        where: expect.objectContaining({
           OR: expect.arrayContaining([
             {
               replyEmail: { contains: "guest@example.com", mode: "insensitive" },
             },
           ]),
-        },
+        }),
       }),
     );
 
@@ -197,8 +212,50 @@ describe("AdminSupportController", () => {
             replyEmail: "guest@example.com",
             orderId: "ord_guest_1",
             topic: "technical",
+            adminReply: "Please clear the cache and try again.",
           }),
         ],
+      }),
+    );
+  });
+
+  it("persists the admin reply body and reply timestamp", async () => {
+    prisma.supportTicket.findUnique.mockResolvedValue({
+      id: "ticket-2",
+      status: "open",
+    });
+    prisma.supportTicket.update.mockResolvedValue({
+      id: "ticket-2",
+      status: "in_progress",
+      adminReply: "We have refreshed the chapter files for you.",
+      adminRepliedAt: new Date("2026-04-02T12:00:00.000Z"),
+    });
+
+    const result = await controller.reply("ticket-2", {
+      message: "We have refreshed the chapter files for you.",
+    });
+
+    expect(prisma.supportTicket.update).toHaveBeenCalledWith({
+      where: { id: "ticket-2" },
+      data: expect.objectContaining({
+        status: "in_progress",
+        adminReply: "We have refreshed the chapter files for you.",
+        adminRepliedAt: expect.any(Date),
+      }),
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        ok: true,
+        ticket: expect.objectContaining({
+          id: "ticket-2",
+          status: "in_progress",
+          adminReply: "We have refreshed the chapter files for you.",
+        }),
+        reply: expect.objectContaining({
+          message: "We have refreshed the chapter files for you.",
+          repliedAt: expect.any(String),
+        }),
       }),
     );
   });

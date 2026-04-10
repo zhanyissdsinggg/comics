@@ -580,6 +580,8 @@ model SupportTicket {
   topic      String?
   subject    String
   message    String
+  adminReply String?
+  adminRepliedAt DateTime?
   status     String   @default("open")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

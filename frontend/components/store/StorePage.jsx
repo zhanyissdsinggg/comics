@@ -512,11 +512,15 @@ export default function StorePage({
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const fieldClass =
-    "flex-1 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-700 outline-none transition focus:border-[rgba(0,113,227,0.24)] focus:ring-2 focus:ring-[rgba(0,113,227,0.12)]";
+    "flex-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2.5 text-xs text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/70";
+  const quietCardClass =
+    "rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4";
+  const compareShellClass =
+    "overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
@@ -527,11 +531,13 @@ export default function StorePage({
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Point packs"
-            title={purchaseActionsEnabled ? "Point packs" : "Point packs soon"}
+            title={
+              purchaseActionsEnabled ? "Buy points." : "Point packs preview."
+            }
             description={
               purchaseActionsEnabled
-                ? "Buy once. Unlock as you go."
-                : "Prices are visible. Checkout opens later."
+                ? "Buy once and unlock as you go."
+                : "Prices now. Checkout later."
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
@@ -620,9 +626,9 @@ export default function StorePage({
                     }),
                   )
                 }
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={secondaryButtonClass}
               >
-                Billing help
+                Billing support
               </button>
             </NetworkFallback>
           ) : (
@@ -635,30 +641,36 @@ export default function StorePage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Before you buy
+              </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Before checkout
+                {purchaseActionsEnabled
+                  ? "Simple checkout."
+                  : "Know the setup."}
               </h2>
             </div>
           </div>
-          <div className="grid gap-3">
+          <div className="grid gap-3 md:grid-cols-3">
             {[
               {
                 label: "Today",
-                detail: "No charge yet.",
+                detail: purchaseActionsEnabled
+                  ? "Buy only what you need."
+                  : "No charge yet.",
               },
               {
-                label: "Purchases",
-                detail: "Receipts show up in Purchases after launch.",
+                label: "Receipts",
+                detail: purchaseActionsEnabled
+                  ? "Every purchase shows in Orders."
+                  : "Orders appear after launch.",
               },
               {
                 label: "Help",
-                detail: "Billing help stays open.",
+                detail: "Support is available.",
               },
             ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-              >
+              <div key={item.label} className={quietCardClass}>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
                   <p className="text-sm font-semibold text-slate-950">
                     {item.label}
@@ -683,7 +695,7 @@ export default function StorePage({
               }
               className={secondaryButtonClass}
             >
-              Billing help
+              Billing support
             </button>
             <button
               type="button"
@@ -715,7 +727,7 @@ export default function StorePage({
               >
                 <div>
                   <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Sign in
+                    Keep purchases on one account.
                   </h2>
                 </div>
                 <button
@@ -728,17 +740,17 @@ export default function StorePage({
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className={secondaryButtonClass}
-                  >
-                    Read Free
+                  onClick={() => router.push("/rankings?type=ttf&window=all")}
+                  className={secondaryButtonClass}
+                >
+                    First picks
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/subscribe")}
                     className={secondaryButtonClass}
                   >
-                    View Plans
+                    Plans
                   </button>
                 </div>
               </SurfacePanel>
@@ -751,26 +763,26 @@ export default function StorePage({
             >
               <div>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Pick the model that fits.
+                  Choose a reading model.
                 </h2>
               </div>
               <div className="grid gap-3">
-                <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-4">
+                <div className={quietCardClass}>
                   <p className="text-sm font-semibold text-slate-950">
                     Point packs
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Buy once.
+                    Buy once and unlock as you go.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4">
+                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">
                     Membership
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {subscriptionStats
                       ? `From ${membershipStartingPrice || "the current plan price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
-                      : "Monthly option."}
+                      : "Monthly plans."}
                   </p>
                 </div>
               </div>
@@ -800,7 +812,7 @@ export default function StorePage({
                     onClick={() => router.push("/orders")}
                     className={secondaryButtonClass}
                   >
-                    View purchases
+                    Orders
                   </button>
                 ) : null}
               </div>
@@ -849,7 +861,7 @@ export default function StorePage({
                     {coupons.map((coupon) => (
                       <span
                         key={coupon.id}
-                        className="rounded-full border border-black/8 bg-white/84 px-3 py-1"
+                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1"
                       >
                         {coupon.label || coupon.code}
                       </span>
@@ -905,25 +917,23 @@ export default function StorePage({
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {purchaseActionsEnabled
-                    ? "Choose a pack"
-                    : "Browse the packs"}
+                  {purchaseActionsEnabled ? "Choose a pack" : "Browse packs"}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">{packCountLabel}</p>
             </div>
 
             {packageComparisonRows.length > 0 ? (
-              <>
-                <details className="overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc] md:hidden">
-                  <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
-                    Compare packs
-                  </summary>
-                  <div className="space-y-3 border-t border-black/8 px-4 py-4">
+              <details className={compareShellClass}>
+                <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
+                  Compare packs
+                </summary>
+                <div className="border-t border-[color:var(--gush-border)] px-4 py-4">
+                  <div className="space-y-3 md:hidden">
                     {packageComparisonRows.map((pkg) => (
                       <div
                         key={pkg.id}
-                        className="rounded-[20px] border border-black/8 bg-white px-4 py-4"
+                        className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-sm font-semibold text-slate-950">
@@ -941,12 +951,10 @@ export default function StorePage({
                       </div>
                     ))}
                   </div>
-                </details>
-                <div className="hidden overflow-hidden rounded-[26px] border border-black/8 bg-[#f8f9fc] md:block">
-                  <div className="overflow-x-auto">
+                  <div className="hidden overflow-x-auto md:block">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-black/8 text-left text-slate-500">
+                        <tr className="border-b border-[color:var(--gush-border)] text-left text-slate-500">
                           <th className="px-4 py-3 font-semibold">Pack</th>
                           <th className="px-4 py-3 font-semibold">Price</th>
                           <th className="px-4 py-3 font-semibold">
@@ -956,7 +964,7 @@ export default function StorePage({
                           <th className="px-4 py-3 font-semibold">Best for</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-black/8 bg-white/84">
+                      <tbody className="divide-y divide-[color:var(--gush-border)] bg-white">
                         {packageComparisonRows.map((pkg) => (
                           <tr key={pkg.id}>
                             <td className="px-4 py-3 font-semibold text-slate-950">
@@ -980,7 +988,7 @@ export default function StorePage({
                     </table>
                   </div>
                 </div>
-              </>
+              </details>
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -1012,7 +1020,7 @@ export default function StorePage({
                   onClick={() => router.push("/orders")}
                   className={secondaryButtonClass}
                 >
-                  View purchases
+                  Orders
                 </button>
                 <button
                   type="button"
@@ -1026,7 +1034,7 @@ export default function StorePage({
                   }
                   className={secondaryButtonClass}
                 >
-                  Get billing help
+                  Billing support
                 </button>
               </div>
             ) : null}

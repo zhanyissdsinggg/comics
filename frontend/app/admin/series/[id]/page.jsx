@@ -659,7 +659,7 @@ export default function AdminSeriesDetailPage() {
       subtitle="先把读者会直接看到的内容信息收稳：标题、简介、封面、发布状态和真实创作者署名。"
       actions={
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/78 p-1.5">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/78 p-1.5">
             <Button type="button" variant="ghost" onClick={() => router.push('/admin/series')}>
               <ArrowLeft className="size-4" />
               返回作品列表
@@ -682,7 +682,7 @@ export default function AdminSeriesDetailPage() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 rounded-full border border-black/8 bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
             {isEditing ? (
               <>
                 <Button type="button" variant="secondary" onClick={handleCancelEditing}>
@@ -791,7 +791,7 @@ export default function AdminSeriesDetailPage() {
               title="封面"
               description="一张稳定的封面，比花哨的后台指标更能提升前台信任感。"
             >
-              <div className="overflow-hidden rounded-[26px] border border-black/8 bg-[rgba(250,247,241,0.78)]">
+              <div className="overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]">
                 {formData.coverUrl ? (
                   <img
                     src={formData.coverUrl}
@@ -826,7 +826,7 @@ export default function AdminSeriesDetailPage() {
                   />
                 </AdminFormField>
                 {isEditing ? (
-                  <label className="block rounded-[22px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.78)] px-4 py-4 text-sm text-slate-600">
+                  <label className="block rounded-[22px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-600">
                     <span className="font-semibold text-slate-950">上传新封面</span>
                     <span className="mt-1 block text-xs text-slate-500">
                       支持 JPG、PNG、GIF、WEBP，大小不能超过 10MB。
@@ -873,7 +873,7 @@ export default function AdminSeriesDetailPage() {
                 {readiness.checks.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-[20px] border border-black/6 bg-[rgba(250,247,241,0.82)] px-4 py-3"
+                    className="rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-slate-950">{item.label}</p>
@@ -943,7 +943,7 @@ export default function AdminSeriesDetailPage() {
               }
             >
               <div className="space-y-4">
-                <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.72)] px-4 py-4">
+                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
                   <p className="text-sm font-semibold text-slate-950">当前前台署名</p>
                   <p className="mt-2 text-base text-slate-700">{creatorPreviewLabel}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -959,7 +959,7 @@ export default function AdminSeriesDetailPage() {
                 </div>
 
                 {creditsQuery.isLoading ? (
-                  <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.72)] px-4 py-8 text-sm text-slate-500">
+                  <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-8 text-sm text-slate-500">
                     正在加载创作者署名...
                   </div>
                 ) : creditsQuery.isError ? (
@@ -970,7 +970,7 @@ export default function AdminSeriesDetailPage() {
                   creditsDraft.map((credit, index) => (
                     <div
                       key={credit.id}
-                      className="rounded-[26px] border border-black/8 bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                      className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2">
@@ -1050,7 +1050,7 @@ export default function AdminSeriesDetailPage() {
                       </div>
 
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                           <span className="flex items-center gap-2">
                             <Eye className="size-4 text-slate-500" />
                             对前台公开
@@ -1065,10 +1065,10 @@ export default function AdminSeriesDetailPage() {
                             className="h-4 w-4 rounded border-black/20 bg-transparent"
                           />
                         </label>
-                        <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                           <span className="flex items-center gap-2">
                             {credit.isPrimary ? (
-                              <Eye className="size-4 text-[var(--gush-accent,#2f58c6)]" />
+                              <Eye className="size-4 text-slate-950" />
                             ) : (
                               <EyeOff className="size-4 text-slate-500" />
                             )}
@@ -1096,7 +1096,7 @@ export default function AdminSeriesDetailPage() {
               description="发布状态和分级限制保持简单明确即可。"
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                   <span>前台可见</span>
                   <input
                     type="checkbox"
@@ -1106,7 +1106,7 @@ export default function AdminSeriesDetailPage() {
                     className="h-4 w-4 rounded border-black/20 bg-transparent"
                   />
                 </label>
-                <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-4 text-sm text-slate-700">
+                <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
                   <span>18+ 作品</span>
                   <input
                     type="checkbox"

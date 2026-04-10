@@ -32,21 +32,24 @@ const HOME_RAIL_PRESETS = {
   new: {
     eyebrow: "Fresh drop",
     title: "Just landed",
-    reason: "New launches and fresh returns worth catching before they get crowded.",
+    reason:
+      "New launches and fresh returns worth catching before they get crowded.",
     href: "/rankings?type=new&window=all",
     ctaLabel: "See new titles",
   },
   completed: {
     eyebrow: STOREFRONT_TERMS.bingeReady,
     title: "Finished and bingeable",
-    reason: "Completed runs for readers who do not want to wait between chapters.",
+    reason:
+      "Completed runs for readers who do not want to wait between chapters.",
     href: "/search?status=Completed&sort=popular",
     ctaLabel: "Browse completed",
   },
   ttf: {
     eyebrow: STOREFRONT_TERMS.freeStart,
     title: "Easy first clicks",
-    reason: "Free-start reads that make it easier to test a story before you commit.",
+    reason:
+      "Free-start reads that make it easier to test a story before you commit.",
     href: "/rankings?type=ttf&window=all",
     ctaLabel: "Browse free chapters",
   },
@@ -66,7 +69,7 @@ const HOME_RAIL_PRESETS = {
   },
   starter: {
     eyebrow: STOREFRONT_TERMS.startHere,
-    title: "Start Here",
+    title: "First Picks",
     reason: "High-confidence first picks for building a new reading list.",
     href: "/rankings?type=popular&window=all",
     ctaLabel: "View best sellers",
@@ -87,7 +90,15 @@ const HOME_RAIL_PRESETS = {
   },
 };
 
-export function buildHomeRail({ id, items, title, reason, href, ctaLabel, eyebrow }) {
+export function buildHomeRail({
+  id,
+  items,
+  title,
+  reason,
+  href,
+  ctaLabel,
+  eyebrow,
+}) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }

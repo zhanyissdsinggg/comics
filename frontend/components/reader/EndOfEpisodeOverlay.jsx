@@ -20,14 +20,14 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
   }
 
   return (
-    <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
-            From
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
+            Opened from
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
-            {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+            {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             {discoveryContext.returnHint}
@@ -37,7 +37,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
           <button
             type="button"
             onClick={onReturnToSource}
-            className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             {discoveryContext.returnLabel}
           </button>
@@ -50,11 +50,11 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
 function MetaPill({ children, accent = false }) {
   return (
     <span
-      className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-        accent
-          ? "border-[rgba(216,183,140,0.22)] bg-[rgba(216,183,140,0.08)] text-[var(--gush-accent,#d8b78c)]"
-          : "border-black/8 bg-white/84 text-slate-600"
-      }`}
+        className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+          accent
+            ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
+            : "border-[color:var(--gush-border)] bg-white text-slate-600"
+        }`}
     >
       {children}
     </span>
@@ -163,13 +163,18 @@ export default function EndOfEpisodeOverlay({
     }
     onPackOffer?.(packOffer);
   };
+  const primaryButtonClass = highlightPrimaryAction
+    ? "rounded-full border border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_18px_38px_rgba(15,23,42,0.14)]"
+    : "rounded-full border border-slate-950 bg-slate-950 text-white hover:bg-slate-800";
+  const secondaryButtonClass =
+    "rounded-full border border-[color:var(--gush-border)] bg-white text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-5 shadow-[0_28px_80px_rgba(15,23,42,0.18)] backdrop-blur-xl">
+      <div className="w-full max-w-2xl rounded-[32px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_20px_52px_rgba(15,23,42,0.12)] backdrop-blur-xl">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-slate-500">Keep reading</p>
+            <p className="text-sm text-slate-500">Next episode</p>
             <p className="text-lg font-semibold text-slate-950">
               {nextEpisode.title}
             </p>
@@ -192,11 +197,11 @@ export default function EndOfEpisodeOverlay({
           />
 
           {nextUnlocked ? (
-            <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
-                    Next up
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
+                    Ready now
                   </p>
                   <h3 className="mt-2 text-xl font-semibold text-slate-950">
                     {nextEpisode.title}
@@ -216,11 +221,7 @@ export default function EndOfEpisodeOverlay({
                     ref={primaryActionRef}
                     type="button"
                     onClick={onNext}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      highlightPrimaryAction
-                        ? "border-[rgba(216,183,140,0.3)] bg-[rgba(216,183,140,0.1)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.12),0_20px_50px_rgba(216,183,140,0.14)] motion-safe:animate-pulse"
-                        : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
-                    }`}
+                    className={`px-4 py-2 text-sm font-semibold transition ${primaryButtonClass}`}
                   >
                     Read next
                   </button>
@@ -228,20 +229,20 @@ export default function EndOfEpisodeOverlay({
                     <button
                       type="button"
                       onClick={onViewSeries}
-                      className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                      className={`px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
                     >
-                      View series
+                      Open series
                     </button>
                   ) : null}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent,#d8b78c)]">
-                    Keep going
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
+                    Continue
                   </p>
                   <h3 className="mt-2 text-xl font-semibold text-slate-950">
                     {nextEpisode.title}
@@ -260,21 +261,21 @@ export default function EndOfEpisodeOverlay({
                         onClick={onClaim}
                         className="mt-4 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
                       >
-                        Read free now
+                        Open now
                       </button>
                     ) : (
                       <div
                         className={`mt-4 ${
                           countdownVariant === "B"
-                            ? "flex flex-col gap-2 rounded-[20px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-xs text-slate-600"
-                            : "flex flex-wrap items-center gap-3 rounded-full border border-black/8 bg-white px-4 py-2 text-xs text-slate-600"
+                            ? "flex flex-col gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-xs text-slate-600"
+                            : "flex flex-wrap items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-xs text-slate-600"
                         }`}
                       >
                         <span>Free in {formatted || "--:--:--"}</span>
                         <button
                           type="button"
                           onClick={() => onNotify?.()}
-                          className="rounded-full border border-black/8 bg-white px-3 py-1 text-[10px] font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                          className={`px-3 py-1 text-[10px] font-semibold ${secondaryButtonClass}`}
                         >
                           Remind me
                         </button>
@@ -288,17 +289,13 @@ export default function EndOfEpisodeOverlay({
                     ref={primaryActionRef}
                     type="button"
                     onClick={handlePrimary}
-                    className={`w-full rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      highlightPrimaryAction
-                        ? "border-[rgba(216,183,140,0.3)] bg-[rgba(216,183,140,0.1)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.12),0_20px_50px_rgba(216,183,140,0.14)] motion-safe:animate-pulse"
-                        : "border-black/8 bg-slate-950 text-white hover:bg-slate-800"
-                    }`}
+                    className={`w-full px-4 py-2 text-sm font-semibold transition ${primaryButtonClass}`}
                   >
                     {primaryLabel}
                   </button>
 
                   {showPackPrimary && packSavingsText ? (
-                    <p className="text-xs font-semibold text-[var(--gush-accent,#d8b78c)]">
+                    <p className="text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                       {packSavingsText}
                     </p>
                   ) : null}
@@ -311,11 +308,11 @@ export default function EndOfEpisodeOverlay({
                           onOfferClick?.("subscribe_basic");
                           onSubscribe();
                         }}
-                        className="w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                        className={`w-full px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
                       >
                         {STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
-                          <span className="ml-2 text-[10px] text-[var(--gush-accent,#d8b78c)]">
+                          <span className="ml-2 text-[10px] text-[var(--gush-accent-strong,#0058cc)]">
                             {upsellBadge}
                           </span>
                         ) : null}
@@ -329,7 +326,7 @@ export default function EndOfEpisodeOverlay({
                       <button
                         type="button"
                         onClick={handleSecondary}
-                        className="w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                        className={`w-full px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
                       >
                         {secondaryLabel}
                       </button>
@@ -348,16 +345,16 @@ export default function EndOfEpisodeOverlay({
               <button
                 type="button"
                 onClick={onViewSeries}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
-                View series
+                Open series
               </button>
             ) : null}
             {onOpenStore ? (
               <button
                 type="button"
                 onClick={onOpenStore}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
                 {STOREFRONT_TERMS.viewPointPacks}
               </button>
@@ -366,9 +363,9 @@ export default function EndOfEpisodeOverlay({
               <button
                 type="button"
                 onClick={onOpenSupport}
-                className="rounded-full border border-black/8 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
-                Need billing help?
+                Support
               </button>
             ) : null}
           </div>

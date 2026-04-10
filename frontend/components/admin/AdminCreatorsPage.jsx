@@ -103,7 +103,7 @@ function ActionButton({ children, className = "", ...props }) {
       type="button"
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+        "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
       {...props}
@@ -120,8 +120,8 @@ function PillButton({ active = false, children, className = "", ...props }) {
       className={cn(
         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         active
-          ? "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
-          : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950",
+          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+          : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
       {...props}
@@ -133,7 +133,7 @@ function PillButton({ active = false, children, className = "", ...props }) {
 
 function MetricCard({ title, value, hint, tone = "blue" }) {
   const toneClasses = {
-    blue: "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)]",
+    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]",
     emerald: "border-emerald-200 bg-emerald-50/90",
     amber: "border-amber-200 bg-amber-50/90",
     rose: "border-rose-200 bg-rose-50/90",
@@ -155,7 +155,7 @@ function MetricCard({ title, value, hint, tone = "blue" }) {
 
 function EmptyState({ title, description }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.72)] px-5 py-10 text-center">
+    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-10 text-center">
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>
@@ -164,11 +164,11 @@ function EmptyState({ title, description }) {
 
 function StatusPill({ children, tone = "slate" }) {
   const toneClasses = {
-    slate: "border-black/8 bg-[rgba(250,247,241,0.92)] text-slate-600",
+    slate: "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
     emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
     amber: "border-amber-200 bg-amber-50 text-amber-700",
     rose: "border-rose-200 bg-rose-50 text-rose-700",
-    blue: "border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]",
+    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950",
   };
 
   return (
@@ -425,7 +425,7 @@ export default function AdminCreatorsPage() {
         <div className="flex flex-wrap gap-2">
           <ActionButton
             onClick={() => router.push("/admin/series")}
-            className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+            className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
           >
             打开作品列表
           </ActionButton>
@@ -482,7 +482,7 @@ export default function AdminCreatorsPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-white/86 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-white/96 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 覆盖率
               </p>
@@ -545,7 +545,7 @@ export default function AdminCreatorsPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="搜索创作者、团队、作品标题或题材"
-              className="w-full rounded-full border border-black/8 bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
+              className="w-full rounded-full border border-[color:var(--gush-border)] bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
             />
           </label>
 
@@ -615,7 +615,7 @@ export default function AdminCreatorsPage() {
                       <div className="grid w-full gap-2 sm:grid-cols-2">
                         <ActionButton
                           onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                          className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                          className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                         >
                           <Edit3 className="h-4 w-4" />
                           编辑代表作品
@@ -675,7 +675,7 @@ export default function AdminCreatorsPage() {
 
                     <ActionButton
                       onClick={() => handleOpenSeries(series.id)}
-                      className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                      className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                     >
                       <Edit3 className="h-4 w-4" />
                       补创作者署名
@@ -726,7 +726,7 @@ export default function AdminCreatorsPage() {
 
                   <ActionButton
                     onClick={() => handleOpenSeries(series.id)}
-                    className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                    className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                   >
                     <Edit3 className="h-4 w-4" />
                     迁到真实 credits
@@ -765,7 +765,7 @@ export default function AdminCreatorsPage() {
                 return (
                   <article
                     key={creator.slug}
-                    className="rounded-[28px] border border-black/8 bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="space-y-3">
@@ -795,13 +795,13 @@ export default function AdminCreatorsPage() {
                       </div>
 
                       <div className="grid min-w-[220px] gap-3 sm:grid-cols-2">
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             作品数
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.titleCount}</p>
                         </div>
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             资料完整度
                           </p>
@@ -809,13 +809,13 @@ export default function AdminCreatorsPage() {
                             {formatPercent(creator.metadataCoverageScore)}
                           </p>
                         </div>
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             已发布
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.publishedCount}</p>
                         </div>
-                        <div className="rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.76)] px-4 py-3">
+                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             前台已就绪
                           </p>
@@ -842,7 +842,7 @@ export default function AdminCreatorsPage() {
                     <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                       <ActionButton
                         onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                        className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                        className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                       >
                         <Edit3 className="h-4 w-4" />
                         编辑代表作品
@@ -874,7 +874,7 @@ export default function AdminCreatorsPage() {
                     </div>
 
                     {isExpanded ? (
-                      <div className="mt-4 rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.62)] p-4">
+                      <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                           <div>
                             <p className="text-sm font-semibold text-slate-950">关联作品</p>
@@ -891,7 +891,7 @@ export default function AdminCreatorsPage() {
                           {creator.series.map((series) => (
                             <div
                               key={`${creator.slug}-${series.id}`}
-                              className="flex flex-col gap-3 rounded-[22px] border border-black/8 bg-white px-4 py-4 xl:flex-row xl:items-center xl:justify-between"
+                              className="flex flex-col gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 xl:flex-row xl:items-center xl:justify-between"
                             >
                               <div className="space-y-2">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -915,7 +915,7 @@ export default function AdminCreatorsPage() {
                               <div className="grid w-full gap-2 sm:grid-cols-2">
                                 <ActionButton
                                   onClick={() => handleOpenSeries(series.id)}
-                                  className="border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]"
+                                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                                 >
                                   <Edit3 className="h-4 w-4" />
                                   编辑作品

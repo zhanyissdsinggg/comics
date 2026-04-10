@@ -2,12 +2,7 @@
 
 import { AGE_GATE_TITLE } from "../../lib/adultGateCopy";
 
-export default function AdultAgeModal({
-  open,
-  onClose,
-  onConfirm,
-  legalAge,
-}) {
+export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
   if (!open) {
     return null;
   }
@@ -20,7 +15,7 @@ export default function AdultAgeModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[30px] border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 shadow-[0_28px_80px_rgba(15,23,42,0.18)]"
+        className="w-full max-w-md rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_18px_44px_rgba(15,23,42,0.1)]"
         onClick={(event) => event.stopPropagation()}
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -37,7 +32,7 @@ export default function AdultAgeModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
           >
             Cancel
           </button>

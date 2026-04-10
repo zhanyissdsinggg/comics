@@ -21,7 +21,7 @@ export default function OfflineNotice() {
 
   return (
     <div className="pointer-events-none fixed inset-x-4 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-40 flex justify-center sm:top-[calc(env(safe-area-inset-top,0px)+5rem)]">
-      <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.92)] px-4 py-2.5 text-sm shadow-[0_16px_34px_rgba(0,0,0,0.08)] backdrop-blur-2xl dark:border-[color:var(--gush-border)] dark:bg-[rgba(18,24,34,0.92)]">
+      <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm shadow-[0_14px_30px_rgba(15,23,42,0.08)] dark:border-[color:var(--gush-border)] dark:bg-[rgba(18,24,34,0.92)]">
         <div
           className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border ${
             online
@@ -38,7 +38,7 @@ export default function OfflineNotice() {
           <p className="mt-0.5 text-sm font-medium leading-5 text-[var(--gush-ink-strong)] dark:text-[var(--gush-ink-strong)]">
             {online
               ? "Back online."
-              : "Offline. Cached pages may still appear."}
+              : "Offline. Some saved pages may still open."}
           </p>
         </div>
       </div>

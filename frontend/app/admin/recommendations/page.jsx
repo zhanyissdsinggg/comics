@@ -171,11 +171,11 @@ function SlotIdentity({ slotKey, itemId = '', hint = '' }) {
     <div className="space-y-2">
       <div className="text-lg font-semibold text-slate-950">{slotMeta.label}</div>
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 font-mono text-slate-600">
+        <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 font-mono text-slate-600">
           {slotMeta.token}
         </span>
         {itemId ? (
-          <span className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 font-mono text-slate-500">
+          <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 font-mono text-slate-500">
             {itemId}
           </span>
         ) : null}
@@ -187,7 +187,7 @@ function SlotIdentity({ slotKey, itemId = '', hint = '' }) {
 
 function RecommendationCard({ title, description, meta = null, footer = null, children }) {
   return (
-    <article className="rounded-[26px] border border-black/8 bg-white/86 p-5 shadow-[var(--gush-shadow-soft)]">
+    <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/86 p-5 shadow-[var(--gush-shadow-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
@@ -196,7 +196,7 @@ function RecommendationCard({ title, description, meta = null, footer = null, ch
         {meta}
       </div>
       {children ? <div className="mt-4">{children}</div> : null}
-      {footer ? <div className="mt-4 border-t border-black/6 pt-4">{footer}</div> : null}
+      {footer ? <div className="mt-4 border-t border-[color:var(--gush-border)] pt-4">{footer}</div> : null}
     </article>
   );
 }
@@ -559,7 +559,7 @@ export default function AdminRecommendationsPage() {
                           seriesIds.map((seriesId) => (
                             <span
                               key={`${slot.id}-${seriesId}`}
-                              className="rounded-full border border-black/8 bg-[rgba(250,247,241,0.9)] px-3 py-1 text-xs text-slate-600"
+                              className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-slate-600"
                             >
                               {seriesId}
                             </span>
@@ -617,11 +617,11 @@ export default function AdminRecommendationsPage() {
                     }
                   >
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
+                      <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-slate-500">最大作品数</p>
                         <p className="mt-2 text-lg font-semibold text-slate-950">{ranking.maxItems || 0}</p>
                       </div>
-                      <div className="rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.82)] p-4">
+                      <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-slate-500">适用范围</p>
                         <p className="mt-2 text-lg font-semibold text-slate-950">
                           {ranking.adult ? '允许 18+ 内容' : '普通内容'}
@@ -647,7 +647,7 @@ export default function AdminRecommendationsPage() {
                 <AdminMetricCard label="点击" value={formatNumber(analyticsSummary.clicks)} detail="推荐位点击量。" />
                 <AdminMetricCard label="转化" value={formatNumber(analyticsSummary.conversions)} detail="被跟踪到的下游动作。" />
               </div>
-              <div className="rounded-[26px] border border-black/8 bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+              <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
                 <AdminFormField label="推荐位筛选">
                   <select
                     id="analytics-slot-filter"
@@ -686,10 +686,10 @@ export default function AdminRecommendationsPage() {
                 emptyMessage={analyticsQuery.isError ? getErrorMessage(analyticsQuery.error, '推荐位分析加载失败。') : '当前筛选条件下没有分析记录。'}
                 wrap={false}
               >
-                <div className="overflow-hidden rounded-[28px] border border-black/8 bg-white/92 shadow-[var(--gush-shadow-soft)]">
+                <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 shadow-[var(--gush-shadow-soft)]">
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
-                      <thead className="bg-[rgba(250,247,241,0.9)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                      <thead className="bg-[color:var(--gush-page-bg-muted)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
                         <tr>
                           <th className="px-4 py-4">日期</th>
                           <th className="px-4 py-4">推荐位</th>
@@ -708,7 +708,7 @@ export default function AdminRecommendationsPage() {
                           return (
                             <tr
                               key={item.id}
-                              className="border-t border-black/6 text-sm text-slate-700 transition hover:bg-[rgba(250,247,241,0.52)]"
+                              className="border-t border-[color:var(--gush-border)] text-sm text-slate-700 transition hover:bg-[color:var(--gush-page-bg-muted)]"
                             >
                               <td className="px-4 py-4">{formatDateTime(item.date)}</td>
                               <td className="px-4 py-4">
@@ -888,7 +888,7 @@ export default function AdminRecommendationsPage() {
               />
             </AdminFormField>
             <div className="grid gap-3">
-              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
+              <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
                 <span>允许 18+ 内容</span>
                 <input
                   type="checkbox"
@@ -897,7 +897,7 @@ export default function AdminRecommendationsPage() {
                   className="h-4 w-4 rounded border-black/20 bg-transparent"
                 />
               </label>
-              <label className="flex items-center justify-between rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.88)] px-4 py-3 text-sm text-slate-700">
+              <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
                 <span>规则启用中</span>
                 <input
                   type="checkbox"

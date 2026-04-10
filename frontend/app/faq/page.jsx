@@ -28,19 +28,19 @@ const QUICK_LINKS = [
     title: "Support",
     description: "Billing or access help.",
     href: "/support",
-    label: "Open Support",
+    label: "Support",
   },
   {
     title: "How it works",
     description: "Points and plans.",
     href: "/how-it-works",
-    label: "Open Guide",
+    label: "Guide",
   },
   {
     title: "Mature content",
     description: "18+ access settings.",
     href: "/mature-content",
-    label: "View 18+ Access",
+    label: "18+ access",
   },
 ];
 
@@ -70,21 +70,21 @@ export default function FAQPage() {
             appearance="light"
             accent="blue"
             eyebrow="Help"
-            title="Quick answers first."
-            description="Billing, account access, membership, and 18+ settings."
+            title="Answers first."
+            description="Billing, access, membership, and 18+."
             actions={
               <>
                 <Link
                   href="/support"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
-                  Open Support
+                  Support
                 </Link>
                 <a
                   href={`mailto:${siteConfig.supportEmail}`}
-                  className="rounded-full border border-black/8 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
-                  Email Support
+                  Email support
                 </a>
               </>
             }
@@ -96,14 +96,6 @@ export default function FAQPage() {
               {
                 label: "Contact",
                 value: "Email + form",
-              },
-              {
-                label: "How it works",
-                value: "Points + plans",
-              },
-              {
-                label: "18+ access",
-                value: "Age + region",
               },
             ]}
           />
@@ -120,7 +112,7 @@ export default function FAQPage() {
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                  Start here.
+                  Support.
                 </h2>
               </div>
             </div>
@@ -130,13 +122,13 @@ export default function FAQPage() {
                 href="/support"
                 className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                Open Support
+                Support
               </Link>
               <Link
                 href="/how-it-works"
-                className="rounded-full border border-black/8 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
-                Open Guide
+                Guide
               </Link>
             </div>
           </SurfacePanel>
@@ -149,14 +141,14 @@ export default function FAQPage() {
                 FAQ
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Quick answers.
+                Answers.
               </h2>
             </div>
             <div className="space-y-3">
               {FAQ.map((item) => (
                 <div
                   key={item.q}
-                  className="rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.03)]"
                 >
                   <h3 className="text-base font-semibold text-slate-950">
                     {item.q}
@@ -188,7 +180,7 @@ export default function FAQPage() {
                 </p>
                 <Link
                   href={item.href}
-                  className="mt-6 inline-flex rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+                  className="mt-6 inline-flex rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                 >
                   {item.label}
                 </Link>

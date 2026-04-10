@@ -10,6 +10,7 @@ import {
   Clock,
   CreditCard,
   Globe,
+  Image,
   LifeBuoy,
   Mail,
   Megaphone,
@@ -35,7 +36,7 @@ const SEARCH_ITEMS = [
     label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "总览", "工作区"],
+    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "总览", "工作台"],
   },
   {
     id: "analytics",
@@ -167,7 +168,7 @@ const SEARCH_ITEMS = [
     id: "branding",
     label: "品牌素材",
     href: "/admin/branding",
-    icon: BookOpen,
+    icon: Image,
     keywords: ["branding", "logo", "banner", "assets", "品牌", "logo", "横幅", "素材"],
   },
   {
@@ -340,10 +341,10 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[rgba(20,27,36,0.28)] p-4 pt-[10vh] backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-black/8 bg-[rgba(255,255,255,0.94)] shadow-[var(--gush-shadow-panel)]">
-        <div className="border-b border-black/6 px-5 py-4">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white/96 shadow-[var(--gush-shadow-panel)]">
+        <div className="border-b border-[color:var(--gush-border)] px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-[color:var(--gush-page-bg-muted)] text-slate-950">
               <Search size={20} />
             </div>
             <input
@@ -358,7 +359,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/8 bg-white text-slate-500 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
               aria-label="关闭搜索"
             >
               <X size={18} />
@@ -380,11 +381,11 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                     onClick={() => handleNavigate(item)}
                     className={`group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left transition-all ${
                       isActive
-                        ? "bg-[rgba(47,88,198,0.06)] text-slate-950"
+                        ? "bg-[color:var(--gush-page-bg-muted)] text-slate-950"
                         : "text-slate-700 hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
                     }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-500 transition-all group-hover:text-[var(--gush-accent,#2f58c6)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-white text-slate-500 transition-all group-hover:text-slate-950">
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -402,7 +403,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
           ) : query ? (
             <div className="py-12 text-center">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400">
                   <Search size={28} />
                 </div>
               </div>
@@ -430,7 +431,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                   onClick={() => handleNavigate(item)}
                   className="group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left text-slate-700 transition-all hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400 transition-all group-hover:text-[var(--gush-accent,#2f58c6)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-white text-slate-400 transition-all group-hover:text-slate-950">
                     <Clock size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -447,7 +448,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
           ) : (
             <div className="py-12 text-center">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-black/6 bg-[rgba(250,247,241,0.9)] text-slate-400">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400">
                   <Search size={28} />
                 </div>
               </div>
@@ -457,27 +458,27 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
           )}
         </div>
 
-        <div className="border-t border-black/6 px-4 py-3">
+        <div className="border-t border-[color:var(--gush-border)] px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
                   ↑
                 </kbd>
-                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
                   ↓
                 </kbd>
                 <span>移动</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
                   Enter
                 </kbd>
                 <span>打开</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="rounded-lg border border-black/8 bg-[rgba(250,247,241,0.9)] px-1.5 py-0.5 font-medium">
+              <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
                 Esc
               </kbd>
               <span>关闭</span>

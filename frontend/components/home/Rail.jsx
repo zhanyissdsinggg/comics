@@ -11,66 +11,71 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
-    lightAccent: "text-[var(--gush-accent,#0071e3)]",
-    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
+    lightAccent: "text-slate-500",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   continue: {
-    lightAccent: "text-[var(--gush-accent,#0071e3)]",
-    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
+    lightAccent: "text-slate-500",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   trending: {
-    lightAccent: "text-rose-500",
-    lightPanel: "border-rose-100 bg-rose-50/80",
+    lightAccent: "text-[color:var(--gush-ink-soft)]",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   completed: {
-    lightAccent: "text-teal-600",
-    lightPanel: "border-teal-100 bg-teal-50/80",
+    lightAccent: "text-[color:var(--gush-ink-soft)]",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   new: {
-    lightAccent: "text-sky-600",
-    lightPanel: "border-sky-100 bg-sky-50/80",
+    lightAccent: "text-slate-500",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   ttf: {
-    lightAccent: "text-emerald-600",
-    lightPanel: "border-emerald-100 bg-emerald-50/80",
+    lightAccent: "text-[color:var(--gush-ink-soft)]",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   adult: {
-    lightAccent: "text-rose-600",
-    lightPanel: "border-rose-100 bg-rose-50/80",
+    lightAccent: "text-[color:var(--gush-danger)]",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   history: {
     lightAccent: "text-slate-700",
-    lightPanel: "border-black/8 bg-[#f8f9fc]",
+    lightPanel:
+      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
   },
   starter: {
-    lightAccent: "text-[var(--gush-accent,#0071e3)]",
-    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
+    lightAccent: "text-slate-500",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   "ai-recommended": {
-    lightAccent: "text-[var(--gush-accent,#0071e3)]",
-    lightPanel: "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]",
+    lightAccent: "text-slate-500",
+    lightPanel: "border-[color:var(--gush-border)] bg-white",
   },
   recommended: {
     lightAccent: "text-slate-700",
-    lightPanel: "border-black/8 bg-[#f8f9fc]",
+    lightPanel:
+      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
   },
   default: {
     lightAccent: "text-slate-600",
-    lightPanel: "border-black/8 bg-[#f8f9fc]",
+    lightPanel:
+      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
   },
 };
 
 const RAIL_SURFACE_BY_ID = {
   following:
-    "bg-[linear-gradient(180deg,rgba(14,18,28,0.94),rgba(9,12,18,0.98))] border-emerald-400/15",
+    "border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.94),rgba(9,12,18,0.98))]",
   continue:
-    "bg-[linear-gradient(180deg,rgba(17,22,30,0.94),rgba(8,12,18,0.98))] border-sky-400/15",
+    "border-white/10 bg-[linear-gradient(180deg,rgba(16,20,28,0.94),rgba(8,12,18,0.98))]",
   trending:
-    "bg-[linear-gradient(180deg,rgba(24,15,20,0.94),rgba(9,12,18,0.98))] border-rose-400/15",
+    "border-white/10 bg-[linear-gradient(180deg,rgba(15,18,24,0.94),rgba(9,12,18,0.98))]",
   completed:
-    "bg-[linear-gradient(180deg,rgba(14,22,21,0.94),rgba(8,12,18,0.98))] border-teal-400/15",
-  new: "bg-[linear-gradient(180deg,rgba(20,19,28,0.94),rgba(8,12,18,0.98))] border-violet-400/15",
-  ttf: "bg-[linear-gradient(180deg,rgba(17,24,24,0.94),rgba(8,12,18,0.98))] border-emerald-400/15",
+    "border-white/10 bg-[linear-gradient(180deg,rgba(14,20,22,0.94),rgba(8,12,18,0.98))]",
+  new: "border-white/10 bg-[linear-gradient(180deg,rgba(16,18,28,0.94),rgba(8,12,18,0.98))]",
+  ttf: "border-white/10 bg-[linear-gradient(180deg,rgba(16,21,22,0.94),rgba(8,12,18,0.98))]",
+  adult:
+    "border-[rgba(255,107,107,0.2)] bg-[linear-gradient(180deg,rgba(22,16,18,0.96),rgba(9,12,18,0.98))]",
   default:
     "bg-[linear-gradient(180deg,rgba(14,18,28,0.94),rgba(8,12,18,0.98))] border-white/10",
 };
@@ -84,8 +89,8 @@ export default function Rail({
   railName,
   onItemClick,
   href = "",
-  ctaLabel = "See All",
-  appearance = "default",
+  ctaLabel = "Browse all",
+  appearance = "light",
   showCreatorShelfLinks = false,
   creatorEntryPoint = "CREATOR_CHIP",
   creatorCampaignId = "",
@@ -108,7 +113,7 @@ export default function Rail({
         className={cn(
           "relative overflow-hidden rounded-[32px] py-0",
           isLight
-            ? "border border-black/6 bg-[rgba(255,255,255,0.92)] shadow-[0_18px_44px_rgba(15,23,42,0.06)]"
+            ? "border border-[color:var(--gush-border)] bg-white shadow-[0_14px_30px_rgba(15,23,42,0.05)]"
             : cn("shadow-[0_24px_90px_rgba(0,0,0,0.24)]", railSurface),
         )}
       >
@@ -116,7 +121,7 @@ export default function Rail({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.04),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.4),transparent)]"
+              ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.88),transparent_44%)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]",
           )}
         />
@@ -161,7 +166,7 @@ export default function Rail({
                 className={cn(
                   "h-10 justify-start gap-2 rounded-full border px-4 text-sm font-semibold",
                   isLight
-                    ? "border-black/8 bg-white text-slate-800 hover:border-black/12 hover:bg-[#f8f9fc]"
+                    ? "border-[color:var(--gush-border)] bg-white text-slate-800 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                     : "border-white/10 bg-white/[0.03] text-white hover:border-white/20 hover:bg-white/[0.06]",
                 )}
               >
@@ -176,7 +181,7 @@ export default function Rail({
               className={cn(
                 "mt-5 rounded-[24px] py-0 shadow-none",
                 isLight
-                  ? "border border-black/8 bg-white"
+                  ? "border border-[color:var(--gush-border)] bg-white"
                   : "border border-white/10 bg-white/[0.03]",
               )}
             >
@@ -199,7 +204,7 @@ export default function Rail({
               className={cn(
                 "mt-5 rounded-[24px] py-0 shadow-none",
                 isLight
-                  ? "border border-black/8 bg-[#f8f9fc]"
+                  ? "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
                   : "border border-white/10 bg-black/20",
               )}
             >
@@ -210,7 +215,7 @@ export default function Rail({
                     isLight ? "text-slate-500" : "text-neutral-500",
                   )}
                 >
-                  Nothing is ready here yet.
+                  Nothing is live here yet.
                 </p>
               </CardContent>
             </Card>

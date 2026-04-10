@@ -22,7 +22,11 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
     <Modal
       isOpen={isOpen}
       title={title}
-      subtitle={isDangerous ? "请在继续前再确认一次，这个操作执行后无法恢复。" : "确认后会立即执行当前操作。"}
+      subtitle={
+        isDangerous
+          ? "请在继续前再确认一次，这个操作执行后无法恢复。"
+          : "确认后会立即执行当前操作。"
+      }
       onClose={onCancel}
       size="sm"
       closeButton={!isLoading}
@@ -40,7 +44,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
           </div>
         ) : null}
 
-        <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
           <p className="text-sm leading-6 text-slate-700">{message}</p>
         </div>
 

@@ -23,6 +23,7 @@
     "ops:post-deploy": "node scripts/ops/post-deploy-check.mjs",
     "ops:load-smoke": "node scripts/ops/load-smoke.mjs",
     "ops:admin-ui-live": "node scripts/ops/admin-ui-live-smoke.mjs",
+    "ops:admin-write-smoke": "node scripts/ops/admin-user-write-smoke.mjs",
     "analyze": "npm --prefix frontend run analyze",
     "analyze:server": "npm --prefix frontend run analyze:server",
     "analyze:browser": "npm --prefix frontend run analyze:browser",

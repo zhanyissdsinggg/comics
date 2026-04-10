@@ -136,12 +136,12 @@ export default function ContentGeneratorPage() {
   return (
     <AdminLayout
       title="内容生成器"
-      subtitle="这是给测试、版式检查和后台流程核验用的工具，不是正式内容录入入口。"
+      subtitle="给测试、版式检查和后台流程核验用的演示数据入口。"
     >
       <div className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-3">
           <AdminMetricCard
-            label="预计生成作品数"
+            label="预计作品数"
             value={String(estimatedSeriesTotal)}
             detail="每次会按相同数量生成漫画和小说。"
             tone="accent"
@@ -153,7 +153,7 @@ export default function ContentGeneratorPage() {
           />
           <AdminMetricCard
             label="使用范围"
-            value="仅测试用途"
+            value="仅测试工具"
             detail="生产环境必须通过 ADMIN_CONTENT_GENERATOR_ENABLED 开关保护。"
           />
         </div>
@@ -165,7 +165,7 @@ export default function ContentGeneratorPage() {
 
         <AdminPageSection
           title="演示内容生成器"
-          description="这里只生成可控的测试目录数据，方便验证页面和流程，不应该被当成正式作品录入通道。"
+          description="这里只生成可控的测试目录数据，不作为正式内容录入入口。"
           action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
         >
           <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -173,7 +173,7 @@ export default function ContentGeneratorPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <AdminFormField
                   label="种子"
-                  helperText="可选。需要复现同一批测试数据时可填写固定种子。"
+                  helperText="可选。需要复现同一批测试数据时再填写。"
                 >
                   <input
                     value={form.seed}
@@ -238,10 +238,10 @@ export default function ContentGeneratorPage() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
               <h3 className="text-base font-semibold text-slate-950">本次将生成的内容</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                这个工具只生成可用于测试的演示库存，不应该再被后台当成“看起来很热闹”的假数据来源。
+                这个工具只生成用于测试的演示目录数据，不再给后台制造看起来很热闹的假数据。
               </p>
 
               <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
@@ -255,8 +255,8 @@ export default function ContentGeneratorPage() {
                 <li>元数据只面向测试、版式检查和后台流程验证</li>
               </ul>
 
-              <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-                在类生产环境里使用这个页面前，请先显式开启 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>。
+              <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+                在类生产环境里使用前，请先显式开启 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>。
               </div>
             </div>
           </div>
@@ -265,18 +265,18 @@ export default function ContentGeneratorPage() {
         {result ? (
           <AdminPageSection
             title="最近一次生成"
-            description="这里只摘要展示最近一次测试生成请求，方便确认这轮生成到底产出了什么。"
+            description="这里只展示最近一次测试生成的摘要，方便快速复核。"
           >
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AdminMetricCard label="运行 ID" value={result.runId || "-"} detail="后端记录这次生成请求的唯一标识。" />
               <AdminMetricCard label="漫画作品" value={String(result.comicsCount ?? 0)} detail="本轮生成出的漫画条目数。" />
               <AdminMetricCard label="小说作品" value={String(result.novelsCount ?? 0)} detail="本轮生成出的小说条目数。" />
               <AdminMetricCard label="总章节数" value={String(result.totalEpisodes ?? 0)} detail="这轮生成覆盖到的章节总量。" />
-              <AdminMetricCard label="耗时" value={`${result.duration ?? 0} 秒`} detail="后端回传的执行耗时。" />
+              <AdminMetricCard label="耗时" value={`${result.duration ?? 0} 秒`} detail="后端返回的执行耗时。" />
               <AdminMetricCard
                 label="种子"
                 value={String(result.requestPayload?.seed || "随机")}
-                detail="需要复现同一批测试数据时，可再次使用这个种子。"
+                detail="需要复现同一批测试数据时，可以再次使用这个种子。"
               />
             </div>
           </AdminPageSection>

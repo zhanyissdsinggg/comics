@@ -70,7 +70,7 @@ export default function SeriesTrustPanel({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   const latestEpisode = useMemo(() => getLatestEpisode(episodes), [episodes]);
   const shareUrl = useMemo(() => {
@@ -172,7 +172,7 @@ export default function SeriesTrustPanel({
             someone gives a story their time.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-4 py-4 text-left">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Quick take
           </p>
@@ -189,7 +189,7 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4 text-left transition hover:border-black/12 hover:bg-white"
+              className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-left transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 {card.label}
@@ -207,7 +207,7 @@ export default function SeriesTrustPanel({
           ) : (
             <div
               key={card.label}
-              className="rounded-[22px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
+              className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                 {card.label}
@@ -224,7 +224,7 @@ export default function SeriesTrustPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Best if you want
           </p>
@@ -238,7 +238,7 @@ export default function SeriesTrustPanel({
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[24px] border border-black/8 bg-white px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Easy to share
           </p>

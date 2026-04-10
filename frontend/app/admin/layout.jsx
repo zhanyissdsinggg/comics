@@ -12,8 +12,11 @@ export default function AdminLayout({ children }) {
     <AdminAuthProvider>
       <QueryWrapper>
         <AdminRouteGuard>
-          <AdminLocaleBridge />
-          {children}
+          <div className="admin-theme min-h-screen bg-[var(--gush-page-bg)] text-[var(--gush-ink-strong)]">
+            {/* Temporary compatibility layer while a few low-frequency admin pages are still source-cleaned. */}
+            <AdminLocaleBridge />
+            {children}
+          </div>
         </AdminRouteGuard>
       </QueryWrapper>
     </AdminAuthProvider>

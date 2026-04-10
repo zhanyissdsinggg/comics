@@ -29,7 +29,7 @@ function PortraitCard({
   density = "default",
   href = "",
   showActionLabel = true,
-  actionLabel = "View Series",
+  actionLabel = "Open series",
   coverFallbackVariant = "default",
   interactionMode = "link",
 }) {
@@ -52,7 +52,8 @@ function PortraitCard({
     : typeof item?.genres === "string" && item.genres.trim();
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
   const genrePills = normalizeGenreList(rawGenreData);
-  const showGenrePills = genrePills.length > 0;
+  const visibleGenrePills = genrePills.slice(0, isCompact ? 1 : 2);
+  const showGenrePills = visibleGenrePills.length > 0;
   const rawDetailCopy =
     item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "")
@@ -100,14 +101,15 @@ function PortraitCard({
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
         isCompact ? "rounded-[24px]" : "rounded-[30px]",
         isLight
-          ? "border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,248,250,0.96))] shadow-[0_14px_30px_rgba(0,0,0,0.045)] backdrop-blur-xl group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_20px_42px_rgba(0,0,0,0.065)]"
+          ? "border border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(15,23,42,0.04)] group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
           : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "relative aspect-[3/4] overflow-hidden bg-neutral-900",
+            "relative aspect-[3/4] overflow-hidden",
+            isLight ? "bg-[color:var(--gush-page-bg-muted)]" : "bg-neutral-900",
             isCompact ? "rounded-[20px]" : "rounded-[24px]",
           )}
         >
@@ -164,26 +166,7 @@ function PortraitCard({
         )}
       >
         <div className="space-y-2">
-          {showGenrePills ? (
-            <div className="flex flex-wrap gap-2">
-              {genrePills.map((genre) => (
-                <span
-                  key={`${item?.id || item?.title || "series"}-${genre}`}
-                  className={cn(
-                    "inline-flex items-center whitespace-nowrap rounded-full border font-medium",
-                    isCompact
-                      ? "px-2.5 py-1 text-[10px]"
-                      : "px-3 py-1 text-[11px]",
-                    isLight
-                      ? "border-[color:var(--gush-border-faint)] bg-[rgba(255,255,255,0.92)] text-[color:var(--gush-ink-soft)]"
-                      : "border-white/10 bg-white/[0.04] text-neutral-300",
-                  )}
-                >
-                  {genre}
-                </span>
-              ))}
-            </div>
-          ) : metaLine ? (
+          {metaLine ? (
             <p
               className={cn(
                 "line-clamp-1 font-semibold uppercase tracking-[0.2em] transition-colors",
@@ -210,6 +193,27 @@ function PortraitCard({
             {item.title}
           </p>
         </div>
+
+        {showGenrePills ? (
+          <div className="flex flex-wrap gap-2">
+            {visibleGenrePills.map((genre) => (
+              <span
+                key={`${item?.id || item?.title || "series"}-${genre}`}
+                className={cn(
+                  "inline-flex items-center whitespace-nowrap rounded-full border font-medium",
+                  isCompact
+                    ? "px-2.5 py-1 text-[10px]"
+                    : "px-3 py-1 text-[11px]",
+                  isLight
+                    ? "border-[color:var(--gush-border-faint)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-soft)]"
+                    : "border-white/10 bg-white/[0.04] text-neutral-300",
+                )}
+              >
+                {genre}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         {detailText ? (
           <p
@@ -271,7 +275,7 @@ function PortraitCard({
             <ArrowRight className="size-4" />
           </span>
         </div>
-        <div className="sr-only">View series details</div>
+        <div className="sr-only">Open series</div>
       </div>
     </div>
   );

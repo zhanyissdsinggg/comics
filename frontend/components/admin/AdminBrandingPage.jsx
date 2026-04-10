@@ -36,7 +36,7 @@ const ASSET_FIELDS = [
     field: "siteLogoUrl",
     keyName: "logo",
     label: "站点标识",
-    helperText: "优先使用透明 PNG 或 SVG，让页头和页脚里的品牌标识保持干净。",
+    helperText: "建议使用透明 PNG 或 SVG，让头部和底部保持清爽。",
     placeholder: "https://.../logo.png",
     emptyText: "还没有上传站点标识。",
     buttonLabel: "上传站点标识",
@@ -45,18 +45,18 @@ const ASSET_FIELDS = [
   {
     field: "faviconUrl",
     keyName: "favicon",
-    label: "网站图标",
-    helperText: "尽量保持为轻量方图，32x32 或 64x64 的素材通常就够用。",
+    label: "站点图标",
+    helperText: "尽量保持轻量，32x32 或 64x64 就足够稳定。",
     placeholder: "https://.../favicon.png",
-    emptyText: "还没有上传网站图标。",
-    buttonLabel: "上传网站图标",
+    emptyText: "还没有上传站点图标。",
+    buttonLabel: "上传站点图标",
     previewClassName: "h-10 w-10 rounded-[14px] object-cover",
   },
   {
     field: "homeBannerUrl",
     keyName: "banner",
     label: "首页横幅",
-    helperText: "这里更适合克制的编辑向主视觉，不要做成吵闹的促销大图。",
+    helperText: "这里适合克制的主视觉，不要做成吵闹的活动海报。",
     placeholder: "https://.../banner.jpg",
     emptyText: "还没有上传首页横幅。",
     buttonLabel: "上传横幅",
@@ -74,7 +74,7 @@ function toDraft(payload) {
 
 function PreviewSurface({ value, alt, emptyText, className }) {
   return (
-    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-black/10 bg-[rgba(250,247,241,0.82)] p-4">
+    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
       {value ? (
         <img src={value} alt={alt} className={className} />
       ) : (
@@ -148,7 +148,10 @@ export default function AdminBrandingPage() {
       setFeedback({ type: "success", message: `${label}已上传。` });
     },
     onError: (error) => {
-      setFeedback({ type: "error", message: normalizeAdminErrorMessage(error, "上传失败。") });
+      setFeedback({
+        type: "error",
+        message: normalizeAdminErrorMessage(error, "上传失败。"),
+      });
     },
   });
 
@@ -212,7 +215,7 @@ export default function AdminBrandingPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <AdminPageSection title="品牌素材" description="确认管理员权限后，再编辑线上品牌素材。">
+      <AdminPageSection title="品牌素材" description="确认后台权限后，再编辑线上品牌素材。">
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -220,7 +223,7 @@ export default function AdminBrandingPage() {
 
   if (!hasHydratedDraft && brandingQuery.isLoading) {
     return (
-      <AdminPageSection title="品牌素材" description="先把已保存的素材配置加载出来，再继续编辑草稿。">
+      <AdminPageSection title="品牌素材" description="先读取已保存的素材配置，再继续编辑。">
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -230,7 +233,7 @@ export default function AdminBrandingPage() {
     return (
       <AdminPageSection
         title="品牌素材"
-        description="已保存的品牌配置暂时无法读取，在数据恢复前这里会保持只读。"
+        description="已保存的品牌配置暂时无法读取，恢复前这里会保持只读。"
         action={
           <Button type="button" variant="outline" onClick={() => brandingQuery.refetch()}>
             <RefreshCw className="size-4" />
@@ -259,18 +262,18 @@ export default function AdminBrandingPage() {
         <AdminMetricCard
           label="已配置素材"
           value={`${configuredAssetCount}/3`}
-          detail="站点标识、网站图标和首页横幅统一归在这一套品牌素材里。"
+          detail="站点标识、站点图标和首页横幅都在这里统一维护。"
           tone="accent"
         />
         <AdminMetricCard
           label="上传上限"
           value="10 MB"
-          detail="允许上传大图，但这里仍会限制到便于复核和替换的范围。"
+          detail="允许上传大图，但仍控制在便于复核和替换的范围里。"
         />
         <AdminMetricCard
           label="影响范围"
-          value="页头、标签、首页"
-          detail="这些素材会直接影响前台观感，所以改动要克制、统一、可复核。"
+          value="头部、标签、首页"
+          detail="这些素材会直接影响前台观感，所以要保持克制和统一。"
         />
       </div>
 
@@ -281,11 +284,11 @@ export default function AdminBrandingPage() {
 
       <AdminPageSection
         title="品牌素材"
-        description="把共享站点标识、网站图标和首页横幅收在一个安静的工作区里统一维护。"
+        description="把站点标识、图标和首页横幅集中在一个地方维护。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>
-              {configuredAssetCount === 3 ? "可进入复核" : "素材仍待补齐"}
+              {configuredAssetCount === 3 ? "可进入复核" : "待补素材"}
             </AdminBadge>
             <Button type="button" onClick={handleSave} disabled={formBusy}>
               {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
@@ -307,14 +310,16 @@ export default function AdminBrandingPage() {
             return (
               <article
                 key={asset.field}
-                className="rounded-[28px] border border-black/8 bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-slate-950">{asset.label}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{asset.helperText}</p>
                   </div>
-                  <AdminBadge tone={value ? "success" : "default"}>{value ? "已配置" : "待补"}</AdminBadge>
+                  <AdminBadge tone={value ? "success" : "default"}>
+                    {value ? "已配置" : "待补"}
+                  </AdminBadge>
                 </div>
 
                 <div className="mt-5 space-y-3">
@@ -341,7 +346,7 @@ export default function AdminBrandingPage() {
                         href={value}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950"
+                        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
                       >
                         <ExternalLink className="size-4" />
                         查看素材
@@ -372,17 +377,17 @@ export default function AdminBrandingPage() {
 
       <AdminPageSection
         title="编辑说明"
-        description="这里修改的是共享前台素材，所以规则要简单明确，不要引入花哨控制。"
+        description="这里修改的是共享前台素材，规则越简单越稳。"
       >
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            上传完成后记得保存，让前台品牌配置读取到最新素材。
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+            上传完成后记得保存，让前台读到最新素材。
           </div>
-          <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            素材尽量保持中性、清楚、可读，它们会贴着内容区出现，不是活动海报位。
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+            素材尽量保持清楚、克制、可读，不要把它做成营销海报。
           </div>
-          <div className="rounded-[24px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4 text-sm leading-6 text-slate-600">
-            必要时可以直接填素材链接，但更建议在这里上传，方便运营复核线上实际文件。
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+            必要时可以直接填链接，但更建议在这里上传，方便统一复核。
           </div>
         </div>
       </AdminPageSection>

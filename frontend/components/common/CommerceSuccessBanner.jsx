@@ -15,7 +15,7 @@ export default function CommerceSuccessBanner({
 
   return (
     <div
-      className={`rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(247,248,250,0.98))] p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] backdrop-blur-xl ${className}`}
+      className={`rounded-[30px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] ${className}`}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
@@ -33,7 +33,7 @@ export default function CommerceSuccessBanner({
               {notice.metaItems.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white/84 px-3 py-1"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1"
                 >
                   {item}
                 </span>
@@ -56,7 +56,7 @@ export default function CommerceSuccessBanner({
             <button
               type="button"
               onClick={() => router.push(notice.secondaryAction.href)}
-              className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[#f8f9fc]"
+              className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             >
               {notice.secondaryAction.label}
             </button>
@@ -65,7 +65,7 @@ export default function CommerceSuccessBanner({
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-full border border-[color:var(--gush-border)] bg-[#f8f9fc] px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
+              className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
             >
               Dismiss
             </button>

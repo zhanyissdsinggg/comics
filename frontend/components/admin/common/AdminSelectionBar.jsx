@@ -15,10 +15,10 @@ export function AdminSelectionBar({
 
   return (
     <div
-      className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.06)] p-4 shadow-[var(--gush-shadow-soft)] lg:flex-row lg:items-center lg:justify-between ${className}`.trim()}
+      className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 p-4 shadow-[var(--gush-shadow-soft)] lg:flex-row lg:items-center lg:justify-between ${className}`.trim()}
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-sm font-semibold text-[var(--gush-accent,#2f58c6)] shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--gush-page-bg-muted)] text-sm font-semibold text-slate-950">
           {selectedCount}
         </div>
         <div>

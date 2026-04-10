@@ -50,7 +50,7 @@ export default function NotificationList({
     if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
       return "See offer";
     }
-    return "View Series";
+    return "Open series";
   };
 
   if (!notifications) {
@@ -58,7 +58,7 @@ export default function NotificationList({
       <section
         className={`rounded-[24px] border p-6 ${
           isLight
-            ? "border-black/8 bg-white text-slate-600"
+            ? "border-[color:var(--gush-border)] bg-white text-slate-600"
             : "border-white/10 bg-black/10"
         }`}
       >
@@ -70,7 +70,7 @@ export default function NotificationList({
         <p
           className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
         >
-          Loading your inbox.
+          Loading inbox.
         </p>
       </section>
     );
@@ -80,7 +80,9 @@ export default function NotificationList({
     return (
       <section
         className={`rounded-[24px] border p-6 ${
-          isLight ? "border-black/8 bg-white" : "border-white/10 bg-black/10"
+          isLight
+            ? "border-[color:var(--gush-border)] bg-white"
+            : "border-white/10 bg-black/10"
         }`}
       >
         <p
@@ -96,7 +98,7 @@ export default function NotificationList({
         <p
           className={`mt-2 text-xs leading-5 ${isLight ? "text-slate-500" : "text-neutral-500"}`}
         >
-          New chapters, offers, and free unlocks land here.
+          New chapters and offers land here.
         </p>
       </section>
     );
@@ -111,10 +113,10 @@ export default function NotificationList({
             "rounded-[24px] border p-4 transition",
             item.read
               ? isLight
-                ? "border-black/8 bg-white"
+                ? "border-[color:var(--gush-border)] bg-white"
                 : "border-white/10 bg-black/10"
               : isLight
-                ? "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
+                ? "border-[color:var(--gush-border-strong)] bg-white"
                 : "border-sky-400/20 bg-sky-500/[0.08]",
           ].join(" ")}
         >
@@ -130,7 +132,7 @@ export default function NotificationList({
                   <span
                     className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${
                       isLight
-                        ? "border-[rgba(0,113,227,0.14)] bg-white text-[var(--gush-accent-strong,#0058cc)]"
+                        ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
                         : "border-sky-400/30 bg-sky-400/10 text-sky-200"
                     }`}
                   >
@@ -159,7 +161,7 @@ export default function NotificationList({
                 onClick={() => onMarkRead(item.id)}
                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
                   isLight
-                    ? "border-black/8 bg-white text-slate-700 hover:border-black/12 hover:bg-[#f8f9fc]"
+                    ? "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                     : "border-white/10 bg-black/10 text-neutral-200 hover:border-white/20 hover:bg-white/10"
                 }`}
                 disabled={

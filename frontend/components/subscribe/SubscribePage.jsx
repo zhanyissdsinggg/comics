@@ -210,9 +210,7 @@ export default function SubscribePage({
 
   const handleSubscribe = async (planId) => {
     if (!isSignedIn) {
-      setFeedback(
-        "Sign in first so membership, receipts, and renewal history stay on one account.",
-      );
+      setFeedback("Sign in first to keep billing on one account.");
       openAuthPrompt();
       return;
     }
@@ -325,7 +323,11 @@ export default function SubscribePage({
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-black/12 hover:bg-[#f8f9fc] disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
+  const quietCardClass =
+    "rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4";
+  const compareShellClass =
+    "overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -338,11 +340,13 @@ export default function SubscribePage({
             eyebrow="Membership"
             title={
               subscriptionActionsEnabled
-                ? "Membership plans."
-                : "Membership opens soon."
+                ? "Choose a membership."
+                : "Membership preview."
             }
             description={
-              subscriptionActionsEnabled ? "Monthly plans." : "Plans preview."
+              subscriptionActionsEnabled
+                ? "Monthly plans for regular reading."
+                : "See the plans before launch."
             }
             stats={subscriptionHeroStats}
           />
@@ -376,7 +380,7 @@ export default function SubscribePage({
                 }
                 className={primaryButtonClass}
               >
-                {subscriptionActionsEnabled ? "View Plans" : launchAccessLabel}
+                {subscriptionActionsEnabled ? "Plans" : launchAccessLabel}
               </button>
               <button
                 type="button"
@@ -402,17 +406,17 @@ export default function SubscribePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                {subscriptionActionsEnabled ? "Plan details" : "Before billing"}
+                Before you start
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {subscriptionActionsEnabled
-                  ? "What happens next."
-                  : "Before you join."}
+                  ? "A clear monthly plan."
+                  : "Know the setup first."}
               </h2>
             </div>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-3 md:grid-cols-2">
             {[
               {
                 title: "Today",
@@ -432,13 +436,10 @@ export default function SubscribePage({
               },
               {
                 title: "Help",
-                body: "Billing help stays open.",
+                body: "Support is available.",
               },
             ].map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[24px] border border-black/6 bg-white/88 px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
-              >
+              <div key={item.title} className={quietCardClass}>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
                   <h3 className="text-sm font-semibold text-slate-950">
                     {item.title}
@@ -463,14 +464,14 @@ export default function SubscribePage({
               }
               className={secondaryButtonClass}
             >
-              Billing help
+              Billing support
             </button>
             <button
               type="button"
               onClick={() => router.push("/orders")}
               className={secondaryButtonClass}
             >
-              View purchases
+              Orders
             </button>
           </div>
         </SurfacePanel>
@@ -483,7 +484,7 @@ export default function SubscribePage({
                   {subscriptionActionsEnabled ? "Sign in first" : "Account"}
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Use one account.
+                  Keep membership on one account.
                 </h2>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -499,7 +500,7 @@ export default function SubscribePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                  Read Free
+                  First picks
                 </button>
               </div>
             </div>
@@ -530,7 +531,7 @@ export default function SubscribePage({
             <p className="text-xs text-slate-500">
               {isActive
                 ? `Current: ${subscription?.planId}`
-                : `${SUBSCRIPTION_OFFERS.length} tiers`}
+                : `${SUBSCRIPTION_OFFERS.length} plans`}
             </p>
           </div>
 
@@ -556,9 +557,9 @@ export default function SubscribePage({
                   key={plan.id}
                   className={`relative rounded-[30px] border p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 ${
                     isBest
-                      ? "border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))]"
-                      : "border-black/6 bg-white"
-                  } ${isCurrent ? "ring-2 ring-[rgba(0,113,227,0.18)]" : ""}`}
+                      ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))]"
+                      : "border-[color:var(--gush-border)] bg-white"
+                  } ${isCurrent ? "ring-2 ring-slate-200" : ""}`}
                 >
                   {isBest ? (
                     <div className="absolute -top-3 left-5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white">
@@ -572,8 +573,8 @@ export default function SubscribePage({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
                             isBest
-                              ? "bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]"
-                              : "bg-[#f8f9fc] text-slate-600"
+                              ? "border border-[color:var(--gush-border)] bg-white text-slate-950"
+                              : "bg-[color:var(--gush-page-bg-muted)] text-slate-600"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
@@ -594,13 +595,13 @@ export default function SubscribePage({
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent-strong,#0058cc)]">
+                        <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-700">
                           Active
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="space-y-2 border-t border-black/6 pt-5">
+                    <div className="space-y-2 border-t border-[color:var(--gush-border)] pt-5">
                       <div className="flex items-end gap-2">
                         <span className="font-display text-4xl font-semibold tracking-tight text-slate-950">
                           {priceLabel}
@@ -610,15 +611,15 @@ export default function SubscribePage({
                         </span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
-                          <Zap className="h-3.5 w-3.5" />
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs font-semibold text-slate-700">
+                          <Zap className="h-3.5 w-3.5 text-slate-500" />
                           Save {perks.discountPct}% on locked chapters
                         </div>
                       ) : null}
                     </div>
 
-                    <div className="space-y-3 border-t border-black/6 pt-5 text-sm text-slate-600">
-                      <div className="rounded-2xl border border-black/8 bg-[#f8f9fc] px-4 py-3">
+                    <div className="space-y-3 border-t border-[color:var(--gush-border)] pt-5 text-sm text-slate-600">
+                      <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
                         <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                           Best for
                         </p>
@@ -627,8 +628,8 @@ export default function SubscribePage({
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
+                          <Check className="h-3 w-3 text-slate-700" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -638,8 +639,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
+                          <Check className="h-3 w-3 text-slate-700" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -651,8 +652,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
+                          <Check className="h-3 w-3 text-slate-700" />
                         </div>
                         <span>
                           <span className="font-semibold text-slate-950">
@@ -662,8 +663,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(0,113,227,0.1)]">
-                          <Check className="h-3 w-3 text-[var(--gush-accent-strong,#0058cc)]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
+                          <Check className="h-3 w-3 text-slate-700" />
                         </div>
                         <span>Better value if you unlock often</span>
                       </div>
@@ -701,133 +702,125 @@ export default function SubscribePage({
           </div>
         </SurfacePanel>
 
-        <details className="overflow-hidden rounded-[26px] border border-black/8 bg-white sm:hidden">
+        <details className={compareShellClass}>
           <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
-            Plan details
+            Compare plans
           </summary>
-          <div className="space-y-3 border-t border-black/8 px-4 py-4">
-            {planComparisonRows.map((plan) => (
-              <div
-                key={plan.id}
-                className="rounded-[20px] border border-black/8 bg-[#f8f9fc] px-4 py-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-950">
-                    {plan.title}
-                  </p>
-                  <span className="text-sm font-semibold text-slate-950">
-                    {plan.priceLabel}
-                  </span>
+          <div className="border-t border-[color:var(--gush-border)] px-4 py-4">
+            <div className="space-y-3 sm:hidden">
+              {planComparisonRows.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-slate-950">
+                      {plan.title}
+                    </p>
+                    <span className="text-sm font-semibold text-slate-950">
+                      {plan.priceLabel}
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm text-slate-600">
+                    <p>{plan.bestFor}</p>
+                    <p>{plan.dailyFreeUnlocks} free reads / day</p>
+                    <p>{plan.waitTimeLabel} of the normal wait</p>
+                    <p>{plan.monthlyPoints} monthly points</p>
+                    <p>{plan.savingsLabel} on locked chapters</p>
+                  </div>
                 </div>
-                <div className="mt-3 grid gap-2 text-sm text-slate-600">
-                  <p>{plan.bestFor}</p>
-                  <p>{plan.dailyFreeUnlocks} free reads / day</p>
-                  <p>{plan.waitTimeLabel} of the normal wait</p>
-                  <p>{plan.monthlyPoints} monthly points</p>
-                  <p>{plan.savingsLabel} on locked chapters</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto sm:block">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[color:var(--gush-border)] text-left text-slate-500">
+                    <th className="pb-4 font-semibold">Feature</th>
+                    {SUBSCRIPTION_OFFERS.map((plan) => (
+                      <th
+                        key={plan.id}
+                        className="pb-4 text-center font-semibold text-slate-950"
+                      >
+                        {plan.title}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[color:var(--gush-border)]">
+                  <tr>
+                    <td className="py-4 text-slate-600">Free Reads / Day</td>
+                    {SUBSCRIPTION_OFFERS.map((plan) => {
+                      const key = plan.id.replace("subscribe_", "");
+                      const perks = planCatalog?.[key];
+                      return (
+                        <td
+                          key={plan.id}
+                          className="py-4 text-center font-semibold text-slate-950"
+                        >
+                          {perks?.dailyFreeUnlocks ?? "-"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr>
+                    <td className="py-4 text-slate-600">Wait Time</td>
+                    {SUBSCRIPTION_OFFERS.map((plan) => {
+                      const key = plan.id.replace("subscribe_", "");
+                      const perks = planCatalog?.[key];
+                      return (
+                        <td
+                          key={plan.id}
+                          className="py-4 text-center font-semibold text-slate-950"
+                        >
+                          {perks?.ttfMultiplier
+                            ? `${Math.round(perks.ttfMultiplier * 100)}%`
+                            : "-"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr>
+                    <td className="py-4 text-slate-600">Monthly Points</td>
+                    {SUBSCRIPTION_OFFERS.map((plan) => {
+                      const key = plan.id.replace("subscribe_", "");
+                      const perks = planCatalog?.[key];
+                      return (
+                        <td
+                          key={plan.id}
+                          className="py-4 text-center font-semibold text-slate-950"
+                        >
+                          {perks?.voucherPts ?? "-"}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  <tr>
+                    <td className="py-4 text-slate-600">Unlock Savings</td>
+                    {SUBSCRIPTION_OFFERS.map((plan) => {
+                      const key = plan.id.replace("subscribe_", "");
+                      const perks = planCatalog?.[key];
+                      return (
+                        <td key={plan.id} className="py-4 text-center">
+                          {perks?.discountPct ? (
+                            <span className="font-semibold text-slate-700">
+                              {perks.discountPct}%
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </details>
 
-        <SurfacePanel
-          className="hidden sm:block"
-          appearance="light"
-          accent="blue"
-        >
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-            See the difference
-          </h3>
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-black/8 text-left text-slate-500">
-                  <th className="pb-4 font-semibold">Feature</th>
-                  {SUBSCRIPTION_OFFERS.map((plan) => (
-                    <th
-                      key={plan.id}
-                      className="pb-4 text-center font-semibold text-slate-950"
-                    >
-                      {plan.title}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/8">
-                <tr>
-                  <td className="py-4 text-slate-600">Free Reads / Day</td>
-                  {SUBSCRIPTION_OFFERS.map((plan) => {
-                    const key = plan.id.replace("subscribe_", "");
-                    const perks = planCatalog?.[key];
-                    return (
-                      <td
-                        key={plan.id}
-                        className="py-4 text-center font-semibold text-slate-950"
-                      >
-                        {perks?.dailyFreeUnlocks ?? "-"}
-                      </td>
-                    );
-                  })}
-                </tr>
-                <tr>
-                  <td className="py-4 text-slate-600">Wait Time</td>
-                  {SUBSCRIPTION_OFFERS.map((plan) => {
-                    const key = plan.id.replace("subscribe_", "");
-                    const perks = planCatalog?.[key];
-                    return (
-                      <td
-                        key={plan.id}
-                        className="py-4 text-center font-semibold text-slate-950"
-                      >
-                        {perks?.ttfMultiplier
-                          ? `${Math.round(perks.ttfMultiplier * 100)}%`
-                          : "-"}
-                      </td>
-                    );
-                  })}
-                </tr>
-                <tr>
-                  <td className="py-4 text-slate-600">Monthly Points</td>
-                  {SUBSCRIPTION_OFFERS.map((plan) => {
-                    const key = plan.id.replace("subscribe_", "");
-                    const perks = planCatalog?.[key];
-                    return (
-                      <td
-                        key={plan.id}
-                        className="py-4 text-center font-semibold text-slate-950"
-                      >
-                        {perks?.voucherPts ?? "-"}
-                      </td>
-                    );
-                  })}
-                </tr>
-                <tr>
-                  <td className="py-4 text-slate-600">Unlock Savings</td>
-                  {SUBSCRIPTION_OFFERS.map((plan) => {
-                    const key = plan.id.replace("subscribe_", "");
-                    const perks = planCatalog?.[key];
-                    return (
-                      <td key={plan.id} className="py-4 text-center">
-                        {perks?.discountPct ? (
-                          <span className="font-semibold text-[var(--gush-accent-strong,#0058cc)]">
-                            {perks.discountPct}%
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </SurfacePanel>
-
         {isActive ? (
           <SurfacePanel
-            className="border-[rgba(0,113,227,0.16)]"
+            className="border-[color:var(--gush-border-strong)]"
             appearance="light"
             accent="blue"
           >
@@ -852,7 +845,7 @@ export default function SubscribePage({
                 className={secondaryButtonClass}
               >
                 {!subscriptionActionsEnabled
-                  ? "Billing help"
+                  ? "Billing support"
                   : workingId === "cancel"
                     ? "Canceling..."
                     : "Cancel plan"}

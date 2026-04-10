@@ -21,7 +21,7 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
 
 const TABS = [
-  { id: "continue", label: "Continue Reading", icon: BookOpen },
+  { id: "continue", label: "Continue", icon: BookOpen },
   { id: "bookmarks", label: "Bookmarks", icon: Bookmark },
   { id: "unlocked", label: "Unlocked", icon: LockKeyhole },
 ];
@@ -85,10 +85,10 @@ function formatRelativeTime(value) {
 
 function formatProgressLabel(currentChapter, totalChapters) {
   if (currentChapter > 0 && totalChapters > 0) {
-    return `Read Chapter ${currentChapter} of ${totalChapters}`;
+    return `Read Ep ${currentChapter} of ${totalChapters}`;
   }
   if (currentChapter > 0) {
-    return `Read Chapter ${currentChapter}`;
+    return `Read Ep ${currentChapter}`;
   }
   return "Start reading";
 }
@@ -118,7 +118,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-black/8 bg-[#eef2f9] shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
         <Image
           src={coverUrl}
           alt={`Cover image for ${title}`}
@@ -133,11 +133,11 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-black/8 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-[color:var(--gush-border)] px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
       style={{
         background:
           coverTone ||
-          "linear-gradient(160deg, rgba(0,113,227,0.18) 0%, rgba(15,23,42,0.08) 100%)",
+          "linear-gradient(160deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.96) 100%)",
       }}
     >
       <span className="line-clamp-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-900/75">
@@ -153,13 +153,13 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
       ? "Resume"
       : item.resumeEpisodeId
         ? "Resume"
-        : "View Series";
+        : "Open series";
   const metaLine = [item.summary, item.updatedLabel]
     .filter(Boolean)
-    .join(" | ");
+    .join(" / ");
 
   return (
-    <article className="rounded-[26px] border border-black/8 bg-white/88 p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition-colors hover:border-black/12 hover:bg-white">
+    <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -175,7 +175,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="rounded-full border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--gush-accent-strong,#0058cc)]">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                     {item.badge}
                   </span>
                 ) : null}
@@ -193,7 +193,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   ? () => onResume(item)
                   : () => onOpenSeries(item)
               }
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-black/8 bg-[#f8f9fc] px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-black/12 hover:bg-white"
+              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
             >
               {actionLabel}
               <ArrowUpRight className="size-4" />
@@ -206,7 +206,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                 <span>{item.progressLabel}</span>
                 <span>{item.progressPercentLabel}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-black/6">
+              <div className="h-2 overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
                 <div
                   className="h-full rounded-full bg-[var(--gush-accent-strong,#0058cc)]"
                   style={{
@@ -222,7 +222,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               {item.genreLine.map((genre) => (
                 <span
                   key={`${item.seriesId}-${genre}`}
-                  className="rounded-full border border-black/8 bg-[#f8f9fc] px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-medium text-slate-600"
                 >
                   {genre}
                 </span>
@@ -241,7 +241,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[26px] border border-black/8 bg-[#eef2f9]"
+          className="h-[124px] animate-pulse rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
         />
       ))}
     </div>
@@ -480,7 +480,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               latestUnlockedChapter,
             ),
             summary: progress?.lastEpisodeId
-              ? `Resume Chapter ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
+              ? `Resume Ep ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
               : series.type
                 ? `${series.type} series`
                 : "",
@@ -514,7 +514,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       bookmarks: {
         items: bookmarkItems,
         emptyTitle: "No saved series yet",
-        emptyDescription: "Save a few titles and your shelf will stay close.",
+        emptyDescription: "Save a few titles to build your shelf.",
       },
       unlocked: {
         items: unlockedItems,
@@ -574,7 +574,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   );
 
   const buttonBaseClass =
-    "rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   return (
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -584,10 +584,10 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             My Library
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            Keep your next read closer than the settings.
+            Your shelf.
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Continue reading, saves, and unlocked chapters stay together here.
+            Continue, saves, and unlocked chapters.
           </p>
         </div>
 
@@ -597,20 +597,20 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             onClick={() => router.push("/library")}
             className={buttonBaseClass}
           >
-            Open full library
+            Full library
           </button>
         ) : null}
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[26px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-5">
+        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-950">
-                Sign in to unlock your shelf
+                Sign in for your shelf
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Bring progress, saves, and unlocked chapters into one account.
+                Keep progress, saves, and unlocked chapters on one account.
               </p>
             </div>
             <button
@@ -643,8 +643,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     isActive
-                      ? "border-[rgba(0,113,227,0.18)] bg-[rgba(0,113,227,0.09)] text-slate-950"
-                      : "border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[#f8f9fc] hover:text-slate-900"
+                      ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950"
+                      : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900"
                   }`}
                 >
                   <Icon className="size-4" />
@@ -677,8 +677,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[26px] border border-dashed border-black/10 bg-[#f8f9fc] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[rgba(0,113,227,0.12)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent-strong,#0058cc)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+              <div className="rounded-[26px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-8 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[color:var(--gush-border)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-semibold text-slate-950">

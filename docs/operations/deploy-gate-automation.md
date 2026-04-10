@@ -89,6 +89,43 @@ The script only performs:
 
 It does not create, update, refund, or delete production data.
 
+## 3.5) Optional Admin Write Smoke For QA Accounts Only
+
+Use this only when you explicitly want one reversible production write check against an allowlisted QA user:
+
+```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+OPS_ADMIN_KEY=<production-admin-key> \
+OPS_ADMIN_WRITE_ALLOWED=1 \
+npm run ops:admin-write-smoke
+```
+
+Guard rails:
+
+- requires `OPS_ADMIN_WRITE_ALLOWED=1`
+- only targets users under `@example.com`
+- only accepts QA-style emails containing one of: `gush.qa.`, `qa_`, `smoke_`, `deploy-verify-`
+- toggles the chosen user's blocked state once, verifies it, then restores the original state
+- creates one QA-only notification, verifies it through the admin list, then deletes it
+- not included in `ops:deploy-gate` on purpose, because deploy gate should stay production-safe and read-first by default
+
+Optional support roundtrip after the support reply migration is deployed:
+
+```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+OPS_ADMIN_KEY=<production-admin-key> \
+OPS_ADMIN_WRITE_ALLOWED=1 \
+OPS_ADMIN_WRITE_SUPPORT=1 \
+npm run ops:admin-write-smoke
+```
+
+That extra branch:
+
+- creates one disposable support ticket through the public `/api/support` path
+- reads it back through `/api/admin/support?includeTestData=1`
+- replies, verifies the persisted admin reply, closes, then deletes the ticket
+- fails loudly if the deployed admin support payload still does not expose `adminReply`
+
 ## 4) Load Smoke
 
 Use this for quick production-safe pressure checks (not full stress tests):

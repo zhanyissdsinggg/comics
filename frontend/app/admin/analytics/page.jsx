@@ -264,7 +264,7 @@ export default function AdminUserAnalyticsPage() {
                     </div>
 
                     <div className="grid gap-4 lg:grid-cols-3">
-                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                      <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <p className="text-sm font-semibold text-slate-950">留存观察</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.atRiskUsers || 0) > 0
@@ -272,7 +272,7 @@ export default function AdminUserAnalyticsPage() {
                             : '当前最新快照里还没有明显的高风险流失信号。'}
                         </p>
                       </div>
-                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                      <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <p className="text-sm font-semibold text-slate-950">收入密度</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.highValueUsers || 0) > 0
@@ -280,7 +280,7 @@ export default function AdminUserAnalyticsPage() {
                             : '等当前数据里出现高价值读者后，这里会自动更新。'}
                         </p>
                       </div>
-                      <div className="rounded-[24px] border border-black/6 bg-[rgba(250,247,241,0.78)] p-4">
+                      <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
                         <p className="text-sm font-semibold text-slate-950">活跃脉搏</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           {Number(stats?.activeUsers || 0) > 0
@@ -312,8 +312,8 @@ export default function AdminUserAnalyticsPage() {
                   }}
                   className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                     selectedSegment === segment.key
-                      ? 'border-[rgba(47,88,198,0.14)] bg-[rgba(47,88,198,0.08)] text-[var(--gush-accent,#2f58c6)]'
-                      : 'border-black/8 bg-white text-slate-600 hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950'
+                      ? 'border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950'
+                      : 'border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950'
                   }`}
                 >
                   {segment.label}
@@ -431,7 +431,7 @@ export default function AdminUserAnalyticsPage() {
                 {() => (
                   <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
                     <div className="space-y-6">
-                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                      <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                           用户画像
                         </p>
@@ -466,7 +466,7 @@ export default function AdminUserAnalyticsPage() {
                       </div>
 
                       <div className="grid gap-4 lg:grid-cols-2">
-                        <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                        <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                           <p className="text-sm font-semibold text-slate-950">消费记录</p>
                           <AdminKeyValueList
                             className="mt-4"
@@ -478,7 +478,7 @@ export default function AdminUserAnalyticsPage() {
                             ]}
                           />
                         </div>
-                        <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                        <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                           <p className="text-sm font-semibold text-slate-950">阅读行为</p>
                           <AdminKeyValueList
                             className="mt-4"
@@ -498,7 +498,7 @@ export default function AdminUserAnalyticsPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                      <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-slate-950">留存状态</p>
@@ -519,7 +519,7 @@ export default function AdminUserAnalyticsPage() {
                         </p>
                       </div>
 
-                      <div className="rounded-[28px] border border-black/8 bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                      <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
                         <p className="text-sm font-semibold text-slate-950">快速信息</p>
                         <AdminKeyValueList
                           className="mt-4"

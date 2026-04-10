@@ -6,13 +6,20 @@ import SurfacePanel from "../common/SurfacePanel";
 import { getSeriesFaqItems } from "../../lib/storefrontFaq";
 import { buildSupportPath } from "../../lib/supportRouting";
 
-export default function SeriesFAQPanel({ series, episodes = [], creatorHref = "" }) {
+export default function SeriesFAQPanel({
+  series,
+  episodes = [],
+  creatorHref = "",
+}) {
   const router = useRouter();
-  const faqItems = useMemo(() => getSeriesFaqItems({ series, episodes }), [episodes, series]);
+  const faqItems = useMemo(
+    () => getSeriesFaqItems({ series, episodes }),
+    [episodes, series],
+  );
   const primaryButtonClass =
     "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-black/8 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
   if (faqItems.length === 0) {
     return null;
@@ -26,7 +33,7 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
             Reader FAQ
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-            Quick answers.
+            Answers.
           </h2>
         </div>
       </div>
@@ -35,10 +42,14 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
         {faqItems.map((item) => (
           <article
             key={item.id || item.question}
-            className="rounded-[24px] border border-black/8 bg-[#f8f9fc] px-5 py-4"
+            className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4"
           >
-            <h3 className="text-base font-semibold text-slate-950 sm:text-lg">{item.question}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{item.answer}</p>
+            <h3 className="text-base font-semibold text-slate-950 sm:text-lg">
+              {item.question}
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              {item.answer}
+            </p>
           </article>
         ))}
       </div>
@@ -72,7 +83,7 @@ export default function SeriesFAQPanel({ series, episodes = [], creatorHref = ""
           }
           className={secondaryButtonClass}
         >
-          Get help
+          Support
         </button>
       </div>
     </SurfacePanel>

@@ -1,12 +1,12 @@
 export const STOREFRONT_TERMS = {
-  startHere: "Start here",
+  startHere: "First picks",
   readingDesk: "Reading picks",
   freeStart: "Free to start",
   bingeReady: "Binge-ready",
   returnWeekly: "Return weekly",
-  compareMembership: "View Plans",
-  viewPointPacks: "View point packs",
-  billingSupport: "Billing help",
+  compareMembership: "Plans",
+  viewPointPacks: "Point packs",
+  billingSupport: "Billing support",
   readerBenefits: "Why join",
 };
 
@@ -36,16 +36,14 @@ const COMMERCE_JOURNEY_GUIDES = {
   value: {
     eyebrow: STOREFRONT_TERMS.bingeReady,
     title: "Value pack",
-    description:
-      "A stronger fit for binge sessions and longer paid runs.",
+    description: "A stronger fit for binge sessions and longer paid runs.",
     nextCta: "Browse completed",
     nextHref: "/search?status=Completed&sort=popular",
   },
   premium: {
     eyebrow: "Big reader pick",
     title: "Big pack",
-    description:
-      "A bigger balance for readers moving across multiple series.",
+    description: "A bigger balance for readers moving across multiple series.",
     nextCta: "See weekly chart",
     nextHref: "/rankings?type=popular&window=week",
   },
@@ -92,6 +90,8 @@ const COMMERCE_JOURNEY_GUIDES = {
 };
 
 export function getCommerceJourneyGuide(packageId) {
-  const normalized = String(packageId || "").trim().toLowerCase();
+  const normalized = String(packageId || "")
+    .trim()
+    .toLowerCase();
   return COMMERCE_JOURNEY_GUIDES[normalized] || COMMERCE_JOURNEY_GUIDES.default;
 }

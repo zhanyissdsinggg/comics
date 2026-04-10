@@ -21,7 +21,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
         "h-full rounded-[28px] border py-0 shadow-none transition-transform duration-300 hover:-translate-y-0.5",
         event.accentClass ||
           (isLight
-            ? "border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,249,252,0.98))] hover:border-black/10 hover:bg-white"
+            ? "border-[color:var(--gush-border)] bg-white hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             : "border-white/10 bg-white/[0.03]"),
       )}
     >
@@ -33,7 +33,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               className={cn(
                 "rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
                 isLight
-                  ? "border-black/8 bg-white/82"
+                  ? "border-[color:var(--gush-border)] bg-white"
                   : "border-white/10 bg-black/20",
               )}
             >
@@ -67,7 +67,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               className={cn(
                 "min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left",
                 isLight
-                  ? "border-black/8 bg-white/80"
+                  ? "border-[color:var(--gush-border)] bg-white"
                   : "border-white/10 bg-black/25",
               )}
             >
@@ -131,7 +131,7 @@ export default function StorefrontEventHub({
         className={cn(
           "relative overflow-hidden rounded-[32px] py-0",
           isLight
-            ? "border border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] shadow-[0_22px_52px_rgba(15,23,42,0.06)]"
+            ? "border border-[color:var(--gush-border)] bg-white shadow-[0_22px_52px_rgba(15,23,42,0.06)]"
             : "border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
         )}
       >
@@ -139,7 +139,7 @@ export default function StorefrontEventHub({
           className={cn(
             "absolute inset-0",
             isLight
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.1),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(255,255,255,0.66),transparent_22%)]"
+              ? "bg-[linear-gradient(180deg,rgba(247,247,249,0.72),transparent_44%)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]",
           )}
         />

@@ -29,9 +29,9 @@ const CONTACT_LINKS = [
 
 export default function AboutPage() {
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+    "rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-3 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -42,15 +42,15 @@ export default function AboutPage() {
             appearance="light"
             accent="blue"
             eyebrow="About Gush"
-            title="Stories first. Everything else stays quiet."
-            description="Original comics and serialized fiction for calmer reading."
+            title="Built for reading."
+            description="Comics and serialized fiction, kept clear."
             actions={
               <>
                 <Link href="/support" className={primaryButtonClass}>
-                  Open Support
+                  Support
                 </Link>
                 <Link href="/faq" className={secondaryButtonClass}>
-                  View FAQ
+                  FAQ
                 </Link>
               </>
             }
@@ -75,7 +75,7 @@ export default function AboutPage() {
 
             <div className="flex flex-col gap-2.5">
               <Link href="/support" className={primaryButtonClass}>
-                Open Support
+                Support
               </Link>
               <a
                 href={`mailto:${siteConfig.legalEmail}`}
@@ -94,7 +94,7 @@ export default function AboutPage() {
                 Principles
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Built for readers first.
+                Readers first.
               </h2>
             </div>
             <p className="text-sm leading-7 text-slate-600">
@@ -110,7 +110,7 @@ export default function AboutPage() {
                 Details
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Clear contact details.
+                Contact details.
               </h2>
             </div>
             <div className="space-y-3 text-sm text-slate-600">
@@ -156,22 +156,6 @@ export default function AboutPage() {
             </div>
           </SurfacePanel>
         </section>
-
-        <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-            Need help?
-          </p>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap gap-3">
-              <Link href="/support" className={primaryButtonClass}>
-                Open Support
-              </Link>
-              <Link href="/privacy-policy" className={secondaryButtonClass}>
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </SurfacePanel>
       </main>
     </div>
   );

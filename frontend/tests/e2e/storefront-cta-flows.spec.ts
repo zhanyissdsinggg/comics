@@ -113,19 +113,29 @@ test.describe("Storefront CTA flows", () => {
     });
   });
 
-  test("search creator match should open the creator page for a live result", async ({ page }) => {
+  test("creators directory should open the creator page for a live result", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -154,26 +164,6 @@ test.describe("Storefront CTA flows", () => {
         return;
       }
 
-      if (pathname === "/api/search") {
-        await fulfillJson(route, SEARCH_RESULTS);
-        return;
-      }
-
-      if (pathname === "/api/search/suggest") {
-        await fulfillJson(route, { suggestions: [] });
-        return;
-      }
-
-      if (pathname === "/api/search/hot" || pathname === "/api/search/keywords") {
-        await fulfillJson(route, { keywords: [] });
-        return;
-      }
-
-      if (pathname === "/api/recommendations/homepage") {
-        await fulfillJson(route, { slots: [] });
-        return;
-      }
-
       if (pathname === "/api/events/batch") {
         await fulfillJson(route, { ok: true });
         return;
@@ -182,46 +172,60 @@ test.describe("Storefront CTA flows", () => {
       await fulfillJson(route, {});
     });
 
-    const response = await page.goto("/search?q=kingdom", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/creators", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: 'Results for "kingdom"' })).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.getByText("1 match.")).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.getByRole("heading", { name: "Mira Dane", exact: true })).toBeVisible({
+    await expect(
+      page.getByRole("heading", {
+        name: /Browse creators\./i,
+      }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
-    const creatorCta = page.getByRole("link", { name: "View Creator", exact: true }).first();
+    const creatorCta = page
+      .getByRole("link", { name: /Open Mira Dane/i })
+      .first();
     await expect(creatorCta).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
-      page.waitForURL((url) => url.pathname.startsWith("/creators/"), { timeout: UI_TIMEOUT_MS }),
+      page.waitForURL((url) => url.pathname.startsWith("/creators/"), {
+        timeout: UI_TIMEOUT_MS,
+      }),
       creatorCta.click(),
     ]);
 
     const creatorUrl = new URL(page.url());
     expect(creatorUrl.pathname).toMatch(/^\/creators\/.+/);
-    expect(creatorUrl.searchParams.get("entry")).toBe("SEARCH_CREATOR_MATCH");
-    await expectNoRuntimeIssues("/search?q=kingdom", runtimeIssues);
+    expect(creatorUrl.searchParams.get("entry")).toBe("CREATORS_HUB_FEATURED");
+    await expectNoRuntimeIssues("/creators", runtimeIssues);
   });
 
-  test("series detail should open the first chapter from the primary reading CTA", async ({ page }) => {
+  test("series detail should open the first chapter from the primary reading CTA", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -296,18 +300,26 @@ test.describe("Storefront CTA flows", () => {
       await fulfillJson(route, {});
     });
 
-    const response = await page.goto("/series/series-001", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/series/series-001", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "The Last Kingdom", exact: true })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "The Last Kingdom", exact: true }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
-    const readChapterButton = page.getByRole("button", { name: "Read Chapter 1", exact: true }).first();
+    const readChapterButton = page
+      .getByRole("button", { name: "Read Chapter 1", exact: true })
+      .first();
     await expect(readChapterButton).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
-      page.waitForURL("**/read/series-001/series-001e1", { timeout: UI_TIMEOUT_MS }),
+      page.waitForURL("**/read/series-001/series-001e1", {
+        timeout: UI_TIMEOUT_MS,
+      }),
       readChapterButton.click(),
     ]);
 
@@ -319,41 +331,60 @@ test.describe("Storefront CTA flows", () => {
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
-    let response = await page.goto("/account", { waitUntil: "domcontentloaded" });
+    let response = await page.goto("/account", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: /Sign in for receipts/i })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: /This device, for now\./i }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
     await Promise.all([
       page.waitForURL("**/auth/reset", { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: "Reset password", exact: true }).first().click(),
+      page
+        .getByRole("button", { name: "Reset password", exact: true })
+        .first()
+        .click(),
     ]);
     expect(new URL(page.url()).pathname).toBe("/auth/reset");
 
     response = await page.goto("/account", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await Promise.all([
-      page.waitForURL((url) => url.pathname === "/support", { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: "Get help", exact: true }).first().click(),
+      page.waitForURL("**/subscribe**", { timeout: UI_TIMEOUT_MS }),
+      page.getByRole("button", { name: "Plans", exact: true }).first().click(),
     ]);
-    expect(new URL(page.url()).pathname).toBe("/support");
+    expect(new URL(page.url()).pathname).toBe("/subscribe");
 
     response = await page.goto("/library", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.getByRole("heading", { name: "Your reading shelf.", exact: true })).toBeVisible({
+    await expect(
+      page.getByRole("heading", {
+        name: /Your shelf\.|Your shelf starts here\./,
+      }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
     await Promise.all([
-      page.waitForURL("**/rankings?type=ttf&window=all", { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: "Read Free", exact: true }).first().click(),
+      page.waitForURL("**/rankings?type=ttf&window=all", {
+        timeout: UI_TIMEOUT_MS,
+      }),
+      page
+        .getByRole("button", { name: "First picks", exact: true })
+        .first()
+        .click(),
     ]);
     expect(new URL(page.url()).pathname).toBe("/rankings");
     expect(new URL(page.url()).searchParams.get("type")).toBe("ttf");
     expect(new URL(page.url()).searchParams.get("window")).toBe("all");
 
-    await expectNoRuntimeIssues("/account + /library guest CTAs", runtimeIssues);
+    await expectNoRuntimeIssues(
+      "/account + /library guest CTAs",
+      runtimeIssues,
+    );
   });
 });

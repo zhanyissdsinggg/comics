@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import Cover from "../common/Cover";
-import EmptyState from "../common/EmptyState";
 import NetworkFallback from "../common/NetworkFallback";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
@@ -90,7 +89,7 @@ function getCreatorShelfBadge(series) {
 
   const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "Start here";
+    return "First picks";
   }
 
   return "";
@@ -190,6 +189,22 @@ function getCreatorHeroCopy(creatorName, creditType, topGenres) {
   };
 }
 
+function summarizeSpotlightDescription(text, fallback) {
+  const source = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!source) {
+    return fallback;
+  }
+
+  if (source.length <= 120) {
+    return source;
+  }
+
+  return `${source.slice(0, 117).trimEnd()}...`;
+}
+
 function CreatorPageSkeleton() {
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -213,7 +228,7 @@ function CreatorPageSkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white/84"
+                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
               />
             ))}
           </SurfacePanel>
@@ -221,7 +236,7 @@ function CreatorPageSkeleton() {
 
         <SurfacePanel appearance="light" accent="blue">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white/85" />
+            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white" />
             <div className="space-y-4">
               <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
               <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -230,7 +245,7 @@ function CreatorPageSkeleton() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white/80"
+                    className="h-28 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
                   />
                 ))}
               </div>
@@ -409,26 +424,12 @@ export default function CreatorPage({
       (item) => String(item?.status || "").toLowerCase() === "completed",
     ).length;
     const strongestGenre = topGenres[0] || "Mixed";
-    const formatLabel =
-      Array.from(
-        new Set(
-          creatorItems
-            .map((item) => String(item?.type || "").trim())
-            .filter(Boolean),
-        ),
-      )
-        .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
-        .join(" / ") || "Series";
     const latestUpdatedAt = creatorItems[0]?.updatedAt;
 
     return [
       {
         label: "Stories",
         value: formatTitleCountLabel(creatorItems.length),
-      },
-      {
-        label: "Format",
-        value: formatLabel,
       },
       {
         label: "Status",
@@ -466,15 +467,13 @@ export default function CreatorPage({
   }, [spotlightSeries]);
 
   const primaryButtonClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(41,151,255,0.98),rgba(0,113,227,0.94))] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(0,113,227,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(0,113,227,0.24)] hover:shadow-[0_20px_38px_rgba(0,113,227,0.22)]";
+    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white/92 px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const creatorCardClass =
-    "overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,248,250,0.96))] shadow-[0_20px_46px_rgba(15,23,42,0.06)]";
+    "overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)]";
   const neutralChipClass =
     "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-soft)]";
-  const accentChipClass =
-    "rounded-full border border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-strong)]";
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -542,10 +541,10 @@ export default function CreatorPage({
               id: "lead-title",
               eyebrow: "Spotlight",
               title: `View ${spotlightSeries.title}.`,
-              cta: "View Series",
+              cta: "Open series",
               onClick: () => handleOpenTitle(spotlightSeries),
               accentClass:
-                "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)]",
+                "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
             }
           : null,
         {
@@ -590,7 +589,7 @@ export default function CreatorPage({
             `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
           ),
         accentClass:
-          "border-[rgba(0,113,227,0.16)] bg-[rgba(0,113,227,0.08)] text-slate-900 hover:border-[rgba(0,113,227,0.24)] hover:bg-[rgba(0,113,227,0.12)]",
+          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
       },
       {
         id: "featured-series",
@@ -687,11 +686,11 @@ export default function CreatorPage({
             >
               <div className="space-y-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  Next step
+                  Next
                 </p>
                 <div>
                   <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                    Keep browsing.
+                    Try another route.
                   </h2>
                 </div>
               </div>
@@ -715,26 +714,13 @@ export default function CreatorPage({
             </SurfacePanel>
           </section>
 
-          <SurfacePanel appearance="light" accent="blue">
-            <EmptyState
-              appearance="light"
-              icon="book"
-              eyebrow="Next"
-              title="Try another route."
-              action={{
-                label: "Search",
-                onClick: () => router.push("/search"),
-              }}
-            />
-          </SurfacePanel>
-
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="space-y-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
                 Next
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Keep browsing.
+                Browse next.
               </h2>
             </div>
             <StorefrontPathwaysGrid
@@ -773,7 +759,7 @@ export default function CreatorPage({
           >
             <div className="space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                Overview
+                Creator
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
@@ -849,8 +835,10 @@ export default function CreatorPage({
                   {spotlightSeries.title}
                 </h2>
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-                  {spotlightSeries.description ||
-                    `${spotlightSeries.title} is a good place to start.`}
+                  {summarizeSpotlightDescription(
+                    spotlightSeries.description,
+                    `${spotlightSeries.title} is a strong place to start.`,
+                  )}
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -863,7 +851,7 @@ export default function CreatorPage({
                     </span>
                   ))}
                   {spotlightSeries?.status ? (
-                    <span className={accentChipClass}>
+                    <span className={neutralChipClass}>
                       {spotlightSeries.status}
                     </span>
                   ) : null}
@@ -886,7 +874,7 @@ export default function CreatorPage({
                     onClick={() => handleOpenTitle(spotlightSeries)}
                     className={primaryButtonClass}
                   >
-                    View Series
+                    Open series
                   </button>
                   <button
                     type="button"
@@ -905,10 +893,10 @@ export default function CreatorPage({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
-                More from {creatorName}
+                Works
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Stories by {creatorName}
+                By {creatorName}
               </h2>
             </div>
             <p className="text-sm text-slate-500">

@@ -10,16 +10,20 @@ const TYPE_OPTIONS = [
 ];
 
 const TAG_OPTIONS = [
-  { value: "romance", label: "Romance", color: "bg-pink-500" },
-  { value: "action", label: "Action", color: "bg-red-500" },
-  { value: "fantasy", label: "Fantasy", color: "bg-purple-500" },
-  { value: "comedy", label: "Comedy", color: "bg-yellow-500" },
-  { value: "drama", label: "Drama", color: "bg-blue-500" },
-  { value: "horror", label: "Horror", color: "bg-gray-500" },
-  { value: "mystery", label: "Mystery", color: "bg-indigo-500" },
-  { value: "scifi", label: "Sci-Fi", color: "bg-cyan-500" },
-  { value: "slice-of-life", label: "Slice of Life", color: "bg-green-500" },
-  { value: "sports", label: "Sports", color: "bg-orange-500" },
+  { value: "romance", label: "Romance", color: "bg-[rgba(214,72,153,0.44)]" },
+  { value: "action", label: "Action", color: "bg-[rgba(197,40,40,0.42)]" },
+  { value: "fantasy", label: "Fantasy", color: "bg-[rgba(99,102,241,0.42)]" },
+  { value: "comedy", label: "Comedy", color: "bg-[rgba(176,95,0,0.38)]" },
+  { value: "drama", label: "Drama", color: "bg-slate-400" },
+  { value: "horror", label: "Horror", color: "bg-[rgba(29,29,31,0.34)]" },
+  { value: "mystery", label: "Mystery", color: "bg-[rgba(79,70,229,0.34)]" },
+  { value: "scifi", label: "Sci-Fi", color: "bg-[rgba(8,145,178,0.34)]" },
+  {
+    value: "slice-of-life",
+    label: "Slice of Life",
+    color: "bg-[rgba(10,125,92,0.34)]",
+  },
+  { value: "sports", label: "Sports", color: "bg-[rgba(56,89,214,0.28)]" },
 ];
 
 const STATUS_OPTIONS = [
@@ -107,21 +111,21 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
     filters.sortBy !== "relevance";
 
   return (
-    <div className="fixed inset-0 z-50 bg-[rgba(15,23,42,0.22)] backdrop-blur-sm">
-      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] px-4 pb-8 pt-6 shadow-[0_28px_90px_rgba(15,23,42,0.16)] md:left-auto md:right-0 md:top-0 md:max-h-none md:w-full md:max-w-md md:rounded-l-3xl md:rounded-tr-none md:border-l md:border-t-0 md:px-6">
+    <div className="fixed inset-0 z-50 bg-[rgba(15,23,42,0.18)] backdrop-blur-md">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-[color:var(--gush-border)] bg-white px-4 pb-8 pt-6 shadow-[0_18px_42px_rgba(15,23,42,0.12)] md:left-auto md:right-0 md:top-0 md:max-h-none md:w-full md:max-w-md md:rounded-l-3xl md:rounded-tr-none md:border-l md:border-t-0 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-950 md:text-xl">
               Filters
             </h2>
             <p className="mt-1 text-xs text-slate-500 md:text-sm">
-              Refine the catalog.
+              Narrow the list.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-400 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900"
             aria-label="Close advanced filters"
           >
             <svg
@@ -153,8 +157,8 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                   onClick={() => toggleType(type.value)}
                   className={`min-h-[44px] rounded-xl border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.types.includes(type.value)
-                      ? "border-[var(--gush-accent,#0071e3)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]"
-                      : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
+                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]"
+                      : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink)]"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -178,8 +182,8 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                   onClick={() => toggleTag(tag.value)}
                   className={`min-h-[44px] rounded-lg border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.tags.includes(tag.value)
-                      ? "border-[var(--gush-accent,#0071e3)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]"
-                      : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
+                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]"
+                      : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink)]"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -205,8 +209,8 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                   }
                   className={`min-h-[44px] rounded-lg border px-4 py-3 text-sm font-medium transition-colors active:scale-95 ${
                     filters.status === status.value
-                      ? "border-[var(--gush-accent,#0071e3)] bg-[rgba(0,113,227,0.08)] text-[var(--gush-accent,#0071e3)]"
-                      : "border-black/8 bg-white/84 text-slate-500 hover:border-black/12 hover:text-slate-700"
+                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]"
+                      : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink)]"
                   }`}
                 >
                   {status.label}
@@ -224,7 +228,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
               onChange={(event) =>
                 setFilters((prev) => ({ ...prev, sortBy: event.target.value }))
               }
-              className="w-full min-h-[44px] rounded-xl border border-black/8 bg-white/88 px-4 py-3 text-sm text-slate-900 focus:border-[var(--gush-accent,#0071e3)] focus:outline-none md:text-base"
+              className="w-full min-h-[44px] rounded-xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 focus:border-[var(--gush-accent,#0071e3)] focus:outline-none md:text-base"
             >
               {SORT_OPTIONS.map((sort) => (
                 <option key={sort.value} value={sort.value}>
@@ -239,21 +243,21 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
           <button
             type="button"
             onClick={handleReset}
-            className="min-h-[44px] flex-1 rounded-full border border-black/8 bg-white/84 px-4 py-3 text-sm font-medium text-slate-700 hover:border-black/12 hover:bg-white md:text-base"
+            className="min-h-[44px] flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] md:text-base"
           >
-            Reset All
+            Reset
           </button>
           <button
             type="button"
             onClick={handleApply}
             className="min-h-[44px] flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 active:bg-slate-900 md:text-base"
           >
-            Apply Filters
+            Apply
           </button>
         </div>
 
         {hasActiveFilters ? (
-          <div className="mt-4 rounded-xl border border-black/6 bg-white/80 px-4 py-3">
+          <div className="mt-4 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
             <p className="text-xs font-medium text-slate-500">
               Active Filters:
             </p>
@@ -261,7 +265,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
               {filters.types.map((type) => (
                 <span
                   key={type}
-                  className="rounded-full bg-[rgba(0,113,227,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#0071e3)]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-[10px] font-medium text-slate-700"
                 >
                   {TYPE_OPTIONS.find((item) => item.value === type)?.label}
                 </span>
@@ -269,13 +273,13 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
               {filters.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-[rgba(0,113,227,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#0071e3)]"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-[10px] font-medium text-slate-700"
                 >
                   {TAG_OPTIONS.find((item) => item.value === tag)?.label}
                 </span>
               ))}
               {filters.status !== "all" ? (
-                <span className="rounded-full bg-[rgba(0,113,227,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#0071e3)]">
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-[10px] font-medium text-slate-700">
                   {
                     STATUS_OPTIONS.find((item) => item.value === filters.status)
                       ?.label
@@ -283,7 +287,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
                 </span>
               ) : null}
               {filters.sortBy !== "relevance" ? (
-                <span className="rounded-full bg-[rgba(0,113,227,0.08)] px-2 py-1 text-[10px] text-[var(--gush-accent,#0071e3)]">
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-[10px] font-medium text-slate-700">
                   {
                     SORT_OPTIONS.find((item) => item.value === filters.sortBy)
                       ?.label

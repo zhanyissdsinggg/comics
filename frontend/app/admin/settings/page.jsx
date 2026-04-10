@@ -3,14 +3,14 @@ import { ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 
 const inlineButtonClassName =
-  "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black/8 bg-white px-3.5 text-[0.82rem] font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[rgba(250,248,244,0.96)] hover:text-slate-950";
+  "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 text-[0.82rem] font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
 
 const inlineGhostButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3.5 text-[0.82rem] font-semibold text-slate-600 transition hover:bg-[rgba(23,20,18,0.045)] hover:text-slate-950";
 
 function SettingsCard({ eyebrow, title, children, action = null }) {
   return (
-    <section className="rounded-[24px] border border-black/8 bg-white p-6 shadow-[var(--gush-shadow-soft)]">
+    <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[var(--gush-shadow-soft)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{eyebrow}</p>
@@ -30,10 +30,7 @@ function SettingsContent() {
         eyebrow="后台访问"
         title="成员会话与登录凭证"
         action={(
-          <Link
-            href="/admin/members"
-            className={inlineButtonClassName}
-          >
+          <Link href="/admin/members" className={inlineButtonClassName}>
             <ShieldCheck className="size-4" />
             打开后台成员
           </Link>
@@ -41,14 +38,15 @@ function SettingsContent() {
       >
         <p>后台会话现在优先使用安全 Cookie，避免再把 token 散落在 URL 或本地存储里。</p>
         <p className="mt-2">
-          当前登录仍以环境里的 <code className="mx-1 rounded bg-[rgba(15,23,42,0.06)] px-1.5 py-0.5">ADMIN_KEYS</code> 为入口，
-          但成员身份、角色、状态和 2FA 已经落到数据库里的后台成员目录。
+          当前登录仍以环境里的
+          <code className="mx-1 rounded bg-[rgba(15,23,42,0.06)] px-1.5 py-0.5">ADMIN_KEYS</code>
+          作为入口，但成员身份、角色、状态和 2FA 已经落到数据库里的后台成员目录中。
         </p>
       </SettingsCard>
 
       <SettingsCard eyebrow="身份治理" title="后台成员体系">
         <p>
-          去后台成员页维护真实的管理员档案：姓名、邮箱、角色、状态、密钥槽位和二次验证 Secret。
+          去后台成员页维护真实的管理员档案：姓名、邮箱、角色、状态、密钥槽位和二次验证密钥。
           这样做的目的很直接，就是别再让后台长期只靠环境变量硬扛身份管理。
         </p>
         <ul className="mt-4 space-y-2">
@@ -71,7 +69,7 @@ function SettingsContent() {
             <code className="mx-1 rounded bg-[rgba(15,23,42,0.06)] px-1.5 py-0.5">ADMIN_ROLE_ASSIGNMENTS</code>
             现在只负责给新同步出来的槽位一个初始角色，后续以后台成员页里的数据库配置为准。
           </p>
-          <div className="mt-4 rounded-[18px] border border-black/8 bg-[rgba(250,247,241,0.82)] p-4 font-mono text-xs leading-6 text-slate-700">
+          <div className="mt-4 rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 font-mono text-xs leading-6 text-slate-700">
             ADMIN_KEYS=keyA,keyB,keyC
             <br />
             ADMIN_ROLE_ASSIGNMENTS=1:super_admin,2:content_admin,3:support_admin
@@ -82,10 +80,7 @@ function SettingsContent() {
           eyebrow="运行边界"
           title="这套后台现在依赖什么"
           action={(
-            <Link
-              href="/admin/members"
-              className={inlineGhostButtonClassName}
-            >
+            <Link href="/admin/members" className={inlineGhostButtonClassName}>
               <SlidersHorizontal className="size-4" />
               去整理成员与槽位
             </Link>
@@ -93,9 +88,9 @@ function SettingsContent() {
         >
           <ul className="space-y-2">
             <li>作品、章节、创作者、推荐位、活动、订单、通知已经能支撑日常运营</li>
-            <li>后台成员页负责把管理员身份、角色和 2FA 收到一个真实可维护的目录里</li>
+            <li>后台成员页负责把管理员身份、角色和 2FA 收到一套真实可维护的目录里</li>
             <li>停用成员后，会在下一次验权或刷新会话时失去后台访问能力</li>
-            <li>如果要继续提高可运维性，下一步就是补更完整的创作者资料 CRUD 和专题集合编辑</li>
+            <li>如果还要继续提高可运维性，下一步就是补更完整的创作者资料 CRUD 和专题集合编排</li>
           </ul>
         </SettingsCard>
       </div>

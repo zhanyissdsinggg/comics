@@ -1450,7 +1450,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             </h1>
             <p className="mt-3 text-sm leading-7 text-neutral-400">
               Access, progress, and unlock checks are loading. If this takes too
-              long, go back to the series page or ask support.
+              long, go back to the series page or open support.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
@@ -1472,7 +1472,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 }
                 className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.06]"
               >
-                Get help
+                Support
               </button>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-3" aria-hidden="true">
@@ -1563,7 +1563,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               }
               className="rounded-full border border-neutral-700 bg-transparent px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-neutral-500 hover:bg-white/[0.04]"
             >
-              Get help
+              Support
             </button>
           </NetworkFallback>
         </div>
@@ -1613,7 +1613,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 Opened from
               </p>
               <p className="mt-2 font-semibold text-white">
-                {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
+                {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
               </p>
               <p className="mt-1 text-sm leading-6 text-neutral-400">
                 {discoveryContext.returnHint}
@@ -1667,9 +1667,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
       {showPaywall ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] p-6 text-center shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
+          <div className="w-full max-w-lg rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 text-center shadow-[0_20px_52px_rgba(15,23,42,0.12)]">
             {commerceNotice ? (
-              <div className="mb-4 rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.06)] px-4 py-4 text-left">
+              <div className="mb-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
@@ -1685,7 +1685,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   <button
                     type="button"
                     onClick={() => setCommerceNotice(null)}
-                    className="rounded-full border border-black/8 bg-white px-3 py-1 text-[10px] font-semibold text-slate-600"
+                    className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
                   >
                     Dismiss
                   </button>
@@ -1693,7 +1693,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </div>
             ) : null}
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Keep reading
+              Continue this episode
             </h2>
             <p className="mt-2 text-sm leading-7 text-slate-600">
               {previewCount || previewParagraphs
@@ -1712,7 +1712,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </p>
             ) : null}
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Your balance
                 </p>
@@ -1725,7 +1725,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     : "Sign in to keep unlocks and progress on one account."}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   This episode
                 </p>
@@ -1742,7 +1742,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       : "Unlock with points."}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-black/8 bg-white/84 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Your access
                 </p>
@@ -1768,13 +1768,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </p>
             ) : null}
             {upcomingEpisodes.length > 0 ? (
-              <div className="mt-4 rounded-[24px] border border-black/8 bg-white/84 px-4 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+              <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                 <p className="text-sm font-semibold text-slate-950">Up next</p>
                 <div className="mt-3 space-y-2">
                   {upcomingEpisodes.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-3 rounded-[20px] border border-black/8 bg-[#f8f9fc] px-3 py-3 text-sm"
+                      className="flex items-center justify-between gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm"
                     >
                       <div>
                         <p className="font-medium text-slate-950">
@@ -1806,7 +1806,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               onClick={handleUnlockCurrent}
               className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
                 commerceNotice
-                  ? "bg-[rgba(216,183,140,0.16)] text-slate-950 shadow-[0_0_0_1px_rgba(216,183,140,0.2),0_24px_60px_rgba(216,183,140,0.16)] motion-safe:animate-pulse hover:bg-[rgba(216,183,140,0.2)] active:bg-[rgba(216,183,140,0.16)]"
+                  ? "border border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_20px_42px_rgba(15,23,42,0.14)] hover:bg-slate-800 active:bg-slate-900"
                   : "bg-slate-950 text-white hover:bg-slate-800 active:bg-slate-900"
               }`}
               style={{ willChange: "transform" }}
@@ -1817,12 +1817,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ? "Continue free"
                   : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
-            <div className="mt-4 rounded-[24px] border border-black/8 bg-[#f8f9fc] px-4 py-3 text-left text-[11px] text-slate-600">
-              <div className="font-semibold text-slate-950">Quick notes</div>
-              <div className="mt-2 space-y-1">
-                <div>- Unlocked episodes stay in your library.</div>
-                <div>- Packs often cost less per chapter.</div>
-                <div>- Membership adds free reads and lower prices.</div>
+            <div className="mt-4 flex flex-wrap gap-2 text-left text-[11px] text-slate-600">
+              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+                Unlocks stay in your library.
+              </div>
+              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+                Packs can lower the cost per episode.
+              </div>
+              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+                Membership adds free reads and lower prices.
               </div>
             </div>
             <button
@@ -1839,7 +1842,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ),
                 );
               }}
-              className="mt-3 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className="mt-3 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             >
               {STOREFRONT_TERMS.compareMembership}
             </button>
@@ -1858,14 +1861,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ),
                 );
               }}
-              className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className="mt-2 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             >
               {STOREFRONT_TERMS.viewPointPacks}
             </button>
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-              className="mt-2 w-full rounded-full border border-black/8 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-black/12 hover:bg-[#f8f9fc]"
+              className="mt-2 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             >
               Back to series
             </button>
@@ -2140,7 +2143,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     label: "Membership",
                     value: isSubscriber
                       ? "Already active"
-                      : "Free unlocks + lower prices",
+                      : "Daily reads + member savings",
                   },
                 ]
               : []

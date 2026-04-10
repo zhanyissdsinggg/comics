@@ -15,7 +15,7 @@ function AuthSkeleton({ variant = "default" }) {
     <div
       className={`hidden h-10 w-24 animate-pulse rounded-full border sm:block ${
         isLight
-          ? "border-black/8 bg-white/90"
+          ? "border-[color:var(--gush-border)] bg-white"
           : "border-white/10 bg-white/[0.04]"
       }`}
       aria-hidden="true"
@@ -104,7 +104,7 @@ export default function HeaderActions({
           isLight
             ? isAdultMode
               ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12] dark:border-red-300/35 dark:bg-red-500/[0.14] dark:text-red-200 dark:hover:border-red-300/45 dark:hover:bg-red-500/[0.2]"
-              : "border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-[rgba(0,113,227,0.04)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:hover:border-red-300/35 dark:hover:bg-red-500/[0.12] dark:hover:text-white"
+              : "border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-[rgba(29,29,31,0.02)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:hover:border-red-300/35 dark:hover:bg-red-500/[0.12] dark:hover:text-white"
             : isAdultMode
               ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
               : "border-white/10 bg-white/[0.04] text-white/72 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
@@ -117,7 +117,7 @@ export default function HeaderActions({
         <span className="flex items-center gap-1.5">
           <span
             className={cn(
-              "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(0,113,227,0.08)]",
+              "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(15,23,42,0.06)]",
               isAdultMode
                 ? "bg-current opacity-90 shadow-[0_0_0_4px_rgba(239,68,68,0.14)]"
                 : isLight

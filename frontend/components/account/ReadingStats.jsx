@@ -61,15 +61,15 @@ const ReadingStats = React.memo(() => {
 
   const tip = useMemo(() => {
     if (stats.totalEpisodesRead === 0) {
-      return "Start a series and your reading history will build itself here.";
+      return "Start a series and your reading history will build here.";
     }
     if (stats.seriesInProgress > 5) {
-      return "You have a lot in progress right now. Finishing one or two series will make your shelf feel cleaner.";
+      return "You have a lot in progress. Finishing one or two will clear your shelf.";
     }
     if (stats.followedCount > stats.seriesInProgress * 2) {
-      return "You are following more series than you are actively reading. It may be time to check the latest updates.";
+      return "You are following more series than you are reading. Check the latest updates.";
     }
-    return "Your reading pace looks healthy. Keep the next chapter easy to reach.";
+    return "Your reading pace looks healthy. Keep the next chapter close.";
   }, [stats.followedCount, stats.seriesInProgress, stats.totalEpisodesRead]);
 
   const statCards = [
@@ -104,11 +104,11 @@ const ReadingStats = React.memo(() => {
             Reading stats
           </p>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-            A quick look at your reading rhythm.
+            Reading rhythm.
           </h2>
         </div>
         <p className="text-sm text-slate-500">
-          Built from your reading history, progress, and follows.
+          History, progress, and follows.
         </p>
       </div>
 
@@ -116,11 +116,11 @@ const ReadingStats = React.memo(() => {
         {statCards.map((card, index) => (
           <div
             key={card.label}
-            className={`rounded-[24px] border px-4 py-4 ${
-              card.highlighted || index === 0
-                ? "border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)]"
-                : "border-black/8 bg-[#f8f9fc]"
-            }`}
+              className={`rounded-[24px] border px-4 py-4 ${
+                card.highlighted || index === 0
+                  ? "border-[color:var(--gush-border-strong)] bg-white"
+                  : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
+              }`}
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {card.label}
@@ -134,7 +134,7 @@ const ReadingStats = React.memo(() => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[24px] border border-black/8 bg-[#f8f9fc] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Milestones
           </p>
@@ -143,22 +143,22 @@ const ReadingStats = React.memo(() => {
               achievements.map((achievement) => (
                 <span
                   key={achievement}
-                  className="rounded-full border border-black/8 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-xs font-semibold text-slate-700"
                 >
                   {achievement}
                 </span>
               ))
             ) : (
               <p className="text-sm text-slate-500">
-                Start reading to unlock milestone badges here.
+                Start reading to unlock milestones.
               </p>
             )}
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            What stands out
+            Reading note
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-700">{tip}</p>
         </div>

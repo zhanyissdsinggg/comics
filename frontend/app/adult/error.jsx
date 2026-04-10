@@ -5,8 +5,8 @@ export default function AdultError({ error, reset }) {
     <main className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
       <div className="gush-page-ambient" />
       <div className="gush-page-main flex min-h-screen items-center justify-center px-6">
-        <div className="relative w-full max-w-3xl rounded-[32px] border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,248,252,0.98))] p-8 text-center shadow-[0_26px_70px_rgba(15,23,42,0.08)]">
-          <span className="inline-flex rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="relative w-full max-w-3xl rounded-[32px] border border-[color:var(--gush-border)] bg-white p-8 text-center shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+          <span className="inline-flex rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Adult
           </span>
           <h1 className="mt-5 font-display text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.7rem]">

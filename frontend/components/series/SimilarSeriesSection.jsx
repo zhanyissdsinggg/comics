@@ -22,7 +22,7 @@ function getSeriesBadge(item) {
 
   const episodeCount = Math.max(0, Number(item?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "Start here";
+    return "First picks";
   }
 
   return "";
@@ -35,7 +35,7 @@ export default function SimilarSeriesSection({ seriesId }) {
     error,
   } = useSimilarRecommendations(seriesId, 6);
   const cardClass =
-    "group overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,248,250,0.96))] text-left shadow-[0_18px_40px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-white";
+    "group overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white text-left shadow-[0_12px_28px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.07)]";
   const chipClass =
     "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-2.5 py-1 text-[11px] text-[color:var(--gush-ink-soft)]";
 

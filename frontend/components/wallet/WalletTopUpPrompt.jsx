@@ -160,6 +160,11 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     return null;
   }
 
+  const shellClass =
+    "relative w-full border border-[color:var(--gush-border)] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.1)] backdrop-blur-xl sm:max-w-xl sm:rounded-[32px]";
+  const quietCardClass =
+    "border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)] hover:border-[color:var(--gush-border-strong)] hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]";
+
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
@@ -170,7 +175,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
     >
       <div
         onClick={handleContentClick}
-        className={`relative w-full border border-black/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,248,252,0.98))] shadow-[0_28px_100px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-all duration-300 sm:max-w-xl sm:rounded-[32px] ${
+        className={`${shellClass} transition-all duration-300 ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-[0.98]"
@@ -180,7 +185,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
           borderTopRightRadius: "1.75rem",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,113,227,0.08),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(255,255,255,0.84),transparent_24%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),transparent_42%)]" />
 
         <div className="relative flex justify-center pb-2 pt-3 sm:hidden">
           <div className="h-1 w-10 rounded-full bg-slate-300" />
@@ -189,7 +194,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/8 bg-white/80 p-2 text-slate-500 transition-all duration-300 hover:bg-white hover:text-slate-900 active:scale-95"
+          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900 active:scale-95"
           aria-label="Close top-up dialog"
         >
           <X size={18} />
@@ -198,7 +203,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
         <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[rgba(29,29,31,0.04)] text-[var(--gush-accent-strong,#0058cc)]">
                 <Wallet size={30} />
               </div>
             </div>
@@ -218,7 +223,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               {[0, 1, 2].map((index) => (
                 <div
                   key={index}
-                  className="h-24 animate-pulse rounded-[24px] border border-black/8 bg-white/80"
+                  className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
                 />
               ))}
             </div>
@@ -242,10 +247,10 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     onClick={() =>
                       handleSelectPackage({ ...pkg, id: packageId })
                     }
-                    className={`relative w-full rounded-[24px] border p-4 text-left shadow-[0_14px_34px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)] active:scale-[0.99] ${
+                    className={`relative w-full rounded-[24px] border p-4 text-left transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.99] ${
                       isHighlighted
-                        ? "border-[rgba(0,113,227,0.16)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,248,255,0.98))]"
-                        : "border-black/8 bg-white"
+                        ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))]"
+                        : quietCardClass
                     }`}
                   >
                     {isHighlighted ? (
@@ -259,8 +264,8 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
                             isHighlighted
-                              ? "bg-[rgba(0,113,227,0.1)] text-[var(--gush-accent-strong,#0058cc)]"
-                              : "bg-[#f8f9fc] text-slate-500"
+                              ? "bg-[rgba(29,29,31,0.04)] text-[var(--gush-accent-strong,#0058cc)]"
+                              : "bg-[color:var(--gush-page-bg-muted)] text-slate-500"
                           }`}
                         >
                           <Zap size={22} />
@@ -271,7 +276,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                               {getPackageTitle(pkg)}
                             </span>
                             {bonusPts > 0 ? (
-                              <span className="flex items-center gap-1 rounded-full bg-[rgba(0,113,227,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
+                              <span className="flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
                                 <Gift size={12} />+{formatUSNumber(bonusPts)}
                               </span>
                             ) : null}
@@ -320,7 +325,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           )}
 
-          <div className="rounded-[24px] border border-[rgba(0,113,227,0.14)] bg-[rgba(0,113,227,0.08)] p-4">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-[var(--gush-accent-strong,#0058cc)]">
                 <Sparkles size={16} />
