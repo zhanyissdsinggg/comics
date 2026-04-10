@@ -42,10 +42,12 @@ frontend/playwright-report/
 # Temporary files
 tmp/
 temp/
+artifacts/
 *.tmp
 .tmp_*
 .tmp-*
 check-*.png
+*-white-ui.png
 .audit-*.json
 .outdated-*.json
 .lighthouse-*.json

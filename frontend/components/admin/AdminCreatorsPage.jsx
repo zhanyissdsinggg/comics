@@ -1,211 +1,33 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  AlertTriangle,
-  ArrowUpRight,
-  BookOpen,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  Edit3,
-  Eye,
-  Search,
-  Users,
-} from "lucide-react";
+import { BookOpen, CheckCircle2, Eye, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import SurfacePanel from "@/components/common/SurfacePanel";
 
-import AdminShell from "./AdminShell";
 import { useAdminAuth } from "./AuthContext";
-import Skeleton from "../common/Skeleton";
 import { adminFetchJson } from "../../lib/adminApiClient";
-
-const EMPTY_AUDIT = {
-  creators: [],
-  missingAuthorSeries: [],
-  legacyAuthorOnlySeries: [],
-  namingRiskCreators: [],
-  stats: {
-    totalSeries: 0,
-    creatorCount: 0,
-    attributedSeriesCount: 0,
-    structuredCreatorSeriesCount: 0,
-    legacyAuthorOnlySeriesCount: 0,
-    missingAuthorSeriesCount: 0,
-    namingRiskCreatorCount: 0,
-    unpublishedSeriesCount: 0,
-  },
-};
-
-function formatPercent(value) {
-  const parsed = Number(value);
-  const safeValue = Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
-  return `${safeValue}%`;
-}
-
-function formatDateLabel(value) {
-  if (!value) {
-    return "暂无更新时间";
-  }
-
-  const parsed = Date.parse(value);
-  if (Number.isNaN(parsed)) {
-    return "暂无更新时间";
-  }
-
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(parsed));
-}
-
-function getErrorMessage(data, response) {
-  return data?.message || data?.error || `请求失败，状态码 ${response.status}。`;
-}
-
-function formatSeriesStatusLabel(value) {
-  const normalized = String(value || "").trim().toLowerCase();
-  if (normalized === "completed") {
-    return "已完结";
-  }
-  if (normalized === "ongoing") {
-    return "连载中";
-  }
-  if (normalized === "hiatus") {
-    return "休更中";
-  }
-  if (normalized === "cancelled") {
-    return "已下线";
-  }
-  return String(value || "状态待补充").trim() || "状态待补充";
-}
-
-function getSeriesMetadataSummary(series) {
-  const genreCount = (Array.isArray(series?.genres) ? series.genres : [])
-    .map((genre) => String(genre || "").trim())
-    .filter(Boolean).length;
-
-  return [
-    series?.coverUrl ? "封面已就绪" : "封面待补",
-    String(series?.description || "").trim() ? "简介已填写" : "简介待补",
-    genreCount > 0 ? `${genreCount} 个标签` : "标签待补",
-  ].join(" · ");
-}
-
-function ActionButton({ children, className = "", ...props }) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function PillButton({ active = false, children, className = "", ...props }) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        active
-          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-          : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function MetricCard({ title, value, hint, tone = "blue" }) {
-  const toneClasses = {
-    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]",
-    emerald: "border-emerald-200 bg-emerald-50/90",
-    amber: "border-amber-200 bg-amber-50/90",
-    rose: "border-rose-200 bg-rose-50/90",
-  };
-
-  return (
-    <div
-      className={cn(
-        "rounded-[24px] border px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]",
-        toneClasses[tone] || toneClasses.blue,
-      )}
-    >
-      <p className="text-sm text-slate-600">{title}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
-      <p className="mt-2 text-xs leading-6 text-slate-500">{hint}</p>
-    </div>
-  );
-}
-
-function EmptyState({ title, description }) {
-  return (
-    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-10 text-center">
-      <p className="text-base font-semibold text-slate-950">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-    </div>
-  );
-}
-
-function StatusPill({ children, tone = "slate" }) {
-  const toneClasses = {
-    slate: "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    amber: "border-amber-200 bg-amber-50 text-amber-700",
-    rose: "border-rose-200 bg-rose-50 text-rose-700",
-    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950",
-  };
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
-        toneClasses[tone] || toneClasses.slate,
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-function LoadingView() {
-  return (
-    <AdminShell
-      title="创作者"
-      subtitle="核对创作者命名、公开署名覆盖率，以及仍待补齐署名的作品。"
-    >
-      <div className="space-y-6">
-        <Skeleton className="h-48 rounded-[32px]" />
-        <div className="grid gap-4 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={`creator-metric-${index}`} className="h-32 rounded-[28px]" />
-          ))}
-        </div>
-        <Skeleton className="h-32 rounded-[28px]" />
-        <div className="grid gap-6 xl:grid-cols-2">
-          <Skeleton className="h-80 rounded-[28px]" />
-          <Skeleton className="h-80 rounded-[28px]" />
-        </div>
-        <Skeleton className="h-[28rem] rounded-[28px]" />
-      </div>
-    </AdminShell>
-  );
-}
+import AdminShell from "./AdminShell";
+import {
+  ActionButton,
+  EmptyState,
+  LoadingView,
+  MetricCard,
+  PillButton,
+  StatusPill,
+} from "./creators-audit/blocks";
+import {
+  CreatorDirectorySection,
+  LegacyAuthorSection,
+  MissingCreditsSection,
+  NamingRiskSection,
+} from "./creators-audit/sections";
+import {
+  EMPTY_AUDIT,
+  getErrorMessage,
+} from "./creators-audit/utils";
 
 export default function AdminCreatorsPage() {
   const router = useRouter();
@@ -470,9 +292,7 @@ export default function AdminCreatorsPage() {
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">内容优先后台</StatusPill>
-                <StatusPill tone="amber">
-                  缺署名 {audit.stats.missingAuthorSeriesCount}
-                </StatusPill>
+                <StatusPill tone="amber">缺署名 {audit.stats.missingAuthorSeriesCount}</StatusPill>
                 <StatusPill tone={audit.stats.legacyAuthorOnlySeriesCount > 0 ? "amber" : "emerald"}>
                   旧 author {audit.stats.legacyAuthorOnlySeriesCount}
                 </StatusPill>
@@ -483,12 +303,8 @@ export default function AdminCreatorsPage() {
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-white/96 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                覆盖率
-              </p>
-              <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">
-                {coverageRate}%
-              </p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">覆盖率</p>
+              <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">{coverageRate}%</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入真实 credits，
                 兼容层还剩 {audit.stats.legacyAuthorOnlySeriesCount} 部。
@@ -507,7 +323,7 @@ export default function AdminCreatorsPage() {
           <MetricCard
             title="真实 credits 已接入"
             value={audit.stats.structuredCreatorSeriesCount.toLocaleString()}
-            hint="前台作品页和创作者目录已可直接使用。"
+            hint="前台作品页和创作者目录可直接使用。"
             tone="emerald"
           />
           <MetricCard
@@ -527,9 +343,7 @@ export default function AdminCreatorsPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                筛选创作者目录
-              </h2>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">筛选创作者目录</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 按创作者名、作品标题或题材快速定位。
               </p>
@@ -568,385 +382,44 @@ export default function AdminCreatorsPage() {
         </SurfacePanel>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <SurfacePanel appearance="light" accent="amber" className="space-y-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  命名清理
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  先处理这里，避免前台把同一人拆成多个条目。
-                </p>
-              </div>
-              <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
-            </div>
-
-            {namingRiskPreview.length === 0 ? (
-              <EmptyState
-                title="当前没有命名冲突"
-                description="当前命名稳定。"
-              />
-            ) : (
-              <div className="space-y-3">
-                {namingRiskPreview.map((creator) => (
-                  <div
-                    key={creator.slug}
-                    className="rounded-[24px] border border-amber-200 bg-amber-50/70 px-5 py-5"
-                  >
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-base font-semibold text-slate-950">{creator.name}</p>
-                          <StatusPill tone="amber">发现 {creator.variants.length} 种写法</StatusPill>
-                        </div>
-                        <p className="text-sm leading-6 text-slate-600">
-                          关联 {creator.titleCount} 部作品，其中 {creator.publishedCount} 部已发布，
-                          {creator.unpublishedCount} 部仍是草稿。
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {creator.variants.map((variant) => (
-                            <StatusPill key={`${creator.slug}-${variant}`} tone="slate">
-                              {variant}
-                            </StatusPill>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="grid w-full gap-2 sm:grid-cols-2">
-                        <ActionButton
-                          onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                          className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          编辑代表作品
-                        </ActionButton>
-                        <ActionButton onClick={() => handleCopyCreatorName(creator)}>
-                          <Copy className="h-4 w-4" />
-                          {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
-                            ? "已复制"
-                            : "复制规范名称"}
-                        </ActionButton>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </SurfacePanel>
-
-          <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  缺少创作者署名的作品
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  这些作品还没有可公开展示的创作者身份。
-                </p>
-              </div>
-              <Users className="mt-1 h-5 w-5 text-cyan-500" />
-            </div>
-
-            {missingCreatorPreview.length === 0 ? (
-              <EmptyState
-                title="当前没有缺失署名"
-                description="当前作品都已有可用署名。"
-              />
-            ) : (
-              <div className="space-y-3">
-                {missingCreatorPreview.map((series) => (
-                  <div
-                    key={series.id}
-                    className="flex flex-col gap-3 rounded-[24px] border border-cyan-200 bg-cyan-50/70 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-base font-semibold text-slate-950">{series.title}</p>
-                        <StatusPill tone="slate">{series.id}</StatusPill>
-                        <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
-                          {series.isPublished ? "已发布" : "草稿"}
-                        </StatusPill>
-                      </div>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
-                        {" "}更新于 {formatDateLabel(series.updatedAt)}
-                      </p>
-                    </div>
-
-                    <ActionButton
-                      onClick={() => handleOpenSeries(series.id)}
-                      className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                      补创作者署名
-                    </ActionButton>
-                  </div>
-                ))}
-              </div>
-            )}
-          </SurfacePanel>
+          <NamingRiskSection
+            namingRiskPreview={namingRiskPreview}
+            handleOpenSeries={handleOpenSeries}
+            handleCopyCreatorName={handleCopyCreatorName}
+            copyFeedback={copyFeedback}
+          />
+          <MissingCreditsSection
+            missingCreatorPreview={missingCreatorPreview}
+            handleOpenSeries={handleOpenSeries}
+          />
         </div>
 
-        <SurfacePanel appearance="light" accent="amber" className="space-y-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  旧 author 兼容项
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  这些作品还能读，但还没真正迁进 Creator / SeriesCredit。
-                </p>
-            </div>
-            <BookOpen className="mt-1 h-5 w-5 text-amber-500" />
-          </div>
+        <LegacyAuthorSection
+          legacyAuthorPreview={legacyAuthorPreview}
+          handleOpenSeries={handleOpenSeries}
+        />
 
-          {legacyAuthorPreview.length === 0 ? (
-              <EmptyState
-                title="当前没有兼容项"
-                description="署名已不再依赖旧 author 字段。"
-              />
-          ) : (
-            <div className="space-y-3">
-              {legacyAuthorPreview.map((series) => (
-                <div
-                  key={`legacy-author-${series.id}`}
-                  className="flex flex-col gap-3 rounded-[24px] border border-amber-200 bg-amber-50/70 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-slate-950">{series.title}</p>
-                      <StatusPill tone="slate">{series.id}</StatusPill>
-                      <StatusPill tone="amber">旧 author 兼容层</StatusPill>
-                    </div>
-                    <p className="text-sm leading-6 text-slate-600">
-                      当前署名：<span className="font-medium text-slate-950">{series.author || "未填写"}</span> |{" "}
-                      {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)}
-                    </p>
-                  </div>
+        <CreatorDirectorySection
+          filteredCreators={filteredCreators}
+          expandedCreators={expandedCreators}
+          audit={audit}
+          handleOpenSeries={handleOpenSeries}
+          handleOpenSeriesLibraryByCreator={handleOpenSeriesLibraryByCreator}
+          handleCopyCreatorName={handleCopyCreatorName}
+          handleOpenCreator={handleOpenCreator}
+          handleOpenStorefrontSeries={handleOpenStorefrontSeries}
+          handleToggleCreatorExpanded={handleToggleCreatorExpanded}
+          copyFeedback={copyFeedback}
+        />
 
-                  <ActionButton
-                    onClick={() => handleOpenSeries(series.id)}
-                    className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                    迁到真实 credits
-                  </ActionButton>
-                </div>
-              ))}
-            </div>
-          )}
-        </SurfacePanel>
-
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                创作者目录
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                在一个地方核对覆盖率、命名状态和前台路径。
-              </p>
-            </div>
-            <p className="text-sm text-slate-500">
-              还有 {audit.stats.unpublishedSeriesCount} 部草稿作品和 {audit.stats.namingRiskCreatorCount} 处命名风险需要处理
-            </p>
-          </div>
-
-          {filteredCreators.length === 0 ? (
-            <EmptyState
-              title="当前筛选下没有匹配的创作者条目"
-              description="清空搜索词，或切回“全部创作者”查看完整目录。"
-            />
-          ) : (
-            <div className="grid gap-4 xl:grid-cols-2">
-              {filteredCreators.map((creator) => {
-                const isExpanded = expandedCreators.includes(creator.slug);
-
-                return (
-                  <article
-                    key={creator.slug}
-                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
-                  >
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-[1.3rem] font-semibold tracking-tight text-slate-950">
-                            {creator.name}
-                          </h3>
-                          <StatusPill tone={creator.hasNamingRisk ? "amber" : "emerald"}>
-                            {creator.hasNamingRisk ? "命名待清理" : "命名稳定"}
-                          </StatusPill>
-                        </div>
-
-                        <p className="text-sm leading-6 text-slate-600">
-                          代表作品：{creator.spotlightSeries?.title || "暂未设置"} | 前台已就绪{" "}
-                          {creator.readySeriesCount} 部 | 最近更新于 {formatDateLabel(creator.latestUpdatedAt)}
-                        </p>
-
-                        {creator.topGenres.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {creator.topGenres.map((genre) => (
-                              <StatusPill key={`${creator.slug}-${genre}`} tone="slate">
-                                {genre}
-                              </StatusPill>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="grid min-w-[220px] gap-3 sm:grid-cols-2">
-                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            作品数
-                          </p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.titleCount}</p>
-                        </div>
-                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            资料完整度
-                          </p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-950">
-                            {formatPercent(creator.metadataCoverageScore)}
-                          </p>
-                        </div>
-                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            已发布
-                          </p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.publishedCount}</p>
-                        </div>
-                        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            前台已就绪
-                          </p>
-                          <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.readySeriesCount}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {creator.variants.length > 1 ? (
-                      <div className="mt-4 rounded-[24px] border border-amber-200 bg-amber-50/70 px-4 py-4">
-                        <p className="text-sm font-semibold text-amber-900">
-                          请把这些写法合并成一个稳定的公开创作者名称：
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {creator.variants.map((variant) => (
-                            <StatusPill key={`${creator.slug}-variant-${variant}`} tone="amber">
-                              {variant}
-                            </StatusPill>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-
-                    <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                      <ActionButton
-                        onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                        className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                        编辑代表作品
-                      </ActionButton>
-                      <ActionButton onClick={() => handleOpenSeriesLibraryByCreator(creator.name)}>
-                        <Search className="h-4 w-4" />
-                        在作品库中搜索
-                      </ActionButton>
-                      <ActionButton onClick={() => handleCopyCreatorName(creator)}>
-                        <Copy className="h-4 w-4" />
-                        {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
-                          ? "已复制"
-                          : "复制规范名称"}
-                      </ActionButton>
-                      <ActionButton onClick={() => handleOpenCreator(creator.path)}>
-                        <Eye className="h-4 w-4" />
-                        打开前台创作者页
-                      </ActionButton>
-                      {creator.spotlightSeries?.id ? (
-                        <ActionButton onClick={() => handleOpenStorefrontSeries(creator.spotlightSeries.id)}>
-                          <ArrowUpRight className="h-4 w-4" />
-                          查看前台代表作品
-                        </ActionButton>
-                      ) : null}
-                      <ActionButton onClick={() => handleToggleCreatorExpanded(creator.slug)}>
-                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        {isExpanded ? "收起关联作品" : `查看关联作品（${creator.titleCount}）`}
-                      </ActionButton>
-                    </div>
-
-                    {isExpanded ? (
-                      <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-950">关联作品</p>
-                            <p className="mt-1 text-sm leading-6 text-slate-600">
-                              用这份清单继续清理作品级署名字段，并复核前台作品页是否已经跟上。
-                            </p>
-                          </div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            共 {creator.series.length} 部
-                          </p>
-                        </div>
-
-                        <div className="mt-4 space-y-3">
-                          {creator.series.map((series) => (
-                            <div
-                              key={`${creator.slug}-${series.id}`}
-                              className="flex flex-col gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 xl:flex-row xl:items-center xl:justify-between"
-                            >
-                              <div className="space-y-2">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-base font-semibold text-slate-950">{series.title}</p>
-                                  <StatusPill tone="slate">{series.id}</StatusPill>
-                                  <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
-                                    {series.isPublished ? "已发布" : "草稿"}
-                                  </StatusPill>
-                                </div>
-                                <p className="text-sm leading-6 text-slate-600">
-                                  {series.type === "novel" ? "小说" : "漫画"} |{" "}
-                                  {formatSeriesStatusLabel(series.status)} | 更新于{" "}
-                                  {formatDateLabel(series.updatedAt)}
-                                </p>
-                                <p className="text-sm leading-6 text-slate-600">
-                                  资料状态：{" "}
-                                  <span className="text-slate-950">{getSeriesMetadataSummary(series)}</span>
-                                </p>
-                              </div>
-
-                              <div className="grid w-full gap-2 sm:grid-cols-2">
-                                <ActionButton
-                                  onClick={() => handleOpenSeries(series.id)}
-                                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                                >
-                                  <Edit3 className="h-4 w-4" />
-                                  编辑作品
-                                </ActionButton>
-                                {series.isPublished ? (
-                                  <ActionButton onClick={() => handleOpenStorefrontSeries(series.id)}>
-                                    <ArrowUpRight className="h-4 w-4" />
-                                    查看前台页
-                                  </ActionButton>
-                                ) : null}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                  </article>
-                );
-              })}
-            </div>
-          )}
-
-          {audit.creators.length === 0 &&
-          audit.missingAuthorSeries.length === 0 &&
-          legacyAuthorPreview.length === 0 ? (
-            <EmptyState
-              title="当前还没有创作者数据"
-              description="先到作品详情页补署名。"
-            />
-          ) : null}
-        </SurfacePanel>
+        {audit.creators.length === 0 &&
+        audit.missingAuthorSeries.length === 0 &&
+        legacyAuthorPreview.length === 0 ? (
+          <EmptyState
+            title="当前还没有创作者数据"
+            description="先到作品详情页补署名。"
+          />
+        ) : null}
 
         <SurfacePanel appearance="light" accent="emerald">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -975,4 +448,3 @@ export default function AdminCreatorsPage() {
     </AdminShell>
   );
 }
-
