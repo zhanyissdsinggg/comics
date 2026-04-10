@@ -4,184 +4,34 @@ export const dynamic = 'force-dynamic';
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Plus, RefreshCw } from 'lucide-react';
 
 import { AdminLayout } from '../../../components/admin/AdminLayout';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { AdminDataState } from '@/components/admin/common/AdminDataState';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { Modal } from '@/components/admin/common/Modal';
+import { AdminPageSection } from '@/components/admin/common/AdminWorkspacePrimitives';
 import {
-  AdminBadge,
-  AdminDataTable,
-  AdminFormField,
-  AdminMetricCard,
-  AdminPageSection,
-  AdminTableHeader,
-  AdminTableRow,
-  AdminTabs,
-  adminInputClassName,
-  adminSelectClassName,
-  adminTextareaClassName,
-} from '@/components/admin/common/AdminWorkspacePrimitives';
-import { Button } from '@/components/ui/button';
-import { adminFetchJson, normalizeAdminErrorMessage } from '@/lib/adminApiClient';
-
-const MARKETING_TABS = [
-  { value: 'campaigns', label: '活动目录' },
-  { value: 'stats', label: '总览' },
-  { value: 'by-segment', label: '分人群' },
-  { value: 'by-type', label: '分类型' },
-];
-
-const INITIAL_FORM = {
-  name: '',
-  description: '',
-  type: 'email',
-  status: 'draft',
-  targetSegment: 'all',
-  budget: '',
-  startDate: '',
-  endDate: '',
-};
-
-const EMPTY_FEEDBACK = { type: '', message: '' };
-
-const TYPE_OPTIONS = ['email', 'push', 'banner', 'discount'];
-const STATUS_OPTIONS = ['draft', 'active', 'paused', 'completed'];
-const SEGMENT_OPTIONS = ['all', 'vip', 'new', 'at-risk', 'high-value'];
-
-function formatCampaignTypeLabel(value) {
-  if (value === 'push') return '推送';
-  if (value === 'banner') return '横幅';
-  if (value === 'discount') return '折扣';
-  return '邮件';
-}
-
-function formatCampaignStatusLabel(value) {
-  if (value === 'active') return '进行中';
-  if (value === 'paused') return '已暂停';
-  if (value === 'completed') return '已完成';
-  return '草稿';
-}
-
-function formatSegmentLabel(value) {
-  if (value === 'vip') return 'VIP 读者';
-  if (value === 'new') return '新读者';
-  if (value === 'at-risk') return '流失风险读者';
-  if (value === 'high-value') return '高价值读者';
-  return '全部读者';
-}
-
-function getErrorMessage(error, fallback) {
-  return normalizeAdminErrorMessage(error, fallback);
-}
-
-function formatCurrency(value) {
-  const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(Number.isFinite(amount) ? amount : 0);
-}
-
-function formatNumber(value) {
-  const amount = Number(value || 0);
-  return new Intl.NumberFormat('zh-CN').format(Number.isFinite(amount) ? amount : 0);
-}
-
-function formatPercent(value) {
-  const amount = Number(value || 0);
-  return `${amount.toFixed(1)}%`;
-}
-
-function formatDate(value, fallback = '未安排') {
-  if (!value) return fallback;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '日期无效';
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  }).format(date);
-}
-
-function getStatusTone(status) {
-  switch (String(status || '').toLowerCase()) {
-    case 'active':
-      return 'success';
-    case 'paused':
-      return 'warning';
-    case 'completed':
-      return 'accent';
-    default:
-      return 'default';
-  }
-}
-
-function getCampaignMetrics(campaign) {
-  const latest = Array.isArray(campaign?.analytics) ? campaign.analytics[0] : null;
-  return {
-    revenue: Number(latest?.revenue || 0),
-    converted: Number(latest?.converted || 0),
-    roi: Number(latest?.roi || 0),
-  };
-}
-
-async function requestPayload(path, init = {}) {
-  const { response, data } = await adminFetchJson(path, init);
-  if (!response.ok) {
-    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
-  }
-  return data || {};
-}
-
-function buildDateQuery(dateRange) {
-  const params = new URLSearchParams();
-  if (dateRange.startDate) params.set('startDate', dateRange.startDate);
-  if (dateRange.endDate) params.set('endDate', dateRange.endDate);
-  const query = params.toString();
-  return query ? `?${query}` : '';
-}
-
-function buildCampaignPayload(formData) {
-  return {
-    name: formData.name.trim(),
-    description: formData.description.trim() || undefined,
-    type: formData.type || 'email',
-    status: formData.status || 'draft',
-    targetSegment: formData.targetSegment || 'all',
-    budget: formData.budget === '' ? undefined : Number(formData.budget),
-    startDate: formData.startDate || undefined,
-    endDate: formData.endDate || undefined,
-  };
-}
-
-function tabMeta(tabKey) {
-  switch (tabKey) {
-    case 'stats':
-      return {
-        title: '表现总览',
-        description: '用紧凑视图看清所选时间范围内的预算、花费、收入和转化。',
-      };
-    case 'by-segment':
-      return {
-        title: '人群表现',
-        description: '对比不同读者人群的效果，但别把页面做成一堵分析面板墙。',
-      };
-    case 'by-type':
-      return {
-        title: '类型表现',
-        description: '先看哪种投放类型真正有效，再决定要不要继续增加活动噪音。',
-      };
-    default:
-      return {
-        title: '活动目录',
-        description: '查看在线和草稿活动时，只保留运营真正需要的事实：范围、排期、花费和结果。',
-      };
-  }
-}
+  CreateCampaignModalContent,
+  MarketingCampaignsSection,
+  MarketingControlsSection,
+  MarketingSegmentsSection,
+  MarketingStatsSection,
+  MarketingSummaryCards,
+  MarketingTypesSection,
+} from '@/components/admin/marketing-workspace/sections';
+import {
+  buildCampaignPayload,
+  buildDateQuery,
+  EMPTY_FEEDBACK,
+  getErrorMessage,
+  INITIAL_FORM,
+  MARKETING_TABS,
+  requestPayload,
+  SEGMENT_OPTIONS,
+  STATUS_OPTIONS,
+  tabMeta,
+  TYPE_OPTIONS,
+} from '@/components/admin/marketing-workspace/utils';
 
 export default function AdminMarketingPage() {
   const [viewMode, setViewMode] = useState('campaigns');
@@ -210,7 +60,9 @@ export default function AdminMarketingPage() {
     queryKey: ['admin', 'marketing', 'stats', dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats${dateQuery}`, { cache: 'no-store' });
+      const data = await requestPayload(`/api/admin/marketing/stats${dateQuery}`, {
+        cache: 'no-store',
+      });
       return data?.stats || null;
     },
   });
@@ -219,7 +71,9 @@ export default function AdminMarketingPage() {
     queryKey: ['admin', 'marketing', 'segments', dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats/by-segment${dateQuery}`, { cache: 'no-store' });
+      const data = await requestPayload(`/api/admin/marketing/stats/by-segment${dateQuery}`, {
+        cache: 'no-store',
+      });
       return Array.isArray(data?.segments) ? data.segments : [];
     },
   });
@@ -228,7 +82,9 @@ export default function AdminMarketingPage() {
     queryKey: ['admin', 'marketing', 'types', dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats/by-type${dateQuery}`, { cache: 'no-store' });
+      const data = await requestPayload(`/api/admin/marketing/stats/by-type${dateQuery}`, {
+        cache: 'no-store',
+      });
       return Array.isArray(data?.types) ? data.types : [];
     },
   });
@@ -342,271 +198,45 @@ export default function AdminMarketingPage() {
       subtitle="在不让页面重新滑回吵闹增长后台的前提下，管理活动规划并读取结果。"
     >
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <AdminMetricCard
-            label="当前活动"
-            value={formatNumber(metricSnapshot.totalCampaigns)}
-            detail="当前工作区内活动总数。"
-            tone="accent"
-          />
-          <AdminMetricCard
-            label="进行中"
-            value={formatNumber(metricSnapshot.activeCampaigns)}
-            detail="仍在运行或排期内保持在线的活动。"
-          />
-          <AdminMetricCard
-            label="当前预算"
-            value={formatCurrency(metricSnapshot.totalBudget)}
-            detail="所选统计时间范围内的计划预算。"
-          />
-          <AdminMetricCard
-            label="平均 ROI"
-            value={formatPercent(metricSnapshot.avgRoi)}
-            detail="当前活动组合效果的快速方向判断。"
-          />
-        </div>
+        <MarketingSummaryCards metricSnapshot={metricSnapshot} />
 
         <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
 
-        <AdminPageSection
-          title="活动控制"
-          description="用一行克制的控制区完成视图切换、时间范围调整和新建活动。"
-          action={
-            <div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" onClick={() => refreshAll()}>
-                <RefreshCw className="size-4" />
-                刷新
-              </Button>
-              <Button type="button" onClick={openCreateModal}>
-                <Plus className="size-4" />
-                新建活动
-              </Button>
-            </div>
-          }
-        >
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
-            <div className="space-y-3">
-              <AdminTabs items={MARKETING_TABS} value={viewMode} onChange={setViewMode} />
-              <p className="text-sm leading-6 text-slate-500">{tabContentMeta.description}</p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <AdminFormField label="开始日期">
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(event) => setRangeValue('startDate', event.target.value)}
-                  max={dateRange.endDate || undefined}
-                  className={adminInputClassName}
-                />
-              </AdminFormField>
-              <AdminFormField label="结束日期">
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(event) => setRangeValue('endDate', event.target.value)}
-                  min={dateRange.startDate || undefined}
-                  className={adminInputClassName}
-                />
-              </AdminFormField>
-            </div>
-          </div>
-        </AdminPageSection>
+        <MarketingControlsSection
+          tabs={MARKETING_TABS}
+          viewMode={viewMode}
+          tabContentMeta={tabContentMeta}
+          dateRange={dateRange}
+          onViewModeChange={setViewMode}
+          onRangeValueChange={setRangeValue}
+          onRefresh={() => refreshAll()}
+          onOpenCreate={openCreateModal}
+        />
 
         <AdminPageSection title={tabContentMeta.title} description={tabContentMeta.description}>
           {viewMode === 'campaigns' ? (
-            <AdminDataState
-              isLoading={campaignsQuery.isLoading}
-              hasData={campaigns.length > 0}
-              emptyMessage="当前视图下还没有可用的活动。"
-              wrap={false}
-            >
-              <AdminDataTable>
-                <table className="min-w-full text-sm">
-                  <AdminTableHeader>
-                    <tr>
-                      <th className="px-4 py-4">活动</th>
-                      <th className="px-4 py-4">状态</th>
-                      <th className="px-4 py-4">受众</th>
-                      <th className="px-4 py-4">排期</th>
-                      <th className="px-4 py-4">预算</th>
-                      <th className="px-4 py-4">结果</th>
-                      <th className="px-4 py-4 text-right">操作</th>
-                    </tr>
-                  </AdminTableHeader>
-                  <tbody>
-                    {campaigns.map((campaign) => {
-                      const metric = getCampaignMetrics(campaign);
-                      const schedule =
-                        campaign.startDate || campaign.endDate
-                          ? `${formatDate(campaign.startDate, '任意时间')} 至 ${formatDate(campaign.endDate, '未结束')}`
-                          : '未安排';
-
-                      return (
-                        <AdminTableRow key={campaign.id || campaign.name}>
-                          <td className="px-4 py-4">
-                            <div className="space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="font-semibold text-slate-950">
-                                  {campaign.name || '未命名活动'}
-                                </p>
-                                <AdminBadge tone="default">
-                                  {formatCampaignTypeLabel(campaign.type)}
-                                </AdminBadge>
-                              </div>
-                              {campaign.description ? (
-                                <p className="max-w-md text-sm leading-6 text-slate-600">
-                                  {campaign.description}
-                                </p>
-                              ) : null}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <AdminBadge tone={getStatusTone(campaign.status)}>
-                              {formatCampaignStatusLabel(campaign.status)}
-                            </AdminBadge>
-                          </td>
-                          <td className="px-4 py-4 text-slate-700">
-                            <div className="space-y-1">
-                              <p>{formatSegmentLabel(campaign.targetSegment)}</p>
-                              <p className="text-xs text-slate-500">
-                                创建于 {formatDate(campaign.createdAt, '未知')}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-slate-700">{schedule}</td>
-                          <td className="px-4 py-4 text-slate-700">
-                            <div className="space-y-1">
-                              <p>预算 {formatCurrency(campaign.budget)}</p>
-                              <p className="text-xs text-slate-500">
-                                已花费 {formatCurrency(campaign.spent)}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-slate-700">
-                            <div className="space-y-1">
-                              <p>收入 {formatCurrency(metric.revenue)}</p>
-                              <p className="text-xs text-slate-500">
-                                {formatNumber(metric.converted)} 次转化，ROI {formatPercent(metric.roi)}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setSelectedCampaign(campaign);
-                                setIsDeleteModalOpen(true);
-                              }}
-                              disabled={deleteCampaignMutation.isPending}
-                            >
-                              {deleteCampaignMutation.isPending && selectedCampaign?.id === campaign.id
-                                ? '正在删除...'
-                                : '删除'}
-                            </Button>
-                          </td>
-                        </AdminTableRow>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </AdminDataTable>
-            </AdminDataState>
+            <MarketingCampaignsSection
+              campaignsQuery={campaignsQuery}
+              campaigns={campaigns}
+              onOpenDelete={(campaign) => {
+                setSelectedCampaign(campaign);
+                setIsDeleteModalOpen(true);
+              }}
+              deletePending={deleteCampaignMutation.isPending}
+              selectedCampaignId={selectedCampaign?.id}
+            />
           ) : null}
 
           {viewMode === 'stats' ? (
-            <AdminDataState
-              isLoading={statsQuery.isLoading}
-              hasData={Boolean(stats)}
-              emptyMessage="当前时间范围内还没有可用的营销表现汇总。"
-              wrap={false}
-            >
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <AdminMetricCard label="活动总数" value={formatNumber(stats?.totalCampaigns)} detail="当前时间窗口内统计到的活动数量。" tone="accent" />
-                <AdminMetricCard label="进行中活动" value={formatNumber(stats?.activeCampaigns)} detail="当前时间窗口内仍在进行的活动。" />
-                <AdminMetricCard label="总预算" value={formatCurrency(stats?.totalBudget)} detail="计划投入预算。" />
-                <AdminMetricCard label="已花费" value={formatCurrency(stats?.totalSpent)} detail="目前已实际发生的花费。" />
-                <AdminMetricCard label="归因收入" value={formatCurrency(stats?.totalRevenue)} detail="当前已归因到活动的收入。" />
-                <AdminMetricCard label="平均 ROI" value={formatPercent(stats?.avgRoi)} detail={`累计 ${formatNumber(stats?.totalConverted)} 次转化`} />
-              </div>
-            </AdminDataState>
+            <MarketingStatsSection statsQuery={statsQuery} stats={stats} />
           ) : null}
 
           {viewMode === 'by-segment' ? (
-            <AdminDataState
-              isLoading={segmentsQuery.isLoading}
-              hasData={segments.length > 0}
-              emptyMessage="当前时间范围内还没有人群表现数据。"
-              wrap={false}
-            >
-              <div className="grid gap-4 xl:grid-cols-2">
-                {segments.map((segment) => (
-                  <div
-                    key={segment.segment || 'unknown'}
-                    className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                          人群
-                        </p>
-                        <h3 className="mt-2 text-xl font-semibold text-slate-950">
-                          {formatSegmentLabel(segment.segment)}
-                        </h3>
-                      </div>
-                      <AdminBadge tone="default">{formatNumber(segment.count)} 个活动</AdminBadge>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                      <AdminMetricCard label="预算" value={formatCurrency(segment.budget)} detail="计划投入。" />
-                      <AdminMetricCard label="已花费" value={formatCurrency(segment.spent)} detail="实际花费。" />
-                      <AdminMetricCard label="收入" value={formatCurrency(segment.revenue)} detail="已归因收入。" tone="accent" />
-                      <AdminMetricCard label="转化" value={formatNumber(segment.converted)} detail="完成结果数。" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </AdminDataState>
+            <MarketingSegmentsSection segmentsQuery={segmentsQuery} segments={segments} />
           ) : null}
 
           {viewMode === 'by-type' ? (
-            <AdminDataState
-              isLoading={typesQuery.isLoading}
-              hasData={types.length > 0}
-              emptyMessage="当前时间范围内还没有类型级别的营销表现数据。"
-              wrap={false}
-            >
-              <AdminDataTable>
-                <table className="min-w-full text-sm">
-                  <AdminTableHeader>
-                    <tr>
-                      <th className="px-4 py-4">类型</th>
-                      <th className="px-4 py-4">活动数</th>
-                      <th className="px-4 py-4">预算</th>
-                      <th className="px-4 py-4">已花费</th>
-                      <th className="px-4 py-4">收入</th>
-                      <th className="px-4 py-4">转化</th>
-                    </tr>
-                  </AdminTableHeader>
-                  <tbody>
-                    {types.map((typeRow) => (
-                      <AdminTableRow key={typeRow.type || 'unknown'}>
-                        <td className="px-4 py-4 font-medium text-slate-950">
-                          {formatCampaignTypeLabel(typeRow.type)}
-                        </td>
-                        <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.count)}</td>
-                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.budget)}</td>
-                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.spent)}</td>
-                        <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.revenue)}</td>
-                        <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.converted)}</td>
-                      </AdminTableRow>
-                    ))}
-                  </tbody>
-                </table>
-              </AdminDataTable>
-            </AdminDataState>
+            <MarketingTypesSection typesQuery={typesQuery} types={types} />
           ) : null}
         </AdminPageSection>
       </div>
@@ -618,111 +248,16 @@ export default function AdminMarketingPage() {
         onClose={() => setIsCreateModalOpen(false)}
         size="xl"
       >
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <AdminFormField label="活动名称">
-              <input
-                value={formData.name}
-                onChange={(event) => setFormValue('name', event.target.value)}
-                className={adminInputClassName}
-                placeholder="春季回流活动"
-              />
-            </AdminFormField>
-
-            <AdminFormField label="受众人群">
-              <select
-                value={formData.targetSegment}
-                onChange={(event) => setFormValue('targetSegment', event.target.value)}
-                className={adminSelectClassName}
-              >
-                {SEGMENT_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {formatSegmentLabel(option)}
-                  </option>
-                ))}
-              </select>
-            </AdminFormField>
-
-            <AdminFormField label="活动类型">
-              <select
-                value={formData.type}
-                onChange={(event) => setFormValue('type', event.target.value)}
-                className={adminSelectClassName}
-              >
-                {TYPE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {formatCampaignTypeLabel(option)}
-                  </option>
-                ))}
-              </select>
-            </AdminFormField>
-
-            <AdminFormField label="状态">
-              <select
-                value={formData.status}
-                onChange={(event) => setFormValue('status', event.target.value)}
-                className={adminSelectClassName}
-              >
-                {STATUS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {formatCampaignStatusLabel(option)}
-                  </option>
-                ))}
-              </select>
-            </AdminFormField>
-
-            <AdminFormField label="预算">
-              <input
-                value={formData.budget}
-                onChange={(event) => setFormValue('budget', event.target.value)}
-                className={adminInputClassName}
-                inputMode="decimal"
-                placeholder="1500"
-              />
-            </AdminFormField>
-
-            <AdminFormField label="开始日期">
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(event) => setFormValue('startDate', event.target.value)}
-                className={adminInputClassName}
-              />
-            </AdminFormField>
-
-            <AdminFormField label="结束日期">
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(event) => setFormValue('endDate', event.target.value)}
-                className={adminInputClassName}
-              />
-            </AdminFormField>
-          </div>
-
-          <AdminFormField label="备注">
-            <textarea
-              value={formData.description}
-              onChange={(event) => setFormValue('description', event.target.value)}
-              rows={5}
-              className={adminTextareaClassName}
-              placeholder="简要写清这次活动想推动什么，以及运营需要重点观察什么。"
-            />
-          </AdminFormField>
-
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-              取消
-            </Button>
-            <Button
-              type="button"
-              onClick={handleCreateCampaign}
-              disabled={createCampaignMutation.isPending}
-            >
-              {createCampaignMutation.isPending ? '正在创建...' : '创建活动'}
-            </Button>
-          </div>
-        </div>
+        <CreateCampaignModalContent
+          formData={formData}
+          setFormValue={setFormValue}
+          segmentOptions={SEGMENT_OPTIONS}
+          typeOptions={TYPE_OPTIONS}
+          statusOptions={STATUS_OPTIONS}
+          onCancel={() => setIsCreateModalOpen(false)}
+          onSubmit={handleCreateCampaign}
+          isPending={createCampaignMutation.isPending}
+        />
       </Modal>
 
       <ConfirmDialog

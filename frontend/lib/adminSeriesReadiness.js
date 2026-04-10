@@ -73,7 +73,7 @@ export function getAdminSeriesReadiness(series) {
       weight: 15,
       hint:
         genres.length > 0
-          ? "题材标签已足够支持搜索、筛选、专题编排和相关推荐。"
+          ? "题材标签已足够支撑搜索、筛选、专题编排和相关推荐。"
           : "缺少题材标签会让筛选、相关推荐和首页编排都失去抓手。",
     },
     {
@@ -128,5 +128,6 @@ export function getAdminSeriesReadiness(series) {
       missingItems.length === 0
         ? "这部作品已经适合进入前台发现流、作品详情页和创作者导流路径。"
         : `优先补齐 ${topIssues.join("、")}，能最快改善前台可读性和读者信任感。`,
+    creatorIdentity,
   };
 }
