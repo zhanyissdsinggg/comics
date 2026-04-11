@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { AdminLayout } from '../../../components/admin/AdminLayout';
+import AdminShell from '@/components/admin/AdminShell';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { Modal } from '@/components/admin/common/Modal';
@@ -193,9 +193,9 @@ export default function AdminMarketingPage() {
   const tabContentMeta = tabMeta(viewMode);
 
   return (
-    <AdminLayout
+    <AdminShell
       title="营销活动"
-      subtitle="在不让页面重新滑回吵闹增长后台的前提下，管理活动规划并读取结果。"
+      subtitle="在不让页面滑回吵闹增长后台的前提下，管理活动规划并读取结果。"
     >
       <div className="space-y-6">
         <MarketingSummaryCards metricSnapshot={metricSnapshot} />
@@ -274,6 +274,6 @@ export default function AdminMarketingPage() {
           setSelectedCampaign(null);
         }}
       />
-    </AdminLayout>
+    </AdminShell>
   );
 }

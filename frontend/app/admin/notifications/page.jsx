@@ -2,62 +2,23 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import AdminShell from '@/components/admin/AdminShell';
+import {
+  NotificationsListSection,
+  NotificationsSummaryCards,
+} from '@/components/admin/notifications-workspace/sections';
+import {
+  searchFields,
+  sortFields,
+  sortOptions,
+} from '@/components/admin/notifications-workspace/utils';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { AdminListToolbar } from '@/components/admin/common/AdminListToolbar';
-import { AdminSelectionBar } from '@/components/admin/common/AdminSelectionBar';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { AdminTableShell } from '@/components/admin/common/AdminTableShell';
-import {
-  AdminMetricCard,
-  AdminPageSection,
-  AdminTableHeader,
-  AdminTableRow,
-} from '@/components/admin/common/AdminWorkspacePrimitives';
-import { Button } from '@/components/ui/button';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
-
-const searchFields = [
-  { field: 'id', type: 'string' },
-  { field: 'title', type: 'string' },
-  { field: 'content', type: 'string' },
-];
-
-const sortFields = [
-  { field: 'createdAt', type: 'date' },
-  { field: 'title', type: 'string' },
-];
-
-const sortOptions = [
-  { value: 'createdAt', label: '创建时间' },
-  { value: 'title', label: '标题' },
-];
-
-function getContentPreview(content) {
-  const text = String(content || '').replace(/\s+/g, ' ').trim();
-  return text.length > 120 ? `${text.slice(0, 120)}...` : text || '暂无通知正文';
-}
-
-function formatDate(value) {
-  if (!value) {
-    return '暂无';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return '暂无';
-  }
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
 
 export default function AdminNotificationsPage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
@@ -115,118 +76,47 @@ export default function AdminNotificationsPage() {
       subtitle="把真正发给读者的通知收在一个清爽列表里，方便检查质量、清理积压，而不是做成吵闹的活动看板。"
     >
       <div className="space-y-6">
-        <div className="grid gap-4 lg:grid-cols-3">
-          <AdminMetricCard
-            label="当前通知"
-            value={String(pagination.total)}
-            detail="当前搜索和排序条件下的通知数量。"
-            tone="accent"
-          />
-          <AdminMetricCard
-            label="有标题"
-            value={String(titledCount)}
-            detail="已经具备读者可见标题的通知。"
-          />
-          <AdminMetricCard
-            label="有正文"
-            value={String(bodyCount)}
-            detail="包含正文而不是只剩标题壳子的通知。"
-          />
-        </div>
+        <NotificationsSummaryCards
+          total={pagination.total}
+          titledCount={titledCount}
+          bodyCount={bodyCount}
+        />
 
         <AdminFeedbackBanner
           feedback={feedback}
           onDismiss={() => setFeedback({ type: '', message: '' })}
         />
 
-        <AdminPageSection
-          title="通知列表"
-          description="在这里检查消息质量、清理过期通知，并确认整个通知队列读起来足够清楚。"
-        >
-          <AdminListToolbar
-            searchTerm={searchTerm}
-            onSearchTermChange={setSearchTerm}
-            searchPlaceholder="搜索通知 ID、标题或正文"
-            onOpenFilters={() => setIsSortModalOpen(true)}
-            sortOrder={sortOrder}
-            onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          />
-
-          <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => setIsDeleteConfirmOpen(true)}
-              disabled={bulkDeleteMutation.isPending}
-            >
-              {bulkDeleteMutation.isPending ? '正在删除...' : '删除通知'}
-            </Button>
-          </AdminSelectionBar>
-
-          <AdminTableShell
-            isError={isError}
-            errorMessage={error?.message || '通知加载失败。'}
-            onRetry={refetch}
-            isLoading={isLoading}
-            hasItems={notifications.length > 0}
-            emptyMessage="当前视图下还没有匹配的通知。"
-            pagination={pagination}
-            page={page}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-          >
-            <table className="min-w-full text-sm">
-              <AdminTableHeader>
-                <tr>
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.length === notifications.length && notifications.length > 0}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectAll(notifications);
-                          return;
-                        }
-
-                        clearSelection();
-                      }}
-                      className="rounded"
-                      aria-label="选择全部通知"
-                    />
-                  </th>
-                  <th className="px-4 py-3">通知</th>
-                  <th className="px-4 py-3">预览</th>
-                  <th className="px-4 py-3">创建时间</th>
-                </tr>
-              </AdminTableHeader>
-              <tbody>
-                {notifications.map((notification) => (
-                  <AdminTableRow key={notification.id}>
-                    <td className="px-4 py-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedIdsSet.has(notification.id)}
-                        onChange={() => toggleSelect(notification.id)}
-                        className="rounded"
-                        aria-label={`选择通知 ${notification.id}`}
-                      />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="font-medium text-slate-950">{notification.title || '未命名通知'}</div>
-                      <div className="mt-1 text-xs text-slate-500">{notification.id}</div>
-                    </td>
-                    <td className="max-w-[36rem] px-4 py-4 text-slate-600">
-                      {getContentPreview(notification.content)}
-                    </td>
-                    <td className="px-4 py-4 text-slate-600">{formatDate(notification.createdAt)}</td>
-                  </AdminTableRow>
-                ))}
-              </tbody>
-            </table>
-          </AdminTableShell>
-        </AdminPageSection>
+        <NotificationsListSection
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          onOpenSortModal={() => setIsSortModalOpen(true)}
+          sortOrder={sortOrder}
+          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          selectedIds={selectedIds}
+          clearSelection={clearSelection}
+          onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
+          deletePending={bulkDeleteMutation.isPending}
+          isError={isError}
+          errorMessage={error?.message || '通知加载失败。'}
+          onRetry={refetch}
+          isLoading={isLoading}
+          notifications={notifications}
+          pagination={pagination}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          selectedIdsSet={selectedIdsSet}
+          onSelectAll={(checked) => {
+            if (checked) {
+              selectAll(notifications);
+              return;
+            }
+            clearSelection();
+          }}
+          onToggleSelect={toggleSelect}
+        />
 
         <AdminSortModal
           isOpen={isSortModalOpen}

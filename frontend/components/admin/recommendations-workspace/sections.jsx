@@ -48,9 +48,7 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
       <AdminDataState
         isLoading={slotsQuery.isLoading}
         hasData={slots.length > 0}
-        emptyMessage={
-          slotsQuery.isError ? slotsQuery.errorMessage : "当前还没有推荐位。"
-        }
+        emptyMessage={slotsQuery.isError ? slotsQuery.errorMessage : "当前还没有推荐位。"}
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -118,9 +116,7 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
       <AdminDataState
         isLoading={rankingsQuery.isLoading}
         hasData={rankings.length > 0}
-        emptyMessage={
-          rankingsQuery.isError ? rankingsQuery.errorMessage : "当前还没有榜单规则。"
-        }
+        emptyMessage={rankingsQuery.isError ? rankingsQuery.errorMessage : "当前还没有榜单规则。"}
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -128,7 +124,9 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
             <RecommendationCard
               key={ranking.id}
               title={ranking.name || "未命名榜单规则"}
-              description={`${formatRankingTypeLabel(ranking.rankingType)} · ${formatTimeRangeLabel(ranking.timeRange)} · ${formatSeriesTypeLabel(ranking.seriesType)}`}
+              description={`${formatRankingTypeLabel(ranking.rankingType)} · ${formatTimeRangeLabel(
+                ranking.timeRange,
+              )} · ${formatSeriesTypeLabel(ranking.seriesType)}`}
               meta={
                 <AdminBadge tone={ranking.active ? "success" : "default"}>
                   {ranking.active ? "启用中" : "已暂停"}
@@ -187,8 +185,17 @@ export function AnalyticsSection({
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <AdminMetricCard label="曝光" value={formatNumber(analyticsSummary.impressions)} detail="当前已加载的分析记录。" tone="accent" />
-          <AdminMetricCard label="详情访问" value={formatNumber(analyticsSummary.views)} detail="进入作品详情页的次数。" />
+          <AdminMetricCard
+            label="曝光"
+            value={formatNumber(analyticsSummary.impressions)}
+            detail="当前已加载的分析记录。"
+            tone="accent"
+          />
+          <AdminMetricCard
+            label="详情访问"
+            value={formatNumber(analyticsSummary.views)}
+            detail="进入作品详情页的次数。"
+          />
           <AdminMetricCard label="点击" value={formatNumber(analyticsSummary.clicks)} detail="推荐位点击量。" />
           <AdminMetricCard label="转化" value={formatNumber(analyticsSummary.conversions)} detail="被跟踪到的下游动作。" />
         </div>
@@ -220,17 +227,23 @@ export function AnalyticsSection({
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <AdminMetricCard label="平均点击率" value={formatPercent(averageCtr)} detail="点击数 / 曝光数。" />
-        <AdminMetricCard label="平均转化率" value={formatPercent(averageConversionRate)} detail="转化数 / 点击数。" />
+        <AdminMetricCard
+          label="平均点击率"
+          value={formatPercent(averageCtr)}
+          detail="点击数 / 曝光数。"
+        />
+        <AdminMetricCard
+          label="平均转化率"
+          value={formatPercent(averageConversionRate)}
+          detail="转化数 / 点击数。"
+        />
       </div>
 
       <div className="mt-6">
         <AdminDataState
           isLoading={analyticsQuery.isLoading}
           hasData={analytics.length > 0}
-          emptyMessage={
-            analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选条件下没有分析记录。"
-          }
+          emptyMessage={analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选条件下没有分析记录。"}
           wrap={false}
         >
           <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 shadow-[var(--gush-shadow-soft)]">
@@ -264,7 +277,9 @@ export function AnalyticsSection({
                             <p className="text-xs text-slate-500">{slotMeta.token}</p>
                           </div>
                         </td>
-                        <td className="px-4 py-4 font-mono text-xs text-slate-600">{item.seriesId || "未知作品"}</td>
+                        <td className="px-4 py-4 font-mono text-xs text-slate-600">
+                          {item.seriesId || "未知作品"}
+                        </td>
                         <td className="px-4 py-4">{formatNumber(item.impressions)}</td>
                         <td className="px-4 py-4">{formatNumber(item.views)}</td>
                         <td className="px-4 py-4">{formatNumber(item.clicks)}</td>
