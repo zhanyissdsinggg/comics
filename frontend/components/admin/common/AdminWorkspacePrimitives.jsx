@@ -4,17 +4,20 @@ import SurfacePanel from "@/components/common/SurfacePanel";
 import { cn } from "@/lib/utils";
 
 export const adminInputClassName =
-  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/55 disabled:cursor-not-allowed disabled:opacity-60";
 
 export const adminTextareaClassName =
-  "w-full rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/55 disabled:cursor-not-allowed disabled:opacity-60";
 
 export const adminSelectClassName =
-  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 text-sm text-slate-950 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/55 disabled:cursor-not-allowed disabled:opacity-60";
+
+export const adminCheckboxClassName =
+  "h-4 w-4 rounded-[6px] border border-black/15 bg-white text-slate-950 accent-slate-950 shadow-[0_1px_2px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:ring-[3px] focus:ring-slate-200/80";
 
 const badgeToneClasses = {
   default: "border-[color:var(--gush-border)] bg-white text-slate-600",
-  accent: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950",
+  accent: "border-[color:var(--gush-border-strong)] bg-white text-slate-950",
   success: "border-emerald-200 bg-emerald-50 text-emerald-700",
   warning: "border-amber-200 bg-amber-50 text-amber-700",
   danger: "border-red-200 bg-red-50 text-red-700",
@@ -59,8 +62,8 @@ export function AdminMetricCard({ label, value, detail, tone = "default", classN
       className={cn(
         "rounded-[24px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
         tone === "accent"
-          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]"
-          : "border-[color:var(--gush-border)] bg-white/92",
+          ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.045)]"
+          : "border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
         className,
       )}
     >
@@ -124,7 +127,7 @@ export function AdminTabs({ items, value, onChange, className = "" }) {
             className={cn(
               "rounded-full border px-4 py-2 text-sm font-semibold transition",
               isActive
-                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
                 : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
             )}
           >
@@ -140,7 +143,8 @@ export function AdminDataTable({ className = "", children }) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 shadow-[var(--gush-shadow-soft)]",
+        "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] shadow-[0_14px_32px_rgba(15,23,42,0.04)]",
+        "ring-1 ring-black/[0.02]",
         className,
       )}
     >

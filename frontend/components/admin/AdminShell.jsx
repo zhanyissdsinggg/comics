@@ -58,7 +58,7 @@ const NAV_GROUPS = [
   {
     label: "发现与前台",
     items: [
-      { label: "前台体检", href: "/admin/storefront", icon: Search, match: ["/admin/storefront"] },
+      { label: "前台巡检", href: "/admin/storefront", icon: Search, match: ["/admin/storefront"] },
       { label: "内容编排", href: "/admin/merchandising", icon: Sparkles, match: ["/admin/merchandising"] },
       { label: "推荐位", href: "/admin/recommendations", icon: Sparkles, match: ["/admin/recommendations"] },
       { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
@@ -89,7 +89,7 @@ const NAV_GROUPS = [
       { label: "品牌素材", href: "/admin/branding", icon: Image, match: ["/admin/branding"] },
       { label: "邮件设置", href: "/admin/email-settings", icon: Mail, match: ["/admin/email-settings"] },
       { label: "邮件任务", href: "/admin/email-jobs", icon: MailCheck, match: ["/admin/email-jobs"] },
-      { label: "跟踪设置", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
+      { label: "追踪设置", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
       { label: "后台成员", href: "/admin/members", icon: ShieldCheck, match: ["/admin/members"] },
       { label: "地区", href: "/admin/regions", icon: Globe, match: ["/admin/regions"] },
       { label: "系统设置", href: "/admin/settings", icon: Settings, match: ["/admin/settings"] },
@@ -102,7 +102,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/analytics", label: "数据分析" },
   { match: "/admin/series", label: "作品" },
   { match: "/admin/creators", label: "创作者" },
-  { match: "/admin/storefront", label: "前台体检" },
+  { match: "/admin/storefront", label: "前台巡检" },
   { match: "/admin/merchandising", label: "内容编排" },
   { match: "/admin/recommendations", label: "推荐位" },
   { match: "/admin/comments", label: "评论" },
@@ -118,7 +118,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/branding", label: "品牌素材" },
   { match: "/admin/email-settings", label: "邮件设置" },
   { match: "/admin/email-jobs", label: "邮件任务" },
-  { match: "/admin/tracking", label: "跟踪设置" },
+  { match: "/admin/tracking", label: "追踪设置" },
   { match: "/admin/members", label: "后台成员" },
   { match: "/admin/regions", label: "地区" },
   { match: "/admin/settings", label: "系统设置" },
@@ -232,12 +232,12 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
   return (
     <div className="admin-theme relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-[var(--gush-ink-strong)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[22rem] bg-[radial-gradient(circle_at_12%_0%,rgba(15,23,42,0.06),transparent_24%),radial-gradient(circle_at_88%_2%,rgba(15,23,42,0.045),transparent_20%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.55),transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white" />
 
       <div className="relative flex min-h-screen">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white/94 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl transition-all duration-300 lg:relative",
+            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.04)] transition-all duration-300 lg:relative",
             isCollapsed ? "w-[92px]" : "w-[284px]",
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           )}
@@ -246,7 +246,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
             <div className="border-b border-[color:var(--gush-border)] px-4 py-5">
               <div className="flex items-start justify-between gap-3">
                 <Link href={effectiveHomePath} className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-slate-950 text-sm font-semibold tracking-[0.18em] text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-sm font-semibold tracking-[0.18em] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                     TT
                   </div>
                   {!isCollapsed ? (
@@ -264,7 +264,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsCollapsed((current) => !current)}
-                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 lg:flex"
+                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 lg:flex"
                   aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
                 >
                   {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -272,7 +272,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               </div>
 
               {!isCollapsed ? (
-                <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
+                <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     当前分区
                   </p>
@@ -289,7 +289,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
                 className={cn(
-                  "flex h-11 w-full items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-left text-sm text-slate-700",
+                  "flex h-11 w-full items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-left text-sm text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.035)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
                   isCollapsed ? "justify-center px-0" : "",
                 )}
               >
@@ -297,7 +297,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 {!isCollapsed ? (
                   <>
                     <span className="flex-1">搜索后台页面</span>
-                    <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                      <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                       Ctrl+K
                     </span>
                   </>
@@ -326,9 +326,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                       const baseClass =
                         "group flex w-full items-center gap-3 rounded-[20px] border px-4 py-3 text-sm font-medium transition-all duration-200";
                       const activeClass =
-                        "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.03)]";
+                        "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_12px_28px_rgba(15,23,42,0.045)]";
                       const idleClass =
-                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-white hover:text-slate-950";
+                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-[color:var(--gush-surface)] hover:text-slate-950";
 
                       return (
                         <div key={item.label}>
@@ -368,7 +368,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                               />
                               {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
                               {isActive && !isCollapsed ? (
-                                <span className="ml-auto h-2 w-2 rounded-full bg-slate-950" />
+                                <span className="ml-auto h-2 w-2 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
                               ) : null}
                             </Link>
                           )}
@@ -385,13 +385,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                     className={cn(
                                       "group flex items-center gap-2 rounded-[16px] px-3 py-2 text-xs font-medium transition-all duration-200",
                                       childIsActive
-                                        ? "bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                                        : "text-slate-500 hover:bg-white hover:text-slate-950",
+                                        ? "bg-white text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
+                                        : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
                                     )}
                                   >
                                     <span className="truncate">{child.label}</span>
                                     {childIsActive ? (
-                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-slate-950" />
+                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
                                     ) : null}
                                   </Link>
                                 );
@@ -408,7 +408,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
             {!isCollapsed ? (
               <div className="border-t border-[color:var(--gush-border)] p-4">
-                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
+                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     当前会话
                   </p>
@@ -442,19 +442,19 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
         {isMobileMenuOpen ? (
           <div
-            className="fixed inset-0 z-40 bg-[rgba(20,27,36,0.28)] backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-white/80 backdrop-blur-sm lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-[color:var(--gush-border)] bg-white/86 backdrop-blur-xl">
+          <header className="sticky top-0 z-30 border-b border-[color:var(--gush-border)] bg-white/95 shadow-[0_10px_24px_rgba(15,23,42,0.035)] backdrop-blur-2xl">
             <div className="mx-auto flex w-[min(var(--gush-page-max-wide),calc(100%-2rem))] flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex items-start gap-4">
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600 lg:hidden"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 lg:hidden"
                   aria-label="打开导航"
                 >
                   <Menu size={20} />
@@ -479,7 +479,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="hidden h-11 items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm font-medium text-slate-700 md:flex"
+                  className="hidden h-11 items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.035)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 md:flex"
                 >
                   <Search size={16} className="text-slate-500" />
                   <span>搜索</span>

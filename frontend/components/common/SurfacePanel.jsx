@@ -15,7 +15,7 @@ const toneClasses = {
     default:
       "border-black/[0.055] bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
     muted:
-      "border-black/[0.055] bg-[color:var(--gush-surface-strong)] text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
+      "border-black/[0.055] bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
       "border-black/[0.06] bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
@@ -100,7 +100,7 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.76),rgba(255,255,255,0)_20%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0)_18%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
             : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
         )}
       />
