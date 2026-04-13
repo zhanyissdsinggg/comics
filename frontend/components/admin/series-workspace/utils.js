@@ -32,9 +32,21 @@ export const QUICK_FILTERS = [
 ];
 
 export const CREATE_FLOW_OPTIONS = [
-  { value: "stay", label: "留在当前页", helper: "继续在作品列表里处理下一部作品。" },
-  { value: "details", label: "打开详情页", helper: "继续补充作品信息、封面和署名。" },
-  { value: "episodes", label: "前往章节管理", helper: "下一步直接开始添加漫画章节或小说内容。" },
+  {
+    value: "stay",
+    label: "留在当前页",
+    helper: "继续在作品列表里处理下一部作品。",
+  },
+  {
+    value: "details",
+    label: "打开详情页",
+    helper: "继续补充作品信息、封面和署名。",
+  },
+  {
+    value: "episodes",
+    label: "前往章节管理",
+    helper: "下一步直接开始添加漫画章节或小说内容。",
+  },
 ];
 
 export function createEmptyCreateForm() {
@@ -155,7 +167,7 @@ export function formatSeriesTypeLabel(type) {
 export function formatSeriesStatusLabel(status) {
   if (status === "Completed") return "已完结";
   if (status === "Hiatus") return "休更中";
-  if (status === "Cancelled") return "已下线";
+  if (status === "Cancelled") return "已下架";
   return "连载中";
 }
 

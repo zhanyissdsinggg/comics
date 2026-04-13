@@ -83,7 +83,7 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
                     seriesIds.map((seriesId) => (
                       <span
                         key={`${slot.id}-${seriesId}`}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-slate-600"
+                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-xs text-slate-600 shadow-[0_4px_12px_rgba(15,23,42,0.025)]"
                       >
                         {seriesId}
                       </span>
@@ -148,11 +148,11 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
               }
             >
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+                <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">最大作品数</p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{ranking.maxItems || 0}</p>
                 </div>
-                <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+                <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">适用范围</p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">
                     {ranking.adult ? "允许 18+ 内容" : "普通内容"}
@@ -199,7 +199,7 @@ export function AnalyticsSection({
           <AdminMetricCard label="点击" value={formatNumber(analyticsSummary.clicks)} detail="推荐位点击量。" />
           <AdminMetricCard label="转化" value={formatNumber(analyticsSummary.conversions)} detail="被跟踪到的下游动作。" />
         </div>
-        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           <AdminFormField label="推荐位筛选">
             <select
               id="analytics-slot-filter"
@@ -246,7 +246,7 @@ export function AnalyticsSection({
           emptyMessage={analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选条件下没有分析记录。"}
           wrap={false}
         >
-          <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 shadow-[var(--gush-shadow-soft)]">
+          <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-[color:var(--gush-page-bg-muted)] text-left text-[11px] uppercase tracking-[0.18em] text-slate-500">
@@ -258,7 +258,7 @@ export function AnalyticsSection({
                     <th className="px-4 py-4">详情访问</th>
                     <th className="px-4 py-4">点击</th>
                     <th className="px-4 py-4">转化</th>
-                    <th className="px-4 py-4">CTR</th>
+                    <th className="px-4 py-4">点击率</th>
                     <th className="px-4 py-4">转化率</th>
                   </tr>
                 </thead>

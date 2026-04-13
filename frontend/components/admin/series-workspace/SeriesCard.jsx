@@ -52,7 +52,7 @@ const primaryActionGroupClassName =
   "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border-strong)] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02] lg:justify-end [&_button]:min-w-[104px] [&_button]:justify-center";
 
 const secondaryActionGroupClassName =
-  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015] lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
+  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
 
 const quietDangerActionGroupClassName =
   "flex justify-end rounded-[22px] border border-transparent bg-transparent p-0 [&_button]:min-w-[98px] [&_button]:justify-center";

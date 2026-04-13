@@ -40,14 +40,14 @@ export function PriorityQueueSection({
       {topPriority.length === 0 ? (
         <EmptyState
           title="当前筛选下没有结果"
-          description="换回“全部作品”或者放宽搜索词，再继续往下巡检。"
+          description="切回“全部作品”或放宽搜索词，再继续往下巡检。"
         />
       ) : (
         <div className="space-y-4">
           {topPriority.map((series) => (
             <article
               key={series.id}
-              className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+              className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
@@ -61,7 +61,8 @@ export function PriorityQueueSection({
 
                   <p className="text-sm leading-6 text-slate-600">
                     {series.creatorLabel ? `署名：${series.creatorLabel}` : "署名待补"} |{" "}
-                    {formatSeriesTypeLabel(series.type)} | {formatLifecycleLabel(series)} | 最近更新 {formatDateLabel(series.updatedAt)}
+                    {formatSeriesTypeLabel(series.type)} | {formatLifecycleLabel(series)} | 最近更新：
+                    {formatDateLabel(series.updatedAt)}
                   </p>
 
                   <p className="text-sm leading-7 text-slate-700">{series.recommendation}</p>
@@ -80,12 +81,16 @@ export function PriorityQueueSection({
                 </div>
 
                 <div className="grid min-w-[220px] gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                  <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">章节规模</p>
+                  <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      章节规模
+                    </p>
                     <p className="mt-2 text-2xl font-semibold text-slate-950">{series.episodeCount}</p>
                   </div>
-                  <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">内容基础</p>
+                  <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      内容基础
+                    </p>
                     <p className="mt-2 text-2xl font-semibold text-slate-950">{series.contentFootprint}</p>
                   </div>
                 </div>
@@ -122,7 +127,7 @@ export function GapDistributionSection({ topGaps }) {
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">缺口分布</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            先看哪一类缺口拖住了最多作品，再决定这一轮补什么最值。
+            先看哪一类缺口拖住了最多作品，再决定这一轮先补什么最值。
           </p>
         </div>
         <Sparkles className="mt-1 h-5 w-5 text-cyan-500" />
@@ -138,7 +143,7 @@ export function GapDistributionSection({ topGaps }) {
           {topGaps.map((item) => (
             <div
               key={item.key}
-              className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
+              className="flex items-center justify-between gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,246,248,0.92))] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
             >
               <div>
                 <p className="text-sm font-semibold text-slate-950">{item.label}</p>
@@ -146,7 +151,9 @@ export function GapDistributionSection({ topGaps }) {
                   这类问题会直接影响发现页、点击信心或作品页可读性。
                 </p>
               </div>
-              <p className="text-2xl font-semibold text-slate-950">{item.value}</p>
+              <div className="rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-1.5 text-2xl font-semibold text-slate-950 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
+                {item.value}
+              </div>
             </div>
           ))}
         </div>
@@ -171,7 +178,7 @@ export function RecommendedSequenceSection() {
       {RECOMMENDED_SEQUENCE.map((item) => (
         <div
           key={item}
-          className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-7 text-slate-700"
+          className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] px-4 py-4 text-sm leading-7 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]"
         >
           {item}
         </div>

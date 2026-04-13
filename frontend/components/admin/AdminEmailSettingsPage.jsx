@@ -304,7 +304,7 @@ export default function AdminEmailSettingsPage() {
                   />
                 </AdminFormField>
 
-                <div className="mt-3 flex justify-end rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+                <div className="mt-3 flex justify-end rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
                   <Button
                     type="button"
                     variant="outline"

@@ -60,7 +60,7 @@ export default function ContentGeneratorPage() {
       setFeedback({
         type: 'success',
         message: response.data?.runId
-          ? `生成完成。运行 ID：${response.data.runId}。`
+          ? `生成完成。任务编号：${response.data.runId}。`
           : '生成完成。',
       });
     } catch (error) {

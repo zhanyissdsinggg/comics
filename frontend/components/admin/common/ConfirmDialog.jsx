@@ -44,7 +44,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
           </div>
         ) : null}
 
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
           <p className="text-sm leading-6 text-slate-700">{message}</p>
         </div>
 

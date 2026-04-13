@@ -126,7 +126,7 @@ export function buildOrdersExportCsv(orders, selectedIdsSet) {
   }
 
   return [
-    ["订单 ID", "用户 ID", "金额", "状态", "创建时间"].join(","),
+    ["订单编号", "用户编号", "金额", "状态", "创建时间"].join(","),
     ...exportData.map((order) =>
       [
         order.id,

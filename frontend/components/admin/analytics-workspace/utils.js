@@ -10,7 +10,7 @@ export const VIEW_TABS = [
 
 export const SEGMENT_FILTERS = [
   { key: "all", label: "全部读者" },
-  { key: "vip", label: "VIP" },
+  { key: "vip", label: "重点会员" },
   { key: "high-value", label: "高价值用户" },
   { key: "at-risk", label: "流失风险用户" },
 ];
@@ -120,7 +120,7 @@ export function buildStatsCards(stats) {
     {
       label: "高价值读者",
       value: formatNumber(stats?.highValueUsers),
-      detail: "已经跨过 LTV 阈值的账号数量。",
+      detail: "已经跨过生命周期价值阈值的账号数量。",
     },
     {
       label: "流失风险读者",

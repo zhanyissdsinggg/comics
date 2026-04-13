@@ -328,7 +328,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                       const activeClass =
                         "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_12px_28px_rgba(15,23,42,0.045)]";
                       const idleClass =
-                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-[color:var(--gush-surface)] hover:text-slate-950";
+                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
 
                       return (
                         <div key={item.label}>

@@ -64,5 +64,5 @@ export function getSeriesMetadataSummary(series) {
     series?.coverUrl ? "封面已就绪" : "封面待补",
     String(series?.description || "").trim() ? "简介已填写" : "简介待补",
     genreCount > 0 ? `${genreCount} 个标签` : "标签待补",
-  ].join(" · ");
+  ].join(" | ");
 }

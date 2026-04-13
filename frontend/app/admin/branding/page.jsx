@@ -10,7 +10,7 @@ export default function BrandingPage() {
   return (
     <AdminLayout
       title="品牌配置"
-      subtitle="统一调整会影响前台观感的共享素材、站点标识和主视觉资源。"
+      subtitle="统一维护会直接影响前台观感的品牌素材、站点标识和首页横幅。"
     >
       <Suspense fallback={<div className="text-sm text-slate-500">正在加载品牌配置...</div>}>
         <AdminBrandingPage />

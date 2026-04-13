@@ -8,8 +8,8 @@ export function AdminListPagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [20, 50, 100],
-  containerClassName = "flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between",
-  pageSizeSelectClassName = "rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 outline-none transition-[border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70",
+  containerClassName = "flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.8),#f5f5f7)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between",
+  pageSizeSelectClassName = "rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-2 text-sm text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70",
 }) {
   const totalPages = Math.max(1, pagination?.totalPages || 1);
   const total = pagination?.total ?? 0;
@@ -23,8 +23,8 @@ export function AdminListPagination({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2">
-          <span>每页</span>
+        <label className="flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <span className="text-slate-500">每页</span>
           <select
             value={pageSize}
             onChange={(event) => onPageSizeChange(Number(event.target.value))}

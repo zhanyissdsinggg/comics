@@ -188,7 +188,7 @@ export default function AdminMembersPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '2FA 重置失败。'));
+        throw new Error(await readAdminResponseMessage(response, '两步验证重置失败。'));
       }
 
       return response.json();
@@ -197,12 +197,12 @@ export default function AdminMembersPage() {
       setTotpSheet(data);
       setFeedback({
         type: 'success',
-        message: '新的 2FA 密钥已生成，请马上保存到验证器。',
+        message: '新的两步验证密钥已生成，请马上保存到验证器。',
       });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `2FA 重置失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `两步验证重置失败：${mutationError.message}` });
     },
   });
 
@@ -213,17 +213,17 @@ export default function AdminMembersPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '2FA 清除失败。'));
+        throw new Error(await readAdminResponseMessage(response, '两步验证清除失败。'));
       }
 
       return response.json();
     },
     onSuccess: () => {
-      setFeedback({ type: 'success', message: '成员专属 2FA 已清除。' });
+      setFeedback({ type: 'success', message: '成员专属两步验证已清除。' });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `2FA 清除失败：${mutationError.message}` });
+      setFeedback({ type: 'error', message: `两步验证清除失败：${mutationError.message}` });
     },
   });
 
@@ -251,7 +251,7 @@ export default function AdminMembersPage() {
   return (
     <AdminShell
       title="后台成员"
-      subtitle="把管理员身份、角色范围、密钥槽位和二次验证放进一套真实可维护的成员目录里，不再只靠环境变量硬撑。"
+      subtitle="把成员身份、角色范围、密钥槽位和两步验证收进同一套后台目录。"
     >
       <div className="space-y-6">
         <MembersSummaryCards
@@ -322,7 +322,7 @@ export default function AdminMembersPage() {
           setForm(DEFAULT_FORM);
         }}
         title={editingMember ? '编辑后台成员' : '新建后台成员'}
-        subtitle="成员档案负责承接真实身份、角色和 2FA 配置；环境密钥只保留为当前登录凭证。"
+        subtitle="成员档案负责承接真实身份、角色和两步验证配置；环境密钥只保留为当前登录凭证。"
         size="lg"
       >
         <MemberEditorModalContent
@@ -344,8 +344,8 @@ export default function AdminMembersPage() {
       <Modal
         isOpen={Boolean(totpSheet)}
         onClose={() => setTotpSheet(null)}
-        title="新的 2FA 密钥"
-        subtitle="请把下面的密钥或 otpauth 链接立刻加入 Google Authenticator、1Password 或其他验证器。"
+        title="新的两步验证密钥"
+        subtitle="请把下面的密钥或导入链接立即加入你的验证器应用，例如 1Password 或系统验证器。"
         size="lg"
       >
         <TotpSecretModalContent

@@ -10,7 +10,7 @@ export const TYPE_OPTIONS = [
 export const STATUS_OPTIONS = [
   { value: "Ongoing", label: "连载中" },
   { value: "Completed", label: "已完结" },
-  { value: "Hiatus", label: "休载中" },
+  { value: "Hiatus", label: "休更中" },
   { value: "Cancelled", label: "已下架" },
 ];
 
@@ -244,12 +244,12 @@ export async function fetchSeriesCredits(seriesId) {
 
 export function buildCreatorPreviewLabel(publicCredits, authorFallback = "") {
   if (!publicCredits.length) {
-    return authorFallback || "待补充";
+    return authorFallback || "待补全";
   }
 
   const primaryCredit = publicCredits.find((credit) => credit.isPrimary) || publicCredits[0];
   if (!primaryCredit) {
-    return "待补充";
+    return "待补全";
   }
 
   if (publicCredits.length === 1) {
@@ -318,7 +318,7 @@ export function buildSeriesInsightState({
       },
     ],
     recordItems: [
-      { label: "作品 ID", value: series?.id || "暂无" },
+      { label: "作品编号", value: series?.id || "暂无" },
       { label: "创建时间", value: formatDateTime(series?.createdAt) },
       { label: "最近更新", value: formatDateTime(series?.updatedAt) },
       { label: "最新章节", value: series?.latestEpisodeId || "暂无" },

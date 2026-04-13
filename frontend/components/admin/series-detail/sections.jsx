@@ -54,7 +54,7 @@ export function SeriesHeaderActions({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/78 p-1.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <Button type="button" variant="ghost" onClick={onBackToList}>
           <ArrowLeft className="size-4" />
           返回作品列表
@@ -69,7 +69,7 @@ export function SeriesHeaderActions({
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
         {isEditing ? (
           <>
             <Button type="button" variant="secondary" onClick={onCancelEditing}>
@@ -192,7 +192,7 @@ export function CoverSection({
       title="封面"
       description="一张稳定的封面，比花哨的后台指标更能提升前台信任感。"
     >
-      <div className="overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]">
+      <div className="overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
         {formData.coverUrl ? (
           <img
             src={formData.coverUrl}
@@ -230,7 +230,7 @@ export function CoverSection({
           />
         </AdminFormField>
         {isEditing ? (
-          <label className="block rounded-[22px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-600">
+          <label className="block rounded-[22px] border border-dashed border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
             <span className="font-semibold text-slate-950">上传新封面</span>
             <span className="mt-1 block text-xs text-slate-500">
               支持 JPG、PNG、GIF、WEBP，大小不能超过 10MB。
@@ -332,7 +332,7 @@ export function CreditsSection({
       }
     >
       <div className="space-y-4">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
           <p className="text-sm font-semibold text-slate-950">当前前台署名</p>
           <p className="mt-2 text-base text-slate-700">{creatorPreviewLabel}</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -348,7 +348,7 @@ export function CreditsSection({
         </div>
 
         {loading ? (
-          <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-8 text-sm text-slate-500">
+          <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white px-4 py-8 text-sm text-slate-500 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
             正在加载创作者署名...
           </div>
         ) : errorMessage ? (
@@ -406,7 +406,7 @@ export function LegacyAuthorNotice({ visible }) {
   return (
     <div
       className={cn(
-        "rounded-[24px] border px-5 py-4 text-sm leading-6 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
+        "rounded-[24px] border px-5 py-4 text-sm leading-6 shadow-[0_12px_28px_rgba(15,23,42,0.04)]",
         "border-amber-200 bg-amber-50/90 text-amber-800",
       )}
     >

@@ -35,7 +35,7 @@ export const Modal = React.memo(function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full max-h-[calc(100vh-3rem)] overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-white shadow-[var(--gush-shadow-panel)] ${sizeClasses[size]}`}
+        className={`relative w-full max-h-[calc(100vh-3rem)] overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(247,247,249,0.94))] shadow-[0_22px_52px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.02] ${sizeClasses[size]}`}
         onClick={(event) => event.stopPropagation()}
       >
         {hasHeader ? (
@@ -48,7 +48,7 @@ export const Modal = React.memo(function Modal({
               <button
                 type="button"
                 onClick={handleRequestClose}
-                className="shrink-0 rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
+                className="shrink-0 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-2 text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
                 aria-label="关闭弹窗"
               >
                 <X className="h-5 w-5" />

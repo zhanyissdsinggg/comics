@@ -5,13 +5,14 @@ import { Eye, EyeOff, Trash2 } from "lucide-react";
 import {
   AdminBadge,
   AdminFormField,
+  adminCheckboxClassName,
   adminInputClassName,
   adminSelectClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 
 export function ReadinessCheckCard({ item }) {
   return (
-    <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
+    <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-slate-950">{item.label}</p>
         <AdminBadge tone={item.ok ? "success" : "warning"}>
@@ -25,14 +26,14 @@ export function ReadinessCheckCard({ item }) {
 
 export function StatusToggleCard({ label, checked, disabled, onChange }) {
   return (
-    <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
+    <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
       <span>{label}</span>
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
         disabled={disabled}
-        className="h-4 w-4 rounded border-black/20 bg-transparent"
+        className={adminCheckboxClassName}
       />
     </label>
   );
@@ -48,7 +49,7 @@ export function CreditDraftCard({
   onRemove,
 }) {
   return (
-    <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+    <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold text-slate-950">署名 {index + 1}</p>
@@ -118,7 +119,7 @@ export function CreditDraftCard({
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
+        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
           <span className="flex items-center gap-2">
             <Eye className="size-4 text-slate-500" />
             对前台公开
@@ -128,10 +129,10 @@ export function CreditDraftCard({
             checked={credit.isPublic}
             disabled={!isEditing}
             onChange={(event) => onFieldChange(credit.id, "isPublic", event.target.checked)}
-            className="h-4 w-4 rounded border-black/20 bg-transparent"
+            className={adminCheckboxClassName}
           />
         </label>
-        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
+        <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
           <span className="flex items-center gap-2">
             {credit.isPrimary ? (
               <Eye className="size-4 text-slate-950" />
@@ -145,7 +146,7 @@ export function CreditDraftCard({
             checked={credit.isPrimary}
             disabled={!isEditing}
             onChange={(event) => onFieldChange(credit.id, "isPrimary", event.target.checked)}
-            className="h-4 w-4 rounded border-black/20 bg-transparent"
+            className={adminCheckboxClassName}
           />
         </label>
       </div>

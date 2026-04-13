@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Search } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import SurfacePanel from "@/components/common/SurfacePanel";
 
 import AdminShell from "./AdminShell";
@@ -135,7 +134,7 @@ export default function AdminStorefrontAuditPage() {
   return (
     <AdminShell
       title="前台巡检"
-      subtitle="按读者真实会感知到的标准检查作品资料、署名和阅读路径。"
+      subtitle="按读者真实看到的页面标准，检查作品资料、署名和阅读路径。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton onClick={() => router.push("/admin/series")}>打开作品列表</ActionButton>
@@ -148,7 +147,7 @@ export default function AdminStorefrontAuditPage() {
     >
       <div className="space-y-6">
         {error ? (
-          <div className="rounded-[24px] border border-rose-200 bg-rose-50/90 px-5 py-4 text-sm text-rose-700 shadow-[var(--gush-shadow-soft)]">
+          <div className="rounded-[24px] border border-rose-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-5 py-4 text-sm text-rose-700 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
             前台巡检加载失败：{error}
           </div>
         ) : null}
@@ -163,7 +162,7 @@ export default function AdminStorefrontAuditPage() {
                 先补读者真的会感觉到的缺口。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                这里不看假热度，不看旧评分，只看作品页是否完整、署名是否可信、阅读路径是否能真正接住前台流量。
+                这里不看假热度，不看旧评分，只看作品页是否完整、署名是否可信、阅读路径能不能真正接住前台流量。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">读者视角巡检</StatusPill>
@@ -172,7 +171,7 @@ export default function AdminStorefrontAuditPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-white/96 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 平均就绪度
               </p>
@@ -221,7 +220,7 @@ export default function AdminStorefrontAuditPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">收敛处理队列</h2>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">收口处理队列</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 先把已上线但明显缺资料的作品拉稳，再处理临门一脚就能发布的草稿。
               </p>
@@ -244,7 +243,7 @@ export default function AdminStorefrontAuditPage() {
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索作品名、ID、创作者、题材或建议动作"
+              placeholder="搜索作品名、编号、创作者、题材或建议动作"
               className="w-full rounded-full border border-[color:var(--gush-border)] bg-white px-11 py-3 text-sm text-slate-900 outline-none transition focus:border-[var(--gush-accent,#2f58c6)]"
             />
           </label>

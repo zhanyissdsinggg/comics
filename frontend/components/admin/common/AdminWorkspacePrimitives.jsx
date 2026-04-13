@@ -63,7 +63,7 @@ export function AdminMetricCard({ label, value, detail, tone = "default", classN
         "rounded-[24px] border px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
         tone === "accent"
           ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.045)]"
-          : "border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
+          : "border-[color:var(--gush-border)] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]",
         className,
       )}
     >
@@ -143,7 +143,7 @@ export function AdminDataTable({ className = "", children }) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] shadow-[0_14px_32px_rgba(15,23,42,0.04)]",
+        "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)]",
         "ring-1 ring-black/[0.02]",
         className,
       )}

@@ -48,7 +48,7 @@ export function GeneratorFormSection({
   return (
     <AdminPageSection
       title="演示内容生成器"
-      description="这里只生成可控的测试目录数据，不作为正式内容录入入口。"
+      description="这里只生成测试目录数据，不作为正式录入入口。"
       action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
     >
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -107,10 +107,10 @@ export function GeneratorFormSection({
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+        <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           <h3 className="text-base font-semibold text-slate-950">本次将生成的内容</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            这个工具只生成用于测试的演示目录数据，不再给后台制造看起来很热闹的假数据。
+            只生成测试用目录，不制造看起来很热闹的假数据。
           </p>
 
           <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
@@ -119,8 +119,8 @@ export function GeneratorFormSection({
             ))}
           </ul>
 
-          <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
-            在类生产环境里使用前，请先显式开启 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code>。
+          <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
+            使用前先确认 <code>ADMIN_CONTENT_GENERATOR_ENABLED=1</code> 已开启。
           </div>
         </div>
       </div>
@@ -136,10 +136,10 @@ export function GeneratorResultSection({ result }) {
   return (
     <AdminPageSection
       title="最近一次生成"
-      description="这里只显示最近一次测试生成的摘要，方便快速复核。"
+      description="这里只看最近一次生成结果。"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <AdminMetricCard label="运行 ID" value={result.runId || "-"} detail="后端记录这次生成请求的唯一标识。" />
+        <AdminMetricCard label="任务编号" value={result.runId || "-"} detail="后端记录这次生成请求的唯一标识。" />
         <AdminMetricCard label="漫画作品" value={String(result.comicsCount ?? 0)} detail="本轮生成出的漫画条目数。" />
         <AdminMetricCard label="小说作品" value={String(result.novelsCount ?? 0)} detail="本轮生成出的小说条目数。" />
         <AdminMetricCard label="总章节数" value={String(result.totalEpisodes ?? 0)} detail="这轮生成覆盖到的章节总量。" />

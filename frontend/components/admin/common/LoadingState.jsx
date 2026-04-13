@@ -20,7 +20,7 @@ export const SkeletonLoader = React.memo(function SkeletonLoader({
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className={`${height} skeleton rounded-[20px] border border-[color:var(--gush-border)] bg-white/70`}
+          className={`${height} skeleton rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(245,245,247,0.82))] shadow-[0_8px_18px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]`}
         />
       ))}
     </div>
@@ -40,8 +40,10 @@ export const Spinner = React.memo(function Spinner({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
-      <RefreshCw className={`${sizeClasses[size]} animate-spin text-slate-900`} />
+    <div className="flex flex-col items-center justify-center gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-6 py-10 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_6px_18px_rgba(15,23,42,0.04)]">
+        <RefreshCw className={`${sizeClasses[size]} animate-spin text-slate-900`} />
+      </div>
       {text ? <p className="text-sm text-slate-500">{text}</p> : null}
     </div>
   );
@@ -99,12 +101,12 @@ EmptyState.displayName = "AdminEmptyState";
 
 export const ErrorState = React.memo(function ErrorState({ error, onRetry }) {
   return (
-    <div className="rounded-[28px] border border-red-200 bg-red-50/90 px-6 py-10 text-center shadow-[var(--gush-shadow-soft)]">
+    <div className="rounded-[28px] border border-red-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(254,242,242,0.96))] px-6 py-10 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
       <h3 className="text-lg font-semibold text-red-700">{DEFAULT_ERROR_TITLE}</h3>
       <p className="mt-2 text-sm leading-6 text-red-600">{error || DEFAULT_ERROR_MESSAGE}</p>
       {onRetry ? (
         <div className="mt-5 flex justify-center">
-          <Button type="button" variant="destructive" onClick={onRetry}>
+          <Button type="button" variant="outline" onClick={onRetry}>
             {RETRY_LABEL}
           </Button>
         </div>

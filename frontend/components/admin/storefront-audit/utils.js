@@ -8,14 +8,14 @@ export const QUICK_FILTERS = [
   { id: "publishedRisk", label: "已上线但有缺口" },
   { id: "launchReady", label: "接近可发布" },
   { id: "creatorGap", label: "署名待补" },
-  { id: "thinPage", label: "页面仍偏空" },
+  { id: "thinPage", label: "页面内容偏薄" },
 ];
 
 export const RECOMMENDED_SEQUENCE = [
-  "先修已上线作品的明显缺口。它们已经在接流量，问题会直接被读者看到。",
-  "署名优先级要靠前，因为它会同时影响可信度、创作者页和作品页信息完整度。",
+  "先修已经上线作品的明显缺口。它们已经在接流量，问题会直接被读者看到。",
+  "署名优先级要靠前，因为它会同时影响可信度、创作者页和作品页的信息完整度。",
   "接近可发布的草稿可以紧接着推进，这样扩目录时不会拉低整体前台质感。",
-  "封面、简介和题材标签最好一轮补齐，别把半成品继续推到专题位里。",
+  "封面、简介和题材标签最好一轮补齐，不要把半成品继续推到专题位里。",
 ];
 
 function toNumber(value) {
@@ -200,14 +200,14 @@ export function getRecommendedAction(series, readiness) {
   }
 
   if (!series.isPublished) {
-    return "这部作品已经接近可上线状态，确认发布条件后就可以推进前台。";
+    return "这部作品已经接近可上线状态，确认发布条件后就可以推进到前台。";
   }
 
   if (readiness.score >= 85) {
     return "基础资料已经完整，可以稳定进入前台推荐、搜索和创作者发现路径。";
   }
 
-  return "剩余缺口已经不多，按当前顺序收尾就能把前台体验拉稳。";
+  return "剩余缺口已经不多，按当前顺序收尾就能把前台体验拉齐。";
 }
 
 export function createAuditedSeries(seriesList) {
@@ -309,7 +309,7 @@ export function getTopGaps(missingSummary) {
   const labels = {
     creator: "创作者署名缺失",
     cover: "封面素材缺失",
-    description: "简介过短",
+    description: "简介内容过短",
     genres: "题材标签缺失",
     episodes: "没有章节",
     published: "仍未发布",

@@ -26,7 +26,7 @@ import {
 } from "./utils";
 
 const actionTrayClassName =
-  "rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2";
+  "rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)]";
 
 const primaryActionClassName =
   "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";

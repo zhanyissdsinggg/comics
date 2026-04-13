@@ -17,7 +17,7 @@ export const sortFields = [
 export const sortOptions = [
   { value: "createdAt", label: "创建时间" },
   { value: "rating", label: "评分" },
-  { value: "userId", label: "读者 ID" },
+  { value: "userId", label: "读者编号" },
 ];
 
 export function getContentPreview(content) {

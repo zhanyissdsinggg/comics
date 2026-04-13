@@ -198,11 +198,11 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               onDrop={handleDrop}
               className={`rounded-[28px] border-2 border-dashed p-8 text-center transition ${
                 isDragging
-                  ? 'border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]'
-                  : 'border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]'
+                  ? 'border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))]'
+                  : 'border-[color:var(--gush-border)] bg-white'
               }`}
             >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[color:var(--gush-border)] bg-white text-slate-950">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
                 <UploadCloud className="h-7 w-7" />
               </div>
               <p className="mt-5 text-sm font-semibold text-slate-950">
@@ -228,7 +228,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               />
               <label
                 htmlFor="episode-bulk-upload"
-                className={`mt-5 inline-flex cursor-pointer items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 ${
+                className={`mt-5 inline-flex cursor-pointer items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-white ${
                   uploadMutation.isPending ? 'pointer-events-none opacity-50' : ''
                 }`}
               >
@@ -237,7 +237,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/80 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
             <p className="text-sm font-semibold text-slate-950">上传前确认</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
               <li>每个 ZIP 文件会对应创建一话章节。</li>
@@ -245,7 +245,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               <li>上传完成后，当前章节列表会自动刷新。</li>
             </ul>
 
-            <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+            <div className="mt-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 当前队列
               </p>
@@ -274,7 +274,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
               {uploadProgress.map((item, index) => (
                 <div
                   key={`${item.fileName}-${index}`}
-                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4"
+                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.9))] p-4 ring-1 ring-black/[0.02]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -311,7 +311,7 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
                   </div>
 
                   {item.status === 'uploading' ? (
-                    <div className="mt-3 h-1.5 w-full rounded-full bg-white">
+                    <div className="mt-3 h-1.5 w-full rounded-full bg-white/90 ring-1 ring-black/[0.04]">
                       <div
                         className="h-1.5 rounded-full bg-[var(--gush-accent,#2f58c6)] transition-all"
                         style={{ width: `${item.progress}%` }}

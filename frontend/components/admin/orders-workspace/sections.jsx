@@ -12,6 +12,7 @@ import {
   AdminPageSection,
   AdminTableHeader,
   AdminTableRow,
+  adminCheckboxClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
@@ -62,7 +63,7 @@ export function OrdersTableSection(props) {
   return (
     <AdminPageSection
       title="订单队列"
-      description="按订单或用户 ID 搜索，在不把页面做成金融控制台的前提下处理退款和导出。"
+      description="按订单或用户编号搜索，在不把页面做成金融控制台的前提下处理退款和导出。"
       action={
         <Button type="button" variant="outline" onClick={onExport} disabled={exportDisabled}>
           <Download className="size-4" />
@@ -73,7 +74,7 @@ export function OrdersTableSection(props) {
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索订单 ID 或用户 ID"
+        searchPlaceholder="搜索订单编号或用户编号"
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -126,7 +127,7 @@ export function OrdersTableSection(props) {
                     aria-label="选择全部订单"
                     checked={orders.length > 0 && selectedIds.length === orders.length}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="h-4 w-4 rounded border-black/20 bg-transparent"
+                    className={adminCheckboxClassName}
                   />
                 </th>
                 <th className="px-4 py-4">订单</th>
@@ -146,14 +147,14 @@ export function OrdersTableSection(props) {
                       aria-label={`选择订单 ${order.id}`}
                       checked={selectedIdsSet.has(order.id)}
                       onChange={() => onToggleSelect(order.id)}
-                      className="h-4 w-4 rounded border-black/20 bg-transparent"
+                      className={adminCheckboxClassName}
                     />
                   </td>
                   <td className="px-4 py-4">
                     <div className="space-y-1">
                       <p className="font-semibold text-slate-950">{order.id}</p>
                       <p className="text-xs text-slate-500">
-                        {order.orderId ? `支付网关 ID：${order.orderId}` : '站内订单记录'}
+                        {order.orderId ? `支付网关编号：${order.orderId}` : '站内订单记录'}
                       </p>
                     </div>
                   </td>
@@ -179,7 +180,7 @@ export function OrdersTableSection(props) {
                         发起退款
                       </Button>
                     ) : (
-                      <span className="text-xs text-slate-500">已记录退款</span>
+                      <AdminBadge tone="default">已记录退款</AdminBadge>
                     )}
                   </td>
                 </AdminTableRow>

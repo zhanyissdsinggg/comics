@@ -125,10 +125,10 @@ export default function AdminRevenuePage() {
   const promotionsRoiAvailable = promotionsData?.roiAvailable !== false;
   const promotionsAttributionCopy =
     promotionsAttributionModel === 'order_audit'
-      ? '当前收入归因来自支付创建时记录的审计元数据。在活动花费归因接线完成前，ROI 仍会保持不可用。'
+      ? '当前收入归因来自支付创建时记录的审计元数据。在活动花费归因接线完成前，投入产出比仍会保持不可用。'
       : promotionsAttributionModel === 'hybrid_order_audit_and_derived_rules'
-        ? '当前收入会优先使用支付创建审计元数据；缺失时再回退到活动规则推导。在活动花费归因接线完成前，ROI 仍会保持不可用。'
-        : '当前收入暂时通过活动规则推导得出。在活动花费归因接线完成前，ROI 仍会保持不可用。';
+        ? '当前收入会优先使用支付创建审计元数据；缺失时再回退到活动规则推导。在活动花费归因接线完成前，投入产出比仍会保持不可用。'
+        : '当前收入暂时通过活动规则推导得出。在活动花费归因接线完成前，投入产出比仍会保持不可用。';
 
   const overviewLoading = statsLoading || userValueLoading || orderStatusLoading;
   const hasOverviewData = Boolean(stats) || Boolean(userValue) || Boolean(orderStatus);

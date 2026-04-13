@@ -17,7 +17,7 @@ export function AdminTableShell({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  containerClassName = "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 shadow-[var(--gush-shadow-soft)]",
+  containerClassName = "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]",
   tableWrapperClassName = "overflow-x-auto",
   paginationProps = {},
   children,

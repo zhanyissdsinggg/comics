@@ -27,10 +27,10 @@ const contentCardClassName =
   "rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]";
 
 const actionTrayClassName =
-  "grid w-full gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 sm:grid-cols-2";
+  "grid w-full gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02] sm:grid-cols-2";
 
 const primaryActionClassName =
-  "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
+  "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]";
 
 const metricTileClassName =
   "rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]";
@@ -323,7 +323,7 @@ export function CreatorDirectorySection({
                   </div>
                 ) : null}
 
-                <div className="mt-5 grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] sm:grid-cols-2 xl:grid-cols-3">
                   <ActionButton
                     onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
                     className={primaryActionClassName}

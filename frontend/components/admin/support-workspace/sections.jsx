@@ -228,7 +228,7 @@ export function SupportQueueSection(props) {
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.createdAt)}</td>
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.updatedAt)}</td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-col items-start gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+                    <div className="flex flex-col items-start gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
                       <Button
                         type="button"
                         variant="outline"
@@ -331,7 +331,7 @@ export function SupportReplyModal({
           />
         </AdminFormField>
 
-        <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+        <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <Button
             type="button"
             onClick={onSubmit}

@@ -26,6 +26,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { canAccessAdminRoute } from "../../lib/adminAccess";
 
 const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
@@ -54,10 +55,10 @@ const SEARCH_ITEMS = [
   },
   {
     id: "storefront",
-    label: "前台体检",
+    label: "前台巡检",
     href: "/admin/storefront",
     icon: Search,
-    keywords: ["storefront", "audit", "readiness", "public page", "前台", "体检", "上线", "读者页面"],
+    keywords: ["storefront", "audit", "readiness", "public page", "前台", "巡检", "上线", "读者页面"],
   },
   {
     id: "merchandising",
@@ -187,10 +188,10 @@ const SEARCH_ITEMS = [
   },
   {
     id: "tracking",
-    label: "跟踪设置",
+    label: "追踪设置",
     href: "/admin/tracking",
     icon: Radar,
-    keywords: ["tracking", "analytics", "pixels", "跟踪", "埋点", "像素"],
+    keywords: ["tracking", "analytics", "pixels", "追踪", "埋点", "像素"],
   },
   {
     id: "regions",
@@ -340,11 +341,11 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[rgba(20,27,36,0.28)] p-4 pt-[10vh] backdrop-blur-sm">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white/96 shadow-[var(--gush-shadow-panel)]">
-        <div className="border-b border-[color:var(--gush-border)] px-5 py-4">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[rgba(244,244,246,0.78)] p-4 pt-[10vh] backdrop-blur-[18px]">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,246,248,0.94))] shadow-[0_36px_90px_rgba(15,23,42,0.12)] ring-1 ring-black/[0.04]">
+        <div className="border-b border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,248,249,0.96))] px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-[color:var(--gush-page-bg-muted)] text-slate-950">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
               <Search size={20} />
             </div>
             <input
@@ -356,14 +357,15 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
               placeholder="搜索页面、工具或设置"
               className="flex-1 bg-transparent text-base text-slate-950 outline-none placeholder:text-slate-400"
             />
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="icon-sm"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
               aria-label="关闭搜索"
             >
               <X size={18} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -379,13 +381,19 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                     key={item.id}
                     type="button"
                     onClick={() => handleNavigate(item)}
-                    className={`group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left transition-all ${
+                    className={`group flex w-full items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition-all ${
                       isActive
-                        ? "bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                        : "text-slate-700 hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
+                        ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,247,0.94))] text-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.02]"
+                        : "border-transparent text-slate-700 hover:border-[color:var(--gush-border)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(245,245,247,0.72))] hover:text-slate-950"
                     }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-white text-slate-500 transition-all group-hover:text-slate-950">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-[16px] border transition-all ${
+                        isActive
+                          ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f4f4f6)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
+                          : "border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8f9)] text-slate-500 group-hover:border-[color:var(--gush-border-strong)] group-hover:bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] group-hover:text-slate-950"
+                      }`}
+                    >
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -394,21 +402,21 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                     </div>
                     <ArrowRight
                       size={16}
-                      className="text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+                      className={`text-slate-400 transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                     />
                   </button>
                 );
               })}
             </div>
           ) : query ? (
-            <div className="py-12 text-center">
+            <div className="mx-auto max-w-sm rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] px-6 py-12 text-center shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-400 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">没有匹配的后台页面</p>
-              <p className="mt-1 text-xs text-slate-500">换个关键词或页面名称再试试。</p>
+              <p className="text-sm font-semibold text-slate-900">没有找到匹配页面</p>
+              <p className="mt-1 text-xs text-slate-500">换个关键词再试试。</p>
             </div>
           ) : recentItems.length > 0 ? (
             <div className="space-y-1">
@@ -416,22 +424,18 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   最近访问
                 </div>
-                <button
-                  type="button"
-                  onClick={handleClearRecent}
-                  className="text-xs text-slate-500 transition-colors hover:text-slate-950"
-                >
+                <Button type="button" variant="ghost" size="xs" onClick={handleClearRecent}>
                   清空
-                </button>
+                </Button>
               </div>
               {recentItems.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleNavigate(item)}
-                  className="group flex w-full items-center gap-3 rounded-[22px] px-4 py-3 text-left text-slate-700 transition-all hover:bg-[rgba(15,23,42,0.04)] hover:text-slate-950"
+                  className="group flex w-full items-center gap-3 rounded-[22px] border border-transparent px-4 py-3 text-left text-slate-700 transition-all hover:border-[color:var(--gush-border)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(245,245,247,0.72))] hover:text-slate-950"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-white text-slate-400 transition-all group-hover:text-slate-950">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[16px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8f9)] text-slate-400 transition-all group-hover:border-[color:var(--gush-border-strong)] group-hover:bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] group-hover:text-slate-950">
                     <Clock size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -446,39 +450,39 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center">
+            <div className="mx-auto max-w-sm rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] px-6 py-12 text-center shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
               <div className="mb-3 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-400 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
                   <Search size={28} />
                 </div>
               </div>
               <p className="text-sm font-semibold text-slate-900">输入内容即可搜索后台</p>
-              <p className="mt-1 text-xs text-slate-500">可以按页面名、任务或对象类型来搜索。</p>
+              <p className="mt-1 text-xs text-slate-500">按页面名或对象类型搜索就行。</p>
             </div>
           )}
         </div>
 
-        <div className="border-t border-[color:var(--gush-border)] px-4 py-3">
+        <div className="border-t border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(246,246,248,0.94))] px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f4f4f6)] px-1.5 py-0.5 font-medium shadow-[0_4px_10px_rgba(15,23,42,0.03)]">
                   ↑
                 </kbd>
-                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f4f4f6)] px-1.5 py-0.5 font-medium shadow-[0_4px_10px_rgba(15,23,42,0.03)]">
                   ↓
                 </kbd>
                 <span>移动</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
+                <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f4f4f6)] px-1.5 py-0.5 font-medium shadow-[0_4px_10px_rgba(15,23,42,0.03)]">
                   Enter
                 </kbd>
                 <span>打开</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-1.5 py-0.5 font-medium">
+              <kbd className="rounded-lg border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f4f4f6)] px-1.5 py-0.5 font-medium shadow-[0_4px_10px_rgba(15,23,42,0.03)]">
                 Esc
               </kbd>
               <span>关闭</span>

@@ -78,7 +78,7 @@ export default function AdminRouteGuard({ children }) {
   if (isLoading || !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--gush-page-bg)] px-4">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 px-6 py-4 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-6 py-4 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           正在检查后台登录状态...
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function AdminRouteGuard({ children }) {
   if (!hasRouteAccess) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--gush-page-bg)] px-4">
-        <div className="w-full max-w-xl rounded-[28px] border border-[color:var(--gush-border)] bg-white/96 p-8 text-center shadow-[var(--gush-shadow-soft)]">
+        <div className="w-full max-w-xl rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-8 text-center shadow-[0_16px_36px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02]">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
             后台权限
           </p>

@@ -54,7 +54,7 @@ export function MarketingControlsSection({
   return (
     <AdminPageSection
       title="活动控制"
-      description="用一行克制的控制区完成视图切换、时间范围调整和新建活动。"
+      description="在这里切换视图、调整时间范围并新建活动。"
       action={
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="outline" onClick={onRefresh}>
@@ -390,7 +390,7 @@ export function CreateCampaignModalContent({
         />
       </AdminFormField>
 
-      <div className="flex flex-wrap justify-end gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 pt-2 ring-1 ring-black/[0.015]">
+      <div className="flex flex-wrap justify-end gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 pt-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>

@@ -74,7 +74,7 @@ function toDraft(payload) {
 
 function PreviewSurface({ value, alt, emptyText, className }) {
   return (
-    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-4 ring-1 ring-black/[0.015]">
+    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
       {value ? (
         <img src={value} alt={alt} className={className} />
       ) : (
@@ -262,18 +262,18 @@ export default function AdminBrandingPage() {
         <AdminMetricCard
           label="已配置素材"
           value={`${configuredAssetCount}/3`}
-          detail="站点标识、站点图标和首页横幅都在这里统一维护。"
+          detail="标识、图标和首页横幅统一放在这里。"
           tone="accent"
         />
         <AdminMetricCard
           label="上传上限"
           value="10 MB"
-          detail="允许上传大图，但仍控制在便于复核和替换的范围里。"
+          detail="保留清晰度，也方便复核和替换。"
         />
         <AdminMetricCard
           label="影响范围"
           value="头部、标签、首页"
-          detail="这些素材会直接影响前台观感，所以要保持克制和统一。"
+          detail="这些素材会直接影响前台观感。"
         />
       </div>
 
@@ -376,18 +376,18 @@ export default function AdminBrandingPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="使用说明"
-        description="这里修改的是共享前台素材，规则越简单越稳。"
+        title="操作提示"
+        description="只记最关键的三件事。"
       >
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            上传完成后记得保存，让前台读到最新素材。
+            上传后记得保存。
           </div>
           <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            素材尽量保持清晰、克制、可读，不要把它做成营销海报。
+            保持清晰、克制、可读。
           </div>
           <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            必要时可以直接填链接，但更建议在这里上传，方便统一复核。
+            优先在这里上传，方便统一复核。
           </div>
         </div>
       </AdminPageSection>

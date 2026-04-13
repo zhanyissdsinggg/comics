@@ -388,12 +388,12 @@ export default function AdminSeriesPageNew() {
     resetCreateForm();
   };
 
-  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-8 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">正在加载作品工作台...</section>;
-  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-10 text-center text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">需要管理员权限才能查看此页面。</section>;
+  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-8 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">正在加载作品工作台...</section>;
+  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-10 text-center text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">需要管理员权限才能查看此页面。</section>;
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
@@ -428,7 +428,7 @@ export default function AdminSeriesPageNew() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesStats.map((item) => (
-          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
             <p className="mt-2 text-sm text-slate-600">{item.hint}</p>
@@ -436,7 +436,7 @@ export default function AdminSeriesPageNew() {
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_16px_36px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
         <div className="flex flex-col gap-4">
           {hasScopedCreatorFilter ? (
             <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50/88 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
@@ -522,7 +522,7 @@ export default function AdminSeriesPageNew() {
       <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-12 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
+        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-12 text-center shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
       ) : (
         <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
           {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}

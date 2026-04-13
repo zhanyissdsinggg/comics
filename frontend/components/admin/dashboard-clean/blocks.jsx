@@ -7,7 +7,7 @@ export const pillIdleClassName =
   "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
 
 export const pillActiveClassName =
-  "rounded-full border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-950";
+  "rounded-full border border-[color:var(--gush-border-strong)] bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]";
 
 export function EmptyBlock({ title, description }) {
   return (
@@ -38,7 +38,7 @@ export function StatCard({ label, value, detail, accent = false }) {
         "rounded-[24px] border px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
         accent
           ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f7f7f9)]"
-          : "border-[color:var(--gush-border)] bg-[color:var(--gush-surface)]",
+          : "border-[color:var(--gush-border)] bg-white",
       )}
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>

@@ -7,6 +7,7 @@ import {
   AdminFormField,
   AdminTableHeader,
   AdminTableRow,
+  adminCheckboxClassName,
   adminInputClassName,
   adminSelectClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
@@ -21,8 +22,8 @@ export function QuickFilterChip({ filter, active, onClick }) {
       onClick={onClick}
       className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
         active
-          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-          : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
+          ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]"
+          : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
       }`}
     >
       {filter.label}
@@ -35,7 +36,7 @@ export function CommercialFieldsToggle({ expanded, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="rounded-full border border-[color:var(--gush-border)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+      className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
     >
       {expanded ? "收起次级发行设置" : "显示次级发行设置"}
     </button>
@@ -44,7 +45,7 @@ export function CommercialFieldsToggle({ expanded, onToggle }) {
 
 export function CommercialFieldsPanel({ children }) {
   return (
-    <div className="grid gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 md:grid-cols-2">
+    <div className="grid gap-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02] md:grid-cols-2">
       {children}
     </div>
   );
@@ -75,7 +76,7 @@ export function EpisodeTable({
                 type="checkbox"
                 checked={allCurrentPageSelected}
                 onChange={handleSelectAllCurrentPage}
-                className="h-4 w-4 rounded border-black/20 bg-transparent"
+                className={adminCheckboxClassName}
                 aria-label="选择当前页全部章节"
               />
             </th>
@@ -94,7 +95,7 @@ export function EpisodeTable({
                   type="checkbox"
                   checked={selectedSet.has(episode.id)}
                   onChange={() => handleToggleSelect(episode.id)}
-                  className="h-4 w-4 rounded border-black/20 bg-transparent"
+                  className={adminCheckboxClassName}
                   aria-label={`选择章节 ${episode.number}`}
                 />
               </td>
@@ -204,7 +205,7 @@ export function EpisodePagination({
   onNextPage,
 }) {
   return (
-    <div className="flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-white px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
       <div>
         第 <span className="font-medium text-slate-950">{pagination.page}</span> 页，共{" "}
         {pagination.totalPages} 页，当前共{" "}
@@ -317,7 +318,7 @@ export function CreateEpisodeFields({
               className={adminInputClassName}
             />
           </AdminFormField>
-          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700">
+          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
             <span>启用免费等候</span>
             <input
               id="new-episode-ttf-eligible"
@@ -326,7 +327,7 @@ export function CreateEpisodeFields({
               onChange={(event) =>
                 setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))
               }
-              className="h-4 w-4 rounded border-black/20 bg-transparent"
+              className={adminCheckboxClassName}
             />
           </label>
         </CommercialFieldsPanel>

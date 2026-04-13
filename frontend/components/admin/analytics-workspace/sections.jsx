@@ -29,7 +29,7 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
   return (
     <AdminPageSection
       title="读者总览"
-      description="在一个克制、清楚的工作区里查看读者规模、活跃情况、价值和流失风险。"
+      description="查看读者规模、活跃、价值和流失风险。"
     >
       {statsQuery.isError ? (
         <AdminDataState
@@ -88,7 +88,7 @@ export function AnalyticsSegmentsSection({
   return (
     <AdminPageSection
       title="读者分群"
-      description="先从一个读者分群看起，只有在需要更深细节时再打开单个账号。"
+      description="先看分群，再按需打开单个账号。"
     >
       <div className="mb-6 flex flex-wrap gap-2 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-3 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
         {segmentFilters.map((segment) => (
@@ -98,8 +98,8 @@ export function AnalyticsSegmentsSection({
             onClick={() => onSelectSegment(segment.key)}
             className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
               selectedSegment === segment.key
-                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
+                ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]"
+                : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
             }`}
           >
             {segment.label}
@@ -190,15 +190,15 @@ export function AnalyticsUserDetailSection({
   const userBehavior = user?.userBehavior;
   const retentionMessage =
     String(analytics?.churnRisk || "").toLowerCase() === "high"
-      ? "这个账号已经出现明显流失信号，近期很可能需要重新唤回。"
+      ? "已出现明显流失信号，建议尽快唤回。"
       : String(analytics?.churnRisk || "").toLowerCase() === "medium"
-        ? "活跃度正在走软，适合补一点更有针对性的发现流或轻量触达。"
-        : "按当前留存模型看，近期互动还算健康。";
+        ? "活跃度在走软，适合补一次定向触达。"
+        : "近期互动稳定，留存状态健康。";
 
   return (
     <AdminPageSection
       title="用户详情"
-      description={`查看当前“${getSegmentLabel(selectedSegment)}”分群里这个账号的具体情况。`}
+      description={`查看“${getSegmentLabel(selectedSegment)}”分群里这个账号的表现。`}
       action={
         <Button type="button" variant="outline" onClick={onBack}>
           返回分群
@@ -299,7 +299,7 @@ export function AnalyticsUserDetailSection({
                     <div>
                       <p className="text-sm font-semibold text-slate-950">留存状态</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
-                        保持描述直接，让运营一眼就能看出风险程度。
+                        用一句话看清当前流失风险。
                       </p>
                     </div>
                     <AdminBadge tone={getChurnTone(analytics?.churnRisk)}>

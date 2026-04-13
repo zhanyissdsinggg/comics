@@ -31,7 +31,7 @@ export function AdminSelectionBar({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-1.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
         {children}
         <Button type="button" variant="ghost" size="sm" onClick={onClear}>
           {clearLabel}

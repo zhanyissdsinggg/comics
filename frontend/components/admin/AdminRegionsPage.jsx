@@ -339,7 +339,7 @@ export default function AdminRegionsPage() {
             </div>
 
             {countryCodes.length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-6 text-sm text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
                 还没有添加任何国际区号。
               </div>
             ) : (
@@ -347,7 +347,7 @@ export default function AdminRegionsPage() {
                 {countryCodes.map((item, index) => (
                   <div
                     key={`${item.code || "new"}-${index}`}
-                    className="grid gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
+                    className="grid gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
                   >
                     <AdminFormField label="区号">
                       <input
@@ -386,7 +386,7 @@ export default function AdminRegionsPage() {
             </div>
 
             {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-6 text-sm text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
                 请先添加至少一个国际区号，再编辑号码长度规则。
               </div>
             ) : (
@@ -397,7 +397,7 @@ export default function AdminRegionsPage() {
                   .map((item, index) => (
                     <label
                       key={`${item.code}-${index}`}
-                      className="grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[110px_minmax(0,1fr)] md:items-center"
+                      className="grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[110px_minmax(0,1fr)] md:items-center"
                     >
                       <span className="text-sm font-semibold text-slate-700">{item.code}</span>
                       <input

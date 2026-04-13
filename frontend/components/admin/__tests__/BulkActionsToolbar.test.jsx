@@ -76,27 +76,22 @@ describe("BulkActionsToolbar", () => {
     expect(callbacks.onPublish).toHaveBeenCalledTimes(1);
     expect(publishButton).toBeDisabled();
     expect(clearButton).toBeDisabled();
-    expect(screen.getByText("发布中...")).toBeInTheDocument();
+    expect(screen.getByText("正在发布 2 部作品...")).toBeInTheDocument();
 
     deferred.resolve();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "撤销" })).toBeInTheDocument();
+      expect(screen.queryByText("正在发布 2 部作品...")).not.toBeInTheDocument();
     });
   });
 
-  it("removes the latest undo entry when undo is clicked", async () => {
+  it("calls delete when the delete button is clicked", async () => {
     const callbacks = createCallbacks();
     const user = userEvent.setup();
     render(<BulkActionsToolbar selectedCount={1} {...callbacks} />);
 
-    await user.click(screen.getByRole("button", { name: "发布" }));
+    await user.click(screen.getByRole("button", { name: "删除" }));
 
-    const undoButton = await screen.findByRole("button", { name: "撤销" });
-    await user.click(undoButton);
-
-    await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "撤销" })).not.toBeInTheDocument();
-    });
+    expect(callbacks.onDelete).toHaveBeenCalledTimes(1);
   });
 });

@@ -41,7 +41,7 @@ export function formatCampaignStatusLabel(value) {
 }
 
 export function formatSegmentLabel(value) {
-  if (value === "vip") return "VIP 读者";
+  if (value === "vip") return "核心付费读者";
   if (value === "new") return "新读者";
   if (value === "at-risk") return "流失风险读者";
   if (value === "high-value") return "高价值读者";

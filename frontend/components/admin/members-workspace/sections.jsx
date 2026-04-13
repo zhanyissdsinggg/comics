@@ -90,7 +90,7 @@ export function MembersDirectorySection(props) {
   return (
     <AdminPageSection
       title="成员目录"
-      description="这里主要看四件事：谁在用后台、看得到什么、绑了哪个密钥槽位、有没有两步验证。"
+      description="快速查看成员、角色、密钥槽位和两步验证。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
@@ -190,7 +190,7 @@ export function MembersDirectorySection(props) {
                   </td>
                   <td className="px-4 py-4 text-slate-600">{formatDate(member.lastLoginAt)}</td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-wrap gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+                    <div className="flex flex-wrap gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
                       <Button type="button" variant="outline" size="sm" onClick={() => onOpenEdit(member)}>
                         编辑
                       </Button>
@@ -256,26 +256,26 @@ export function MembersGuideSection() {
   return (
     <AdminPageSection
       title="使用建议"
-      description="这页负责维护后台成员，不再只靠环境变量硬撑。"
+      description="在这里维护后台成员、角色和两步验证。"
       accent="amber"
     >
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <p className="text-sm font-semibold text-slate-950">先同步密钥槽位</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            先把环境里的密钥槽位同步进成员目录，再补齐姓名、邮箱和角色。
+            先同步槽位，再补齐姓名、邮箱和角色。
           </p>
         </div>
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <p className="text-sm font-semibold text-slate-950">角色和状态在这里维护</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            菜单可见范围继续跟角色走，成员身份本身在这里维护。
+            菜单权限继续跟角色走，成员身份在这里维护。
           </p>
         </div>
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <p className="text-sm font-semibold text-slate-950">验证密钥只在重置后展示一次</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            重置后请立即保存，页面不会长期保留明文密钥。
+            重置后请立刻保存，明文密钥不会长期保留。
           </p>
         </div>
       </div>
@@ -400,7 +400,7 @@ export function MemberEditorModalContent({
         />
       </AdminFormField>
 
-      <div className="flex flex-wrap justify-end gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+      <div className="flex flex-wrap justify-end gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
         <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
           取消
         </Button>
@@ -446,7 +446,7 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
         </div>
       </AdminFormField>
 
-      <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+      <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
         <Button type="button" onClick={onClose}>
           完成
         </Button>

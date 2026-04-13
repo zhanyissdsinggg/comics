@@ -402,7 +402,7 @@ export default function AdminHomeMerchandisingPage() {
 
   const handleCopyIds = async (label, ids) => {
     if (!Array.isArray(ids) || ids.length === 0) {
-      setFeedback({ type: "error", message: `${label} 当前没有可复制的作品 ID。` });
+      setFeedback({ type: "error", message: `${label} 当前没有可复制的作品编号。` });
       return;
     }
     if (typeof navigator === "undefined" || !navigator.clipboard) {
@@ -411,7 +411,7 @@ export default function AdminHomeMerchandisingPage() {
     }
     try {
       await navigator.clipboard.writeText(ids.join("\n"));
-      setFeedback({ type: "success", message: `${label} 的作品 ID 已复制。` });
+      setFeedback({ type: "success", message: `${label} 的作品编号已复制。` });
     } catch (copyError) {
       setFeedback({
         type: "error",
@@ -496,6 +496,13 @@ export default function AdminHomeMerchandisingPage() {
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
+            onClick={() => router.push("/admin/recommendations")}
+            className="border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
+          >
+            <Sparkles className="h-4 w-4" />
+            打开发现配置
+          </ActionButton>
+          <ActionButton
             onClick={() => {
               if (typeof window !== "undefined") {
                 window.open("/", "_blank", "noopener,noreferrer");
@@ -505,19 +512,12 @@ export default function AdminHomeMerchandisingPage() {
             <ArrowUpRight className="h-4 w-4" />
             查看线上首页
           </ActionButton>
-          <ActionButton
-            onClick={() => router.push("/admin/recommendations")}
-            className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-          >
-            <Sparkles className="h-4 w-4" />
-            打开发现配置
-          </ActionButton>
         </div>
       }
     >
       <div className="space-y-6">
         {error ? (
-          <div className="rounded-[24px] border border-rose-200 bg-rose-50/90 px-5 py-4 text-sm text-rose-700 shadow-[var(--gush-shadow-soft)]">
+          <div className="rounded-[24px] border border-rose-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-5 py-4 text-sm text-rose-700 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
             首页编排工作台加载失败：{error}
           </div>
         ) : null}
@@ -527,7 +527,7 @@ export default function AdminHomeMerchandisingPage() {
             {warnings.map((warning) => (
               <div
                 key={warning}
-                className="rounded-[24px] border border-amber-200 bg-amber-50/90 px-5 py-4 text-sm text-amber-800 shadow-[var(--gush-shadow-soft)]"
+                className="rounded-[24px] border border-amber-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,251,235,0.95))] px-5 py-4 text-sm text-amber-800 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 {warning}
               </div>
@@ -538,7 +538,7 @@ export default function AdminHomeMerchandisingPage() {
         {feedback.message ? (
           <div
             className={cn(
-              "rounded-[24px] border px-5 py-4 text-sm shadow-[var(--gush-shadow-soft)]",
+              "rounded-[24px] border px-5 py-4 text-sm shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
               feedback.type === "error"
                 ? "border-rose-200 bg-rose-50/90 text-rose-700"
                 : "border-emerald-200 bg-emerald-50/90 text-emerald-700",
@@ -557,13 +557,13 @@ export default function AdminHomeMerchandisingPage() {
               <h2 className="mt-3 text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.45rem]">
                 先收紧真正决定首页观感的几个入口。
               </h2>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                先保证主视觉、起步推荐和回访入口都挂上真正能打的作品。
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
+                主视觉、起步推荐和回访入口先用最稳的作品。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <ActionButton
                   onClick={() => void handleRefreshSlots()}
-                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                  className="border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
                 >
                   <RefreshCw className={cn("h-4 w-4", refreshing ? "animate-spin" : "")} />
                   {refreshing ? "刷新中..." : "刷新推荐位"}
@@ -596,7 +596,7 @@ export default function AdminHomeMerchandisingPage() {
             {slotCards.map((slot) => (
               <article
                 key={slot.id}
-                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -614,7 +614,7 @@ export default function AdminHomeMerchandisingPage() {
                         <div className="mt-2 flex flex-wrap gap-2">
                       {slot.recommendedSeries.length > 0 ? (
                         slot.recommendedSeries.map((series) => (
-                          <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
                             {series.title}
                           </span>
                         ))
@@ -638,7 +638,7 @@ export default function AdminHomeMerchandisingPage() {
                           </span>
                         ))
                       ) : (
-                        <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-500">
+                        <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-500 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
                           尚未配置
                         </span>
                       )}
@@ -651,7 +651,7 @@ export default function AdminHomeMerchandisingPage() {
                     onClick={() => void handleApplyRecommendation(slot)}
                     className={cn(
                       slot.canApplyRecommendation
-                        ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                        ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
                         : "opacity-60",
                     )}
                     disabled={!slot.canApplyRecommendation || savingSlot === slot.id || slot.aligned}
@@ -661,7 +661,7 @@ export default function AdminHomeMerchandisingPage() {
                   </ActionButton>
                   <ActionButton onClick={() => void handleCopyIds(`${slot.label} 建议方案`, slot.recommendedIds)}>
                     <Copy className="h-4 w-4" />
-                    复制建议作品 ID
+                    复制建议作品编号
                   </ActionButton>
                 </div>
               </article>
@@ -689,9 +689,9 @@ export default function AdminHomeMerchandisingPage() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                  <div key={item.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-950">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-slate-950 shadow-[0_6px_16px_rgba(15,23,42,0.03)]">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -733,7 +733,7 @@ export default function AdminHomeMerchandisingPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {hotSignals.map((signal) => (
-                  <div key={signal.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+                  <div key={signal.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                     <p className="text-sm font-semibold text-slate-950">{signal.label}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{signal.detail}</p>
                   </div>

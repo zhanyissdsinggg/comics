@@ -7,7 +7,7 @@ import AdminShell from "../AdminShell";
 
 function getToneClasses(tone) {
   if (tone === "blue") {
-    return "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
+    return "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950";
   }
 
   if (tone === "emerald") {
@@ -48,7 +48,7 @@ export function PillButton({ active = false, children, className = "", ...props 
       className={cn(
         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         active
-          ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+          ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
           : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
         className,
       )}
@@ -61,17 +61,17 @@ export function PillButton({ active = false, children, className = "", ...props 
 
 export function MetricCard({ label, value, hint, tone = "blue" }) {
   const toneClasses = {
-    blue: "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)]",
-    emerald: "border-emerald-200 bg-emerald-50/90",
-    amber: "border-amber-200 bg-amber-50/90",
-    rose: "border-rose-200 bg-rose-50/90",
-    cyan: "border-sky-200 bg-sky-50/90",
+    blue: "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f7f7f9)]",
+    emerald: "border-emerald-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,253,245,0.95))]",
+    amber: "border-amber-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,251,235,0.95))]",
+    rose: "border-rose-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))]",
+    cyan: "border-sky-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(240,249,255,0.95))]",
   };
 
   return (
     <div
       className={cn(
-        "rounded-[24px] border px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]",
+        "rounded-[24px] border px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
         toneClasses[tone] || toneClasses.blue,
       )}
     >
@@ -84,7 +84,7 @@ export function MetricCard({ label, value, hint, tone = "blue" }) {
 
 export function EmptyState({ title, description }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-10 text-center">
+    <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white px-5 py-10 text-center shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>
@@ -97,7 +97,7 @@ export function StatusPill({ children, tone = "slate" }) {
       className={cn(
         "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
         tone === "slate"
-          ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600"
+          ? "border-[color:var(--gush-border)] bg-white text-slate-600"
           : getToneClasses(tone),
       )}
     >
@@ -110,7 +110,7 @@ export function LoadingView() {
   return (
     <AdminShell
       title="前台巡检"
-      subtitle="按读者真实会感知到的标准检查作品资料、署名和阅读路径。"
+      subtitle="按读者真实看到的页面标准，检查作品资料、署名和阅读路径。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />

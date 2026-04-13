@@ -3,6 +3,7 @@
 import {
   AdminBadge,
   AdminFormField,
+  adminCheckboxClassName,
   adminInputClassName,
   adminSelectClassName,
   adminTextareaClassName,
@@ -16,11 +17,11 @@ export function SlotIdentity({ slotMeta, itemId = "", hint = "" }) {
     <div className="space-y-2">
       <div className="text-lg font-semibold text-slate-950">{slotMeta.label}</div>
       <div className="flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 font-mono text-slate-600">
+        <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 font-mono text-slate-600 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
           {slotMeta.token}
         </span>
         {itemId ? (
-          <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 font-mono text-slate-500">
+          <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 font-mono text-slate-500 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
             {itemId}
           </span>
         ) : null}
@@ -32,7 +33,7 @@ export function SlotIdentity({ slotMeta, itemId = "", hint = "" }) {
 
 export function RecommendationCard({ title, description, meta = null, footer = null, children }) {
   return (
-    <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-white/86 p-5 shadow-[var(--gush-shadow-soft)]">
+    <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
@@ -98,7 +99,7 @@ export function CreateSlotModalContent({
         />
       </AdminFormField>
 
-      <AdminFormField label="作品 ID" helperText="多个作品 ID 可用逗号或换行分隔。">
+      <AdminFormField label="作品编号" helperText="多个作品编号可用逗号或换行分隔。">
         <textarea
           id="slot-series-ids"
           rows={5}
@@ -198,22 +199,22 @@ export function CreateRankingModalContent({
           />
         </AdminFormField>
         <div className="grid gap-3">
-          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
+          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
             <span>允许 18+ 内容</span>
             <input
               type="checkbox"
               checked={rankingForm.adult}
               onChange={(event) => setRankingForm((current) => ({ ...current, adult: event.target.checked }))}
-              className="h-4 w-4 rounded border-black/20 bg-transparent"
+              className={adminCheckboxClassName}
             />
           </label>
-          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
+          <label className="flex items-center justify-between rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
             <span>规则启用中</span>
             <input
               type="checkbox"
               checked={rankingForm.active}
               onChange={(event) => setRankingForm((current) => ({ ...current, active: event.target.checked }))}
-              className="h-4 w-4 rounded border-black/20 bg-transparent"
+              className={adminCheckboxClassName}
             />
           </label>
         </div>

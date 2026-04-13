@@ -26,7 +26,7 @@ export function EpisodesHeaderActions({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/78 p-1.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <Button type="button" variant="ghost" onClick={onBackToSeries}>
           <ArrowLeft className="size-4" />
           返回作品详情
@@ -37,7 +37,7 @@ export function EpisodesHeaderActions({
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/88 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
         <Button type="button" variant="secondary" onClick={onOpenBulkUpload}>
           <Upload className="size-4" />
           批量上传
@@ -129,13 +129,13 @@ export function EpisodesWorkspaceSection({
         </div>
       }
     >
-      <div className="mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+      <div className="mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="grid gap-3 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_220px_180px]">
             <input
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="搜索章节标题或章节 ID..."
+              placeholder="搜索章节标题或章节编号..."
               className={adminInputClassName}
             />
             <select
@@ -155,7 +155,7 @@ export function EpisodesWorkspaceSection({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-            <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+            <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
               已选 {selectedIds.length} 章
             </span>
             <Button
@@ -189,7 +189,7 @@ export function EpisodesWorkspaceSection({
           description="换一个筛选条件，或者先新增第一章开始处理。"
         />
       ) : (
-        <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 shadow-[var(--gush-shadow-soft)]">
+        <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
           <EpisodeTable {...tableProps} />
           <EpisodePagination
             pagination={pagination}
