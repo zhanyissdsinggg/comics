@@ -60,7 +60,7 @@ const TEXT_MAP = new Map([
   ["Loading email settings...", "正在加载邮件设置..."],
   ["Loading region settings...", "正在加载地区设置..."],
   ["Open asset", "打开素材"],
-  ["Storefront audit", "前台体检"],
+  ["Storefront audit", "前台巡检"],
   ["Home merchandising", "首页编排"],
   ["No action needed", "无需处理"],
   ["No support tickets yet.", "当前还没有客服工单。"],
@@ -77,14 +77,14 @@ const TEXT_MAP = new Map([
   ["Unknown email", "未知邮箱"],
   ["Unknown user", "未知用户"],
   ["No email listed", "未填写邮箱"],
-  ["Search by account ID or email...", "搜索账号 ID 或邮箱..."],
-  ["Search by ticket ID, user, subject, or message...", "搜索工单 ID、用户、主题或消息内容..."],
-  ["Search by order ID or user ID...", "搜索订单 ID 或用户 ID..."],
-  ["Search package ID, name, or label", "搜索套餐 ID、名称或标签"],
-  ["Search promotion ID or title", "搜索活动 ID 或标题"],
-  ["Search notification ID, title, or text", "搜索通知 ID、标题或正文"],
-  ["Search comment ID, reader ID, email, or text", "搜索评论 ID、读者 ID、邮箱或正文"],
-  ["Search ID, action, resource, target, or operator", "搜索日志 ID、动作、资源、目标或操作者"],
+  ["Search by account ID or email...", "搜索账号编号或邮箱..."],
+  ["Search by ticket ID, user, subject, or message...", "搜索工单编号、用户、主题或消息内容..."],
+  ["Search by order ID or user ID...", "搜索订单编号或用户编号..."],
+  ["Search package ID, name, or label", "搜索套餐编号、名称或标签"],
+  ["Search promotion ID or title", "搜索活动编号或标题"],
+  ["Search notification ID, title, or text", "搜索通知编号、标题或正文"],
+  ["Search comment ID, reader ID, email, or text", "搜索评论编号、读者编号、邮箱或正文"],
+  ["Search ID, action, resource, target, or operator", "搜索日志编号、动作、资源、目标或操作者"],
 ]);
 
 const PATTERNS = [
@@ -103,7 +103,7 @@ const PATTERNS = [
   [/^(\d+)\s+failed in this view$/i, (_, count) => `当前视图中有 ${count} 条失败任务`],
   [/^Updated\s+(.+)$/i, (_, value) => `更新于 ${value}`],
   [/^Released:\s*(.+)$/i, (_, value) => `发布时间：${value}`],
-  [/^Generation finished\. Run ID:\s*(.+)\.$/i, (_, runId) => `生成完成。运行 ID：${runId}。`],
+  [/^Generation finished\. Run ID:\s*(.+)\.$/i, (_, runId) => `生成完成。任务编号：${runId}。`],
   [/^Country calling codes must be unique:\s*(.+)\.$/i, (_, value) => `国家区号必须唯一：${value}。`],
 ];
 
