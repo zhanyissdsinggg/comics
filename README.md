@@ -179,3 +179,5 @@ When cleaning the repo in future passes:
 2. Remove only true orphaned files, not infrastructure inputs.
 3. Re-run `npm run lint` and `npm run build`.
 4. Keep the root README current when commands, folder roles, or deployment flows change.
+
+Railway redeploy trigger: refresh build cache.
