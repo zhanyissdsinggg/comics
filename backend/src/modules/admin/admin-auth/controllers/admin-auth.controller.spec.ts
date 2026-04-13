@@ -2,11 +2,7 @@ import { HttpStatus } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
-import {
-  getAdminKeysFromEnv,
-  isAdminTotpEnabled,
-  verifyAdminTotpCode,
-} from "../../../../common/utils/admin-security";
+import { isAdminTotpEnabled, verifyAdminTotpCode } from "../../../../common/utils/admin-security";
 import { getRedisClient, isRedisConfigured } from "../../../../common/redis/client";
 import { AdminAuthController } from "./admin-auth.controller";
 import { resetAdminTokenRevocationStore } from "../../utils/admin-token-revocation";
@@ -26,7 +22,6 @@ jest.mock("../../../../common/redis/client", () => ({
 }));
 
 jest.mock("../../../../common/utils/admin-security", () => ({
-  getAdminKeysFromEnv: jest.fn(),
   validateAdminKeyFormat: jest.fn(() => true),
   isAdminTotpEnabled: jest.fn(),
   verifyAdminTotpCode: jest.fn(),
@@ -37,7 +32,7 @@ describe("AdminAuthController", () => {
   let jwtService: { sign: jest.Mock; verify: jest.Mock };
   let adminLogService: { log: jest.Mock };
   let adminMembersService: {
-    resolveLoginMember: jest.Mock;
+    resolveLoginMemberByEmail: jest.Mock;
     touchLastLogin: jest.Mock;
     resolveSessionProfile: jest.Mock;
     isMemberTotpEnabled: jest.Mock;
@@ -84,7 +79,7 @@ describe("AdminAuthController", () => {
         {
           provide: AdminMembersService,
           useValue: {
-            resolveLoginMember: jest.fn(),
+            resolveLoginMemberByEmail: jest.fn(),
             touchLastLogin: jest.fn().mockResolvedValue(undefined),
             resolveSessionProfile: jest.fn(),
             isMemberTotpEnabled: jest.fn(() => false),
@@ -107,10 +102,9 @@ describe("AdminAuthController", () => {
     mockGetRedisClient.mockReturnValue(mockRedis as any);
     mockIsRedisConfigured.mockReturnValue(true);
 
-    (getAdminKeysFromEnv as jest.Mock).mockReturnValue(["test-admin-key"]);
     (isAdminTotpEnabled as jest.Mock).mockReturnValue(false);
     (verifyAdminTotpCode as jest.Mock).mockReturnValue(true);
-    adminMembersService.resolveLoginMember.mockResolvedValue({
+    adminMembersService.resolveLoginMemberByEmail.mockResolvedValue({
       adminId: "admin-1-test",
       adminRole: "content_admin",
       member: {
@@ -157,7 +151,7 @@ describe("AdminAuthController", () => {
   });
 
   describe("login", () => {
-    it("should login successfully with valid admin key and set auth cookies", async () => {
+    it("should login successfully with valid email and password and set auth cookies", async () => {
       const req = {
         ip: "127.0.0.1",
         headers: {},
@@ -165,7 +159,10 @@ describe("AdminAuthController", () => {
         res: { setHeader: jest.fn() },
       };
 
-      const result = await controller.login({ adminKey: "test-admin-key" }, req);
+      const result = await controller.login(
+        { email: "admin@example.com", password: "Password123!", totpCode: "" },
+        req,
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -198,7 +195,7 @@ describe("AdminAuthController", () => {
       expect(adminMembersService.touchLastLogin).toHaveBeenCalledWith("admin-1-test");
     });
 
-    it("should reject invalid admin key", async () => {
+    it("should reject invalid credentials", async () => {
       const req = {
         ip: "127.0.0.1",
         headers: {},
@@ -206,7 +203,11 @@ describe("AdminAuthController", () => {
         res: { setHeader: jest.fn() },
       };
 
-      await expect(controller.login({ adminKey: "wrong-key" }, req)).rejects.toMatchObject({
+      adminMembersService.resolveLoginMemberByEmail.mockResolvedValueOnce(null);
+
+      await expect(
+        controller.login({ email: "bad@example.com", password: "wrong-password" }, req),
+      ).rejects.toMatchObject({
         status: HttpStatus.UNAUTHORIZED,
       });
     });
@@ -223,7 +224,10 @@ describe("AdminAuthController", () => {
       };
 
       await expect(
-        controller.login({ adminKey: "test-admin-key", totpCode: "000000" }, req),
+        controller.login(
+          { email: "admin@example.com", password: "Password123!", totpCode: "000000" },
+          req,
+        ),
       ).rejects.toMatchObject({
         status: HttpStatus.UNAUTHORIZED,
       });

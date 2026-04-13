@@ -17,7 +17,6 @@ import { getRedisClient } from "../../../../common/redis/client";
 import { logger } from "../../../../common/logger/winston.init";
 import { ValidationPipe } from "../../../../common/pipes/validation.pipe";
 import {
-  getAdminKeysFromEnv,
   isAdminTotpEnabled,
   verifyAdminTotpCode,
 } from "../../../../common/utils/admin-security";
@@ -63,7 +62,7 @@ type RequestLike = {
   };
   res?: ResponseLike;
 };
-type LoginFailureReason = "invalid_admin_key" | "invalid_two_factor_code";
+type LoginFailureReason = "invalid_credentials" | "invalid_two_factor_code";
 type SessionTokenPayload = {
   role?: string;
   adminRole?: string;
@@ -83,9 +82,10 @@ export class AdminAuthController {
   @Post("login")
   @UsePipes(new ValidationPipe())
   async login(@Body() dto: AdminLoginDto, @Req() req: RequestLike) {
-    const { adminKey, totpCode } = dto;
+    const { email, password, totpCode } = dto;
     const clientIp = this.getClientIp(req);
     const redis = getRedisClient();
+    const appConfig = getAppConfig();
 
     if (redis) {
       const failKey = `admin:login:fail:${clientIp}`;
@@ -103,18 +103,17 @@ export class AdminAuthController {
       }
     }
 
-    const adminKeys = getAdminKeysFromEnv();
-    if (!adminKeys.length) {
+    if (!appConfig.admin.passwordAuthEnabled) {
       throw new HttpException(
-        "Server misconfigured: missing ADMIN_KEY or ADMIN_KEYS",
+        "Server misconfigured: admin password auth is disabled",
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    const isKeyValid = adminKeys.includes(adminKey);
-    const loginMember = isKeyValid
-      ? await this.adminMembersService.resolveLoginMember(adminKey)
-      : null;
+    const loginMember = await this.adminMembersService.resolveLoginMemberByEmail(
+      String(email || "").trim(),
+      String(password || ""),
+    );
     const requiresTotp = loginMember?.member
       ? this.adminMembersService.isMemberTotpEnabled(loginMember.member) || isAdminTotpEnabled()
       : isAdminTotpEnabled();
@@ -129,9 +128,9 @@ export class AdminAuthController {
           : verifyAdminTotpCode(totpCode || "")
       );
 
-    if (!isKeyValid || !isTotpValid) {
-      const reason: LoginFailureReason = !isKeyValid
-        ? "invalid_admin_key"
+    if (!loginMember || !isTotpValid) {
+      const reason: LoginFailureReason = !loginMember
+        ? "invalid_credentials"
         : "invalid_two_factor_code";
 
       await this.handleLoginFailure({
@@ -141,7 +140,7 @@ export class AdminAuthController {
       });
 
       throw new HttpException(
-        reason === "invalid_two_factor_code" ? "Invalid two-factor code" : "Invalid admin key",
+        reason === "invalid_two_factor_code" ? "Invalid two-factor code" : "Invalid email or password",
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -349,7 +348,7 @@ export class AdminAuthController {
 
     const reasonMessage = reason === "invalid_two_factor_code"
       ? "Invalid two-factor code"
-      : "Invalid admin key";
+      : "Invalid email or password";
 
     await this.adminLogService.log("login_failed", "auth", "admin", {
       reason: reasonMessage,

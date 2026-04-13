@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import type { AdminMember, Prisma } from "@prisma/client";
+import bcrypt from "bcrypt";
 import { getAppConfig } from "../../../../common/config/app-config";
 import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
@@ -39,6 +40,7 @@ const ADMIN_MEMBER_SORT_FIELDS = new Set([
   "keySlot",
 ]);
 const ADMIN_MEMBER_ENV_SYNC_TTL_MS = 5 * 60 * 1000;
+const ADMIN_PASSWORD_MIN_LENGTH = 8;
 
 type AdminMembersStorageMode = "unknown" | "database" | "env_compat";
 
@@ -325,6 +327,7 @@ export class AdminMembersService {
     }
 
     const email = this.normalizeEmail(input.email);
+    const passwordHash = await this.hashPassword(input.password);
     const keySlot = input.keySlot === undefined ? null : this.readKeySlot(input.keySlot);
     await this.assertEmailAvailable(email);
     await this.assertKeySlotAvailable(keySlot);
@@ -335,6 +338,7 @@ export class AdminMembersService {
         data: {
           name,
           email,
+          passwordHash,
           role: normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN),
           status: normalizeMemberStatus(input.status),
           keySlot,
@@ -365,6 +369,7 @@ export class AdminMembersService {
 
     const nextEmail = input.email !== undefined ? this.normalizeEmail(input.email) : undefined;
     const nextKeySlot = input.keySlot !== undefined ? this.readKeySlot(input.keySlot) : undefined;
+    const nextPasswordHash = await this.hashPassword(input.password, true);
     await this.assertEmailAvailable(nextEmail, id);
     await this.assertKeySlotAvailable(nextKeySlot, id);
 
@@ -382,6 +387,7 @@ export class AdminMembersService {
         data: {
           name: input.name !== undefined ? sanitizeText(input.name) || existing.name : undefined,
           email: nextEmail,
+          passwordHash: nextPasswordHash === undefined ? undefined : nextPasswordHash,
           role: input.role !== undefined
             ? normalizeAdminRole(input.role, AdminRole.SUPER_ADMIN)
             : undefined,
@@ -399,6 +405,43 @@ export class AdminMembersService {
     );
 
     return this.mapMember(member);
+  }
+
+  async resolveLoginMemberByEmail(email: string, password: string) {
+    const normalizedEmail = this.normalizeEmail(email);
+    if (!normalizedEmail) {
+      return null;
+    }
+
+    const member = await this.runWithMemberStoreFallback(
+      () => this.prisma.adminMember.findUnique({ where: { email: normalizedEmail } }),
+      () => null,
+    );
+
+    if (!member) {
+      return null;
+    }
+
+    if (normalizeMemberStatus(member.status) !== ADMIN_MEMBER_STATUS_ACTIVE) {
+      throw new UnauthorizedException("杩欎釜鍚庡彴鎴愬憳宸茶鍋滅敤銆?");
+    }
+
+    if (!member.passwordHash) {
+      return null;
+    }
+
+    const isValid = await bcrypt.compare(password, member.passwordHash);
+    if (!isValid) {
+      return null;
+    }
+
+    const adminRole = normalizeAdminRole(member.role, AdminRole.SUPER_ADMIN);
+    return {
+      member,
+      adminId: member.id,
+      adminRole,
+      session: this.buildMemberSession(member, AdminRole.SUPER_ADMIN),
+    };
   }
 
   async setMemberStatus(id: string, status: string) {
@@ -820,6 +863,31 @@ export class AdminMembersService {
     }
 
     return email;
+  }
+
+  private async hashPassword(
+    value: unknown,
+    allowEmpty = false,
+  ): Promise<string | null | undefined> {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const password = String(value || "");
+    if (!password) {
+      if (allowEmpty) {
+        return null;
+      }
+      throw new BadRequestException("鍚庡彴鐧诲綍瀵嗙爜涓嶈兘涓虹┖銆?");
+    }
+
+    if (password.length < ADMIN_PASSWORD_MIN_LENGTH) {
+      throw new BadRequestException(
+        `鍚庡彴鐧诲綍瀵嗙爜鑷冲皯 ${ADMIN_PASSWORD_MIN_LENGTH} 浣嶃€?`,
+      );
+    }
+
+    return await bcrypt.hash(password, 10);
   }
 
   private readKeySlot(value: unknown): number | null {

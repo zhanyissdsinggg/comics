@@ -35,6 +35,7 @@ export type BrandingPayloadInput = Partial<
 export type AdminMemberInput = {
   name?: string;
   email?: string | null;
+  password?: string;
   role?: string;
   status?: string;
   keySlot?: number | null;

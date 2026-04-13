@@ -43,18 +43,18 @@ export function MembersSummaryCards({ paginationTotal, enabledCount, boundSlotsC
       <AdminMetricCard
         label="当前成员数"
         value={String(paginationTotal)}
-        detail="包含手动成员和由环境密钥槽位同步出的后台成员。"
+        detail="包含手动成员和同步出的槽位成员。"
         tone="accent"
       />
       <AdminMetricCard
         label="已启用成员"
         value={String(enabledCount)}
-        detail="状态为启用的成员可以继续进入后台。"
+        detail="启用状态的成员可以继续进入后台。"
       />
       <AdminMetricCard
-        label="已配置二次验证"
+        label="已启用两步验证"
         value={String(totpEnabledCount)}
-        detail={`当前结果中有 ${boundSlotsCount} 个成员已经绑定有效密钥槽位。`}
+        detail={`当前有 ${boundSlotsCount} 个成员已绑定密钥槽位。`}
       />
     </div>
   );
@@ -90,12 +90,12 @@ export function MembersDirectorySection(props) {
   return (
     <AdminPageSection
       title="成员目录"
-      description="这里回答四件事：谁在用后台、他能看到什么、绑定了哪一个密钥槽位、有没有二次验证。"
+      description="这里主要看四件事：谁在用后台、看得到什么、绑了哪个密钥槽位、有没有两步验证。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索成员名称、邮箱、角色或成员 ID..."
+        searchPlaceholder="搜索成员名称、邮箱、角色或成员编号..."
         onOpenFilters={onOpenSort}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -137,7 +137,7 @@ export function MembersDirectorySection(props) {
                 <th className="px-4 py-4">角色</th>
                 <th className="px-4 py-4">状态</th>
                 <th className="px-4 py-4">密钥槽位</th>
-                <th className="px-4 py-4">2FA</th>
+                <th className="px-4 py-4">两步验证</th>
                 <th className="px-4 py-4">最近登录</th>
                 <th className="px-4 py-4">操作</th>
               </tr>
@@ -226,7 +226,7 @@ export function MembersDirectorySection(props) {
                         disabled={resetTotpPending}
                       >
                         <ShieldCheck className="size-4" />
-                        重置 2FA
+                        重置验证
                       </Button>
                       {member.hasTotpSecret ? (
                         <Button
@@ -237,7 +237,7 @@ export function MembersDirectorySection(props) {
                           disabled={clearTotpPending}
                         >
                           <ShieldOff className="size-4" />
-                          清除 2FA
+                          清除验证
                         </Button>
                       ) : null}
                     </div>
@@ -255,27 +255,27 @@ export function MembersDirectorySection(props) {
 export function MembersGuideSection() {
   return (
     <AdminPageSection
-      title="怎么用这页"
-      description="后台成员体系现在仍以环境密钥登录，但成员档案、角色、状态和 2FA 已经落到数据库里，日常运营终于有一套真实可维护的入口。"
+      title="使用建议"
+      description="这页负责维护后台成员，不再只靠环境变量硬撑。"
       accent="amber"
     >
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
           <p className="text-sm font-semibold text-slate-950">先同步密钥槽位</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            把环境里的 ADMIN_KEYS 槽位同步进成员目录，再补齐姓名、邮箱和真实角色。
+            先把环境里的密钥槽位同步进成员目录，再补齐姓名、邮箱和角色。
           </p>
         </div>
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
           <p className="text-sm font-semibold text-slate-950">角色和状态在这里维护</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            菜单可见范围和权限继续走统一 RBAC，但成员身份不再只有一串环境变量。
+            菜单可见范围继续跟角色走，成员身份本身在这里维护。
           </p>
         </div>
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-          <p className="text-sm font-semibold text-slate-950">2FA 密钥只在重置后展示一次</p>
+          <p className="text-sm font-semibold text-slate-950">验证密钥只在重置后展示一次</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            重置后请立刻把密钥或 otpauth 链接加入验证器，页面不会长期保留明文。
+            重置后请立即保存，页面不会长期保留明文密钥。
           </p>
         </div>
       </div>
@@ -325,7 +325,17 @@ export function MemberEditorModalContent({
             className={adminInputClassName}
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            placeholder="name@example.com"
+            placeholder="editor@yoursite.com"
+          />
+        </AdminFormField>
+
+        <AdminFormField label="登录密码" helperText="成员创建或调整密码时请更新。空白不会覆盖旧密码。">
+          <input
+            className={adminInputClassName}
+            type="password"
+            value={form.password}
+            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+            placeholder="至少 8 位的密码"
           />
         </AdminFormField>
       </div>
@@ -386,7 +396,7 @@ export function MemberEditorModalContent({
           rows={4}
           value={form.notes}
           onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
-          placeholder="例如：负责首页编排、作品上架与 creator credits 维护。"
+          placeholder="例如：负责首页编排、作品上架与创作者署名维护。"
         />
       </AdminFormField>
 
@@ -412,7 +422,7 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
         </p>
       </div>
 
-      <AdminFormField label="Base32 密钥" helperText="手动添加验证器时直接粘贴这一串。">
+      <AdminFormField label="手动录入密钥" helperText="需要手动添加验证器时，直接粘贴这一串即可。">
         <div className="flex gap-2">
           <input className={adminInputClassName} readOnly value={totpSheet?.secret || ""} />
           <Button type="button" variant="outline" onClick={() => onCopy(totpSheet?.secret || "", "密钥")}>
@@ -422,13 +432,13 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
         </div>
       </AdminFormField>
 
-      <AdminFormField label="otpauth 链接" helperText="支持从链接导入的验证器可以直接使用。">
+      <AdminFormField label="验证器导入链接" helperText="支持从链接导入的验证器应用可以直接使用。">
         <div className="flex gap-2">
           <input className={adminInputClassName} readOnly value={totpSheet?.otpauthUrl || ""} />
           <Button
             type="button"
             variant="outline"
-            onClick={() => onCopy(totpSheet?.otpauthUrl || "", "otpauth 链接")}
+            onClick={() => onCopy(totpSheet?.otpauthUrl || "", "验证器导入链接")}
           >
             <Copy className="size-4" />
             复制

@@ -3,6 +3,7 @@
 export const DEFAULT_FORM = {
   name: "",
   email: "",
+  password: "",
   role: "content_admin",
   status: "active",
   keySlot: "",
@@ -67,7 +68,7 @@ export function formatRole(role) {
 }
 
 export function buildPayload(form) {
-  return {
+  const payload = {
     name: String(form.name || "").trim(),
     email: String(form.email || "").trim() || null,
     role: String(form.role || "").trim() || "content_admin",
@@ -75,6 +76,13 @@ export function buildPayload(form) {
     keySlot: form.keySlot === "" ? null : Number(form.keySlot),
     notes: String(form.notes || "").trim() || null,
   };
+
+  const password = String(form.password || "").trim();
+  if (password) {
+    payload.password = password;
+  }
+
+  return payload;
 }
 
 export function toFormState(member) {
@@ -85,6 +93,7 @@ export function toFormState(member) {
   return {
     name: member.name || "",
     email: member.email || "",
+    password: "",
     role: member.role || "content_admin",
     status: member.status || "active",
     keySlot: typeof member.keySlot === "number" ? String(member.keySlot) : "",

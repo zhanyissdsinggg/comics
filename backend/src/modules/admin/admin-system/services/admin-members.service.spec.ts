@@ -1,4 +1,5 @@
 import { ServiceUnavailableException } from "@nestjs/common";
+import bcrypt from "bcrypt";
 import { resetAppConfigForTests } from "../../../../common/config/app-config";
 import { AdminRole } from "../../permissions/admin-permissions";
 import { AdminMembersService } from "./admin-members.service";
@@ -181,5 +182,37 @@ describe("AdminMembersService", () => {
     const result = await service.resolveLoginMember("TestAdminKey123!Secure");
 
     expect(result.session?.adminName).toBe("后台密钥槽位 1");
+  });
+
+  it("authenticates admin members by email + password when stored", async () => {
+    const passwordHash = await bcrypt.hash("Password123!", 10);
+    const prisma = {
+      adminMember: {
+        findMany: jest.fn().mockResolvedValue([]),
+        create: jest.fn(),
+        findUnique: jest.fn().mockResolvedValue({
+          id: "member-2",
+          name: "Content Admin",
+          email: "admin@example.com",
+          role: "content_admin",
+          status: "active",
+          keySlot: null,
+          source: "manual",
+          totpEnabled: false,
+          totpSecret: null,
+          notes: null,
+          passwordHash,
+          lastLoginAt: null,
+          createdAt: new Date("2026-04-02T00:00:00.000Z"),
+          updatedAt: new Date("2026-04-02T00:00:00.000Z"),
+        }),
+      },
+    };
+
+    const service = new AdminMembersService(prisma as any);
+    const result = await service.resolveLoginMemberByEmail("admin@example.com", "Password123!");
+
+    expect(result?.member?.id).toBe("member-2");
+    expect(result?.session?.adminRole).toBe(AdminRole.CONTENT_ADMIN);
   });
 });

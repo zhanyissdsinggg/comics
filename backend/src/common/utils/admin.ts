@@ -1,10 +1,12 @@
 import { Request } from "express";
+import { getAppConfig } from "../config/app-config";
 import { logger } from "../logger/winston.init";
 import { getAdminKeysFromEnv, validateAdminKeyFormat } from "./admin-security";
 
 const ADMIN_KEYS = getAdminKeysFromEnv();
+const adminConfig = getAppConfig().admin;
 
-if (!ADMIN_KEYS.length) {
+if (!ADMIN_KEYS.length && !adminConfig.passwordAuthEnabled) {
   logger.error("Fatal: ADMIN_KEY or ADMIN_KEYS is not configured.");
   logger.error("Set at least one admin key. Example: ADMIN_KEYS=key1,key2");
   process.exit(1);
@@ -17,7 +19,9 @@ if (invalidKeys.length) {
   process.exit(1);
 }
 
-logger.info(`Admin key validation passed. Loaded ${ADMIN_KEYS.length} admin key(s).`);
+if (ADMIN_KEYS.length) {
+  logger.info(`Admin key validation passed. Loaded ${ADMIN_KEYS.length} admin key(s).`);
+}
 
 export function isAdminAuthorized(req: Request, _body?: any) {
   const user = (req as any).user;

@@ -265,12 +265,13 @@ export function AdminAuthProvider({ children }) {
     return () => clearInterval(timer);
   }, [isAuthenticated, logout, session]);
 
-  const login = useCallback(async (adminKey, totpCode = "") => {
+  const login = useCallback(async (email, password, totpCode = "") => {
     try {
       const baseUrl = getApiBaseUrl();
-      const normalizedAdminKey = String(adminKey || "").trim();
+      const normalizedEmail = String(email || "").trim();
+      const normalizedPassword = String(password || "");
       const normalizedTotp = String(totpCode || "").trim();
-      const payload = { adminKey: normalizedAdminKey };
+      const payload = { email: normalizedEmail, password: normalizedPassword };
 
       if (normalizedTotp) {
         payload.totpCode = normalizedTotp;
@@ -286,7 +287,7 @@ export function AdminAuthProvider({ children }) {
       const raw = await response.json().catch(() => ({}));
       const data = unwrapPayload(raw);
       if (!response.ok || data.success === false) {
-        return { success: false, error: data?.message || "后台密钥无效。" };
+        return { success: false, error: data?.message || "账号或密码无效。" };
       }
 
       const nextSession = buildAdminSession(data.session);

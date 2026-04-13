@@ -156,6 +156,7 @@ const appConfigSchema = z
     ADMIN_TOKEN_FALLBACK_ENABLED: z.string().optional().default("0"),
     ADMIN_LEGACY_BEARER_ENABLED: z.string().optional().default("0"),
     ADMIN_CONTENT_GENERATOR_ENABLED: z.string().optional().default(""),
+    ADMIN_PASSWORD_AUTH_ENABLED: z.string().optional().default("1"),
     ENABLE_ADMIN_RUNTIME: z.string().optional().default("1"),
     ENABLE_COMMERCIAL_RUNTIME: z.string().optional().default("1"),
     ENABLE_OPS_RUNTIME: z.string().optional().default("1"),
@@ -191,6 +192,7 @@ const appConfigSchema = z
         tokenFallbackEnabled: normalizeBoolean(env.ADMIN_TOKEN_FALLBACK_ENABLED, false),
         legacyBearerEnabled: normalizeBoolean(env.ADMIN_LEGACY_BEARER_ENABLED, false),
         contentGeneratorEnabled: normalizeOptional(env.ADMIN_CONTENT_GENERATOR_ENABLED),
+        passwordAuthEnabled: normalizeBoolean(env.ADMIN_PASSWORD_AUTH_ENABLED, true),
       },
       cookies: {
         domain: normalizeOptional(env.COOKIE_DOMAIN),
@@ -242,10 +244,14 @@ const appConfigSchema = z
       });
     }
 
-    if (config.environment !== "test" && config.admin.keys.length === 0) {
+    if (
+      config.environment !== "test"
+      && config.admin.keys.length === 0
+      && !config.admin.passwordAuthEnabled
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Set ADMIN_KEY or ADMIN_KEYS before starting the backend",
+        message: "Set ADMIN_KEY/ADMIN_KEYS or enable ADMIN_PASSWORD_AUTH_ENABLED before starting the backend",
         path: ["admin", "keys"],
       });
     }

@@ -211,6 +211,7 @@ model AdminMember {
   id          String   @id @default(cuid())
   name        String
   email       String?  @unique
+  passwordHash String?
   role        String   @default("super_admin")
   status      String   @default("active")
   keySlot     Int?     @unique
