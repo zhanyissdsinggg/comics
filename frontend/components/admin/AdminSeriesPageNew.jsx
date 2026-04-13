@@ -40,9 +40,20 @@ import {
   STATUS_OPTIONS,
   TYPE_TABS,
 } from "./series-workspace/utils";
+import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
 
 function Feedback({ feedback, onDismiss }) {
   return feedback?.message ? <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} /> : null;
+}
+
+function slugifySeriesTitle(title) {
+  const slug = String(title || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return slug || "series";
 }
 
 export default function AdminSeriesPageNew() {
@@ -164,7 +175,7 @@ export default function AdminSeriesPageNew() {
     ];
   }, [seriesList]);
 
-  const suggestedSeriesId = useMemo(() => `${slugifyTitle(createForm.title)}-xxxxxx`, [createForm.title]);
+  const suggestedSeriesId = useMemo(() => `${slugifySeriesTitle(createForm.title)}-xxxxxx`, [createForm.title]);
 
   const allVisibleSelected = filteredSeries.length > 0 && filteredSeries.every((series) => selectedSeries.includes(series.id));
   const dismissFeedback = () => setFeedback(EMPTY_FEEDBACK);
@@ -313,12 +324,12 @@ export default function AdminSeriesPageNew() {
     },
   });
 
-  const handleOpenDuplicate = (series) => setDuplicateDialog({ isOpen: true, series, newId: `${slugifyTitle(series.title)}-copy` });
+  const handleOpenDuplicate = (series) => setDuplicateDialog({ isOpen: true, series, newId: `${slugifySeriesTitle(series.title)}-copy` });
   const handleDuplicate = async () => {
     const source = duplicateDialog.series;
     const nextId = duplicateDialog.newId.trim();
     if (!source || !nextId) {
-      setFeedback({ type: "error", message: "请输入新的作品 ID。" });
+      setFeedback({ type: "error", message: "请输入新的作品编号。" });
       return;
     }
     setIsDuplicating(true);
@@ -377,19 +388,19 @@ export default function AdminSeriesPageNew() {
     resetCreateForm();
   };
 
-  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-8 text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">正在加载作品工作台...</section>;
-  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white/88 p-10 text-center text-sm text-slate-600 shadow-[var(--gush-shadow-soft)]">需要管理员权限才能查看此页面。</section>;
+  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-8 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">正在加载作品工作台...</section>;
+  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-10 text-center text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">需要管理员权限才能查看此页面。</section>;
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 p-6 shadow-[var(--gush-shadow-soft)]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
             <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
             <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理。</p>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
             <Button
               type="button"
               variant="secondary"
@@ -417,7 +428,7 @@ export default function AdminSeriesPageNew() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesStats.map((item) => (
-          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[var(--gush-shadow-soft)]">
+          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
             <p className="mt-2 text-sm text-slate-600">{item.hint}</p>
@@ -425,34 +436,35 @@ export default function AdminSeriesPageNew() {
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/92 p-5 shadow-[var(--gush-shadow-soft)]">
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
         <div className="flex flex-col gap-4">
           {hasScopedCreatorFilter ? (
-            <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50/88 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
               <p>
                 当前列表已按创作者筛选：
-                <span className="font-semibold text-slate-950"> {scopedCreatorQuery}</span>.
-                会同时匹配作品标题、ID 和创作者署名，方便集中补齐归属。
+                <span className="font-semibold text-slate-950"> {scopedCreatorQuery}</span>。
+                会同时匹配作品标题、编号和创作者署名，方便集中补齐归属。
               </p>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => router.push("/admin/series")}
-                className="inline-flex items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
               >
                 清除创作者筛选
-              </button>
+              </Button>
             </div>
           ) : null}
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="flex flex-wrap gap-2">
-              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}>{tab.label}</button>)}
+              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}>{tab.label}</button>)}
             </div>
 
             <div className="flex flex-1 flex-col gap-3 xl:items-end">
               <div className="flex w-full flex-col gap-3 xl:max-w-3xl xl:flex-row xl:justify-end">
-                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
+                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:bg-white">
                   <Search size={16} className="text-slate-400" />
-                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、ID、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、编号、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
                 </label>
                 <div className="xl:shrink-0">
                   <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
@@ -466,7 +478,7 @@ export default function AdminSeriesPageNew() {
                       key={filter.value}
                       type="button"
                       onClick={() => setQuickFilter(filter.value)}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950" : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`}
+                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}
                     >
                       {filter.label}
                     </button>
@@ -480,9 +492,25 @@ export default function AdminSeriesPageNew() {
                   <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
                     {allVisibleSelected ? "清空选择" : "全选"}
                   </Button>
-                  <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-white">
-                    <button type="button" onClick={() => setViewMode("grid")} className={`px-4 py-2.5 transition ${viewMode === "grid" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`} title="网格视图"><Grid size={16} /></button>
-                    <button type="button" onClick={() => setViewMode("list")} className={`px-4 py-2.5 transition ${viewMode === "list" ? "bg-slate-950 text-white" : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"}`} title="列表视图"><List size={16} /></button>
+                  <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                    <Button
+                      type="button"
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      size="icon-sm"
+                      onClick={() => setViewMode("grid")}
+                      title="网格视图"
+                    >
+                      <Grid size={16} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="icon-sm"
+                      onClick={() => setViewMode("list")}
+                      title="列表视图"
+                    >
+                      <List size={16} />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -494,7 +522,7 @@ export default function AdminSeriesPageNew() {
       <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white/88 p-12 text-center shadow-[var(--gush-shadow-soft)]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
+        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-12 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
       ) : (
         <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
           {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
