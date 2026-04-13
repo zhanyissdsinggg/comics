@@ -10,8 +10,8 @@ import TrackingSettings from "../../../components/tracking/TrackingSettings";
 export default function AdminTrackingPage() {
   return (
     <AdminLayout
-      title="跟踪设置"
-      subtitle="把追踪脚本、平台令牌和本地草稿同步收在一个安静页面里，不把后台做成吵闹的分析面板。"
+      title="追踪设置"
+      subtitle="把追踪脚本、平台令牌和本地草稿同步收在一个安静页面里，不把后台做成喧闹的分析面板。"
     >
       <Suspense
         fallback={
