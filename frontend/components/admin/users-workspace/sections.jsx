@@ -12,6 +12,7 @@ import {
   AdminPageSection,
   AdminTableHeader,
   AdminTableRow,
+  adminCheckboxClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
@@ -64,12 +65,12 @@ export function UsersDirectorySection(props) {
   return (
     <AdminPageSection
       title="读者目录"
-      description="按邮箱或账号 ID 搜索，再处理状态变更，不把页面做成吵闹的 CRM。"
+      description="按邮箱或账号编号搜索，再处理状态变更，不把页面做成吵闹的用户控制台。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索账号 ID 或邮箱..."
+        searchPlaceholder="搜索账号编号或邮箱..."
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -131,7 +132,7 @@ export function UsersDirectorySection(props) {
                     aria-label="选择全部用户"
                     checked={users.length > 0 && selectedIds.length === users.length}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="h-4 w-4 rounded border-black/20 bg-transparent"
+                    className={adminCheckboxClassName}
                   />
                 </th>
                 <th className="px-4 py-4">账号</th>
@@ -150,7 +151,7 @@ export function UsersDirectorySection(props) {
                       aria-label={`选择用户 ${user.id}`}
                       checked={selectedIdsSet.has(user.id)}
                       onChange={() => onToggleSelect(user.id)}
-                      className="h-4 w-4 rounded border-black/20 bg-transparent"
+                      className={adminCheckboxClassName}
                     />
                   </td>
                   <td className="px-4 py-4">
@@ -166,9 +167,23 @@ export function UsersDirectorySection(props) {
                     </AdminBadge>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="space-y-1 text-sm text-slate-600">
-                      <p>付费点数：{formatNumber(user.wallet?.paidPts || 0)}</p>
-                      <p>赠送点数：{formatNumber(user.wallet?.bonusPts || 0)}</p>
+                    <div className="grid min-w-[240px] gap-2 sm:grid-cols-2">
+                      <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white px-3 py-2.5 shadow-[0_6px_14px_rgba(15,23,42,0.02)] ring-1 ring-black/[0.015]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          付费点数
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">
+                          {formatNumber(user.wallet?.paidPts || 0)}
+                        </p>
+                      </div>
+                      <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white px-3 py-2.5 shadow-[0_6px_14px_rgba(15,23,42,0.02)] ring-1 ring-black/[0.015]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          赠送点数
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">
+                          {formatNumber(user.wallet?.bonusPts || 0)}
+                        </p>
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-4">
@@ -200,19 +215,19 @@ export function UsersGuideSection() {
       accent="amber"
     >
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <p className="text-sm font-semibold text-slate-950">先看账号状态</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             封禁和恢复按钮保持可见，但不过度抢戏，让处理动作不至于压过账号信息本身。
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-          <p className="text-sm font-semibold text-slate-950">不要做成 CRM</p>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+          <p className="text-sm font-semibold text-slate-950">不要做成生硬的客户后台</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             这里不做销售控制台，只保留账号身份、钱包状态和访问状态这些真正有用的信息。
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
           <p className="text-sm font-semibold text-slate-950">只在真省事时批量处理</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             批量操作只在选中后出现，默认页面先保持安静、清楚、好扫一眼。

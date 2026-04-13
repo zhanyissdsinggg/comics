@@ -20,7 +20,7 @@ export function AdminListToolbar({
   return (
     <div
       className={cn(
-        "mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 p-4 shadow-[var(--gush-shadow-soft)]",
+        "mb-6 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]",
         className,
       )}
     >
@@ -32,11 +32,11 @@ export function AdminListToolbar({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}
-            className="h-11 w-full rounded-full border border-[color:var(--gush-border)] bg-white py-2 pl-10 pr-4 text-sm text-slate-900 outline-none transition-[border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:ring-[3px] focus:ring-slate-200/70"
+            className="h-11 w-full rounded-full border border-[color:var(--gush-border)] bg-white py-2 pl-10 pr-4 text-sm text-slate-900 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
           />
         </label>
 
-        <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-1.5 xl:justify-end">
           <Button type="button" variant="outline" onClick={onOpenFilters}>
             <SlidersHorizontal className="size-4" />
             {filtersLabel}
@@ -47,7 +47,9 @@ export function AdminListToolbar({
             {sortOrder === "asc" ? ascendingLabel : descendingLabel}
           </Button>
 
-          {extraActions ? <div className="flex flex-wrap items-center gap-2">{extraActions}</div> : null}
+          {extraActions ? (
+            <div className="flex flex-wrap items-center gap-2">{extraActions}</div>
+          ) : null}
         </div>
       </div>
     </div>

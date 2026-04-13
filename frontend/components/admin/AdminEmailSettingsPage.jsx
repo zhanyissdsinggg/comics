@@ -29,8 +29,8 @@ const defaultDraft = {
 const providerOptions = [
   { value: "console", label: "控制台" },
   { value: "webhook", label: "回调地址" },
-  { value: "resend", label: "Resend" },
-  { value: "sendgrid", label: "SendGrid" },
+  { value: "resend", label: "Resend 邮件服务" },
+  { value: "sendgrid", label: "SendGrid 邮件服务" },
 ];
 
 const secretFields = [
@@ -47,7 +47,7 @@ const secretFields = [
   {
     key: "smsWebhookUrl",
     label: "短信回调地址",
-    placeholder: "https://sms.example.com/webhook",
+    placeholder: "https://notify.yoursite.com/sms/webhook",
   },
 ];
 
@@ -257,7 +257,7 @@ export default function AdminEmailSettingsPage() {
               value={draft.from}
               onChange={(event) => handleChange("from", event.target.value)}
               className={adminInputClassName}
-              placeholder="no-reply@yourdomain.com"
+              placeholder="notice@yoursite.com"
             />
           </AdminFormField>
 
@@ -266,7 +266,7 @@ export default function AdminEmailSettingsPage() {
               value={draft.adminNotifyEmail}
               onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
               className={adminInputClassName}
-              placeholder="alerts@yourdomain.com"
+              placeholder="ops@yoursite.com"
             />
           </AdminFormField>
         </div>
@@ -282,7 +282,7 @@ export default function AdminEmailSettingsPage() {
               value={draft.webhookUrl}
               onChange={(event) => handleChange("webhookUrl", event.target.value)}
               className={adminInputClassName}
-              placeholder="https://provider.example.com/webhook"
+              placeholder="https://notify.yoursite.com/email/webhook"
             />
           </AdminFormField>
 
@@ -290,7 +290,7 @@ export default function AdminEmailSettingsPage() {
             {secretFields.map((field) => (
               <div
                 key={field.key}
-                className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/86 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]"
               >
                 <AdminFormField
                   label={field.label}
@@ -304,7 +304,7 @@ export default function AdminEmailSettingsPage() {
                   />
                 </AdminFormField>
 
-                <div className="mt-3">
+                <div className="mt-3 flex justify-end rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
                   <Button
                     type="button"
                     variant="outline"
@@ -337,7 +337,7 @@ export default function AdminEmailSettingsPage() {
               value={draft.testRecipient}
               onChange={(event) => handleChange("testRecipient", event.target.value)}
               className={adminInputClassName}
-              placeholder="you@example.com"
+              placeholder="qa@yoursite.com"
             />
           </AdminFormField>
           <p className="text-sm leading-6 text-slate-500">

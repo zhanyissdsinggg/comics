@@ -5,6 +5,7 @@ import { AdminSelectionBar } from "@/components/admin/common/AdminSelectionBar";
 import { AdminTableShell } from "@/components/admin/common/AdminTableShell";
 import {
   AdminBadge,
+  adminCheckboxClassName,
   AdminDataTable,
   AdminMetricCard,
   AdminPageSection,
@@ -63,7 +64,7 @@ export function PromotionsListSection(props) {
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索活动 ID 或标题"
+        searchPlaceholder="搜索活动编号或标题"
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -103,7 +104,7 @@ export function PromotionsListSection(props) {
                     type="checkbox"
                     checked={selectedIds.length === promotions.length && promotions.length > 0}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="rounded"
+                    className={adminCheckboxClassName}
                     aria-label="选择全部活动"
                   />
                 </th>
@@ -127,7 +128,7 @@ export function PromotionsListSection(props) {
                         type="checkbox"
                         checked={selectedIdsSet.has(promotion.id)}
                         onChange={() => onToggleSelect(promotion.id)}
-                        className="rounded"
+                        className={adminCheckboxClassName}
                         aria-label={`选择活动 ${promotion.id}`}
                       />
                     </td>

@@ -214,7 +214,7 @@ export default function AdminEmailJobsPage() {
           </div>
         }
       >
-        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mb-5 flex flex-col gap-4 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:flex-row lg:items-center lg:justify-between">
           <AdminTabs items={viewOptions} value={view} onChange={setView} />
           <p className="text-sm text-slate-500">
             {view === "failed"
@@ -224,7 +224,7 @@ export default function AdminEmailJobsPage() {
         </div>
 
         {jobs.length === 0 ? (
-          <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-8 text-center text-sm text-slate-500">
+          <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-8 text-center text-sm text-slate-500 ring-1 ring-black/[0.015]">
             当前视图下还没有匹配的邮件任务。
           </div>
         ) : (

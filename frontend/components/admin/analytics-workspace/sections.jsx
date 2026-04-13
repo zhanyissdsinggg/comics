@@ -56,7 +56,7 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
                 {insightCards.map((card) => (
                   <div
                     key={card.title}
-                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4"
+                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
                   >
                     <p className="text-sm font-semibold text-slate-950">{card.title}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{card.message}</p>
@@ -90,7 +90,7 @@ export function AnalyticsSegmentsSection({
       title="读者分群"
       description="先从一个读者分群看起，只有在需要更深细节时再打开单个账号。"
     >
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 flex flex-wrap gap-2 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-3 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
         {segmentFilters.map((segment) => (
           <button
             key={segment.key}
@@ -126,7 +126,7 @@ export function AnalyticsSegmentsSection({
               <tr>
                 <th className="px-4 py-4">读者</th>
                 <th className="px-4 py-4">钱包</th>
-                <th className="px-4 py-4">LTV</th>
+                <th className="px-4 py-4">生命周期价值</th>
                 <th className="px-4 py-4">浏览作品数</th>
                 <th className="px-4 py-4">流失风险</th>
                 <th className="px-4 py-4">加入时间</th>
@@ -225,7 +225,7 @@ export function AnalyticsUserDetailSection({
           {() => (
             <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
               <div className="space-y-6">
-                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                     用户画像
                   </p>
@@ -260,7 +260,7 @@ export function AnalyticsUserDetailSection({
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                  <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                     <p className="text-sm font-semibold text-slate-950">消费记录</p>
                     <AdminKeyValueList
                       className="mt-4"
@@ -272,7 +272,7 @@ export function AnalyticsUserDetailSection({
                       ]}
                     />
                   </div>
-                  <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                  <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                     <p className="text-sm font-semibold text-slate-950">阅读行为</p>
                     <AdminKeyValueList
                       className="mt-4"
@@ -294,7 +294,7 @@ export function AnalyticsUserDetailSection({
               </div>
 
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-slate-950">留存状态</p>
@@ -309,7 +309,7 @@ export function AnalyticsUserDetailSection({
                   <p className="mt-4 text-sm leading-7 text-slate-600">{retentionMessage}</p>
                 </div>
 
-                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-6 shadow-[var(--gush-shadow-soft)]">
+                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                   <p className="text-sm font-semibold text-slate-950">快速信息</p>
                   <AdminKeyValueList
                     className="mt-4"

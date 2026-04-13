@@ -5,6 +5,7 @@ import { AdminSelectionBar } from "@/components/admin/common/AdminSelectionBar";
 import { AdminTableShell } from "@/components/admin/common/AdminTableShell";
 import {
   AdminBadge,
+  adminCheckboxClassName,
   AdminDataTable,
   AdminMetricCard,
   AdminPageSection,
@@ -66,7 +67,7 @@ export function CommentsListSection(props) {
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索评论 ID、读者 ID、邮箱或正文"
+        searchPlaceholder="搜索评论编号、读者编号、邮箱或正文"
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -109,7 +110,7 @@ export function CommentsListSection(props) {
                     type="checkbox"
                     checked={selectedIds.length === comments.length && comments.length > 0}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="rounded"
+                    className={adminCheckboxClassName}
                     aria-label="选择全部评论"
                   />
                 </th>
@@ -127,7 +128,7 @@ export function CommentsListSection(props) {
                       type="checkbox"
                       checked={selectedIdsSet.has(comment.id)}
                       onChange={() => onToggleSelect(comment.id)}
-                      className="rounded"
+                        className={adminCheckboxClassName}
                       aria-label={`选择评论 ${comment.id}`}
                     />
                   </td>

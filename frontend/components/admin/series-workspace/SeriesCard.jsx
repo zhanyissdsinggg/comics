@@ -13,6 +13,11 @@ import {
   Trash2,
 } from "lucide-react";
 
+import {
+  adminCheckboxClassName,
+  adminInputClassName,
+  adminSelectClassName,
+} from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
 import { getAdminSeriesReadiness } from "../../../lib/adminSeriesReadiness";
@@ -40,6 +45,21 @@ function getReadinessToneClasses(tone) {
   return "border-rose-200 bg-rose-50 text-rose-700";
 }
 
+const actionGroupClassName =
+  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:justify-end [&_button]:justify-center";
+
+const primaryActionGroupClassName =
+  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border-strong)] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02] lg:justify-end [&_button]:min-w-[104px] [&_button]:justify-center";
+
+const secondaryActionGroupClassName =
+  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015] lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
+
+const quietDangerActionGroupClassName =
+  "flex justify-end rounded-[22px] border border-transparent bg-transparent p-0 [&_button]:min-w-[98px] [&_button]:justify-center";
+
+const statCellClassName =
+  "rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.03)]";
+
 export default function SeriesCard(props) {
   const {
     series,
@@ -63,27 +83,39 @@ export default function SeriesCard(props) {
 
   const isList = viewMode === "list";
   const readiness = getAdminSeriesReadiness(series);
-  const creatorLine = series.creatorLabel || "创作者信息待补充";
+  const creatorLine = series.creatorLabel || "创作者署名待补充";
+  const readinessHint =
+    readiness.missingCount > 0
+      ? `优先补齐 ${readiness.topIssues.join("、")}`
+      : "已具备前台展示所需的基础信息";
 
   return (
     <article
-      className={`rounded-[28px] border bg-white/92 p-4 shadow-[var(--gush-shadow-soft)] transition ${
+      className={`rounded-[30px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(246,246,248,0.94))] p-4 shadow-[0_16px_36px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02] transition ${
         isSelected
-          ? "border-[color:var(--gush-border-strong)] ring-1 ring-slate-200/70"
+          ? "border-[color:var(--gush-border-strong)] shadow-[0_18px_40px_rgba(15,23,42,0.07)]"
           : "border-[color:var(--gush-border)]"
       }`}
     >
-      <div className={`grid gap-4 ${isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""}`}>
-        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[color:var(--gush-page-bg-muted)]">
+      <div
+        className={`grid gap-4 ${
+          isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""
+        }`}
+      >
+        <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] shadow-[0_10px_22px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           <input
             type="checkbox"
             checked={isSelected}
             onChange={() => onSelect(series.id)}
-            className="h-4 w-4 cursor-pointer rounded border-black/20 bg-transparent text-slate-950"
+            className={`${adminCheckboxClassName} cursor-pointer`}
           />
         </label>
 
-        <div className={`${isList ? "h-24 w-16" : "aspect-[2/3] w-full"} overflow-hidden rounded-[24px] bg-[color:var(--gush-page-bg-muted)]`}>
+        <div
+          className={`${
+            isList ? "h-24 w-16" : "aspect-[2/3] w-full"
+          } overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,244,246,0.96))] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]`}
+        >
           {series.coverUrl ? (
             <img src={series.coverUrl} alt={`${series.title}封面`} className="h-full w-full object-cover" />
           ) : (
@@ -95,10 +127,10 @@ export default function SeriesCard(props) {
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-700">
+            <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-700">
               {formatSeriesTypeLabel(series.type)}
             </span>
-            <span className="rounded-full border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-950">
+            <span className="rounded-full border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,245,249,0.92))] px-2.5 py-1 text-slate-950">
               {formatSeriesStatusLabel(series.status)}
             </span>
             <span className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}>
@@ -117,18 +149,22 @@ export default function SeriesCard(props) {
           </div>
 
           {isEditing ? (
-            <div className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+            <div className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
               <input
                 value={editDraft?.title || ""}
-                onChange={(event) => onEditDraftChange({ ...editDraft, title: event.target.value })}
-                className="w-full rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                onChange={(event) =>
+                  onEditDraftChange({ ...editDraft, title: event.target.value })
+                }
+                className={adminInputClassName}
                 placeholder="作品标题"
               />
               <div className="grid gap-3 md:grid-cols-2">
                 <select
                   value={editDraft?.status || "Ongoing"}
-                  onChange={(event) => onEditDraftChange({ ...editDraft, status: event.target.value })}
-                  className="rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-950 outline-none focus:border-[var(--gush-accent,#2f58c6)]"
+                  onChange={(event) =>
+                    onEditDraftChange({ ...editDraft, status: event.target.value })
+                  }
+                  className={adminSelectClassName}
                 >
                   {STATUS_OPTIONS.map((option) => (
                     <option key={option} value={option}>
@@ -136,12 +172,14 @@ export default function SeriesCard(props) {
                     </option>
                   ))}
                 </select>
-                <label className="flex items-center gap-3 rounded-[18px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700">
+                <label className="flex items-center gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] px-4 py-3 text-sm text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.03)]">
                   <input
                     type="checkbox"
                     checked={Boolean(editDraft?.adult)}
-                    onChange={(event) => onEditDraftChange({ ...editDraft, adult: event.target.checked })}
-                    className="h-4 w-4 rounded border-black/20 bg-white text-slate-950"
+                    onChange={(event) =>
+                      onEditDraftChange({ ...editDraft, adult: event.target.checked })
+                    }
+                    className={adminCheckboxClassName}
                   />
                   <span>18+ 作品</span>
                 </label>
@@ -156,9 +194,9 @@ export default function SeriesCard(props) {
               >
                 {series.title}
               </button>
-              <p className="text-xs uppercase tracking-wide text-slate-400">{series.id}</p>
+              <p className="text-xs text-slate-400">作品编号：{series.id}</p>
               <p className="text-sm text-slate-600">
-                创作者：{" "}
+                创作者：
                 <span className={series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"}>
                   {creatorLine}
                 </span>
@@ -167,14 +205,11 @@ export default function SeriesCard(props) {
                 {series.description || "作品简介待补充。"}
               </p>
               <p className="text-xs text-slate-500">
-                前台就绪度 {readiness.score}
-                {readiness.missingCount > 0
-                  ? ` · 优先补齐 ${readiness.topIssues.join("、")}`
-                  : " · 已可进入前台发现流"}
+                前台准备度 {readiness.score} 分 · {readinessHint}
               </p>
               <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
-                <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
-                  {series.episodeCount > 0 ? `${series.episodeCount} 章` : "还没有章节"}
+                <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-600">
+                  {series.episodeCount > 0 ? `${series.episodeCount} 章` : "尚未添加章节"}
                 </span>
                 {!series.creatorLabel ? (
                   <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
@@ -187,12 +222,12 @@ export default function SeriesCard(props) {
                   </span>
                 ) : null}
                 {!series.description?.trim() ? (
-                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-600">
                     仍需补简介
                   </span>
                 ) : null}
                 {!series.genres.length ? (
-                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-600">
+                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-600">
                     仍需补标签
                   </span>
                 ) : null}
@@ -204,7 +239,7 @@ export default function SeriesCard(props) {
                 {series.genres.slice(0, 3).map((genre) => (
                   <span
                     key={`${series.id}-${genre}`}
-                    className="rounded-full border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-slate-950"
+                    className="rounded-full border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,245,249,0.92))] px-2.5 py-1 text-slate-950"
                   >
                     {genre}
                   </span>
@@ -214,67 +249,92 @@ export default function SeriesCard(props) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 rounded-[24px] bg-[color:var(--gush-page-bg-muted)] p-4 text-sm lg:grid-cols-2">
-          <div>
+        <div className="grid grid-cols-2 gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] p-4 text-sm shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] lg:grid-cols-2">
+          <div className={statCellClassName}>
             <p className="text-slate-500">章节数</p>
             <p className="mt-1 font-semibold text-slate-950">{series.episodeCount || 0}</p>
           </div>
-          <div>
+          <div className={statCellClassName}>
             <p className="text-slate-500">最近更新</p>
             <p className="mt-1 font-semibold text-slate-950">{formatUpdatedAt(series.updatedAt, true)}</p>
           </div>
-          <div>
+          <div className={statCellClassName}>
             <p className="text-slate-500">封面</p>
-            <p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "已补齐" : "待补充"}</p>
+            <p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "已补齐" : "待补齐"}</p>
           </div>
-          <div>
+          <div className={statCellClassName}>
             <p className="text-slate-500">发布状态</p>
             <p className="mt-1 font-semibold text-slate-950">{series.isPublished ? "已发布" : "草稿"}</p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:items-end">
+        <div className="flex flex-col gap-2 lg:min-w-[258px] lg:items-stretch">
           {isEditing ? (
-            <div className="flex flex-wrap gap-2 lg:justify-end">
-              <Button type="button" variant="secondary" size="sm" onClick={onCancelEdit} disabled={isSaving}>
+            <div className={actionGroupClassName}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={onCancelEdit}
+                disabled={isSaving}
+                className="min-w-[104px] justify-center"
+              >
                 取消
               </Button>
-              <Button type="button" size="sm" onClick={onSaveEdit} disabled={isSaving}>
+              <Button
+                type="button"
+                size="sm"
+                onClick={onSaveEdit}
+                disabled={isSaving}
+                className="min-w-[104px] justify-center"
+              >
                 {isSaving ? "保存中..." : "保存"}
               </Button>
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap gap-2 lg:justify-end">
-                <Button type="button" size="sm" onClick={() => onOpenDetails(series.id)} title="编辑详情">
+              <div className={primaryActionGroupClassName}>
+                <Button type="button" size="sm" onClick={() => onOpenDetails(series.id)} title="查看详情">
                   <Edit className="size-4" />
                   详情
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => onOpenEpisodes(series.id)} title="管理章节">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenEpisodes(series.id)}
+                  title="管理章节"
+                >
                   <BookOpen className="size-4" />
                   章节
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-2 lg:justify-end">
+              <div className={secondaryActionGroupClassName}>
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   onClick={() => onOpenFrontend(series.id)}
                   disabled={!series.isPublished}
-                  title={series.isPublished ? "查看前台作品页" : "草稿状态不能直接打开前台页"}
+                  title={series.isPublished ? "查看前台作品页" : "草稿状态下不能直接打开前台页"}
                 >
                   <ExternalLink className="size-4" />
                   前台页
                 </Button>
-                <Button type="button" variant="secondary" size="sm" onClick={() => onStartEdit(series)} title="快速编辑">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onStartEdit(series)}
+                  title="快速编辑"
+                >
                   <Edit className="size-4" />
                   快速编辑
                 </Button>
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant={series.isPublished ? "secondary" : "default"}
                   size="sm"
                   onClick={() => onTogglePublish(series)}
                   title={series.isPublished ? "转为草稿" : "立即发布"}
@@ -282,14 +342,26 @@ export default function SeriesCard(props) {
                   {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   {series.isPublished ? "转为草稿" : "立即发布"}
                 </Button>
-                <Button type="button" variant="secondary" size="sm" onClick={() => onDuplicate(series)} title="复制作品">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDuplicate(series)}
+                  title="复制作品"
+                >
                   <Copy className="size-4" />
                   复制
                 </Button>
               </div>
 
-              <div className="flex flex-wrap gap-2 lg:justify-end">
-                <Button type="button" variant="destructive" size="sm" onClick={() => onDelete(series)} title="删除作品">
+              <div className={quietDangerActionGroupClassName}>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(series)}
+                  title="删除作品"
+                >
                   <Trash2 className="size-4" />
                   删除
                 </Button>

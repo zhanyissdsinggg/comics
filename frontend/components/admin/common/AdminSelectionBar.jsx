@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function AdminSelectionBar({
   selectedCount,
@@ -15,21 +16,24 @@ export function AdminSelectionBar({
 
   return (
     <div
-      className={`mb-6 flex flex-col gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white/96 p-4 shadow-[var(--gush-shadow-soft)] lg:flex-row lg:items-center lg:justify-between ${className}`.trim()}
+      className={cn(
+        "mb-6 flex flex-col gap-3 rounded-[26px] border border-[color:var(--gush-border-strong)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] lg:flex-row lg:items-center lg:justify-between",
+        className,
+      )}
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--gush-page-bg-muted)] text-sm font-semibold text-slate-950">
+        <div className="flex h-10 min-w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-sm font-semibold text-slate-950 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
           {selectedCount}
         </div>
         <div>
           <p className="text-sm font-semibold text-slate-900">已选择 {selectedCount} 项</p>
-          <p className="text-xs text-slate-500">批量操作会按当前选择立即生效。</p>
+          <p className="text-xs text-slate-500">批量操作会立即应用到当前选中的内容。</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-1.5">
         {children}
-        <Button type="button" variant="ghost" onClick={onClear}>
+        <Button type="button" variant="ghost" size="sm" onClick={onClear}>
           {clearLabel}
         </Button>
       </div>

@@ -17,6 +17,7 @@ import {
   adminSelectClassName,
   adminTextareaClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
+import { cn } from "@/lib/utils";
 import { Modal } from "@/components/admin/common/Modal";
 import { Button } from "@/components/ui/button";
 
@@ -90,7 +91,7 @@ export function SupportQueueSection(props) {
         </Button>
       }
     >
-      <div className="mb-6 rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-4 shadow-[0_14px_34px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+      <div className="mb-6 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
           <label className="relative">
             <input
@@ -128,7 +129,7 @@ export function SupportQueueSection(props) {
           </Button>
         </div>
         {!replyEnabled && replyDisabledMessage ? (
-          <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm leading-6 text-amber-800">
+          <p className="mt-3 rounded-2xl border border-amber-200 bg-white px-3.5 py-2.5 text-sm leading-6 text-amber-800 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
             {replyDisabledMessage}
           </p>
         ) : null}
@@ -227,7 +228,7 @@ export function SupportQueueSection(props) {
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.createdAt)}</td>
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.updatedAt)}</td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-col items-start gap-2">
+                    <div className="flex flex-col items-start gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
                       <Button
                         type="button"
                         variant="outline"
@@ -291,13 +292,13 @@ export function SupportReplyModal({
     >
       <div className="space-y-4">
         {!replyEnabled && replyDisabledMessage ? (
-          <div className="rounded-[24px] border border-amber-200 bg-amber-50 px-4 py-4 text-sm leading-6 text-amber-800">
+          <div className="rounded-[24px] border border-amber-200 bg-white px-4 py-4 text-sm leading-6 text-amber-800 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
             {replyDisabledMessage}
           </div>
         ) : null}
         {selectedTicket ? (
           <div className="space-y-3">
-            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-600">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
               <p className="font-semibold text-slate-950">原始消息</p>
               <p className="mt-2 leading-6">{selectedTicket.message || "未附带消息内容。"}</p>
             </div>
@@ -330,13 +331,16 @@ export function SupportReplyModal({
           />
         </AdminFormField>
 
-        <Button
-          type="button"
-          onClick={onSubmit}
-          disabled={!replyEnabled || !replyContent.trim() || isPending}
-        >
-          {isPending ? "发送中..." : "发送回复"}
-        </Button>
+        <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 ring-1 ring-black/[0.015]">
+          <Button
+            type="button"
+            onClick={onSubmit}
+            disabled={!replyEnabled || !replyContent.trim() || isPending}
+            className={cn("min-w-[112px]")}
+          >
+            {isPending ? "发送中..." : "发送回复"}
+          </Button>
+        </div>
       </div>
     </Modal>
   );

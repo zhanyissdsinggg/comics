@@ -245,22 +245,22 @@ export default function AdminCreatorsPage() {
       subtitle="集中处理署名、命名和作品归属。"
       actions={
         <div className="flex flex-wrap gap-2">
+          <ActionButton onClick={() => handleOpenCreator("/creators")}>
+            <Eye className="h-4 w-4" />
+            查看前台创作者页
+          </ActionButton>
           <ActionButton
             onClick={() => router.push("/admin/series")}
             className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
           >
             打开作品列表
           </ActionButton>
-          <ActionButton onClick={() => handleOpenCreator("/creators")}>
-            <Eye className="h-4 w-4" />
-            查看前台创作者页
-          </ActionButton>
         </div>
       }
     >
       <div className="space-y-6">
         {error ? (
-          <div className="rounded-[24px] border border-rose-200 bg-rose-50/90 px-5 py-4 text-sm text-rose-700 shadow-[var(--gush-shadow-soft)]">
+          <div className="rounded-[24px] border border-rose-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-5 py-4 text-sm text-rose-700 shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
             创作者巡检加载失败：{error}
           </div>
         ) : null}
@@ -268,7 +268,7 @@ export default function AdminCreatorsPage() {
         {copyFeedback.message ? (
           <div
             className={cn(
-              "rounded-[24px] border px-5 py-4 text-sm shadow-[var(--gush-shadow-soft)]",
+              "rounded-[24px] border px-5 py-4 text-sm shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
               copyFeedback.type === "error"
                 ? "border-rose-200 bg-rose-50/90 text-rose-700"
                 : "border-emerald-200 bg-emerald-50/90 text-emerald-700",
@@ -302,7 +302,7 @@ export default function AdminCreatorsPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-white/96 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">覆盖率</p>
               <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">{coverageRate}%</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">

@@ -36,7 +36,7 @@ export function MarketingSummaryCards({ metricSnapshot }) {
       <AdminMetricCard label="当前活动" value={formatNumber(metricSnapshot.totalCampaigns)} detail="当前工作区内活动总数。" tone="accent" />
       <AdminMetricCard label="进行中" value={formatNumber(metricSnapshot.activeCampaigns)} detail="仍在运行或排期内保持在线的活动。" />
       <AdminMetricCard label="当前预算" value={formatCurrency(metricSnapshot.totalBudget)} detail="所选统计时间范围内的计划预算。" />
-      <AdminMetricCard label="平均 ROI" value={formatPercent(metricSnapshot.avgRoi)} detail="当前活动组合效果的快速方向判断。" />
+      <AdminMetricCard label="平均投入产出比" value={formatPercent(metricSnapshot.avgRoi)} detail="当前活动组合效果的快速方向判断。" />
     </div>
   );
 }
@@ -169,7 +169,7 @@ export function MarketingCampaignsSection({
                     <div className="space-y-1">
                       <p>收入 {formatCurrency(metric.revenue)}</p>
                       <p className="text-xs text-slate-500">
-                        {formatNumber(metric.converted)} 次转化，ROI {formatPercent(metric.roi)}
+                        {formatNumber(metric.converted)} 次转化，投入产出比 {formatPercent(metric.roi)}
                       </p>
                     </div>
                   </td>
@@ -208,7 +208,7 @@ export function MarketingStatsSection({ statsQuery, stats }) {
         <AdminMetricCard label="总预算" value={formatCurrency(stats?.totalBudget)} detail="计划投入预算。" />
         <AdminMetricCard label="已花费" value={formatCurrency(stats?.totalSpent)} detail="目前已实际发生的花费。" />
         <AdminMetricCard label="归因收入" value={formatCurrency(stats?.totalRevenue)} detail="当前已归因到活动的收入。" />
-        <AdminMetricCard label="平均 ROI" value={formatPercent(stats?.avgRoi)} detail={`累计 ${formatNumber(stats?.totalConverted)} 次转化`} />
+        <AdminMetricCard label="平均投入产出比" value={formatPercent(stats?.avgRoi)} detail={`累计 ${formatNumber(stats?.totalConverted)} 次转化`} />
       </div>
     </AdminDataState>
   );
@@ -226,7 +226,7 @@ export function MarketingSegmentsSection({ segmentsQuery, segments }) {
         {segments.map((segment) => (
           <div
             key={segment.segment || "unknown"}
-            className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+            className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -390,7 +390,7 @@ export function CreateCampaignModalContent({
         />
       </AdminFormField>
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex flex-wrap justify-end gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 pt-2 ring-1 ring-black/[0.015]">
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>

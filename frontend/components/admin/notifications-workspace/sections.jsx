@@ -4,6 +4,7 @@ import { AdminListToolbar } from "@/components/admin/common/AdminListToolbar";
 import { AdminSelectionBar } from "@/components/admin/common/AdminSelectionBar";
 import { AdminTableShell } from "@/components/admin/common/AdminTableShell";
 import {
+  adminCheckboxClassName,
   AdminDataTable,
   AdminMetricCard,
   AdminPageSection,
@@ -60,7 +61,7 @@ export function NotificationsListSection(props) {
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索通知 ID、标题或正文"
+        searchPlaceholder="搜索通知编号、标题或正文"
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -100,7 +101,7 @@ export function NotificationsListSection(props) {
                     type="checkbox"
                     checked={selectedIds.length === notifications.length && notifications.length > 0}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="rounded"
+                    className={adminCheckboxClassName}
                     aria-label="选择全部通知"
                   />
                 </th>
@@ -117,7 +118,7 @@ export function NotificationsListSection(props) {
                       type="checkbox"
                       checked={selectedIdsSet.has(notification.id)}
                       onChange={() => onToggleSelect(notification.id)}
-                      className="rounded"
+                      className={adminCheckboxClassName}
                       aria-label={`选择通知 ${notification.id}`}
                     />
                   </td>

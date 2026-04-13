@@ -44,12 +44,12 @@ export function LogsFiltersSection({
       title="日志筛选"
       description="需要缩小视角时再按动作或操作者筛选，默认视图保持简单、易读。"
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
+      <div className="grid gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
         <input
           type="search"
           value={searchTerm}
           onChange={(event) => onSearchTermChange(event.target.value)}
-          placeholder="搜索日志 ID、动作、资源、目标或操作者"
+          placeholder="搜索日志编号、动作、资源、目标或操作者"
           className={adminInputClassName}
         />
         <select
@@ -126,7 +126,7 @@ export function LogsTableSection({ logsQuery, logs }) {
                     <AdminBadge tone="accent">{log.action || "未知动作"}</AdminBadge>
                   </td>
                   <td className="px-4 py-4 text-slate-700">{log.resource || "未知资源"}</td>
-                  <td className="px-4 py-4 text-slate-700">{log.resourceId || "暂无目标 ID"}</td>
+                  <td className="px-4 py-4 text-slate-700">{log.resourceId || "暂无目标编号"}</td>
                   <td className="max-w-[28rem] px-4 py-4 text-xs leading-6 text-slate-600">
                     {summarizeDetails(log.details)}
                   </td>

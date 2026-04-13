@@ -185,7 +185,7 @@ export function RevenuePromotionsSection({
         description="把活动结果和归因限制同时说明白，避免看起来像后台自己编出了完整效果。"
       >
         {!promotionsRoiAvailable || promotionsAttributionModel ? (
-          <div className="mb-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="mb-5 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
             {promotionsAttributionCopy}
           </div>
         ) : null}
@@ -197,7 +197,7 @@ export function RevenuePromotionsSection({
                 <th className="px-4 py-4">活动</th>
                 <th className="px-4 py-4">订单数</th>
                 <th className="px-4 py-4">收入</th>
-                <th className="px-4 py-4">ROI</th>
+                <th className="px-4 py-4">投入产出比</th>
                 <th className="px-4 py-4">状态</th>
               </tr>
             </AdminTableHeader>

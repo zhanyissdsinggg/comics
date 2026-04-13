@@ -25,6 +25,12 @@ import {
   PERFORMANCE_WINDOWS,
 } from "./utils";
 
+const actionTrayClassName =
+  "rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2";
+
+const primaryActionClassName =
+  "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
+
 export function PerformanceOverviewSection(props) {
   const {
     performanceWindow,
@@ -63,7 +69,7 @@ export function PerformanceOverviewSection(props) {
       </div>
 
       {performanceNotice ? (
-        <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 px-5 py-4 text-sm text-amber-800">
+        <div className="rounded-[24px] border border-amber-200 bg-white px-5 py-4 text-sm text-amber-800 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
           {performanceNotice}
         </div>
       ) : null}
@@ -94,7 +100,7 @@ export function PerformanceOverviewSection(props) {
               return (
                 <article
                   key={`${slot.id}-performance`}
-                  className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                  className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -113,7 +119,7 @@ export function PerformanceOverviewSection(props) {
                     <MiniMetric label="转化" value={formatCompactNumber(slot.performance.totalConversions)} />
                     <MiniMetric label="点击率" value={formatPercentValue(slot.performance.avgCtr)} />
                     <MiniMetric label="转化率" value={formatPercentValue(slot.performance.avgConversionRate)} />
-                    <MiniMetric label="推荐位 ID" value={slot.id} hint="追踪参考" />
+                    <MiniMetric label="推荐位编号" value={slot.id} hint="追踪参考" />
                   </div>
                 </article>
               );
@@ -151,7 +157,7 @@ export function OptimizationQueueSection(props) {
         {slotOptimizationCards.map((slot) => (
           <article
             key={`${slot.id}-optimization`}
-            className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+            className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
           >
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
@@ -176,7 +182,7 @@ export function OptimizationQueueSection(props) {
                   {slot.plan.replacementCandidates.map((series) => (
                     <span
                       key={`${slot.id}-replacement-${series.id}`}
-                      className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-700"
+                      className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700"
                     >
                       {series.title}
                     </span>
@@ -185,11 +191,11 @@ export function OptimizationQueueSection(props) {
               </div>
             ) : null}
 
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <div className={`mt-5 grid gap-2 sm:grid-cols-2 ${actionTrayClassName}`}>
               {slot.plan.actionType === "apply" ? (
                 <ActionButton
                   onClick={() => void handleApplyRecommendation(slot)}
-                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                  className={primaryActionClassName}
                   disabled={savingSlot === slot.id || !slot.canApplyRecommendation}
                 >
                   <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
@@ -247,14 +253,14 @@ export function HeroCandidatesSection(props) {
             return (
               <article
                 key={series.id}
-                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-[1.25rem] font-semibold tracking-tight text-slate-950">{series.title}</h3>
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(readiness.tone)}`}>
                     {readiness.statusLabel}
                   </span>
-                  <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-xs font-semibold text-slate-600">
+                  <span className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-600">
                     候选分 {Math.round(score)}
                   </span>
                 </div>
@@ -286,8 +292,8 @@ export function HeroCandidatesSection(props) {
                   <MiniMetric label="内容基础" value={formatCompactNumber(getReaderProof(series))} />
                   <MiniMetric label="就绪分" value={readiness.score} />
                 </div>
-                <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                  <ActionButton onClick={() => openSeriesEditor(series.id)}>
+                <div className={`mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3 ${actionTrayClassName}`}>
+                  <ActionButton onClick={() => openSeriesEditor(series.id)} className={primaryActionClassName}>
                     <BookOpen className="h-4 w-4" />
                     编辑作品
                   </ActionButton>
@@ -297,7 +303,7 @@ export function HeroCandidatesSection(props) {
                   </ActionButton>
                   <ActionButton onClick={() => void handleCopyIds(series.title, [series.id])}>
                     <Copy className="h-4 w-4" />
-                    复制作品 ID
+                    复制作品编号
                   </ActionButton>
                 </div>
               </article>

@@ -400,10 +400,10 @@ export default function AdminSeriesPageNew() {
             <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
             <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理（已更新）。</p>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.035)]">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={() => {
                 setCreateForm({
                   ...createEmptyCreateForm(),
@@ -462,7 +462,7 @@ export default function AdminSeriesPageNew() {
 
             <div className="flex flex-1 flex-col gap-3 xl:items-end">
               <div className="flex w-full flex-col gap-3 xl:max-w-3xl xl:flex-row xl:justify-end">
-                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:bg-white">
+                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:ring-[3px] focus-within:ring-slate-200/55">
                   <Search size={16} className="text-slate-400" />
                   <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、编号、创作者署名或草稿备注..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
                 </label>
@@ -485,14 +485,14 @@ export default function AdminSeriesPageNew() {
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                  <p className="mr-1 text-sm text-slate-600">
+                <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.03)] xl:justify-end">
+                  <p className="px-2 text-sm text-slate-600">
                     <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部作品
                   </p>
                   <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
                     {allVisibleSelected ? "清空选择" : "全选"}
                   </Button>
-                  <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-white p-1">
                     <Button
                       type="button"
                       variant={viewMode === "grid" ? "default" : "ghost"}

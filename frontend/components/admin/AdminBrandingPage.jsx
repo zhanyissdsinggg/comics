@@ -36,8 +36,8 @@ const ASSET_FIELDS = [
     field: "siteLogoUrl",
     keyName: "logo",
     label: "站点标识",
-    helperText: "建议使用透明 PNG 或 SVG，让头部和底部保持清爽。",
-    placeholder: "https://.../logo.png",
+    helperText: "建议使用透明 PNG 或 SVG，让头部和底部都保持清爽。",
+    placeholder: "https://cdn.yoursite.com/brand/logo.png",
     emptyText: "还没有上传站点标识。",
     buttonLabel: "上传站点标识",
     previewClassName: "h-10 w-auto object-contain",
@@ -47,7 +47,7 @@ const ASSET_FIELDS = [
     keyName: "favicon",
     label: "站点图标",
     helperText: "尽量保持轻量，32x32 或 64x64 就足够稳定。",
-    placeholder: "https://.../favicon.png",
+    placeholder: "https://cdn.yoursite.com/brand/favicon.png",
     emptyText: "还没有上传站点图标。",
     buttonLabel: "上传站点图标",
     previewClassName: "h-10 w-10 rounded-[14px] object-cover",
@@ -56,10 +56,10 @@ const ASSET_FIELDS = [
     field: "homeBannerUrl",
     keyName: "banner",
     label: "首页横幅",
-    helperText: "这里适合克制的主视觉，不要做成吵闹的活动海报。",
-    placeholder: "https://.../banner.jpg",
+    helperText: "这里适合克制的主视觉，不要做成喧闹的活动海报。",
+    placeholder: "https://cdn.yoursite.com/brand/home-banner.jpg",
     emptyText: "还没有上传首页横幅。",
-    buttonLabel: "上传横幅",
+    buttonLabel: "上传首页横幅",
     previewClassName: "h-full max-h-28 w-full rounded-[20px] object-cover",
   },
 ];
@@ -74,7 +74,7 @@ function toDraft(payload) {
 
 function PreviewSurface({ value, alt, emptyText, className }) {
   return (
-    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+    <div className="mt-4 flex min-h-28 items-center justify-center rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-4 ring-1 ring-black/[0.015]">
       {value ? (
         <img src={value} alt={alt} className={className} />
       ) : (
@@ -310,7 +310,7 @@ export default function AdminBrandingPage() {
             return (
               <article
                 key={asset.field}
-                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -376,17 +376,17 @@ export default function AdminBrandingPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="编辑说明"
+        title="使用说明"
         description="这里修改的是共享前台素材，规则越简单越稳。"
       >
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
             上传完成后记得保存，让前台读到最新素材。
           </div>
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
-            素材尽量保持清楚、克制、可读，不要把它做成营销海报。
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+            素材尽量保持清晰、克制、可读，不要把它做成营销海报。
           </div>
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
             必要时可以直接填链接，但更建议在这里上传，方便统一复核。
           </div>
         </div>

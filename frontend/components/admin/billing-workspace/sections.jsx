@@ -5,6 +5,7 @@ import { AdminSelectionBar } from "@/components/admin/common/AdminSelectionBar";
 import { AdminTableShell } from "@/components/admin/common/AdminTableShell";
 import {
   AdminBadge,
+  adminCheckboxClassName,
   AdminDataTable,
   AdminKeyValueList,
   AdminMetricCard,
@@ -87,7 +88,7 @@ export function BillingPackagesSection(props) {
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索套餐 ID、名称或标签"
+        searchPlaceholder="搜索套餐编号、名称或标签"
         onOpenFilters={onOpenSortModal}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
@@ -130,7 +131,7 @@ export function BillingPackagesSection(props) {
                     type="checkbox"
                     checked={selectedIds.length === packages.length && packages.length > 0}
                     onChange={(event) => onSelectAll(event.target.checked)}
-                    className="rounded"
+                    className={adminCheckboxClassName}
                     aria-label="选择全部套餐"
                   />
                 </th>
@@ -153,7 +154,7 @@ export function BillingPackagesSection(props) {
                         type="checkbox"
                         checked={selectedIdsSet.has(pkg.id)}
                         onChange={() => onToggleSelect(pkg.id)}
-                        className="rounded"
+                        className={adminCheckboxClassName}
                         aria-label={`选择套餐 ${pkg.id}`}
                       />
                     </td>

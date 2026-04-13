@@ -127,7 +127,7 @@ export default function AdminRegionsPage() {
     } else {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "区域设置加载失败。",
+        message: response.error || response.message || "地区设置加载失败。",
       });
     }
 
@@ -224,11 +224,11 @@ export default function AdminRegionsPage() {
       const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
       setCountryCodes(nextPayload.countryCodes);
       setLengthRules(nextPayload.lengthRules);
-      setFeedback({ type: "success", message: "区域设置已保存。" });
+      setFeedback({ type: "success", message: "地区设置已保存。" });
     } else {
       setFeedback({
         type: "error",
-        message: response.error || response.message || "区域设置保存失败。",
+        message: response.error || response.message || "地区设置保存失败。",
       });
     }
 
@@ -241,7 +241,7 @@ export default function AdminRegionsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "region-config.json";
+    link.download = "地区规则配置.json";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -268,7 +268,7 @@ export default function AdminRegionsPage() {
       setLengthRules(payload.lengthRules);
       setFeedback({
         type: "success",
-        message: "区域设置已导入，保存后生效。",
+        message: "地区设置已导入，保存后生效。",
       });
     } catch {
       setFeedback({ type: "error", message: "导入失败，请上传有效的配置文件。" });
@@ -279,16 +279,16 @@ export default function AdminRegionsPage() {
 
   if (isLoading || loading) {
     return (
-      <AdminPageSection title="区域设置" description="正在加载登录与账号找回流程使用的地区规则。">
-        <p className="text-sm text-slate-500">正在加载区域设置...</p>
+      <AdminPageSection title="地区设置" description="正在加载登录与账号找回流程使用的地区规则。">
+        <p className="text-sm text-slate-500">正在加载地区设置...</p>
       </AdminPageSection>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="区域设置" description="需要先以管理员身份登录，才能编辑地区和手机号规则。">
-        <p className="text-sm text-slate-500">请先登录后台后再管理区域设置。</p>
+      <AdminPageSection title="地区设置" description="需要先以管理员身份登录，才能编辑地区和手机号规则。">
+        <p className="text-sm text-slate-500">请先登录后台后再管理地区设置。</p>
       </AdminPageSection>
     );
   }
@@ -302,7 +302,7 @@ export default function AdminRegionsPage() {
 
       <AdminPageSection
         title="手机号地区规则"
-        description="维护 OTP 和账号找回流程所使用的国际区号与本地号码长度规则。"
+        description="维护短信验证码与账号找回流程所使用的国际区号和本地号码长度规则。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -319,13 +319,13 @@ export default function AdminRegionsPage() {
               导出配置
             </Button>
             <Button type="button" onClick={handleSave} disabled={saving}>
-              {saving ? "正在保存..." : "保存更改"}
+              {saving ? "正在保存..." : "保存变更"}
             </Button>
           </div>
         }
       >
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
@@ -339,7 +339,7 @@ export default function AdminRegionsPage() {
             </div>
 
             {countryCodes.length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 text-sm text-slate-500">
                 还没有添加任何国际区号。
               </div>
             ) : (
@@ -347,7 +347,7 @@ export default function AdminRegionsPage() {
                 {countryCodes.map((item, index) => (
                   <div
                     key={`${item.code || "new"}-${index}`}
-                    className="grid gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
+                    className="grid gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[130px_minmax(0,1fr)_auto] md:items-end"
                   >
                     <AdminFormField label="区号">
                       <input
@@ -376,16 +376,17 @@ export default function AdminRegionsPage() {
             )}
           </div>
 
-          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/88 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
             <div>
               <h3 className="text-base font-semibold text-slate-950">本地号码长度</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                为每个已保存的国际区号填写号码长度，多个值用逗号分隔，例如 <code>10</code> 或 <code>9,10,11</code>。
+                为每个已保存的国际区号填写号码长度，多个值用逗号分隔，例如
+                <code>10</code> 或 <code>9,10,11</code>。
               </p>
             </div>
 
             {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
-              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-6 text-sm text-slate-500">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-6 text-sm text-slate-500">
                 请先添加至少一个国际区号，再编辑号码长度规则。
               </div>
             ) : (
@@ -396,7 +397,7 @@ export default function AdminRegionsPage() {
                   .map((item, index) => (
                     <label
                       key={`${item.code}-${index}`}
-                      className="grid gap-2 md:grid-cols-[110px_minmax(0,1fr)] md:items-center"
+                      className="grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[110px_minmax(0,1fr)] md:items-center"
                     >
                       <span className="text-sm font-semibold text-slate-700">{item.code}</span>
                       <input

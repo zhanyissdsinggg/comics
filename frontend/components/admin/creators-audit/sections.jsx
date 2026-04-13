@@ -23,6 +23,18 @@ import {
 } from "./utils";
 import { ActionButton, EmptyState, StatusPill } from "./blocks";
 
+const contentCardClassName =
+  "rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]";
+
+const actionTrayClassName =
+  "grid w-full gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 sm:grid-cols-2";
+
+const primaryActionClassName =
+  "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
+
+const metricTileClassName =
+  "rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]";
+
 export function NamingRiskSection({
   namingRiskPreview,
   handleOpenSeries,
@@ -42,13 +54,13 @@ export function NamingRiskSection({
       </div>
 
       {namingRiskPreview.length === 0 ? (
-        <EmptyState title="当前没有命名冲突" description="当前命名稳定。" />
+        <EmptyState title="当前没有命名冲突" description="当前命名状态稳定。" />
       ) : (
         <div className="space-y-3">
           {namingRiskPreview.map((creator) => (
             <div
               key={creator.slug}
-              className="rounded-[24px] border border-amber-200 bg-amber-50/70 px-5 py-5"
+              className={contentCardClassName}
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
@@ -69,10 +81,10 @@ export function NamingRiskSection({
                   </div>
                 </div>
 
-                <div className="grid w-full gap-2 sm:grid-cols-2">
+                <div className={actionTrayClassName}>
                   <ActionButton
                     onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                    className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                    className={primaryActionClassName}
                   >
                     <Edit3 className="h-4 w-4" />
                     编辑代表作品
@@ -115,7 +127,7 @@ export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries 
           {missingCreatorPreview.map((series) => (
             <div
               key={series.id}
-              className="flex flex-col gap-3 rounded-[24px] border border-cyan-200 bg-cyan-50/70 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
+              className={`${contentCardClassName} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}
             >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -126,14 +138,14 @@ export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries 
                   </StatusPill>
                 </div>
                 <p className="text-sm leading-6 text-slate-600">
-                  {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} | 更新于{" "}
-                  {formatDateLabel(series.updatedAt)}
+                  {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
+                  更新于 {formatDateLabel(series.updatedAt)}
                 </p>
               </div>
 
               <ActionButton
                 onClick={() => handleOpenSeries(series.id)}
-                className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                className={primaryActionClassName}
               >
                 <Edit3 className="h-4 w-4" />
                 补创作者署名
@@ -151,7 +163,9 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
     <SurfacePanel appearance="light" accent="amber" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">旧 author 兼容项</h2>
+          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+            旧 author 兼容层
+          </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             这些作品还能读，但还没真正迁进 Creator / SeriesCredit。
           </p>
@@ -160,13 +174,13 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
       </div>
 
       {legacyAuthorPreview.length === 0 ? (
-        <EmptyState title="当前没有兼容项" description="署名已不再依赖旧 author 字段。" />
+        <EmptyState title="当前没有兼容层残留" description="署名已经不再依赖旧 author 字段。" />
       ) : (
         <div className="space-y-3">
           {legacyAuthorPreview.map((series) => (
             <div
               key={`legacy-author-${series.id}`}
-              className="flex flex-col gap-3 rounded-[24px] border border-amber-200 bg-amber-50/70 px-5 py-5 lg:flex-row lg:items-center lg:justify-between"
+              className={`${contentCardClassName} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}
             >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -175,8 +189,7 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
                   <StatusPill tone="amber">旧 author 兼容层</StatusPill>
                 </div>
                 <p className="text-sm leading-6 text-slate-600">
-                  当前署名：
-                  <span className="font-medium text-slate-950">{series.author || "未填写"}</span>
+                  当前署名：<span className="font-medium text-slate-950">{series.author || "未填写"}</span>
                   {" | "}
                   {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)}
                 </p>
@@ -184,7 +197,7 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
 
               <ActionButton
                 onClick={() => handleOpenSeries(series.id)}
-                className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                className={primaryActionClassName}
               >
                 <Edit3 className="h-4 w-4" />
                 迁到真实 credits
@@ -236,7 +249,7 @@ export function CreatorDirectorySection({
             return (
               <article
                 key={creator.slug}
-                className="rounded-[28px] border border-[color:var(--gush-border)] bg-white/82 px-5 py-5 shadow-[0_12px_24px_rgba(15,23,42,0.03)]"
+                className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
@@ -266,29 +279,37 @@ export function CreatorDirectorySection({
                   </div>
 
                   <div className="grid min-w-[220px] gap-3 sm:grid-cols-2">
-                    <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">作品数</p>
+                    <div className={metricTileClassName}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        作品数
+                      </p>
                       <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.titleCount}</p>
                     </div>
-                    <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">资料完整度</p>
+                    <div className={metricTileClassName}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        资料完整度
+                      </p>
                       <p className="mt-2 text-2xl font-semibold text-slate-950">
                         {formatPercent(creator.metadataCoverageScore)}
                       </p>
                     </div>
-                    <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">已发布</p>
+                    <div className={metricTileClassName}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        已发布
+                      </p>
                       <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.publishedCount}</p>
                     </div>
-                    <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">前台已就绪</p>
+                    <div className={metricTileClassName}>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        前台已就绪
+                      </p>
                       <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.readySeriesCount}</p>
                     </div>
                   </div>
                 </div>
 
                 {creator.variants.length > 1 ? (
-                  <div className="mt-4 rounded-[24px] border border-amber-200 bg-amber-50/70 px-4 py-4">
+                  <div className="mt-4 rounded-[24px] border border-amber-200 bg-white px-4 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
                     <p className="text-sm font-semibold text-amber-900">
                       请把这些写法合并成一个稳定的公开创作者名称：
                     </p>
@@ -302,10 +323,10 @@ export function CreatorDirectorySection({
                   </div>
                 ) : null}
 
-                <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface)] p-2 sm:grid-cols-2 xl:grid-cols-3">
                   <ActionButton
                     onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
-                    className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                    className={primaryActionClassName}
                   >
                     <Edit3 className="h-4 w-4" />
                     编辑代表作品
@@ -337,7 +358,7 @@ export function CreatorDirectorySection({
                 </div>
 
                 {isExpanded ? (
-                  <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
+                  <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-slate-950">关联作品</p>
@@ -374,10 +395,7 @@ export function CreatorDirectorySection({
                           </div>
 
                           <div className="grid w-full gap-2 sm:grid-cols-2">
-                            <ActionButton
-                              onClick={() => handleOpenSeries(series.id)}
-                              className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
-                            >
+                            <ActionButton onClick={() => handleOpenSeries(series.id)} className={primaryActionClassName}>
                               <Edit3 className="h-4 w-4" />
                               编辑作品
                             </ActionButton>
