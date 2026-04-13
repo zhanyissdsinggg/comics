@@ -23,25 +23,25 @@ export const QUICK_ACTIONS = [
   {
     href: "/admin/series",
     label: "去作品管理",
-    description: "补封面、简介和发布状态。",
+    description: "作品资料和发布状态。",
     icon: "series",
   },
   {
     href: "/admin/creators",
     label: "去创作者页",
-    description: "核对署名、归属和命名。",
+    description: "署名、归属和命名。",
     icon: "creators",
   },
   {
     href: "/admin/support",
     label: "去客服队列",
-    description: "先处理最新待回复工单。",
+    description: "查看待回复工单。",
     icon: "support",
   },
   {
     href: "/admin/merchandising",
     label: "去首页编排",
-    description: "首页和发现位都在这里收口。",
+    description: "首页和发现位。",
     icon: "merchandising",
   },
 ];
@@ -66,27 +66,27 @@ export const PENDING_ITEMS = [
   {
     key: "drafts",
     label: "草稿作品",
-    description: "先确认封面、简介和章节，再决定是否发布。",
+    description: "确认封面、简介和章节。",
   },
   {
     key: "missingCredits",
     label: "待补公开署名",
-    description: "署名没补齐，前台作品页和创作者页都会显得不可信。",
+    description: "补齐前台可见署名。",
   },
   {
     key: "missingCovers",
     label: "待补封面",
-    description: "缺封面的作品很难进入列表页和前台发现流。",
+    description: "补齐列表和详情页封面。",
   },
   {
     key: "emptyEpisodes",
     label: "缺少章节",
-    description: "只有作品壳没有内容，就算发布也接不住读者。",
+    description: "先补正文内容再发布。",
   },
   {
     key: "readyDrafts",
     label: "可安排上线",
-    description: "这些草稿基础信息已经够用，可以推进下一步。",
+    description: "基础信息够用，可推进发布。",
   },
 ];
 

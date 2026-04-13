@@ -34,14 +34,14 @@ export function PendingItemsSection({ insights }) {
     <SurfacePanel appearance="light" accent="blue">
       <SectionHeader
         title="待处理事项"
-        description="这里只保留会影响前台质量和日常运营的项目。"
+        description="只留真正要先处理的项目。"
       />
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {PENDING_ITEMS.map((item) => (
           <Link
             key={item.key}
             href="/admin/series"
-            className="rounded-[24px] border border-[color:var(--gush-border)] bg-white/92 px-5 py-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:-translate-y-[1px] hover:shadow-[0_14px_28px_rgba(15,23,42,0.05)]"
+            className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] transition hover:-translate-y-[1px] hover:shadow-[0_16px_34px_rgba(15,23,42,0.05)]"
           >
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
               {item.label}
@@ -98,7 +98,7 @@ export function LatestSeriesSection({ latestUpdated }) {
 export function QuickActionsSection() {
   return (
     <SurfacePanel appearance="light" accent="amber">
-      <SectionHeader title="快捷入口" description="这里只留最常用的四个入口。" />
+      <SectionHeader title="快捷入口" description="只留最常用的入口。" />
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {QUICK_ACTIONS.map((item) => {
           const Icon = ACTION_ICONS[item.icon];
@@ -107,7 +107,7 @@ export function QuickActionsSection() {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex min-h-[110px] items-start gap-4 rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
+              className="group flex min-h-[110px] items-start gap-4 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:border-[color:var(--gush-border-strong)] hover:-translate-y-[1px] hover:shadow-[0_14px_28px_rgba(15,23,42,0.05)]"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-slate-950">
                 <Icon className="size-4.5" />
@@ -129,7 +129,7 @@ export function SupportQueueSection({ support }) {
     <SurfacePanel appearance="light" accent="cyan">
       <SectionHeader
         title="客服队列"
-        description="优先看最近有更新的工单。"
+        description="先看最近更新。"
         action={
           <Link href="/admin/support" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
             查看全部
@@ -148,7 +148,7 @@ export function SupportQueueSection({ support }) {
             />
           ))
         ) : (
-          <EmptyBlock title="当前没有客服队列" description="当前没有工单。" />
+          <EmptyBlock title="当前没有客服队列" description="没有新工单。" />
         )}
       </div>
     </SurfacePanel>
@@ -160,7 +160,7 @@ export function OrdersQueueSection({ orders }) {
     <SurfacePanel appearance="light" accent="rose">
       <SectionHeader
         title="最近订单"
-        description="这里只看真实订单。"
+        description="只看真实订单。"
         action={
           <Link href="/admin/orders" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
             查看全部
@@ -179,7 +179,7 @@ export function OrdersQueueSection({ orders }) {
             />
           ))
         ) : (
-          <EmptyBlock title="当前没有订单记录" description="当前没有真实订单。" />
+          <EmptyBlock title="当前没有订单记录" description="没有真实订单。" />
         )}
       </div>
     </SurfacePanel>
@@ -210,7 +210,7 @@ export function CommentsQueueSection({ comments }) {
             />
           ))
         ) : (
-          <EmptyBlock title="当前没有评论列表" description="当前没有评论。" />
+          <EmptyBlock title="当前没有评论列表" description="没有评论。" />
         )}
       </div>
     </SurfacePanel>

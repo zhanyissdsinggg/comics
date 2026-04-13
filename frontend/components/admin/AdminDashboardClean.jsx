@@ -127,8 +127,8 @@ export default function AdminDashboardClean() {
             <h2 className="mt-3 text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.45rem]">
               先清待处理，再看趋势。
             </h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-              草稿、缺署名、缺封面和缺章节，决定前台看起来是不是可信。
+            <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
+              先把草稿和资料缺口清干净。
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -216,18 +216,18 @@ export default function AdminDashboardClean() {
             <StatCard
               label="当前最该先看"
               value={`${insights.drafts + insights.missingCredits + insights.missingCovers}`}
-              detail="草稿、缺署名和缺封面是最先要清掉的入口。"
+              detail="先清草稿和资料缺口。"
               accent
             />
             <StatCard
               label="最近工单"
               value={`${workspace.support.length}`}
-              detail={workspace.support.length > 0 ? "客服队列里已经有真实工单。" : "当前没有新工单。"}
+              detail={workspace.support.length > 0 ? "客服队列有更新。" : "当前没有新工单。"}
             />
             <StatCard
               label="最新评论"
               value={`${workspace.comments.length}`}
-              detail={workspace.comments.length > 0 ? "最新评论已经进入后台。" : "当前没有新评论。"}
+              detail={workspace.comments.length > 0 ? "最新评论已进入后台。" : "当前没有评论。"}
             />
           </div>
         </div>
