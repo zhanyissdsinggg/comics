@@ -33,6 +33,19 @@ const sortFields = [
   { field: 'status', type: 'string' },
 ];
 
+function readReplyPersistenceCapability(meta) {
+  if (!meta || typeof meta !== 'object') {
+    return true;
+  }
+
+  const capabilities = meta.capabilities;
+  if (!capabilities || typeof capabilities !== 'object') {
+    return true;
+  }
+
+  return capabilities.replyPersistence !== false;
+}
+
 export default function AdminSupportPage() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyContent, setReplyContent] = useState('');
@@ -51,6 +64,7 @@ export default function AdminSupportPage() {
     isError,
     error,
     refetch,
+    meta,
     searchTerm,
     setSearchTerm,
     sortBy,
@@ -69,6 +83,9 @@ export default function AdminSupportPage() {
   const statusFilter = typeof filters.status === 'string' ? filters.status : '';
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const hasActiveFilters = Boolean(searchTerm.trim() || statusFilter);
+  const replyPersistence = readReplyPersistenceCapability(meta);
+  const replyUnavailableMessage =
+    '当前数据库还没应用客服回复字段迁移，客服页暂时只支持查看和关单，回复按钮已停用。';
 
   const openCount = useMemo(
     () => tickets.filter((ticket) => String(ticket.status || '').toLowerCase() === 'open').length,
@@ -149,12 +166,22 @@ export default function AdminSupportPage() {
   };
 
   const openReplyModal = (ticket) => {
+    if (!replyPersistence) {
+      setFeedback({ type: 'error', message: replyUnavailableMessage });
+      return;
+    }
+
     setSelectedTicket(ticket);
     setReplyContent(ticket?.adminReply || '');
     setIsReplyModalOpen(true);
   };
 
   const handleReplyTicket = () => {
+    if (!replyPersistence) {
+      setFeedback({ type: 'error', message: replyUnavailableMessage });
+      return;
+    }
+
     const message = replyContent.trim();
 
     if (!selectedTicket?.id || !message) {
@@ -224,6 +251,8 @@ export default function AdminSupportPage() {
           onCloseTicket={(ticketId) => closeTicketMutation.mutate(ticketId)}
           closePending={closeTicketMutation.isPending}
           statusOptions={STATUS_OPTIONS}
+          replyEnabled={replyPersistence}
+          replyDisabledMessage={replyPersistence ? '' : replyUnavailableMessage}
         />
       </div>
 
@@ -239,6 +268,8 @@ export default function AdminSupportPage() {
         }}
         onSubmit={handleReplyTicket}
         isPending={replyTicketMutation.isPending}
+        replyEnabled={replyPersistence}
+        replyDisabledMessage={replyPersistence ? '' : replyUnavailableMessage}
       />
 
       <ConfirmDialog

@@ -52,6 +52,14 @@ function extractItems<T>(data: AdminListPayload<T> | undefined, endpoint: string
   return [];
 }
 
+function extractMeta(data: AdminListPayload<unknown> | undefined): Record<string, unknown> {
+  if (isRecord(data) && isRecord(data.meta)) {
+    return data.meta;
+  }
+
+  return {};
+}
+
 function extractPagination<T>(
   data: AdminListPayload<T> | undefined,
   fallbackPage: number,
@@ -107,6 +115,7 @@ export interface UseAdminListReturn<T> {
   isError: boolean;
   error: Error | null;
   refetch: () => void;
+  meta: Record<string, unknown>;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   sortBy: string;
@@ -172,6 +181,7 @@ export function useAdminList<T extends { id: string }>(
   });
 
   const items = useMemo(() => extractItems<T>(data, endpoint), [data, endpoint]);
+  const meta = useMemo(() => extractMeta(data), [data]);
   const pagination = useMemo(
     () => extractPagination(data, page, pageSize, items.length),
     [data, items.length, page, pageSize],
@@ -228,6 +238,7 @@ export function useAdminList<T extends { id: string }>(
     isError,
     error: error ?? null,
     refetch,
+    meta,
     searchTerm,
     setSearchTerm,
     sortBy,

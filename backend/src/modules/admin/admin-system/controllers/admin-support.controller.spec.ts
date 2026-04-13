@@ -259,4 +259,174 @@ describe("AdminSupportController", () => {
       }),
     );
   });
+
+  it("falls back to compat list mode when reply columns are missing from support_tickets", async () => {
+    prisma.supportTicket.findMany
+      .mockRejectedValueOnce({
+        code: "P2022",
+        message: 'The column support_tickets.adminReply does not exist in the current database.',
+      })
+      .mockResolvedValueOnce([
+        {
+          id: "ticket-compat-1",
+          userId: null,
+          replyEmail: "reader@example.com",
+          orderId: null,
+          topic: "account",
+          subject: "Account help",
+          message: "Please check my login",
+          status: "open",
+          createdAt: new Date("2026-04-10T08:00:00.000Z"),
+          updatedAt: new Date("2026-04-10T08:30:00.000Z"),
+          user: null,
+        },
+      ]);
+    prisma.supportTicket.count.mockResolvedValue(1);
+
+    const result = await controller.list({
+      query: {
+        search: "reader@example.com",
+      },
+    } as never);
+
+    expect(prisma.supportTicket.findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        select: expect.objectContaining({
+          adminReply: true,
+          adminRepliedAt: true,
+        }),
+      }),
+    );
+    const compatListCall = prisma.supportTicket.findMany.mock.calls[1][0];
+    expect(compatListCall.select.adminReply).toBeUndefined();
+    expect(compatListCall.select.adminRepliedAt).toBeUndefined();
+    expect(JSON.stringify(compatListCall.where)).not.toContain("adminReply");
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            id: "ticket-compat-1",
+            adminReply: null,
+            adminRepliedAt: null,
+          }),
+        ],
+        meta: {
+          capabilities: {
+            replyPersistence: false,
+          },
+        },
+      }),
+    );
+  });
+
+  it("returns 503 when reply persistence is unavailable in compat mode", async () => {
+    prisma.supportTicket.findMany
+      .mockRejectedValueOnce({
+        code: "P2022",
+        message: 'The column support_tickets.adminReply does not exist in the current database.',
+      })
+      .mockResolvedValueOnce([]);
+    prisma.supportTicket.count.mockResolvedValue(0);
+
+    await controller.list({
+      query: {},
+    } as never);
+
+    prisma.supportTicket.findUnique.mockResolvedValue({
+      id: "ticket-compat-2",
+      status: "open",
+    });
+
+    await expect(
+      controller.reply("ticket-compat-2", {
+        message: "We are checking this for you.",
+      }),
+    ).rejects.toMatchObject({
+      response: expect.objectContaining({
+        message:
+          "当前数据库还没有应用客服回复字段迁移，客服队列暂时只支持查看和关单。请先执行 support_tickets 回复字段迁移。",
+        code: "SUPPORT_REPLY_PERSISTENCE_UNAVAILABLE",
+        capabilities: {
+          replyPersistence: false,
+        },
+      }),
+      status: 503,
+    });
+
+    expect(prisma.supportTicket.update).not.toHaveBeenCalled();
+  });
+
+  it("re-probes support reply persistence after the compat cooldown and restores full mode", async () => {
+    const nowSpy = jest.spyOn(Date, "now");
+    nowSpy.mockReturnValue(0);
+
+    prisma.supportTicket.findMany
+      .mockRejectedValueOnce({
+        code: "P2022",
+        message: 'The column support_tickets.adminReply does not exist in the current database.',
+      })
+      .mockResolvedValueOnce([
+        {
+          id: "ticket-compat-3",
+          userId: null,
+          replyEmail: "reader@example.com",
+          orderId: null,
+          topic: null,
+          subject: "Compat mode",
+          message: "fallback row",
+          status: "open",
+          createdAt: new Date("2026-04-10T08:00:00.000Z"),
+          updatedAt: new Date("2026-04-10T08:30:00.000Z"),
+          user: null,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: "ticket-full-1",
+          userId: null,
+          replyEmail: "reader@example.com",
+          orderId: null,
+          topic: null,
+          subject: "Full mode",
+          message: "reply fields are back",
+          adminReply: "Stored reply",
+          adminRepliedAt: new Date("2026-04-10T09:00:00.000Z"),
+          status: "in_progress",
+          createdAt: new Date("2026-04-10T08:00:00.000Z"),
+          updatedAt: new Date("2026-04-10T09:00:00.000Z"),
+          user: null,
+        },
+      ]);
+    prisma.supportTicket.count.mockResolvedValue(1);
+
+    await controller.list({
+      query: {},
+    } as never);
+
+    nowSpy.mockReturnValue(31_000);
+    const result = await controller.list({
+      query: {},
+    } as never);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            id: "ticket-full-1",
+            adminReply: "Stored reply",
+          }),
+        ],
+        meta: {
+          capabilities: {
+            replyPersistence: true,
+          },
+        },
+      }),
+    );
+    expect(prisma.supportTicket.findMany).toHaveBeenCalledTimes(3);
+
+    nowSpy.mockRestore();
+  });
 });
