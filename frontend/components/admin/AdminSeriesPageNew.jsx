@@ -398,7 +398,7 @@ export default function AdminSeriesPageNew() {
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
             <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
-            <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理。</p>
+            <p className="text-sm leading-6 text-slate-600">优先按前台可读性检查作品，再进入详情页或章节管理做下一步处理（已更新）。</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
             <Button
