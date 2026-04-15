@@ -23,25 +23,24 @@ const PAGE_CONFIG = {
     eyebrow: "Comics",
     heroTitle: "Original comics.",
     title: "Comics",
-    description:
-      "Browse recent releases, finished runs, and stories worth keeping up with.",
+    description: "",
     secondary: "",
     emptyIcon: "search",
-    emptyTitle: "No comics match this filter set",
-    emptyDescription: "Clear the current filters or browse featured series.",
+    emptyTitle: "No comics found",
+    emptyDescription: "",
     pathname: "/comics",
     emptyBrowseCards: [
       {
         eyebrow: "Featured Series",
         title: "Featured Series",
-        body: "Editorial picks from across the catalog.",
+        body: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=featured",
       },
       {
         eyebrow: "Completed Series",
         title: "Completed Series",
-        body: "Finished stories ready to read through.",
+        body: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=completed",
       },
@@ -52,25 +51,24 @@ const PAGE_CONFIG = {
     eyebrow: "Novels",
     heroTitle: "Original novels.",
     title: "Novels",
-    description:
-      "Browse serialized fiction, recent chapters, and finished stories.",
+    description: "",
     secondary: "",
     emptyIcon: "book",
-    emptyTitle: "No novels match this filter set",
-    emptyDescription: "Clear the current filters or browse featured series.",
+    emptyTitle: "No novels found",
+    emptyDescription: "",
     pathname: "/novels",
     emptyBrowseCards: [
       {
         eyebrow: "Featured Series",
         title: "Featured Series",
-        body: "Editorial picks from across the catalog.",
+        body: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=featured",
       },
       {
         eyebrow: "Completed Series",
         title: "Completed Series",
-        body: "Finished stories ready to read through.",
+        body: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=completed",
       },
@@ -370,7 +368,7 @@ export default function SeriesPage({
         id: "start-free",
         eyebrow: "First Picks",
         title: "First Picks",
-        description: "Reader-friendly stories to begin with.",
+        description: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=start-here",
         items: startHere,
@@ -379,7 +377,7 @@ export default function SeriesPage({
         id: "featured",
         eyebrow: "Featured Series",
         title: "Featured Series",
-        description: "Editorial picks from the catalog.",
+        description: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=featured",
         items: featured,
@@ -388,7 +386,7 @@ export default function SeriesPage({
         id: "latest",
         eyebrow: "Recent Updates",
         title: "Recent Updates",
-        description: "The most recently updated titles.",
+        description: "",
         ctaLabel: "Browse Series",
         href: `${config.pathname}?sort=latest`,
         items: latest,
@@ -397,7 +395,7 @@ export default function SeriesPage({
         id: "completed",
         eyebrow: "Completed Series",
         title: "Completed Series",
-        description: "Finished stories ready to read through.",
+        description: "",
         ctaLabel: "Browse Series",
         href: "/rankings?view=completed",
         items: completed,
@@ -409,7 +407,7 @@ export default function SeriesPage({
     if (!loading && series.length === 0) {
       return {
         title: "Nothing here yet.",
-        description: "Browse featured series or search by genre.",
+        description: "",
       };
     }
 
@@ -762,10 +760,6 @@ export default function SeriesPage({
               <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
                 {config.title}
               </h2>
-              <p className="mt-2 text-sm leading-7 text-slate-600">
-                Filter by format, status, and genre without losing the shelf
-                structure.
-              </p>
             </div>
             {showCatalogCount ? (
               <p className="text-sm font-medium text-slate-500">

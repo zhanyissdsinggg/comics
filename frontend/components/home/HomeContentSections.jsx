@@ -193,7 +193,7 @@ const GUIDE_CARDS = [
     icon: Compass,
     eyebrow: "Shelf",
     title: "Featured",
-    description: "Go straight to the lead shelf.",
+    description: "",
     ctaLabel: "Open Featured",
     href: "/rankings",
   },
@@ -202,7 +202,7 @@ const GUIDE_CARDS = [
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
-    description: "Panel-led stories first.",
+    description: "",
     ctaLabel: "Browse Comics",
     href: "/comics",
   },
@@ -211,7 +211,7 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
-    description: "Longer chapter-led reads.",
+    description: "",
     ctaLabel: "Browse Novels",
     href: "/novels",
   },
@@ -220,7 +220,7 @@ const GUIDE_CARDS = [
     icon: Users,
     eyebrow: "Credits",
     title: "Creators",
-    description: "Follow the names behind each title.",
+    description: "",
     ctaLabel: "Open creators",
     href: "/creators",
   },
@@ -266,7 +266,7 @@ export default function HomeContentSections({
             icon={BookOpenText}
             eyebrow="Lead Shelf"
             title="Featured"
-            description="Lead titles worth opening first."
+            description=""
             ctaLabel="Browse all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
@@ -280,7 +280,7 @@ export default function HomeContentSections({
               icon={BookOpenText}
               eyebrow="Comics"
               title="Comics"
-              description="Panel-led picks for a faster read."
+              description=""
               items={comicSpotlightItems}
               actionLabel="Open Comic"
               onItemClick={onComicSpotlightItemClick}
@@ -293,7 +293,7 @@ export default function HomeContentSections({
               icon={BookOpen}
               eyebrow="Novels"
               title="Novels"
-              description="Longer reads with a quieter pace."
+              description=""
               items={novelSpotlightItems}
               actionLabel="Open Novel"
               onItemClick={onNovelSpotlightItemClick}
@@ -307,7 +307,7 @@ export default function HomeContentSections({
               icon={BookOpen}
               eyebrow="Starting Points"
               title="First Picks"
-              description="Easy first picks."
+              description=""
               items={startHereItems}
               actionLabel="Read Chapter 1"
               onItemClick={onStartHereItemClick}
@@ -320,7 +320,7 @@ export default function HomeContentSections({
         <HomeSectionHeader
           eyebrow="Browse"
           title="Browse sections"
-          description="Jump straight to the part you want."
+          description=""
         />
 
         <div className="grid gap-4 pt-7 md:grid-cols-2 xl:grid-cols-4">

@@ -532,12 +532,12 @@ export default function StorePage({
           <EditorialHero
             eyebrow="Point packs"
             title={
-              purchaseActionsEnabled ? "Buy points." : "Point packs preview."
+              purchaseActionsEnabled ? "Buy points." : "Point packs"
             }
             description={
               purchaseActionsEnabled
-                ? "Buy once and unlock as you go."
-                : "Prices now. Checkout later."
+                ? "Buy and unlock."
+                : "View packs."
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
@@ -557,7 +557,7 @@ export default function StorePage({
               </p>
               <div>
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                  {purchaseActionsEnabled ? "Pick a pack." : "See the packs."}
+                  {purchaseActionsEnabled ? "Pick a pack." : "Packs"}
                 </h2>
               </div>
             </div>
@@ -613,7 +613,7 @@ export default function StorePage({
               className="px-0 py-0"
               cardClassName="max-w-none rounded-[28px] px-5 py-5 sm:px-6 sm:py-6"
               title="Point-pack checkout hit a snag."
-              description={`${errorMessage} Try again or contact billing.`}
+              description={errorMessage}
               onRetry={retryFailedPurchase}
             >
               <button
@@ -647,7 +647,7 @@ export default function StorePage({
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                 {purchaseActionsEnabled
                   ? "Simple checkout."
-                  : "Know the setup."}
+                  : "Details."}
               </h2>
             </div>
           </div>
@@ -656,18 +656,18 @@ export default function StorePage({
               {
                 label: "Today",
                 detail: purchaseActionsEnabled
-                  ? "Buy only what you need."
-                  : "No charge yet.",
+                  ? "Buy what you need."
+                  : "Not live yet.",
               },
               {
                 label: "Receipts",
                 detail: purchaseActionsEnabled
-                  ? "Every purchase shows in Orders."
-                  : "Orders appear after launch.",
+                  ? "Receipts in Orders."
+                  : "Receipts after launch.",
               },
               {
                 label: "Help",
-                detail: "Support is available.",
+                detail: "Need help? Contact support.",
               },
             ].map((item) => (
               <div key={item.label} className={quietCardClass}>
@@ -917,7 +917,7 @@ export default function StorePage({
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {purchaseActionsEnabled ? "Choose a pack" : "Browse packs"}
+                  {purchaseActionsEnabled ? "Choose a pack" : "Packs"}
                 </h2>
               </div>
               <p className="text-xs text-slate-500">{packCountLabel}</p>

@@ -694,7 +694,7 @@ function HomeContent({ initialSearchParams = {} }) {
         id: "featured-series",
         eyebrow: "Browse",
         title: "Featured Stories",
-        description: "Go straight to the strongest live shelf.",
+        description: "",
         label: "Browse Stories",
         href: "/search",
       },
@@ -702,7 +702,7 @@ function HomeContent({ initialSearchParams = {} }) {
         id: "browse-comics",
         eyebrow: "Formats",
         title: "Comics and Novels",
-        description: "Choose a format, then keep reading.",
+        description: "",
         label: "Browse Comics",
         href: "/comics",
       },
@@ -762,8 +762,8 @@ function HomeContent({ initialSearchParams = {} }) {
     ? "Pick up where you left off."
     : "Start with a story worth opening.";
   const heroSummary = resumeSeries
-    ? "Jump back in and keep moving."
-    : "One strong lead pick, then a cleaner shelf of comics, novels, and creators.";
+    ? ""
+    : "";
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue Reading"
     : heroSeries?.id

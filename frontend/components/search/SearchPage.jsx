@@ -715,9 +715,9 @@ export default function SearchPage() {
   const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
   const heroDescription = query
     ? loading
-      ? "Refreshing the shelf."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"} across titles and creators.`
-    : "Titles, creators, and genres.";
+      ? "Updating."
+      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
+    : "";
   const heroSecondary = "";
   const loadingResultLabel = "Updating";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
@@ -750,8 +750,8 @@ export default function SearchPage() {
             title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} already live.`
-                : "A clear place to begin.",
+                ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} live.`
+                : "",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -765,7 +765,7 @@ export default function SearchPage() {
             id: "free-unlock",
             eyebrow: "First picks",
             title: "Open a strong first pick.",
-            description: "Start with an editorial pick.",
+            description: "",
             ctaLabel: "Browse First Picks",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
@@ -775,7 +775,7 @@ export default function SearchPage() {
             id: "completed-binge-slot",
             eyebrow: "Binge path",
             title: `Read ${completedPick.title} straight through.`,
-            description: "Completed and ready in one run.",
+            description: "",
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -789,7 +789,7 @@ export default function SearchPage() {
             id: "completed-binge",
             eyebrow: "Binge path",
             title: "Browse completed series.",
-            description: "Finished stories for a full read.",
+            description: "",
             ctaLabel: "Browse Completed",
             onClick: () =>
               updateParams(
@@ -810,8 +810,8 @@ export default function SearchPage() {
             eyebrow: "Breakout watch",
             title: `${breakoutPick.title} is picking up.`,
             description: leadHotKeyword?.label
-              ? `Showing up alongside "${leadHotLabel}".`
-              : "A fast-rising pick from the shelf.",
+              ? `Near "${leadHotLabel}".`
+              : "",
             ctaLabel: `Open ${breakoutPick.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -825,7 +825,7 @@ export default function SearchPage() {
             id: "breakout-watch",
             eyebrow: "Breakout watch",
             title: `Search "${leadHotLabel}".`,
-            description: "A quick way into the shelf.",
+            description: "",
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -845,7 +845,7 @@ export default function SearchPage() {
             id: "adult-desk",
             eyebrow: "18+ page",
             title: "Open the 18+ shelf.",
-            description: "Go straight to mature reads.",
+            description: "",
             ctaLabel: "Open 18+ page",
             onClick: () => router.push("/adult"),
             accentClass: lightCardAccentClass,
@@ -1117,15 +1117,15 @@ export default function SearchPage() {
                   {query
                     ? leadSearchResult?.title || "Results are updating."
                     : mastheadLeadKeyword?.label
-                      ? `"${mastheadLeadKeyword.label}" is active right now.`
-                      : "Start with a title, genre, or creator."}
+                      ? `"${mastheadLeadKeyword.label}"`
+                      : "Type to search."}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   {query
                     ? leadSearchResult
                       ? summarizeSearchDescription(leadSearchResult)
-                      : "Use filters to narrow."
-                    : "Use a live keyword or a saved search."}
+                      : "Use filters."
+                    : ""}
                 </p>
               </div>
             </div>
@@ -1230,16 +1230,16 @@ export default function SearchPage() {
                 </div>
               ) : (
                 <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-                  <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
-                    {query ? "Closest result." : "Popular now."}
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {query
-                      ? "Use filters to narrow."
-                      : mastheadLeadKeyword
-                        ? `"${mastheadLeadKeyword.label}" is trending.`
-                        : "Titles and creators."}
-                  </p>
+                <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
+                  {query ? "Closest result." : "Popular now."}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {query
+                    ? "Use filters."
+                    : mastheadLeadKeyword
+                        ? `"${mastheadLeadKeyword.label}"`
+                        : ""}
+                </p>
                 </div>
               )}
 
@@ -1303,7 +1303,7 @@ export default function SearchPage() {
           <StorefrontEventHub
             eyebrow={query ? "Search picks" : "Featured"}
             title={query ? "Open the lead match." : "Popular now."}
-            description={query ? "Nearby picks." : "A few picks."}
+            description=""
             events={searchEventCards}
             appearance="light"
           />
@@ -1464,7 +1464,7 @@ export default function SearchPage() {
               <NetworkFallback
                 compact
                 title="Search is unavailable right now."
-                description="Try again."
+                description=""
                 onRetry={retrySearch}
               >
                 <button

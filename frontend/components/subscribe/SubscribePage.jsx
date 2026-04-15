@@ -338,16 +338,8 @@ export default function SubscribePage({
             accent="blue"
             appearance="light"
             eyebrow="Membership"
-            title={
-              subscriptionActionsEnabled
-                ? "Choose a membership."
-                : "Membership preview."
-            }
-            description={
-              subscriptionActionsEnabled
-                ? "Monthly plans for regular reading."
-                : "See the plans before launch."
-            }
+            title="Choose a membership."
+            description=""
             stats={subscriptionHeroStats}
           />
 
@@ -365,7 +357,7 @@ export default function SubscribePage({
                 <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
                   {subscriptionActionsEnabled
                     ? "Choose your plan."
-                    : "See the lineup."}
+                    : "Plan details."}
                 </h2>
               </div>
             </div>
@@ -408,11 +400,11 @@ export default function SubscribePage({
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                 Before you start
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                {subscriptionActionsEnabled
-                  ? "A clear monthly plan."
-                  : "Know the setup first."}
-              </h2>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  {subscriptionActionsEnabled
+                    ? "A clear monthly plan."
+                    : "Monthly billing details."}
+                </h2>
             </div>
           </div>
 
@@ -422,13 +414,13 @@ export default function SubscribePage({
                 title: "Today",
                 body: subscriptionActionsEnabled
                   ? "Billing starts at checkout."
-                  : "No monthly charge yet.",
+                  : "Not live yet.",
               },
               {
                 title: "Billing",
                 body: subscriptionActionsEnabled
                   ? "Renews monthly while active."
-                  : "Billing starts when membership goes live.",
+                  : "Checkout required.",
               },
               {
                 title: "Receipts",
@@ -436,7 +428,7 @@ export default function SubscribePage({
               },
               {
                 title: "Help",
-                body: "Support is available.",
+                body: "Need help? Support.",
               },
             ].map((item) => (
               <div key={item.title} className={quietCardClass}>
@@ -480,9 +472,9 @@ export default function SubscribePage({
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                  {subscriptionActionsEnabled ? "Sign in first" : "Account"}
-                </p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                      {subscriptionActionsEnabled ? "Sign in first" : "Account"}
+                    </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
                   Keep membership on one account.
                 </h2>

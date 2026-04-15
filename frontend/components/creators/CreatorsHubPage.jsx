@@ -77,6 +77,27 @@ function formatCreditTypeLabel(creditType) {
   return "Creator";
 }
 
+function resolveDisplayCreditType(creator) {
+  const rawType = String(creator?.creditType || "")
+    .trim()
+    .toLowerCase();
+  if (rawType === "studio" || rawType === "team" || rawType === "creator") {
+    return rawType;
+  }
+
+  const fallbackName = String(creator?.name || "")
+    .trim()
+    .toLowerCase();
+  if (fallbackName.includes("studio")) {
+    return "studio";
+  }
+  if (fallbackName.includes("team")) {
+    return "team";
+  }
+
+  return "creator";
+}
+
 function isCollectiveCreditType(creditType) {
   return creditType === "team" || creditType === "studio";
 }
@@ -386,8 +407,8 @@ export default function CreatorsHubPage({
       const matchesCredit =
         creditFilter === "all" ||
         (creditFilter === "team"
-          ? isCollectiveCreditType(creator?.creditType)
-          : !isCollectiveCreditType(creator?.creditType));
+          ? isCollectiveCreditType(resolveDisplayCreditType(creator))
+          : !isCollectiveCreditType(resolveDisplayCreditType(creator)));
       const matchesGenre =
         activeGenre === "All" ||
         (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(
@@ -421,7 +442,9 @@ export default function CreatorsHubPage({
   const featuredTeams = useMemo(
     () =>
       creators
-        .filter((creator) => isCollectiveCreditType(creator?.creditType))
+        .filter((creator) =>
+          isCollectiveCreditType(resolveDisplayCreditType(creator)),
+        )
         .slice(0, 3),
     [creators],
   );
@@ -430,7 +453,7 @@ export default function CreatorsHubPage({
       creators
         .filter(
           (creator) =>
-            !isCollectiveCreditType(creator?.creditType) &&
+            !isCollectiveCreditType(resolveDisplayCreditType(creator)) &&
             creator?.titleCount > 1,
         )
         .slice(0, 3),
@@ -513,8 +536,9 @@ export default function CreatorsHubPage({
   }, [featuredTeams, featuredVoices, spotlightCreators]);
   const collectiveCreatorCount = useMemo(
     () =>
-      creators.filter((creator) => isCollectiveCreditType(creator?.creditType))
-        .length,
+      creators.filter((creator) =>
+        isCollectiveCreditType(resolveDisplayCreditType(creator)),
+      ).length,
     [creators],
   );
   const creditedSeriesCount = useMemo(
@@ -850,7 +874,7 @@ export default function CreatorsHubPage({
                 First picks
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Start with these titles.
+                Quick picks.
               </h2>
             </div>
 
@@ -947,8 +971,8 @@ export default function CreatorsHubPage({
             accent="blue"
             appearance="light"
             eyebrow="Creators"
-            title="Browse creators."
-            description="Writers, artists, studios, and teams behind live titles."
+            title="Creators"
+            description=""
             stats={creatorHeroStats}
           />
 
@@ -997,7 +1021,7 @@ export default function CreatorsHubPage({
                 Search
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Find creators.
+                Search
               </h2>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (
@@ -1068,7 +1092,7 @@ export default function CreatorsHubPage({
               Featured
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Featured creators.
+              Featured
             </h2>
           </div>
 
@@ -1110,7 +1134,9 @@ export default function CreatorsHubPage({
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                            {formatCreditTypeLabel(creator.creditType)}
+                            {formatCreditTypeLabel(
+                              resolveDisplayCreditType(creator),
+                            )}
                           </p>
                           <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
                             {creator.name}
@@ -1156,7 +1182,7 @@ export default function CreatorsHubPage({
                 First picks
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Start with these titles.
+                Quick picks.
               </h2>
             </div>
 
@@ -1214,7 +1240,9 @@ export default function CreatorsHubPage({
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                             {creator
-                              ? formatCreditTypeLabel(creator.creditType)
+                              ? formatCreditTypeLabel(
+                                  resolveDisplayCreditType(creator),
+                                )
                               : "Story pick"}
                           </p>
                           <h3 className="mt-2 font-display text-xl font-semibold tracking-tight text-slate-950">
@@ -1309,7 +1337,7 @@ export default function CreatorsHubPage({
               Browse
             </p>
             <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Browse genres.
+              Genres
             </h2>
           </div>
 
@@ -1328,7 +1356,7 @@ export default function CreatorsHubPage({
             </div>
           ) : (
             <p className="text-sm text-slate-500">
-              Use comics, novels, or search.
+              No genres yet.
             </p>
           )}
         </SurfacePanel>
@@ -1362,7 +1390,7 @@ export default function CreatorsHubPage({
               icon="search"
               eyebrow="No match"
               title="Try a broader search"
-              description="Clear a filter or broaden the term."
+              description=""
               action={{
                 label: "Show all",
                 onClick: () => {
@@ -1404,7 +1432,9 @@ export default function CreatorsHubPage({
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                              {formatCreditTypeLabel(creator.creditType)}
+                              {formatCreditTypeLabel(
+                                resolveDisplayCreditType(creator),
+                              )}
                             </p>
                             <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
                               {creator.name}

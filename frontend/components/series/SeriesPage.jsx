@@ -830,11 +830,8 @@ export default function SeriesPage({
               Series unavailable
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              This title is not in the public catalog.
+              Title unavailable.
             </h1>
-            <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-[15px]">
-              Browse another title or search the catalog.
-            </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
@@ -876,13 +873,13 @@ export default function SeriesPage({
             compact
             title={
               isUnavailable
-                ? "This title is unavailable right now."
-                : "We couldn't load this title yet."
+                ? "Title unavailable."
+                : "Load failed."
             }
             description={
               isUnavailable
-                ? "Try again or browse another title."
-                : "Connection looks shaky. Try the page again."
+                ? ""
+                : ""
             }
             onRetry={() => fetchSeries({ bust: true })}
           >
@@ -967,9 +964,6 @@ export default function SeriesPage({
                 <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
                   {discoveryContext.title}
                 </h2>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                  {discoveryContext.returnHint}
-                </p>
               </div>
               <button
                 type="button"
