@@ -3,6 +3,55 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Link2, Share2, X } from "lucide-react";
 
+const TRACKING_PARAM_KEYS = new Set([
+  "entry",
+  "entrypoint",
+  "campaignid",
+  "sourcepath",
+  "seriesid",
+  "episodeid",
+  "sourceseriesid",
+  "sourceepisodeid",
+  "returnto",
+  "promotionid",
+  "offerid",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "gclid",
+  "fbclid",
+]);
+
+function sanitizeShareUrl(rawUrl) {
+  const value = String(rawUrl || "").trim();
+  if (!value) {
+    return "";
+  }
+
+  try {
+    const base =
+      typeof window !== "undefined" ? window.location.origin : "https://www.gushcomics.com";
+    const parsed = new URL(value, base);
+
+    Array.from(parsed.searchParams.keys()).forEach((key) => {
+      if (TRACKING_PARAM_KEYS.has(key.toLowerCase())) {
+        parsed.searchParams.delete(key);
+      }
+    });
+
+    if (typeof window !== "undefined" && parsed.origin === window.location.origin) {
+      const query = parsed.searchParams.toString();
+      return `${parsed.pathname}${query ? `?${query}` : ""}${parsed.hash || ""}`;
+    }
+
+    return parsed.toString();
+  } catch {
+    return value;
+  }
+}
+
 const ShareButton = React.memo(function ShareButton({
   url,
   title,
@@ -11,6 +60,7 @@ const ShareButton = React.memo(function ShareButton({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const shareableUrl = useMemo(() => sanitizeShareUrl(url), [url]);
   const buttonClassName = className
     ? `inline-flex items-center gap-2 ${className}`
     : "inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
@@ -72,7 +122,7 @@ const ShareButton = React.memo(function ShareButton({
 
   const handleShare = useCallback(
     (platform) => {
-      const shareUrl = platform.getUrl(url, title);
+      const shareUrl = platform.getUrl(shareableUrl, title);
       window.open(
         shareUrl,
         "_blank",
@@ -80,7 +130,7 @@ const ShareButton = React.memo(function ShareButton({
       );
       handleClose();
     },
-    [handleClose, title, url],
+    [handleClose, shareableUrl, title],
   );
 
   const handleCopyLink = useCallback(async () => {
@@ -88,18 +138,18 @@ const ShareButton = React.memo(function ShareButton({
       if (!navigator.clipboard?.writeText) {
         throw new Error("Clipboard API not supported");
       }
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareableUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy link:", error);
     }
-  }, [url]);
+  }, [shareableUrl]);
 
   const handleNativeShare = useCallback(async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: description, url });
+        await navigator.share({ title, text: description, url: shareableUrl });
         return;
       } catch (error) {
         if (error.name !== "AbortError") {
@@ -108,7 +158,7 @@ const ShareButton = React.memo(function ShareButton({
       }
     }
     setIsOpen(true);
-  }, [description, title, url]);
+  }, [description, shareableUrl, title]);
 
   return (
     <>
@@ -180,7 +230,7 @@ const ShareButton = React.memo(function ShareButton({
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={url}
+                  value={shareableUrl}
                   readOnly
                   className="flex-1 rounded-xl border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#0071e3)]"
                 />

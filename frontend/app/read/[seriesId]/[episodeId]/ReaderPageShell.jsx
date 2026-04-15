@@ -6,6 +6,7 @@ const ReaderPage = dynamic(() => import("../../../../components/reader/ReaderPag
   ssr: false,
   loading: () => (
     <main className="min-h-screen bg-neutral-950 text-neutral-100">
+      <h1 className="sr-only">Reader</h1>
       <div className="sticky top-0 z-20 border-b border-white/10 bg-neutral-950/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <div className="h-8 w-16 animate-pulse rounded-full bg-white/10" />
@@ -21,6 +22,11 @@ const ReaderPage = dynamic(() => import("../../../../components/reader/ReaderPag
           />
         ))}
       </div>
+      <noscript>
+        <p className="mx-auto max-w-5xl px-4 pb-8 text-sm text-neutral-300">
+          JavaScript is required to open the reader view.
+        </p>
+      </noscript>
     </main>
   ),
 });

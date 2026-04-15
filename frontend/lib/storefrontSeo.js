@@ -78,6 +78,28 @@ export const loadSeriesSeoPayload = cache(async (seriesId) => {
   return routePayload?.payload || null;
 });
 
+export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
+  if (!seriesId || !episodeId) {
+    return {
+      series: null,
+      episode: null,
+    };
+  }
+
+  const [seriesRoutePayload, episodePayload] = await Promise.all([
+    loadSeriesRoutePayload(seriesId),
+    fetchSeoApiJson(
+      `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
+      "reader-metadata",
+    ),
+  ]);
+
+  return {
+    series: seriesRoutePayload?.payload?.series || null,
+    episode: episodePayload?.episode || null,
+  };
+});
+
 export const loadSeriesRoutePayload = cache(async (seriesId) => {
   if (!seriesId) {
     return {
