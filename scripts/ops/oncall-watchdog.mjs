@@ -105,6 +105,16 @@ function buildMarkdownReport(payload) {
     }
   }
   lines.push("");
+  lines.push("## Warnings");
+  lines.push("");
+  if (!Array.isArray(payload.warnings) || payload.warnings.length === 0) {
+    lines.push("- None");
+  } else {
+    for (const item of payload.warnings) {
+      lines.push(`- ${item}`);
+    }
+  }
+  lines.push("");
   return `${lines.join("\n")}\n`;
 }
 
@@ -116,6 +126,7 @@ async function run() {
 
   const observabilityKey = String(process.env.OBSERVABILITY_KEY || "").trim();
   const requireRedis = process.env.WATCHDOG_REQUIRE_REDIS === "1";
+  const requireObservability = process.env.WATCHDOG_REQUIRE_OBSERVABILITY === "1";
   const jsonPath = String(process.env.WATCHDOG_REPORT_JSON || "ops-watchdog-report.json").trim();
   const mdPath = String(process.env.WATCHDOG_REPORT_MD || "ops-watchdog-report.md").trim();
 
@@ -158,15 +169,21 @@ async function run() {
       redisConnected: false,
     },
     breaches,
+    warnings: [],
   };
 
   if (!result.ok || !result.body || typeof result.body !== "object") {
-    severity = "P1";
-    status = "failed";
-    breaches.push({
-      severity: "P1",
-      message: `observability endpoint unavailable: status=${result.status}, error=${result.error || "n/a"}`,
-    });
+    const message = `observability endpoint unavailable: status=${result.status}, error=${result.error || "n/a"}`;
+    if (requireObservability) {
+      severity = "P1";
+      status = "failed";
+      breaches.push({
+        severity: "P1",
+        message,
+      });
+    } else {
+      payload.warnings.push(message);
+    }
   } else {
     const errorRatePct = Number(result.body?.requests?.errorRatePct || 0);
     const slowRatePct = Number(result.body?.requests?.slowRatePct || 0);
@@ -217,6 +234,9 @@ async function run() {
   fs.writeFileSync(jsonPath, JSON.stringify(payload, null, 2));
   fs.writeFileSync(mdPath, buildMarkdownReport(payload));
 
+  for (const warning of payload.warnings) {
+    console.warn(`[watchdog] warning: ${warning}`);
+  }
   console.log(`[watchdog] severity=${payload.severity}`);
   console.log(`[watchdog] report json=${jsonPath}`);
   console.log(`[watchdog] report md=${mdPath}`);

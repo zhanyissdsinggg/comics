@@ -11,6 +11,8 @@ const DEFAULT_FRONTEND_URL = "https://www.gushcomics.com";
 const DEFAULT_OUTPUT_JSON = "frontend/.tmp-admin-audit/live-interactions/latest.json";
 const DEFAULT_OUTPUT_TXT = "frontend/.tmp-admin-audit/live-interactions/latest.txt";
 const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_LOGIN_RETRIES = 3;
+const DEFAULT_LOGIN_RETRY_DELAY_MS = 1_000;
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
@@ -23,6 +25,18 @@ function normalizeBaseUrl(value) {
 
 function ensureDirectory(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
+}
+
+function readNumber(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function parseSetCookieHeader(headerValue) {
@@ -71,19 +85,40 @@ function parseSetCookieHeader(headerValue) {
     .filter(Boolean);
 }
 
-async function loginAndBuildCookies(baseUrl, adminKey) {
+async function loginAndBuildCookies(baseUrl, credentials) {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  let payload = {};
+  let mode = "unknown";
+
+  if (credentials.email && credentials.password) {
+    mode = "email-password";
+    payload = {
+      email: credentials.email,
+      password: credentials.password,
+    };
+  } else if (credentials.adminKey) {
+    mode = "admin-key";
+    payload = {
+      adminKey: credentials.adminKey,
+    };
+  } else {
+    throw new Error(
+      "missing admin credentials: set OPS_ADMIN_EMAIL + OPS_ADMIN_PASSWORD or OPS_ADMIN_KEY/ADMIN_KEY",
+    );
+  }
+
   const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ adminKey }),
+    headers,
+    body: JSON.stringify(payload),
   });
 
   const body = await response.text();
   if (response.status !== 201) {
-    throw new Error(`admin login failed: status=${response.status} body=${body}`);
+    throw new Error(`admin login failed (${mode}): status=${response.status} body=${body}`);
   }
 
   const setCookie = response.headers.get("set-cookie");
@@ -98,6 +133,26 @@ async function loginAndBuildCookies(baseUrl, adminKey) {
     secure: true,
     sameSite: "Strict",
   }));
+}
+
+async function loginAndBuildCookiesWithRetry(baseUrl, credentials, retries, delayMs) {
+  let lastError = null;
+  const attempts = Math.max(1, retries);
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await loginAndBuildCookies(baseUrl, credentials);
+    } catch (error) {
+      lastError = error;
+      const message = summarizeError(error);
+      console.warn(`[ops-admin-ui] login attempt ${attempt}/${attempts} failed: ${message}`);
+      if (attempt < attempts) {
+        await sleep(delayMs);
+      }
+    }
+  }
+
+  throw lastError || new Error("admin login failed");
 }
 
 async function waitForPopup(page, action) {
@@ -1060,10 +1115,20 @@ async function runCheck(context, baseUrl, check, artifactsDir) {
 function formatTextReport(summary) {
   const lines = [];
   lines.push(`frontend=${summary.frontendUrl}`);
+  lines.push(`status=${summary.status || "unknown"}`);
   lines.push(`checks=${summary.results.length}`);
   lines.push(`passed=${summary.passed}`);
   lines.push(`failed=${summary.failed}`);
+  lines.push(`warnings=${Array.isArray(summary.warnings) ? summary.warnings.length : 0}`);
   lines.push("");
+
+  if (Array.isArray(summary.warnings) && summary.warnings.length > 0) {
+    lines.push("warnings:");
+    for (const warning of summary.warnings) {
+      lines.push(`- ${warning}`);
+    }
+    lines.push("");
+  }
 
   for (const result of summary.results) {
     lines.push(`[${result.ok ? "PASS" : "FAIL"}] ${result.id}`);
@@ -1085,18 +1150,64 @@ function formatTextReport(summary) {
 async function run() {
   const frontendUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
+  const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
+  const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
+  const adminUiRequired = process.env.OPS_ADMIN_UI_REQUIRED === "1";
+  const loginRetries = readNumber(process.env.OPS_ADMIN_UI_LOGIN_RETRIES, DEFAULT_LOGIN_RETRIES);
+  const loginRetryDelayMs = readNumber(
+    process.env.OPS_ADMIN_UI_LOGIN_RETRY_DELAY_MS,
+    DEFAULT_LOGIN_RETRY_DELAY_MS,
+  );
   const outputJson = path.resolve(ROOT, process.env.OPS_ADMIN_UI_SMOKE_JSON_OUT || DEFAULT_OUTPUT_JSON);
   const outputTxt = path.resolve(ROOT, process.env.OPS_ADMIN_UI_SMOKE_TXT_OUT || DEFAULT_OUTPUT_TXT);
   const artifactsDir = path.dirname(outputJson);
 
-  if (!adminKey) {
-    throw new Error("OPS_ADMIN_KEY or ADMIN_KEY is required");
+  if (!(adminEmail && adminPassword) && !adminKey) {
+    throw new Error(
+      "admin credentials required: set OPS_ADMIN_EMAIL + OPS_ADMIN_PASSWORD, or OPS_ADMIN_KEY/ADMIN_KEY",
+    );
   }
 
   ensureDirectory(outputJson);
   ensureDirectory(outputTxt);
 
-  const cookies = await loginAndBuildCookies(frontendUrl, adminKey);
+  const warnings = [];
+  let cookies;
+  try {
+    const credentials =
+      adminEmail && adminPassword
+        ? { email: adminEmail, password: adminPassword }
+        : { adminKey };
+    cookies = await loginAndBuildCookiesWithRetry(
+      frontendUrl,
+      credentials,
+      loginRetries,
+      loginRetryDelayMs,
+    );
+  } catch (error) {
+    const loginMessage = `admin login unavailable: ${summarizeError(error)}`;
+    if (adminUiRequired) {
+      throw error;
+    }
+
+    warnings.push(loginMessage);
+    const summary = {
+      generatedAt: new Date().toISOString(),
+      frontendUrl,
+      status: "warning",
+      passed: 0,
+      failed: 0,
+      warnings,
+      results: [],
+    };
+    fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+    fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");
+    console.warn(`[ops-admin-ui] warning: ${loginMessage}`);
+    console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputJson).replace(/\\/g, "/")}`);
+    console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputTxt).replace(/\\/g, "/")}`);
+    return;
+  }
+
   const browser = await chromium.launch({ headless: true });
 
   try {
@@ -1118,8 +1229,10 @@ async function run() {
     const summary = {
       generatedAt: new Date().toISOString(),
       frontendUrl,
+      status: results.some((item) => !item.ok) ? "failed" : "ok",
       passed: results.filter((item) => item.ok).length,
       failed: results.filter((item) => !item.ok).length,
+      warnings,
       results,
     };
 

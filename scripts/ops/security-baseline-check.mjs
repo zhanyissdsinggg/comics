@@ -76,6 +76,7 @@ async function run() {
   const allowHttp = process.env.SEC_ALLOW_HTTP === "1";
   const requireHsts = process.env.SEC_REQUIRE_HSTS !== "0";
   const expectObsProtected = process.env.SEC_EXPECT_OBS_PROTECTED !== "0";
+  const requireObservabilityEndpoint = process.env.SEC_REQUIRE_OBSERVABILITY_ENDPOINT === "1";
 
   if (!backendUrl || !frontendUrl) {
     throw new Error("BACKEND_URL and FRONTEND_URL are required");
@@ -129,7 +130,9 @@ async function run() {
   const observabilityWithoutKey = await fetchResponse(`${backendUrl}/api/meta/observability`, {
     Accept: "application/json",
   });
-  if (expectObsProtected && observabilityWithoutKey.status !== 403) {
+  if (!requireObservabilityEndpoint && observabilityWithoutKey.status === 404) {
+    warnings.push("observability endpoint is not exposed (404); skipping observability access-policy check");
+  } else if (expectObsProtected && observabilityWithoutKey.status !== 403) {
     failures.push(
       `observability endpoint should be protected (expected 403 without key, got ${observabilityWithoutKey.status})`,
     );

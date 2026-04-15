@@ -4,790 +4,874 @@
     "category": "read",
     "path": "/admin/analytics/behavior/:userId",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 40
+    "line": 43
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/analytics/segments",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 33
+    "line": 36
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/analytics/stats",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 16
+    "line": 19
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/analytics/users/:userId",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 23
+    "line": 26
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/analytics/users/:userId/assess-churn",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 71
+    "line": 77
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/analytics/users/:userId/calculate-ltv",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 64
+    "line": 69
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/analytics/users/:userId/metrics",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 57
+    "line": 61
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/analytics/users/:userId/tags",
     "file": "backend/src/modules/admin/controllers/admin-analytics.controller.ts",
-    "line": 50
+    "line": 53
   },
   {
     "method": "POST",
     "category": "session",
     "path": "/admin/auth/login",
     "file": "backend/src/modules/admin/admin-auth/controllers/admin-auth.controller.ts",
-    "line": 61
+    "line": 82
   },
   {
     "method": "POST",
     "category": "session",
     "path": "/admin/auth/logout",
     "file": "backend/src/modules/admin/admin-auth/controllers/admin-auth.controller.ts",
-    "line": 242
+    "line": 292
   },
   {
     "method": "POST",
     "category": "session",
     "path": "/admin/auth/refresh",
     "file": "backend/src/modules/admin/admin-auth/controllers/admin-auth.controller.ts",
-    "line": 149
+    "line": 190
   },
   {
     "method": "POST",
     "category": "session",
     "path": "/admin/auth/verify",
     "file": "backend/src/modules/admin/admin-auth/controllers/admin-auth.controller.ts",
-    "line": 193
+    "line": 239
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/billing",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 33
+    "line": 37
   },
   {
     "method": "DELETE",
     "category": "billing",
     "path": "/admin/billing/:id",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 101
+    "line": 107
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/billing/plans",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 126
+    "line": 133
   },
   {
     "method": "POST",
     "category": "billing",
     "path": "/admin/billing/plans",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 132
+    "line": 139
   },
   {
     "method": "PATCH",
     "category": "billing",
     "path": "/admin/billing/plans/:id",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 137
+    "line": 145
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/billing/topups",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 44
+    "line": 48
   },
   {
     "method": "POST",
     "category": "billing",
     "path": "/admin/billing/topups",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 50
+    "line": 54
   },
   {
     "method": "PATCH",
     "category": "billing",
     "path": "/admin/billing/topups/:id",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-billing.controller.ts",
-    "line": 79
+    "line": 84
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/branding",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-branding.controller.ts",
-    "line": 22
+    "line": 26
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/branding",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-branding.controller.ts",
-    "line": 33
+    "line": 37
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/comments",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-comments.controller.ts",
-    "line": 22
+    "line": 134
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/comments/:id",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-comments.controller.ts",
-    "line": 95
+    "line": 218
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/comments/hide",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-comments.controller.ts",
-    "line": 60
+    "line": 180
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/comments/recalc-rating",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-comments.controller.ts",
-    "line": 75
+    "line": 197
+  },
+  {
+    "method": "GET",
+    "category": "read",
+    "path": "/admin/creators/audit",
+    "file": "backend/src/modules/admin/controllers/admin-creators.controller.ts",
+    "line": 13
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/email",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email.controller.ts",
-    "line": 40
+    "line": 69
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/email",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email.controller.ts",
-    "line": 50
+    "line": 76
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/email/jobs",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email-jobs.controller.ts",
-    "line": 17
+    "line": 20
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/email/jobs/failed",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email-jobs.controller.ts",
-    "line": 22
+    "line": 25
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/email/jobs/retry",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email-jobs.controller.ts",
-    "line": 27
+    "line": 30
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/email/test",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-email.controller.ts",
-    "line": 114
+    "line": 131
   },
   {
     "method": "POST",
     "category": "content-pipeline",
     "path": "/admin/generate-content",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-content-generator.controller.ts",
-    "line": 413
+    "line": 497
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/logs",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-logs.controller.ts",
-    "line": 31
+    "line": 24
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/logs/:id",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-logs.controller.ts",
-    "line": 63
+    "line": 54
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/campaigns",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 23
+    "line": 26
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/marketing/campaigns",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 30
+    "line": 33
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/marketing/campaigns/:campaignId/targets/:userId",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 83
+    "line": 91
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/marketing/campaigns/:id",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 50
+    "line": 55
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/campaigns/:id",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 37
+    "line": 41
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/marketing/campaigns/:id",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 43
+    "line": 47
   },
   {
     "method": "GET",
     "category": "read",
-    "path": "/admin/marketing/campaigns/:id/analytics",
-    "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 57
-  },
-  {
-    "method": "POST",
-    "category": "mutation",
     "path": "/admin/marketing/campaigns/:id/analytics",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
     "line": 63
   },
   {
+    "method": "POST",
+    "category": "mutation",
+    "path": "/admin/marketing/campaigns/:id/analytics",
+    "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
+    "line": 69
+  },
+  {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/campaigns/:id/budget",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 94
+    "line": 103
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/marketing/campaigns/:id/budget",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 101
+    "line": 110
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/campaigns/:id/targets",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 70
+    "line": 77
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/marketing/campaigns/:id/targets",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 76
+    "line": 83
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/stats",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 108
+    "line": 118
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/stats/by-segment",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 115
+    "line": 125
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/marketing/stats/by-type",
     "file": "backend/src/modules/admin/controllers/admin-marketing.controller.ts",
-    "line": 122
+    "line": 132
+  },
+  {
+    "method": "GET",
+    "category": "read",
+    "path": "/admin/members",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 26
+  },
+  {
+    "method": "POST",
+    "category": "mutation",
+    "path": "/admin/members",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 43
+  },
+  {
+    "method": "PATCH",
+    "category": "mutation",
+    "path": "/admin/members/:id",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 54
+  },
+  {
+    "method": "DELETE",
+    "category": "mutation",
+    "path": "/admin/members/:id/2fa",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 82
+  },
+  {
+    "method": "POST",
+    "category": "mutation",
+    "path": "/admin/members/:id/reset-2fa",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 75
+  },
+  {
+    "method": "PATCH",
+    "category": "mutation",
+    "path": "/admin/members/:id/status",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 66
+  },
+  {
+    "method": "GET",
+    "category": "read",
+    "path": "/admin/members/meta",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 31
+  },
+  {
+    "method": "POST",
+    "category": "mutation",
+    "path": "/admin/members/sync-env",
+    "file": "backend/src/modules/admin/admin-system/controllers/admin-members.controller.ts",
+    "line": 36
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/metrics",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-metrics.controller.ts",
-    "line": 12
+    "line": 15
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/notifications",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-notifications.controller.ts",
-    "line": 37
+    "line": 41
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/notifications",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-notifications.controller.ts",
-    "line": 54
+    "line": 58
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/notifications/:id",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-notifications.controller.ts",
-    "line": 120
+    "line": 126
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/orders",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-orders.controller.ts",
-    "line": 85
+    "line": 108
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/orders/:id",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-orders.controller.ts",
-    "line": 326
+    "line": 372
   },
   {
     "method": "POST",
     "category": "billing",
     "path": "/admin/orders/adjust",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-orders.controller.ts",
-    "line": 254
+    "line": 299
   },
   {
     "method": "POST",
     "category": "billing",
     "path": "/admin/orders/refund",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-orders.controller.ts",
-    "line": 127
+    "line": 164
   },
   {
     "method": "POST",
     "category": "billing",
     "path": "/admin/orders/refund/:id",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-orders.controller.ts",
-    "line": 239
+    "line": 283
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/promotions",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 98
+    "line": 101
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/promotions",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 127
+    "line": 131
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/promotions/:id",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 187
+    "line": 193
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/promotions/:id",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 157
+    "line": 162
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/promotions/defaults",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 104
+    "line": 107
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/promotions/defaults",
     "file": "backend/src/modules/admin/admin-content/controllers/admin-promotions.controller.ts",
-    "line": 114
+    "line": 117
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/rankings",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-rankings.controller.ts",
-    "line": 28
+    "line": 31
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/analytics",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 78
+    "line": 87
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/recommendations/analytics",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 85
+    "line": 94
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/popular",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 114
+    "line": 124
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/rankings",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 50
+    "line": 56
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/recommendations/rankings",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 57
+    "line": 63
   },
   {
     "method": "DELETE",
+    "category": "mutation",
+    "path": "/admin/recommendations/rankings/:id",
+    "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
+    "line": 79
+  },
+  {
+    "method": "PATCH",
     "category": "mutation",
     "path": "/admin/recommendations/rankings/:id",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
     "line": 71
   },
   {
-    "method": "PATCH",
-    "category": "mutation",
-    "path": "/admin/recommendations/rankings/:id",
-    "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 64
-  },
-  {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/rankings/:type/performance",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 104
+    "line": 114
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/slots",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 22
+    "line": 25
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/recommendations/slots",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 29
+    "line": 32
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/recommendations/slots/:id",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 43
+    "line": 48
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/recommendations/slots/:id",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 36
+    "line": 40
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/recommendations/slots/:id/performance",
     "file": "backend/src/modules/admin/controllers/admin-recommendation.controller.ts",
-    "line": 97
+    "line": 107
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/regions",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-regions.controller.ts",
-    "line": 54
+    "line": 97
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/regions",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-regions.controller.ts",
-    "line": 63
+    "line": 107
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/channels",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 165
+    "line": 168
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/order-status-distribution",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 323
+    "line": 326
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/promotions",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 212
+    "line": 215
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/stats",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 97
+    "line": 100
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/trend",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 125
+    "line": 128
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/revenue/user-value-distribution",
     "file": "backend/src/modules/admin/admin-billing/controllers/admin-revenue.controller.ts",
-    "line": 276
+    "line": 279
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/series",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 56
+    "line": 262
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/series",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 117
+    "line": 374
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/series/:id",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 165
+    "line": 471
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/series/:id",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 138
+    "line": 402
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/series/:id",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 148
+    "line": 430
+  },
+  {
+    "method": "GET",
+    "category": "read",
+    "path": "/admin/series/:id/credits",
+    "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
+    "line": 415
+  },
+  {
+    "method": "PATCH",
+    "category": "mutation",
+    "path": "/admin/series/:id/credits",
+    "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
+    "line": 455
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/series/:id/episodes",
     "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
-    "line": 189
+    "line": 277
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/series/:id/episodes",
     "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
-    "line": 202
+    "line": 372
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/series/:id/episodes/:episodeId",
     "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
-    "line": 346
+    "line": 685
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/series/:id/episodes/:episodeId",
     "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
-    "line": 320
+    "line": 648
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/series/:id/episodes/bulk",
     "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
-    "line": 276
+    "line": 467
+  },
+  {
+    "method": "POST",
+    "category": "mutation",
+    "path": "/admin/series/:id/episodes/reorder",
+    "file": "backend/src/modules/admin/controllers/admin-episodes.controller.ts",
+    "line": 524
   },
   {
     "method": "POST",
     "category": "content-pipeline",
     "path": "/admin/series/:id/episodes/upload",
     "file": "backend/src/modules/admin/controllers/admin-episodes-upload.controller.ts",
-    "line": 89
+    "line": 110
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/series/search/advanced",
     "file": "backend/src/modules/admin/controllers/admin-series.controller.ts",
-    "line": 62
+    "line": 296
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/stats",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-stats.controller.ts",
-    "line": 23
+    "line": 26
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/stats/dashboard",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-stats.controller.ts",
-    "line": 14
+    "line": 17
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/support",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-support.controller.ts",
-    "line": 29
+    "line": 79
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/support/:id",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-support.controller.ts",
-    "line": 121
+    "line": 186
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/support/:id/close",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-support.controller.ts",
-    "line": 106
+    "line": 170
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/support/:id/reply",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-support.controller.ts",
-    "line": 78
+    "line": 122
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/tracking",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-tracking.controller.ts",
-    "line": 22
+    "line": 24
   },
   {
     "method": "POST",
     "category": "mutation",
     "path": "/admin/tracking",
     "file": "backend/src/modules/admin/admin-analytics/controllers/admin-tracking.controller.ts",
-    "line": 31
+    "line": 29
   },
   {
     "method": "POST",
     "category": "content-pipeline",
     "path": "/admin/upload/image",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-upload.controller.ts",
-    "line": 36
+    "line": 129
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/users",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-users.controller.ts",
-    "line": 44
+    "line": 60
   },
   {
     "method": "DELETE",
     "category": "mutation",
     "path": "/admin/users/:id",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-users.controller.ts",
-    "line": 108
+    "line": 154
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/users/:id/block",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-users.controller.ts",
-    "line": 95
+    "line": 140
   },
   {
     "method": "PATCH",
     "category": "mutation",
     "path": "/admin/users/block",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-users.controller.ts",
-    "line": 81
+    "line": 125
   },
   {
     "method": "GET",
     "category": "read",
     "path": "/admin/users/support",
     "file": "backend/src/modules/admin/admin-system/controllers/admin-users.controller.ts",
-    "line": 63
+    "line": 105
   }
 ]
