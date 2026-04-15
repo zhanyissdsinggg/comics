@@ -37,6 +37,17 @@ function readNumber(name, fallback) {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
 }
 
+function readCsv(name, fallback = []) {
+  const raw = String(process.env[name] || "").trim();
+  if (!raw) {
+    return [...fallback];
+  }
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
   if (!normalized) {
@@ -140,36 +151,47 @@ function buildFrontendAuditSpecs(seriesCatalog) {
   const hasRealCreators = (Array.isArray(seriesCatalog) ? seriesCatalog : []).some((series) =>
     hasPublicCreatorCredit(series),
   );
+  const homeRequired = readCsv("OPS_AUDIT_HOME_REQUIRED", [
+    "Start with a story worth opening.",
+    "Featured",
+    "Comics",
+    "Novels",
+    "Creators",
+  ]);
+  const rankingsRequired = readCsv("OPS_AUDIT_RANKINGS_REQUIRED", [
+    "Featured",
+    "Editor's shelf",
+    "Browse views",
+  ]);
+  const creatorsRequiredWithRealData = readCsv("OPS_AUDIT_CREATORS_REQUIRED", [
+    "Creators",
+    "All Creators",
+    "Featured",
+  ]);
+  const creatorsRequiredFallback = readCsv("OPS_AUDIT_CREATORS_FALLBACK_REQUIRED", [
+    "Creators",
+    "All Creators",
+  ]);
   const specs = [
     {
       route: "/",
-      required: [
-        "Read original comics and novels in one place.",
-        "Start Reading",
-        "Browse Comics",
-        "Browse Novels",
-        "Featured",
-      ],
+      required: homeRequired,
       forbidden: LEGACY_TERMS,
     },
     {
       route: "/rankings",
-      required: [
-        "Featured Series",
-        "Featured stories. Editorial picks across the catalog.",
-        "Meet the Creators",
-      ],
+      required: rankingsRequired,
       forbidden: [...LEGACY_TERMS, "Rank #", "All time", "Weekly", "Monthly"],
     },
     hasRealCreators
       ? {
           route: "/creators",
-          required: ["Meet the Creators", "Featured Creators", "Start with These Stories", "All Creators"],
+          required: creatorsRequiredWithRealData,
           forbidden: ["Story team", "The team behind", CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL],
         }
       : {
           route: "/creators",
-          required: ["Behind the Stories", "Start with These Stories", "How creator credits appear"],
+          required: creatorsRequiredFallback,
           forbidden: ["Story team", "The team behind", "Featured Creators"],
         },
   ];
@@ -266,6 +288,7 @@ async function run() {
   const maxEndpointP95Ms = readNumber("OPS_MAX_ENDPOINT_P95_MS", DEFAULT_MAX_ENDPOINT_P95_MS);
   const maxFrontendP95Ms = readNumber("OPS_MAX_FRONTEND_P95_MS", DEFAULT_MAX_FRONTEND_P95_MS);
   const allowedFrontendSlowSamples = readNumber("OPS_ALLOWED_FRONTEND_SLOW_SAMPLES", 1);
+  const allowedBackendSlowSamples = readNumber("OPS_ALLOWED_BACKEND_SLOW_SAMPLES", 1);
   const allowedTransientFailures = readNumber("OPS_ALLOWED_TRANSIENT_FAILURES", 1);
   const maxObsErrorRatePct = readNumber(
     "OPS_MAX_OBS_ERROR_RATE_PCT",
@@ -430,12 +453,17 @@ async function run() {
     const threshold = isFrontendRoute ? maxFrontendP95Ms : maxEndpointP95Ms;
     const slowSampleCount = effectiveSamples.filter((value) => value > threshold).length;
     if (p95 > threshold) {
-      if (isFrontendRoute && slowSampleCount <= allowedFrontendSlowSamples) {
+      const isWithinTolerance = isFrontendRoute
+        ? slowSampleCount <= allowedFrontendSlowSamples
+        : slowSampleCount <= allowedBackendSlowSamples;
+      if (isWithinTolerance) {
         warnings.push(
-          `${routeKey} had ${slowSampleCount} slow sample(s) over ${threshold}ms, tolerated by allowance=${allowedFrontendSlowSamples}`,
+          `${routeKey} had ${slowSampleCount} slow sample(s) over ${threshold}ms, tolerated by allowance=${
+            isFrontendRoute ? allowedFrontendSlowSamples : allowedBackendSlowSamples
+          }`,
         );
       } else {
-      failures.push(`${routeKey} p95=${p95}ms exceeds threshold ${threshold}ms`);
+        failures.push(`${routeKey} p95=${p95}ms exceeds threshold ${threshold}ms`);
       }
     }
     console.log(

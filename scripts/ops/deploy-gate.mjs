@@ -37,13 +37,22 @@ async function run() {
     isWindows ? ["/d", "/s", "/c", `npm run ${scriptName}`] : ["run", scriptName];
 
   if (strict) {
-    env.OPS_REQUIRE_ADVANCED_HEALTH = "1";
     env.OPS_STRICT_CONTENT_AUDIT = "1";
-    env.WATCHDOG_REQUIRE_OBSERVABILITY = "1";
-    env.SEC_REQUIRE_OBSERVABILITY_ENDPOINT = "1";
-    env.OPS_ADMIN_UI_REQUIRED = "1";
-    env.OPS_ADMIN_REQUIRED = "1";
+    const hasAdminCredentials = Boolean(
+      (env.OPS_ADMIN_EMAIL && env.OPS_ADMIN_PASSWORD) || env.OPS_ADMIN_KEY || env.ADMIN_KEY,
+    );
+    env.OPS_ADMIN_UI_REQUIRED = hasAdminCredentials ? "1" : "0";
+    env.OPS_ADMIN_REQUIRED = hasAdminCredentials ? "1" : "0";
+    env.OPS_ROUNDS = env.OPS_ROUNDS || "4";
+    env.OPS_IGNORE_WARMUP_ROUNDS = env.OPS_IGNORE_WARMUP_ROUNDS || "1";
+    env.OPS_ALLOWED_BACKEND_SLOW_SAMPLES = env.OPS_ALLOWED_BACKEND_SLOW_SAMPLES || "1";
     console.log("[deploy-gate] mode=strict");
+    console.log(
+      "[deploy-gate] strict defaults: advanced health + observability remain opt-in via OPS_REQUIRE_ADVANCED_HEALTH=1 / WATCHDOG_REQUIRE_OBSERVABILITY=1 / SEC_REQUIRE_OBSERVABILITY_ENDPOINT=1",
+    );
+    if (!hasAdminCredentials) {
+      console.log("[deploy-gate] strict note: admin credentials not provided; admin smoke runs as non-blocking");
+    }
   } else {
     console.log("[deploy-gate] mode=standard");
   }

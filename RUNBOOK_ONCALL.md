@@ -51,7 +51,8 @@ $env:FRONTEND_URL='https://www.gushcomics.com'
 npm run ops:deploy-gate
 
 # Strict gate (release-candidate / pre-major-release)
-# Requires observability endpoint + advanced health endpoints + admin auth credentials
+# Default strict requires content audit + admin auth credentials
+# Advanced health / observability can be explicitly turned on by env flags below
 npm run ops:deploy-gate:strict
 ```
 
@@ -66,6 +67,9 @@ $env:OPS_STRICT_CONTENT_AUDIT='1'
 # Treat observability endpoint absence as hard failure
 $env:WATCHDOG_REQUIRE_OBSERVABILITY='1'
 $env:SEC_REQUIRE_OBSERVABILITY_ENDPOINT='1'
+
+# Optional: tighten backend latency tolerance for strict mode
+$env:OPS_ALLOWED_BACKEND_SLOW_SAMPLES='0'
 ```
 
 ## If Admin Runtime Fails
