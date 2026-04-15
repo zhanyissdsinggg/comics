@@ -595,9 +595,13 @@ async function run() {
   });
 
   if (!observabilityResult.ok) {
+    const missingAccessKeyHint =
+      observabilityResult.status === 403 && !observabilityKey
+        ? " (OBSERVABILITY_KEY missing)"
+        : "";
     const message = `observability check skipped/failed: status=${observabilityResult.status}, error=${
       observabilityResult.error || "n/a"
-    }`;
+    }${missingAccessKeyHint}`;
     if (observabilityRequired) {
       failures.push(message);
     } else {

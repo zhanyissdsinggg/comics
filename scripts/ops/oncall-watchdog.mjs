@@ -173,7 +173,13 @@ async function run() {
   };
 
   if (!result.ok || !result.body || typeof result.body !== "object") {
-    const message = `observability endpoint unavailable: status=${result.status}, error=${result.error || "n/a"}`;
+    const missingAccessKeyHint =
+      result.status === 403 && !observabilityKey
+        ? " (OBSERVABILITY_KEY missing while WATCHDOG_REQUIRE_OBSERVABILITY=1)"
+        : "";
+    const message = `observability endpoint unavailable: status=${result.status}, error=${
+      result.error || "n/a"
+    }${missingAccessKeyHint}`;
     if (requireObservability) {
       severity = "P1";
       status = "failed";
