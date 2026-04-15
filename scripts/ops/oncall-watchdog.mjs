@@ -242,7 +242,8 @@ async function run() {
   console.log(`[watchdog] report md=${mdPath}`);
 
   if (payload.severity !== "OK") {
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 }
 
