@@ -5,7 +5,7 @@ function getActionClass(variant) {
     return "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   }
 
-  return "border-transparent bg-slate-950 text-white hover:bg-slate-800";
+  return "border-transparent bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82";
 }
 
 export default function ActionModal({

@@ -80,7 +80,7 @@ export function LoadingView() {
   return (
     <AdminShell
       title="首页编排"
-      subtitle="把首页推荐位当成编辑工作区来维护，而不是当成一堆喧闹指标卡。"
+      subtitle="把首页推荐位当成编辑工作区来维护。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />

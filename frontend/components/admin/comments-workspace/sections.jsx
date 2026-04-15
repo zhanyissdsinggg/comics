@@ -62,7 +62,7 @@ export function CommentsListSection(props) {
   return (
     <AdminPageSection
       title="评论列表"
-      description="让表格先回答最关键的事：谁写的、写了什么、现在要不要处理。"
+      description="先看谁写的、写了什么、要不要处理。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
@@ -84,7 +84,7 @@ export function CommentsListSection(props) {
           onClick={onOpenDeleteConfirm}
           disabled={selectedIds.length === 0 || deletePending}
         >
-          {deletePending ? "删除中..." : "删除评论"}
+          {deletePending ? "删除中..." : "删除所选"}
         </Button>
       </AdminSelectionBar>
 

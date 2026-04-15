@@ -37,15 +37,17 @@ export default function ReaderDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60">
-      <div className="flex h-full w-full max-w-full flex-col border-l border-neutral-800 bg-neutral-950 px-4 py-5 sm:max-w-sm">
+    <div className="fixed inset-0 z-50 flex justify-end bg-[rgba(15,23,42,0.46)] backdrop-blur-sm">
+      <div className="flex h-full w-full max-w-full flex-col border-l border-white/8 bg-[rgba(12,12,14,0.96)] px-4 py-5 shadow-[-16px_0_44px_rgba(0,0,0,0.24)] sm:max-w-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <button
               type="button"
               onClick={() => setTab("toc")}
               className={`rounded-full px-3 py-1 ${
-                tab === "toc" ? "bg-white text-neutral-900" : "border border-neutral-800 text-neutral-300"
+                tab === "toc"
+                  ? "bg-white text-slate-950 shadow-[0_10px_24px_rgba(255,255,255,0.08)]"
+                  : "border border-white/8 bg-white/[0.04] text-neutral-300 hover:border-white/16 hover:bg-white/[0.08]"
               }`}
             >
               Contents
@@ -55,8 +57,8 @@ export default function ReaderDrawer({
               onClick={() => setTab("bookmarks")}
               className={`rounded-full px-3 py-1 ${
                 tab === "bookmarks"
-                  ? "bg-white text-neutral-900"
-                  : "border border-neutral-800 text-neutral-300"
+                  ? "bg-white text-slate-950 shadow-[0_10px_24px_rgba(255,255,255,0.08)]"
+                  : "border border-white/8 bg-white/[0.04] text-neutral-300 hover:border-white/16 hover:bg-white/[0.08]"
               }`}
             >
               Bookmarks
@@ -65,13 +67,13 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-neutral-800 px-3 py-1 text-xs text-neutral-300"
+            className="rounded-full border border-white/8 bg-white/[0.04] px-3 py-1 text-xs text-neutral-300 transition hover:border-white/16 hover:bg-white/[0.08]"
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900/40 p-3 text-xs text-neutral-300">
+          <div className="mt-4 rounded-2xl border border-white/8 bg-white/[0.04] p-3 text-xs text-neutral-300 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
               <span>Members get free reads and lower prices.</span>
               <button
@@ -80,7 +82,7 @@ export default function ReaderDrawer({
                   trackEvent("click_subscribe_from_toc", { seriesId: currentSeriesId });
                   onSubscribe();
                 }}
-                className="rounded-full border border-neutral-700 px-3 py-1 text-[10px]"
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] transition hover:border-white/16 hover:bg-white/[0.08]"
               >
                 See membership
               </button>
@@ -103,7 +105,7 @@ export default function ReaderDrawer({
                       onSelectEpisode(episode.id);
                     }
                   }}
-                  className="w-full rounded-2xl border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-left text-sm text-neutral-200"
+                  className="w-full rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 text-left text-sm text-neutral-200 transition hover:border-white/16 hover:bg-white/[0.08]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -123,7 +125,7 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
-              <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4">
+              <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4 backdrop-blur-sm">
                 <div className="text-sm font-semibold text-neutral-100">No bookmarks yet.</div>
                 <div className="mt-1 text-xs leading-5 text-neutral-400">
                   Save a spot and it will show up here.
@@ -133,7 +135,7 @@ export default function ReaderDrawer({
               bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="rounded-2xl border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-sm text-neutral-200"
+                  className="rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -153,7 +155,7 @@ export default function ReaderDrawer({
                   <button
                     type="button"
                     onClick={() => onGoBookmark(bookmark)}
-                    className="mt-2 w-full rounded-full border border-neutral-700 px-3 py-1 text-xs"
+                    className="mt-2 w-full rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs transition hover:border-white/16 hover:bg-white/[0.08]"
                   >
                     Go
                   </button>

@@ -528,9 +528,9 @@ export default function SeriesPage({
     [completedSeriesCount, genres.length, series.length],
   );
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const showEntrySpotlight =
     Boolean(entrySpotlight) &&
     !isComicPage &&
@@ -554,13 +554,13 @@ export default function SeriesPage({
             appearance="light"
           >
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] dark:text-white/46">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
                 {config.eyebrow}
               </p>
-              <h1 className="mt-4 font-display text-[2.55rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[color:var(--gush-ink-strong)] sm:text-[3.1rem] xl:text-[4rem] dark:text-white">
+              <h1 className="mt-4 font-display text-[2.55rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[color:var(--gush-ink-strong)] sm:text-[3.1rem] xl:text-[4rem]">
                 {config.heroTitle}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--gush-ink-soft)] sm:text-[0.98rem] dark:text-white/68">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--gush-ink-soft)] sm:text-[0.98rem]">
                 {config.description}
               </p>
             </div>
@@ -571,7 +571,7 @@ export default function SeriesPage({
                   key={`hero-genre-${item.genre}`}
                   type="button"
                   onClick={() => updateParams({ genre: item.genre })}
-                  className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1.5 text-xs font-medium text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/68 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                  className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.82)] px-3 py-1.5 text-xs font-medium text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
                 >
                   {item.genre}
                 </button>
@@ -582,14 +582,14 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
+                className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
               >
                 Search the catalog
               </button>
               <button
                 type="button"
                 onClick={() => router.push(oppositeFormatHref)}
-                className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/74 dark:hover:border-white/16 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
               >
                 {oppositeFormatLabel}
               </button>
@@ -599,12 +599,12 @@ export default function SeriesPage({
               {heroStats.map((stat) => (
                 <div
                   key={stat.id}
-                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] dark:border-white/10 dark:bg-white/[0.04]"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
                 >
-                  <p className="text-lg font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
+                  <p className="text-lg font-semibold tracking-tight text-[color:var(--gush-ink-strong)]">
                     {stat.value}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
                     {stat.label}
                   </p>
                 </div>
@@ -613,7 +613,7 @@ export default function SeriesPage({
           </SurfacePanel>
 
           {showEntrySpotlight ? (
-            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-6 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(16,21,31,0.92),rgba(11,16,24,0.98))] dark:shadow-[0_24px_70px_rgba(0,0,0,0.22)]">
+            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-6">
               <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                 <Cover
                   tone={entrySpotlight.coverTone}
@@ -625,17 +625,17 @@ export default function SeriesPage({
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_32px_rgba(15,23,42,0.08)] dark:border-white/10 dark:shadow-[0_18px_36px_rgba(0,0,0,0.24)]"
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_32px_rgba(15,23,42,0.08)]"
                 />
 
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--gush-ink-faint)] dark:text-white/42">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--gush-ink-faint)]">
                     Featured title
                   </p>
-                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
+                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-[color:var(--gush-ink-strong)]">
                     {entrySpotlight.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)] dark:text-white/60">
+                  <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                     {getSeriesSubtitle(entrySpotlight)}
                   </p>
 
@@ -648,7 +648,7 @@ export default function SeriesPage({
                       .map((genre) => (
                         <span
                           key={`spotlight-${entrySpotlight.id}-${genre}`}
-                          className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.68)] px-3 py-1 text-xs font-medium text-[color:var(--gush-ink-soft)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/72"
+                          className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.82)] px-3 py-1 text-xs font-medium text-[color:var(--gush-ink-soft)]"
                         >
                           {genre}
                         </span>
@@ -658,7 +658,7 @@ export default function SeriesPage({
                   <button
                     type="button"
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
-                    className="mt-5 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#241d18] dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
+                    className="mt-5 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                   >
                     Open series
                   </button>

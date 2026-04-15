@@ -242,18 +242,18 @@ export default function AdminCreatorsPage() {
   return (
     <AdminShell
       title="创作者"
-      subtitle="集中处理署名、命名和作品归属。"
+      subtitle="收口署名和作品归属。"
       actions={
         <div className="flex flex-wrap gap-2">
-          <ActionButton onClick={() => handleOpenCreator("/creators")}>
-            <Eye className="h-4 w-4" />
-            查看前台创作者页
-          </ActionButton>
           <ActionButton
             onClick={() => router.push("/admin/series")}
             className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
           >
             打开作品列表
+          </ActionButton>
+          <ActionButton onClick={() => handleOpenCreator("/creators")}>
+            <Eye className="h-4 w-4" />
+            查看前台创作者页
           </ActionButton>
         </div>
       }
@@ -288,7 +288,7 @@ export default function AdminCreatorsPage() {
                 先补齐署名，再收命名。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                先清缺失署名，再处理命名冲突，最后回看前台是否对齐。
+                先补署名，再回看前台。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">内容优先后台</StatusPill>
@@ -306,8 +306,7 @@ export default function AdminCreatorsPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">覆盖率</p>
               <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">{coverageRate}%</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入真实 credits，
-                兼容层还剩 {audit.stats.legacyAuthorOnlySeriesCount} 部。
+                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入真实 credits。
               </p>
             </div>
           </div>
@@ -345,7 +344,7 @@ export default function AdminCreatorsPage() {
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">筛选创作者目录</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                按创作者名、作品标题或题材快速定位。
+                按名字、作品或题材快速定位。
               </p>
             </div>
             <p className="text-sm text-slate-500">
@@ -428,7 +427,7 @@ export default function AdminCreatorsPage() {
                 建议处理顺序
               </p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                先补缺失署名，再清命名变体，最后抽查前台页。
+                先补署名，再抽查前台页。
               </p>
             </div>
 

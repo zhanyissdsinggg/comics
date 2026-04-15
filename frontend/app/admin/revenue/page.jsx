@@ -135,10 +135,7 @@ export default function AdminRevenuePage() {
   const meta = viewMeta(viewMode);
 
   return (
-    <AdminLayout
-      title="营收"
-      subtitle="用和后台其余页面一致的克制语气，查看收入结果、渠道结构和活动影响，不把这里重新做成一块吵闹 BI 面板。"
-    >
+    <AdminLayout title="营收" subtitle="查看收入、渠道和活动结果。">
       <div className="space-y-6">
         <RevenueSummaryCards stats={stats} />
 

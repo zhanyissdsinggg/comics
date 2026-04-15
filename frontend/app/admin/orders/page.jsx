@@ -5,7 +5,10 @@ export const dynamic = 'force-dynamic';
 import { useMemo, useState } from 'react';
 
 import AdminShell from '@/components/admin/AdminShell';
-import { OrdersSummaryCards, OrdersTableSection } from '@/components/admin/orders-workspace/sections';
+import {
+  OrdersSummaryCards,
+  OrdersTableSection,
+} from '@/components/admin/orders-workspace/sections';
 import {
   buildOrdersExportCsv,
   buildOrdersMetricCards,
@@ -132,10 +135,7 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <AdminShell
-      title="订单"
-      subtitle="把读者购买、退款处理和支付异常收在一个安静工作区里，既看得清，也不会变成会计控制台。"
-    >
+    <AdminShell title="订单" subtitle="处理订单、退款和支付异常。">
       <div className="space-y-6">
         <OrdersSummaryCards cards={metricCards} />
 
@@ -188,7 +188,7 @@ export default function AdminOrdersPage() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
         options={sortOptions}
-        title="排序订单"
+        title="订单排序"
         label="排序方式"
         actionLabel="完成"
       />

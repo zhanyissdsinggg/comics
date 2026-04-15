@@ -19,10 +19,26 @@ export const EMPTY_BULK_FORM = {
 };
 
 export const QUICK_FILTERS = [
-  { id: "all", label: "全部章节", filters: { priceType: "all", previewStatus: "all", ttfEligible: "all" } },
-  { id: "preview", label: "含试看页", filters: { priceType: "all", previewStatus: "enabled", ttfEligible: "all" } },
-  { id: "free", label: "免费章节", filters: { priceType: "free", previewStatus: "all", ttfEligible: "all" } },
-  { id: "paid", label: "付费章节", filters: { priceType: "paid", previewStatus: "all", ttfEligible: "all" } },
+  {
+    id: "all",
+    label: "全部章节",
+    filters: { priceType: "all", previewStatus: "all", ttfEligible: "all" },
+  },
+  {
+    id: "preview",
+    label: "含试看页",
+    filters: { priceType: "all", previewStatus: "enabled", ttfEligible: "all" },
+  },
+  {
+    id: "free",
+    label: "免费章节",
+    filters: { priceType: "free", previewStatus: "all", ttfEligible: "all" },
+  },
+  {
+    id: "paid",
+    label: "付费章节",
+    filters: { priceType: "paid", previewStatus: "all", ttfEligible: "all" },
+  },
 ];
 
 export const SORT_OPTIONS = [
@@ -163,7 +179,7 @@ export function validateNewEpisodeDraft(newEpisode) {
     !isNonNegativeIntegerString(newEpisode.previewFreePages, { allowEmpty: true }) ||
     !isNonNegativeIntegerString(newEpisode.pricePts, { allowEmpty: true })
   ) {
-    return "试看页数和次级发行设置必须是非负整数。";
+    return "试看页数和附加发行设置必须是非负整数。";
   }
 
   return "";

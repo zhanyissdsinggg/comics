@@ -5,10 +5,7 @@ export default function NotificationList({
   onMarkRead,
   onNavigate,
   workingId,
-  appearance = "default",
 }) {
-  const isLight = appearance === "light";
-
   const formatTimestamp = (value) => {
     if (!value) {
       return "Just now";
@@ -55,49 +52,25 @@ export default function NotificationList({
 
   if (!notifications) {
     return (
-      <section
-        className={`rounded-[24px] border p-6 ${
-          isLight
-            ? "border-[color:var(--gush-border)] bg-white text-slate-600"
-            : "border-white/10 bg-black/10"
-        }`}
-      >
-        <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
-        >
+      <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-6 text-slate-600">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
           Inbox
         </p>
-        <p
-          className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
-        >
-          Loading inbox.
-        </p>
+        <p className="mt-2 text-sm font-semibold text-slate-900">Loading inbox.</p>
       </section>
     );
   }
 
   if (notifications.length === 0) {
     return (
-      <section
-        className={`rounded-[24px] border p-6 ${
-          isLight
-            ? "border-[color:var(--gush-border)] bg-white"
-            : "border-white/10 bg-black/10"
-        }`}
-      >
-        <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
-        >
+      <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
           Inbox
         </p>
-        <p
-          className={`mt-2 text-sm font-semibold ${isLight ? "text-slate-900" : "text-white"}`}
-        >
+        <p className="mt-2 text-sm font-semibold text-slate-900">
           You're caught up.
         </p>
-        <p
-          className={`mt-2 text-xs leading-5 ${isLight ? "text-slate-500" : "text-neutral-500"}`}
-        >
+        <p className="mt-2 text-xs leading-5 text-slate-500">
           New chapters and offers land here.
         </p>
       </section>
@@ -110,44 +83,26 @@ export default function NotificationList({
         <div
           key={item.id}
           className={[
-            "rounded-[24px] border p-4 transition",
+            "rounded-[24px] border p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition",
             item.read
-              ? isLight
-                ? "border-[color:var(--gush-border)] bg-white"
-                : "border-white/10 bg-black/10"
-              : isLight
-                ? "border-[color:var(--gush-border-strong)] bg-white"
-                : "border-sky-400/20 bg-sky-500/[0.08]",
+              ? "border-[color:var(--gush-border)] bg-white"
+              : "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-elevated)]",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p
-                  className={`text-sm font-semibold ${isLight ? "text-slate-950" : "text-white"}`}
-                >
-                  {item.title}
-                </p>
+                <p className="text-sm font-semibold text-slate-950">{item.title}</p>
                 {!item.read ? (
                   <span
-                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${
-                      isLight
-                        ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
-                        : "border-sky-400/30 bg-sky-400/10 text-sky-200"
-                    }`}
+                    className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-700"
                   >
                     Unread
                   </span>
                 ) : null}
               </div>
-              <p
-                className={`mt-2 text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-300"}`}
-              >
-                {item.message}
-              </p>
-              <div
-                className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
-              >
+              <p className="mt-2 text-sm leading-6 text-slate-600">{item.message}</p>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
                 <span>{getMeta(item)}</span>
                 <span>{formatTimestamp(item.createdAt)}</span>
                 {item.expiresAt ? (
@@ -159,11 +114,7 @@ export default function NotificationList({
               <button
                 type="button"
                 onClick={() => onMarkRead(item.id)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
-                  isLight
-                    ? "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
-                    : "border-white/10 bg-black/10 text-neutral-200 hover:border-white/20 hover:bg-white/10"
-                }`}
+                className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:opacity-50"
                 disabled={
                   item.read || workingId === item.id || workingId === "__all__"
                 }
@@ -180,11 +131,7 @@ export default function NotificationList({
                 <button
                   type="button"
                   onClick={() => onNavigate?.(item)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                    isLight
-                      ? "bg-slate-950 text-white hover:bg-slate-800"
-                      : "bg-white text-neutral-950 hover:bg-neutral-200"
-                  }`}
+                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-3 py-1.5 text-xs font-semibold text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                 >
                   {getCtaLabel(item)}
                 </button>

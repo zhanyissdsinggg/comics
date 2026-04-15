@@ -106,10 +106,7 @@ export default function AdminUserAnalyticsPage() {
   };
 
   return (
-    <AdminShell
-      title="用户分析"
-      subtitle="先看整体读者状态，再下钻到分群或单个账号，不把页面做成吵闹的 KPI 墙。"
-    >
+    <AdminShell title="用户分析" subtitle="看规模、分群和单个账号。">
       <div className="space-y-6">
         <AdminTabs items={VIEW_TABS} value={viewMode} onChange={setViewMode} />
 

@@ -152,7 +152,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition hover:bg-slate-800"
+                className="min-h-[44px] rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
               >
                 Install
               </button>

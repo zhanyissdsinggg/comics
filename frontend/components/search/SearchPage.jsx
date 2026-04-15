@@ -733,7 +733,7 @@ export default function SearchPage() {
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const accentButtonClass =
-    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
   const filterSelectClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm text-[color:var(--gush-ink)] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
   const editorialBrowsePaths = useMemo(() => {
@@ -1338,7 +1338,7 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("day")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "day"
-                      ? "border-slate-950 bg-slate-950 text-white"
+                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
                       : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
                   }`}
                 >
@@ -1349,7 +1349,7 @@ export default function SearchPage() {
                   onClick={() => setHotWindow("week")}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                     hotWindow === "week"
-                      ? "border-slate-950 bg-slate-950 text-white"
+                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
                       : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
                   }`}
                 >

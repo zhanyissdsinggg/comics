@@ -134,10 +134,15 @@ export default function AdminStorefrontAuditPage() {
   return (
     <AdminShell
       title="前台巡检"
-      subtitle="按读者真实看到的页面标准，检查作品资料、署名和阅读路径。"
+      subtitle="按读者视角检查作品页和阅读路径。"
       actions={
         <div className="flex flex-wrap gap-2">
-          <ActionButton onClick={() => router.push("/admin/series")}>打开作品列表</ActionButton>
+          <ActionButton
+            onClick={() => router.push("/admin/series")}
+            className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+          >
+            打开作品列表
+          </ActionButton>
           <ActionButton onClick={() => router.push("/admin/creators")}>
             <BookOpen className="h-4 w-4" />
             查看创作者署名
@@ -162,7 +167,7 @@ export default function AdminStorefrontAuditPage() {
                 先补读者真的会感觉到的缺口。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                这里不看假热度，不看旧评分，只看作品页是否完整、署名是否可信、阅读路径能不能真正接住前台流量。
+                先看资料、署名和阅读路径。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">读者视角巡检</StatusPill>
@@ -222,7 +227,7 @@ export default function AdminStorefrontAuditPage() {
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">收口处理队列</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                先把已上线但明显缺资料的作品拉稳，再处理临门一脚就能发布的草稿。
+                先稳住已上线作品，再处理接近可发的草稿。
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

@@ -193,10 +193,7 @@ export default function AdminSupportPage() {
   };
 
   return (
-    <AdminShell
-      title="客服"
-      subtitle="把工单主题、发件人和下一步动作讲清楚，让客服页面先保持可读，再谈效率。"
-    >
+    <AdminShell title="客服" subtitle="查看工单和下一步动作。">
       <div className="space-y-6">
         <SupportSummaryCards
           total={pagination.total}

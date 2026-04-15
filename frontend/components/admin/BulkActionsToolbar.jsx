@@ -63,7 +63,7 @@ export default function BulkActionsToolbar({
             </div>
             <div>
               <p className="text-sm font-semibold text-slate-950">已选择 {selectedCount} 部作品</p>
-              <p className="text-xs text-slate-500">批量操作会直接影响当前选中的作品，请确认后再执行。</p>
+              <p className="text-xs text-slate-500">批量操作会直接作用到当前选中项。</p>
             </div>
           </div>
 

@@ -271,7 +271,7 @@ export default function AdminRegionsPage() {
         message: "地区设置已导入，保存后生效。",
       });
     } catch {
-      setFeedback({ type: "error", message: "导入失败，请上传有效的配置文件。" });
+      setFeedback({ type: "error", message: "导入失败，请上传有效的 JSON 配置文件。" });
     } finally {
       event.target.value = "";
     }
@@ -279,7 +279,7 @@ export default function AdminRegionsPage() {
 
   if (isLoading || loading) {
     return (
-      <AdminPageSection title="地区设置" description="正在加载登录与账号找回流程使用的地区规则。">
+      <AdminPageSection title="地区设置" description="正在读取地区规则。">
         <p className="text-sm text-slate-500">正在加载地区设置...</p>
       </AdminPageSection>
     );
@@ -287,7 +287,7 @@ export default function AdminRegionsPage() {
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="地区设置" description="需要先以管理员身份登录，才能编辑地区和手机号规则。">
+      <AdminPageSection title="地区设置" description="需要先登录后台。">
         <p className="text-sm text-slate-500">请先登录后台后再管理地区设置。</p>
       </AdminPageSection>
     );
@@ -301,8 +301,8 @@ export default function AdminRegionsPage() {
       />
 
       <AdminPageSection
-        title="手机号地区规则"
-        description="维护短信验证码与账号找回流程所使用的国际区号和本地号码长度规则。"
+        title="手机号码规则"
+        description="维护国际区号和本地号码长度。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <input
@@ -319,7 +319,7 @@ export default function AdminRegionsPage() {
               导出配置
             </Button>
             <Button type="button" onClick={handleSave} disabled={saving}>
-              {saving ? "正在保存..." : "保存变更"}
+              {saving ? "保存中..." : "保存更改"}
             </Button>
           </div>
         }
@@ -330,7 +330,7 @@ export default function AdminRegionsPage() {
               <div>
                 <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  保持列表简短、易读。每一条都由区号和读者可见的地区名称组成。
+                  每一条只保留区号和显示名称。
                 </p>
               </div>
               <Button type="button" variant="outline" onClick={addCode}>
@@ -380,14 +380,13 @@ export default function AdminRegionsPage() {
             <div>
               <h3 className="text-base font-semibold text-slate-950">本地号码长度</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                为每个已保存的国际区号填写号码长度，多个值用逗号分隔，例如
-                <code>10</code> 或 <code>9,10,11</code>。
+                多个长度用逗号分隔，例如 <code>10</code> 或 <code>9,10,11</code>。
               </p>
             </div>
 
             {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
               <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-6 text-sm text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
-                请先添加至少一个国际区号，再编辑号码长度规则。
+                请先添加至少一个国际区号，再填写长度规则。
               </div>
             ) : (
               <div className="mt-6 space-y-3">

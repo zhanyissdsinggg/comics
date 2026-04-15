@@ -250,7 +250,7 @@ const AdvancedFilterPanel = memo(function AdvancedFilterPanel({
           <button
             type="button"
             onClick={handleApply}
-            className="min-h-[44px] flex-1 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800 active:bg-slate-900 md:text-base"
+            className="min-h-[44px] flex-1 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82 active:scale-[0.99] md:text-base"
           >
             Apply
           </button>

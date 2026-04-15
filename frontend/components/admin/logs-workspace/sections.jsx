@@ -42,7 +42,7 @@ export function LogsFiltersSection({
   return (
     <AdminPageSection
       title="日志筛选"
-      description="需要缩小视角时再按动作或操作者筛选，默认视图保持简单、易读。"
+      description="按动作或操作者筛选。"
     >
       <div className="grid gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
         <input
@@ -85,7 +85,7 @@ export function LogsTableSection({ logsQuery, logs }) {
   return (
     <AdminPageSection
       title="操作记录"
-      description="先看动作发生时间、是谁执行的，以及最短但足够有用的详情摘要。"
+      description="先看时间、操作者和动作摘要。"
       action={
         <Button type="button" variant="outline" onClick={() => logsQuery.refetch()}>
           <RefreshCw className="size-4" />
@@ -98,7 +98,7 @@ export function LogsTableSection({ logsQuery, logs }) {
       ) : logsQuery.error ? (
         <LoadingState.ErrorState error={logsQuery.error.message} onRetry={() => logsQuery.refetch()} />
       ) : logs.length === 0 ? (
-        <LoadingState.EmptyState message="当前视图下没有审计日志。" />
+        <LoadingState.EmptyState message="当前筛选下没有审计日志。" />
       ) : (
         <AdminDataTable>
           <table className="min-w-full text-sm">

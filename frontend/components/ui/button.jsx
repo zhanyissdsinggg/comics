@@ -11,7 +11,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-slate-950 text-white shadow-[0_14px_28px_rgba(15,23,42,0.12)] ring-1 ring-white/10 hover:bg-slate-800 hover:shadow-[0_18px_36px_rgba(15,23,42,0.16)]",
+          "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] ring-1 ring-white/10 hover:bg-black/82 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]",
         outline:
           "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink)] shadow-none hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] dark:bg-white/[0.04] dark:hover:bg-white/[0.08]",
         secondary:

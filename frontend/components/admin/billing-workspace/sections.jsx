@@ -38,14 +38,14 @@ export function BillingSnapshotSection({ billingSnapshotItems, membershipSnapsho
     <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
       <AdminPageSection
         title="支付状态概览"
-        description="先确认当前运行模式和真实可用操作，再去调整套餐和会员设置。"
+        description="先确认当前运行模式和可用操作。"
       >
         <AdminKeyValueList items={billingSnapshotItems} />
       </AdminPageSection>
 
       <AdminPageSection
         title="会员方案概览"
-        description="用最短的信息看清会员价值：折扣、免费解锁和代金券支持。"
+        description="快速看清会员价值。"
       >
         <AdminKeyValueList items={membershipSnapshotItems} />
       </AdminPageSection>
@@ -83,7 +83,7 @@ export function BillingPackagesSection(props) {
   return (
     <AdminPageSection
       title="充值套餐"
-      description="先回答最重要的几个问题：套餐是什么、读者付多少钱、可得多少点数、当前是否仍在售。"
+      description="看套餐内容、价格、点数和状态。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}

@@ -327,7 +327,7 @@ export default function AdminRecommendationsPage() {
   return (
     <AdminShell
       title="搜索与发现"
-      subtitle="把发现页当成编辑工作来管理：推荐位、榜单规则和表现数据都要真实、克制、可解释。"
+      subtitle="管理推荐位、榜单和表现。"
     >
       <div className="space-y-6">
         <RecommendationsStatsSection cards={statCards} />
@@ -394,7 +394,7 @@ export default function AdminRecommendationsPage() {
       <Modal
         isOpen={createTarget === 'slot'}
         title="新建推荐位"
-        subtitle="推荐位标识必须稳定、清楚，不要让前台接线和运营判断跟着一起发散。"
+        subtitle="填写标识和作品组合。"
         onClose={() => {
           if (!createSlotMutation.isPending) {
             setCreateTarget(null);
@@ -415,7 +415,7 @@ export default function AdminRecommendationsPage() {
       <Modal
         isOpen={createTarget === 'ranking'}
         title="新建榜单规则"
-        subtitle="榜单规则必须显式可见，这样发现页才能保持真实且可维护。"
+        subtitle="填写策略、范围和状态。"
         onClose={() => {
           if (!createRankingMutation.isPending) {
             setCreateTarget(null);
@@ -437,7 +437,7 @@ export default function AdminRecommendationsPage() {
       <Modal
         isOpen={Boolean(deleteTarget)}
         title="删除项目"
-        subtitle="这会立即删除当前选中的发现页配置记录。"
+        subtitle="会立即删除当前配置。"
         onClose={() => {
           if (!deleteBusy) {
             setDeleteTarget(null);

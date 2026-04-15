@@ -164,8 +164,8 @@ export default function EndOfEpisodeOverlay({
     onPackOffer?.(packOffer);
   };
   const primaryButtonClass = highlightPrimaryAction
-    ? "rounded-full border border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_18px_38px_rgba(15,23,42,0.14)]"
-    : "rounded-full border border-slate-950 bg-slate-950 text-white hover:bg-slate-800";
+    ? "rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_0_0_4px_rgba(15,23,42,0.05),0_16px_30px_rgba(15,23,42,0.12)]"
+    : "rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82";
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
 
@@ -259,7 +259,7 @@ export default function EndOfEpisodeOverlay({
                       <button
                         type="button"
                         onClick={onClaim}
-                        className="mt-4 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                        className="mt-4 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                       >
                         Open now
                       </button>

@@ -110,7 +110,7 @@ export function LoadingView() {
   return (
     <AdminShell
       title="前台巡检"
-      subtitle="按读者真实看到的页面标准，检查作品资料、署名和阅读路径。"
+      subtitle="按读者视角检查作品页。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />

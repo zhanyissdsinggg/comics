@@ -321,7 +321,7 @@ export default function SubscribePage({
   ]);
 
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
   const quietCardClass =
@@ -562,7 +562,7 @@ export default function SubscribePage({
                   } ${isCurrent ? "ring-2 ring-slate-200" : ""}`}
                 >
                   {isBest ? (
-                    <div className="absolute -top-3 left-5 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white">
+                    <div className="absolute -top-3 left-5 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-strong)] shadow-[0_10px_20px_rgba(15,23,42,0.05)]">
                       Best value
                     </div>
                   ) : null}

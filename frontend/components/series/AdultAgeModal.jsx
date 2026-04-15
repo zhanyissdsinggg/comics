@@ -39,7 +39,7 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
           >
             I confirm
           </button>

@@ -31,7 +31,7 @@ export function PriorityQueueSection({
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">优先处理队列</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            这些作品现在处理，最能直接改善读者看到的真实页面。
+            这些作品最值得先处理。
           </p>
         </div>
         <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
@@ -97,7 +97,10 @@ export function PriorityQueueSection({
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                <ActionButton onClick={() => handleOpenSeries(series.id)}>
+                <ActionButton
+                  onClick={() => handleOpenSeries(series.id)}
+                  className="border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950"
+                >
                   <PenSquare className="h-4 w-4" />
                   编辑作品
                 </ActionButton>
@@ -127,7 +130,7 @@ export function GapDistributionSection({ topGaps }) {
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">缺口分布</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            先看哪一类缺口拖住了最多作品，再决定这一轮先补什么最值。
+            先看哪类缺口拖住了最多作品。
           </p>
         </div>
         <Sparkles className="mt-1 h-5 w-5 text-cyan-500" />
@@ -148,7 +151,7 @@ export function GapDistributionSection({ topGaps }) {
               <div>
                 <p className="text-sm font-semibold text-slate-950">{item.label}</p>
                 <p className="mt-1 text-xs leading-6 text-slate-500">
-                  这类问题会直接影响发现页、点击信心或作品页可读性。
+                  会直接影响发现页和作品页可读性。
                 </p>
               </div>
               <div className="rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-1.5 text-2xl font-semibold text-slate-950 shadow-[0_6px_16px_rgba(15,23,42,0.04)]">
@@ -169,7 +172,7 @@ export function RecommendedSequenceSection() {
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">建议处理顺序</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            按这个顺序推进，最容易让前台体验快速变稳。
+            按这个顺序推进，前台会更快稳定。
           </p>
         </div>
         <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-500" />

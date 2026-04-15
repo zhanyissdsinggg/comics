@@ -17,7 +17,7 @@ export function AdminSortModal({
     <Modal
       isOpen={isOpen}
       title={title}
-      subtitle="这里只切换当前列表的排序方式，不会改动筛选条件或已选内容。"
+      subtitle="只调整当前列表排序。"
       onClose={onClose}
     >
       <div className="space-y-5">

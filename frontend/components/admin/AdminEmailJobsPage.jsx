@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ const STATUS_LABELS = {
 
 const viewOptions = [
   { value: "all", label: "全部任务" },
-  { value: "failed", label: "仅看失败任务" },
+  { value: "failed", label: "失败任务" },
 ];
 
 function toCsv(rows) {
@@ -179,7 +179,7 @@ export default function AdminEmailJobsPage() {
 
   if (isLoading || loading) {
     return (
-      <AdminPageSection title="投递队列" description="正在加载外发任务队列和最近的邮件尝试。">
+      <AdminPageSection title="投递队列" description="正在加载邮件队列。">
         <p className="text-sm text-slate-500">正在加载邮件任务...</p>
       </AdminPageSection>
     );
@@ -187,8 +187,8 @@ export default function AdminEmailJobsPage() {
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="投递队列" description="需要管理员权限后，才能查看邮件投递任务。">
-        <p className="text-sm text-slate-500">请先以管理员身份登录，再查看邮件任务。</p>
+      <AdminPageSection title="投递队列" description="需要管理员权限后，才能查看邮件任务。">
+        <p className="text-sm text-slate-500">请先以管理员身份登录，再查看投递记录。</p>
       </AdminPageSection>
     );
   }
@@ -202,12 +202,15 @@ export default function AdminEmailJobsPage() {
 
       <AdminPageSection
         title="投递队列"
-        description="把队列看清楚：发给了谁、当前状态如何、是否还需要继续重试。"
+        description="看收件人、状态和是否需要重试。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={failedCount > 0 ? "warning" : "success"}>
-              {failedCount > 0 ? `当前视图下有 ${failedCount} 条失败任务` : "当前视图下没有失败任务"}
+              {failedCount > 0 ? `当前有 ${failedCount} 条失败任务` : "当前没有失败任务"}
             </AdminBadge>
+            <Button type="button" variant="outline" onClick={() => loadData()}>
+              刷新
+            </Button>
             <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length}>
               导出 CSV
             </Button>
@@ -217,15 +220,13 @@ export default function AdminEmailJobsPage() {
         <div className="mb-5 flex flex-col gap-4 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:flex-row lg:items-center lg:justify-between">
           <AdminTabs items={viewOptions} value={view} onChange={setView} />
           <p className="text-sm text-slate-500">
-            {view === "failed"
-              ? "这里只保留失败投递，方便运营逐条重试。"
-              : "所有排队中和已完成的投递任务都会在同一张安静的表格里展示。"}
+            {view === "failed" ? "这里只保留失败任务。" : "排队中和已完成任务会一起显示。"}
           </p>
         </div>
 
         {jobs.length === 0 ? (
           <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-8 text-center text-sm text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            当前视图下还没有匹配的邮件任务。
+            当前视图下没有邮件任务。
           </div>
         ) : (
           <AdminDataTable>
@@ -288,4 +289,3 @@ export default function AdminEmailJobsPage() {
     </div>
   );
 }
-

@@ -37,13 +37,17 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:placeholder:text-neutral-500 dark:focus:bg-white/[0.1]";
+    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80";
   const secondaryPillClass =
-    "border border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-300 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white";
+    "border border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95 dark:border-white/10 dark:bg-white/[0.05] dark:text-neutral-200 dark:hover:border-white/18 dark:hover:bg-white/[0.08] dark:hover:text-white";
+    "rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95";
+  const activePillClass =
+    "border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]";
   const dividerClass =
-    "h-px flex-1 bg-[color:var(--gush-border)] dark:bg-white/10";
+    "h-px flex-1 bg-[color:var(--gush-border)]";
+  const primaryButtonClass =
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-300 hover:scale-[1.01] hover:bg-black/82 active:scale-95";
 
   useEffect(() => {
     if (open) {
@@ -172,7 +176,7 @@ export default function LoginGateModal({
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <p className="text-slate-500 dark:text-neutral-300">{description}</p>
+        <p className="text-slate-500">{description}</p>
         <div className="mt-6 space-y-4">
           <input
             type="email"
@@ -190,7 +194,7 @@ export default function LoginGateModal({
                 onClick={() => setOtpChannel("email")}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                   otpChannel === "email"
-                    ? "bg-slate-950 text-white"
+                    ? activePillClass
                     : secondaryPillClass
                 }`}
               >
@@ -201,7 +205,7 @@ export default function LoginGateModal({
                 onClick={() => setOtpChannel("sms")}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                   otpChannel === "sms"
-                    ? "bg-slate-950 text-white"
+                    ? activePillClass
                     : secondaryPillClass
                 }`}
               >
@@ -228,7 +232,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm text-slate-700 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:focus:bg-white/[0.1]"
+                    className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm text-slate-700 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80"
                   >
                     {(
                       config?.countryCodes || [
@@ -268,7 +272,7 @@ export default function LoginGateModal({
 
           {step !== "otp" && googleAuthEnabled ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-neutral-500">
+              <div className="flex items-center gap-3 text-xs text-slate-400">
                 <div className={dividerClass} />
                 <span>or continue with</span>
                 <div className={dividerClass} />
@@ -295,7 +299,7 @@ export default function LoginGateModal({
         ) : null}
 
         {step === "otp" ? (
-          <div className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+          <div className="mt-3 text-xs text-slate-500">
             {otpStatus}
             <button
               type="button"
@@ -314,7 +318,7 @@ export default function LoginGateModal({
               onClick={() => setMode("login")}
               className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "login"
-                  ? "bg-slate-950 text-white"
+                  ? activePillClass
                   : secondaryPillClass
               }`}
             >
@@ -325,7 +329,7 @@ export default function LoginGateModal({
               onClick={() => setMode("register")}
               className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "register"
-                  ? "bg-slate-950 text-white"
+                  ? activePillClass
                   : secondaryPillClass
               }`}
             >
@@ -338,7 +342,7 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-              className="font-semibold text-slate-500 transition-colors duration-300 hover:text-slate-950 dark:text-neutral-400 dark:hover:text-white"
+              className="font-semibold text-slate-500 transition-colors duration-300 hover:text-slate-950"
           >
             Forgot password?
           </button>
@@ -350,7 +354,7 @@ export default function LoginGateModal({
           </div>
         ) : null}
 
-        <p className="mt-4 text-[11px] text-slate-400 dark:text-neutral-500">
+        <p className="mt-4 text-[11px] text-slate-400">
           If your email is not verified yet, use the link in your inbox first.
         </p>
 
@@ -364,7 +368,7 @@ export default function LoginGateModal({
           </button>
           <button
             type="submit"
-            className="rounded-full bg-slate-950 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-slate-800 active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
+            className={primaryButtonClass}
           >
             {mode === "register" ? "Register" : "Sign in"}
           </button>

@@ -24,8 +24,8 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
       title={title}
       subtitle={
         isDangerous
-          ? "请在继续前再确认一次，这个操作执行后无法恢复。"
-          : "确认后会立即执行当前操作。"
+          ? "请再次确认，操作后无法恢复。"
+          : "确认后会立即执行。"
       }
       onClose={onCancel}
       size="sm"
@@ -38,7 +38,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
             <div className="space-y-1">
               <p className="text-sm font-semibold text-red-700">高风险操作</p>
               <p className="text-sm leading-6 text-red-700">
-                删除或覆盖后不会自动恢复，请确认影响范围后再继续。
+                删除或覆盖后不会自动恢复，请先确认影响范围。
               </p>
             </div>
           </div>

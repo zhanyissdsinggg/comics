@@ -7,7 +7,7 @@ export default function EmailSettingsPage() {
   return (
     <AdminLayout
       title="邮件设置"
-      subtitle="统一管理发信身份、默认投递方式，以及支撑读者沟通的邮件配置。"
+      subtitle="管理发信身份和邮件配置。"
     >
       <AdminEmailSettingsPage />
     </AdminLayout>

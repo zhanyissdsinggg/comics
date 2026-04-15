@@ -36,30 +36,30 @@ const ASSET_FIELDS = [
     field: "siteLogoUrl",
     keyName: "logo",
     label: "站点标识",
-    helperText: "建议使用透明 PNG 或 SVG，让头部和底部都保持清爽。",
+    helperText: "建议用透明 PNG 或 SVG。",
     placeholder: "https://cdn.yoursite.com/brand/logo.png",
     emptyText: "还没有上传站点标识。",
-    buttonLabel: "上传站点标识",
+    buttonLabel: "上传标识",
     previewClassName: "h-10 w-auto object-contain",
   },
   {
     field: "faviconUrl",
     keyName: "favicon",
     label: "站点图标",
-    helperText: "尽量保持轻量，32x32 或 64x64 就足够稳定。",
+    helperText: "建议用 32x32 或 64x64 图标。",
     placeholder: "https://cdn.yoursite.com/brand/favicon.png",
     emptyText: "还没有上传站点图标。",
-    buttonLabel: "上传站点图标",
+    buttonLabel: "上传图标",
     previewClassName: "h-10 w-10 rounded-[14px] object-cover",
   },
   {
     field: "homeBannerUrl",
     keyName: "banner",
     label: "首页横幅",
-    helperText: "这里适合克制的主视觉，不要做成喧闹的活动海报。",
+    helperText: "适合放干净、克制的主视觉。",
     placeholder: "https://cdn.yoursite.com/brand/home-banner.jpg",
     emptyText: "还没有上传首页横幅。",
-    buttonLabel: "上传首页横幅",
+    buttonLabel: "上传横幅",
     previewClassName: "h-full max-h-28 w-full rounded-[20px] object-cover",
   },
 ];
@@ -215,7 +215,7 @@ export default function AdminBrandingPage() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <AdminPageSection title="品牌素材" description="确认后台权限后，再编辑线上品牌素材。">
+      <AdminPageSection title="品牌素材" description="确认权限后再编辑线上品牌素材。">
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -223,7 +223,7 @@ export default function AdminBrandingPage() {
 
   if (!hasHydratedDraft && brandingQuery.isLoading) {
     return (
-      <AdminPageSection title="品牌素材" description="先读取已保存的素材配置，再继续编辑。">
+      <AdminPageSection title="品牌素材" description="正在读取已保存的素材配置。">
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -233,7 +233,7 @@ export default function AdminBrandingPage() {
     return (
       <AdminPageSection
         title="品牌素材"
-        description="已保存的品牌配置暂时无法读取，恢复前这里会保持只读。"
+        description="已保存的品牌配置暂时无法读取。"
         action={
           <Button type="button" variant="outline" onClick={() => brandingQuery.refetch()}>
             <RefreshCw className="size-4" />
@@ -262,18 +262,18 @@ export default function AdminBrandingPage() {
         <AdminMetricCard
           label="已配置素材"
           value={`${configuredAssetCount}/3`}
-          detail="标识、图标和首页横幅统一放在这里。"
+          detail="标识、图标和首页横幅。"
           tone="accent"
         />
         <AdminMetricCard
           label="上传上限"
           value="10 MB"
-          detail="保留清晰度，也方便复核和替换。"
+          detail="兼顾清晰和加载速度。"
         />
         <AdminMetricCard
           label="影响范围"
-          value="头部、标签、首页"
-          detail="这些素材会直接影响前台观感。"
+          value="前台观感"
+          detail="会影响头部、图标和首页视觉。"
         />
       </div>
 
@@ -284,11 +284,11 @@ export default function AdminBrandingPage() {
 
       <AdminPageSection
         title="品牌素材"
-        description="把站点标识、图标和首页横幅集中在一个地方维护。"
+        description="统一维护站点标识、图标和首页横幅。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>
-              {configuredAssetCount === 3 ? "可进入复核" : "待补素材"}
+              {configuredAssetCount === 3 ? "素材完整" : "待补素材"}
             </AdminBadge>
             <Button type="button" onClick={handleSave} disabled={formBusy}>
               {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
@@ -372,23 +372,6 @@ export default function AdminBrandingPage() {
               </article>
             );
           })}
-        </div>
-      </AdminPageSection>
-
-      <AdminPageSection
-        title="操作提示"
-        description="只记最关键的三件事。"
-      >
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            上传后记得保存。
-          </div>
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            保持清晰、克制、可读。
-          </div>
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            优先在这里上传，方便统一复核。
-          </div>
         </div>
       </AdminPageSection>
     </div>

@@ -26,27 +26,22 @@ export function EpisodesHeaderActions({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-        <Button type="button" variant="ghost" onClick={onBackToSeries}>
-          <ArrowLeft className="size-4" />
-          返回作品详情
-        </Button>
-        <Button type="button" variant="ghost" onClick={onOpenStorefront}>
-          <ArrowUpRight className="size-4" />
-          查看前台页
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-        <Button type="button" variant="secondary" onClick={onOpenBulkUpload}>
-          <Upload className="size-4" />
-          批量上传
-        </Button>
-        <Button type="button" onClick={onOpenCreateEpisode}>
-          <Plus className="size-4" />
-          新增章节
-        </Button>
-      </div>
+      <Button type="button" variant="outline" onClick={onBackToSeries}>
+        <ArrowLeft className="size-4" />
+        返回作品详情
+      </Button>
+      <Button type="button" variant="outline" onClick={onOpenStorefront}>
+        <ArrowUpRight className="size-4" />
+        查看前台页
+      </Button>
+      <Button type="button" variant="secondary" onClick={onOpenBulkUpload}>
+        <Upload className="size-4" />
+        批量上传
+      </Button>
+      <Button type="button" onClick={onOpenCreateEpisode}>
+        <Plus className="size-4" />
+        新增章节
+      </Button>
     </div>
   );
 }
@@ -107,15 +102,10 @@ export function EpisodesWorkspaceSection({
   return (
     <AdminPageSection
       title="章节工作台"
-      description="先按标题搜索，再用轻量筛选收窄范围，最后直接在表格里完成标题、试看页数和章节顺序调整。"
+      description="搜索、筛选，然后在表格里直接调整标题、试看页数和顺序。"
       action={
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onOpenBulkUpdate}
-            disabled={selectedIds.length === 0}
-          >
+          <Button type="button" onClick={onOpenBulkUpdate} disabled={selectedIds.length === 0}>
             批量修改
           </Button>
           <Button
@@ -124,7 +114,7 @@ export function EpisodesWorkspaceSection({
             onClick={onAutoRenumber}
             disabled={reorderPending}
           >
-            自动重排章节号
+            重排章节号
           </Button>
         </div>
       }
@@ -164,7 +154,7 @@ export function EpisodesWorkspaceSection({
               onClick={onOpenDeleteSelected}
               disabled={selectedIds.length === 0}
             >
-              删除所选章节
+              删除所选
             </Button>
           </div>
         </div>
@@ -186,7 +176,7 @@ export function EpisodesWorkspaceSection({
       ) : episodes.length === 0 ? (
         <AdminPageSection
           title="当前视图下还没有章节"
-          description="换一个筛选条件，或者先新增第一章开始处理。"
+          description="换个筛选条件，或者先新增第一章。"
         />
       ) : (
         <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">

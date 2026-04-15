@@ -135,9 +135,7 @@ function MastercardIcon() {
 }
 
 function PaymentIconRow({ isHome }) {
-  const iconTone = isHome
-    ? "border-slate-300/70 bg-white/60 text-slate-500"
-    : "border-white/10 bg-white/[0.03] text-neutral-200";
+  const iconTone = "border-slate-300/70 bg-white/60 text-slate-500";
 
   return (
     <div className="flex flex-wrap items-center gap-2 opacity-60">
@@ -245,11 +243,7 @@ export default function SiteFooter({
   if (isCompact) {
     return (
       <footer
-        className={`mt-16 border-t ${
-          isHome
-            ? "border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.9)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.92)] dark:text-white"
-            : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
-        }`}
+        className="mt-16 border-t border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.92)] text-slate-900"
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -273,29 +267,19 @@ export default function SiteFooter({
               {footerPrimaryLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  isHome
-                    ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
-                    : "text-neutral-300 transition-colors hover:text-white",
+                  "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
                 ),
               )}
             </nav>
           </div>
 
           <div
-            className={`mt-4 flex flex-col gap-3 border-t pt-3 text-sm lg:flex-row lg:items-center lg:justify-between ${
-              isHome
-                ? "border-[color:var(--gush-border)] text-slate-400 dark:border-white/10 dark:text-neutral-500"
-                : "border-white/10 text-neutral-500"
-            }`}
+          className="mt-4 flex flex-col gap-3 border-t border-[color:var(--gush-border)] pt-3 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={
-                  isHome
-                    ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
-                    : "text-neutral-300 transition-colors hover:text-white"
-                }
+                className="text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -303,9 +287,7 @@ export default function SiteFooter({
                 {footerMetaLinks.map((link) =>
                   renderInternalLink(
                     link,
-                    isHome
-                      ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white"
-                      : "text-neutral-400 transition-colors hover:text-white",
+                    "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
                   ),
                 )}
                 <FooterAgeBadge isHome={isHome} />
@@ -325,31 +307,25 @@ export default function SiteFooter({
 
   return (
     <footer
-      className={`mt-16 border-t ${
-        isHome
-          ? "border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.94)] text-slate-900 dark:border-white/10 dark:bg-[rgba(10,14,21,0.94)] dark:text-white"
-          : "border-white/10 bg-[linear-gradient(180deg,rgba(8,10,16,0.78),rgba(5,7,11,1))] text-white"
-      }`}
+      className="mt-16 border-t border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.96)] text-slate-900"
     >
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
               <p
-                className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-[color:var(--gush-ink-faint)] dark:text-neutral-500" : "text-neutral-400"}`}
+                className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[color:var(--gush-ink-faint)]"
               >
                 Stories
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className={`font-display text-[2.45rem] font-semibold tracking-[-0.05em] ${isHome ? "text-slate-950 dark:text-white" : "text-white"}`}
+                className="font-display text-[2.45rem] font-semibold tracking-[-0.05em] text-slate-950"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
               {showTagline && footerTagline ? (
-                <p
-                  className={`text-sm leading-6 ${isHome ? "text-[color:var(--gush-ink-soft)] dark:text-neutral-300" : "text-neutral-300"}`}
-                >
+                <p className="text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                   {footerTagline}
                 </p>
               ) : null}
@@ -358,11 +334,7 @@ export default function SiteFooter({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={
-                  isHome
-                    ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
-                    : "text-neutral-300 transition-colors hover:text-white"
-                }
+                className="text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -371,20 +343,14 @@ export default function SiteFooter({
                   <a
                     key={item.label}
                     href={item.href}
-                    className={
-                      isHome
-                        ? "text-slate-600 transition-colors hover:text-slate-950 dark:text-neutral-300 dark:hover:text-white"
-                        : "text-neutral-300 transition-colors hover:text-white"
-                    }
+                    className="text-slate-600 transition-colors hover:text-slate-950"
                   >
                     {item.label}
                   </a>
                 ) : (
                   renderInternalLink(
                     item,
-                    isHome
-                      ? "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white"
-                      : "text-neutral-300 transition-colors hover:text-white",
+                    "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
                   )
                 ),
               )}
@@ -395,7 +361,7 @@ export default function SiteFooter({
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
                 <h4
-                  className={`text-[11px] font-semibold uppercase tracking-[0.32em] ${isHome ? "text-[color:var(--gush-ink-faint)] dark:text-neutral-500" : "text-neutral-400"}`}
+                  className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[color:var(--gush-ink-faint)]"
                 >
                   {section.title}
                 </h4>
@@ -404,7 +370,7 @@ export default function SiteFooter({
                     <li key={link.href}>
                       {renderInternalLink(
                         link,
-                        `text-sm transition-colors ${isHome ? "text-[color:var(--gush-ink-soft)] hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-300 dark:hover:text-white" : "text-neutral-300 hover:text-white"}`,
+                        "text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
                       )}
                     </li>
                   ))}
@@ -414,21 +380,13 @@ export default function SiteFooter({
           </div>
         </div>
 
-        <div
-          className={`mt-6 flex flex-col gap-3 border-t pt-4 text-sm lg:flex-row lg:items-center lg:justify-between ${
-            isHome
-              ? "border-[color:var(--gush-border)] text-slate-400 dark:border-white/10 dark:text-neutral-500"
-              : "border-white/10 text-neutral-500"
-          }`}
-        >
+        <div className="mt-6 flex flex-col gap-3 border-t border-[color:var(--gush-border)] pt-4 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {footerMetaLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  isHome
-                    ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white"
-                    : "text-neutral-400 transition-colors hover:text-white",
+                  "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
                 ),
               )}
               <FooterAgeBadge isHome={isHome} />
@@ -440,11 +398,7 @@ export default function SiteFooter({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={
-                    isHome
-                      ? "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:text-white"
-                      : "text-neutral-400 transition-colors hover:text-white"
-                  }
+                  className="text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
                 >
                   {item.label}
                 </a>

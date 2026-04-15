@@ -143,17 +143,17 @@ export function tabMeta(tabKey) {
     case "by-segment":
       return {
         title: "人群表现",
-        description: "对比不同读者人群的效果，但别把页面做成一堆分析面板墙。",
+        description: "对比不同读者人群的活动效果。",
       };
     case "by-type":
       return {
         title: "类型表现",
-        description: "先看哪种投放类型真正有效，再决定要不要继续增加活动噪音。",
+        description: "先看哪种投放类型更有效。",
       };
     default:
       return {
         title: "活动目录",
-        description: "查看在线和草稿活动时，只保留运营真正需要的事实：范围、排期、花费和结果。",
+        description: "查看范围、排期、花费和结果。",
       };
   }
 }

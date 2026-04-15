@@ -172,9 +172,7 @@ export default function AdminEmailSettingsPage() {
     if (response.ok) {
       setFeedback({
         type: "success",
-        message: savedBeforeTest
-          ? "邮件配置已保存，并已发送测试邮件。"
-          : "测试邮件已发送。",
+        message: savedBeforeTest ? "配置已保存，并已发出测试邮件。" : "测试邮件已发出。",
       });
     } else {
       setFeedback({
@@ -196,15 +194,15 @@ export default function AdminEmailSettingsPage() {
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="邮件投递" description="需要管理员权限后，才能编辑邮件发送配置。">
-        <p className="text-sm text-slate-500">请先以管理员身份登录，再管理发件人与投递配置。</p>
+      <AdminPageSection title="邮件投递" description="需要管理员权限后，才能编辑邮件配置。">
+        <p className="text-sm text-slate-500">请先登录后台，再管理发信配置。</p>
       </AdminPageSection>
     );
   }
 
   if (loading) {
     return (
-      <AdminPageSection title="邮件投递" description="正在加载已保存的发件人与投递通道配置。">
+      <AdminPageSection title="邮件投递" description="正在读取已保存的发信配置。">
         <p className="text-sm text-slate-500">正在加载邮件配置...</p>
       </AdminPageSection>
     );
@@ -218,8 +216,8 @@ export default function AdminEmailSettingsPage() {
       />
 
       <AdminPageSection
-        title="基础投递设置"
-        description="在这里设置投递通道、默认发件地址，以及后台使用的内部告警邮箱。"
+        title="发信通道"
+        description="先定通道、发件地址和通知邮箱。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             {hasUnsavedChanges ? <AdminBadge tone="warning">有未保存更改</AdminBadge> : null}
@@ -238,7 +236,7 @@ export default function AdminEmailSettingsPage() {
         }
       >
         <div className="grid gap-4 lg:grid-cols-3">
-          <AdminFormField label="投递通道" helperText="选择后台运营邮件当前使用的发送方式。">
+          <AdminFormField label="投递通道" helperText="选择当前使用的发信方式。">
             <select
               value={draft.provider}
               onChange={(event) => handleChange("provider", event.target.value)}
@@ -252,7 +250,7 @@ export default function AdminEmailSettingsPage() {
             </select>
           </AdminFormField>
 
-          <AdminFormField label="默认发件地址" helperText="读者最终会看到这个发件地址。">
+          <AdminFormField label="默认发件地址" helperText="读者会看到这个发件地址。">
             <input
               value={draft.from}
               onChange={(event) => handleChange("from", event.target.value)}
@@ -261,7 +259,7 @@ export default function AdminEmailSettingsPage() {
             />
           </AdminFormField>
 
-          <AdminFormField label="后台告警邮箱" helperText="投递异常和运营提醒都会发到这里。">
+          <AdminFormField label="运营通知邮箱" helperText="投递异常和系统提醒会发到这里。">
             <input
               value={draft.adminNotifyEmail}
               onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
@@ -273,11 +271,11 @@ export default function AdminEmailSettingsPage() {
       </AdminPageSection>
 
       <AdminPageSection
-        title="通道密钥"
-        description="把敏感密钥和内容工作流分开，但仍保持在邮件异常时能快速复核。"
+        title="密钥与回调"
+        description="把密钥和回调集中放在一起。"
       >
         <div className="space-y-4">
-          <AdminFormField label="默认回调地址" helperText="当当前启用的是回调通道时，会使用这里的地址。">
+          <AdminFormField label="默认回调地址" helperText="启用回调通道时会使用这里的地址。">
             <input
               value={draft.webhookUrl}
               onChange={(event) => handleChange("webhookUrl", event.target.value)}
@@ -294,7 +292,7 @@ export default function AdminEmailSettingsPage() {
               >
                 <AdminFormField
                   label={field.label}
-                  helperText="如果要继续沿用当前密钥，保留已有遮罩值即可。"
+                  helperText="继续沿用当前值时，保持原样即可。"
                 >
                   <input
                     value={draft[field.key]}
@@ -304,7 +302,7 @@ export default function AdminEmailSettingsPage() {
                   />
                 </AdminFormField>
 
-                <div className="mt-3 flex justify-end rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+                <div className="mt-3 flex justify-end">
                   <Button
                     type="button"
                     variant="outline"
@@ -322,15 +320,15 @@ export default function AdminEmailSettingsPage() {
 
       <AdminPageSection
         title="测试邮件"
-        description="直接用当前草稿发一封真实测试邮件，方便运营确认投递是否正常。"
+        description="用当前草稿发一封测试邮件。"
       >
         <div className="grid gap-4">
           <AdminFormField
             label="测试收件人"
             helperText={
               hasUnsavedChanges
-                ? "发送前会先保存当前草稿，再发测试邮件。"
-                : "下一封测试邮件会直接使用当前已保存配置。"
+                ? "发送前会先保存当前草稿。"
+                : "会直接使用当前已保存的配置。"
             }
           >
             <input
@@ -340,9 +338,6 @@ export default function AdminEmailSettingsPage() {
               placeholder="qa@yoursite.com"
             />
           </AdminFormField>
-          <p className="text-sm leading-6 text-slate-500">
-            收件人准备好后，直接用上方操作区发送测试邮件。
-          </p>
         </div>
       </AdminPageSection>
     </div>

@@ -190,7 +190,7 @@ const ShareButton = React.memo(function ShareButton({
                   className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
                     copied
                       ? "bg-[var(--gush-accent,#0071e3)] text-white"
-                      : "bg-slate-950 text-white hover:bg-slate-800"
+                      : "bg-[color:var(--gush-ink-strong)] text-white hover:bg-black/82"
                   }`}
                 >
                   {copied ? "Copied" : "Copy"}

@@ -96,7 +96,7 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
         </p>
       </div>
 
-      <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border border-white/10 bg-black/20 p-5">
+      <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border border-white/12 bg-white/[0.08] p-5 backdrop-blur-[2px]">
         <div className="h-2.5 w-24 rounded-full" style={{ backgroundColor: accent }} />
         <div className="mt-5 h-4 w-4/5 rounded-full bg-white/85" />
         <div className="mt-3 h-3.5 w-full rounded-full bg-white/20" />

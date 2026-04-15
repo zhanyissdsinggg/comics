@@ -16,7 +16,7 @@ const TRACKING_GROUPS = [
   {
     id: "facebook",
     title: "Facebook 像素",
-    desc: "用于维护 Facebook 广告归因需要的像素标识、访问令牌和页面注入脚本。",
+    desc: "维护 Facebook 广告归因所需的像素标识、访问令牌和页面注入脚本。",
     fields: [
       {
         key: "pixelId",
@@ -52,7 +52,7 @@ const TRACKING_GROUPS = [
   {
     id: "instagram",
     title: "Instagram",
-    desc: "用于维护 Instagram 活动转化归因与受众信号所需的配置。",
+    desc: "维护 Instagram 活动归因、转化追踪和受众信号所需的基础配置。",
     fields: [
       {
         key: "businessId",
@@ -88,7 +88,7 @@ const TRACKING_GROUPS = [
   {
     id: "snapchat",
     title: "Snapchat 像素",
-    desc: "用于同步 Snapchat Ads 的像素标识、令牌和转化脚本。",
+    desc: "同步 Snapchat Ads 追踪所需的像素标识、接口令牌和转化脚本。",
     fields: [
       {
         key: "pixelId",
@@ -101,7 +101,7 @@ const TRACKING_GROUPS = [
         key: "apiToken",
         label: "API 令牌",
         legacyName: "API Token",
-        placeholder: "用于转化 API 的令牌",
+        placeholder: "用于转化 API 的访问令牌",
         inputType: "text",
       },
       {
@@ -124,7 +124,7 @@ const TRACKING_GROUPS = [
   {
     id: "google",
     title: "Google Analytics / Ads",
-    desc: "用于维护 GA4、Google Ads 以及相关转化追踪脚本。",
+    desc: "维护 GA4、Google Ads 以及相关转化追踪脚本。",
     fields: [
       {
         key: "measurementId",
@@ -160,7 +160,7 @@ const TRACKING_GROUPS = [
   {
     id: "global",
     title: "全局脚本",
-    desc: "用于配置不依赖具体平台的通用跟踪代码或公共注入片段。",
+    desc: "配置不依赖具体平台的通用追踪代码或公共注入片段。",
     fields: [
       {
         key: "headScript",
@@ -303,10 +303,10 @@ const STATUS_BADGE_TONE = {
 
 function getFieldHelperText(field) {
   if (field.inputType === "textarea") {
-    return "粘贴提供商要求的脚本片段，保存时保持原样。";
+    return "粘贴平台要求的脚本片段即可，保存时会按原样写入。";
   }
 
-  return "保持和投放平台上的配置完全一致。";
+  return "保持与投放平台中的配置一致。";
 }
 
 export default function TrackingSettings() {
@@ -315,7 +315,7 @@ export default function TrackingSettings() {
   const [savedAt, setSavedAt] = useState("");
   const [status, setStatus] = useState({
     tone: "neutral",
-    message: "正在加载跟踪设置...",
+    message: "正在加载追踪设置...",
   });
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -335,7 +335,7 @@ export default function TrackingSettings() {
         }
         setStatus({
           tone: "neutral",
-          message: "已先载入本地草稿，同时正在检查服务器配置。",
+          message: "已先载入本地草稿，同时正在检查服务器中的最新配置。",
         });
       }
 
@@ -361,7 +361,8 @@ export default function TrackingSettings() {
             setReadOnly(false);
             setStatus({
               tone: "warning",
-              message: "当前正在使用更新日期更晚的本地草稿。点击保存后会把它同步到服务器。",
+              message:
+                "当前正在使用更新更晚的本地草稿。保存后会把这份配置同步到服务器。",
             });
             setHydrating(false);
             return;
@@ -375,7 +376,7 @@ export default function TrackingSettings() {
           writeLocalTrackingSnapshot(normalizedValues, serverUpdatedAt, false);
           setStatus({
             tone: "success",
-            message: "已从服务器载入当前跟踪配置。",
+            message: "已从服务器载入当前追踪配置。",
           });
           setHydrating(false);
           return;
@@ -386,7 +387,7 @@ export default function TrackingSettings() {
           setDirty(false);
           setStatus({
             tone: "warning",
-            message: "当前账号没有编辑或同步跟踪设置的权限，页面已切为只读模式。",
+            message: "当前账号没有编辑或同步追踪设置的权限，页面已切换为只读模式。",
           });
           setHydrating(false);
           return;
@@ -433,7 +434,7 @@ export default function TrackingSettings() {
     setDirty(true);
     setStatus({
       tone: "neutral",
-      message: "草稿已变更，保存全部修改后会同步当前版本。",
+      message: "草稿已更新，保存后会同步当前版本。",
     });
   };
 
@@ -484,12 +485,12 @@ export default function TrackingSettings() {
 
       setStatus({
         tone: "danger",
-        message: response.error || "服务器保存失败，但草稿仍保存在本地。",
+        message: response.error || "服务器保存失败，但草稿仍保留在本地。",
       });
     } catch {
       setStatus({
         tone: "danger",
-        message: "服务器保存失败，但草稿仍保存在本地。",
+        message: "服务器保存失败，但草稿仍保留在本地。",
       });
     } finally {
       setSaving(false);
@@ -500,8 +501,8 @@ export default function TrackingSettings() {
   const syncStateDetail = readOnly
     ? "当前账号只能查看配置，不能提交到服务器。"
     : dirty
-      ? "页面里还有未同步到服务器的变更。"
-      : "本地草稿和服务器配置目前保持一致。";
+      ? "页面里还有尚未同步到服务器的更改。"
+      : "本地草稿与服务器配置目前保持一致。";
   const localModeLabel = hydrating
     ? "正在比对版本"
     : dirty
@@ -512,7 +513,7 @@ export default function TrackingSettings() {
     <div className="space-y-6">
       <AdminPageSection
         title="同步状态"
-        description="先把本地草稿、服务器版本和权限状态讲清楚，再决定是否继续调整平台脚本。"
+        description="先确认本地草稿、服务器版本和权限状态。"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge tone={STATUS_BADGE_TONE[status.tone] || "default"}>
@@ -543,7 +544,7 @@ export default function TrackingSettings() {
               </p>
               <p className="mt-3 text-base font-semibold text-slate-950">{formatSavedAt(savedAt)}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                本地草稿和服务器同步成功时都会更新这个时间。
+                本地草稿与服务器同步成功时都会更新这里的时间。
               </p>
             </div>
 
@@ -553,7 +554,7 @@ export default function TrackingSettings() {
               </p>
               <p className="mt-3 text-base font-semibold text-slate-950">{localModeLabel}</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                页面会优先保留更新时间更晚的版本，避免把新草稿被旧配置覆盖。
+                页面会优先保留更新时间更晚的版本，避免新草稿被旧配置覆盖。
               </p>
             </div>
 
@@ -570,7 +571,7 @@ export default function TrackingSettings() {
 
       <AdminPageSection
         title="平台配置"
-        description="每个平台都按同一套节奏维护：先填标识，再补令牌，最后放脚本，让配置页面保持整洁、可读、可回扫。"
+        description="先填标识，再补令牌，最后放脚本。"
       >
         <div className="grid gap-4 xl:grid-cols-2">
           {TRACKING_GROUPS.map((group) => (

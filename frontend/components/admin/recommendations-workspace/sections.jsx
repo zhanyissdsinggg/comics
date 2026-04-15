@@ -37,7 +37,7 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
   return (
     <AdminPageSection
       title="推荐位"
-      description="推荐位是前台稳定的编辑入口。标识要稳定，作品组合要有明确意图，不要临时拼凑。"
+      description="把入口和作品组合收清楚。"
       action={
         <Button type="button" onClick={() => onOpenCreateModal("slot")}>
           <Plus className="size-4" />
@@ -48,7 +48,7 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
       <AdminDataState
         isLoading={slotsQuery.isLoading}
         hasData={slots.length > 0}
-        emptyMessage={slotsQuery.isError ? slotsQuery.errorMessage : "当前还没有推荐位。"}
+        emptyMessage={slotsQuery.isError ? slotsQuery.errorMessage : "还没有推荐位。"}
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -57,17 +57,17 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
             const slotMeta = getStorefrontSlotDisplayMeta(slot.slot || slot.name);
 
             return (
-              <RecommendationCard
-                key={slot.id}
-                title={slotMeta.label}
-                description={slotMeta.hint}
+            <RecommendationCard
+              key={slot.id}
+              title={slotMeta.label}
+              description={slotMeta.hint}
                 meta={<AdminBadge tone="accent">{seriesIds.length} 部作品</AdminBadge>}
                 footer={
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xs text-slate-500">更新于 {formatDateTime(slot.updatedAt)}</p>
-                    <Button
-                      type="button"
-                      variant="destructive"
+                  <p className="text-xs text-slate-500">更新于 {formatDateTime(slot.updatedAt)}</p>
+                  <Button
+                    type="button"
+                    variant="destructive"
                       size="sm"
                       onClick={() => onOpenDeleteModal("slot", slot)}
                     >
@@ -105,7 +105,7 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
   return (
     <AdminPageSection
       title="榜单规则"
-      description="榜单规则要写清楚：用什么编辑策略、覆盖哪些作品、当前是否启用，别再把旧热度排序当成默认入口。"
+      description="把策略和范围收清楚。"
       action={
         <Button type="button" onClick={() => onOpenCreateModal("ranking")}>
           <Plus className="size-4" />
@@ -116,7 +116,7 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
       <AdminDataState
         isLoading={rankingsQuery.isLoading}
         hasData={rankings.length > 0}
-        emptyMessage={rankingsQuery.isError ? rankingsQuery.errorMessage : "当前还没有榜单规则。"}
+        emptyMessage={rankingsQuery.isError ? rankingsQuery.errorMessage : "还没有榜单规则。"}
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -181,14 +181,14 @@ export function AnalyticsSection({
   return (
     <AdminPageSection
       title="推荐位表现分析"
-      description="先按推荐位筛选，再比较曝光、点击和转化，不把不相关的入口混成一锅。"
+      description="按推荐位筛选，再看曝光、点击和转化。"
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <AdminMetricCard
             label="曝光"
             value={formatNumber(analyticsSummary.impressions)}
-            detail="当前已加载的分析记录。"
+            detail="当前已加载记录。"
             tone="accent"
           />
           <AdminMetricCard
@@ -220,7 +220,7 @@ export function AnalyticsSection({
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-slate-600">
-              先选定一个推荐位，再把分析表聚焦到单一读者入口上。
+              先选一个推荐位。
             </p>
           )}
         </div>
@@ -243,7 +243,7 @@ export function AnalyticsSection({
         <AdminDataState
           isLoading={analyticsQuery.isLoading}
           hasData={analytics.length > 0}
-          emptyMessage={analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选条件下没有分析记录。"}
+          emptyMessage={analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选下没有分析记录。"}
           wrap={false}
         >
           <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">

@@ -173,7 +173,8 @@ export const ConfirmModal = memo(function ConfirmModal({
   variant = "default",
 }) {
   const variantClasses = {
-    default: "bg-slate-950 hover:bg-slate-800",
+    default:
+      "bg-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82",
     danger: "bg-red-600 hover:bg-red-700",
     warning: "bg-slate-800 hover:bg-slate-700",
   };

@@ -65,7 +65,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           <button
             type="button"
             onClick={onOpenModal}
-            className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-neutral-200"
+            className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
           >
             {ADULT_GATE_ACTION_LABELS[status] || "Continue"}
           </button>

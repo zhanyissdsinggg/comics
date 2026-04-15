@@ -353,7 +353,7 @@ export default function SupportPage() {
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
   const supportHeroStats = [
     {
       label: "Topics",
@@ -420,13 +420,13 @@ export default function SupportPage() {
                     className={[
                       "rounded-[22px] border px-4 py-3 text-left transition",
                       isActive
-                        ? "border-black/10 bg-slate-950 text-white"
+                        ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
                         : "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
                     <p
-                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/72" : "text-slate-500"}`}
+                      className={`mt-1 text-xs leading-5 ${isActive ? "text-[color:var(--gush-ink-soft)]" : "text-slate-500"}`}
                     >
                       {item.context}
                     </p>

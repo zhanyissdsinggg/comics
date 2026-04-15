@@ -60,7 +60,7 @@ export default function AdminLogsPage() {
   return (
     <AdminShell
       title="审计日志"
-      subtitle="用一个以阅读为先的安静记录页查看后台动作，先确认是谁改了什么，而不是再造一个吵闹的控制台。"
+      subtitle="查看后台动作，确认是谁改了什么。"
     >
       <div className="space-y-6">
         <LogsSummaryCards

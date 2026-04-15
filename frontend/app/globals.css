@@ -101,7 +101,7 @@ html {
 
 body {
   min-height: 100vh;
-  background: #ffffff;
+  background: var(--gush-page-bg);
   color: var(--gush-ink-strong);
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
@@ -133,23 +133,17 @@ body::before {
 }
 
 html.dark body {
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(41, 151, 255, 0.14),
-      transparent 22%
-    ),
-    linear-gradient(180deg, #000000 0%, #050507 28%, #0a0a0c 100%);
+  background: var(--gush-page-bg);
 }
 
 html.dark body::before {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.04) 0%,
-    rgba(255, 255, 255, 0.012) 20%,
-    transparent 46%
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.76) 16%,
+    transparent 42%
   );
-  opacity: 0.56;
+  opacity: 1;
 }
 
 * {
@@ -314,20 +308,15 @@ textarea {
   position: relative;
   min-height: 100vh;
   color: var(--gush-ink-strong);
+  background: var(--gush-page-bg);
 }
 
 .gush-home-shell {
-  background: #ffffff;
+  background: var(--gush-page-bg);
 }
 
 html.dark .gush-home-shell {
-  background:
-    radial-gradient(
-      circle at 50% -8%,
-      rgba(41, 151, 255, 0.14),
-      transparent 24%
-    ),
-    linear-gradient(180deg, #050507 0%, #0a0a0c 42%, #000000 100%);
+  background: var(--gush-page-bg);
 }
 
 .gush-page-ambient {
@@ -344,13 +333,11 @@ html.dark .gush-home-shell {
 }
 
 html.dark .gush-page-ambient {
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(41, 151, 255, 0.18),
-      transparent 18%
-    ),
-    linear-gradient(180deg, rgba(4, 4, 6, 0.96) 0%, rgba(8, 8, 10, 0.08) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 .gush-home-shell .gush-page-ambient {
@@ -365,18 +352,13 @@ html.dark .gush-page-ambient {
 }
 
 html.dark .gush-home-shell .gush-page-ambient {
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(41, 151, 255, 0.16),
-      transparent 18%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(2, 2, 3, 0.98) 0%,
-      rgba(7, 7, 8, 0.82) 38%,
-      rgba(7, 7, 8, 0.08) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.98) 18%,
+    rgba(255, 255, 255, 0.92) 34%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 .gush-page-main {

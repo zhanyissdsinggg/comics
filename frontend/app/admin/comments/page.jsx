@@ -5,8 +5,15 @@ export const dynamic = 'force-dynamic';
 import { useMemo, useState } from 'react';
 
 import AdminShell from '@/components/admin/AdminShell';
-import { CommentsListSection, CommentsSummaryCards } from '@/components/admin/comments-workspace/sections';
-import { searchFields, sortFields, sortOptions } from '@/components/admin/comments-workspace/utils';
+import {
+  CommentsListSection,
+  CommentsSummaryCards,
+} from '@/components/admin/comments-workspace/sections';
+import {
+  searchFields,
+  sortFields,
+  sortOptions,
+} from '@/components/admin/comments-workspace/utils';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
@@ -67,10 +74,7 @@ export default function AdminCommentsPage() {
   });
 
   return (
-    <AdminShell
-      title="评论管理"
-      subtitle="把读者反馈收进一个安静、好读的目录里，先判断内容本身，再处理不该继续留在线上的评论。"
-    >
+    <AdminShell title="评论管理" subtitle="处理读者评论和下线项。">
       <div className="space-y-6">
         <CommentsSummaryCards
           total={pagination.total}
@@ -120,7 +124,7 @@ export default function AdminCommentsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="排序评论"
+          title="评论排序"
           label="排序方式"
           actionLabel="应用"
         />

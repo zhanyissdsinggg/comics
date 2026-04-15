@@ -67,7 +67,9 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       return response.json();
     },
     onSuccess: () => {
-      setUploadProgress((current) => current.map((item) => ({ ...item, status: 'success', progress: 100 })));
+      setUploadProgress((current) =>
+        current.map((item) => ({ ...item, status: 'success', progress: 100 })),
+      );
       setFeedback({ type: 'success', message: '批量上传完成，正在刷新章节列表。' });
 
       window.setTimeout(() => {
@@ -92,7 +94,9 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       return;
     }
 
-    const zipFiles = Array.from(selectedFiles).filter((file) => file.name.toLowerCase().endsWith('.zip'));
+    const zipFiles = Array.from(selectedFiles).filter((file) =>
+      file.name.toLowerCase().endsWith('.zip'),
+    );
 
     if (zipFiles.length === 0) {
       setFeedback({ type: 'error', message: '请至少选择一个 ZIP 文件。' });
@@ -141,7 +145,9 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
     }
 
     setFeedback({ type: '', message: '' });
-    setUploadProgress((current) => current.map((item) => ({ ...item, status: 'uploading', progress: 0 })));
+    setUploadProgress((current) =>
+      current.map((item) => ({ ...item, status: 'uploading', progress: 0 })),
+    );
 
     const progressTimer = window.setInterval(() => {
       setUploadProgress((current) =>
@@ -158,13 +164,14 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
       },
     });
   };
+
   const canClose = !uploadMutation.isPending;
 
   return (
     <Modal
       isOpen={isOpen}
       title="批量上传章节"
-      subtitle="一次提交多个 ZIP 文件，系统会按顺序创建章节，让批量录入保持直接、安静、可控。"
+      subtitle="一次提交多个 ZIP 文件，系统会按顺序创建章节。"
       onClose={canClose ? handleClose : () => {}}
       size="2xl"
       closeButton={canClose}
@@ -250,7 +257,9 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
                 当前队列
               </p>
               <p className="mt-3 text-lg font-semibold text-slate-950">
-                {uploadProgress.length > 0 ? `${uploadProgress.length} 个待处理文件` : '还没有文件进入队列'}
+                {uploadProgress.length > 0
+                  ? `${uploadProgress.length} 个待处理文件`
+                  : '还没有文件进入队列'}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 {startNumber
@@ -319,7 +328,9 @@ export function BulkUploadModal({ isOpen, seriesId, onClose, onSuccess }: BulkUp
                     </div>
                   ) : null}
 
-                  {item.error ? <p className="mt-3 text-xs leading-5 text-red-700">{item.error}</p> : null}
+                  {item.error ? (
+                    <p className="mt-3 text-xs leading-5 text-red-700">{item.error}</p>
+                  ) : null}
                 </div>
               ))}
             </div>

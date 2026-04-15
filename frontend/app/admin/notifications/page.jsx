@@ -71,10 +71,7 @@ export default function AdminNotificationsPage() {
   });
 
   return (
-    <AdminShell
-      title="读者通知"
-      subtitle="把真正发给读者的通知收在一个清爽列表里，方便检查质量、清理积压，而不是做成吵闹的活动看板。"
-    >
+    <AdminShell title="读者通知" subtitle="查看通知内容和待清理积压。">
       <div className="space-y-6">
         <NotificationsSummaryCards
           total={pagination.total}
@@ -124,7 +121,7 @@ export default function AdminNotificationsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="排序通知"
+          title="通知排序"
           label="排序方式"
           actionLabel="应用"
         />

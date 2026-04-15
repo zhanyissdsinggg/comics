@@ -370,7 +370,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className="gush-home-shell overflow-hidden">
@@ -695,7 +695,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                             workingId === order.orderId
                               ? "cursor-not-allowed bg-slate-300 text-slate-500"
-                              : "bg-slate-950 text-white hover:bg-slate-800"
+                              : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
                           }`}
                           disabled={workingId === order.orderId}
                         >

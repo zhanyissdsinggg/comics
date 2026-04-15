@@ -34,7 +34,7 @@ export function PendingItemsSection({ insights }) {
     <SurfacePanel appearance="light" accent="blue">
       <SectionHeader
         title="待处理事项"
-        description="只留真正要先处理的项目。"
+        description="先处理这些。"
       />
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {PENDING_ITEMS.map((item) => (
@@ -63,7 +63,7 @@ export function PendingItemsSection({ insights }) {
 export function LatestSeriesSection({ latestUpdated }) {
   return (
     <SurfacePanel appearance="light" accent="blue">
-      <SectionHeader title="最近更新的作品" description="顺着处理封面、署名和章节。" />
+      <SectionHeader title="最近更新的作品" description="封面、署名和章节一起看。" />
       <div className="mt-5 space-y-3">
         {latestUpdated.length > 0 ? (
           latestUpdated.map((series) => {
@@ -88,7 +88,7 @@ export function LatestSeriesSection({ latestUpdated }) {
             );
           })
         ) : (
-          <EmptyBlock title="还没有作品目录数据" description="当前没有作品列表。" />
+          <EmptyBlock title="还没有作品目录数据" description="没有作品列表。" />
         )}
       </div>
     </SurfacePanel>
@@ -98,7 +98,7 @@ export function LatestSeriesSection({ latestUpdated }) {
 export function QuickActionsSection() {
   return (
     <SurfacePanel appearance="light" accent="amber">
-      <SectionHeader title="快捷入口" description="只留最常用的入口。" />
+      <SectionHeader title="快捷入口" description="常用动作放这里。" />
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {QUICK_ACTIONS.map((item) => {
           const Icon = ACTION_ICONS[item.icon];

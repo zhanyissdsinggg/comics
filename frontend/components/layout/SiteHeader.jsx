@@ -35,8 +35,6 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const [authError, setAuthError] = useState("");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const isLight =
-    variant === "light" || variant === "home" || variant === "default";
 
   useEffect(() => {
     const stored =
@@ -167,21 +165,15 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         data-site-header="1"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
-          isLight
-            ? scrolled
-              ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.94)] shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-[rgba(15,15,18,0.86)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.28)]"
-              : "border-transparent bg-[rgba(255,255,255,0.88)] backdrop-blur-lg dark:border-transparent dark:bg-[rgba(15,15,18,0.72)]"
-            : scrolled
-              ? "border-white/10 bg-[rgba(9,9,11,0.84)] shadow-[var(--gush-shadow-header)] backdrop-blur-2xl"
-              : "border-transparent bg-[rgba(9,9,11,0.66)] backdrop-blur-xl"
+          scrolled
+            ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.96)] shadow-[0_12px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+            : "border-transparent bg-[rgba(255,255,255,0.88)] backdrop-blur-lg"
         }`}
       >
         <div
           className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
             scrolled
-              ? isLight
-                ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.08),transparent)] before:content-[''] dark:before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)]"
-                : "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)] before:content-['']"
+              ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.08),transparent)] before:content-['']"
               : ""
           }`}
         >

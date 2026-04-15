@@ -22,7 +22,7 @@ export default function AdultError({ error, reset }) {
           <button
             type="button"
             onClick={() => reset()}
-            className="mt-6 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="mt-6 rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
           >
             Retry
           </button>

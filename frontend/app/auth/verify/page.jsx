@@ -41,7 +41,7 @@ function VerifyPageContent() {
   const inputClassName =
     "w-full rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-4 focus:ring-slate-200/80";
   const primaryButtonClass =
-    "w-full rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
     "w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-60";
 

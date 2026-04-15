@@ -51,10 +51,7 @@ export default function AdminPage() {
   }
 
   return (
-    <AdminShell
-      title="仪表盘"
-      subtitle="先看待处理事项，再看作品、读者、订单和评论这些真实后台数据。"
-    >
+    <AdminShell title="仪表盘" subtitle="先看今天最该处理的事。">
       <AdminDashboardClean />
     </AdminShell>
   );

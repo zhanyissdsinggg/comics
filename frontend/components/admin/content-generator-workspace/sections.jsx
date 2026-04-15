@@ -48,7 +48,7 @@ export function GeneratorFormSection({
   return (
     <AdminPageSection
       title="演示内容生成器"
-      description="这里只生成测试目录数据，不作为正式录入入口。"
+      description="只生成测试目录数据。"
       action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
     >
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -56,7 +56,7 @@ export function GeneratorFormSection({
           <div className="grid gap-4 md:grid-cols-2">
             <AdminFormField
               label="种子"
-              helperText="可选。需要复现同一批测试数据时再填写。"
+              helperText="可选。需要复现同一批测试数据时再填。"
             >
               <input
                 value={form.seed}
@@ -66,7 +66,7 @@ export function GeneratorFormSection({
               />
             </AdminFormField>
 
-            <AdminFormField label="每种类型作品数" helperText="允许范围：1 到 20。">
+            <AdminFormField label="每种类型作品数" helperText="范围：1 到 20。">
               <input
                 value={form.seriesPerType}
                 onChange={(event) => onUpdateField("seriesPerType", event.target.value)}
@@ -75,7 +75,7 @@ export function GeneratorFormSection({
               />
             </AdminFormField>
 
-            <AdminFormField label="最少章节数" helperText="允许范围：1 到 30。">
+            <AdminFormField label="最少章节数" helperText="范围：1 到 30。">
               <input
                 value={form.minEpisodes}
                 onChange={(event) => onUpdateField("minEpisodes", event.target.value)}
@@ -84,7 +84,7 @@ export function GeneratorFormSection({
               />
             </AdminFormField>
 
-            <AdminFormField label="最多章节数" helperText="允许范围：1 到 30。">
+            <AdminFormField label="最多章节数" helperText="范围：1 到 30。">
               <input
                 value={form.maxEpisodes}
                 onChange={(event) => onUpdateField("maxEpisodes", event.target.value)}
@@ -110,7 +110,7 @@ export function GeneratorFormSection({
         <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           <h3 className="text-base font-semibold text-slate-950">本次将生成的内容</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            只生成测试用目录，不制造看起来很热闹的假数据。
+            只生成测试目录，不制造假热度。
           </p>
 
           <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
@@ -136,18 +136,18 @@ export function GeneratorResultSection({ result }) {
   return (
     <AdminPageSection
       title="最近一次生成"
-      description="这里只看最近一次生成结果。"
+      description="只看最近一次结果。"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <AdminMetricCard label="任务编号" value={result.runId || "-"} detail="后端记录这次生成请求的唯一标识。" />
+        <AdminMetricCard label="任务编号" value={result.runId || "-"} detail="这次生成的唯一标识。" />
         <AdminMetricCard label="漫画作品" value={String(result.comicsCount ?? 0)} detail="本轮生成出的漫画条目数。" />
         <AdminMetricCard label="小说作品" value={String(result.novelsCount ?? 0)} detail="本轮生成出的小说条目数。" />
         <AdminMetricCard label="总章节数" value={String(result.totalEpisodes ?? 0)} detail="这轮生成覆盖到的章节总量。" />
-        <AdminMetricCard label="耗时" value={`${result.duration ?? 0} 秒`} detail="后端返回的执行耗时。" />
+        <AdminMetricCard label="耗时" value={`${result.duration ?? 0} 秒`} detail="执行耗时。" />
         <AdminMetricCard
           label="种子"
           value={String(result.requestPayload?.seed || "随机")}
-          detail="需要复现同一批测试数据时，可以再次使用这个种子。"
+          detail="需要复现同一批测试数据时，可再次使用这个种子。"
         />
       </div>
     </AdminPageSection>

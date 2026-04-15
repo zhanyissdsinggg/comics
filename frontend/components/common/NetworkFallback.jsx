@@ -84,7 +84,7 @@ export default function NetworkFallback({
             className={cn(
               "mt-6 inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
               canRetry
-                ? "border-slate-950 bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
+                ? "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
                 : "cursor-not-allowed border-[color:var(--gush-border)] bg-slate-200 text-slate-500",
             )}
           >

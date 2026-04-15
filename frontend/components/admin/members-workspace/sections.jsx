@@ -37,24 +37,29 @@ import {
   STATUS_LABELS,
 } from "./utils";
 
-export function MembersSummaryCards({ paginationTotal, enabledCount, boundSlotsCount, totpEnabledCount }) {
+export function MembersSummaryCards({
+  paginationTotal,
+  enabledCount,
+  boundSlotsCount,
+  totpEnabledCount,
+}) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <AdminMetricCard
-        label="当前成员数"
+        label="成员总数"
         value={String(paginationTotal)}
-        detail="包含手动成员和同步出的槽位成员。"
+        detail="包括手动创建成员和槽位同步成员。"
         tone="accent"
       />
       <AdminMetricCard
-        label="已启用成员"
+        label="当前启用"
         value={String(enabledCount)}
-        detail="启用状态的成员可以继续进入后台。"
+        detail="仍可进入后台的成员数量。"
       />
       <AdminMetricCard
         label="已启用两步验证"
         value={String(totpEnabledCount)}
-        detail={`当前有 ${boundSlotsCount} 个成员已绑定密钥槽位。`}
+        detail={`其中 ${boundSlotsCount} 个成员已绑定环境槽位。`}
       />
     </div>
   );
@@ -90,23 +95,23 @@ export function MembersDirectorySection(props) {
   return (
     <AdminPageSection
       title="成员目录"
-      description="快速查看成员、角色、密钥槽位和两步验证。"
+      description="看成员、角色、槽位和两步验证。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
         onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索成员名称、邮箱、角色或成员编号..."
+        searchPlaceholder="搜索成员名称、邮箱、角色或成员编号"
         onOpenFilters={onOpenSort}
         sortOrder={sortOrder}
         onToggleSortOrder={onToggleSortOrder}
         filtersLabel="排序"
-        ascendingLabel="更早优先"
+        ascendingLabel="较早优先"
         descendingLabel="最新优先"
         extraActions={
           <>
             <Button type="button" variant="outline" onClick={onSync} disabled={syncPending}>
               <RefreshCcw className="size-4" />
-              {syncPending ? "同步中..." : "同步密钥槽位"}
+              {syncPending ? "同步中..." : "同步槽位"}
             </Button>
             <Button type="button" onClick={onOpenCreate}>
               <Plus className="size-4" />
@@ -122,7 +127,7 @@ export function MembersDirectorySection(props) {
         onRetry={onRetry}
         isLoading={membersState.isLoading}
         hasItems={members.length > 0}
-        emptyMessage="当前还没有后台成员。先同步环境密钥槽位，或手动新增成员。"
+        emptyMessage="还没有后台成员。先同步槽位，或手动新增成员。"
         pagination={pagination}
         page={page}
         pageSize={pageSize}
@@ -136,7 +141,7 @@ export function MembersDirectorySection(props) {
                 <th className="px-4 py-4">成员</th>
                 <th className="px-4 py-4">角色</th>
                 <th className="px-4 py-4">状态</th>
-                <th className="px-4 py-4">密钥槽位</th>
+                <th className="px-4 py-4">槽位</th>
                 <th className="px-4 py-4">两步验证</th>
                 <th className="px-4 py-4">最近登录</th>
                 <th className="px-4 py-4">操作</th>
@@ -170,9 +175,9 @@ export function MembersDirectorySection(props) {
                       {member.keySlot ? (
                         <p className="text-xs text-slate-500">
                           {member.keySlotStatus === "assigned"
-                            ? "与环境密钥槽位保持一致"
+                            ? "已和环境槽位对齐"
                             : member.keySlotStatus === "missing"
-                              ? "当前环境没有这个槽位"
+                              ? "当前环境缺少这个槽位"
                               : "暂未绑定"}
                         </p>
                       ) : null}
@@ -190,7 +195,7 @@ export function MembersDirectorySection(props) {
                   </td>
                   <td className="px-4 py-4 text-slate-600">{formatDate(member.lastLoginAt)}</td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-wrap gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+                    <div className="flex flex-wrap gap-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => onOpenEdit(member)}>
                         编辑
                       </Button>
@@ -253,31 +258,37 @@ export function MembersDirectorySection(props) {
 }
 
 export function MembersGuideSection() {
+  const items = [
+    {
+      title: "先同步，再补齐信息",
+      description: "先把环境槽位同步进来，再补名称、邮箱和角色。",
+    },
+    {
+      title: "角色和状态都在这里维护",
+      description: "菜单权限跟着角色走，启用和停用也在这里改。",
+    },
+    {
+      title: "新密钥只展示一次",
+      description: "重置后立即保存到验证器，关闭后不会再明文返回。",
+    },
+  ];
+
   return (
     <AdminPageSection
-      title="使用建议"
-      description="在这里维护后台成员、角色和两步验证。"
+      title="操作要点"
+      description="只保留最关键的三件事。"
       accent="amber"
     >
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">先同步密钥槽位</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            先同步槽位，再补齐姓名、邮箱和角色。
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">角色和状态在这里维护</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            菜单权限继续跟角色走，成员身份在这里维护。
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">验证密钥只在重置后展示一次</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            重置后请立刻保存，明文密钥不会长期保留。
-          </p>
-        </div>
+        {items.map((item) => (
+          <div
+            key={item.title}
+            className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
+          >
+            <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+          </div>
+        ))}
       </div>
     </AdminPageSection>
   );
@@ -320,7 +331,7 @@ export function MemberEditorModalContent({
           />
         </AdminFormField>
 
-        <AdminFormField label="邮箱" helperText="建议填写真实邮箱，方便识别成员身份。">
+        <AdminFormField label="邮箱" helperText="建议填写真实邮箱，方便识别成员。">
           <input
             className={adminInputClassName}
             value={form.email}
@@ -329,19 +340,19 @@ export function MemberEditorModalContent({
           />
         </AdminFormField>
 
-        <AdminFormField label="登录密码" helperText="成员创建或调整密码时请更新。空白不会覆盖旧密码。">
+        <AdminFormField label="登录密码" helperText="创建成员或调整密码时填写，留空则保留旧密码。">
           <input
             className={adminInputClassName}
             type="password"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder="至少 8 位的密码"
+            placeholder="至少 8 位"
           />
         </AdminFormField>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <AdminFormField label="角色" helperText="决定后台菜单和接口权限范围。">
+        <AdminFormField label="角色" helperText="决定后台菜单和接口权限。">
           <select
             className={adminSelectClassName}
             value={form.role}
@@ -355,7 +366,7 @@ export function MemberEditorModalContent({
           </select>
         </AdminFormField>
 
-        <AdminFormField label="状态" helperText="停用后成员会在下一次验权时失去后台访问能力。">
+        <AdminFormField label="状态" helperText="停用后会在下一次验权时失去后台访问能力。">
           <select
             className={adminSelectClassName}
             value={form.status}
@@ -369,7 +380,7 @@ export function MemberEditorModalContent({
           </select>
         </AdminFormField>
 
-        <AdminFormField label="密钥槽位" helperText="绑定后，该成员会与对应的 ADMIN_KEYS 槽位关联。">
+        <AdminFormField label="密钥槽位" helperText="需要和环境变量对应时再绑定。">
           <select
             className={adminSelectClassName}
             value={form.keySlot}
@@ -390,17 +401,17 @@ export function MemberEditorModalContent({
         </AdminFormField>
       </div>
 
-      <AdminFormField label="备注" helperText="记录这个成员负责的领域或轮班说明。">
+      <AdminFormField label="备注" helperText="记下这位成员负责的内容范围或值班说明。">
         <textarea
           className={adminTextareaClassName}
           rows={4}
           value={form.notes}
           onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
-          placeholder="例如：负责首页编排、作品上架与创作者署名维护。"
+          placeholder="例如：负责首页编排、作品上架和创作者署名维护。"
         />
       </AdminFormField>
 
-      <div className="flex flex-wrap justify-end gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+      <div className="flex flex-wrap justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
           取消
         </Button>
@@ -418,11 +429,11 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
       <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
         <p className="text-sm font-semibold text-slate-950">{totpSheet?.member?.name || "后台成员"}</p>
         <p className="mt-1 text-sm text-slate-600">
-          新密钥只会在这里展示一次，关闭后不会再以明文形式返回。
+          新密钥只会展示一次，关闭后不会再明文返回。
         </p>
       </div>
 
-      <AdminFormField label="手动录入密钥" helperText="需要手动添加验证器时，直接粘贴这一串即可。">
+      <AdminFormField label="手动录入密钥" helperText="需要手动添加到验证器时，直接复制这一串。">
         <div className="flex gap-2">
           <input className={adminInputClassName} readOnly value={totpSheet?.secret || ""} />
           <Button type="button" variant="outline" onClick={() => onCopy(totpSheet?.secret || "", "密钥")}>
@@ -432,13 +443,13 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
         </div>
       </AdminFormField>
 
-      <AdminFormField label="验证器导入链接" helperText="支持从链接导入的验证器应用可以直接使用。">
+      <AdminFormField label="验证器导入链接" helperText="支持导入链接的验证器可以直接使用。">
         <div className="flex gap-2">
           <input className={adminInputClassName} readOnly value={totpSheet?.otpauthUrl || ""} />
           <Button
             type="button"
             variant="outline"
-            onClick={() => onCopy(totpSheet?.otpauthUrl || "", "验证器导入链接")}
+            onClick={() => onCopy(totpSheet?.otpauthUrl || "", "导入链接")}
           >
             <Copy className="size-4" />
             复制
@@ -446,7 +457,7 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
         </div>
       </AdminFormField>
 
-      <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+      <div className="flex justify-end">
         <Button type="button" onClick={onClose}>
           完成
         </Button>

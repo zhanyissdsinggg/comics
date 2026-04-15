@@ -63,9 +63,9 @@ export function OrdersTableSection(props) {
   return (
     <AdminPageSection
       title="订单队列"
-      description="按订单或用户编号搜索，在不把页面做成金融控制台的前提下处理退款和导出。"
+      description="按订单或用户编号搜索，再处理退款或导出。"
       action={
-        <Button type="button" variant="outline" onClick={onExport} disabled={exportDisabled}>
+        <Button type="button" variant="secondary" onClick={onExport} disabled={exportDisabled}>
           <Download className="size-4" />
           导出所选
         </Button>
@@ -172,7 +172,7 @@ export function OrdersTableSection(props) {
                     {!isRefunded(order.status) ? (
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => onRefundOne(order.id)}
                         disabled={refundPending}

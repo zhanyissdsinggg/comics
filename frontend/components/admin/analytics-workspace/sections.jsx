@@ -29,7 +29,7 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
   return (
     <AdminPageSection
       title="读者总览"
-      description="查看读者规模、活跃、价值和流失风险。"
+      description="看规模、活跃、价值和流失风险。"
     >
       {statsQuery.isError ? (
         <AdminDataState
@@ -41,7 +41,7 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
         <AdminDataState
           isLoading={statsQuery.isLoading}
           hasData={Boolean(stats)}
-          emptyMessage="当前还没有可用的分析数据。"
+          emptyMessage="还没有可用的分析数据。"
           wrap={false}
         >
           {() => (
@@ -88,7 +88,7 @@ export function AnalyticsSegmentsSection({
   return (
     <AdminPageSection
       title="读者分群"
-      description="先看分群，再按需打开单个账号。"
+      description="先看分群，再打开账号。"
     >
       <div className="mb-6 flex flex-wrap gap-2 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-3 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
         {segmentFilters.map((segment) => (
@@ -113,7 +113,7 @@ export function AnalyticsSegmentsSection({
         onRetry={() => segmentsQuery.refetch()}
         isLoading={segmentsQuery.isLoading}
         hasItems={users.length > 0}
-        emptyMessage="当前分群下还没有匹配的用户。"
+        emptyMessage="当前分群下没有匹配用户。"
         pagination={pagination}
         page={page}
         pageSize={pageSize}
@@ -192,13 +192,13 @@ export function AnalyticsUserDetailSection({
     String(analytics?.churnRisk || "").toLowerCase() === "high"
       ? "已出现明显流失信号，建议尽快唤回。"
       : String(analytics?.churnRisk || "").toLowerCase() === "medium"
-        ? "活跃度在走软，适合补一次定向触达。"
+        ? "活跃度在走软，适合补一次触达。"
         : "近期互动稳定，留存状态健康。";
 
   return (
     <AdminPageSection
       title="用户详情"
-      description={`查看“${getSegmentLabel(selectedSegment)}”分群里这个账号的表现。`}
+      description={`查看“${getSegmentLabel(selectedSegment)}”分群里的账号表现。`}
       action={
         <Button type="button" variant="outline" onClick={onBack}>
           返回分群
@@ -249,7 +249,7 @@ export function AnalyticsUserDetailSection({
                     <AdminMetricCard
                       label="钱包余额"
                       value={formatNumber(user?.wallet?.coins)}
-                      detail="当前点数余额。"
+                      detail="点数余额。"
                     />
                     <AdminMetricCard
                       label="活跃评分"
@@ -268,7 +268,7 @@ export function AnalyticsUserDetailSection({
                         { label: "首单时间", value: formatDate(ltv?.firstOrderDate) },
                         { label: "最近订单", value: formatDate(ltv?.lastOrderDate) },
                         { label: "订单数", value: formatNumber(ltv?.totalOrders) },
-                        { label: "当前分群", value: getSegmentLabel(selectedSegment) },
+                        { label: "所在分群", value: getSegmentLabel(selectedSegment) },
                       ]}
                     />
                   </div>
@@ -299,7 +299,7 @@ export function AnalyticsUserDetailSection({
                     <div>
                       <p className="text-sm font-semibold text-slate-950">留存状态</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
-                        用一句话看清当前流失风险。
+                        一句话看清流失风险。
                       </p>
                     </div>
                     <AdminBadge tone={getChurnTone(analytics?.churnRisk)}>

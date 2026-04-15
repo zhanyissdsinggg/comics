@@ -177,7 +177,7 @@ export function validateCreditsDraft(credits) {
   );
 
   if (!hasPrimaryPublicCredit) {
-    return "至少保留一条公开主署名，前台作品页和创作者页才有稳定身份。";
+    return "至少保留一条公开主署名，前台作品页和创作者页才能稳定展示。";
   }
 
   return "";
@@ -244,12 +244,12 @@ export async function fetchSeriesCredits(seriesId) {
 
 export function buildCreatorPreviewLabel(publicCredits, authorFallback = "") {
   if (!publicCredits.length) {
-    return authorFallback || "待补全";
+    return authorFallback || "待补充";
   }
 
   const primaryCredit = publicCredits.find((credit) => credit.isPrimary) || publicCredits[0];
   if (!primaryCredit) {
-    return "待补全";
+    return "待补充";
   }
 
   if (publicCredits.length === 1) {
@@ -273,7 +273,7 @@ export function buildSeriesInsightState({
 }) {
   const normalizedGenres = normalizeGenresInput(formData.genres);
   const descriptionLength = formData.description.trim().length;
-  const coverStatus = formData.coverUrl.trim() ? "封面已就绪" : "封面待补";
+  const coverStatus = formData.coverUrl.trim() ? "封面已补齐" : "封面待补";
   const synopsisStatus = descriptionLength > 0 ? `简介 ${descriptionLength} 字` : "简介待补";
   const genreStatus = normalizedGenres.length > 0 ? `${normalizedGenres.length} 个标签` : "标签待补";
   const hasLegacyAuthorFallback = !publicCredits.length && Boolean(authorFallback);
@@ -281,8 +281,8 @@ export function buildSeriesInsightState({
   const creatorStatusDetail = publicCredits.length
     ? `${publicCredits.length} 条公开署名 · ${coverStatus} · ${genreStatus}`
     : hasLegacyAuthorFallback
-      ? "当前仍由旧 author 字段兼容兜底，建议尽快迁移到真实署名。"
-      : "当前还缺少可公开展示的创作者署名。";
+      ? "当前仍由旧 author 字段兜底，建议尽快迁移到真实署名。"
+      : "当前还没有可公开展示的创作者署名。";
 
   return {
     normalizedGenres,
@@ -296,9 +296,7 @@ export function buildSeriesInsightState({
       {
         label: "章节数",
         value: String(series?.episodeCount || 0),
-        detail: series?.latestEpisodeId
-          ? `最新章节：${series.latestEpisodeId}`
-          : "还没有章节。",
+        detail: series?.latestEpisodeId ? `最新章节：${series.latestEpisodeId}` : "还没有章节。",
         tone: "accent",
       },
       {

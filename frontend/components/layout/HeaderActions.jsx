@@ -9,22 +9,16 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 function AuthSkeleton({ variant = "default" }) {
-  const isLight =
-    variant === "light" || variant === "home" || variant === "default";
   return (
     <div
-      className={`hidden h-10 w-24 animate-pulse rounded-full border sm:block ${
-        isLight
-          ? "border-[color:var(--gush-border)] bg-white"
-          : "border-white/10 bg-white/[0.04]"
-      }`}
+      className="hidden h-10 w-24 animate-pulse rounded-full border border-[color:var(--gush-border)] bg-white sm:block"
       aria-hidden="true"
     />
   );
 }
 
 const ICON_BUTTON_CLASS =
-  "relative h-10 w-10 rounded-full border border-white/10 bg-white/[0.04] text-white/72 hover:border-white/16 hover:bg-white/[0.08] hover:text-white";
+  "relative h-10 w-10 rounded-full border border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]";
 
 export default function HeaderActions({
   onWalletClick,
@@ -41,11 +35,7 @@ export default function HeaderActions({
   const { unreadCount } = useNotificationsStore();
   const walletTotal = paidPts + bonusPts;
   const showWallet = hydrated && isSignedIn;
-  const isLight =
-    variant === "light" || variant === "home" || variant === "default";
-  const iconButtonClass = isLight
-    ? "relative h-10 w-10 rounded-full border border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:shadow-[0_14px_30px_rgba(0,0,0,0.22)] dark:hover:border-white/18 dark:hover:bg-white/[0.1] dark:hover:text-white"
-    : ICON_BUTTON_CLASS;
+  const iconButtonClass = ICON_BUTTON_CLASS;
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
@@ -55,18 +45,12 @@ export default function HeaderActions({
           size="sm"
           variant="outline"
           onClick={onWalletClick}
-          className={`hidden h-10 rounded-full px-4 lg:inline-flex ${
-            isLight
-              ? "border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-strong)] hover:border-[color:var(--gush-border-strong)] hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/18 dark:hover:bg-white/[0.1]"
-              : "border-white/10 bg-white/[0.04] text-white hover:border-white/16 hover:bg-white/[0.08]"
-          }`}
+          className="hidden h-10 rounded-full border-[color:var(--gush-border)] bg-white/92 px-4 text-[color:var(--gush-ink-strong)] hover:border-[color:var(--gush-border-strong)] hover:bg-white lg:inline-flex"
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
           <span className="text-sm font-semibold">Wallet</span>
-          <span
-            className={`text-xs tabular-nums ${isLight ? "text-slate-500 dark:text-neutral-400" : "text-white/48"}`}
-          >
+          <span className="text-xs tabular-nums text-[color:var(--gush-ink-faint)]">
             {walletTotal.toLocaleString()}
           </span>
         </Button>
@@ -101,13 +85,9 @@ export default function HeaderActions({
         onClick={onAdultToggleClick}
         className={cn(
           "h-10 min-w-[4.5rem] rounded-full px-3 text-xs font-semibold sm:min-w-[5.5rem] sm:px-3.5",
-          isLight
-            ? isAdultMode
-              ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12] dark:border-red-300/35 dark:bg-red-500/[0.14] dark:text-red-200 dark:hover:border-red-300/45 dark:hover:bg-red-500/[0.2]"
-              : "border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-[rgba(29,29,31,0.02)] hover:text-[color:var(--gush-ink-strong)] dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:hover:border-red-300/35 dark:hover:bg-red-500/[0.12] dark:hover:text-white"
-            : isAdultMode
-              ? "border-red-400/30 bg-red-500/[0.12] text-red-200 hover:border-red-300/45 hover:bg-red-500/[0.18]"
-              : "border-white/10 bg-white/[0.04] text-white/72 hover:border-red-400/30 hover:bg-red-500/[0.08] hover:text-white",
+          isAdultMode
+            ? "border-red-300/30 bg-red-500/[0.08] text-red-600 hover:border-red-400/40 hover:bg-red-500/[0.12]"
+            : "border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] hover:border-[color:var(--gush-border-strong)] hover:bg-[rgba(29,29,31,0.02)] hover:text-[color:var(--gush-ink-strong)]",
         )}
         aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
         aria-pressed={isAdultMode}
@@ -120,9 +100,7 @@ export default function HeaderActions({
               "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(15,23,42,0.06)]",
               isAdultMode
                 ? "bg-current opacity-90 shadow-[0_0_0_4px_rgba(239,68,68,0.14)]"
-                : isLight
-                  ? "bg-slate-400 dark:bg-neutral-500"
-                  : "bg-white/40",
+                : "bg-slate-400",
             )}
           />
           <span>{legalAge}+</span>
@@ -162,11 +140,7 @@ export default function HeaderActions({
             size="sm"
             variant="outline"
             onClick={() => router.push("/account")}
-            className={`hidden h-10 rounded-full px-4 text-sm font-semibold sm:inline-flex ${
-              isLight
-                ? "border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-strong)] hover:border-[color:var(--gush-border-strong)] hover:bg-white dark:border-white/10 dark:bg-white/[0.06] dark:text-white dark:hover:border-white/18 dark:hover:bg-white/[0.1]"
-                : "border-white/10 bg-white/[0.04] text-white hover:border-white/16 hover:bg-white/[0.08]"
-            }`}
+            className="hidden h-10 rounded-full border-[color:var(--gush-border)] bg-white/92 px-4 text-sm font-semibold text-[color:var(--gush-ink-strong)] hover:border-[color:var(--gush-border-strong)] hover:bg-white sm:inline-flex"
           >
             <User className="size-4" />
             Account

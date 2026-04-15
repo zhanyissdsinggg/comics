@@ -11,7 +11,7 @@ export default function AdminTrackingPage() {
   return (
     <AdminLayout
       title="追踪设置"
-      subtitle="把追踪脚本、平台令牌和本地草稿同步收在一个安静页面里，不把后台做成喧闹的分析面板。"
+      subtitle="管理脚本、令牌和草稿。"
     >
       <Suspense
         fallback={

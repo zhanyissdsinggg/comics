@@ -648,7 +648,7 @@ export default function SeriesPage({
     );
   }, [episodes]);
   const primaryButtonClass =
-    "rounded-full border border-slate-950 bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.12)] transition-all duration-200 hover:bg-slate-800 hover:shadow-[0_18px_34px_rgba(15,23,42,0.14)]";
+    "rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-200 hover:bg-black/82 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]";
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryReadAction = useMemo(

@@ -277,9 +277,6 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     当前分区
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    把作品、署名、前台编排和日常运营动作收在一个安静、好用的后台里。
-                  </p>
                 </div>
               ) : null}
             </div>
@@ -431,9 +428,6 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    菜单和搜索结果会按角色自动收口。拿到什么权限，就只看到对应的工作区。
-                  </p>
                 </div>
               </div>
             ) : null}

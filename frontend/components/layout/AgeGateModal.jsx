@@ -44,11 +44,11 @@ export default function AgeGateModal({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex min-h-screen items-center justify-center bg-[rgba(15,23,42,0.44)] px-4 py-6 backdrop-blur-sm dark:bg-[rgba(2,6,12,0.72)]"
+      className="fixed inset-0 z-[90] flex min-h-screen items-center justify-center bg-[rgba(15,23,42,0.44)] px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_22px_56px_rgba(15,23,42,0.1)] sm:p-7 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(18,24,35,0.98),rgba(12,18,28,0.98))] dark:shadow-[0_34px_120px_rgba(0,0,0,0.36)]"
+        className="relative w-full max-w-xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_22px_56px_rgba(15,23,42,0.1)] sm:p-7"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -60,31 +60,31 @@ export default function AgeGateModal({
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
-          <p className="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-neutral-400">
+          <p className="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             <AlertTriangle className="size-3.5" />
             18+ access
           </p>
           <h2
             id="adult-gate-title"
-            className="mt-3 font-display text-[2rem] font-semibold tracking-tight text-slate-950 dark:text-white sm:text-[2.35rem]"
+            className="mt-3 font-display text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.35rem]"
           >
             Adult Access Check
           </h2>
           <p
             id="adult-gate-description"
-            className="mt-4 text-sm leading-7 text-slate-600 dark:text-neutral-300 sm:text-[15px]"
+            className="mt-4 text-sm leading-7 text-slate-600 sm:text-[15px]"
           >
             Adults only. Are you {currentAge} or older?
           </p>
 
-          <div className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 dark:border-white/10 dark:bg-white/[0.05]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-neutral-400">
+          <div className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               Region check
             </p>
-            <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+            <p className="mt-2 text-sm font-semibold text-slate-900">
               {regionLabel} requires {currentAge}+ access for this catalog.
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-neutral-300">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Saved on this device after you confirm.
             </p>
           </div>
@@ -94,14 +94,14 @@ export default function AgeGateModal({
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="h-11 rounded-full px-5 text-sm font-semibold text-slate-600 hover:bg-black/[0.04] hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+              className="h-11 rounded-full px-5 text-sm font-semibold text-slate-600 hover:bg-black/[0.04] hover:text-slate-950"
             >
               No, take me back
             </Button>
             <Button
               type="button"
               onClick={() => onConfirm?.(normalizedRule)}
-              className="h-11 rounded-full bg-slate-950 px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
+              className="h-11 rounded-full bg-[color:var(--gush-ink-strong)] px-5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82"
             >
               Yes, I am {currentAge} or older
               <ChevronRight className="size-4" />

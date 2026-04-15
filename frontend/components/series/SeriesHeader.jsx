@@ -137,8 +137,8 @@ export default function SeriesHeader({
   const primaryActionClassName = [
     "inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
     highlightPrimaryAction
-      ? "border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_18px_38px_rgba(15,23,42,0.14)]"
-      : "border-slate-950 bg-slate-950 text-white shadow-[0_16px_34px_rgba(15,23,42,0.14)] hover:bg-slate-800 hover:shadow-[0_18px_36px_rgba(15,23,42,0.16)]",
+      ? "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_0_0_4px_rgba(15,23,42,0.05),0_16px_30px_rgba(15,23,42,0.12)]"
+      : "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">

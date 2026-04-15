@@ -312,22 +312,22 @@ export function viewMeta(tab) {
     case "trend":
       return {
         title: "收入趋势",
-        description: "按天看收入波动和支付完成订单，不把页面做成吵闹的图表墙。",
+        description: "按天看收入波动和支付完成订单。",
       };
     case "channels":
       return {
         title: "渠道表现",
-        description: "看清真正带来收入的是哪些支付或购买渠道，而不是只堆一排指标。",
+        description: "看清带来收入的支付或购买渠道。",
       };
     case "promotions":
       return {
         title: "活动表现",
-        description: "把活动带来的收入和归因限制说清楚，避免后台看起来像会自己脑补结果。",
+        description: "查看活动收入和归因限制。",
       };
     default:
       return {
         title: "收入总览",
-        description: "用一个更克制的方式阅读收入、退款、读者层级和订单结果，不回到旧 BI 面板语气。",
+        description: "阅读收入、退款、读者层级和订单结果。",
       };
   }
 }

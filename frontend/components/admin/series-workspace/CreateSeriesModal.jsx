@@ -151,7 +151,7 @@ export default function CreateSeriesModal(props) {
                 className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
               />
               <span className="text-xs text-slate-500">
-                尽量填写公开署名，前台作品页和创作者页会保持一致。
+                尽量填写公开署名，前台作品页和创作者页会一致显示。
               </span>
             </label>
 

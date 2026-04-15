@@ -25,7 +25,6 @@ function PortraitCard({
   item,
   tone,
   onClick,
-  appearance = "default",
   density = "default",
   href = "",
   showActionLabel = true,
@@ -42,7 +41,6 @@ function PortraitCard({
       100,
     ),
   );
-  const isLight = appearance === "light";
   const isCompact = density === "compact";
   const resolvedHref =
     href || (item?.id ? `/series/${encodeURIComponent(item.id)}` : "");
@@ -100,16 +98,14 @@ function PortraitCard({
       className={cn(
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
         isCompact ? "rounded-[24px]" : "rounded-[30px]",
-        isLight
-          ? "border border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(15,23,42,0.04)] group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
-          : "border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,31,0.88),rgba(8,11,18,0.98))] shadow-[0_20px_70px_rgba(0,0,0,0.2)] group-hover:border-white/20 group-hover:shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
+        "border border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(15,23,42,0.04)] group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
             "relative aspect-[3/4] overflow-hidden",
-            isLight ? "bg-[color:var(--gush-page-bg-muted)]" : "bg-neutral-900",
+            "bg-[color:var(--gush-page-bg-muted)]",
             isCompact ? "rounded-[20px]" : "rounded-[24px]",
           )}
         >
@@ -125,26 +121,16 @@ function PortraitCard({
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
           />
           <div
-            className={cn(
-              "absolute inset-0",
-              isLight
-                ? "bg-gradient-to-t from-black/44 via-black/10 to-transparent"
-                : "bg-gradient-to-t from-black/85 via-black/18 to-transparent",
-            )}
+            className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent"
           />
           <div
-            className={cn(
-              "absolute inset-0",
-              isLight
-                ? "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]"
-                : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_22%)]",
-            )}
+            className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]"
           />
           <div
             className={cn(
               "absolute inset-[1px]",
               isCompact ? "rounded-[19px]" : "rounded-[23px]",
-              isLight ? "border border-white/38" : "border border-white/10",
+              "border border-white/38",
             )}
           />
 
@@ -171,9 +157,7 @@ function PortraitCard({
               className={cn(
                 "line-clamp-1 font-semibold uppercase tracking-[0.2em] transition-colors",
                 isCompact ? "text-[10px]" : "text-[11px]",
-                isLight
-                  ? "text-[color:var(--gush-ink-faint)] group-hover:text-[color:var(--gush-ink-soft)]"
-                  : "text-neutral-500 group-hover:text-neutral-400",
+                "text-[color:var(--gush-ink-faint)] group-hover:text-[color:var(--gush-ink-soft)]",
               )}
             >
               {metaLine}
@@ -185,9 +169,7 @@ function PortraitCard({
               isCompact
                 ? "text-[1.08rem] leading-5"
                 : "text-[1.12rem] leading-6",
-              isLight
-                ? "text-[color:var(--gush-ink-strong)] group-hover:text-[color:var(--gush-ink-strong)]"
-                : "text-neutral-100 group-hover:text-white",
+              "text-[color:var(--gush-ink-strong)] group-hover:text-[color:var(--gush-ink-strong)]",
             )}
           >
             {item.title}
@@ -204,9 +186,7 @@ function PortraitCard({
                   isCompact
                     ? "px-2.5 py-1 text-[10px]"
                     : "px-3 py-1 text-[11px]",
-                  isLight
-                    ? "border-[color:var(--gush-border-faint)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-soft)]"
-                    : "border-white/10 bg-white/[0.04] text-neutral-300",
+                  "border-[color:var(--gush-border-faint)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-soft)]",
                 )}
               >
                 {genre}
@@ -220,9 +200,7 @@ function PortraitCard({
             className={cn(
               "line-clamp-1 transition-colors",
               isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
-              isLight
-                ? "text-[color:var(--gush-ink-soft)] group-hover:text-[color:var(--gush-ink)]"
-                : "text-neutral-400 group-hover:text-neutral-300",
+              "text-[color:var(--gush-ink-soft)] group-hover:text-[color:var(--gush-ink)]",
             )}
           >
             {detailText}
@@ -244,9 +222,7 @@ function PortraitCard({
             <p
               className={cn(
                 "text-[11px] font-medium",
-                isLight
-                  ? "text-[color:var(--gush-ink-faint)]"
-                  : "text-neutral-500",
+                "text-[color:var(--gush-ink-faint)]",
               )}
             >
               {Math.round(progressWidth)}% read
@@ -256,9 +232,7 @@ function PortraitCard({
               className={cn(
                 isCompact ? "text-[10px]" : "text-[11px]",
                 "font-medium uppercase tracking-[0.16em]",
-                isLight
-                  ? "text-[color:var(--gush-ink-faint)]"
-                  : "text-neutral-500",
+                "text-[color:var(--gush-ink-faint)]",
               )}
             >
               {actionLabel}
@@ -267,9 +241,7 @@ function PortraitCard({
           <span
             className={cn(
               "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1",
-              isLight
-                ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]"
-                : "border-white/10 bg-white/[0.04] text-white/82",
+              "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]",
             )}
           >
             <ArrowRight className="size-4" />

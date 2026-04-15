@@ -25,8 +25,7 @@ import {
   PERFORMANCE_WINDOWS,
 } from "./utils";
 
-const actionTrayClassName =
-  "rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)]";
+const actionTrayClassName = "flex flex-wrap gap-2";
 
 const primaryActionClassName =
   "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-slate-950";
@@ -49,7 +48,7 @@ export function PerformanceOverviewSection(props) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">推荐位表现</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">看入口有没有真正拿到曝光、点击和承接。</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">看入口有没有拿到曝光和点击。</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {PERFORMANCE_WINDOWS.map((window) => (
@@ -191,7 +190,7 @@ export function OptimizationQueueSection(props) {
               </div>
             ) : null}
 
-            <div className={`mt-5 grid gap-2 sm:grid-cols-2 ${actionTrayClassName}`}>
+            <div className={`mt-5 ${actionTrayClassName}`}>
               {slot.plan.actionType === "apply" ? (
                 <ActionButton
                   onClick={() => void handleApplyRecommendation(slot)}
@@ -238,7 +237,7 @@ export function HeroCandidatesSection(props) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">主视觉候选作品</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">这些作品最接近能接住首页最强曝光。</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">这些作品最接近首页最强曝光位。</p>
         </div>
         <Star className="mt-1 h-5 w-5 text-amber-500" />
       </div>
@@ -292,7 +291,7 @@ export function HeroCandidatesSection(props) {
                   <MiniMetric label="内容基础" value={formatCompactNumber(getReaderProof(series))} />
                   <MiniMetric label="就绪分" value={readiness.score} />
                 </div>
-                <div className={`mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-3 ${actionTrayClassName}`}>
+                <div className={`mt-5 ${actionTrayClassName}`}>
                   <ActionButton onClick={() => openSeriesEditor(series.id)} className={primaryActionClassName}>
                     <BookOpen className="h-4 w-4" />
                     编辑作品

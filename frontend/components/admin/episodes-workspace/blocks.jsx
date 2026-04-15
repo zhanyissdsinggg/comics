@@ -38,7 +38,7 @@ export function CommercialFieldsToggle({ expanded, onToggle }) {
       onClick={onToggle}
       className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
     >
-      {expanded ? "收起次级发行设置" : "显示次级发行设置"}
+      {expanded ? "收起附加发行设置" : "显示附加发行设置"}
     </button>
   );
 }
@@ -174,7 +174,9 @@ export function EpisodeTable({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`/read/${seriesId}/${episode.id}`, "_blank", "noopener,noreferrer")}
+                    onClick={() =>
+                      window.open(`/read/${seriesId}/${episode.id}`, "_blank", "noopener,noreferrer")
+                    }
                   >
                     <BookOpen className="size-4" />
                     阅读页

@@ -138,14 +138,14 @@ export default function AdminHomeMerchandisingPage() {
           );
         } else {
           setSlots([]);
-          nextWarnings.push("推荐位配置暂时没有加载成功，当前页面只展示编排建议，不代表已保存的线上状态。");
+          nextWarnings.push("推荐位配置暂时没有加载成功，当前先展示编排建议。");
         }
 
         if (hotResult.status === "fulfilled" && hotResult.value.ok) {
           setHotKeywords(Array.isArray(hotResult.value.data?.keywords) ? hotResult.value.data.keywords : []);
         } else {
           setHotKeywords([]);
-          nextWarnings.push("搜索关注点暂时不可用，不过首页编排的其他区块仍可正常使用。");
+          nextWarnings.push("搜索关注点暂时不可用，其余编排区块仍可正常使用。");
         }
 
         setWarnings(nextWarnings);
@@ -492,7 +492,7 @@ export default function AdminHomeMerchandisingPage() {
   return (
     <AdminShell
       title="首页编排"
-      subtitle="把首页主视觉、起步推荐和回访入口放进同一套编排工作流。"
+      subtitle="把首页关键入口收在一套编排流里。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -555,7 +555,7 @@ export default function AdminHomeMerchandisingPage() {
                 首页编排基线
               </p>
               <h2 className="mt-3 text-[2rem] font-semibold tracking-tight text-slate-950 sm:text-[2.45rem]">
-                先收紧真正决定首页观感的几个入口。
+                先收紧首页最关键的入口。
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
                 主视觉、起步推荐和回访入口先用最稳的作品。
@@ -719,7 +719,7 @@ export default function AdminHomeMerchandisingPage() {
                   搜索关注点
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  用真实搜索关注点辅助判断入口方向。
+                  用真实搜索词辅助判断入口方向。
                 </p>
               </div>
               <Search className="mt-1 h-5 w-5 text-amber-500" />

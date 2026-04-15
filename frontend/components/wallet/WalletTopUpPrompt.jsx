@@ -168,7 +168,9 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating ? "bg-slate-950/42 backdrop-blur-md" : "bg-transparent"
+        isAnimating
+          ? "bg-[rgba(15,23,42,0.34)] backdrop-blur-md"
+          : "bg-transparent"
       }`}
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
@@ -254,7 +256,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     }`}
                   >
                     {isHighlighted ? (
-                      <div className="absolute -top-2 right-4 rounded-full bg-slate-950 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white shadow-lg">
+                      <div className="absolute -top-2 right-4 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-strong)] shadow-[0_10px_20px_rgba(15,23,42,0.05)]">
                         Best value
                       </div>
                     ) : null}
@@ -317,7 +319,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 <button
                   type="button"
                   onClick={() => handleSelectPackage({ id: "auto" })}
-                  className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                 >
                   Open store
                 </button>

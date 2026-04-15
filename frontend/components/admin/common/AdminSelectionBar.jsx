@@ -27,11 +27,11 @@ export function AdminSelectionBar({
         </div>
         <div>
           <p className="text-sm font-semibold text-slate-900">已选择 {selectedCount} 项</p>
-          <p className="text-xs text-slate-500">批量操作会立即应用到当前选中的内容。</p>
+          <p className="text-xs text-slate-500">批量操作会立即应用到已选内容。</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
+      <div className="flex flex-wrap items-center gap-2">
         {children}
         <Button type="button" variant="ghost" size="sm" onClick={onClear}>
           {clearLabel}

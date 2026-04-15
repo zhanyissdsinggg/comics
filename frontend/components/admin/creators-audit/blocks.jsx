@@ -95,7 +95,7 @@ export function LoadingView() {
   return (
     <AdminShell
       title="创作者"
-      subtitle="正在整理创作者署名、命名和前台身份数据。"
+      subtitle="正在整理创作者署名和前台身份数据。"
     >
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />

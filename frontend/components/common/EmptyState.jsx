@@ -111,7 +111,7 @@ export const EmptyState = memo(function EmptyState({
               isLight
                 ? icon === "alert"
                   ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-                  : "border-slate-950 bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:bg-slate-800"
+                  : "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
                 : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/16"
             }`}
           >

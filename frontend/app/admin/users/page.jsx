@@ -9,8 +9,16 @@ import AdminShell from '@/components/admin/AdminShell';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { UsersDirectorySection, UsersGuideSection, UsersSummaryCards } from '@/components/admin/users-workspace/sections';
-import { searchFields, sortFields, sortOptions } from '@/components/admin/users-workspace/utils';
+import {
+  UsersDirectorySection,
+  UsersGuideSection,
+  UsersSummaryCards,
+} from '@/components/admin/users-workspace/sections';
+import {
+  searchFields,
+  sortFields,
+  sortOptions,
+} from '@/components/admin/users-workspace/utils';
 import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
@@ -140,10 +148,7 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <AdminShell
-      title="用户"
-      subtitle="把读者账号、钱包余额和访问状态放在一个安静可读的目录里，批量操作只在真的省事时出现。"
-    >
+    <AdminShell title="用户" subtitle="查看账号、钱包和访问状态。">
       <div className="space-y-6">
         <UsersSummaryCards
           total={pagination.total}
@@ -204,7 +209,7 @@ export default function AdminUsersPage() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
         options={sortOptions}
-        title="排序用户"
+        title="用户排序"
         label="排序方式"
         actionLabel="完成"
       />

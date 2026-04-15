@@ -34,9 +34,9 @@ export function MarketingSummaryCards({ metricSnapshot }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <AdminMetricCard label="当前活动" value={formatNumber(metricSnapshot.totalCampaigns)} detail="当前工作区内活动总数。" tone="accent" />
-      <AdminMetricCard label="进行中" value={formatNumber(metricSnapshot.activeCampaigns)} detail="仍在运行或排期内保持在线的活动。" />
-      <AdminMetricCard label="当前预算" value={formatCurrency(metricSnapshot.totalBudget)} detail="所选统计时间范围内的计划预算。" />
-      <AdminMetricCard label="平均投入产出比" value={formatPercent(metricSnapshot.avgRoi)} detail="当前活动组合效果的快速方向判断。" />
+      <AdminMetricCard label="进行中" value={formatNumber(metricSnapshot.activeCampaigns)} detail="仍在运行或排期内的活动。" />
+      <AdminMetricCard label="当前预算" value={formatCurrency(metricSnapshot.totalBudget)} detail="所选时间范围内的计划预算。" />
+      <AdminMetricCard label="平均投入产出比" value={formatPercent(metricSnapshot.avgRoi)} detail="快速判断当前活动效果。" />
     </div>
   );
 }
@@ -54,7 +54,7 @@ export function MarketingControlsSection({
   return (
     <AdminPageSection
       title="活动控制"
-      description="在这里切换视图、调整时间范围并新建活动。"
+      description="切换视图、调整时间范围并新建活动。"
       action={
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="outline" onClick={onRefresh}>
@@ -390,7 +390,7 @@ export function CreateCampaignModalContent({
         />
       </AdminFormField>
 
-      <div className="flex flex-wrap justify-end gap-3 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 pt-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+      <div className="flex flex-wrap justify-end gap-3">
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>

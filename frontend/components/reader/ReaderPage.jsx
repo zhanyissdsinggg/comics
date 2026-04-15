@@ -1434,21 +1434,21 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-neutral-950 text-neutral-100">
+      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
         <ReaderTopBar
           title="Opening your chapter"
           episodeLabel="Reader"
           onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
-          <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.24)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-400">
+          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
               Opening chapter
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--gush-ink-strong)] sm:text-4xl">
               Opening your chapter.
             </h1>
-            <p className="mt-3 text-sm leading-7 text-neutral-400">
+            <p className="mt-3 text-sm leading-7 text-[color:var(--gush-ink-soft)]">
               Access, progress, and unlock checks are loading. If this takes too
               long, go back to the series page or open support.
             </p>
@@ -1456,7 +1456,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               <button
                 type="button"
                 onClick={() => router.push(buildSeriesHref())}
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-200"
+                className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/82"
               >
                 Back to series
               </button>
@@ -1470,7 +1470,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     }),
                   )
                 }
-                className="rounded-full border border-white/12 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.06]"
+                className="rounded-full border border-[color:var(--gush-border)] px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
               >
                 Support
               </button>
@@ -1479,11 +1479,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`reader-loading-${index}`}
-                  className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4"
+                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
                 >
-                  <div className="h-3 w-20 animate-pulse rounded-full bg-white/10" />
-                  <div className="mt-3 h-4 w-28 animate-pulse rounded-full bg-white/10" />
-                  <div className="mt-4 h-3 w-full animate-pulse rounded-full bg-white/5" />
+                  <div className="h-3 w-20 animate-pulse rounded-full bg-[rgba(29,29,31,0.08)]" />
+                  <div className="mt-3 h-4 w-28 animate-pulse rounded-full bg-[rgba(29,29,31,0.08)]" />
+                  <div className="mt-4 h-3 w-full animate-pulse rounded-full bg-[rgba(29,29,31,0.05)]" />
                 </div>
               ))}
             </div>
@@ -1495,7 +1495,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (error === "ADULT_GATED") {
     return (
-      <main className="min-h-screen bg-neutral-950 text-neutral-100">
+      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
         <ReaderTopBar
           title="Adult content"
           episodeLabel="..."
@@ -1531,7 +1531,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-neutral-950 text-neutral-100">
+      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
         <ReaderTopBar
           title="Error"
           episodeLabel="..."
@@ -1547,7 +1547,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-              className="rounded-full border border-neutral-700 bg-transparent px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-neutral-500 hover:bg-white/[0.04]"
+              className="rounded-full border border-[color:var(--gush-border)] bg-transparent px-4 py-2 text-xs font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
             >
               Back to Series
             </button>
@@ -1561,7 +1561,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   }),
                 )
               }
-              className="rounded-full border border-neutral-700 bg-transparent px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-neutral-500 hover:bg-white/[0.04]"
+              className="rounded-full border border-[color:var(--gush-border)] bg-transparent px-4 py-2 text-xs font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
             >
               Support
             </button>
@@ -1573,7 +1573,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   return (
     <main
-      className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-neutral-950 text-neutral-100"}`}
+      className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]"}`}
     >
       <ReaderTopBar
         title={seriesData?.series?.title || "Series"}
@@ -1806,8 +1806,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
               onClick={handleUnlockCurrent}
               className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
                 commerceNotice
-                  ? "border border-slate-950 bg-slate-950 text-white shadow-[0_0_0_4px_rgba(15,23,42,0.06),0_20px_42px_rgba(15,23,42,0.14)] hover:bg-slate-800 active:bg-slate-900"
-                  : "bg-slate-950 text-white hover:bg-slate-800 active:bg-slate-900"
+                  ? "border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_0_0_4px_rgba(15,23,42,0.05),0_16px_30px_rgba(15,23,42,0.12)] hover:bg-black/82"
+                  : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82"
               }`}
               style={{ willChange: "transform" }}
             >

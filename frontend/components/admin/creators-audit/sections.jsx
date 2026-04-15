@@ -26,8 +26,7 @@ import { ActionButton, EmptyState, StatusPill } from "./blocks";
 const contentCardClassName =
   "rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]";
 
-const actionTrayClassName =
-  "grid w-full gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02] sm:grid-cols-2";
+const actionTrayClassName = "flex w-full flex-wrap gap-2";
 
 const primaryActionClassName =
   "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]";
@@ -47,7 +46,7 @@ export function NamingRiskSection({
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">命名清理</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            先处理这里，避免前台把同一位创作者拆成多个条目。
+            先把同一位创作者的名字收成一个版本。
           </p>
         </div>
         <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
@@ -69,8 +68,7 @@ export function NamingRiskSection({
                     <StatusPill tone="amber">发现 {creator.variants.length} 种写法</StatusPill>
                   </div>
                   <p className="text-sm leading-6 text-slate-600">
-                    关联 {creator.titleCount} 部作品，其中 {creator.publishedCount} 部已发布，
-                    {creator.unpublishedCount} 部仍是草稿。
+                    关联 {creator.titleCount} 部作品，已发布 {creator.publishedCount} 部，草稿 {creator.unpublishedCount} 部。
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {creator.variants.map((variant) => (
@@ -114,7 +112,7 @@ export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries 
             缺少创作者署名的作品
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            这些作品还没有可公开展示的创作者身份。
+            这些作品前台还拿不到真实署名。
           </p>
         </div>
         <Users className="mt-1 h-5 w-5 text-cyan-500" />
@@ -167,7 +165,7 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
             旧 author 兼容层
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            这些作品还能读，但还没真正迁进 Creator / SeriesCredit。
+            这些作品还没迁进 Creator / SeriesCredit。
           </p>
         </div>
         <BookOpen className="mt-1 h-5 w-5 text-amber-500" />
@@ -228,11 +226,11 @@ export function CreatorDirectorySection({
         <div>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">创作者目录</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            在一个地方核对覆盖率、命名状态和前台路径。
+            在一个地方看覆盖率、命名状态和前台路径。
           </p>
         </div>
         <p className="text-sm text-slate-500">
-          还有 {audit.stats.unpublishedSeriesCount} 部草稿作品和 {audit.stats.namingRiskCreatorCount} 处命名风险需要处理
+          草稿 {audit.stats.unpublishedSeriesCount} 部，命名风险 {audit.stats.namingRiskCreatorCount} 处
         </p>
       </div>
 
@@ -311,7 +309,7 @@ export function CreatorDirectorySection({
                 {creator.variants.length > 1 ? (
                   <div className="mt-4 rounded-[24px] border border-amber-200 bg-white px-4 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
                     <p className="text-sm font-semibold text-amber-900">
-                      请把这些写法合并成一个稳定的公开创作者名称：
+                      建议合并成一个稳定的公开名称：
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {creator.variants.map((variant) => (
@@ -323,7 +321,7 @@ export function CreatorDirectorySection({
                   </div>
                 ) : null}
 
-                <div className="mt-5 grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 flex flex-wrap gap-2">
                   <ActionButton
                     onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
                     className={primaryActionClassName}
@@ -361,10 +359,10 @@ export function CreatorDirectorySection({
                   <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">关联作品</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          用这份清单继续清理作品级署名字段，并复核前台作品页是否已经跟上。
-                        </p>
+                      <p className="text-sm font-semibold text-slate-950">关联作品</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                          继续核对作品级署名和前台页。
+                      </p>
                       </div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         共 {creator.series.length} 部
@@ -394,7 +392,7 @@ export function CreatorDirectorySection({
                             </p>
                           </div>
 
-                          <div className="grid w-full gap-2 sm:grid-cols-2">
+                          <div className="flex w-full flex-wrap gap-2">
                             <ActionButton onClick={() => handleOpenSeries(series.id)} className={primaryActionClassName}>
                               <Edit3 className="h-4 w-4" />
                               编辑作品

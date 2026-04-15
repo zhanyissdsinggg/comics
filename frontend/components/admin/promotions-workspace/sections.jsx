@@ -59,7 +59,7 @@ export function PromotionsListSection(props) {
   return (
     <AdminPageSection
       title="活动列表"
-      description="先用一个简单状态视图看清活动是什么、现在是否在线，以及接下来应该做什么。"
+      description="先看活动内容、当前状态和下一步动作。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
@@ -78,7 +78,7 @@ export function PromotionsListSection(props) {
           onClick={onOpenDeleteConfirm}
           disabled={selectedIds.length === 0 || deletePending}
         >
-          {deletePending ? "正在删除..." : "删除活动"}
+          {deletePending ? "正在删除..." : "删除所选"}
         </Button>
       </AdminSelectionBar>
 
@@ -145,7 +145,7 @@ export function PromotionsListSection(props) {
                     <td className="px-4 py-4">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant={isActive ? "secondary" : "default"}
                         size="sm"
                         onClick={() => onToggleStatus(promotion.id, isActive)}
                         disabled={isUpdating}

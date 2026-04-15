@@ -26,18 +26,12 @@ const HOME_NAV_ITEMS = [
 export default function HeaderNav({ variant = "default" }) {
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
-  const isLight =
-    variant === "light" || variant === "home" || variant === "default";
   const navItems = variant === "home" ? HOME_NAV_ITEMS : DEFAULT_NAV_ITEMS;
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">
       <div
-        className={`inline-flex items-center gap-1 rounded-full px-1.5 py-1 ${
-          isLight
-            ? "border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-white/[0.04] dark:shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
-            : "border border-white/10 bg-white/[0.04] shadow-[0_14px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl"
-        }`}
+        className="inline-flex items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-white/94 px-1.5 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.05)]"
       >
         {navItems.map((item) => {
           const isActive =
@@ -76,12 +70,8 @@ export default function HeaderNav({ variant = "default" }) {
               aria-current={isActive ? "page" : undefined}
               className={`relative rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? isLight
-                    ? "bg-white text-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(15,23,42,0.06)] dark:bg-white/[0.1] dark:text-white dark:shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
-                    : "bg-white/[0.12] text-white shadow-[0_12px_26px_rgba(0,0,0,0.24)]"
-                  : isLight
-                    ? "text-[color:var(--gush-ink-soft)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] dark:text-neutral-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
-                    : "text-white/68 hover:bg-white/[0.06] hover:text-white"
+                  ? "bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_0_0_1px_rgba(29,29,31,0.05)]"
+                  : "text-[color:var(--gush-ink-soft)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
               }`}
             >
               {item.label}

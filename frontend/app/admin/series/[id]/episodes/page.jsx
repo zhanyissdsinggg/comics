@@ -37,10 +37,7 @@ import {
   toInteger,
   validateNewEpisodeDraft,
 } from '@/components/admin/episodes-workspace/utils';
-import {
-  adminFetch,
-  readAdminResponseMessage,
-} from '@/lib/adminApiClient';
+import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
 
 const DEFAULT_FILTERS = {
   priceType: 'all',
@@ -453,7 +450,7 @@ export default function AdminEpisodesPage() {
   return (
     <AdminShell
       title={series.title || '章节管理'}
-      subtitle="按内容优先方式维护章节号、标题、试看页数和发布时间；旧商业设置保留在次级入口。"
+      subtitle="集中维护章节号、标题、试看页数和发布时间。"
       actions={
         <EpisodesHeaderActions
           onBackToSeries={() => router.push(`/admin/series/${seriesId}`)}
@@ -518,7 +515,7 @@ export default function AdminEpisodesPage() {
       <Modal
         isOpen={isAddModalOpen}
         title="新增章节"
-        subtitle="先把章节号、标题和试看入口补好，次级发行设置默认收起。"
+        subtitle="先补章节号、标题和试看入口。"
         onClose={() => setIsAddModalOpen(false)}
         size="lg"
       >
@@ -535,7 +532,7 @@ export default function AdminEpisodesPage() {
       <Modal
         isOpen={isBulkModalOpen}
         title="批量修改章节"
-        subtitle={`把统一内容修改应用到 ${selectedIds.length} 个已选章节。`}
+        subtitle={`把统一修改应用到 ${selectedIds.length} 个已选章节。`}
         onClose={() => setIsBulkModalOpen(false)}
         size="lg"
       >

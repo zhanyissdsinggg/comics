@@ -119,7 +119,7 @@ export default function PackageCard({
           className={`mt-4 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-all ${
             disabled
               ? "cursor-not-allowed bg-slate-200 text-slate-500"
-              : "bg-slate-950 text-white hover:bg-slate-800 active:scale-95 active:bg-slate-900"
+              : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82 active:scale-95"
           }`}
           onClick={() => onSelect?.(pkg.id)}
           disabled={disabled}

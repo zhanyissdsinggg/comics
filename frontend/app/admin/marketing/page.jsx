@@ -193,10 +193,7 @@ export default function AdminMarketingPage() {
   const tabContentMeta = tabMeta(viewMode);
 
   return (
-    <AdminShell
-      title="营销活动"
-      subtitle="在不让页面滑回吵闹增长后台的前提下，管理活动规划并读取结果。"
-    >
+    <AdminShell title="营销活动" subtitle="管理活动并查看结果。">
       <div className="space-y-6">
         <MarketingSummaryCards metricSnapshot={metricSnapshot} />
 
@@ -244,7 +241,7 @@ export default function AdminMarketingPage() {
       <Modal
         isOpen={isCreateModalOpen}
         title="新建活动"
-        subtitle="把活动设置说清楚就够了：它是什么、面向谁、什么时候开始跑。"
+        subtitle="写清名称、对象和时间。"
         onClose={() => setIsCreateModalOpen(false)}
         size="xl"
       >

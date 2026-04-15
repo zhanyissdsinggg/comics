@@ -83,9 +83,9 @@ export function SupportQueueSection(props) {
   return (
     <AdminPageSection
       title="客服队列"
-      description="按主题、用户或工单编号搜索，让操作行保持克制，把消息正文留给真正需要判断的人。"
+      description="按主题、用户或工单编号搜索。"
       action={
-        <Button type="button" variant="outline" onClick={onReset}>
+        <Button type="button" variant="secondary" onClick={onReset}>
           <RefreshCw className="size-4" />
           重置视图
         </Button>
@@ -97,7 +97,7 @@ export function SupportQueueSection(props) {
             <input
               value={searchTerm}
               onChange={(event) => onSearchTermChange(event.target.value)}
-              placeholder="搜索工单编号、用户、主题、原消息或回复内容..."
+              placeholder="搜索工单编号、用户、主题或消息内容..."
               className={adminInputClassName}
             />
           </label>
@@ -228,10 +228,10 @@ export function SupportQueueSection(props) {
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.createdAt)}</td>
                   <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.updatedAt)}</td>
                   <td className="px-4 py-4">
-                    <div className="flex flex-col items-start gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => onOpenReply(ticket)}
                         disabled={!replyEnabled || replyPending}
@@ -319,7 +319,7 @@ export function SupportReplyModal({
 
         <AdminFormField
           label={selectedTicket?.adminReply ? "更新回复内容" : "回复内容"}
-          helperText="回复保持直接、克制，并准确回应读者这次提出的问题。发送后会覆盖当前工单的最近一次回复。"
+          helperText="发送后会覆盖当前工单的最近一次回复。"
         >
           <textarea
             value={replyContent}
@@ -331,7 +331,7 @@ export function SupportReplyModal({
           />
         </AdminFormField>
 
-        <div className="flex justify-end rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+        <div className="flex justify-end">
           <Button
             type="button"
             onClick={onSubmit}

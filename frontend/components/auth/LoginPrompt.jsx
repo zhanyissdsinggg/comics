@@ -143,7 +143,7 @@ const LoginPrompt = memo(function LoginPrompt({
             <button
               type="button"
               onClick={handleLogin}
-              className="w-full min-h-[48px] rounded-full bg-slate-950 px-6 py-3 text-base font-semibold text-white transition-all duration-300 hover:bg-slate-800 active:scale-[0.98]"
+              className="w-full min-h-[48px] rounded-full bg-[color:var(--gush-ink-strong)] px-6 py-3 text-base font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-300 hover:bg-black/82 active:scale-[0.98]"
             >
               {primaryLabel}
             </button>

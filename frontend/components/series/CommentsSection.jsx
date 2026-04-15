@@ -241,7 +241,7 @@ export default function CommentsSection({
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
   const inputClass =
     "flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
 
@@ -299,7 +299,7 @@ export default function CommentsSection({
             onClick={() => setSortKey("latest")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "latest"
-                ? "border-black/10 bg-slate-950 text-white"
+                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
                 : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             }`}
           >
@@ -310,7 +310,7 @@ export default function CommentsSection({
             onClick={() => setSortKey("top")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "top"
-                ? "border-black/10 bg-slate-950 text-white"
+                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
                 : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
             }`}
           >
@@ -449,7 +449,7 @@ export default function CommentsSection({
                   <button
                     type="button"
                     onClick={() => handleReply(comment.id)}
-                    className="rounded-full bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                    className="rounded-full bg-[color:var(--gush-ink-strong)] px-3 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                   >
                     Reply
                   </button>

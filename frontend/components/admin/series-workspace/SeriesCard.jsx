@@ -46,16 +46,16 @@ function getReadinessToneClasses(tone) {
 }
 
 const actionGroupClassName =
-  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:justify-end [&_button]:justify-center";
+  "flex flex-wrap gap-2 lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
 
 const primaryActionGroupClassName =
-  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border-strong)] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02] lg:justify-end [&_button]:min-w-[104px] [&_button]:justify-center";
+  "flex flex-wrap gap-2 lg:justify-end [&_button]:min-w-[104px] [&_button]:justify-center";
 
 const secondaryActionGroupClassName =
-  "flex flex-wrap gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white p-2 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
+  "flex flex-wrap gap-2 lg:justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
 
 const quietDangerActionGroupClassName =
-  "flex justify-end rounded-[22px] border border-transparent bg-transparent p-0 [&_button]:min-w-[98px] [&_button]:justify-center";
+  "flex justify-end [&_button]:min-w-[98px] [&_button]:justify-center";
 
 const statCellClassName =
   "rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3 shadow-[0_6px_14px_rgba(15,23,42,0.03)]";
@@ -308,20 +308,19 @@ export default function SeriesCard(props) {
                   <BookOpen className="size-4" />
                   章节
                 </Button>
+                <Button
+                  type="button"
+                  variant={series.isPublished ? "secondary" : "default"}
+                  size="sm"
+                  onClick={() => onTogglePublish(series)}
+                  title={series.isPublished ? "转为草稿" : "立即发布"}
+                >
+                  {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {series.isPublished ? "转草稿" : "发布"}
+                </Button>
               </div>
 
               <div className={secondaryActionGroupClassName}>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onOpenFrontend(series.id)}
-                  disabled={!series.isPublished}
-                  title={series.isPublished ? "查看前台作品页" : "草稿状态下不能直接打开前台页"}
-                >
-                  <ExternalLink className="size-4" />
-                  前台页
-                </Button>
                 <Button
                   type="button"
                   variant="secondary"
@@ -334,13 +333,14 @@ export default function SeriesCard(props) {
                 </Button>
                 <Button
                   type="button"
-                  variant={series.isPublished ? "secondary" : "default"}
+                  variant="secondary"
                   size="sm"
-                  onClick={() => onTogglePublish(series)}
-                  title={series.isPublished ? "转为草稿" : "立即发布"}
+                  onClick={() => onOpenFrontend(series.id)}
+                  disabled={!series.isPublished}
+                  title={series.isPublished ? "查看前台作品页" : "草稿状态下不能直接打开前台页"}
                 >
-                  {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  {series.isPublished ? "转为草稿" : "立即发布"}
+                  <ExternalLink className="size-4" />
+                  前台页
                 </Button>
                 <Button
                   type="button"

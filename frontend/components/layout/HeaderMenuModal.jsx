@@ -198,7 +198,7 @@ export default function HeaderMenuModal({
                       onClose();
                       onOpenLogin?.();
                     }}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
                   >
                     Sign In
                   </button>

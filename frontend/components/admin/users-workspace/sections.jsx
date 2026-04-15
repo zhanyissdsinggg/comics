@@ -65,7 +65,7 @@ export function UsersDirectorySection(props) {
   return (
     <AdminPageSection
       title="读者目录"
-      description="按邮箱或账号编号搜索，再处理状态变更，不把页面做成吵闹的用户控制台。"
+      description="按邮箱或账号编号搜索。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
@@ -115,7 +115,7 @@ export function UsersDirectorySection(props) {
         onRetry={onRetry}
         isLoading={isLoading}
         hasItems={users.length > 0}
-        emptyMessage="当前视图下还没有匹配的用户。"
+        emptyMessage="当前筛选下没有用户。"
         pagination={pagination}
         page={page}
         pageSize={pageSize}
@@ -208,31 +208,37 @@ export function UsersDirectorySection(props) {
 }
 
 export function UsersGuideSection() {
+  const items = [
+    {
+      title: "先看账号状态",
+      description: "封禁和恢复要清楚，但不要盖过账号本身。",
+    },
+    {
+      title: "钱包信息只看核心值",
+      description: "这里只看账号身份、钱包状态和访问状态。",
+    },
+    {
+      title: "批量操作只在需要时出现",
+      description: "默认页面保持安静，选中后再处理。",
+    },
+  ];
+
   return (
     <AdminPageSection
-      title="这个页面要保持什么样子"
-      description="用户后台就回答三件事：这是谁、能不能正常使用、钱包状态有没有需要处理的地方。"
+      title="操作要点"
+      description="只保留最关键的三件事。"
       accent="amber"
     >
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">先看账号状态</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            封禁和恢复按钮保持可见，但不过度抢戏，让处理动作不至于压过账号信息本身。
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">不要做成生硬的客户后台</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            这里不做销售控制台，只保留账号身份、钱包状态和访问状态这些真正有用的信息。
-          </p>
-        </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-          <p className="text-sm font-semibold text-slate-950">只在真省事时批量处理</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            批量操作只在选中后出现，默认页面先保持安静、清楚、好扫一眼。
-          </p>
-        </div>
+        {items.map((item) => (
+          <div
+            key={item.title}
+            className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
+          >
+            <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+          </div>
+        ))}
       </div>
     </AdminPageSection>
   );

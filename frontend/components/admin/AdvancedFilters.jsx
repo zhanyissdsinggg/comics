@@ -118,7 +118,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                 <div>
                   <h3 className="text-base font-semibold text-slate-950">进一步筛选</h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    只保留当前真正需要处理的作品，让列表更清楚。
+                    只看要处理的作品。
                   </p>
                 </div>
                 <Button

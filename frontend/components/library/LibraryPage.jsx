@@ -840,7 +840,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
     ];
   }, [openAuthPrompt, router]);
   const primaryButtonClass =
-    "rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800";
+    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
   const secondaryButtonClass =
     "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
   const signedInHeroDescription = viewerSignedIn
@@ -1070,7 +1070,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))] p-5 sm:p-6">
+                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-6">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
@@ -1091,9 +1091,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             </span>
                             <span>{resumeSpotlightProgressLabel}</span>
                           </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-white/85">
+                          <div className="h-2 overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
                             <div
-                              className="h-full rounded-full bg-slate-950"
+                              className="h-full rounded-full bg-[color:var(--gush-accent)]"
                               style={{
                                 width: `${Math.round(resumeSpotlightProgressWidth)}%`,
                               }}
@@ -1163,7 +1163,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))] p-5 sm:p-6">
+                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-6">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
                         Your Shelf
                       </p>

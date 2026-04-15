@@ -24,9 +24,9 @@ import {
 export function RevenueSummaryCards({ stats }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <AdminMetricCard label="总营收" value={stats ? formatCurrency(stats.totalRevenue) : "--"} detail="当前时间范围内的支付成功总收入。" tone="accent" />
-      <AdminMetricCard label="支付成功订单" value={stats ? formatCount(stats.totalOrders) : "--"} detail="当前营收快照里计入的订单数量。" />
-      <AdminMetricCard label="客单价" value={stats ? formatCurrency(stats.avgOrderValue) : "--"} detail="快速判断订单质量，不只看订单数量。" />
+      <AdminMetricCard label="总营收" value={stats ? formatCurrency(stats.totalRevenue) : "--"} detail="所选时间范围内的支付成功收入。" tone="accent" />
+      <AdminMetricCard label="支付成功订单" value={stats ? formatCount(stats.totalOrders) : "--"} detail="当前快照里计入的订单数量。" />
+      <AdminMetricCard label="客单价" value={stats ? formatCurrency(stats.avgOrderValue) : "--"} detail="快速判断订单质量。" />
       <AdminMetricCard label="净营收" value={stats ? formatCurrency(stats.netRevenue) : "--"} detail="扣除退款金额后的剩余收入。" />
     </div>
   );
@@ -36,7 +36,7 @@ export function RevenueRangeSection({ tabs, viewMode, meta, dateRange, onViewMod
   return (
     <AdminPageSection
       title="查看范围"
-      description="切换视角和时间窗口时，页面保持清楚、轻量、可读，不回到通用 BI 仪表盘写法。"
+      description="切换时间范围。"
     >
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
         <div className="space-y-3">
@@ -74,7 +74,7 @@ export function RevenueOverviewSection({ overviewLoading, hasOverviewData, stats
     <AdminDataState isLoading={overviewLoading} hasData={hasOverviewData} emptyMessage={EMPTY_MESSAGE} wrap={false}>
       <div className="space-y-6">
         {stats ? (
-          <AdminPageSection title="收入总览" description="在当前时间窗口内，先把收入、退款和订单质量读清楚。">
+          <AdminPageSection title="收入总览" description="先看收入、退款和订单质量。">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <AdminMetricCard label="总收入" value={formatCurrency(stats.totalRevenue)} detail="退款前的支付成功收入。" tone="accent" />
               <AdminMetricCard label="订单总数" value={formatCount(stats.totalOrders)} detail="当前快照里统计到的订单数。" />
@@ -86,18 +86,18 @@ export function RevenueOverviewSection({ overviewLoading, hasOverviewData, stats
         ) : null}
 
         {userValue ? (
-          <AdminPageSection title="付费读者层级" description="按照累计消费做一个轻量分层，帮助判断读者价值结构。">
+          <AdminPageSection title="付费读者层级" description="按累计消费看读者价值结构。">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <AdminMetricCard label="高价值" value={formatCount(userValue.highValue)} detail="累计消费最强的一批读者。" tone="accent" />
               <AdminMetricCard label="中价值" value={formatCount(userValue.mediumValue)} detail="处在中间消费带的读者。" />
               <AdminMetricCard label="低价值" value={formatCount(userValue.lowValue)} detail="已付费但还未进入中段的读者。" />
-              <AdminMetricCard label="未付费" value={formatCount(userValue.noValue)} detail="当前没有记录到消费的读者。" />
+              <AdminMetricCard label="未付费" value={formatCount(userValue.noValue)} detail="当前没有消费记录的读者。" />
             </div>
           </AdminPageSection>
         ) : null}
 
         {orderStatus ? (
-          <AdminPageSection title="订单结果结构" description="让订单健康度保持可读，这样客服和商业判断才建立在真实结果上。">
+          <AdminPageSection title="订单结果结构" description="看清订单健康度。">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <AdminMetricCard label="待完成" value={formatCount(orderStatus.pending)} detail="仍在等待支付完成的订单。" />
               <AdminMetricCard label="已支付" value={formatCount(orderStatus.paid)} detail="已经成功完成支付的订单。" tone="accent" />
@@ -114,7 +114,7 @@ export function RevenueOverviewSection({ overviewLoading, hasOverviewData, stats
 export function RevenueTrendSection({ trendLoading, trend }) {
   return (
     <AdminDataState isLoading={trendLoading} hasData={trend.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
-      <AdminPageSection title="收入趋势" description="按天看收入和支付完成订单的变化。">
+      <AdminPageSection title="收入趋势" description="按天看收入和支付订单变化。">
         <AdminDataTable>
           <table className="w-full text-sm">
             <AdminTableHeader>
@@ -143,7 +143,7 @@ export function RevenueTrendSection({ trendLoading, trend }) {
 export function RevenueChannelsSection({ channelsLoading, channels }) {
   return (
     <AdminDataState isLoading={channelsLoading} hasData={channels.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
-      <AdminPageSection title="渠道表现" description="比较不同支付或购买渠道带来的收入，不把页面做成密密麻麻的仪表盘。">
+      <AdminPageSection title="渠道表现" description="比较不同渠道带来的收入。">
         <AdminDataTable>
           <table className="w-full text-sm">
             <AdminTableHeader>
@@ -182,7 +182,7 @@ export function RevenuePromotionsSection({
     <AdminDataState isLoading={promotionsLoading} hasData={promotions.length > 0} emptyMessage={EMPTY_MESSAGE} wrap={false}>
       <AdminPageSection
         title="活动表现"
-        description="把活动结果和归因限制同时说明白，避免看起来像后台自己编出了完整效果。"
+        description="同时看活动结果和归因限制。"
       >
         {!promotionsRoiAvailable || promotionsAttributionModel ? (
           <div className="mb-5 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">

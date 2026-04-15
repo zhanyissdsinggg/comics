@@ -32,7 +32,7 @@ function HomeSectionHeader({
         {eyebrow ? (
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
             {Icon ? (
-              <span className="inline-flex size-7 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.86)] dark:bg-white/[0.04]">
+              <span className="inline-flex size-7 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.86)]">
                 <Icon className="size-3.5" />
               </span>
             ) : null}
@@ -157,7 +157,7 @@ function HomeGuideCard({
   return (
     <Card className="h-full overflow-hidden rounded-[34px] border border-[color:var(--gush-border)] bg-white py-0 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
       <CardContent className="flex h-full flex-col p-6 sm:p-7">
-        <div className="flex size-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] dark:bg-white/[0.06]">
+        <div className="flex size-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
           <Icon className="size-5" />
         </div>
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">

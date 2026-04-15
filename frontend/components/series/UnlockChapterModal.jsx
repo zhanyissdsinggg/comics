@@ -396,7 +396,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(15,23,42,0.16)] transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {primaryButtonLabel}
                 </button>

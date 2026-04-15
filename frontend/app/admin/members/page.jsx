@@ -249,10 +249,7 @@ export default function AdminMembersPage() {
   };
 
   return (
-    <AdminShell
-      title="后台成员"
-      subtitle="把成员身份、角色范围、密钥槽位和两步验证收进同一套后台目录。"
-    >
+    <AdminShell title="后台成员" subtitle="维护成员、角色、槽位和两步验证。">
       <div className="space-y-6">
         <MembersSummaryCards
           paginationTotal={pagination.total}
@@ -322,7 +319,7 @@ export default function AdminMembersPage() {
           setForm(DEFAULT_FORM);
         }}
         title={editingMember ? '编辑后台成员' : '新建后台成员'}
-        subtitle="成员档案负责承接真实身份、角色和两步验证配置；环境密钥只保留为当前登录凭证。"
+        subtitle="在这里维护成员身份、角色和两步验证。"
         size="lg"
       >
         <MemberEditorModalContent
@@ -345,7 +342,7 @@ export default function AdminMembersPage() {
         isOpen={Boolean(totpSheet)}
         onClose={() => setTotpSheet(null)}
         title="新的两步验证密钥"
-        subtitle="请把下面的密钥或导入链接立即加入你的验证器应用，例如 1Password 或系统验证器。"
+        subtitle="请立即把下面的密钥或导入链接加入验证器。"
         size="lg"
       >
         <TotpSecretModalContent

@@ -66,7 +66,7 @@ export function CreateSlotModalContent({
     >
       <AdminFormField
         label="推荐位预设"
-        helperText={selectedSlotMeta.hint || "先从已有推荐位预设开始，减少接线和命名错误。"}
+        helperText={selectedSlotMeta.hint || "先从已有推荐位预设开始。"}
       >
         <select
           id="slot-preset"
@@ -145,7 +145,7 @@ export function CreateRankingModalContent({
             className={adminInputClassName}
           />
         </AdminFormField>
-        <AdminFormField label="榜单类型" helperText="这里只保留当前仍建议新建的榜单策略；旧规则只会作为历史配置显示。">
+        <AdminFormField label="榜单类型" helperText="这里只保留当前仍建议新建的榜单策略。">
           <select
             id="ranking-type"
             value={rankingForm.rankingType}

@@ -86,13 +86,13 @@ export default function AdminDashboardClean() {
 
       setWarning(
         warnings.length
-          ? `部分数据暂时不可用：${warnings.join("、")}。页面只展示当前拿到的真实后台数据。`
+          ? `部分数据暂时不可用：${warnings.join("、")}。页面先展示当前拿到的数据。`
           : "",
       );
     } catch (error) {
       console.error("admin dashboard load failed:", error);
       setWorkspace(EMPTY_WORKSPACE);
-      setWarning("仪表盘暂时加载失败，当前没有拿到可展示的后台数据。");
+      setWarning("仪表盘暂时加载失败，当前没有可展示的数据。");
     } finally {
       if (mode === "initial") {
         setLoading(false);
@@ -222,12 +222,12 @@ export default function AdminDashboardClean() {
             <StatCard
               label="最近工单"
               value={`${workspace.support.length}`}
-              detail={workspace.support.length > 0 ? "客服队列有更新。" : "当前没有新工单。"}
+              detail={workspace.support.length > 0 ? "客服队列有更新。" : "没有新工单。"}
             />
             <StatCard
               label="最新评论"
               value={`${workspace.comments.length}`}
-              detail={workspace.comments.length > 0 ? "最新评论已进入后台。" : "当前没有评论。"}
+              detail={workspace.comments.length > 0 ? "最新评论已进入后台。" : "没有评论。"}
             />
           </div>
         </div>

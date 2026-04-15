@@ -15,7 +15,7 @@ export const RECOMMENDED_SEQUENCE = [
   "先修已经上线作品的明显缺口。它们已经在接流量，问题会直接被读者看到。",
   "署名优先级要靠前，因为它会同时影响可信度、创作者页和作品页的信息完整度。",
   "接近可发布的草稿可以紧接着推进，这样扩目录时不会拉低整体前台质感。",
-  "封面、简介和题材标签最好一轮补齐，不要把半成品继续推到专题位里。",
+  "封面、简介和题材标签最好一轮补齐，再推进到专题位。",
 ];
 
 function toNumber(value) {
@@ -192,7 +192,7 @@ export function getRecommendedAction(series, readiness) {
   }
 
   if (!series.description) {
-    return "把简介补到能读的程度，别让作品页像没写完的空壳。";
+    return "把简介补到能读的程度，让作品页更完整。";
   }
 
   if (!Array.isArray(series.genres) || series.genres.length === 0) {

@@ -39,7 +39,7 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
           type="button"
           onClick={() => onClaim(mission.id)}
           disabled={!done || mission.claimed || workingId === mission.id}
-          className="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white disabled:opacity-40"
+          className="rounded-full bg-[color:var(--gush-ink-strong)] px-3 py-1 text-xs font-semibold text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] disabled:opacity-40"
         >
           {mission.claimed ? "Claimed" : "Claim points"}
         </button>

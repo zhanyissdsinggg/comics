@@ -56,7 +56,7 @@ export function NotificationsListSection(props) {
   return (
     <AdminPageSection
       title="通知列表"
-      description="在这里检查消息质量、清理过期通知，并确认整个通知队列读起来足够清楚。"
+      description="检查内容并清理过期通知。"
     >
       <AdminListToolbar
         searchTerm={searchTerm}
@@ -75,7 +75,7 @@ export function NotificationsListSection(props) {
           onClick={onOpenDeleteConfirm}
           disabled={selectedIds.length === 0 || deletePending}
         >
-          {deletePending ? "正在删除..." : "删除通知"}
+          {deletePending ? "正在删除..." : "删除所选"}
         </Button>
       </AdminSelectionBar>
 
@@ -85,7 +85,7 @@ export function NotificationsListSection(props) {
         onRetry={onRetry}
         isLoading={isLoading}
         hasItems={notifications.length > 0}
-        emptyMessage="当前视图下还没有匹配的通知。"
+        emptyMessage="当前筛选下没有通知。"
         pagination={pagination}
         page={page}
         pageSize={pageSize}

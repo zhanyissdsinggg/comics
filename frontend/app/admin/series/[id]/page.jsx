@@ -390,7 +390,7 @@ export default function AdminSeriesDetailPage() {
   return (
     <AdminShell
       title={series.title || '作品详情'}
-      subtitle="优先收紧读者会直接看到的内容信息：标题、简介、封面、发布状态和真实创作者署名。"
+      subtitle="优先维护读者会直接看到的作品信息和真实署名。"
       actions={
         <SeriesHeaderActions
           onBackToList={() => router.push('/admin/series')}

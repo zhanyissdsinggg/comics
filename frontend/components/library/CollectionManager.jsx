@@ -127,7 +127,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
           <button
             type="button"
             onClick={handleCreate}
-            className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            className="rounded-lg bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-medium text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82"
           >
             Create
           </button>
@@ -190,7 +190,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     <button
                       type="button"
                       onClick={handleSaveEdit}
-                      className="rounded-lg bg-slate-950 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-slate-800"
+                      className="rounded-lg bg-[color:var(--gush-ink-strong)] px-3 py-1 text-xs font-medium text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82"
                     >
                       Save
                     </button>

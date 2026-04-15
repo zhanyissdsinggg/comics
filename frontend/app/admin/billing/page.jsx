@@ -116,10 +116,7 @@ export default function AdminBillingPage() {
   );
 
   return (
-    <AdminShell
-      title="充值与会员"
-      subtitle="把充值套餐、会员方案和支付开关收在一个清爽工作区里，先看读者现在到底能买什么。"
-    >
+    <AdminShell title="充值与会员" subtitle="查看套餐、会员方案和可售状态。">
       <div className="space-y-6">
         <BillingSummaryCards cards={metricCards} />
 
@@ -171,7 +168,7 @@ export default function AdminBillingPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="排序套餐"
+          title="套餐排序"
           label="排序方式"
           actionLabel="应用"
         />

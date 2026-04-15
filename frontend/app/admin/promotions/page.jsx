@@ -94,10 +94,7 @@ export default function AdminPromotionsPage() {
   });
 
   return (
-    <AdminShell
-      title="活动运营"
-      subtitle="先看清哪些活动还在线、哪些已暂停，以及读者当前在前台还会感知到什么。"
-    >
+    <AdminShell title="活动运营" subtitle="查看活动状态和下一步动作。">
       <div className="space-y-6">
         <PromotionsSummaryCards
           total={pagination.total}
@@ -151,7 +148,7 @@ export default function AdminPromotionsPage() {
           sortBy={sortBy}
           onSortByChange={setSortBy}
           options={sortOptions}
-          title="排序活动"
+          title="活动排序"
           label="排序方式"
           actionLabel="应用"
         />
