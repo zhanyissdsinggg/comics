@@ -14,7 +14,11 @@ const ROUTES_TO_CHECK = [
 ];
 
 const MOJIBAKE_PATTERNS = [
-  /(?:Ã.|Â.|â€|â€™|â€œ|â€\x9d|ðŸ|�|\uFFFD)/,
+  // Common UTF-8/Latin-1 mojibake fragments.
+  /(?:Ã.|Â.|â€|â€™|â€œ|â€\x9d|ðŸ)/,
+  // Unicode replacement characters.
+  /(?:\uFFFD|�)/,
+  // Legacy Chinese mojibake tokens that showed up in old admin copy.
   /(?:鍚庡彴|鏈壘鍒|璇峰厛|杩欎釜|瀵嗛挜|閸|鈧)/,
 ];
 

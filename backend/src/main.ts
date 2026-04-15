@@ -27,6 +27,20 @@ import { initSentry } from "./common/sentry/sentry.init";
 import { SentryMiddleware } from "./common/sentry/sentry.middleware";
 
 const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
+const isOriginMatchedBySuffix = (origin: string, suffixes: string[]): boolean => {
+  try {
+    const hostname = new URL(origin).hostname.toLowerCase();
+    return suffixes.some((suffix) => {
+      const normalizedSuffix = String(suffix || "").trim().toLowerCase().replace(/^\./, "");
+      if (!normalizedSuffix) {
+        return false;
+      }
+      return hostname === normalizedSuffix || hostname.endsWith(`.${normalizedSuffix}`);
+    });
+  } catch {
+    return false;
+  }
+};
 
 async function bootstrap(): Promise<void> {
   const appConfig = getAppConfig();
@@ -70,6 +84,7 @@ async function bootstrap(): Promise<void> {
 
   const allowedOrigins = appConfig.server.frontendOrigins.map(normalizeOrigin).filter(Boolean);
   const allowedOriginSet = new Set(allowedOrigins);
+  const trustedDomainSuffixes = appConfig.server.corsTrustedDomainSuffixes;
   const isProd = appConfig.environment === "production";
   const uploadsDir = join(process.cwd(), "public", "uploads");
   expressApp.use(
@@ -81,7 +96,6 @@ async function bootstrap(): Promise<void> {
     }),
   );
   const localhostOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
-  const trustedGushDomainPattern = /^https:\/\/([a-z0-9-]+\.)*gushcomics\.com$/i;
 
   app.enableCors({
     origin: (requestOrigin, callback) => {
@@ -98,7 +112,7 @@ async function bootstrap(): Promise<void> {
         return callback(null, true);
       }
 
-      if (trustedGushDomainPattern.test(normalizedRequestOrigin)) {
+      if (isOriginMatchedBySuffix(normalizedRequestOrigin, trustedDomainSuffixes)) {
         return callback(null, true);
       }
 

@@ -14,11 +14,18 @@ import { CorePublicRuntimeModule } from "./modules/runtime/core-public-runtime.m
 import { OpsRuntimeModule } from "./modules/runtime/ops-runtime.module";
 import { UserRuntimeModule } from "./modules/runtime/user-runtime.module";
 
-const runtimeConfig = loadAndValidateAppConfig(process.env).runtime;
+const isRuntimeEnabled = (rawValue: string | undefined, fallback = true): boolean => {
+  const normalized = String(rawValue || "").trim().toLowerCase();
+  if (!normalized) {
+    return fallback;
+  }
+  return ["1", "true", "yes", "on"].includes(normalized);
+};
+
 const optionalRuntimeImports = [
-  ...(runtimeConfig.commercialEnabled ? [CommercialRuntimeModule] : []),
-  ...(runtimeConfig.opsEnabled ? [OpsRuntimeModule] : []),
-  ...(runtimeConfig.adminEnabled ? [AdminRuntimeModule] : []),
+  ...(isRuntimeEnabled(process.env.ENABLE_COMMERCIAL_RUNTIME, true) ? [CommercialRuntimeModule] : []),
+  ...(isRuntimeEnabled(process.env.ENABLE_OPS_RUNTIME, true) ? [OpsRuntimeModule] : []),
+  ...(isRuntimeEnabled(process.env.ENABLE_ADMIN_RUNTIME, true) ? [AdminRuntimeModule] : []),
 ];
 
 @Module({

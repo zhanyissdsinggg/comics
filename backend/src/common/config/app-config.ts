@@ -120,6 +120,7 @@ const appConfigSchema = z
     DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
     PORT: z.coerce.number().int().min(1).max(65535).default(DEFAULT_PORT),
     FRONTEND_ORIGIN: z.string().min(1, "FRONTEND_ORIGIN is required"),
+    CORS_TRUSTED_DOMAIN_SUFFIXES: z.string().optional().default(""),
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
     ADMIN_KEY: z.string().optional().default(""),
     ADMIN_KEYS: z.string().optional().default(""),
@@ -174,6 +175,7 @@ const appConfigSchema = z
       server: {
         port: env.PORT,
         frontendOrigins,
+        corsTrustedDomainSuffixes: normalizeCsv(env.CORS_TRUSTED_DOMAIN_SUFFIXES),
         logLevel: normalizeOptional(env.LOG_LEVEL) || DEFAULT_LOG_LEVEL,
       },
       auth: {

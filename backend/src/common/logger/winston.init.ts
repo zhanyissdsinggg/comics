@@ -18,6 +18,7 @@ function resolveLoggerBootstrapConfig(): LoggerBootstrapConfig {
       server: {
         port: 0,
         frontendOrigins: [],
+        corsTrustedDomainSuffixes: [],
         logLevel: "warn",
       },
     };
