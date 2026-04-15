@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import type { AdminMember, Prisma } from "@prisma/client";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { getAppConfig } from "../../../../common/config/app-config";
 import { logger } from "../../../../common/logger/winston.init";
 import { PrismaService } from "../../../../common/prisma/prisma.service";

@@ -1,6 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
+import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 import { AdminRevenueController } from './admin-revenue.controller';
 
 describe('AdminRevenueController', () => {
@@ -8,7 +9,7 @@ describe('AdminRevenueController', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       controllers: [AdminRevenueController],
       providers: [
         {
@@ -36,7 +37,11 @@ describe('AdminRevenueController', () => {
           },
         },
       ],
-    }).compile();
+    });
+
+    builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
+
+    const module: TestingModule = await builder.compile();
 
     controller = module.get<AdminRevenueController>(AdminRevenueController);
     prisma = module.get<PrismaService>(PrismaService);

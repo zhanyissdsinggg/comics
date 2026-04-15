@@ -4,6 +4,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ContentCacheInvalidationService } from "../../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminContentGeneratorController } from "./admin-content-generator.controller";
 
 describe("AdminContentGeneratorController", () => {
@@ -13,7 +14,7 @@ describe("AdminContentGeneratorController", () => {
   beforeEach(async () => {
     process.env.ADMIN_CONTENT_GENERATOR_ENABLED = "1";
 
-    const module: TestingModule = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       controllers: [AdminContentGeneratorController],
       providers: [
         {
@@ -44,7 +45,10 @@ describe("AdminContentGeneratorController", () => {
           },
         },
       ],
-    }).compile();
+    });
+    builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
+
+    const module: TestingModule = await builder.compile();
 
     controller = module.get<AdminContentGeneratorController>(
       AdminContentGeneratorController,

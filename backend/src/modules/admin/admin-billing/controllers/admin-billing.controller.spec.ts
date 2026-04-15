@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminBillingController } from './admin-billing.controller';
 import { PrismaService } from '../../../../common/prisma/prisma.service';
+import { AdminAuthGuard } from '../../guards/admin-auth.guard';
 
 // Mock配置函数
 jest.mock('../../../../common/config/topup', () => ({
@@ -23,7 +24,7 @@ describe('AdminBillingController', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       controllers: [AdminBillingController],
       providers: [
         {
@@ -63,7 +64,11 @@ describe('AdminBillingController', () => {
           },
         },
       ],
-    }).compile();
+    });
+
+    builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
+
+    const module: TestingModule = await builder.compile();
 
     controller = module.get<AdminBillingController>(AdminBillingController);
     prisma = module.get<PrismaService>(PrismaService);

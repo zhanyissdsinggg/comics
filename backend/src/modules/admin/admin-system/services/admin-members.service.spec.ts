@@ -1,5 +1,5 @@
 import { ServiceUnavailableException } from "@nestjs/common";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { resetAppConfigForTests } from "../../../../common/config/app-config";
 import { AdminRole } from "../../permissions/admin-permissions";
 import { AdminMembersService } from "./admin-members.service";

@@ -14,7 +14,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { randomBytes, randomInt } from "crypto";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { EmailService } from "../email/email.service";

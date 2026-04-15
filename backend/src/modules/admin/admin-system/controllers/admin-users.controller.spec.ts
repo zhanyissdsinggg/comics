@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { AdminLogService } from "../../../../common/services/admin-log.service";
+import { buildAdminVisibleUserWhere } from "../../../../common/utils/admin-visible-data";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminUsersController } from "./admin-users.controller";
 
@@ -53,14 +54,18 @@ describe("AdminUsersController", () => {
         sortOrder: "asc",
       },
     } as never);
-
-    expect(prisma.user.findMany).toHaveBeenCalledWith({
-      where: {
+    const expectedWhere = buildAdminVisibleUserWhere(
+      {
         OR: [
           { id: { contains: "reader@example.com", mode: "insensitive" } },
           { email: { contains: "reader@example.com", mode: "insensitive" } },
         ],
       },
+      false,
+    );
+
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      where: expectedWhere,
       select: {
         id: true,
         email: true,
@@ -78,12 +83,7 @@ describe("AdminUsersController", () => {
       skip: 10,
     });
     expect(prisma.user.count).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          { id: { contains: "reader@example.com", mode: "insensitive" } },
-          { email: { contains: "reader@example.com", mode: "insensitive" } },
-        ],
-      },
+      where: expectedWhere,
     });
   });
 });

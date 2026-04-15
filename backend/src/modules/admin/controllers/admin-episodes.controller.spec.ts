@@ -2,6 +2,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminEpisodesController } from "./admin-episodes.controller";
 
 describe("AdminEpisodesController", () => {
@@ -64,7 +65,7 @@ describe("AdminEpisodesController", () => {
       invalidateSeriesContent: jest.fn().mockResolvedValue(undefined),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       controllers: [AdminEpisodesController],
       providers: [
         {
@@ -80,7 +81,11 @@ describe("AdminEpisodesController", () => {
           useValue: contentCacheInvalidation,
         },
       ],
-    }).compile();
+    });
+
+    builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
+
+    const module: TestingModule = await builder.compile();
 
     controller = module.get(AdminEpisodesController);
   });

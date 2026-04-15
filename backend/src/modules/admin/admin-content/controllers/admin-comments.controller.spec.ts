@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { buildAdminVisibleCommentWhere } from "../../../../common/utils/admin-visible-data";
 import { AdminCommentsController } from "./admin-comments.controller";
 
 describe("AdminCommentsController", () => {
@@ -55,9 +56,10 @@ describe("AdminCommentsController", () => {
     prisma.comment.count.mockResolvedValue(1);
 
     const result = await controller.list();
+    const expectedWhere = buildAdminVisibleCommentWhere({}, false);
 
     expect(prisma.comment.findMany).toHaveBeenCalledWith({
-      where: {},
+      where: expectedWhere,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -72,7 +74,7 @@ describe("AdminCommentsController", () => {
       skip: 0,
       take: 20,
     });
-    expect(prisma.comment.count).toHaveBeenCalledWith({ where: {} });
+    expect(prisma.comment.count).toHaveBeenCalledWith({ where: expectedWhere });
     expect(result).toEqual({
       comments: [
         {
@@ -118,9 +120,8 @@ describe("AdminCommentsController", () => {
     prisma.comment.count.mockResolvedValue(0);
 
     await controller.list("2", "10", "reader@example.com", "rating", "asc");
-
-    expect(prisma.comment.findMany).toHaveBeenCalledWith({
-      where: {
+    const expectedWhere = buildAdminVisibleCommentWhere(
+      {
         OR: [
           { id: { contains: "reader@example.com", mode: "insensitive" } },
           { userId: { contains: "reader@example.com", mode: "insensitive" } },
@@ -136,6 +137,11 @@ describe("AdminCommentsController", () => {
           },
         ],
       },
+      false,
+    );
+
+    expect(prisma.comment.findMany).toHaveBeenCalledWith({
+      where: expectedWhere,
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
@@ -151,22 +157,7 @@ describe("AdminCommentsController", () => {
       take: 10,
     });
     expect(prisma.comment.count).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          { id: { contains: "reader@example.com", mode: "insensitive" } },
-          { userId: { contains: "reader@example.com", mode: "insensitive" } },
-          { seriesId: { contains: "reader@example.com", mode: "insensitive" } },
-          { text: { contains: "reader@example.com", mode: "insensitive" } },
-          { content: { contains: "reader@example.com", mode: "insensitive" } },
-          {
-            user: {
-              is: {
-                email: { contains: "reader@example.com", mode: "insensitive" },
-              },
-            },
-          },
-        ],
-      },
+      where: expectedWhere,
     });
   });
 

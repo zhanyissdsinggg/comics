@@ -7,6 +7,7 @@ import {
   getIdempotencyRecord,
   setIdempotencyRecord,
 } from "../../../../common/storage/limits";
+import { buildAdminVisibleOrderWhere } from "../../../../common/utils/admin-visible-data";
 import { ORDER_STATUS } from "../../../../common/utils/order-status";
 import { AdminAuthGuard } from "../../guards/admin-auth.guard";
 import { AdminOrdersController } from "./admin-orders.controller";
@@ -176,15 +177,19 @@ describe("AdminOrdersController", () => {
         sortOrder: "asc",
       },
     } as never);
-
-    expect(prisma.order.findMany).toHaveBeenCalledWith({
-      where: {
+    const expectedWhere = buildAdminVisibleOrderWhere(
+      {
         OR: [
           { id: { contains: "user-1", mode: "insensitive" } },
           { userId: { contains: "user-1", mode: "insensitive" } },
           { idempotencyKey: { contains: "user-1", mode: "insensitive" } },
         ],
       },
+      false,
+    );
+
+    expect(prisma.order.findMany).toHaveBeenCalledWith({
+      where: expectedWhere,
       select: {
         id: true,
         userId: true,

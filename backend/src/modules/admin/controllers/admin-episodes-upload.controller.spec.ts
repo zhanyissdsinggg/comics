@@ -6,13 +6,14 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { AdminEpisodesUploadController } from "./admin-episodes-upload.controller";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { AdminAuthGuard } from "../guards/admin-auth.guard";
 
 describe("AdminEpisodesUploadController", () => {
   let controller: AdminEpisodesUploadController;
   let prisma: PrismaService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       controllers: [AdminEpisodesUploadController],
       providers: [
         {
@@ -53,7 +54,11 @@ describe("AdminEpisodesUploadController", () => {
           },
         },
       ],
-    }).compile();
+    });
+
+    builder.overrideGuard(AdminAuthGuard).useValue({ canActivate: () => true });
+
+    const module: TestingModule = await builder.compile();
 
     controller = module.get<AdminEpisodesUploadController>(
       AdminEpisodesUploadController,

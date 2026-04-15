@@ -68,9 +68,10 @@ describe("API smoke (e2e)", () => {
     expect(res.body).toEqual(
       expect.objectContaining({
         name: "gush-backend",
-        version: "0.1.0",
+        version: expect.any(String),
       }),
     );
+    expect(res.body.version).toMatch(/^\d+\.\d+\.\d+/);
     expect(typeof res.body.time).toBe("string");
   });
 
