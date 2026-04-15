@@ -423,7 +423,7 @@ export class AdminMembersService {
     }
 
     if (normalizeMemberStatus(member.status) !== ADMIN_MEMBER_STATUS_ACTIVE) {
-      throw new UnauthorizedException("杩欎釜鍚庡彴鎴愬憳宸茶鍋滅敤銆?");
+      throw new UnauthorizedException("\u8be5\u540e\u53f0\u6210\u5458\u5df2\u88ab\u505c\u7528\u3002");
     }
 
     if (!member.passwordHash) {
@@ -878,12 +878,12 @@ export class AdminMembersService {
       if (allowEmpty) {
         return null;
       }
-      throw new BadRequestException("鍚庡彴鐧诲綍瀵嗙爜涓嶈兘涓虹┖銆?");
+      throw new BadRequestException("\u540e\u53f0\u767b\u5f55\u5bc6\u7801\u4e0d\u80fd\u4e3a\u7a7a\u3002");
     }
 
     if (password.length < ADMIN_PASSWORD_MIN_LENGTH) {
       throw new BadRequestException(
-        `鍚庡彴鐧诲綍瀵嗙爜鑷冲皯 ${ADMIN_PASSWORD_MIN_LENGTH} 浣嶃€?`,
+        `\u540e\u53f0\u767b\u5f55\u5bc6\u7801\u81f3\u5c11 ${ADMIN_PASSWORD_MIN_LENGTH} \u4f4d\u3002`,
       );
     }
 
