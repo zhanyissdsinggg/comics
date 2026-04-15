@@ -296,18 +296,28 @@ export function CreditsSection({
               <Button type="button" variant="secondary" onClick={onCancelEditing}>
                 取消
               </Button>
-              <Button type="button" onClick={onSave} disabled={!creditsDirty || isSaving}>
+              <Button
+                type="button"
+                data-testid="admin-series-credits-save"
+                onClick={onSave}
+                disabled={!creditsDirty || isSaving}
+              >
                 <Save className="size-4" />
                 {isSaving ? "保存中..." : "保存署名"}
               </Button>
             </>
           ) : (
-            <Button type="button" onClick={onStartEditing}>
+            <Button type="button" data-testid="admin-series-credits-edit" onClick={onStartEditing}>
               <Users className="size-4" />
               编辑署名
             </Button>
           )}
-          <Button type="button" variant="secondary" onClick={onAddCredit}>
+          <Button
+            type="button"
+            variant="secondary"
+            data-testid="admin-series-credits-add"
+            onClick={onAddCredit}
+          >
             <Plus className="size-4" />
             添加署名
           </Button>

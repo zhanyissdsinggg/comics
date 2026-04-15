@@ -226,10 +226,11 @@ export default function AdminEmailSettingsPage() {
               variant="outline"
               onClick={handleTest}
               disabled={testing || saving || !draft.testRecipient}
+              data-testid="admin-email-send-test"
             >
               {testButtonLabel}
             </Button>
-            <Button type="button" onClick={handleSave} disabled={saving || !hasUnsavedChanges}>
+            <Button type="button" onClick={handleSave} disabled={saving || !hasUnsavedChanges} data-testid="admin-email-save-settings">
               {saving ? "保存中..." : "保存设置"}
             </Button>
           </div>
@@ -256,6 +257,7 @@ export default function AdminEmailSettingsPage() {
               onChange={(event) => handleChange("from", event.target.value)}
               className={adminInputClassName}
               placeholder="notice@yoursite.com"
+              data-testid="admin-email-from-input"
             />
           </AdminFormField>
 
@@ -336,6 +338,7 @@ export default function AdminEmailSettingsPage() {
               onChange={(event) => handleChange("testRecipient", event.target.value)}
               className={adminInputClassName}
               placeholder="qa@yoursite.com"
+              data-testid="admin-email-test-recipient"
             />
           </AdminFormField>
         </div>

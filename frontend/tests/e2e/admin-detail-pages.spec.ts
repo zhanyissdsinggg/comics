@@ -131,7 +131,7 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByText("all-user-21@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText(/第 2 页，共 2 页|Page 2 of 2/, { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
-    await page.getByRole("button").filter({ hasText: /VIP/ }).click();
+    await page.getByTestId("admin-analytics-segment-vip").click();
     await expect(page.getByText("vip-reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText(/第 1 页，共 1 页|Page 1 of 1/, { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
@@ -310,9 +310,9 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByText("当前前台署名", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await page.getByRole("button", { name: /添加 credit/i }).click();
+    await page.getByTestId("admin-series-credits-add").click();
     await page.getByLabel("公开署名").first().fill("Studio North");
-    await page.getByRole("button", { name: /保存署名|Save credits/ }).click();
+    await page.getByTestId("admin-series-credits-save").click();
 
     await expect(page.getByText("创作者署名已保存。", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
@@ -408,15 +408,15 @@ test.describe("Admin detail page regressions", () => {
     await expect(page.getByText("当前章节数", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.getByLabel("选择章节 1").check();
-    await expect(page.getByRole("button", { name: /批量修改|批量编辑|Bulk edit/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await page.getByRole("button", { name: /批量修改|批量编辑|Bulk edit/ }).click();
+    await expect(page.getByTestId("admin-episodes-bulk-edit")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await page.getByTestId("admin-episodes-bulk-edit").click();
 
     await expect(page.getByLabel("批量点数价格")).toHaveCount(0);
     await page.getByLabel("批量试看页数").fill("9");
-    await page.getByRole("button", { name: "应用批量修改" }).click();
+    await page.getByTestId("admin-episodes-bulk-apply").click();
     await expect.poll(() => bulkCalls).toBe(1);
 
-    await page.getByRole("button", { name: "自动重排章节号" }).click();
+    await page.getByTestId("admin-episodes-auto-renumber").click();
     await expect.poll(() => reorderCalls).toBe(1);
 
     await page.waitForTimeout(300);

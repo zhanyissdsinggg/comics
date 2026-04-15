@@ -97,7 +97,7 @@ test.describe("Admin config page regressions", () => {
     await expect(page.getByText(/正在加载品牌配置|Loading branding settings/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.locator('input[placeholder="https://.../logo.png"]')).toHaveValue(
+    await expect(page.getByTestId("admin-branding-logo-input")).toHaveValue(
       "https://cdn.example.com/logo.png",
       {
         timeout: ADMIN_UI_TIMEOUT_MS,
@@ -173,8 +173,8 @@ test.describe("Admin config page regressions", () => {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: /仅看失败任务|仅失败任务|Failed only/ }).dispatchEvent("click");
-    await page.getByRole("button", { name: /全部任务|All jobs/ }).dispatchEvent("click");
+    await page.getByTestId("admin-tab-failed").click();
+    await page.getByTestId("admin-tab-all").click();
 
     await page.waitForTimeout(900);
     await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({

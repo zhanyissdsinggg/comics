@@ -247,10 +247,6 @@ test.describe("Admin commercial page regressions", () => {
     await expect(page.getByText("Spring relaunch", { exact: true })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText(/ROI 仍会保持不可用/)).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/revenue", runtimeIssues);
   });

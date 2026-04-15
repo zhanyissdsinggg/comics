@@ -105,12 +105,18 @@ export function EpisodesWorkspaceSection({
       description="搜索、筛选，然后在表格里直接调整标题、试看页数和顺序。"
       action={
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={onOpenBulkUpdate} disabled={selectedIds.length === 0}>
+          <Button
+            type="button"
+            data-testid="admin-episodes-bulk-edit"
+            onClick={onOpenBulkUpdate}
+            disabled={selectedIds.length === 0}
+          >
             批量修改
           </Button>
           <Button
             type="button"
             variant="outline"
+            data-testid="admin-episodes-auto-renumber"
             onClick={onAutoRenumber}
             disabled={reorderPending}
           >
@@ -240,7 +246,12 @@ export function BulkUpdateModalContent({
         setShowBulkCommercialFields={setShowBulkCommercialFields}
       />
 
-      <Button type="button" onClick={onApply} disabled={isPending}>
+      <Button
+        type="button"
+        data-testid="admin-episodes-bulk-apply"
+        onClick={onApply}
+        disabled={isPending}
+      >
         {isPending ? "应用中..." : "应用批量修改"}
       </Button>
     </div>

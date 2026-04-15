@@ -124,6 +124,7 @@ export function AdminTabs({ items, value, onChange, className = "" }) {
             key={item.value}
             type="button"
             onClick={() => onChange(item.value)}
+            data-testid={`admin-tab-${item.value}`}
             className={cn(
               "rounded-full border px-4 py-2 text-sm font-semibold transition",
               isActive

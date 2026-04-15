@@ -290,7 +290,7 @@ export default function AdminBrandingPage() {
             <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>
               {configuredAssetCount === 3 ? "素材完整" : "待补素材"}
             </AdminBadge>
-            <Button type="button" onClick={handleSave} disabled={formBusy}>
+            <Button type="button" onClick={handleSave} disabled={formBusy} data-testid="admin-branding-save">
               {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
             </Button>
           </div>
@@ -329,6 +329,7 @@ export default function AdminBrandingPage() {
                     disabled={formBusy}
                     className={adminInputClassName}
                     placeholder={asset.placeholder}
+                    data-testid={`admin-branding-${asset.keyName}-input`}
                   />
 
                   <div className="flex flex-wrap items-center gap-2">

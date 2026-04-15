@@ -95,6 +95,7 @@ export function AnalyticsSegmentsSection({
           <button
             key={segment.key}
             type="button"
+            data-testid={`admin-analytics-segment-${segment.key}`}
             onClick={() => onSelectSegment(segment.key)}
             className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
               selectedSegment === segment.key

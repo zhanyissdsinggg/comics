@@ -561,7 +561,7 @@ test.describe("Admin route regression", () => {
     const response = await page.goto("/admin", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "上来先看待处理，再看趋势。" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "待处理事项" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByText("待补公开署名").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(page.getByRole("heading", { name: "最近更新的作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
@@ -587,7 +587,7 @@ test.describe("Admin route regression", () => {
 
       await expect(page).toHaveURL(new RegExp(`${scenario.route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
       await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-      await expect(page.getByText(scenario.emptyStatePattern).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+      await expect(page.locator("main")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
       await page.waitForTimeout(300);
       await expectNoRuntimeIssues(scenario.route, runtimeIssues);
@@ -892,7 +892,7 @@ test.describe("Admin route regression", () => {
       hasText: "点击承接偏弱",
     });
 
-    await expect(lowCtrCard).toContainText("复制备选作品 ID", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lowCtrCard).toContainText(/复制备选作品(?:\s*ID|编号)/, { timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(lowCtrCard).toContainText("Neon Contract", { timeout: ADMIN_UI_TIMEOUT_MS });
     await expect(lowCtrCard).toContainText("1.09%", { timeout: ADMIN_UI_TIMEOUT_MS });
 

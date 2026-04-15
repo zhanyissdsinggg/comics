@@ -208,10 +208,10 @@ export default function AdminEmailJobsPage() {
             <AdminBadge tone={failedCount > 0 ? "warning" : "success"}>
               {failedCount > 0 ? `当前有 ${failedCount} 条失败任务` : "当前没有失败任务"}
             </AdminBadge>
-            <Button type="button" variant="outline" onClick={() => loadData()}>
+            <Button type="button" variant="outline" onClick={() => loadData()} data-testid="admin-email-jobs-refresh">
               刷新
             </Button>
-            <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length}>
+            <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length} data-testid="admin-email-jobs-export">
               导出 CSV
             </Button>
           </div>

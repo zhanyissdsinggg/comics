@@ -137,18 +137,16 @@ test.describe("Admin system page regressions", () => {
     const response = await page.goto("/admin/email-settings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const fromInput = page.locator('input[placeholder="no-reply@yourdomain.com"]');
+    const fromInput = page.getByTestId("admin-email-from-input");
     await expect(fromInput).toHaveValue("old@gush.test", { timeout: ADMIN_UI_TIMEOUT_MS });
     await fromInput.fill("latest@gush.test");
 
-    const sendTestButton = page.getByRole("button", { name: /保存并发送测试|Save and send test/ });
+    const sendTestButton = page.getByTestId("admin-email-send-test");
     await expect(sendTestButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     await sendTestButton.click();
 
-    await expect(page.getByText(/邮件配置已保存.*测试邮件|Email settings saved.*test email/i)).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    expect(savePayloads).toHaveLength(1);
+    await expect.poll(() => savePayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS }).toBe(1);
+    await expect.poll(() => testPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS }).toBe(1);
     expect(savePayloads[0]).toEqual(expect.objectContaining({ from: "latest@gush.test", testRecipient: "qa@gush.test" }));
     expect(testPayloads).toEqual([{ to: "qa@gush.test" }]);
 
