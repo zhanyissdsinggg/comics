@@ -1,6 +1,8 @@
 import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_RETRY_ATTEMPTS = 3;
+const DEFAULT_RETRY_INTERVAL_MS = 800;
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
@@ -40,6 +42,26 @@ async function fetchResponse(url, headers = {}) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, headers = {}, attempts = DEFAULT_RETRY_ATTEMPTS) {
+  const maxAttempts = Number.isFinite(attempts) && attempts > 0 ? Math.floor(attempts) : 1;
+  let lastResult = null;
+  for (let index = 1; index <= maxAttempts; index += 1) {
+    const result = await fetchResponse(url, headers);
+    lastResult = result;
+    if (result.ok || result.status > 0) {
+      return result;
+    }
+    if (index < maxAttempts) {
+      await sleep(DEFAULT_RETRY_INTERVAL_MS);
+    }
+  }
+  return lastResult || { ok: false, status: 0, headers: new Headers(), error: "fetch failed" };
 }
 
 function checkSecurityHeaders(scope, headers, failures, requireHsts) {
@@ -94,7 +116,7 @@ async function run() {
     failures.push(frontendHttpsError);
   }
 
-  const backendHealth = await fetchResponse(`${backendUrl}/api/health`, {
+  const backendHealth = await fetchWithRetry(`${backendUrl}/api/health`, {
     Accept: "application/json",
   });
   if (!backendHealth.ok) {
@@ -105,7 +127,7 @@ async function run() {
     checkSecurityHeaders("backend /api/health", backendHealth.headers, failures, requireHsts);
   }
 
-  const backendVersion = await fetchResponse(`${backendUrl}/api/meta/version`, {
+  const backendVersion = await fetchWithRetry(`${backendUrl}/api/meta/version`, {
     Accept: "application/json",
   });
   if (!backendVersion.ok) {
@@ -116,7 +138,7 @@ async function run() {
     checkSecurityHeaders("backend /api/meta/version", backendVersion.headers, failures, requireHsts);
   }
 
-  const frontendHome = await fetchResponse(`${frontendUrl}/`, {
+  const frontendHome = await fetchWithRetry(`${frontendUrl}/`, {
     Accept: "text/html",
   });
   if (!frontendHome.ok) {
@@ -127,7 +149,7 @@ async function run() {
     checkSecurityHeaders("frontend /", frontendHome.headers, failures, requireHsts);
   }
 
-  const observabilityWithoutKey = await fetchResponse(`${backendUrl}/api/meta/observability`, {
+  const observabilityWithoutKey = await fetchWithRetry(`${backendUrl}/api/meta/observability`, {
     Accept: "application/json",
   });
   if (!requireObservabilityEndpoint && observabilityWithoutKey.status === 404) {

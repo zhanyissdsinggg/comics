@@ -24,11 +24,13 @@
     "ops:load-smoke": "node scripts/ops/load-smoke.mjs",
     "ops:admin-ui-live": "node scripts/ops/admin-ui-live-smoke.mjs",
     "ops:admin-write-smoke": "node scripts/ops/admin-user-write-smoke.mjs",
+    "ops:rollback-verify": "node scripts/ops/rollback-verify.mjs",
     "analyze": "npm --prefix frontend run analyze",
     "analyze:server": "npm --prefix frontend run analyze:server",
     "analyze:browser": "npm --prefix frontend run analyze:browser",
     "ops:admin-smoke": "node scripts/ops/admin-session-smoke.mjs",
-    "ops:deploy-gate": "npm run ops:post-deploy && npm run ops:admin-smoke",
+    "ops:deploy-gate": "node scripts/ops/deploy-gate.mjs",
+    "ops:deploy-gate:strict": "node scripts/ops/deploy-gate.mjs --strict",
     "ops:admin-routes": "node scripts/ops/admin-route-inventory.mjs"
   }
 }

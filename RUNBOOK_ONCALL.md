@@ -43,6 +43,18 @@ npm run ops:post-deploy
 npm run ops:oncall-watchdog
 ```
 
+## Unified Deploy Gate
+```powershell
+# Standard gate (recommended default)
+$env:BACKEND_URL='https://www.gushcomics.com'
+$env:FRONTEND_URL='https://www.gushcomics.com'
+npm run ops:deploy-gate
+
+# Strict gate (release-candidate / pre-major-release)
+# Requires observability endpoint + advanced health endpoints + admin auth credentials
+npm run ops:deploy-gate:strict
+```
+
 ### Optional strict modes
 ```powershell
 # Enforce advanced health endpoints in post-deploy gate
@@ -59,16 +71,19 @@ $env:SEC_REQUIRE_OBSERVABILITY_ENDPOINT='1'
 ## If Admin Runtime Fails
 ```powershell
 cd "c:/Users/86133/Downloads/tappytoon-nextjs"
+$env:BACKEND_URL='https://www.gushcomics.com'
 $env:FRONTEND_URL='https://www.gushcomics.com'
 $env:OPS_ADMIN_EMAIL='<admin_email>'
 $env:OPS_ADMIN_PASSWORD='<admin_password>'
 npm run ops:admin-ui-live
+npm run ops:admin-smoke
 ```
 
 Compatibility fallback:
 ```powershell
 $env:OPS_ADMIN_KEY='<legacy_admin_key>'
 npm run ops:admin-ui-live
+npm run ops:admin-smoke
 ```
 
 ## Known Contract Gaps (as of 2026-04-15)
@@ -80,6 +95,16 @@ npm run ops:admin-ui-live
 1. 10 min unresolved P1: trigger rollback.
 2. 20 min unresolved P1: freeze deploys and start incident notes.
 3. 30 min unresolved P1: engage infra + backend owners jointly.
+
+## Rollback Verification
+```powershell
+cd "c:/Users/86133/Downloads/tappytoon-nextjs"
+$env:BACKEND_URL='https://www.gushcomics.com'
+$env:FRONTEND_URL='https://www.gushcomics.com'
+$env:EXPECT_BACKEND_COMMIT='<target_backend_commit>'
+$env:EXPECT_FRONTEND_COMMIT='<target_frontend_commit>'
+npm run ops:rollback-verify
+```
 
 ## Post-incident Record
 - Incident start/end time

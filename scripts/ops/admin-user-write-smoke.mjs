@@ -222,11 +222,15 @@ function unwrapList(payload) {
   return [];
 }
 
-async function login(backendBaseUrl, adminKey, cookieJar) {
+async function login(backendBaseUrl, credentials, cookieJar) {
+  const loginPayload =
+    credentials?.email && credentials?.password
+      ? { email: credentials.email, password: credentials.password }
+      : { adminKey: credentials?.adminKey || "" };
   const result = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ adminKey }),
+    body: JSON.stringify(loginPayload),
     cookieJar,
   });
   logStep(`POST ${LOGIN_PATH}`, result);
@@ -648,17 +652,25 @@ async function run() {
 
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
+  const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
+  const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
 
   if (!backendBaseUrl) {
     throw new Error("BACKEND_URL is required");
   }
 
-  if (!adminKey) {
-    throw new Error("OPS_ADMIN_KEY or ADMIN_KEY is required");
+  if (!(adminEmail && adminPassword) && !adminKey) {
+    throw new Error(
+      "admin credentials required: set OPS_ADMIN_EMAIL + OPS_ADMIN_PASSWORD, or OPS_ADMIN_KEY/ADMIN_KEY",
+    );
   }
 
   const cookieJar = {};
-  await login(backendBaseUrl, adminKey, cookieJar);
+  const credentials =
+    adminEmail && adminPassword
+      ? { email: adminEmail, password: adminPassword }
+      : { adminKey };
+  await login(backendBaseUrl, credentials, cookieJar);
 
   let candidate = null;
   let originalBlocked = false;

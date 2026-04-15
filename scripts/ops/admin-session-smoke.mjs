@@ -249,6 +249,8 @@ async function assertAppendOnlyAuditDelete(backendBaseUrl, headers) {
 async function run() {
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
+  const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
+  const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
   const adminRequired = process.env.OPS_ADMIN_REQUIRED === "1";
   const readPaths = getReadPaths();
 
@@ -256,8 +258,9 @@ async function run() {
     throw new Error("BACKEND_URL is required");
   }
 
-  if (!adminKey) {
-    const message = "admin smoke skipped: OPS_ADMIN_KEY/ADMIN_KEY not provided";
+  const hasCredential = (adminEmail && adminPassword) || adminKey;
+  if (!hasCredential) {
+    const message = "admin smoke skipped: provide OPS_ADMIN_EMAIL+OPS_ADMIN_PASSWORD or OPS_ADMIN_KEY/ADMIN_KEY";
     if (adminRequired) {
       fail(message);
     }
@@ -271,10 +274,14 @@ async function run() {
   await assertReadPaths(backendBaseUrl, readPaths, "unauthorized", [401, 403]);
   const cookieJar = {};
 
+  const loginPayload = adminEmail && adminPassword
+    ? { email: adminEmail, password: adminPassword }
+    : { adminKey };
+
   const login = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ adminKey }),
+    body: JSON.stringify(loginPayload),
     cookieJar,
   });
   logStep(`POST ${LOGIN_PATH}`, login);

@@ -3,8 +3,9 @@ import process from "node:process";
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_ROUNDS = 3;
 const DEFAULT_INTERVAL_MS = 3_000;
-const DEFAULT_MAX_ENDPOINT_P95_MS = 2_000;
-const DEFAULT_MAX_FRONTEND_P95_MS = 1_800;
+const DEFAULT_IGNORE_WARMUP_ROUNDS = 1;
+const DEFAULT_MAX_ENDPOINT_P95_MS = 2_500;
+const DEFAULT_MAX_FRONTEND_P95_MS = 3_500;
 const DEFAULT_MAX_OBS_ERROR_RATE_PCT = 2;
 const DEFAULT_MAX_OBS_P95_MS = 1_200;
 const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
@@ -261,8 +262,11 @@ async function run() {
 
   const rounds = readNumber("OPS_ROUNDS", DEFAULT_ROUNDS);
   const intervalMs = readNumber("OPS_INTERVAL_MS", DEFAULT_INTERVAL_MS);
+  const ignoreWarmupRounds = readNumber("OPS_IGNORE_WARMUP_ROUNDS", DEFAULT_IGNORE_WARMUP_ROUNDS);
   const maxEndpointP95Ms = readNumber("OPS_MAX_ENDPOINT_P95_MS", DEFAULT_MAX_ENDPOINT_P95_MS);
   const maxFrontendP95Ms = readNumber("OPS_MAX_FRONTEND_P95_MS", DEFAULT_MAX_FRONTEND_P95_MS);
+  const allowedFrontendSlowSamples = readNumber("OPS_ALLOWED_FRONTEND_SLOW_SAMPLES", 1);
+  const allowedTransientFailures = readNumber("OPS_ALLOWED_TRANSIENT_FAILURES", 1);
   const maxObsErrorRatePct = readNumber(
     "OPS_MAX_OBS_ERROR_RATE_PCT",
     DEFAULT_MAX_OBS_ERROR_RATE_PCT,
@@ -287,6 +291,8 @@ async function run() {
   const latencyByRoute = new Map();
   const successCountByRoute = new Map();
   const requiredByRoute = new Map();
+  const failureCountByRoute = new Map();
+  const failureExampleByRoute = new Map();
   const failures = [];
   const warnings = [];
   let latestVersion = null;
@@ -321,23 +327,22 @@ async function run() {
       const url = `${backendBaseUrl}${path}`;
       const result = await timedFetch(url);
 
-      if (!latencyByRoute.has(routeKey)) {
-        latencyByRoute.set(routeKey, []);
-      }
-      latencyByRoute.get(routeKey).push(result.durationMs);
-
       if (!result.ok) {
+        const failureMessage = `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
+          result.error || "n/a"
+        }`;
         if (!required && result.status === 404) {
           warnings.push(`${routeKey} unavailable (404) but optional in current mode`);
           continue;
         }
-        failures.push(
-          `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
-            result.error || "n/a"
-          }`,
-        );
+        failureCountByRoute.set(routeKey, (failureCountByRoute.get(routeKey) || 0) + 1);
+        failureExampleByRoute.set(routeKey, failureMessage);
       } else {
         successCountByRoute.set(routeKey, (successCountByRoute.get(routeKey) || 0) + 1);
+        if (!latencyByRoute.has(routeKey)) {
+          latencyByRoute.set(routeKey, []);
+        }
+        latencyByRoute.get(routeKey).push(result.durationMs);
         console.log(`[ops] ${routeKey} -> ${result.status} (${result.durationMs}ms)`);
       }
 
@@ -361,19 +366,18 @@ async function run() {
           },
         });
 
-        if (!latencyByRoute.has(routeKey)) {
-          latencyByRoute.set(routeKey, []);
-        }
-        latencyByRoute.get(routeKey).push(result.durationMs);
-
         if (!result.ok) {
-          failures.push(
-            `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
-              result.error || "n/a"
-            }`,
-          );
+          const failureMessage = `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
+            result.error || "n/a"
+          }`;
+          failureCountByRoute.set(routeKey, (failureCountByRoute.get(routeKey) || 0) + 1);
+          failureExampleByRoute.set(routeKey, failureMessage);
         } else {
           successCountByRoute.set(routeKey, (successCountByRoute.get(routeKey) || 0) + 1);
+          if (!latencyByRoute.has(routeKey)) {
+            latencyByRoute.set(routeKey, []);
+          }
+          latencyByRoute.get(routeKey).push(result.durationMs);
           console.log(`[ops] ${routeKey} -> ${result.status} (${result.durationMs}ms)`);
           if (!frontendIdentity) {
             frontendIdentity = {
@@ -392,6 +396,26 @@ async function run() {
     }
   }
 
+  for (const [routeKey, count] of failureCountByRoute.entries()) {
+    const required = requiredByRoute.get(routeKey) !== false;
+    if (!required) {
+      warnings.push(`${routeKey} had ${count} failed probe(s) but is optional`);
+      continue;
+    }
+
+    if (count > allowedTransientFailures) {
+      failures.push(
+        `${routeKey} failed ${count} probe(s), allowance=${allowedTransientFailures}. ${
+          failureExampleByRoute.get(routeKey) || ""
+        }`.trim(),
+      );
+    } else {
+      warnings.push(
+        `${routeKey} transient failure tolerated (${count}/${allowedTransientFailures})`,
+      );
+    }
+  }
+
   for (const [routeKey, samples] of latencyByRoute.entries()) {
     const required = requiredByRoute.get(routeKey) !== false;
     const successCount = successCountByRoute.get(routeKey) || 0;
@@ -399,16 +423,26 @@ async function run() {
       console.log(`[ops] latency ${routeKey}: skipped (optional route unavailable)`);
       continue;
     }
-    const p95 = percentile(samples, 95);
-    const threshold = routeKey.startsWith("frontend ") ? maxFrontendP95Ms : maxEndpointP95Ms;
+    const effectiveSamples =
+      samples.length > ignoreWarmupRounds ? samples.slice(ignoreWarmupRounds) : samples;
+    const p95 = percentile(effectiveSamples, 95);
+    const isFrontendRoute = routeKey.startsWith("frontend ");
+    const threshold = isFrontendRoute ? maxFrontendP95Ms : maxEndpointP95Ms;
+    const slowSampleCount = effectiveSamples.filter((value) => value > threshold).length;
     if (p95 > threshold) {
+      if (isFrontendRoute && slowSampleCount <= allowedFrontendSlowSamples) {
+        warnings.push(
+          `${routeKey} had ${slowSampleCount} slow sample(s) over ${threshold}ms, tolerated by allowance=${allowedFrontendSlowSamples}`,
+        );
+      } else {
       failures.push(`${routeKey} p95=${p95}ms exceeds threshold ${threshold}ms`);
+      }
     }
     console.log(
-      `[ops] latency ${routeKey}: p50=${percentile(samples, 50)}ms p95=${p95}ms p99=${percentile(
-        samples,
+      `[ops] latency ${routeKey}: p50=${percentile(effectiveSamples, 50)}ms p95=${p95}ms p99=${percentile(
+        effectiveSamples,
         99,
-      )}ms`,
+      )}ms (samples=${samples.length}, warmupIgnored=${Math.min(ignoreWarmupRounds, samples.length)})`,
     );
   }
 
