@@ -91,7 +91,7 @@ export function ReaderSettingsProvider({ children }) {
       const next = {
         ...prev,
         theme: validThemes.includes(theme) ? theme : "light",
-        nightMode: theme === "dark", // 鍚屾nightMode浠ュ吋瀹规棫鐗堟湰
+        nightMode: theme === "dark", // ?? nightMode ??????
       };
       writeSettings(next);
       return next;

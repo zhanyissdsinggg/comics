@@ -1,5 +1,5 @@
 // This is your Prisma schema file
-// 鑰佺帇璇达細瀹屾暣鐨勬暟鎹簱schema
+// Complete Prisma schema for the backend service.
 
 generator client {
   provider = "prisma-client-js"
@@ -34,7 +34,7 @@ model User {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  // 鑰佺帇鏂板锛氭墍鏈夊弽鍚戝叧绯?
+  // Reverse relations from User
   wallet         Wallet?        @relation("UserWallet")
   sessions       Session[]      @relation("UserSessions")
   comments       Comment[]      @relation("UserComments")
@@ -90,7 +90,7 @@ model Series {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
+  // Reverse relations from Series
   episodes         Episode[]         @relation("SeriesEpisodes")
   comments         Comment[]         @relation("SeriesComments")
   follows          Follow[]          @relation("SeriesFollows")
@@ -159,14 +159,14 @@ model Episode {
   pages            Json      @default("[]")
   paragraphs       String[]  @default([])
   text             String?
-  isDeleted        Boolean   @default(false) // 鑰佺帇璇达細杞垹闄ゆ爣璁帮紝闃叉鏁版嵁琚‖鍒犻櫎
+  isDeleted        Boolean   @default(false) // Soft delete flag to avoid hard deletes
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝鏀逛负Restrict闃叉鎰忓鍒犻櫎
+  // Relation to Series; keep Restrict to prevent accidental cascade deletes
   series           Series    @relation("SeriesEpisodes", fields: [seriesId], references: [id], onDelete: Restrict)
 
-  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
+  // Reverse relations from Episode
   bookmarks        Bookmark[]        @relation("EpisodeBookmarks")
   entitlements     Entitlement[]     @relation("EpisodeEntitlements")
   readingHistory   ReadingHistory[]  @relation("EpisodeReadingHistory")
@@ -234,7 +234,6 @@ model DailyActive {
   date      DateTime
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserDailyActives", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([dateKey, userId])
@@ -298,7 +297,6 @@ model CommentLike {
   commentId String
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鍜孋omment鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCommentLikes", fields: [userId], references: [id], onDelete: Cascade)
   comment   Comment  @relation("CommentLikes", fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -317,7 +315,6 @@ model CommentReply {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鍜孋omment鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCommentReplies", fields: [userId], references: [id], onDelete: Cascade)
   comment   Comment  @relation("CommentReplies", fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -332,7 +329,6 @@ model Follow {
   seriesId  String
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鍜孲eries鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesFollows", fields: [seriesId], references: [id], onDelete: Cascade)
 
@@ -352,7 +348,6 @@ model Bookmark {
   label     String?
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserBookmarks", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesBookmarks", fields: [seriesId], references: [id], onDelete: Cascade)
   episode   Episode  @relation("EpisodeBookmarks", fields: [episodeId], references: [id], onDelete: Cascade)
@@ -404,7 +399,6 @@ model UserCoupon {
   claimedAt DateTime @default(now())
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鍜孋oupon鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserCoupons", fields: [userId], references: [id], onDelete: Cascade)
   coupon    Coupon   @relation("CouponUserCoupons", fields: [couponId], references: [id])
 
@@ -425,7 +419,6 @@ model Subscription {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([planId])
@@ -440,7 +433,6 @@ model SubscriptionUsage {
   used      Int      @default(0)
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptionUsages", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
@@ -457,7 +449,6 @@ model SubscriptionVoucherUsage {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserSubscriptionVoucherUsages", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
@@ -479,7 +470,6 @@ model TopupPackage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氬弽鍚戝叧绯?
   orders    Order[]  @relation("PackageOrders")
 
   @@map("topup_packages")
@@ -527,7 +517,6 @@ model UserPreference {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_preferences")
@@ -565,7 +554,6 @@ model SeriesViewStat {
   date      DateTime
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝绾ц仈鍒犻櫎
   series    Series   @relation("SeriesViewStats", fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@unique([dateKey, seriesId])
@@ -587,7 +575,6 @@ model SupportTicket {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user       User?    @relation("UserSupportTickets", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -727,7 +714,6 @@ model MissionState {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserMissionStates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("mission_states")
@@ -744,7 +730,6 @@ model RewardState {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user            User      @relation("UserRewardStates", fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reward_states")
@@ -809,7 +794,6 @@ model PaymentIntent {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鍜孫rder鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserPaymentIntents", fields: [userId], references: [id], onDelete: Cascade)
   order     Order    @relation("OrderPaymentIntents", fields: [orderId], references: [id], onDelete: Cascade)
   retries   PaymentRetry[] @relation("PaymentIntentRetries")
@@ -850,7 +834,6 @@ model Rating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User鍜孲eries鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserRatings", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesRatings", fields: [seriesId], references: [id], onDelete: Cascade)
 
@@ -900,7 +883,6 @@ model Progress {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user          User     @relation("UserProgress", fields: [userId], references: [id], onDelete: Cascade)
   series        Series   @relation("SeriesProgress", fields: [seriesId], references: [id], onDelete: Cascade)
   lastEpisode   Episode? @relation("EpisodeProgress", fields: [lastEpisodeId], references: [id], onDelete: SetNull)
@@ -923,7 +905,6 @@ model Notification {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
   series    Series?  @relation("SeriesNotifications", fields: [seriesId], references: [id], onDelete: SetNull)
   episode   Episode? @relation("EpisodeNotifications", fields: [episodeId], references: [id], onDelete: SetNull)
@@ -942,14 +923,13 @@ model ReadingHistory {
   percent   Int      @default(0)
   createdAt DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌User銆丼eries銆丒pisode鐨勫叧绯伙紝绾ц仈鍒犻櫎
   user      User     @relation("UserReadingHistory", fields: [userId], references: [id], onDelete: Cascade)
   series    Series   @relation("SeriesReadingHistory", fields: [seriesId], references: [id], onDelete: Cascade)
   episode   Episode  @relation("EpisodeReadingHistory", fields: [episodeId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([episodeId])
-  @@index([userId, createdAt]) // 鑰佺帇璇达細鐢ㄤ簬蹇€熸煡璇㈢敤鎴风殑闃呰鍘嗗彶锛屾寜鏃堕棿鎺掑簭
+  @@index([userId, createdAt])
   @@map("reading_history")
 }
 
@@ -985,7 +965,6 @@ model RecommendationAnalytics {
   date        DateTime
   createdAt   DateTime @default(now())
 
-  // 鑰佺帇鏂板锛氫笌Series鐨勫叧绯伙紝绾ц仈鍒犻櫎
   series      Series   @relation("SeriesRecommendationAnalytics", fields: [seriesId], references: [id], onDelete: Cascade)
 
   @@index([slot])

@@ -38,39 +38,39 @@ const ADMIN_ROUTE_CASES = [
   },
   {
     route: "/admin/orders",
-    emptyStatePattern: /No orders match this view yet\.|暂无订单|当前视图下还没有匹配的订单。|鏆傛棤璁㈠崟/,
+    emptyStatePattern: /No orders match this view yet\.|暂无订单|当前视图下还没有匹配的订单。/,
   },
   {
     route: "/admin/comments",
-    emptyStatePattern: /No comments match this view yet\.|暂无评论|当前视图下还没有匹配的评论。|鏆傛棤璇勮/,
+    emptyStatePattern: /No comments match this view yet\.|暂无评论|当前视图下还没有匹配的评论。/,
   },
   {
     route: "/admin/notifications",
-    emptyStatePattern: /No notifications match this view yet\.|暂无通知|当前视图下还没有匹配的通知。|鏆傛棤閫氱煡/,
+    emptyStatePattern: /No notifications match this view yet\.|暂无通知|当前视图下还没有匹配的通知。/,
   },
   {
     route: "/admin/promotions",
-    emptyStatePattern: /No promotions match this view yet\.|暂无活动|当前视图下还没有匹配的活动。|鏆傛棤娲诲姩/,
+    emptyStatePattern: /No promotions match this view yet\.|暂无活动|当前视图下还没有匹配的活动。/,
   },
   {
     route: "/admin/billing",
-    emptyStatePattern: /No top-up packages match this view yet\.|暂无充值套餐|当前视图下还没有匹配的充值套餐。|鏆傛棤鍏呭€煎椁?/,
+    emptyStatePattern: /No top-up packages match this view yet\.|暂无充值套餐|当前视图下还没有匹配的充值套餐。/,
   },
   {
     route: "/admin/marketing",
-    emptyStatePattern: /No campaigns are available for this view\.|暂无活动|当前视图下还没有可用的活动。|鏆傛棤娲诲姩/,
+    emptyStatePattern: /No campaigns are available for this view\.|暂无活动|当前视图下还没有可用的活动。/,
   },
   {
     route: "/admin/recommendations",
-    emptyStatePattern: /No recommendation slots exist yet\.|暂无推荐位|当前还没有推荐位。|鏆傛棤鎺ㄨ崘浣?/,
+    emptyStatePattern: /No recommendation slots exist yet\.|暂无推荐位|当前还没有推荐位。/,
   },
   {
     route: "/admin/logs",
-    emptyStatePattern: /No audit logs were found for this view\.|未找到审计日志|当前视图下没有审计日志。|鏈壘鍒板璁℃棩蹇?/,
+    emptyStatePattern: /No audit logs were found for this view\.|未找到审计日志|当前视图下没有审计日志。/,
   },
   {
     route: "/admin/revenue",
-    emptyStatePattern: /No revenue data is available for this range\.|暂无收入数据|当前时间范围内还没有收入数据。|鏆傛棤鏀跺叆鏁版嵁/,
+    emptyStatePattern: /No revenue data is available for this range\.|暂无收入数据|当前时间范围内还没有收入数据。/,
   },
 ] as const;
 

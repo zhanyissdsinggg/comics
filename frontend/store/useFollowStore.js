@@ -50,7 +50,7 @@ export function FollowProvider({ children }) {
     }
   }, []);
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙矮绻氱€涙ɑ鏁归挊蹇撱仚閸掔櫦ocalStorage
+  // ???????? localStorage
   const saveCollections = useCallback((newCollections) => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem("mn_collections", JSON.stringify(newCollections));
@@ -128,12 +128,12 @@ export function FollowProvider({ children }) {
     [collections, saveCollections]
   );
 
-  // 閼颁胶甯囧▔銊╁櫞閿涙碍鍧婇崝鐘辩稊閸濅礁鍩岄弨鎯版婢?
+  // ??????????????
   const addToCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
         if (c.id === collectionId) {
-          // 闁灝鍘ら柌宥咁槻濞ｈ濮?
+          // ?????????
           if (c.seriesIds.includes(seriesId)) {
             return c;
           }
