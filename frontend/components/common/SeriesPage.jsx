@@ -499,32 +499,6 @@ export default function SeriesPage({
       count: null,
     }));
   }, [config.fallbackGenres, genreQuickPicks]);
-  const completedSeriesCount = useMemo(
-    () =>
-      series.filter((item) => normalizeStatus(item?.status) === "completed")
-        .length,
-    [series],
-  );
-  const heroStats = useMemo(
-    () => [
-      {
-        id: "titles",
-        label: "Titles",
-        value: Number(series.length || 0).toLocaleString(),
-      },
-      {
-        id: "genres",
-        label: "Genres",
-        value: Number(genres.length || 0).toLocaleString(),
-      },
-      {
-        id: "completed",
-        label: "Finished",
-        value: Number(completedSeriesCount || 0).toLocaleString(),
-      },
-    ],
-    [completedSeriesCount, genres.length, series.length],
-  );
   const primaryButtonClass =
     "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
   const secondaryButtonClass =
@@ -534,9 +508,6 @@ export default function SeriesPage({
     !isComicPage &&
     (!isNovelPage || !hasActiveFilters);
   const showCatalogCount = !isComicPage;
-  const oppositeFormatHref = type === "comic" ? "/novels" : "/comics";
-  const oppositeFormatLabel =
-    type === "comic" ? "Browse Novels" : "Browse Comics";
 
   return (
     <main className="gush-page-shell gush-home-shell overflow-hidden">
@@ -544,9 +515,9 @@ export default function SeriesPage({
       <SiteHeader variant="home" />
 
       <div className="gush-page-main gush-section-stack">
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.28fr)_minmax(320px,0.72fr)]">
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)]">
           <SurfacePanel
-            className="space-y-6 rounded-[38px] px-5 py-5 sm:px-7 sm:py-7"
+            className="space-y-5 rounded-[34px] px-5 py-5 sm:px-6 sm:py-6"
             tone="highlight"
             accent="blue"
             appearance="light"
@@ -584,29 +555,6 @@ export default function SeriesPage({
               >
                 Search the catalog
               </button>
-              <button
-                type="button"
-                onClick={() => router.push(oppositeFormatHref)}
-                className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink-soft)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
-              >
-                {oppositeFormatLabel}
-              </button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {heroStats.map((stat) => (
-                <div
-                  key={stat.id}
-                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]"
-                >
-                  <p className="text-lg font-semibold tracking-tight text-[color:var(--gush-ink-strong)]">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
             </div>
           </SurfacePanel>
 

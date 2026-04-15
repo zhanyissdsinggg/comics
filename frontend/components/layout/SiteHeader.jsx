@@ -166,17 +166,11 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
           scrolled
-            ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.96)] shadow-[0_12px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl"
+            ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.97)] shadow-[0_8px_18px_rgba(15,23,42,0.04)] backdrop-blur-xl"
             : "border-transparent bg-[rgba(255,255,255,0.88)] backdrop-blur-lg"
         }`}
       >
-        <div
-          className={`relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8 ${
-            scrolled
-              ? "before:absolute before:inset-x-6 before:bottom-0 before:h-px before:bg-[linear-gradient(90deg,transparent,rgba(29,29,31,0.08),transparent)] before:content-['']"
-              : ""
-          }`}
-        >
+        <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
           <div className="flex min-h-[58px] items-center gap-2 py-2 sm:min-h-[64px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>

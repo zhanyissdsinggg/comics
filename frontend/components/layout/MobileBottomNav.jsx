@@ -129,14 +129,14 @@ export default function MobileBottomNav() {
               className={cn(
                 "relative flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-[1.35rem] px-2 py-2 text-center transition-all duration-200",
                 isActive
-                  ? "border border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-strong)] shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
-                  : "text-[color:var(--gush-ink-faint)] hover:bg-black/[0.02] hover:text-[color:var(--gush-ink-soft)]",
+                  ? "bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)]"
+                  : "text-[color:var(--gush-ink-faint)] hover:bg-black/[0.015] hover:text-[color:var(--gush-ink-soft)]",
               )}
             >
               <span
                 className={cn(
-                  "absolute left-1/2 top-1.5 h-1 w-8 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-[var(--gush-accent)]" : "bg-transparent",
+                  "absolute left-1/2 top-1.5 h-[2px] w-7 -translate-x-1/2 rounded-full transition-all duration-200",
+                  isActive ? "bg-[var(--gush-accent)] opacity-85" : "bg-transparent",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />

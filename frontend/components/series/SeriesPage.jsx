@@ -955,20 +955,20 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-6 rounded-[30px] border border-[color:var(--gush-border)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:px-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-4 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 sm:px-5">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent)]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent)]">
                   {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
                 </p>
-                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2.15rem]">
+                <h2 className="mt-1 text-sm font-semibold tracking-tight text-slate-900 sm:text-base">
                   {discoveryContext.title}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={handleReturnToDiscovery}
-                className={`shrink-0 ${secondaryButtonClass}`}
+                className="shrink-0 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--gush-ink)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]"
               >
                 {discoveryContext.returnLabel}
               </button>

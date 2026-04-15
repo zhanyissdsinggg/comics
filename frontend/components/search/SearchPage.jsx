@@ -1084,50 +1084,28 @@ export default function SearchPage() {
       <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
+        <section className="grid gap-5">
           <SurfacePanel
-            className="space-y-7 rounded-[44px] px-5 py-5 sm:px-7 sm:py-8"
+            className="space-y-6 rounded-[36px] px-5 py-5 sm:px-6 sm:py-6"
             tone="highlight"
             accent="blue"
             appearance="light"
           >
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(260px,0.7fr)] xl:items-end">
-              <div className="max-w-3xl">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <p className="rounded-full border border-[color:var(--gush-border)] bg-white/72 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
-                    Search
-                  </p>
-                </div>
-                <h1 className="mt-5 font-display text-[2.6rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[3.4rem] xl:text-[4.35rem]">
-                  {heroTitle}
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[1rem]">
-                  {heroDescription}
-                </p>
-                {heroSecondary ? (
-                  <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
-                ) : null}
-              </div>
-
-              <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  {query ? "Lead result" : "First picks"}
-                </p>
-                <p className="mt-3 text-base font-semibold tracking-tight text-slate-950">
-                  {query
-                    ? leadSearchResult?.title || "Results are updating."
-                    : mastheadLeadKeyword?.label
-                      ? `"${mastheadLeadKeyword.label}"`
-                      : "Type to search."}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {query
-                    ? leadSearchResult
-                      ? summarizeSearchDescription(leadSearchResult)
-                      : "Use filters."
-                    : ""}
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <p className="rounded-full border border-[color:var(--gush-border)] bg-white/72 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                  Search
                 </p>
               </div>
+              <h1 className="mt-5 font-display text-[2.5rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[3.2rem] xl:text-[3.9rem]">
+                {heroTitle}
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[0.98rem]">
+                {heroDescription}
+              </p>
+              {heroSecondary ? (
+                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+              ) : null}
             </div>
 
             <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:p-5">
@@ -1172,7 +1150,7 @@ export default function SearchPage() {
             </div>
           </SurfacePanel>
 
-          <div className="grid gap-4">
+          <div className="hidden">
             <SurfacePanel
               className="h-full space-y-5 rounded-[36px] p-5 sm:p-6"
               tone="muted"
