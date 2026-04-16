@@ -398,8 +398,20 @@ export class AdminMarketingService {
   }
 
   async deleteCampaign(id: string): Promise<MarketingCampaign> {
-    return this.prisma.marketingCampaign.delete({
-      where: { id },
+    return this.prisma.$transaction(async (tx) => {
+      await tx.marketingCampaignTarget.deleteMany({
+        where: { campaignId: id },
+      });
+      await tx.marketingAnalytics.deleteMany({
+        where: { campaignId: id },
+      });
+      await tx.marketingBudget.deleteMany({
+        where: { campaignId: id },
+      });
+
+      return tx.marketingCampaign.delete({
+        where: { id },
+      });
     });
   }
 

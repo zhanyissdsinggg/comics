@@ -643,7 +643,7 @@ async function assertSupportTicketAbsent(backendBaseUrl, cookieJar, ticketId) {
 
 async function runOptionalSupportWriteSmoke(backendBaseUrl, cookieJar, candidate) {
   if (!supportWriteEnabled()) {
-    console.log("[ops-admin-write] support roundtrip skipped (set OPS_ADMIN_WRITE_SUPPORT=1 after support reply deploy)");
+    console.log("[ops-admin-write] support roundtrip skipped (set OPS_ADMIN_WRITE_SUPPORT=1 to include support ticket write flow)");
     return;
   }
   const required = supportWriteRequired();
