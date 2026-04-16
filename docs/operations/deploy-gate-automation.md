@@ -131,6 +131,21 @@ That extra branch:
 Use this for quick production-safe pressure checks (not full stress tests):
 
 ```bash
+BACKEND_URL=https://comics-production-07fa.up.railway.app \
+LOAD_DURATION_SEC=20 \
+LOAD_CONCURRENCY=15 \
+npm run ops:load-smoke
+```
+
+When `LOAD_TARGETS` is not provided, the script now auto-derives safe defaults from `BACKEND_URL`:
+
+- `/api/health`
+- `/api/health/ready`
+- `/api/series?adult=0`
+
+If you want full control, still pass explicit `LOAD_TARGETS`:
+
+```bash
 LOAD_TARGETS=https://comics-production-07fa.up.railway.app/api/health,https://comics-production-07fa.up.railway.app/api/health/ready \
 LOAD_DURATION_SEC=20 \
 LOAD_CONCURRENCY=15 \

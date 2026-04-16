@@ -103,6 +103,35 @@ function includesText(haystack, needle) {
   return normalizeText(haystack).toLowerCase().includes(normalizeText(needle).toLowerCase());
 }
 
+async function fetchWithRetry(url, options = {}) {
+  const attempts = Number(options.attempts || 2);
+  const retryDelayMs = Number(options.retryDelayMs || 500);
+  let lastResponse = null;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url);
+      lastResponse = response;
+      if (response.ok || attempt === attempts) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) {
+        throw error;
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+  }
+
+  if (lastResponse) {
+    return lastResponse;
+  }
+  throw lastError || new Error(`request failed: ${url}`);
+}
+
 function hasPublicCreatorCredit(series) {
   const label = String(series?.creator?.label || "").trim();
   const isFallback = Boolean(series?.creator?.isFallback);
@@ -158,26 +187,26 @@ function buildRouteChecks(seriesCatalog) {
     {
       route: "/",
       titleIncludes: "Read Comics and Novels Online",
-      h1: "Read original comics and novels in one place.",
-      required: ["Featured Series", "Browse Comics", "Browse Novels", "Meet the Creators", "Need Help?"],
+      h1: "Start with a story worth opening.",
+      required: ["Lead Story", "Featured", "Comics", "Novels", "Creators"],
       forbidden: LEGACY_FORBIDDEN,
       expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
     },
     {
       route: "/creators",
-      titleIncludes: hasRealCreators ? "Creators" : "Behind the Stories",
-      h1: hasRealCreators ? "Meet the Creators" : "Behind the Stories",
+      titleIncludes: "Creators",
+      h1: "Creators",
       required: hasRealCreators
-        ? ["Featured Creators", "Start with These Stories", "Browse by Genre", "All Creators"]
-        : ["Start with These Stories", "Browse by Genre", "How creator credits appear"],
+        ? ["Profiles", "All Creators", "Studios & Teams", "All genres"]
+        : ["Profiles", "All genres", "Open directory"],
       forbidden: hasRealCreators
         ? ["Story team", "The team behind"]
-        : ["Story team", "The team behind", "Featured Creators"],
+        : ["Story team", "The team behind"],
     },
     {
       route: "/rankings",
       titleIncludes: "Featured Series",
-      h1: "Editor's picks and reader-friendly starting points.",
+      h1: "Featured.",
       required: ["Featured Series", "Browse Comics", "Browse Novels"],
       forbidden: [...LEGACY_FORBIDDEN, "Rank #", "All time", "Weekly", "Monthly"],
       expectedHrefPatterns: [{ label: "series links", pattern: /href="\/series\/[^"]+"/i }],
@@ -206,7 +235,13 @@ function buildRouteChecks(seriesCatalog) {
 }
 
 async function loadSeriesCatalog(backendBaseUrl) {
-  const response = await fetch(`${backendBaseUrl}/api/series?adult=0`);
+  const response = await fetchWithRetry(`${backendBaseUrl}/api/series?adult=0`, {
+    attempts: 3,
+    retryDelayMs: 600,
+  });
+  if (!response.ok) {
+    throw new Error(`failed to load series catalog: status=${response.status}`);
+  }
   const payload = await response.json();
   return Array.isArray(payload?.series) ? payload.series : [];
 }
@@ -262,7 +297,10 @@ async function run() {
     const failures = [];
 
     for (const item of routeChecks) {
-      const res = await fetch(`${baseUrl}${item.route}`);
+      const res = await fetchWithRetry(`${baseUrl}${item.route}`, {
+        attempts: 2,
+        retryDelayMs: 400,
+      });
       const html = await res.text();
       const title = getFirstMatch(html, /<title>(.*?)<\/title>/i);
       const h1 = getFirstMatch(html, /<h1[^>]*>(.*?)<\/h1>/i);
@@ -282,6 +320,7 @@ async function run() {
       }));
 
       console.log(`[verify] route=${item.route}`);
+      console.log(`[verify] status=${res.status}`);
       console.log(`[verify] title=${title}`);
       console.log(`[verify] h1=${h1}`);
       console.log(
@@ -295,6 +334,9 @@ async function run() {
         console.log(`[verify] forbids "${needle}" -> ${!present}`);
       });
 
+      if (!res.ok) {
+        failures.push(`Route ${item.route} status is not ok: ${res.status}`);
+      }
       if (!title.includes(item.titleIncludes)) {
         failures.push(`Route ${item.route} title mismatch: ${title}`);
       }

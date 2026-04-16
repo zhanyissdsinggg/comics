@@ -6,6 +6,38 @@ const DEFAULT_TIMEOUT_MS = 5_000;
 const DEFAULT_MAX_ERROR_RATE_PCT = 1;
 const DEFAULT_MAX_P95_MS = 1_200;
 
+function normalizeBaseUrl(value) {
+  if (!value) {
+    return "";
+  }
+  return String(value).trim().replace(/\/+$/, "");
+}
+
+function resolveTargets() {
+  const explicitTargets = String(process.env.LOAD_TARGETS || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (explicitTargets.length > 0) {
+    return explicitTargets;
+  }
+
+  const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
+  if (!backendBaseUrl) {
+    throw new Error(
+      "LOAD_TARGETS is required. You can also set BACKEND_URL to auto-use default targets: /api/health,/api/health/ready,/api/series?adult=0",
+    );
+  }
+
+  const derivedTargets = [
+    `${backendBaseUrl}/api/health`,
+    `${backendBaseUrl}/api/health/ready`,
+    `${backendBaseUrl}/api/series?adult=0`,
+  ];
+  console.log(`[load] LOAD_TARGETS not provided; using derived defaults from BACKEND_URL=${backendBaseUrl}`);
+  return derivedTargets;
+}
+
 function readNumber(name, fallback) {
   const raw = process.env[name];
   if (!raw) {
@@ -87,16 +119,7 @@ async function runTarget(targetUrl, options) {
 }
 
 async function run() {
-  const targets = String(process.env.LOAD_TARGETS || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-  if (targets.length === 0) {
-    throw new Error(
-      "LOAD_TARGETS is required, example: LOAD_TARGETS=https://your-backend/api/health,https://your-backend/api/health/ready",
-    );
-  }
+  const targets = resolveTargets();
 
   const options = {
     durationSec: readNumber("LOAD_DURATION_SEC", DEFAULT_DURATION_SEC),
