@@ -88,9 +88,9 @@ jobs:
         if: ${{ steps.resolve.outputs.profile == 'deploy' }}
         env:
           OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
-          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL != '' && secrets.PROD_ADMIN_EMAIL || secrets.ADMIN_EMAIL }}
-          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD != '' && secrets.PROD_ADMIN_PASSWORD || secrets.ADMIN_PASSWORD }}
-          OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY != '' && secrets.PROD_ADMIN_KEY || secrets.ADMIN_KEY }}
+          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL }}
+          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD }}
+          OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY }}
         run: |
           HAS_OBSERVABILITY=0
           HAS_ADMIN_KEY=0
@@ -112,8 +112,8 @@ jobs:
           if [ "$HAS_OBSERVABILITY" -ne 1 ]; then
             MISSING+=("OBSERVABILITY_KEY")
           fi
-          if [ "$HAS_ADMIN_KEY" -ne 1 ] && { [ "$HAS_ADMIN_EMAIL" -ne 1 ] || [ "$HAS_ADMIN_PASSWORD" -ne 1 ]; }; then
-            MISSING+=("admin credentials: set PROD_ADMIN_KEY or PROD_ADMIN_EMAIL+PROD_ADMIN_PASSWORD")
+          if [ "$HAS_ADMIN_EMAIL" -ne 1 ] || [ "$HAS_ADMIN_PASSWORD" -ne 1 ]; then
+            MISSING+=("deploy admin credentials: set PROD_ADMIN_EMAIL + PROD_ADMIN_PASSWORD")
           fi
 
           if [ "${#MISSING[@]}" -gt 0 ]; then
@@ -126,9 +126,8 @@ jobs:
           BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
           OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
-          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL != '' && secrets.PROD_ADMIN_EMAIL || secrets.ADMIN_EMAIL }}
-          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD != '' && secrets.PROD_ADMIN_PASSWORD || secrets.ADMIN_PASSWORD }}
-          OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY != '' && secrets.PROD_ADMIN_KEY || secrets.ADMIN_KEY }}
+          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL }}
+          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD }}
           OPS_ADMIN_WRITE_ALLOWED: "1"
           OPS_SOP_RETRY_TIMES: "1"
         run: npm run ops:sop:${{ steps.resolve.outputs.profile }}

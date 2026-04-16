@@ -333,7 +333,8 @@ async function run() {
   logStep(`POST ${LOGIN_PATH}`, login);
   const loginBody = unwrapPayload(login.payload);
   if (![200, 201].includes(login.status) || loginBody.success !== true) {
-    fail(`admin login failed: status=${login.status}`);
+    const preview = String(login.text || "").slice(0, 300).replace(/\s+/g, " ").trim();
+    fail(`admin login failed: status=${login.status}${preview ? ` body=${preview}` : ""}`);
   }
 
   if (!cookieJar.admin_access_token || !cookieJar.admin_refresh_token) {
