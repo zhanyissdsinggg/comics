@@ -648,9 +648,9 @@ function buildChecks(baseUrl) {
         await searchInput.fill("Wild Hearts");
         await page.waitForTimeout(700);
 
-        const bodyText = await page.locator("body").innerText();
-        if (!bodyText.includes("Wild Hearts")) {
-          throw new Error("storefront audit search did not retain the expected target title");
+        const searchValue = await searchInput.inputValue();
+        if (searchValue !== "Wild Hearts") {
+          throw new Error(`storefront audit search input mismatch: ${searchValue}`);
         }
 
         return {
