@@ -31,7 +31,7 @@
     "ops:admin-smoke": "node scripts/ops/admin-session-smoke.mjs",
     "ops:deploy-gate": "node scripts/ops/deploy-gate.mjs",
     "ops:deploy-gate:strict": "node scripts/ops/deploy-gate.mjs --strict",
-    "ops:deploy-gate:strict:full": "node scripts/ops/deploy-gate.mjs --strict",
+    "ops:deploy-gate:strict:full": "node scripts/ops/deploy-gate-strict-full.mjs",
     "ops:admin-routes": "node scripts/ops/admin-route-inventory.mjs"
   }
 }

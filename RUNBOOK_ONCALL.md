@@ -56,6 +56,7 @@ npm run ops:deploy-gate:strict
 
 # Strict full (recommended for release candidate)
 # Requires valid OBSERVABILITY_KEY configured on backend
+# Script enforces required env vars and strict full flags automatically
 $env:OBSERVABILITY_KEY='<observability_key>'
 $env:OPS_REQUIRE_ADVANCED_HEALTH='1'
 $env:WATCHDOG_REQUIRE_OBSERVABILITY='1'
