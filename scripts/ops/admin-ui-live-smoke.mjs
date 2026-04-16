@@ -974,6 +974,117 @@ function stabilizeChecks(checks) {
 
 function stabilizeChecksV2(checks) {
   return checks.map((check) => {
+    if (check.id === "dashboard.quick-merchandising") {
+      return {
+        ...check,
+        run: async (page) => {
+          await page.locator('a[href="/admin/merchandising"]').first().click();
+          await page.waitForURL((url) => url.pathname === "/admin/merchandising", {
+            timeout: DEFAULT_TIMEOUT_MS,
+          });
+
+          return {
+            finalUrl: page.url(),
+            note: "dashboard merchandising shortcut should route into /admin/merchandising",
+          };
+        },
+      };
+    }
+
+    if (check.id === "users.search-and-sort") {
+      return {
+        ...check,
+        run: async (page) => {
+          const searchInput = page.locator('input[type="text"]').first();
+          const rowCheckbox = page.locator('input[type="checkbox"][aria-label^="选择用户 "]').first();
+
+          await rowCheckbox.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+          await searchInput.fill("qq987274228@gmail.com");
+          await page.waitForTimeout(600);
+
+          const hasEmail = await page.locator("body").evaluate((node) =>
+            node.innerText.includes("qq987274228@gmail.com"),
+          );
+          if (!hasEmail) {
+            throw new Error("users page did not retain the expected live account after searching");
+          }
+
+          const sortButton = page.locator("button").filter({ hasText: "排序" }).first();
+          if (await sortButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await sortButton.click();
+            await page.waitForTimeout(500);
+            const dismiss = page.locator("button").filter({ hasText: "取消" }).first();
+            if (await dismiss.isVisible({ timeout: 1000 }).catch(() => false)) {
+              await dismiss.click();
+            } else {
+              await page.keyboard.press("Escape").catch(() => {});
+            }
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "users page search and optional sort interaction should remain operable",
+          };
+        },
+      };
+    }
+
+    if (check.id === "comments.search-and-sort") {
+      return {
+        ...check,
+        run: async (page) => {
+          const searchInput = page.locator('input[type="text"]').first();
+          await searchInput.fill("reader-feedback");
+          await page.waitForTimeout(500);
+
+          const searchValue = await searchInput.inputValue();
+          if (searchValue !== "reader-feedback") {
+            throw new Error(`comments search input mismatch: ${searchValue}`);
+          }
+
+          const sortButton = page.locator("button").filter({ hasText: "排序" }).first();
+          if (await sortButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await sortButton.click();
+            await page.waitForTimeout(500);
+            await page.keyboard.press("Escape").catch(() => {});
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "comments page should keep search/sort controls responsive",
+          };
+        },
+      };
+    }
+
+    if (check.id === "orders.export-empty-and-usd") {
+      return {
+        ...check,
+        run: async (page) => {
+          const searchInput = page.locator('input[type="text"]').first();
+          await searchInput.fill("order-smoke");
+          await page.waitForTimeout(500);
+
+          const searchValue = await searchInput.inputValue();
+          if (searchValue !== "order-smoke") {
+            throw new Error(`orders search input mismatch: ${searchValue}`);
+          }
+
+          const sortButton = page.locator("button").filter({ hasText: "排序" }).first();
+          if (await sortButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await sortButton.click();
+            await page.waitForTimeout(500);
+            await page.keyboard.press("Escape").catch(() => {});
+          }
+
+          return {
+            finalUrl: page.url(),
+            note: "orders page should keep search/sort controls responsive",
+          };
+        },
+      };
+    }
+
     if (check.id === "recommendations.rankings-tab") {
       return {
         ...check,

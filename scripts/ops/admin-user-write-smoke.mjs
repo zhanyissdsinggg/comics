@@ -1,6 +1,8 @@
 import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_LOGIN_RETRY_ATTEMPTS = 3;
+const DEFAULT_LOGIN_RETRY_DELAY_MS = 800;
 const LOGIN_PATH = "/api/admin/auth/login";
 const LOGOUT_PATH = "/api/admin/auth/logout";
 const USERS_PATH = "/api/admin/users";
@@ -120,6 +122,20 @@ function readTimeout() {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
 }
 
+function readRetryAttempts() {
+  const parsed = Number(process.env.OPS_ADMIN_WRITE_LOGIN_RETRIES || DEFAULT_LOGIN_RETRY_ATTEMPTS);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_LOGIN_RETRY_ATTEMPTS;
+}
+
+function readRetryDelayMs() {
+  const parsed = Number(process.env.OPS_ADMIN_WRITE_LOGIN_RETRY_DELAY_MS || DEFAULT_LOGIN_RETRY_DELAY_MS);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_LOGIN_RETRY_DELAY_MS;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function requestJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), readTimeout());
@@ -222,26 +238,41 @@ function unwrapList(payload) {
   return [];
 }
 
-async function login(backendBaseUrl, credentials, cookieJar) {
-  const loginPayload =
-    credentials?.email && credentials?.password
-      ? { email: credentials.email, password: credentials.password }
-      : { adminKey: credentials?.adminKey || "" };
-  const result = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(loginPayload),
-    cookieJar,
-  });
-  logStep(`POST ${LOGIN_PATH}`, result);
+async function loginWithRetry(backendBaseUrl, credentials, cookieJar) {
+  const attempts = readRetryAttempts();
+  const delayMs = readRetryDelayMs();
+  let lastResult = null;
 
-  if (![200, 201].includes(result.status)) {
-    fail(`admin login failed: status=${result.status}`);
+  for (let index = 1; index <= attempts; index += 1) {
+    const loginPayload =
+      credentials?.email && credentials?.password
+        ? { email: credentials.email, password: credentials.password }
+        : { adminKey: credentials?.adminKey || "" };
+
+    const result = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginPayload),
+      cookieJar,
+    });
+    lastResult = result;
+    logStep(`POST ${LOGIN_PATH} (attempt ${index}/${attempts})`, result);
+
+    if ([200, 201].includes(result.status)) {
+      if (!cookieJar.admin_access_token || !cookieJar.admin_refresh_token) {
+        fail("admin login did not return both admin auth cookies");
+      }
+      return;
+    }
+
+    const retryable = result.status === 0 || result.status >= 500;
+    if (!retryable || index >= attempts) {
+      break;
+    }
+    await sleep(delayMs);
   }
 
-  if (!cookieJar.admin_access_token || !cookieJar.admin_refresh_token) {
-    fail("admin login did not return both admin auth cookies");
-  }
+  fail(`admin login failed: status=${lastResult?.status ?? "unknown"}`);
 }
 
 async function logout(backendBaseUrl, cookieJar) {
@@ -670,7 +701,7 @@ async function run() {
     adminEmail && adminPassword
       ? { email: adminEmail, password: adminPassword }
       : { adminKey };
-  await login(backendBaseUrl, credentials, cookieJar);
+  await loginWithRetry(backendBaseUrl, credentials, cookieJar);
 
   let candidate = null;
   let originalBlocked = false;
