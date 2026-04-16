@@ -81,6 +81,33 @@ Goal:
 
 - Refresh route inventory, schema drift posture, load behavior, chaos resilience, and rollback confidence.
 
+## GitHub Automation
+
+Workflow:
+
+- `.github/workflows/ops-sop-automation.yml`
+
+Automatic schedule:
+
+- Daily profile at `01:00 UTC`
+- Weekly profile at `02:30 UTC` on Monday
+
+Manual dispatch:
+
+1. Open GitHub Actions -> `OPS SOP Automation`
+2. Click `Run workflow`
+3. Select `profile` (`daily` / `deploy` / `weekly`)
+4. Optionally override backend/frontend URLs
+
+Required repo configuration:
+
+- `vars.PROD_BACKEND_URL` (optional if using default domain)
+- `vars.PROD_FRONTEND_URL` (optional if using default domain)
+- `secrets.OBSERVABILITY_KEY` (required for deploy profile)
+- Admin auth (one of):
+  - `secrets.PROD_ADMIN_KEY` (or `secrets.ADMIN_KEY`)
+  - `secrets.PROD_ADMIN_EMAIL` + `secrets.PROD_ADMIN_PASSWORD`
+
 ## Failure Handling
 
 When a profile fails:

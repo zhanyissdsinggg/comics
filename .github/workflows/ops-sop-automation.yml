@@ -1,0 +1,131 @@
+name: OPS SOP Automation
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+    - cron: "30 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "SOP profile to run"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - daily
+          - deploy
+          - weekly
+      backend_url:
+        description: "Backend base URL (optional, fallback to vars.PROD_BACKEND_URL)"
+        required: false
+        default: ""
+        type: string
+      frontend_url:
+        description: "Frontend base URL (optional, fallback to vars.PROD_FRONTEND_URL)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ops-sop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      DEFAULT_BACKEND_URL: https://www.gushcomics.com
+      DEFAULT_FRONTEND_URL: https://www.gushcomics.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Resolve profile and targets
+        id: resolve
+        env:
+          INPUT_PROFILE: ${{ github.event.inputs.profile }}
+          INPUT_BACKEND_URL: ${{ github.event.inputs.backend_url }}
+          INPUT_FRONTEND_URL: ${{ github.event.inputs.frontend_url }}
+          BACKEND_URL_FROM_VAR: ${{ vars.PROD_BACKEND_URL }}
+          FRONTEND_URL_FROM_VAR: ${{ vars.PROD_FRONTEND_URL }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          PROFILE="${INPUT_PROFILE}"
+          if [ -z "$PROFILE" ]; then
+            if [ "$EVENT_SCHEDULE" = "30 2 * * 1" ]; then
+              PROFILE="weekly"
+            else
+              PROFILE="daily"
+            fi
+          fi
+
+          BACKEND_URL="${INPUT_BACKEND_URL:-$BACKEND_URL_FROM_VAR}"
+          FRONTEND_URL="${INPUT_FRONTEND_URL:-$FRONTEND_URL_FROM_VAR}"
+          BACKEND_URL="${BACKEND_URL:-$DEFAULT_BACKEND_URL}"
+          FRONTEND_URL="${FRONTEND_URL:-$DEFAULT_FRONTEND_URL}"
+
+          echo "profile=$PROFILE" >> "$GITHUB_OUTPUT"
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+          echo "frontend_url=$FRONTEND_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Install Playwright Chromium
+        if: ${{ steps.resolve.outputs.profile == 'daily' }}
+        run: npx --prefix frontend playwright install --with-deps chromium
+
+      - name: Validate required secrets for deploy profile
+        if: ${{ steps.resolve.outputs.profile == 'deploy' }}
+        env:
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL != '' && secrets.PROD_ADMIN_EMAIL || secrets.ADMIN_EMAIL }}
+          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD != '' && secrets.PROD_ADMIN_PASSWORD || secrets.ADMIN_PASSWORD }}
+          OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY != '' && secrets.PROD_ADMIN_KEY || secrets.ADMIN_KEY }}
+        run: |
+          if [ -z "$OBSERVABILITY_KEY" ]; then
+            echo "Missing OBSERVABILITY_KEY for deploy profile" >&2
+            exit 1
+          fi
+          if [ -z "$OPS_ADMIN_KEY" ] && { [ -z "$OPS_ADMIN_EMAIL" ] || [ -z "$OPS_ADMIN_PASSWORD" ]; }; then
+            echo "Missing admin credentials (set PROD_ADMIN_KEY or PROD_ADMIN_EMAIL+PROD_ADMIN_PASSWORD)" >&2
+            exit 1
+          fi
+
+      - name: Run SOP profile
+        env:
+          BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          OPS_ADMIN_EMAIL: ${{ secrets.PROD_ADMIN_EMAIL != '' && secrets.PROD_ADMIN_EMAIL || secrets.ADMIN_EMAIL }}
+          OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD != '' && secrets.PROD_ADMIN_PASSWORD || secrets.ADMIN_PASSWORD }}
+          OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY != '' && secrets.PROD_ADMIN_KEY || secrets.ADMIN_KEY }}
+          OPS_ADMIN_WRITE_ALLOWED: "1"
+          OPS_SOP_RETRY_TIMES: "1"
+        run: npm run ops:sop:${{ steps.resolve.outputs.profile }}
+
+      - name: Upload SOP artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-sop-${{ steps.resolve.outputs.profile }}-${{ github.run_id }}
+          path: |
+            frontend/.tmp-admin-audit/live-interactions/latest.json
+            frontend/.tmp-admin-audit/live-interactions/latest.txt
+            frontend/.tmp-admin-audit/live-interactions/*.png
+            ops-watchdog-report.md
+            ops-watchdog-report.json
+            docs/operations/admin-route-inventory.md
+            docs/operations/admin-route-inventory.json
+          if-no-files-found: warn
+
