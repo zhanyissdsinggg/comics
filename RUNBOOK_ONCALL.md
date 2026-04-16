@@ -51,9 +51,16 @@ $env:FRONTEND_URL='https://www.gushcomics.com'
 npm run ops:deploy-gate
 
 # Strict gate (release-candidate / pre-major-release)
-# Default strict requires content audit + admin auth credentials
-# Advanced health / observability can be explicitly turned on by env flags below
+# Default strict: content-first audit + resilient runtime checks
 npm run ops:deploy-gate:strict
+
+# Strict full (recommended for release candidate)
+# Requires valid OBSERVABILITY_KEY configured on backend
+$env:OBSERVABILITY_KEY='<observability_key>'
+$env:OPS_REQUIRE_ADVANCED_HEALTH='1'
+$env:WATCHDOG_REQUIRE_OBSERVABILITY='1'
+$env:SEC_REQUIRE_OBSERVABILITY_ENDPOINT='1'
+npm run ops:deploy-gate:strict:full
 ```
 
 ### Optional strict modes
@@ -67,6 +74,9 @@ $env:OPS_STRICT_CONTENT_AUDIT='1'
 # Treat observability endpoint absence as hard failure
 $env:WATCHDOG_REQUIRE_OBSERVABILITY='1'
 $env:SEC_REQUIRE_OBSERVABILITY_ENDPOINT='1'
+
+# Provide observability access key for strict full mode
+$env:OBSERVABILITY_KEY='<observability_key>'
 
 # Optional: tighten backend latency tolerance for strict mode
 $env:OPS_ALLOWED_BACKEND_SLOW_SAMPLES='0'
@@ -90,10 +100,10 @@ npm run ops:admin-ui-live
 npm run ops:admin-smoke
 ```
 
-## Known Contract Gaps (as of 2026-04-15)
-- `/api/health/ready` and `/api/health/detail` return 404 in live runtime.
-- Observability probe endpoint expected by scripts returns 404.
-- On Windows local runtime, watchdog may exit with `UV_HANDLE_CLOSING` after report generation.
+## Known Runtime Notes (as of 2026-04-16)
+- `GET /api/meta/observability` is protected and returns `403` without `x-observability-key`.
+- Strict full mode requires backend/CI to share the same `OBSERVABILITY_KEY`.
+- Admin smoke is non-blocking when no admin credentials are provided; provide `OPS_ADMIN_EMAIL` + `OPS_ADMIN_PASSWORD` to enforce admin validation.
 
 ## Escalation
 1. 10 min unresolved P1: trigger rollback.
