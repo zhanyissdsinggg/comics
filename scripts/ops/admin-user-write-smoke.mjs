@@ -566,7 +566,7 @@ async function replyToSupportTicket(backendBaseUrl, cookieJar, ticketId, message
   });
   logStep(`POST ${ADMIN_SUPPORT_PATH}/${ticketId}/reply`, result);
 
-  if (result.status !== 200) {
+  if (result.status !== 200 && result.status !== 201) {
     supportError(`failed to reply to QA support ticket: status=${result.status}`);
   }
 
