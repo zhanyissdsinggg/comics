@@ -2,6 +2,8 @@ import fs from "node:fs";
 import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_RETRY_ATTEMPTS = 2;
+const DEFAULT_RETRY_INTERVAL_MS = 500;
 const DEFAULT_P1_ERROR_RATE_PCT = 1;
 const DEFAULT_P1_P95_MS = 2_000;
 const DEFAULT_P2_ERROR_RATE_PCT = 0.5;
@@ -78,6 +80,36 @@ async function fetchJson(url, headers = {}) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchJsonWithRetry(url, headers = {}) {
+  const attemptsRaw = Number(process.env.WATCHDOG_RETRY_ATTEMPTS || DEFAULT_RETRY_ATTEMPTS);
+  const intervalRaw = Number(process.env.WATCHDOG_RETRY_INTERVAL_MS || DEFAULT_RETRY_INTERVAL_MS);
+  const attempts = Number.isFinite(attemptsRaw) && attemptsRaw > 0 ? Math.floor(attemptsRaw) : DEFAULT_RETRY_ATTEMPTS;
+  const intervalMs = Number.isFinite(intervalRaw) && intervalRaw >= 0 ? intervalRaw : DEFAULT_RETRY_INTERVAL_MS;
+  let lastResult = null;
+
+  for (let index = 1; index <= attempts; index += 1) {
+    const result = await fetchJson(url, headers);
+    lastResult = result;
+    const retryable = !result.ok && (result.status === 0 || result.status >= 500);
+    if (!retryable || index >= attempts) {
+      return result;
+    }
+    await sleep(intervalMs);
+  }
+
+  return lastResult || {
+    ok: false,
+    status: 0,
+    durationMs: 0,
+    body: null,
+    error: "fetch failed",
+  };
+}
+
 function buildMarkdownReport(payload) {
   const lines = [];
   lines.push("# OPS Watchdog Report");
@@ -150,7 +182,7 @@ async function run() {
     headers["x-observability-key"] = observabilityKey;
   }
 
-  const result = await fetchJson(`${backendUrl}/api/meta/observability`, headers);
+  const result = await fetchJsonWithRetry(`${backendUrl}/api/meta/observability`, headers);
   let severity = "OK";
   const breaches = [];
   let status = "ok";

@@ -31,15 +31,35 @@ async function main() {
   const backendUrl = requireEnv("BACKEND_URL");
   const frontendUrl = requireEnv("FRONTEND_URL");
   const observabilityKey = requireEnv("OBSERVABILITY_KEY");
+  const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
+  const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
+  const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
+  const hasAdminCredentials = (adminEmail && adminPassword) || adminKey;
+
+  if (!hasAdminCredentials) {
+    throw new Error(
+      "OPS_ADMIN_EMAIL+OPS_ADMIN_PASSWORD or OPS_ADMIN_KEY/ADMIN_KEY is required for strict full deploy gate",
+    );
+  }
 
   const env = {
     ...process.env,
     BACKEND_URL: backendUrl,
     FRONTEND_URL: frontendUrl,
     OBSERVABILITY_KEY: observabilityKey,
+    ...(adminEmail && adminPassword
+      ? {
+          OPS_ADMIN_EMAIL: adminEmail,
+          OPS_ADMIN_PASSWORD: adminPassword,
+        }
+      : {
+          OPS_ADMIN_KEY: adminKey,
+        }),
     OPS_REQUIRE_ADVANCED_HEALTH: "1",
     WATCHDOG_REQUIRE_OBSERVABILITY: "1",
     SEC_REQUIRE_OBSERVABILITY_ENDPOINT: "1",
+    OPS_ADMIN_REQUIRED: "1",
+    OPS_ADMIN_UI_REQUIRED: "1",
   };
 
   const isWindows = process.platform === "win32";

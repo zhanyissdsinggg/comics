@@ -1,6 +1,8 @@
 import process from "node:process";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
+const DEFAULT_PROBE_RETRY_ATTEMPTS = 2;
+const DEFAULT_PROBE_RETRY_INTERVAL_MS = 500;
 const DEFAULT_ROUNDS = 3;
 const DEFAULT_INTERVAL_MS = 3_000;
 const DEFAULT_IGNORE_WARMUP_ROUNDS = 1;
@@ -266,6 +268,35 @@ async function timedFetch(url, options = {}) {
   }
 }
 
+async function probeWithRetry(url, options = {}) {
+  const attempts = readNumber("OPS_PROBE_RETRY_ATTEMPTS", DEFAULT_PROBE_RETRY_ATTEMPTS);
+  const retryIntervalMs = readNumber("OPS_PROBE_RETRY_INTERVAL_MS", DEFAULT_PROBE_RETRY_INTERVAL_MS);
+  const maxAttempts = Number.isFinite(attempts) && attempts > 0 ? Math.floor(attempts) : 1;
+  let lastResult = null;
+
+  for (let index = 1; index <= maxAttempts; index += 1) {
+    const result = await timedFetch(url, options);
+    lastResult = result;
+
+    const shouldRetry = !result.ok && (result.status === 0 || result.status >= 500);
+    if (!shouldRetry || index >= maxAttempts) {
+      return result;
+    }
+
+    await sleep(retryIntervalMs);
+  }
+
+  return lastResult || {
+    ok: false,
+    status: 0,
+    durationMs: 0,
+    headers: {},
+    text: "",
+    body: null,
+    error: "probe failed",
+  };
+}
+
 async function run() {
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const frontendBaseUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
@@ -348,7 +379,7 @@ async function run() {
       const routeKey = `backend ${path}`;
       requiredByRoute.set(routeKey, required);
       const url = `${backendBaseUrl}${path}`;
-      const result = await timedFetch(url);
+      const result = await probeWithRetry(url);
 
       if (!result.ok) {
         const failureMessage = `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
@@ -383,7 +414,7 @@ async function run() {
         const routeKey = `frontend ${route}`;
         requiredByRoute.set(routeKey, true);
         const url = `${frontendBaseUrl}${route}`;
-        const result = await timedFetch(url, {
+        const result = await probeWithRetry(url, {
           headers: {
             Accept: "text/html,application/xhtml+xml",
           },
@@ -486,7 +517,7 @@ async function run() {
   }
 
   if (frontendBaseUrl) {
-    const identityProbe = await timedFetch(`${frontendBaseUrl}/`, {
+    const identityProbe = await probeWithRetry(`${frontendBaseUrl}/`, {
       headers: {
         Accept: "text/html,application/xhtml+xml",
       },
@@ -544,7 +575,7 @@ async function run() {
     if (strictContentAudit) {
       const frontendAuditSpecs = buildFrontendAuditSpecs(publicCatalog);
       for (const spec of frontendAuditSpecs) {
-        const result = await timedFetch(`${frontendBaseUrl}${spec.route}`, {
+        const result = await probeWithRetry(`${frontendBaseUrl}${spec.route}`, {
           headers: {
             Accept: "text/html,application/xhtml+xml",
           },
@@ -590,7 +621,7 @@ async function run() {
   if (observabilityKey) {
     observabilityHeaders["x-observability-key"] = observabilityKey;
   }
-  const observabilityResult = await timedFetch(`${backendBaseUrl}/api/meta/observability`, {
+  const observabilityResult = await probeWithRetry(`${backendBaseUrl}/api/meta/observability`, {
     headers: observabilityHeaders,
   });
 

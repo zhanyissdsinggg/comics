@@ -57,10 +57,11 @@ npm run ops:deploy-gate:strict
 # Strict full (recommended for release candidate)
 # Requires valid OBSERVABILITY_KEY configured on backend
 # Script enforces required env vars and strict full flags automatically
+# Also requires admin credentials and runs admin smoke as blocking
 $env:OBSERVABILITY_KEY='<observability_key>'
-$env:OPS_REQUIRE_ADVANCED_HEALTH='1'
-$env:WATCHDOG_REQUIRE_OBSERVABILITY='1'
-$env:SEC_REQUIRE_OBSERVABILITY_ENDPOINT='1'
+$env:OPS_ADMIN_EMAIL='<admin_email>'
+$env:OPS_ADMIN_PASSWORD='<admin_password>'
+# or: $env:OPS_ADMIN_KEY='<legacy_admin_key>'
 npm run ops:deploy-gate:strict:full
 ```
 
@@ -104,7 +105,7 @@ npm run ops:admin-smoke
 ## Known Runtime Notes (as of 2026-04-16)
 - `GET /api/meta/observability` is protected and returns `403` without `x-observability-key`.
 - Strict full mode requires backend/CI to share the same `OBSERVABILITY_KEY`.
-- Admin smoke is non-blocking when no admin credentials are provided; provide `OPS_ADMIN_EMAIL` + `OPS_ADMIN_PASSWORD` to enforce admin validation.
+- Strict full mode requires admin credentials and treats admin smoke as blocking.
 
 ## Escalation
 1. 10 min unresolved P1: trigger rollback.

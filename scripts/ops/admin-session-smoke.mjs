@@ -1,6 +1,8 @@
 import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_RETRY_ATTEMPTS = 2;
+const DEFAULT_RETRY_INTERVAL_MS = 500;
 const DEFAULT_READ_PATH = "/api/admin/series?page=1&pageSize=1";
 const DEFAULT_READ_PATHS = [
   "/api/admin/series?page=1&pageSize=1",
@@ -136,6 +138,16 @@ function readTimeout() {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
 }
 
+function readRetryAttempts() {
+  const parsed = Number(process.env.OPS_ADMIN_RETRY_ATTEMPTS || DEFAULT_RETRY_ATTEMPTS);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_RETRY_ATTEMPTS;
+}
+
+function readRetryIntervalMs() {
+  const parsed = Number(process.env.OPS_ADMIN_RETRY_INTERVAL_MS || DEFAULT_RETRY_INTERVAL_MS);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_RETRY_INTERVAL_MS;
+}
+
 function getReadPaths() {
   const singlePath = String(process.env.OPS_ADMIN_READ_PATH || "").trim();
   if (singlePath) {
@@ -200,6 +212,40 @@ async function requestJson(url, options = {}) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestJsonWithRetry(url, options = {}) {
+  const method = String(options.method || "GET").toUpperCase();
+  const shouldRetry = method === "GET" || method === "HEAD";
+  if (!shouldRetry) {
+    return requestJson(url, options);
+  }
+
+  const attempts = readRetryAttempts();
+  const retryIntervalMs = readRetryIntervalMs();
+  let lastResult = null;
+  for (let index = 1; index <= attempts; index += 1) {
+    const result = await requestJson(url, options);
+    lastResult = result;
+    const retryable = !result.ok && (result.status === 0 || result.status >= 500);
+    if (!retryable || index >= attempts) {
+      return result;
+    }
+    await sleep(retryIntervalMs);
+  }
+
+  return lastResult || {
+    ok: false,
+    status: 0,
+    durationMs: 0,
+    payload: null,
+    text: "",
+    error: "request failed",
+  };
+}
+
 function logStep(step, result) {
   const parts = [`[ops-admin] ${step}`, `status=${result.status}`, `durationMs=${result.durationMs}`];
   if (result.error) {
@@ -223,7 +269,7 @@ function assertPayloadPresent(result, label) {
 
 async function assertReadPaths(backendBaseUrl, readPaths, label, expectedStatuses, headers = {}) {
   for (const readPath of readPaths) {
-    const result = await requestJson(`${backendBaseUrl}${readPath}`, { headers });
+    const result = await requestJsonWithRetry(`${backendBaseUrl}${readPath}`, { headers });
     logStep(`GET ${readPath} (${label})`, result);
     if (!expectedStatuses.includes(result.status)) {
       fail(`expected ${label} admin read ${readPath} to return ${expectedStatuses.join("/")}, got ${result.status}`);
