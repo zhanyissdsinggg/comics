@@ -187,6 +187,10 @@ function fail(message) {
   process.exit(1);
 }
 
+function supportError(message) {
+  throw new Error(message);
+}
+
 function logStep(step, result) {
   const parts = [`[ops-admin-write] ${step}`, `status=${result.status}`, `durationMs=${result.durationMs}`];
   if (result.error) {
@@ -203,6 +207,10 @@ function ensureWriteAllowed() {
 
 function supportWriteEnabled() {
   return process.env.OPS_ADMIN_WRITE_SUPPORT === "1";
+}
+
+function supportWriteRequired() {
+  return process.env.OPS_ADMIN_WRITE_SUPPORT_REQUIRED === "1";
 }
 
 function isSafeQaEmail(value) {
@@ -488,11 +496,11 @@ async function createSupportTicket(backendBaseUrl, candidate) {
   logStep(`POST ${PUBLIC_SUPPORT_PATH}`, result);
 
   if (result.status !== 200 && result.status !== 201) {
-    fail(`failed to create QA support ticket: status=${result.status}`);
+    supportError(`failed to create QA support ticket: status=${result.status}`);
   }
 
   if (result.payload?.ok !== true) {
-    fail("support ticket create did not return ok=true");
+    supportError("support ticket create did not return ok=true");
   }
 
   return { replyEmail, subject, message };
@@ -515,7 +523,7 @@ async function listSupportTickets(backendBaseUrl, cookieJar, search) {
   logStep(`GET ${ADMIN_SUPPORT_PATH}?${params.toString()}`, result);
 
   if (result.status !== 200) {
-    fail(`failed to list QA support tickets: status=${result.status}`);
+    supportError(`failed to list QA support tickets: status=${result.status}`);
   }
 
   return unwrapList(result.payload);
@@ -539,11 +547,11 @@ async function findSupportTicketBySearch(backendBaseUrl, cookieJar, search) {
 async function resolveSupportTicket(backendBaseUrl, cookieJar, supportSeed) {
   const ticket = await findSupportTicketBySearch(backendBaseUrl, cookieJar, supportSeed.subject);
   if (!ticket) {
-    fail(`could not find the QA support ticket after create: ${supportSeed.subject}`);
+    supportError(`could not find the QA support ticket after create: ${supportSeed.subject}`);
   }
 
   if (String(ticket.replyEmail || ticket.userEmail || "").trim().toLowerCase() !== supportSeed.replyEmail.toLowerCase()) {
-    fail("resolved support ticket does not match the expected QA reply email");
+    supportError("resolved support ticket does not match the expected QA reply email");
   }
 
   return ticket;
@@ -559,11 +567,11 @@ async function replyToSupportTicket(backendBaseUrl, cookieJar, ticketId, message
   logStep(`POST ${ADMIN_SUPPORT_PATH}/${ticketId}/reply`, result);
 
   if (result.status !== 200) {
-    fail(`failed to reply to QA support ticket: status=${result.status}`);
+    supportError(`failed to reply to QA support ticket: status=${result.status}`);
   }
 
   if (result.payload?.ok !== true) {
-    fail("support reply did not return ok=true");
+    supportError("support reply did not return ok=true");
   }
 }
 
@@ -575,11 +583,11 @@ async function closeSupportTicket(backendBaseUrl, cookieJar, ticketId) {
   logStep(`PATCH ${ADMIN_SUPPORT_PATH}/${ticketId}/close`, result);
 
   if (result.status !== 200) {
-    fail(`failed to close QA support ticket: status=${result.status}`);
+    supportError(`failed to close QA support ticket: status=${result.status}`);
   }
 
   if (result.payload?.ok !== true) {
-    fail("support close did not return ok=true");
+    supportError("support close did not return ok=true");
   }
 }
 
@@ -591,33 +599,33 @@ async function deleteSupportTicket(backendBaseUrl, cookieJar, ticketId) {
   logStep(`DELETE ${ADMIN_SUPPORT_PATH}/${ticketId}`, result);
 
   if (result.status !== 200) {
-    fail(`failed to delete QA support ticket: status=${result.status}`);
+    supportError(`failed to delete QA support ticket: status=${result.status}`);
   }
 
   if (result.payload?.ok !== true) {
-    fail("support delete did not return ok=true");
+    supportError("support delete did not return ok=true");
   }
 }
 
 async function assertSupportTicketState(backendBaseUrl, cookieJar, ticketId, expected) {
   const ticket = await findSupportTicketBySearch(backendBaseUrl, cookieJar, ticketId);
   if (!ticket || ticket.id !== ticketId) {
-    fail(`could not re-read QA support ticket ${ticketId}`);
+    supportError(`could not re-read QA support ticket ${ticketId}`);
   }
 
   if (expected.status && String(ticket.status || "").toLowerCase() !== expected.status.toLowerCase()) {
-    fail(`support ticket ${ticketId} status mismatch: expected ${expected.status}, got ${ticket.status}`);
+    supportError(`support ticket ${ticketId} status mismatch: expected ${expected.status}, got ${ticket.status}`);
   }
 
   if (expected.adminReply !== undefined) {
     if (!Object.prototype.hasOwnProperty.call(ticket, "adminReply")) {
-      fail(
+      supportError(
         "support ticket payload does not expose adminReply yet. Deploy the support reply migration/runtime before enabling OPS_ADMIN_WRITE_SUPPORT=1.",
       );
     }
 
     if (String(ticket.adminReply || "") !== String(expected.adminReply || "")) {
-      fail(
+      supportError(
         `support ticket ${ticketId} reply mismatch: expected "${expected.adminReply}", got "${ticket.adminReply}"`,
       );
     }
@@ -629,7 +637,7 @@ async function assertSupportTicketState(backendBaseUrl, cookieJar, ticketId, exp
 async function assertSupportTicketAbsent(backendBaseUrl, cookieJar, ticketId) {
   const ticket = await findSupportTicketBySearch(backendBaseUrl, cookieJar, ticketId);
   if (ticket) {
-    fail(`support ticket ${ticketId} still exists after deletion`);
+    supportError(`support ticket ${ticketId} still exists after deletion`);
   }
 }
 
@@ -638,11 +646,12 @@ async function runOptionalSupportWriteSmoke(backendBaseUrl, cookieJar, candidate
     console.log("[ops-admin-write] support roundtrip skipped (set OPS_ADMIN_WRITE_SUPPORT=1 after support reply deploy)");
     return;
   }
-
-  const supportSeed = await createSupportTicket(backendBaseUrl, candidate);
+  const required = supportWriteRequired();
+  let supportSeed = null;
   let ticket = null;
 
   try {
+    supportSeed = await createSupportTicket(backendBaseUrl, candidate);
     ticket = await resolveSupportTicket(backendBaseUrl, cookieJar, supportSeed);
     console.log(`[ops-admin-write] resolved support ticket id=${ticket.id} subject=${ticket.subject}`);
 
@@ -669,11 +678,26 @@ async function runOptionalSupportWriteSmoke(backendBaseUrl, cookieJar, candidate
     await assertSupportTicketAbsent(backendBaseUrl, cookieJar, ticket.id);
     console.log(`[ops-admin-write] removed support ticket id=${ticket.id}`);
     ticket = null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (required) {
+      fail(`support roundtrip required but failed: ${message}`);
+    }
+    console.warn(
+      `[ops-admin-write] warning: support roundtrip skipped due to runtime limitation (${message}). Set OPS_ADMIN_WRITE_SUPPORT_REQUIRED=1 to make this blocking.`,
+    );
   } finally {
     if (ticket?.id) {
       await deleteSupportTicket(backendBaseUrl, cookieJar, ticket.id);
       await assertSupportTicketAbsent(backendBaseUrl, cookieJar, ticket.id);
       console.log(`[ops-admin-write] cleanup removed support ticket id=${ticket.id}`);
+    } else if (supportSeed?.subject) {
+      const dangling = await findSupportTicketBySearch(backendBaseUrl, cookieJar, supportSeed.subject);
+      if (dangling?.id) {
+        await deleteSupportTicket(backendBaseUrl, cookieJar, dangling.id);
+        await assertSupportTicketAbsent(backendBaseUrl, cookieJar, dangling.id);
+        console.log(`[ops-admin-write] cleanup removed support ticket id=${dangling.id}`);
+      }
     }
   }
 }

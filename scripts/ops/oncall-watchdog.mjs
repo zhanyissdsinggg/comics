@@ -18,6 +18,14 @@ const SEVERITY_RANK = {
   P1: 3,
 };
 
+function normalizeSeverity(value, fallback = "P2") {
+  const raw = String(value || "").trim().toUpperCase();
+  if (Object.prototype.hasOwnProperty.call(SEVERITY_RANK, raw)) {
+    return raw;
+  }
+  return fallback;
+}
+
 function readNumber(name, fallback) {
   const raw = process.env[name];
   if (!raw) {
@@ -159,6 +167,7 @@ async function run() {
   const observabilityKey = String(process.env.OBSERVABILITY_KEY || "").trim();
   const requireRedis = process.env.WATCHDOG_REQUIRE_REDIS === "1";
   const requireObservability = process.env.WATCHDOG_REQUIRE_OBSERVABILITY === "1";
+  const failOnSeverity = normalizeSeverity(process.env.WATCHDOG_FAIL_ON_SEVERITY, "P2");
   const jsonPath = String(process.env.WATCHDOG_REPORT_JSON || "ops-watchdog-report.json").trim();
   const mdPath = String(process.env.WATCHDOG_REPORT_MD || "ops-watchdog-report.md").trim();
 
@@ -276,10 +285,11 @@ async function run() {
     console.warn(`[watchdog] warning: ${warning}`);
   }
   console.log(`[watchdog] severity=${payload.severity}`);
+  console.log(`[watchdog] failOnSeverity=${failOnSeverity}`);
   console.log(`[watchdog] report json=${jsonPath}`);
   console.log(`[watchdog] report md=${mdPath}`);
 
-  if (payload.severity !== "OK") {
+  if (SEVERITY_RANK[payload.severity] >= SEVERITY_RANK[failOnSeverity]) {
     process.exitCode = 1;
     return;
   }

@@ -82,6 +82,9 @@ $env:OBSERVABILITY_KEY='<observability_key>'
 
 # Optional: tighten backend latency tolerance for strict mode
 $env:OPS_ALLOWED_BACKEND_SLOW_SAMPLES='0'
+
+# Watchdog blocks only when severity >= this threshold (OK/P3/P2/P1)
+$env:WATCHDOG_FAIL_ON_SEVERITY='P2'
 ```
 
 ## If Admin Runtime Fails
@@ -100,6 +103,18 @@ Compatibility fallback:
 $env:OPS_ADMIN_KEY='<legacy_admin_key>'
 npm run ops:admin-ui-live
 npm run ops:admin-smoke
+```
+
+Support write-path verification:
+```powershell
+$env:BACKEND_URL='https://www.gushcomics.com'
+$env:OPS_ADMIN_EMAIL='<admin_email>'
+$env:OPS_ADMIN_PASSWORD='<admin_password>'
+$env:OPS_ADMIN_WRITE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_SUPPORT='1'
+# Optional: make support verification blocking
+$env:OPS_ADMIN_WRITE_SUPPORT_REQUIRED='1'
+npm run ops:admin-write-smoke
 ```
 
 ## Known Runtime Notes (as of 2026-04-16)
