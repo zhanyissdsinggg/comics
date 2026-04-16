@@ -26,6 +26,7 @@
     "ops:admin-write-smoke": "node scripts/ops/admin-user-write-smoke.mjs",
     "ops:admin-high-risk-write-smoke": "node scripts/ops/admin-high-risk-write-smoke.mjs",
     "ops:admin-sensitive-write-smoke": "node scripts/ops/admin-sensitive-write-smoke.mjs",
+    "ops:admin-content-write-smoke": "node scripts/ops/admin-content-write-smoke.mjs",
     "ops:rollback-verify": "node scripts/ops/rollback-verify.mjs",
     "analyze": "npm --prefix frontend run analyze",
     "analyze:server": "npm --prefix frontend run analyze:server",
