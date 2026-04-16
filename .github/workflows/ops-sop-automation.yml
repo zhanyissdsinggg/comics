@@ -92,12 +92,32 @@ jobs:
           OPS_ADMIN_PASSWORD: ${{ secrets.PROD_ADMIN_PASSWORD != '' && secrets.PROD_ADMIN_PASSWORD || secrets.ADMIN_PASSWORD }}
           OPS_ADMIN_KEY: ${{ secrets.PROD_ADMIN_KEY != '' && secrets.PROD_ADMIN_KEY || secrets.ADMIN_KEY }}
         run: |
-          if [ -z "$OBSERVABILITY_KEY" ]; then
-            echo "Missing OBSERVABILITY_KEY for deploy profile" >&2
-            exit 1
+          HAS_OBSERVABILITY=0
+          HAS_ADMIN_KEY=0
+          HAS_ADMIN_EMAIL=0
+          HAS_ADMIN_PASSWORD=0
+
+          if [ -n "$OBSERVABILITY_KEY" ]; then HAS_OBSERVABILITY=1; fi
+          if [ -n "$OPS_ADMIN_KEY" ]; then HAS_ADMIN_KEY=1; fi
+          if [ -n "$OPS_ADMIN_EMAIL" ]; then HAS_ADMIN_EMAIL=1; fi
+          if [ -n "$OPS_ADMIN_PASSWORD" ]; then HAS_ADMIN_PASSWORD=1; fi
+
+          echo "Deploy secrets readiness:"
+          echo "  OBSERVABILITY_KEY=$HAS_OBSERVABILITY"
+          echo "  OPS_ADMIN_KEY=$HAS_ADMIN_KEY"
+          echo "  OPS_ADMIN_EMAIL=$HAS_ADMIN_EMAIL"
+          echo "  OPS_ADMIN_PASSWORD=$HAS_ADMIN_PASSWORD"
+
+          MISSING=()
+          if [ "$HAS_OBSERVABILITY" -ne 1 ]; then
+            MISSING+=("OBSERVABILITY_KEY")
           fi
-          if [ -z "$OPS_ADMIN_KEY" ] && { [ -z "$OPS_ADMIN_EMAIL" ] || [ -z "$OPS_ADMIN_PASSWORD" ]; }; then
-            echo "Missing admin credentials (set PROD_ADMIN_KEY or PROD_ADMIN_EMAIL+PROD_ADMIN_PASSWORD)" >&2
+          if [ "$HAS_ADMIN_KEY" -ne 1 ] && { [ "$HAS_ADMIN_EMAIL" -ne 1 ] || [ "$HAS_ADMIN_PASSWORD" -ne 1 ]; }; then
+            MISSING+=("admin credentials: set PROD_ADMIN_KEY or PROD_ADMIN_EMAIL+PROD_ADMIN_PASSWORD")
+          fi
+
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "Missing required deploy secrets: ${MISSING[*]}" >&2
             exit 1
           fi
 
