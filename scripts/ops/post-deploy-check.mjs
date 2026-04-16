@@ -163,7 +163,7 @@ function buildFrontendAuditSpecs(seriesCatalog) {
   const rankingsRequired = readCsv("OPS_AUDIT_RANKINGS_REQUIRED", [
     "Featured",
     "Editor's shelf",
-    "Browse views",
+    "Views",
   ]);
   const creatorsRequiredWithRealData = readCsv("OPS_AUDIT_CREATORS_REQUIRED", [
     "Creators",
