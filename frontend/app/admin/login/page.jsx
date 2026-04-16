@@ -5,8 +5,8 @@ import AdminLoginPage from "../../../components/admin/AdminLoginPage";
 import { createPageMetadata } from "../../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Admin Sign In",
-  description: "Secure access for the Gush admin workspace.",
+  title: "后台登录",
+  description: "Gush 管理后台安全登录入口。",
   path: "/admin/login",
   robots: {
     index: false,

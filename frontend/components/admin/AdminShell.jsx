@@ -294,7 +294,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 {!isCollapsed ? (
                   <>
                     <span className="flex-1">搜索后台页面</span>
-                      <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                    <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                       Ctrl+K
                     </span>
                   </>

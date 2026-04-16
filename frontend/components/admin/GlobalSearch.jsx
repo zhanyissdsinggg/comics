@@ -44,7 +44,7 @@ const SEARCH_ITEMS = [
     label: "数据分析",
     href: "/admin/analytics",
     icon: BarChart3,
-    keywords: ["analytics", "insights", "report", "dashboard", "数据分析", "分析", "报表", "数据"],
+    keywords: ["analytics", "insights", "report", "数据分析", "分析", "报表", "数据"],
   },
   {
     id: "series",
@@ -79,7 +79,7 @@ const SEARCH_ITEMS = [
     label: "内容生成器",
     href: "/admin/content-generator",
     icon: Sparkles,
-    keywords: ["generator", "seed", "fixture", "mock content", "内容生成器", "测试内容", "生成", "种子"],
+    keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试内容", "生成", "种子"],
   },
   {
     id: "creators",
@@ -170,7 +170,7 @@ const SEARCH_ITEMS = [
     label: "品牌素材",
     href: "/admin/branding",
     icon: Image,
-    keywords: ["branding", "logo", "banner", "assets", "品牌", "logo", "横幅", "素材"],
+    keywords: ["branding", "logo", "banner", "assets", "品牌", "标识", "横幅", "素材"],
   },
   {
     id: "email-settings",
@@ -457,7 +457,7 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                 </div>
               </div>
               <p className="text-sm font-semibold text-slate-900">输入内容即可搜索后台</p>
-              <p className="mt-1 text-xs text-slate-500">按页面名或对象类型搜索就行。</p>
+              <p className="mt-1 text-xs text-slate-500">按页面名或对象类型查找。</p>
             </div>
           )}
         </div>
