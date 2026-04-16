@@ -896,7 +896,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       <div className="flex items-center justify-between gap-3">
                         <div>
                           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
-                            Next on the shelf
+                            Next
                           </p>
                         </div>
                         <Button
@@ -905,7 +905,7 @@ function HomeContent({ initialSearchParams = {} }) {
                           onClick={() => router.push("/search")}
                           className="h-auto rounded-full px-0 py-0 text-sm font-semibold text-[color:var(--gush-ink-soft)] hover:bg-transparent hover:text-[color:var(--gush-ink-strong)]"
                         >
-                          View all
+                          Browse
                           <ArrowRight className="size-4" />
                         </Button>
                       </div>

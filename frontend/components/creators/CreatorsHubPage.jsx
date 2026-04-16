@@ -231,14 +231,14 @@ function buildCreatorWorksSummary(creator) {
     : [];
 
   if (leadSeries?.title) {
-    return `Known for ${leadSeries.title}.`;
+    return `Known for ${leadSeries.title}`;
   }
 
   if (genres.length > 0) {
-    return `Works across ${genres.join(" / ")}.`;
+    return `Works across ${genres.join(" / ")}`;
   }
 
-  return "Live work in the catalog.";
+  return "Live in the catalog";
 }
 
 function CreatorDirectorySkeleton() {
@@ -789,7 +789,7 @@ export default function CreatorsHubPage({
       : "A full creator directory is not live yet.";
     const fallbackDeskTitle = error
       ? "Try again or browse titles."
-      : "Browse titles.";
+      : "Browse titles";
 
     return (
       <main className="gush-home-shell overflow-hidden">
@@ -874,7 +874,7 @@ export default function CreatorsHubPage({
                 First picks
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Quick picks.
+                Picks
               </h2>
             </div>
 
@@ -927,7 +927,7 @@ export default function CreatorsHubPage({
                   Browse
                 </p>
                 <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                  Start from a genre.
+                  Genres
                 </h2>
               </div>
 
@@ -950,7 +950,7 @@ export default function CreatorsHubPage({
                 </div>
               ) : (
                 <p className="text-sm text-slate-500">
-                  Use comics, novels, or search.
+                  Use search.
                 </p>
               )}
             </SurfacePanel>
@@ -984,7 +984,7 @@ export default function CreatorsHubPage({
           >
             <div>
               <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
-                Open the directory.
+                Creators directory
               </h2>
             </div>
 
@@ -994,14 +994,14 @@ export default function CreatorsHubPage({
                 onClick={jumpToCreatorList}
                 className={primaryButtonClass}
               >
-                Open directory
+                View creators
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                Browse titles
+                Browse stories
               </button>
             </div>
           </SurfacePanel>
@@ -1164,7 +1164,7 @@ export default function CreatorsHubPage({
 
                       {leadSeries?.title ? (
                         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--gush-ink-faint)]">
-                          Lead title: {leadSeries.title}
+                          Lead: {leadSeries.title}
                         </p>
                       ) : null}
                     </div>
@@ -1182,7 +1182,7 @@ export default function CreatorsHubPage({
                 First picks
               </p>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                Quick picks.
+                Picks
               </h2>
             </div>
 
@@ -1282,7 +1282,7 @@ export default function CreatorsHubPage({
                       <p className="text-sm leading-6 text-slate-600">
                         {summarizeLeadCopy(
                           series?.description,
-                          creator ? `From ${creator.name}.` : "Featured.",
+                          creator ? `By ${creator.name}` : "Featured",
                         )}
                       </p>
 

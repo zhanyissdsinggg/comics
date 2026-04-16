@@ -21,13 +21,13 @@ export const siteConfig = {
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
-    "Read original comics and novels on Gush. Start with chapter one and follow the stories you want to keep reading.",
+    "Read comics and novels on Gush.",
   tagline:
     clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) ||
-    "Comics and novels, without the platform clutter.",
+    "Comics and novels.",
   aboutSummary:
     clean(process.env.NEXT_PUBLIC_ABOUT_SUMMARY) ||
-    "Gush brings comics and novels together with cleaner reading, clearer pricing, and simpler account controls.",
+    "Gush brings comics and novels together in one reading home.",
   supportEmail: clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
   privacyEmail:
     clean(process.env.NEXT_PUBLIC_PRIVACY_EMAIL) ||

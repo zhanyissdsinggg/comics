@@ -99,7 +99,7 @@ export default function SearchCreatorMatchesPanel({
 
         let matchLabel = "Creator match";
         let matchDescription =
-          "This search lines up with a creator page and a wider linked shelf.";
+          "Matched creator and related titles.";
         let matchScore = 0;
 
         if (exactNameMatch) {
@@ -275,7 +275,7 @@ export default function SearchCreatorMatchesPanel({
                 </p>
               ) : (
                 <p className="text-sm leading-6 text-slate-600">
-                  Open the creator page.
+                  Creator page
                 </p>
               )}
 

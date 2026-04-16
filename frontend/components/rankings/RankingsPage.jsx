@@ -24,27 +24,27 @@ const VIEWS = [
   {
     id: "featured",
     label: "Featured",
-    description: "Editorial picks across the catalog.",
+    description: "Editorial picks.",
   },
   {
     id: "start-here",
     label: "First Picks",
-    description: "Strong first reads.",
+    description: "Easy starts.",
   },
   {
     id: "completed",
     label: "Completed",
-    description: "Finished stories ready to finish.",
+    description: "Complete stories.",
   },
   {
     id: "comics",
     label: "Comics",
-    description: "Editorial comic picks.",
+    description: "Comic picks.",
   },
   {
     id: "novels",
     label: "Novels",
-    description: "Editorial novel picks.",
+    description: "Novel picks.",
   },
 ];
 
@@ -412,11 +412,11 @@ export default function RankingsPage({
                 Views
               </p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                Browse views.
+                Views
               </h2>
             </div>
             <p className="max-w-md text-sm leading-7 text-slate-600">
-              Featured, first picks, completed, comics, and novels.
+              Featured, first picks, completed, comics, novels.
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
@@ -452,10 +452,10 @@ export default function RankingsPage({
                   View
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Nothing is live here yet.
+                  No titles yet.
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the catalog or switch views.
+                  Browse catalog or switch views.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -486,10 +486,10 @@ export default function RankingsPage({
                   Creators
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  Open creators.
+                  Creators
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Browse the names behind these stories.
+                  Browse creator profiles.
                 </p>
               </div>
               <button
@@ -688,7 +688,7 @@ export default function RankingsPage({
                     Browse
                   </p>
                   <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
-                    Browse next.
+                    Browse
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">

@@ -296,7 +296,7 @@ export default function SeriesHeader({
               </p>
               <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
                 {creatorHref
-                  ? "Open the creator page."
+                  ? "Creator page"
                   : creatorPresentation.detail}
               </p>
             </div>
