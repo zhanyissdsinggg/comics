@@ -42,10 +42,10 @@ jobs:
       DEFAULT_BACKEND_URL: https://www.gushcomics.com
       DEFAULT_FRONTEND_URL: https://www.gushcomics.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"
 
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload SOP artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ops-sop-${{ steps.resolve.outputs.profile }}-${{ github.run_id }}
           path: |
