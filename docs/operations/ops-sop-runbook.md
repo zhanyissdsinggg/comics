@@ -24,6 +24,18 @@ npm run ops:deploy-gate:strict:live
 
 This command auto-targets `https://www.gushcomics.com` for both backend/frontend unless overridden by environment variables.
 
+For one-command release readiness (baseline + optional full strict gate):
+
+```bash
+npm run ops:release:ready-live
+```
+
+Behavior:
+
+- always runs `ops:deploy-gate:strict:live` (blocking)
+- runs `ops:deploy-gate:strict:full` only when both `OBSERVABILITY_KEY` and admin credentials are present
+- retries each gate once by default to absorb transient network jitter (`OPS_RELEASE_RETRY_TIMES`, default `1`)
+
 Optional support-write probe:
 
 - `OPS_ADMIN_WRITE_SUPPORT=1`
