@@ -69,8 +69,14 @@ Single-command full flow (recommended for daily release checks):
 npm run ops:release:all-live
 ```
 
-This runs `ops:release:ready-live` and then `ops:release:summary`, and prints final summary verdict in terminal.
+This runs `ops:release:ready-live`, `ops:release:summary`, and `ops:release:brief`, then prints final summary verdict in terminal.
 It also exits non-zero when summary verdict is not `READY`.
+
+Alias:
+
+```bash
+npm run ops:release:autopilot
+```
 
 To force full strict gate in the same one-command flow:
 

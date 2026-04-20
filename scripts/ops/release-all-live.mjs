@@ -3,6 +3,7 @@ import process from "node:process";
 import { existsSync, readFileSync } from "node:fs";
 
 const DEFAULT_SUMMARY_JSON_PATH = "ops-release-summary.json";
+const DEFAULT_BRIEF_MD_PATH = "ops-release-brief.md";
 
 function runNpmScript(scriptName, env) {
   return new Promise((resolve, reject) => {
@@ -56,15 +57,22 @@ function readSummaryVerdict() {
   }
 }
 
+function resolveBriefPath() {
+  return String(process.env.OPS_RELEASE_BRIEF_MD || DEFAULT_BRIEF_MD_PATH).trim() || DEFAULT_BRIEF_MD_PATH;
+}
+
 async function main() {
   const env = { ...process.env };
   await runNpmScript("ops:release:ready-live", env);
   await runNpmScript("ops:release:summary", env);
+  await runNpmScript("ops:release:brief", env);
 
   const summary = readSummaryVerdict();
+  const briefPath = resolveBriefPath();
   console.log(
     `[release-all] summary verdict=${summary.verdict} blockers=${summary.blockers} advisories=${summary.advisories} path=${summary.path}`,
   );
+  console.log(`[release-all] brief path=${briefPath} exists=${existsSync(briefPath) ? "yes" : "no"}`);
   if (summary.reason) {
     console.warn(`[release-all] summary parse warning: ${summary.reason}`);
   }

@@ -42,6 +42,7 @@
     "ops:release:brief": "node scripts/ops/release-brief.mjs",
     "ops:release:all-live": "node scripts/ops/release-all-live.mjs",
     "ops:release:all-live:full": "node scripts/ops/release-all-live-full.mjs",
+    "ops:release:autopilot": "node scripts/ops/release-all-live.mjs",
     "ops:admin-routes": "node scripts/ops/admin-route-inventory.mjs",
     "ops:sop:daily": "node scripts/ops/sop-runner.mjs daily",
     "ops:sop:deploy": "node scripts/ops/sop-runner.mjs deploy",
