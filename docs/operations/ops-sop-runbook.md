@@ -40,6 +40,7 @@ Behavior:
 Optional strictness:
 
 - set `OPS_RELEASE_REQUIRE_FULL=1` to make full strict gate mandatory (fail if prerequisites are missing)
+- or run `npm run ops:release:ready-live:full` (cross-platform shortcut, same behavior)
 
 Optional support-write probe:
 
