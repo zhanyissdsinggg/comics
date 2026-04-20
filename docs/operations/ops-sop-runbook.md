@@ -71,11 +71,18 @@ npm run ops:release:all-live
 
 This runs `ops:release:ready-live`, `ops:release:summary`, and `ops:release:brief`, then prints final summary verdict in terminal.
 It also exits non-zero when summary verdict is not `READY`.
+By default it also archives release artifacts under `ops-release-history/` (disable with `OPS_RELEASE_ARCHIVE=0`).
 
 Alias:
 
 ```bash
 npm run ops:release:autopilot
+```
+
+Manual archive command (if needed):
+
+```bash
+npm run ops:release:archive
 ```
 
 To force full strict gate in the same one-command flow:

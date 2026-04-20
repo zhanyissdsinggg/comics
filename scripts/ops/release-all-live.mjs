@@ -66,6 +66,18 @@ async function main() {
   await runNpmScript("ops:release:ready-live", env);
   await runNpmScript("ops:release:summary", env);
   await runNpmScript("ops:release:brief", env);
+  const shouldArchive = String(env.OPS_RELEASE_ARCHIVE ?? "1").trim() !== "0";
+  if (shouldArchive) {
+    try {
+      await runNpmScript("ops:release:archive", env);
+    } catch (error) {
+      console.warn(
+        `[release-all] warning: archive step failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
 
   const summary = readSummaryVerdict();
   const briefPath = resolveBriefPath();
@@ -73,6 +85,7 @@ async function main() {
     `[release-all] summary verdict=${summary.verdict} blockers=${summary.blockers} advisories=${summary.advisories} path=${summary.path}`,
   );
   console.log(`[release-all] brief path=${briefPath} exists=${existsSync(briefPath) ? "yes" : "no"}`);
+  console.log(`[release-all] archive enabled=${shouldArchive ? "yes" : "no"}`);
   if (summary.reason) {
     console.warn(`[release-all] summary parse warning: ${summary.reason}`);
   }
