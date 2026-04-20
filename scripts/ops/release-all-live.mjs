@@ -34,16 +34,24 @@ function runNpmScript(scriptName, env) {
 function readSummaryVerdict() {
   const path = String(process.env.OPS_RELEASE_SUMMARY_JSON || DEFAULT_SUMMARY_JSON_PATH).trim() || DEFAULT_SUMMARY_JSON_PATH;
   if (!existsSync(path)) {
-    return { verdict: "UNKNOWN", path, reason: "summary file not found" };
+    return { verdict: "UNKNOWN", path, reason: "summary file not found", blockers: 0, advisories: 0 };
   }
   try {
     const payload = JSON.parse(readFileSync(path, "utf8"));
-    return { verdict: String(payload?.verdict || "UNKNOWN"), path, reason: null };
+    return {
+      verdict: String(payload?.verdict || "UNKNOWN"),
+      path,
+      reason: null,
+      blockers: Array.isArray(payload?.blockers) ? payload.blockers.length : 0,
+      advisories: Array.isArray(payload?.advisories) ? payload.advisories.length : 0,
+    };
   } catch (error) {
     return {
       verdict: "UNKNOWN",
       path,
       reason: error instanceof Error ? error.message : String(error),
+      blockers: 0,
+      advisories: 0,
     };
   }
 }
@@ -54,9 +62,14 @@ async function main() {
   await runNpmScript("ops:release:summary", env);
 
   const summary = readSummaryVerdict();
-  console.log(`[release-all] summary verdict=${summary.verdict} path=${summary.path}`);
+  console.log(
+    `[release-all] summary verdict=${summary.verdict} blockers=${summary.blockers} advisories=${summary.advisories} path=${summary.path}`,
+  );
   if (summary.reason) {
     console.warn(`[release-all] summary parse warning: ${summary.reason}`);
+  }
+  if (summary.verdict !== "READY") {
+    throw new Error(`release summary verdict is ${summary.verdict}`);
   }
 }
 

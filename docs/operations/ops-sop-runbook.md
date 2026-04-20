@@ -60,6 +60,13 @@ npm run ops:release:all-live
 ```
 
 This runs `ops:release:ready-live` and then `ops:release:summary`, and prints final summary verdict in terminal.
+It also exits non-zero when summary verdict is not `READY`.
+
+To force full strict gate in the same one-command flow:
+
+```bash
+npm run ops:release:all-live:full
+```
 
 Optional support-write probe:
 
