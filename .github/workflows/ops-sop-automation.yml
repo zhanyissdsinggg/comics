@@ -143,7 +143,7 @@ jobs:
           if (!backend || candidates.length === 0) {
             console.warn('[ops-preflight] missing backend/admin credentials for login preflight');
             fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
-            return;
+            process.exit(0);
           }
 
           const url = backend + '/api/admin/auth/login';
@@ -168,9 +168,11 @@ jobs:
             }
             console.warn('[ops-preflight] admin login preflight failed for all credential sources: ' + String(lastError || 'unknown'));
             fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
+            process.exit(0);
           })().catch((error) => {
             console.warn('[ops-preflight] admin login preflight crashed error=' + (error?.message || String(error)));
             fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
+            process.exit(0);
           });
           "
 
