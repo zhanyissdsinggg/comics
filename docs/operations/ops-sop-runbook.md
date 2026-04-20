@@ -42,6 +42,17 @@ Optional strictness:
 - set `OPS_RELEASE_REQUIRE_FULL=1` to make full strict gate mandatory (fail if prerequisites are missing)
 - or run `npm run ops:release:ready-live:full` (cross-platform shortcut, same behavior)
 
+After `ops:release:ready-live`, generate a concise release summary:
+
+```bash
+npm run ops:release:summary
+```
+
+Summary outputs:
+
+- `ops-release-summary.json`
+- `ops-release-summary.md`
+
 Optional support-write probe:
 
 - `OPS_ADMIN_WRITE_SUPPORT=1`
