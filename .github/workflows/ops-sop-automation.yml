@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       DEFAULT_BACKEND_URL: https://www.gushcomics.com
       DEFAULT_FRONTEND_URL: https://www.gushcomics.com
     steps:
@@ -46,7 +47,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Resolve profile and targets
         id: resolve
