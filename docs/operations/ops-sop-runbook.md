@@ -35,6 +35,11 @@ Behavior:
 - always runs `ops:deploy-gate:strict:live` (blocking)
 - runs `ops:deploy-gate:strict:full` only when both `OBSERVABILITY_KEY` and admin credentials are present
 - retries each gate once by default to absorb transient network jitter (`OPS_RELEASE_RETRY_TIMES`, default `1`)
+- writes release reports to `ops-release-ready-report.json` and `ops-release-ready-report.md`
+
+Optional strictness:
+
+- set `OPS_RELEASE_REQUIRE_FULL=1` to make full strict gate mandatory (fail if prerequisites are missing)
 
 Optional support-write probe:
 
