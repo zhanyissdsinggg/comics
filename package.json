@@ -39,6 +39,7 @@
     "ops:release:ready-live": "node scripts/ops/release-ready-live.mjs",
     "ops:release:ready-live:full": "node scripts/ops/release-ready-live-full.mjs",
     "ops:release:summary": "node scripts/ops/release-summary.mjs",
+    "ops:release:all-live": "node scripts/ops/release-all-live.mjs",
     "ops:admin-routes": "node scripts/ops/admin-route-inventory.mjs",
     "ops:sop:daily": "node scripts/ops/sop-runner.mjs daily",
     "ops:sop:deploy": "node scripts/ops/sop-runner.mjs deploy",

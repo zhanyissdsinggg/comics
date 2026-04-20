@@ -53,6 +53,14 @@ Summary outputs:
 - `ops-release-summary.json`
 - `ops-release-summary.md`
 
+Single-command full flow (recommended for daily release checks):
+
+```bash
+npm run ops:release:all-live
+```
+
+This runs `ops:release:ready-live` and then `ops:release:summary`, and prints final summary verdict in terminal.
+
 Optional support-write probe:
 
 - `OPS_ADMIN_WRITE_SUPPORT=1`
