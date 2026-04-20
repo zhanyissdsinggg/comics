@@ -12,9 +12,17 @@ Set these before running any SOP profile:
 - `OPS_ADMIN_PASSWORD`
 - `OPS_ADMIN_WRITE_ALLOWED=1` (required for write probes)
 
-Required for strict deploy gate profile:
+Required for strict full deploy gate profile:
 
 - `OBSERVABILITY_KEY`
+
+If you want a quick live strict gate without manually exporting URLs:
+
+```bash
+npm run ops:deploy-gate:strict:live
+```
+
+This command auto-targets `https://www.gushcomics.com` for both backend/frontend unless overridden by environment variables.
 
 Optional support-write probe:
 
@@ -103,10 +111,10 @@ Required repo configuration:
 
 - `vars.PROD_BACKEND_URL` (optional if using default domain)
 - `vars.PROD_FRONTEND_URL` (optional if using default domain)
-- `secrets.OBSERVABILITY_KEY` (required for deploy profile)
-- Admin auth (one of):
-  - `secrets.PROD_ADMIN_KEY` (or `secrets.ADMIN_KEY`)
+- `secrets.OBSERVABILITY_KEY` (required)
+- Admin auth for advisory checks (optional in soft mode):
   - `secrets.PROD_ADMIN_EMAIL` + `secrets.PROD_ADMIN_PASSWORD`
+  - fallback: `secrets.ADMIN_EMAIL` + `secrets.ADMIN_PASSWORD`
 
 ## Failure Handling
 
