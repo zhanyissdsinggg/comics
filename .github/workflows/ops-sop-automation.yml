@@ -125,7 +125,6 @@ jobs:
 
       - name: Preflight admin login for deploy profile
         id: admin_preflight
-        continue-on-error: true
         if: ${{ steps.resolve.outputs.profile == 'deploy' }}
         env:
           BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
@@ -142,8 +141,9 @@ jobs:
             { source: 'legacy', email: String(process.env.ADMIN_EMAIL || '').trim(), password: String(process.env.ADMIN_PASSWORD || '').trim() },
           ].filter((item) => item.email && item.password);
           if (!backend || candidates.length === 0) {
-            console.error('[ops-preflight] missing backend/admin credentials for login preflight');
-            process.exit(1);
+            console.warn('[ops-preflight] missing backend/admin credentials for login preflight');
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
+            return;
           }
 
           const url = backend + '/api/admin/auth/login';
@@ -160,16 +160,17 @@ jobs:
               console.log('[ops-preflight] source=' + item.source + ' admin login status=' + response.status);
               if ([200, 201].includes(response.status)) {
                 fs.appendFileSync(process.env.GITHUB_OUTPUT, 'credential_source=' + item.source + '\n');
+                fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=true\n');
                 console.log('[ops-preflight] admin login preflight passed source=' + item.source);
                 return;
               }
               lastError = compactBody || ('status=' + response.status);
             }
-            console.error('[ops-preflight] admin login preflight failed for all credential sources: ' + String(lastError || 'unknown'));
-            process.exit(1);
+            console.warn('[ops-preflight] admin login preflight failed for all credential sources: ' + String(lastError || 'unknown'));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
           })().catch((error) => {
-            console.error('[ops-preflight] admin login preflight crashed error=' + (error?.message || String(error)));
-            process.exit(1);
+            console.warn('[ops-preflight] admin login preflight crashed error=' + (error?.message || String(error)));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'preflight_ok=false\n');
           });
           "
 
@@ -193,8 +194,7 @@ jobs:
         run: npm run ops:deploy-gate:strict
 
       - name: Run deploy extended admin suite (non-blocking)
-        continue-on-error: true
-        if: ${{ steps.resolve.outputs.profile == 'deploy' && steps.admin_preflight.outcome == 'success' }}
+        if: ${{ steps.resolve.outputs.profile == 'deploy' && steps.admin_preflight.outputs.preflight_ok == 'true' }}
         env:
           BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
@@ -203,13 +203,16 @@ jobs:
           OPS_ADMIN_PASSWORD: ${{ steps.admin_preflight.outputs.credential_source == 'legacy' && secrets.ADMIN_PASSWORD || secrets.PROD_ADMIN_PASSWORD }}
           OPS_ADMIN_WRITE_ALLOWED: "1"
           OPS_SOP_RETRY_TIMES: "1"
-        run: npm run ops:sop:deploy
+        run: |
+          npm run ops:sop:deploy || {
+            echo "[ops-sop] warning: deploy extended admin suite failed in soft mode, baseline already passed.";
+          }
 
       - name: Note deploy admin suite status
         if: ${{ steps.resolve.outputs.profile == 'deploy' }}
         run: |
           echo "[ops-sop] deploy baseline is blocking; admin preflight/extended suite are advisory in soft mode."
-          echo "[ops-sop] preflight outcome=${{ steps.admin_preflight.outcome }}"
+          echo "[ops-sop] preflight ok=${{ steps.admin_preflight.outputs.preflight_ok }}"
 
       - name: Upload SOP artifacts
         if: always()
