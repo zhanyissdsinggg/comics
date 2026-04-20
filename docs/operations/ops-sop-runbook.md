@@ -53,6 +53,16 @@ Summary outputs:
 - `ops-release-summary.json`
 - `ops-release-summary.md`
 
+Generate an operator-facing short brief:
+
+```bash
+npm run ops:release:brief
+```
+
+Brief output:
+
+- `ops-release-brief.md`
+
 Single-command full flow (recommended for daily release checks):
 
 ```bash
