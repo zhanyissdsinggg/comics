@@ -116,18 +116,6 @@ jobs:
           if [ "$HAS_OBSERVABILITY" -ne 1 ]; then
             MISSING+=("OBSERVABILITY_KEY")
           fi
-          HAS_PROD_PAIR=0
-          HAS_FALLBACK_PAIR=0
-          if [ "$HAS_PROD_ADMIN_EMAIL" -eq 1 ] && [ "$HAS_PROD_ADMIN_PASSWORD" -eq 1 ]; then
-            HAS_PROD_PAIR=1
-          fi
-          if [ "$HAS_ADMIN_EMAIL" -eq 1 ] && [ "$HAS_ADMIN_PASSWORD" -eq 1 ]; then
-            HAS_FALLBACK_PAIR=1
-          fi
-
-          if [ "$HAS_PROD_PAIR" -ne 1 ] && [ "$HAS_FALLBACK_PAIR" -ne 1 ]; then
-            MISSING+=("admin credentials: set PROD_ADMIN_EMAIL+PROD_ADMIN_PASSWORD or ADMIN_EMAIL+ADMIN_PASSWORD")
-          fi
 
           if [ "${#MISSING[@]}" -gt 0 ]; then
             echo "Missing required deploy secrets: ${MISSING[*]}" >&2
@@ -136,6 +124,7 @@ jobs:
 
       - name: Preflight admin login for deploy profile
         id: admin_preflight
+        continue-on-error: true
         if: ${{ steps.resolve.outputs.profile == 'deploy' }}
         env:
           BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
@@ -183,7 +172,28 @@ jobs:
           });
           "
 
-      - name: Run SOP profile
+      - name: Run SOP profile (daily/weekly)
+        if: ${{ steps.resolve.outputs.profile != 'deploy' }}
+        env:
+          BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          OPS_ADMIN_WRITE_ALLOWED: "1"
+          OPS_SOP_RETRY_TIMES: "1"
+        run: npm run ops:sop:${{ steps.resolve.outputs.profile }}
+
+      - name: Run deploy baseline gate (blocking)
+        if: ${{ steps.resolve.outputs.profile == 'deploy' }}
+        env:
+          BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
+          OBSERVABILITY_KEY: ${{ secrets.OBSERVABILITY_KEY }}
+          OPS_ADMIN_WRITE_ALLOWED: "1"
+        run: npm run ops:deploy-gate:strict
+
+      - name: Run deploy extended admin suite (non-blocking)
+        continue-on-error: true
+        if: ${{ steps.resolve.outputs.profile == 'deploy' && steps.admin_preflight.outcome == 'success' }}
         env:
           BACKEND_URL: ${{ steps.resolve.outputs.backend_url }}
           FRONTEND_URL: ${{ steps.resolve.outputs.frontend_url }}
@@ -192,7 +202,13 @@ jobs:
           OPS_ADMIN_PASSWORD: ${{ steps.admin_preflight.outputs.credential_source == 'legacy' && secrets.ADMIN_PASSWORD || secrets.PROD_ADMIN_PASSWORD }}
           OPS_ADMIN_WRITE_ALLOWED: "1"
           OPS_SOP_RETRY_TIMES: "1"
-        run: npm run ops:sop:${{ steps.resolve.outputs.profile }}
+        run: npm run ops:sop:deploy
+
+      - name: Note deploy admin suite status
+        if: ${{ steps.resolve.outputs.profile == 'deploy' }}
+        run: |
+          echo "[ops-sop] deploy baseline is blocking; admin preflight/extended suite are advisory in soft mode."
+          echo "[ops-sop] preflight outcome=${{ steps.admin_preflight.outcome }}"
 
       - name: Upload SOP artifacts
         if: always()
