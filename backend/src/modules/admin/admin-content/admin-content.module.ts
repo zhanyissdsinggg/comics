@@ -11,6 +11,7 @@ import { AdminCommentsController } from "./controllers/admin-comments.controller
 import { AdminPromotionsController } from "./controllers/admin-promotions.controller";
 import { AdminContentGeneratorController } from "./controllers/admin-content-generator.controller";
 import { AdminCreatorsService } from "./services/admin-creators.service";
+import { AdminInteractiveStoriesController } from "../controllers/admin-interactive-stories.controller";
 
 @Module({
   imports: [AdminAuthModule],
@@ -23,6 +24,7 @@ import { AdminCreatorsService } from "./services/admin-creators.service";
     AdminCommentsController,
     AdminPromotionsController,
     AdminContentGeneratorController,
+    AdminInteractiveStoriesController,
   ],
   providers: [AdminRecommendationService, AdminCreatorsService, PrismaService],
   exports: [AdminRecommendationService, AdminCreatorsService],

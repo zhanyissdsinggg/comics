@@ -89,6 +89,13 @@ const SEARCH_ITEMS = [
     keywords: ["creators", "author", "artist", "studio", "credits", "创作者", "作者", "画师", "团队", "署名"],
   },
   {
+    id: "interactive-stories",
+    label: "互动小说",
+    href: "/admin/interactive-stories",
+    icon: BookOpen,
+    keywords: ["interactive story", "branching", "node", "choice", "剧情节点", "互动小说", "选项分支"],
+  },
+  {
     id: "comments",
     label: "评论",
     href: "/admin/comments",

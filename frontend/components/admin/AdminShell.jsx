@@ -53,6 +53,7 @@ const NAV_GROUPS = [
         ],
       },
       { label: "创作者", href: "/admin/creators", icon: PenSquare, match: ["/admin/creators"] },
+      { label: "互动小说", href: "/admin/interactive-stories", icon: BookOpen, match: ["/admin/interactive-stories"] },
     ],
   },
   {
@@ -102,6 +103,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/analytics", label: "数据分析" },
   { match: "/admin/series", label: "作品" },
   { match: "/admin/creators", label: "创作者" },
+  { match: "/admin/interactive-stories", label: "互动小说" },
   { match: "/admin/storefront", label: "前台巡检" },
   { match: "/admin/merchandising", label: "内容编排" },
   { match: "/admin/recommendations", label: "推荐位" },
