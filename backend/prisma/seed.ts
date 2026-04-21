@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { CreditRole, CreatorType, PrismaClient } from "@prisma/client";
+import { CreditRole, CreatorType, Prisma, PrismaClient } from "@prisma/client";
 import { resolve } from "path";
 
 const envLoader = process as NodeJS.Process & {
@@ -39,6 +39,40 @@ type SeriesSeed = {
   ttfIntervalHours: number;
   credits: CreditSeed[];
 };
+
+type InteractiveStorySeed = {
+  id: string;
+  seriesId: string;
+  slug: string;
+  title: string;
+  description: string;
+  baseContext: string;
+  initialState: Record<string, unknown>;
+  nodes: Array<{
+    id: string;
+    key: string;
+    title: string;
+    fallbackText: string;
+    basePrompt: string;
+    stateEffects?: Record<string, unknown>;
+    requiredFlags?: string[];
+    blockedFlags?: string[];
+    isEnding?: boolean;
+    choices: Array<{
+      id: string;
+      key: string;
+      label: string;
+      targetNodeId: string;
+      stateEffects?: Record<string, unknown>;
+      requiredFlags?: string[];
+      blockedFlags?: string[];
+    }>;
+  }>;
+};
+
+function toInputJson(value: Record<string, unknown>): Prisma.InputJsonValue {
+  return value as Prisma.InputJsonValue;
+}
 
 function escapeXml(value: string) {
   return String(value)
@@ -395,6 +429,201 @@ const recommendationSlotData: Array<{
   },
 ];
 
+const interactiveStorySeeds: InteractiveStorySeed[] = [
+  {
+    id: "story-solar-wind-001",
+    seriesId: "series-011",
+    slug: "solar-wind-first-contact",
+    title: "Solar Wind: First Contact",
+    description:
+      "A structured interactive branch set in the Solar Wind universe.",
+    baseContext:
+      "You are on the salvage ship Solar Wind. The crew is entering a dark relay field where an unknown signal wakes ancient systems.",
+    initialState: {
+      affection: 0,
+      trust: 0,
+      risk: 1,
+      clues: 0,
+      flags: [],
+    },
+    nodes: [
+      {
+        id: "story-solar-wind-node-001",
+        key: "relay_entrance",
+        title: "Relay Entrance",
+        fallbackText:
+          "The ship slips into the relay shadow. Consoles flicker, and a fractured beacon starts repeating coordinates no one recognizes.",
+        basePrompt:
+          "Write a tense but clear setup paragraph as the crew enters a dangerous relay zone.",
+        choices: [
+          {
+            id: "story-solar-wind-choice-001",
+            key: "scan_signal",
+            label: "Run a deep scan before moving.",
+            targetNodeId: "story-solar-wind-node-002",
+            stateEffects: { trust: 1, clues: 1, risk: -1, flags: ["cautious_scan"] },
+          },
+          {
+            id: "story-solar-wind-choice-002",
+            key: "approach_beacon",
+            label: "Approach the beacon at half thrust.",
+            targetNodeId: "story-solar-wind-node-003",
+            stateEffects: { risk: 2, clues: 1, flags: ["direct_approach"] },
+          },
+          {
+            id: "story-solar-wind-choice-003",
+            key: "wake_captain",
+            label: "Wake the captain and hold position.",
+            targetNodeId: "story-solar-wind-node-004",
+            stateEffects: { affection: 1, trust: 1, risk: -1, flags: ["captain_alerted"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-002",
+        key: "scan_results",
+        title: "Scan Results",
+        fallbackText:
+          "The deep scan reveals layered encryption tied to a vanished survey fleet. Hidden inside is a map fragment pointing deeper into the relay.",
+        basePrompt:
+          "Write a discovery paragraph that rewards caution and reveals credible clues.",
+        stateEffects: { clues: 1 },
+        choices: [
+          {
+            id: "story-solar-wind-choice-004",
+            key: "share_with_crew",
+            label: "Share findings with the full crew.",
+            targetNodeId: "story-solar-wind-node-005",
+            stateEffects: { trust: 1, flags: ["crew_briefed"] },
+          },
+          {
+            id: "story-solar-wind-choice-005",
+            key: "keep_private",
+            label: "Keep it between you and the navigator.",
+            targetNodeId: "story-solar-wind-node-006",
+            stateEffects: { risk: 1, flags: ["intel_hidden"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-003",
+        key: "beacon_contact",
+        title: "Beacon Contact",
+        fallbackText:
+          "As the hull nears the beacon, dormant defense drones warm up. Your approach wakes something that was never meant to track living ships.",
+        basePrompt:
+          "Write an immediate escalation paragraph caused by an aggressive approach.",
+        stateEffects: { risk: 1 },
+        choices: [
+          {
+            id: "story-solar-wind-choice-006",
+            key: "deploy_decoys",
+            label: "Deploy decoys and break line-of-sight.",
+            targetNodeId: "story-solar-wind-node-005",
+            stateEffects: { risk: -1, clues: 1, flags: ["decoys_used"] },
+          },
+          {
+            id: "story-solar-wind-choice-007",
+            key: "force_dock",
+            label: "Force dock with the beacon shell.",
+            targetNodeId: "story-solar-wind-node-007",
+            stateEffects: { risk: 2, clues: 2, flags: ["forced_dock"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-004",
+        key: "captain_bridge",
+        title: "Captain on Bridge",
+        fallbackText:
+          "The captain arrives in silence, studies the telemetry, and hands command back to you with one line: \"Make the call we can survive.\"",
+        basePrompt:
+          "Write a character-focused paragraph where leadership pressure sharpens the decision.",
+        stateEffects: { trust: 1 },
+        choices: [
+          {
+            id: "story-solar-wind-choice-008",
+            key: "cautious_path",
+            label: "Take the cautious scan route.",
+            targetNodeId: "story-solar-wind-node-002",
+            stateEffects: { trust: 1, flags: ["captain_approved_scan"] },
+          },
+          {
+            id: "story-solar-wind-choice-009",
+            key: "bold_path",
+            label: "Commit to the direct beacon approach.",
+            targetNodeId: "story-solar-wind-node-003",
+            stateEffects: { affection: 1, risk: 1, flags: ["captain_backed_risk"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-005",
+        key: "relay_hub_entry",
+        title: "Relay Hub Entry",
+        fallbackText:
+          "With partial control restored, the Solar Wind reaches a sealed relay hub. The next move determines whether this becomes a rescue mission or a trap.",
+        basePrompt:
+          "Write a transition paragraph into the next chapter hook with controlled suspense.",
+        isEnding: true,
+        choices: [
+          {
+            id: "story-solar-wind-choice-010",
+            key: "continue_next_arc",
+            label: "Continue to Chapter 2",
+            targetNodeId: "story-solar-wind-node-005",
+            stateEffects: { flags: ["chapter_one_complete"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-006",
+        key: "silent_split",
+        title: "Silent Split",
+        fallbackText:
+          "Keeping intel private buys speed but fractures trust on the bridge. When a mismatch appears in the map, no one agrees which coordinate is real.",
+        basePrompt:
+          "Write a consequence paragraph where secrecy creates team tension.",
+        choices: [
+          {
+            id: "story-solar-wind-choice-011",
+            key: "admit_now",
+            label: "Reveal the hidden intel now.",
+            targetNodeId: "story-solar-wind-node-005",
+            stateEffects: { trust: 1, risk: -1, flags: ["late_truth"] },
+          },
+          {
+            id: "story-solar-wind-choice-012",
+            key: "double_down",
+            label: "Double down and choose alone.",
+            targetNodeId: "story-solar-wind-node-007",
+            stateEffects: { risk: 2, clues: 1, flags: ["solo_command"] },
+          },
+        ],
+      },
+      {
+        id: "story-solar-wind-node-007",
+        key: "hazard_core",
+        title: "Hazard Core",
+        fallbackText:
+          "The beacon shell opens into a hazard core. Emergency lights bloom red as automated systems identify your crew as contamination.",
+        basePrompt:
+          "Write a high-risk paragraph that ends with a clean cliffhanger.",
+        isEnding: true,
+        choices: [
+          {
+            id: "story-solar-wind-choice-013",
+            key: "retreat_protocol",
+            label: "Trigger emergency retreat.",
+            targetNodeId: "story-solar-wind-node-007",
+            stateEffects: { flags: ["hazard_retreat"] },
+          },
+        ],
+      },
+    ],
+  },
+];
+
 async function upsertCreatorCredits(series: SeriesSeed) {
   await prisma.seriesCredit.deleteMany({
     where: {
@@ -627,10 +856,126 @@ async function seedRecommendationSlots() {
   }
 }
 
+async function seedInteractiveStories() {
+  for (const story of interactiveStorySeeds) {
+    const initialNode = story.nodes[0];
+    await prisma.interactiveStory.upsert({
+      where: { id: story.id },
+      update: {
+        seriesId: story.seriesId,
+        slug: story.slug,
+        title: story.title,
+        description: story.description,
+        baseContext: story.baseContext,
+        initialNodeId: initialNode?.id || null,
+        initialState: toInputJson(story.initialState),
+        isPublished: true,
+        aiEnabled: true,
+      },
+      create: {
+        id: story.id,
+        seriesId: story.seriesId,
+        slug: story.slug,
+        title: story.title,
+        description: story.description,
+        baseContext: story.baseContext,
+        initialNodeId: initialNode?.id || null,
+        initialState: toInputJson(story.initialState),
+        isPublished: true,
+        aiEnabled: true,
+      },
+    });
+
+    for (const [nodeIndex, node] of story.nodes.entries()) {
+      await prisma.interactiveStoryNode.upsert({
+        where: {
+          storyId_nodeKey: {
+            storyId: story.id,
+            nodeKey: node.key,
+          },
+        },
+        update: {
+          id: node.id,
+          title: node.title,
+          baseContext: node.fallbackText,
+          basePrompt: node.basePrompt,
+          fallbackText: node.fallbackText,
+          requiredFlags: node.requiredFlags || [],
+          blockedFlags: node.blockedFlags || [],
+          stateEffects: toInputJson(node.stateEffects || {}),
+          sortOrder: nodeIndex,
+          isEnding: Boolean(node.isEnding),
+          aiEnabled: true,
+        },
+        create: {
+          id: node.id,
+          storyId: story.id,
+          nodeKey: node.key,
+          title: node.title,
+          baseContext: node.fallbackText,
+          basePrompt: node.basePrompt,
+          fallbackText: node.fallbackText,
+          requiredFlags: node.requiredFlags || [],
+          blockedFlags: node.blockedFlags || [],
+          stateEffects: toInputJson(node.stateEffects || {}),
+          sortOrder: nodeIndex,
+          isEnding: Boolean(node.isEnding),
+          aiEnabled: true,
+        },
+      });
+    }
+
+    for (const node of story.nodes) {
+      for (const [choiceIndex, choice] of node.choices.entries()) {
+        await prisma.interactiveStoryChoice.upsert({
+          where: {
+            nodeId_choiceKey: {
+              nodeId: node.id,
+              choiceKey: choice.key,
+            },
+          },
+          update: {
+            id: choice.id,
+            targetNodeId: choice.targetNodeId,
+            label: choice.label,
+            description: null,
+            requiredFlags: choice.requiredFlags || [],
+            blockedFlags: choice.blockedFlags || [],
+            stateEffects: toInputJson(choice.stateEffects || {}),
+            sortOrder: choiceIndex,
+          },
+          create: {
+            id: choice.id,
+            nodeId: node.id,
+            targetNodeId: choice.targetNodeId,
+            choiceKey: choice.key,
+            label: choice.label,
+            description: null,
+            requiredFlags: choice.requiredFlags || [],
+            blockedFlags: choice.blockedFlags || [],
+            stateEffects: toInputJson(choice.stateEffects || {}),
+            sortOrder: choiceIndex,
+          },
+        });
+      }
+    }
+
+    await prisma.interactiveStory.update({
+      where: { id: story.id },
+      data: {
+        initialNodeId: initialNode?.id || null,
+      },
+    });
+
+    console.log(`seeded interactive story ${story.id} (${story.title})`);
+  }
+}
+
 async function main() {
   console.log("seeding backend fixtures...");
   await seedSeries();
   await seedEpisodes();
+  await seedInteractiveStories();
   await seedRecommendationSlots();
   await seedTopupPackages();
   console.log("seed complete.");

@@ -76,6 +76,23 @@ Admin series writes still bridge legacy `author` input into normalized credits a
 Local seed data now creates real `Creator` and `SeriesCredit` rows, and it seeds novel episodes with paragraph payloads so creator discovery and episode detail paths can be exercised without fallback-only fixtures.
 It also seeds storefront homepage recommendation slots so a fresh environment does not boot into an empty homepage recommendations state.
 
+## Interactive story MVP
+
+The backend now includes a structured interactive-fiction runtime:
+
+- `InteractiveStory` / `InteractiveStoryNode` / `InteractiveStoryChoice`
+- per-user `UserStoryProgress` and `UserStoryState`
+- `UserStoryChoiceLog` and `StoryGenerationLog` for traceability
+
+Public/user APIs:
+
+- `GET /api/interactive-stories/by-series/:seriesId`
+- `GET /api/interactive-stories/:storyId`
+- `GET /api/interactive-stories/:storyId/progress` (signed-in user)
+- `POST /api/interactive-stories/:storyId/choice` (signed-in user)
+
+AI generation runs server-side only. If AI is disabled, unavailable, or times out, the system falls back to node-level fallback text so reading never hard-fails.
+
 ## Creator credit import workflow
 
 Do not run the creator import against production with placeholder data.

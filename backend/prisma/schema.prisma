@@ -62,6 +62,10 @@ model User {
   missionStates  MissionState[] @relation("UserMissionStates")
   rewardStates   RewardState[]  @relation("UserRewardStates")
   preferences    UserPreference? @relation("UserPreferences")
+  storyProgress  UserStoryProgress[] @relation("UserStoryProgress")
+  storyState     UserStoryState[] @relation("UserStoryState")
+  storyChoiceLogs UserStoryChoiceLog[] @relation("UserStoryChoiceLogs")
+  storyGenerationLogs StoryGenerationLog[] @relation("UserStoryGenerationLogs")
 
   @@index([createdAt])
   @@map("users")
@@ -103,11 +107,179 @@ model Series {
   notifications    Notification[]    @relation("SeriesNotifications")
   viewStats        SeriesViewStat[]  @relation("SeriesViewStats")
   recommendationAnalytics RecommendationAnalytics[] @relation("SeriesRecommendationAnalytics")
+  interactiveStory InteractiveStory? @relation("SeriesInteractiveStory")
 
   @@index([title])
   @@index([createdAt])
   @@index([updatedAt])
   @@map("series")
+}
+
+model InteractiveStory {
+  id            String   @id @default(cuid())
+  seriesId      String?  @unique
+  slug          String   @unique
+  title         String
+  description   String?
+  baseContext   String?
+  initialNodeId String?
+  initialState  Json     @default("{}")
+  isPublished   Boolean  @default(false)
+  aiEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  series         Series?               @relation("SeriesInteractiveStory", fields: [seriesId], references: [id], onDelete: SetNull)
+  nodes          InteractiveStoryNode[]
+  progress       UserStoryProgress[]
+  state          UserStoryState[]
+  choiceLogs     UserStoryChoiceLog[]
+  generationLogs StoryGenerationLog[]
+
+  @@index([isPublished, updatedAt])
+  @@map("interactive_stories")
+}
+
+model InteractiveStoryNode {
+  id            String   @id @default(cuid())
+  storyId       String
+  nodeKey       String
+  title         String
+  baseContext   String?
+  basePrompt    String?
+  fallbackText  String?
+  requiredFlags String[] @default([])
+  blockedFlags  String[] @default([])
+  stateEffects  Json     @default("{}")
+  sortOrder     Int      @default(0)
+  isEnding      Boolean  @default(false)
+  aiEnabled     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  story          InteractiveStory      @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  choices        InteractiveStoryChoice[] @relation("InteractiveNodeChoices")
+  targetedBy     InteractiveStoryChoice[] @relation("InteractiveChoiceTargets")
+  progress       UserStoryProgress[]   @relation("InteractiveNodeProgress")
+  choiceLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceNodeLogs")
+  targetLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceTargetLogs")
+  generationLogs StoryGenerationLog[]  @relation("InteractiveNodeGenerationLogs")
+
+  @@unique([storyId, nodeKey])
+  @@index([storyId, sortOrder])
+  @@map("interactive_story_nodes")
+}
+
+model InteractiveStoryChoice {
+  id            String   @id @default(cuid())
+  nodeId        String
+  targetNodeId  String?
+  choiceKey     String
+  label         String
+  description   String?
+  requiredFlags String[] @default([])
+  blockedFlags  String[] @default([])
+  stateEffects  Json     @default("{}")
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  node           InteractiveStoryNode  @relation("InteractiveNodeChoices", fields: [nodeId], references: [id], onDelete: Cascade)
+  targetNode     InteractiveStoryNode? @relation("InteractiveChoiceTargets", fields: [targetNodeId], references: [id], onDelete: SetNull)
+  lastProgressEntries UserStoryProgress[] @relation("InteractiveProgressLastChoice")
+  choiceLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceLogs")
+  generationLogs StoryGenerationLog[]  @relation("InteractiveChoiceGenerationLogs")
+
+  @@unique([nodeId, choiceKey])
+  @@index([nodeId, sortOrder])
+  @@index([targetNodeId])
+  @@map("interactive_story_choices")
+}
+
+model UserStoryProgress {
+  id                String    @id @default(cuid())
+  userId            String
+  storyId           String
+  currentNodeId     String
+  lastChoiceId      String?
+  lastChoiceAt      DateTime?
+  lastGeneratedText String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user         User                 @relation("UserStoryProgress", fields: [userId], references: [id], onDelete: Cascade)
+  story        InteractiveStory     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  currentNode  InteractiveStoryNode @relation("InteractiveNodeProgress", fields: [currentNodeId], references: [id], onDelete: Restrict)
+  lastChoice   InteractiveStoryChoice? @relation("InteractiveProgressLastChoice", fields: [lastChoiceId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, storyId])
+  @@index([storyId, updatedAt])
+  @@map("user_story_progress")
+}
+
+model UserStoryState {
+  id        String   @id @default(cuid())
+  userId    String
+  storyId   String
+  state     Json     @default("{}")
+  flags     String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User             @relation("UserStoryState", fields: [userId], references: [id], onDelete: Cascade)
+  story InteractiveStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@index([storyId, updatedAt])
+  @@map("user_story_state")
+}
+
+model UserStoryChoiceLog {
+  id           String   @id @default(cuid())
+  userId       String
+  storyId      String
+  nodeId       String
+  choiceId     String
+  targetNodeId String?
+  stateBefore  Json     @default("{}")
+  stateAfter   Json     @default("{}")
+  createdAt    DateTime @default(now())
+
+  user       User                  @relation("UserStoryChoiceLogs", fields: [userId], references: [id], onDelete: Cascade)
+  story      InteractiveStory      @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  node       InteractiveStoryNode  @relation("InteractiveChoiceNodeLogs", fields: [nodeId], references: [id], onDelete: Restrict)
+  choice     InteractiveStoryChoice @relation("InteractiveChoiceLogs", fields: [choiceId], references: [id], onDelete: Restrict)
+  targetNode InteractiveStoryNode? @relation("InteractiveChoiceTargetLogs", fields: [targetNodeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, storyId, createdAt])
+  @@index([storyId, createdAt])
+  @@map("user_story_choice_logs")
+}
+
+model StoryGenerationLog {
+  id           String    @id @default(cuid())
+  userId       String?
+  storyId      String
+  nodeId       String
+  choiceId     String?
+  status       String
+  provider     String
+  model        String?
+  prompt       String
+  response     String?
+  errorMessage String?
+  latencyMs    Int?
+  createdAt    DateTime  @default(now())
+
+  user   User?                 @relation("UserStoryGenerationLogs", fields: [userId], references: [id], onDelete: SetNull)
+  story  InteractiveStory      @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  node   InteractiveStoryNode  @relation("InteractiveNodeGenerationLogs", fields: [nodeId], references: [id], onDelete: Restrict)
+  choice InteractiveStoryChoice? @relation("InteractiveChoiceGenerationLogs", fields: [choiceId], references: [id], onDelete: SetNull)
+
+  @@index([storyId, createdAt])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("story_generation_logs")
 }
 
 model Creator {
@@ -981,5 +1153,3 @@ model RankingConfig {
 
   @@map("ranking_configs")
 }
-
-

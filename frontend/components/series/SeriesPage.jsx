@@ -157,6 +157,7 @@ export default function SeriesPage({
   );
   const [activeModal, setActiveModal] = useState(null);
   const [showSecondarySections, setShowSecondarySections] = useState(false);
+  const [interactiveStory, setInteractiveStory] = useState(null);
   const [authError, setAuthError] = useState("");
   const [commerceNotice, setCommerceNotice] = useState(null);
   const gateReportedRef = useRef(false);
@@ -423,6 +424,39 @@ export default function SeriesPage({
     loadWallet,
     viewSeries,
   ]);
+
+  useEffect(() => {
+    const seriesType = String(data?.series?.type || "").trim().toLowerCase();
+    if (!data?.series?.id || seriesType !== "novel") {
+      setInteractiveStory(null);
+      return;
+    }
+
+    let cancelled = false;
+    apiGet(`/api/interactive-stories/by-series/${encodeURIComponent(seriesId)}`, {
+      suppressAuthModal: true,
+      cacheMs: 30_000,
+    })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        if (response.ok && response.data?.story?.id) {
+          setInteractiveStory(response.data.story);
+          return;
+        }
+        setInteractiveStory(null);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setInteractiveStory(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.series?.id, data?.series?.type, seriesId]);
 
   useEffect(() => {
     if (error === "ADULT_GATED") {
@@ -989,6 +1023,28 @@ export default function SeriesPage({
           highlightPrimaryAction={Boolean(commerceNotice)}
           creatorHref={creatorHref}
         />
+
+        {interactiveStory ? (
+          <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
+                  Interactive Story
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[color:var(--gush-ink)]">
+                  Structured branching mode is available for this title.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
+                className="rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(15,23,42,0.1)] transition hover:bg-black/85"
+              >
+                Enter interactive mode
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <EpisodeList
           series={series}
