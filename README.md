@@ -86,6 +86,18 @@ That adds one disposable QA support roundtrip:
 - replies to it, verifies the saved admin reply, closes it, then deletes it
 
 ```bash
+npm run ops:release:all-live:fast
+```
+
+Runs the fast release autopilot (baseline strict live gate is blocking; full strict gate is optional).
+
+```bash
+npm run ops:release:all-live:strict
+```
+
+Runs strict autopilot (baseline + full strict gate are both mandatory).
+
+```bash
 npm run check:all
 ```
 

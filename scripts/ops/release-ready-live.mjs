@@ -57,6 +57,9 @@ function createReportBase(input) {
     timestamp: new Date().toISOString(),
     backendUrl: input.backendUrl,
     frontendUrl: input.frontendUrl,
+    mode: input.mode,
+    fullGatePolicy: input.fullGatePolicy,
+    thresholdTier: input.thresholdTier,
     retryTimes: input.retryTimes,
     requireFull: input.requireFull,
     hasObservabilityKey: input.hasObs,
@@ -78,6 +81,9 @@ function writeReportFiles(report) {
     `- timestamp: ${report.timestamp}`,
     `- backend: ${report.backendUrl}`,
     `- frontend: ${report.frontendUrl}`,
+    `- mode: ${report.mode}`,
+    `- fullGatePolicy: ${report.fullGatePolicy}`,
+    `- thresholdTier: ${report.thresholdTier}`,
     `- retryTimes: ${report.retryTimes}`,
     `- requireFull: ${report.requireFull ? "yes" : "no"}`,
     `- hasObservabilityKey: ${report.hasObservabilityKey ? "yes" : "no"}`,
@@ -134,12 +140,28 @@ async function main() {
   const hasAdmin = hasAdminCredentials(env);
   const retryTimes = readRetryTimes();
   const requireFull = readRequireFull();
-  const report = createReportBase({ backendUrl, frontendUrl, retryTimes, requireFull, hasObs, hasAdmin });
+  const mode = requireFull ? "strict" : "fast";
+  const fullGatePolicy = requireFull ? "required" : "optional";
+  const thresholdTier = requireFull ? "strict-p2" : "baseline-default";
+  const report = createReportBase({
+    backendUrl,
+    frontendUrl,
+    mode,
+    fullGatePolicy,
+    thresholdTier,
+    retryTimes,
+    requireFull,
+    hasObs,
+    hasAdmin,
+  });
 
   console.log(`[release-ready] backend=${backendUrl}`);
   console.log(`[release-ready] frontend=${frontendUrl}`);
   console.log(`[release-ready] hasObservabilityKey=${hasObs ? "yes" : "no"}`);
   console.log(`[release-ready] hasAdminCredentials=${hasAdmin ? "yes" : "no"}`);
+  console.log(`[release-ready] mode=${mode}`);
+  console.log(`[release-ready] fullGatePolicy=${fullGatePolicy}`);
+  console.log(`[release-ready] thresholdTier=${thresholdTier}`);
   console.log(`[release-ready] retryTimes=${retryTimes}`);
   console.log(`[release-ready] requireFull=${requireFull ? "yes" : "no"}`);
 

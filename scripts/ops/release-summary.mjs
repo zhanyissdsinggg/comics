@@ -24,6 +24,9 @@ function buildSummary(releaseReport, watchdogReport) {
   const releaseVerdict = String(releaseReport?.verdict || "unknown");
   const releaseBaseline = String(releaseReport?.baseline?.status || "unknown");
   const releaseFull = String(releaseReport?.full?.status || "unknown");
+  const releaseMode = String(releaseReport?.mode || (releaseReport?.requireFull ? "strict" : "fast"));
+  const fullGatePolicy = String(releaseReport?.fullGatePolicy || (releaseReport?.requireFull ? "required" : "optional"));
+  const thresholdTier = String(releaseReport?.thresholdTier || (releaseReport?.requireFull ? "strict-p2" : "baseline-default"));
   const watchdogSeverity = String(watchdogReport?.severity || "unknown");
   const watchdogStatus = String(watchdogReport?.status || "unknown");
   const watchdogWarnings = normalizeArray(watchdogReport?.warnings);
@@ -56,6 +59,9 @@ function buildSummary(releaseReport, watchdogReport) {
       verdict: releaseVerdict,
       baseline: releaseBaseline,
       full: releaseFull,
+      mode: releaseMode,
+      fullGatePolicy,
+      thresholdTier,
       backendUrl: releaseReport?.backendUrl || null,
       frontendUrl: releaseReport?.frontendUrl || null,
       timestamp: releaseReport?.timestamp || null,
@@ -79,6 +85,9 @@ function toMarkdown(summary) {
     `- generatedAt: ${summary.generatedAt}`,
     `- verdict: ${summary.verdict}`,
     `- releaseGate: ${summary.release.verdict}`,
+    `- mode: ${summary.release.mode}`,
+    `- fullGatePolicy: ${summary.release.fullGatePolicy}`,
+    `- thresholdTier: ${summary.release.thresholdTier}`,
     `- baseline: ${summary.release.baseline}`,
     `- full: ${summary.release.full}`,
     `- watchdog: severity=${summary.watchdog.severity}, status=${summary.watchdog.status}`,

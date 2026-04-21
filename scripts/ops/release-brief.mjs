@@ -35,6 +35,8 @@ function buildBrief(summary) {
     `- Release status: **${verdict}**`,
     `- Backend: ${release.backendUrl || "n/a"}`,
     `- Frontend: ${release.frontendUrl || "n/a"}`,
+    `- Mode: ${release.mode || "unknown"} (fullGatePolicy=${release.fullGatePolicy || "unknown"})`,
+    `- Threshold tier: ${release.thresholdTier || "unknown"}`,
     `- Release gate: ${release.verdict || "unknown"} (baseline=${release.baseline || "unknown"}, full=${release.full || "unknown"})`,
     `- Watchdog: severity=${watchdog.severity || "unknown"}, status=${watchdog.status || "unknown"}`,
     "",

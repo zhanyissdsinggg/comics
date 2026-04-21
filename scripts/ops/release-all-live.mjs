@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const DEFAULT_SUMMARY_JSON_PATH = "ops-release-summary.json";
 const DEFAULT_BRIEF_MD_PATH = "ops-release-brief.md";
+const DEFAULT_DASHBOARD_MD_PATH = "ops-release-dashboard.md";
 
 function runNpmScript(scriptName, env) {
   return new Promise((resolve, reject) => {
@@ -61,6 +62,10 @@ function resolveBriefPath() {
   return String(process.env.OPS_RELEASE_BRIEF_MD || DEFAULT_BRIEF_MD_PATH).trim() || DEFAULT_BRIEF_MD_PATH;
 }
 
+function resolveDashboardPath() {
+  return String(process.env.OPS_RELEASE_DASHBOARD_MD || DEFAULT_DASHBOARD_MD_PATH).trim() || DEFAULT_DASHBOARD_MD_PATH;
+}
+
 async function main() {
   const env = { ...process.env };
   await runNpmScript("ops:release:ready-live", env);
@@ -79,9 +84,28 @@ async function main() {
           }`,
         );
       }
+      try {
+        await runNpmScript("ops:release:dashboard", env);
+      } catch (error) {
+        console.warn(
+          `[release-all] warning: dashboard step failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
     } catch (error) {
       console.warn(
         `[release-all] warning: archive step failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  } else {
+    try {
+      await runNpmScript("ops:release:dashboard", env);
+    } catch (error) {
+      console.warn(
+        `[release-all] warning: dashboard step failed: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
@@ -90,10 +114,12 @@ async function main() {
 
   const summary = readSummaryVerdict();
   const briefPath = resolveBriefPath();
+  const dashboardPath = resolveDashboardPath();
   console.log(
     `[release-all] summary verdict=${summary.verdict} blockers=${summary.blockers} advisories=${summary.advisories} path=${summary.path}`,
   );
   console.log(`[release-all] brief path=${briefPath} exists=${existsSync(briefPath) ? "yes" : "no"}`);
+  console.log(`[release-all] dashboard path=${dashboardPath} exists=${existsSync(dashboardPath) ? "yes" : "no"}`);
   console.log(`[release-all] archive enabled=${shouldArchive ? "yes" : "no"}`);
   if (summary.reason) {
     console.warn(`[release-all] summary parse warning: ${summary.reason}`);

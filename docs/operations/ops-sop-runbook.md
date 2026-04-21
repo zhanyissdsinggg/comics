@@ -34,6 +34,8 @@ Behavior:
 
 - always runs `ops:deploy-gate:strict:live` (blocking)
 - runs `ops:deploy-gate:strict:full` only when both `OBSERVABILITY_KEY` and admin credentials are present
+- default mode is **fast** (`fullGatePolicy=optional`)
+- report includes `thresholdTier=baseline-default`
 - retries each gate once by default to absorb transient network jitter (`OPS_RELEASE_RETRY_TIMES`, default `1`)
 - writes release reports to `ops-release-ready-report.json` and `ops-release-ready-report.md`
 
@@ -41,6 +43,8 @@ Optional strictness:
 
 - set `OPS_RELEASE_REQUIRE_FULL=1` to make full strict gate mandatory (fail if prerequisites are missing)
 - or run `npm run ops:release:ready-live:full` (cross-platform shortcut, same behavior)
+- strict mode is reported as `mode=strict` with `fullGatePolicy=required`
+- strict mode report sets `thresholdTier=strict-p2`
 
 After `ops:release:ready-live`, generate a concise release summary:
 
@@ -63,6 +67,16 @@ Brief output:
 
 - `ops-release-brief.md`
 
+Generate a release trend dashboard (reads history + latest summary):
+
+```bash
+npm run ops:release:dashboard
+```
+
+Dashboard output:
+
+- `ops-release-dashboard.md`
+
 Single-command full flow (recommended for daily release checks):
 
 ```bash
@@ -72,7 +86,13 @@ npm run ops:release:all-live
 This runs `ops:release:ready-live`, `ops:release:summary`, and `ops:release:brief`, then prints final summary verdict in terminal.
 It also exits non-zero when summary verdict is not `READY`.
 By default it also archives release artifacts under `ops-release-history/` (disable with `OPS_RELEASE_ARCHIVE=0`).
-It also prunes release history after archiving (default keep last `30`, override with `OPS_RELEASE_HISTORY_KEEP`).
+It also prunes release history after archiving (default keep last `30`, override with `OPS_RELEASE_HISTORY_KEEP`),
+and regenerates `ops-release-dashboard.md`.
+
+Mode aliases:
+
+- fast mode: `npm run ops:release:all-live:fast`
+- strict mode: `npm run ops:release:all-live:strict`
 
 Alias:
 
