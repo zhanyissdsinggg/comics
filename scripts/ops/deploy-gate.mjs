@@ -46,6 +46,9 @@ async function run() {
     env.OPS_ROUNDS = env.OPS_ROUNDS || "4";
     env.OPS_IGNORE_WARMUP_ROUNDS = env.OPS_IGNORE_WARMUP_ROUNDS || "1";
     env.OPS_ALLOWED_BACKEND_SLOW_SAMPLES = env.OPS_ALLOWED_BACKEND_SLOW_SAMPLES || "1";
+    env.OPS_ADMIN_REQUEST_TIMEOUT_MS = env.OPS_ADMIN_REQUEST_TIMEOUT_MS || "12000";
+    env.OPS_ADMIN_RETRY_ATTEMPTS = env.OPS_ADMIN_RETRY_ATTEMPTS || "3";
+    env.OPS_ADMIN_MUTATION_RETRY_ATTEMPTS = env.OPS_ADMIN_MUTATION_RETRY_ATTEMPTS || "2";
     console.log("[deploy-gate] mode=strict");
     console.log(
       "[deploy-gate] strict defaults: advanced health + observability remain opt-in via OPS_REQUIRE_ADVANCED_HEALTH=1 / WATCHDOG_REQUIRE_OBSERVABILITY=1 / SEC_REQUIRE_OBSERVABILITY_ENDPOINT=1",

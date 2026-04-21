@@ -1,8 +1,9 @@
 import process from "node:process";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
-const DEFAULT_RETRY_ATTEMPTS = 2;
-const DEFAULT_RETRY_INTERVAL_MS = 500;
+const DEFAULT_RETRY_ATTEMPTS = 3;
+const DEFAULT_MUTATION_RETRY_ATTEMPTS = 2;
+const DEFAULT_RETRY_INTERVAL_MS = 800;
 const DEFAULT_READ_PATH = "/api/admin/series?page=1&pageSize=1";
 const DEFAULT_READ_PATHS = [
   "/api/admin/series?page=1&pageSize=1",
@@ -134,13 +135,18 @@ function buildCookieHeader(cookieJar) {
 }
 
 function readTimeout() {
-  const parsed = Number(process.env.OPS_REQUEST_TIMEOUT_MS || DEFAULT_TIMEOUT_MS);
+  const parsed = Number(process.env.OPS_ADMIN_REQUEST_TIMEOUT_MS || process.env.OPS_REQUEST_TIMEOUT_MS || DEFAULT_TIMEOUT_MS);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
 }
 
 function readRetryAttempts() {
   const parsed = Number(process.env.OPS_ADMIN_RETRY_ATTEMPTS || DEFAULT_RETRY_ATTEMPTS);
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_RETRY_ATTEMPTS;
+}
+
+function readMutationRetryAttempts() {
+  const parsed = Number(process.env.OPS_ADMIN_MUTATION_RETRY_ATTEMPTS || DEFAULT_MUTATION_RETRY_ATTEMPTS);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : DEFAULT_MUTATION_RETRY_ATTEMPTS;
 }
 
 function readRetryIntervalMs() {
@@ -246,6 +252,31 @@ async function requestJsonWithRetry(url, options = {}) {
   };
 }
 
+async function requestJsonWithTransientRetry(url, options = {}) {
+  const attempts = readMutationRetryAttempts();
+  const retryIntervalMs = readRetryIntervalMs();
+  let lastResult = null;
+
+  for (let index = 1; index <= attempts; index += 1) {
+    const result = await requestJson(url, options);
+    lastResult = result;
+    const retryable = !result.ok && result.status === 0;
+    if (!retryable || index >= attempts) {
+      return result;
+    }
+    await sleep(retryIntervalMs);
+  }
+
+  return lastResult || {
+    ok: false,
+    status: 0,
+    durationMs: 0,
+    payload: null,
+    text: "",
+    error: "request failed",
+  };
+}
+
 function logStep(step, result) {
   const parts = [`[ops-admin] ${step}`, `status=${result.status}`, `durationMs=${result.durationMs}`];
   if (result.error) {
@@ -324,7 +355,7 @@ async function run() {
     ? { email: adminEmail, password: adminPassword }
     : { adminKey };
 
-  const login = await requestJson(`${backendBaseUrl}${LOGIN_PATH}`, {
+  const login = await requestJsonWithTransientRetry(`${backendBaseUrl}${LOGIN_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(loginPayload),
@@ -341,7 +372,7 @@ async function run() {
     fail("admin login did not set both admin auth cookies");
   }
 
-  const verify = await requestJson(`${backendBaseUrl}${VERIFY_PATH}`, {
+  const verify = await requestJsonWithTransientRetry(`${backendBaseUrl}${VERIFY_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
@@ -359,7 +390,7 @@ async function run() {
     Cookie: buildCookieHeader(cookieJar),
   });
 
-  const logout = await requestJson(`${backendBaseUrl}${LOGOUT_PATH}`, {
+  const logout = await requestJsonWithTransientRetry(`${backendBaseUrl}${LOGOUT_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
@@ -370,7 +401,7 @@ async function run() {
     fail("logout did not return success=true");
   }
 
-  const verifyAfterLogout = await requestJson(`${backendBaseUrl}${VERIFY_PATH}`, {
+  const verifyAfterLogout = await requestJsonWithTransientRetry(`${backendBaseUrl}${VERIFY_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
@@ -381,7 +412,7 @@ async function run() {
     fail("verify after logout did not return valid=false");
   }
 
-  const refreshAfterLogout = await requestJson(`${backendBaseUrl}${REFRESH_PATH}`, {
+  const refreshAfterLogout = await requestJsonWithTransientRetry(`${backendBaseUrl}${REFRESH_PATH}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
