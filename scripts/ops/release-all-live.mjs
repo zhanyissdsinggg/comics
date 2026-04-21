@@ -70,6 +70,15 @@ async function main() {
   if (shouldArchive) {
     try {
       await runNpmScript("ops:release:archive", env);
+      try {
+        await runNpmScript("ops:release:history:prune", env);
+      } catch (error) {
+        console.warn(
+          `[release-all] warning: history prune step failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
     } catch (error) {
       console.warn(
         `[release-all] warning: archive step failed: ${

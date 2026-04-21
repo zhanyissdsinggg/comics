@@ -41,6 +41,7 @@
     "ops:release:summary": "node scripts/ops/release-summary.mjs",
     "ops:release:brief": "node scripts/ops/release-brief.mjs",
     "ops:release:archive": "node scripts/ops/release-archive.mjs",
+    "ops:release:history:prune": "node scripts/ops/release-history-prune.mjs",
     "ops:release:all-live": "node scripts/ops/release-all-live.mjs",
     "ops:release:all-live:full": "node scripts/ops/release-all-live-full.mjs",
     "ops:release:autopilot": "node scripts/ops/release-all-live.mjs",
