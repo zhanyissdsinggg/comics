@@ -15,6 +15,7 @@ import {
 import type { Prisma } from "@prisma/client";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { validateInteractiveStoryGraph } from "../../interactive-stories/interactive-story-validation";
 import { RequireAdminPermissions } from "../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminPermission } from "../permissions/admin-permissions";
@@ -54,6 +55,21 @@ type AdminChoiceInput = {
   blockedFlags?: string[];
   stateEffects?: Record<string, unknown> | null;
   sortOrder?: number;
+};
+
+type StoryImportPayload = {
+  story?: AdminStoryInput & { id?: string };
+  nodes?: Array<
+    AdminNodeInput & {
+      nodeKey: string;
+      choices?: Array<
+        AdminChoiceInput & {
+          choiceKey: string;
+          targetNodeKey?: string | null;
+        }
+      >;
+    }
+  >;
 };
 
 const STORY_LIST_SELECT = {
@@ -223,6 +239,38 @@ export class AdminInteractiveStoriesController {
       throw new BadRequestException("initialNodeId does not belong to this story");
     }
     return normalizedInitialNodeId;
+  }
+
+  private async loadStoryWithGraph(storyId: string) {
+    const normalizedStoryId = normalizeText(storyId);
+    if (!normalizedStoryId) {
+      return null;
+    }
+    return this.prisma.interactiveStory.findUnique({
+      where: { id: normalizedStoryId },
+      select: STORY_DETAIL_SELECT,
+    });
+  }
+
+  private async getStoryValidation(storyId: string) {
+    const story = await this.loadStoryWithGraph(storyId);
+    if (!story) {
+      throw new NotFoundException("Interactive story not found");
+    }
+    return {
+      story,
+      validation: validateInteractiveStoryGraph(story as any),
+    };
+  }
+
+  private async assertPublishReady(storyId: string) {
+    const { validation } = await this.getStoryValidation(storyId);
+    if (!validation.ok) {
+      throw new BadRequestException({
+        message: "Interactive story is not publish-ready",
+        validation,
+      });
+    }
   }
 
   private toStoryCreateData(input: AdminStoryInput): Prisma.InteractiveStoryCreateInput {
@@ -476,6 +524,232 @@ export class AdminInteractiveStoriesController {
     };
   }
 
+  @Post("import")
+  @RequireAdminPermissions(AdminPermission.INTERACTIVE_STORY_CREATE)
+  async importStory(
+    @Body() body: { payload?: StoryImportPayload; mode?: "create" | "replace" },
+  ) {
+    const mode = body?.mode === "replace" ? "replace" : "create";
+    const payload = body?.payload || {};
+    const storyInput = payload?.story || {};
+    const nodesInput = Array.isArray(payload?.nodes) ? payload.nodes : [];
+
+    if (nodesInput.length === 0) {
+      throw new BadRequestException("payload.nodes cannot be empty");
+    }
+
+    const slug = normalizeText(storyInput?.slug);
+    const title = normalizeText(storyInput?.title);
+    if (!slug || !title) {
+      throw new BadRequestException("payload.story.slug and payload.story.title are required");
+    }
+
+    const seriesId = await this.assertSeriesExists(storyInput?.seriesId ?? null);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      let storyId = normalizeText(storyInput?.id || "");
+      let existingStory = storyId
+        ? await tx.interactiveStory.findUnique({ where: { id: storyId }, select: { id: true } })
+        : null;
+
+      if (!existingStory) {
+        existingStory = await tx.interactiveStory.findUnique({
+          where: { slug },
+          select: { id: true },
+        });
+      }
+
+      if (mode === "replace") {
+        if (!existingStory) {
+          throw new BadRequestException("replace mode requires existing story id or slug");
+        }
+        storyId = existingStory.id;
+        await tx.interactiveStory.update({
+          where: { id: storyId },
+          data: {
+            slug,
+            title,
+            description: normalizeNullableText(storyInput?.description),
+            baseContext: normalizeNullableText(storyInput?.baseContext),
+            initialState: normalizeJsonObject(storyInput?.initialState),
+            isPublished: false,
+            aiEnabled: storyInput?.aiEnabled !== false,
+            series: seriesId ? { connect: { id: seriesId } } : { disconnect: true },
+          },
+        });
+        await tx.interactiveStoryNode.deleteMany({ where: { storyId } });
+      } else {
+        if (existingStory) {
+          throw new ConflictException("Story already exists, use replace mode");
+        }
+        const created = await tx.interactiveStory.create({
+          data: {
+            slug,
+            title,
+            description: normalizeNullableText(storyInput?.description),
+            baseContext: normalizeNullableText(storyInput?.baseContext),
+            initialState: normalizeJsonObject(storyInput?.initialState),
+            isPublished: false,
+            aiEnabled: storyInput?.aiEnabled !== false,
+            series: seriesId ? { connect: { id: seriesId } } : undefined,
+          },
+          select: { id: true },
+        });
+        storyId = created.id;
+      }
+
+      const nodeKeyToId = new Map<string, string>();
+      for (let index = 0; index < nodesInput.length; index += 1) {
+        const node = nodesInput[index];
+        const nodeKey = normalizeText(node?.nodeKey);
+        const nodeTitle = normalizeText(node?.title);
+        if (!nodeKey || !nodeTitle) {
+          throw new BadRequestException(`node.nodeKey and node.title are required at index ${index}`);
+        }
+        if (nodeKeyToId.has(nodeKey)) {
+          throw new BadRequestException(`Duplicated nodeKey in import payload: ${nodeKey}`);
+        }
+
+        const createdNode = await tx.interactiveStoryNode.create({
+          data: {
+            storyId,
+            nodeKey,
+            title: nodeTitle,
+            baseContext: normalizeNullableText(node?.baseContext),
+            basePrompt: normalizeNullableText(node?.basePrompt),
+            fallbackText: normalizeNullableText(node?.fallbackText),
+            requiredFlags: normalizeStringArray(node?.requiredFlags),
+            blockedFlags: normalizeStringArray(node?.blockedFlags),
+            stateEffects: normalizeJsonObject(node?.stateEffects),
+            sortOrder: Number.isFinite(Number(node?.sortOrder))
+              ? Number(node?.sortOrder)
+              : index,
+            isEnding: Boolean(node?.isEnding),
+            aiEnabled: node?.aiEnabled !== false,
+          },
+          select: { id: true, nodeKey: true },
+        });
+
+        nodeKeyToId.set(createdNode.nodeKey, createdNode.id);
+      }
+
+      for (const node of nodesInput) {
+        const nodeKey = normalizeText(node?.nodeKey);
+        const sourceNodeId = nodeKeyToId.get(nodeKey);
+        const choices = Array.isArray(node?.choices) ? node.choices : [];
+
+        for (let choiceIndex = 0; choiceIndex < choices.length; choiceIndex += 1) {
+          const choice = choices[choiceIndex];
+          const choiceKey = normalizeText(choice?.choiceKey);
+          const label = normalizeText(choice?.label);
+          if (!choiceKey || !label) {
+            throw new BadRequestException(
+              `choice.choiceKey and choice.label are required at node ${nodeKey}`,
+            );
+          }
+          const targetNodeKey = normalizeText(
+            (choice as any)?.targetNodeKey || "",
+          );
+          const targetNodeId = normalizeNullableText(choice?.targetNodeId)
+            || (targetNodeKey ? nodeKeyToId.get(targetNodeKey) || null : null);
+          if (targetNodeKey && !targetNodeId) {
+            throw new BadRequestException(
+              `targetNodeKey not found in payload: ${targetNodeKey}`,
+            );
+          }
+
+          await tx.interactiveStoryChoice.create({
+            data: {
+              nodeId: sourceNodeId || "",
+              targetNodeId,
+              choiceKey,
+              label,
+              description: normalizeNullableText(choice?.description),
+              requiredFlags: normalizeStringArray(choice?.requiredFlags),
+              blockedFlags: normalizeStringArray(choice?.blockedFlags),
+              stateEffects: normalizeJsonObject(choice?.stateEffects),
+              sortOrder: Number.isFinite(Number(choice?.sortOrder))
+                ? Number(choice?.sortOrder)
+                : choiceIndex,
+            },
+          });
+        }
+      }
+
+      const initialNodeId =
+        normalizeNullableText(storyInput?.initialNodeId)
+        || nodeKeyToId.get(normalizeText(storyInput?.initialNodeId || ""))
+        || nodeKeyToId.get(normalizeText(nodesInput[0]?.nodeKey || ""));
+
+      await tx.interactiveStory.update({
+        where: { id: storyId },
+        data: {
+          initialNodeId: initialNodeId || null,
+          isPublished: false,
+        },
+      });
+
+      return { storyId };
+    });
+
+    const { story, validation } = await this.getStoryValidation(result.storyId);
+    await this.invalidateSeriesContent([story.seriesId]);
+    return {
+      story,
+      validation,
+      mode,
+    };
+  }
+
+  @Get(":id/validation")
+  async validate(@Param("id") id: string) {
+    const { story, validation } = await this.getStoryValidation(id);
+    return { storyId: story.id, validation };
+  }
+
+  @Get(":id/export")
+  async export(@Param("id") id: string) {
+    const { story, validation } = await this.getStoryValidation(id);
+    const payload = {
+      story: {
+        id: story.id,
+        slug: story.slug,
+        title: story.title,
+        description: story.description,
+        seriesId: story.seriesId,
+        baseContext: story.baseContext,
+        initialNodeId: story.initialNodeId,
+        initialState: story.initialState,
+        isPublished: story.isPublished,
+        aiEnabled: story.aiEnabled,
+      },
+      nodes: (story.nodes || []).map((node) => ({
+        nodeKey: node.nodeKey,
+        title: node.title,
+        baseContext: node.baseContext,
+        basePrompt: node.basePrompt,
+        fallbackText: node.fallbackText,
+        requiredFlags: node.requiredFlags,
+        blockedFlags: node.blockedFlags,
+        stateEffects: node.stateEffects,
+        sortOrder: node.sortOrder,
+        isEnding: node.isEnding,
+        aiEnabled: node.aiEnabled,
+        choices: (node.choices || []).map((choice) => ({
+          choiceKey: choice.choiceKey,
+          label: choice.label,
+          description: choice.description,
+          requiredFlags: choice.requiredFlags,
+          blockedFlags: choice.blockedFlags,
+          stateEffects: choice.stateEffects,
+          sortOrder: choice.sortOrder,
+          targetNodeId: choice.targetNodeId,
+        })),
+      })),
+    };
+    return { payload, validation };
+  }
+
   @Get(":id")
   async detail(@Param("id") id: string) {
     const story = await this.prisma.interactiveStory.findUnique({
@@ -546,6 +820,13 @@ export class AdminInteractiveStoriesController {
       updateData.initialNodeId = initialNodeId;
     }
 
+    if (Object.prototype.hasOwnProperty.call(input || {}, "isPublished")) {
+      const publishRequested = Boolean(input?.isPublished);
+      if (publishRequested) {
+        await this.assertPublishReady(storyId);
+      }
+    }
+
     try {
       const story = await this.prisma.interactiveStory.update({
         where: { id: storyId },
@@ -577,6 +858,35 @@ export class AdminInteractiveStoriesController {
     await this.prisma.interactiveStory.delete({ where: { id: storyId } });
     await this.invalidateSeriesContent([existing.seriesId]);
     return { ok: true };
+  }
+
+  @Post(":id/publish")
+  @RequireAdminPermissions(AdminPermission.INTERACTIVE_STORY_UPDATE)
+  async publish(
+    @Param("id") id: string,
+    @Body() body: { publish?: boolean },
+  ) {
+    const storyId = normalizeText(id);
+    const publish = body?.publish !== false;
+    const existing = await this.prisma.interactiveStory.findUnique({
+      where: { id: storyId },
+      select: { id: true, seriesId: true },
+    });
+    if (!existing) {
+      throw new NotFoundException("Interactive story not found");
+    }
+
+    if (publish) {
+      await this.assertPublishReady(storyId);
+    }
+
+    const story = await this.prisma.interactiveStory.update({
+      where: { id: storyId },
+      data: { isPublished: publish },
+      select: STORY_DETAIL_SELECT,
+    });
+    await this.invalidateSeriesContent([story.seriesId, existing.seriesId]);
+    return { story };
   }
 
   @Post(":id/nodes")

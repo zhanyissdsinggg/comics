@@ -1,4 +1,5 @@
 import { JwtService } from "@nestjs/jwt";
+import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -19,6 +20,13 @@ describe("AdminInteractiveStoriesController", () => {
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
         findUnique: jest.fn().mockResolvedValue(null),
+        update: jest.fn().mockResolvedValue({
+          id: "story-1",
+          slug: "test-story",
+          title: "Test Story",
+          seriesId: "series-011",
+          nodes: [],
+        }),
         create: jest.fn().mockResolvedValue({
           id: "story-1",
           slug: "test-story",
@@ -122,5 +130,49 @@ describe("AdminInteractiveStoriesController", () => {
       "admin-interactive-story-change",
     );
     expect(result.node.id).toBe("node-1");
+  });
+
+  it("returns validation result for a story graph", async () => {
+    prisma.interactiveStory.findUnique.mockResolvedValueOnce({
+      id: "story-1",
+      initialNodeId: "node-1",
+      nodes: [
+        {
+          id: "node-1",
+          nodeKey: "start",
+          isEnding: false,
+          choices: [{ choiceKey: "c1", targetNodeId: "node-2" }],
+        },
+        {
+          id: "node-2",
+          nodeKey: "end",
+          isEnding: true,
+          choices: [],
+        },
+      ],
+    });
+
+    const result = await controller.validate("story-1");
+    expect(result.validation.ok).toBe(true);
+  });
+
+  it("blocks publish update when validation has errors", async () => {
+    prisma.interactiveStory.findUnique
+      .mockResolvedValueOnce({
+        id: "story-1",
+        seriesId: "series-011",
+      })
+      .mockResolvedValueOnce({
+        id: "story-1",
+        initialNodeId: "missing-node",
+        nodes: [],
+      });
+
+    await expect(
+      controller.update("story-1", {
+        story: { isPublished: true },
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.interactiveStory.update).not.toHaveBeenCalled();
   });
 });
