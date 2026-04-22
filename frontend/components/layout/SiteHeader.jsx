@@ -164,14 +164,14 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
       <header
         data-site-header="1"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-        className={`sticky top-0 z-40 border-b transition-all duration-500 ease-out ${
+        className={`sticky top-0 z-40 border-b-[3px] transition-all duration-500 ease-out ${
           scrolled
-            ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.97)] shadow-[0_8px_18px_rgba(15,23,42,0.04)] backdrop-blur-xl"
-            : "border-transparent bg-[rgba(255,255,255,0.88)] backdrop-blur-lg"
+            ? "border-black bg-[rgba(255,255,255,0.96)] shadow-[0_12px_0_0_rgba(0,0,0,1)] backdrop-blur-xl"
+            : "border-black bg-[rgba(255,255,255,0.92)] shadow-[0_8px_0_0_rgba(0,0,0,1)] backdrop-blur-lg"
         }`}
       >
         <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
-          <div className="flex min-h-[58px] items-center gap-2 py-2 sm:min-h-[64px] sm:gap-4 sm:py-2.5 lg:gap-6">
+          <div className="flex min-h-[62px] items-center gap-2 py-2 sm:min-h-[68px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>
               <HeaderNav variant={variant} />

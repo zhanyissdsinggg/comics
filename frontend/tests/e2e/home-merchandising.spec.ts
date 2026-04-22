@@ -202,7 +202,7 @@ test.describe("Homepage merchandising sync", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: "Start with a story worth opening.",
+        name: /Start with a story worth opening|Pick up your story/i,
       }),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
@@ -230,10 +230,10 @@ test.describe("Homepage merchandising sync", () => {
     await expect(homepageMain).toContainText("Featured", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Lead titles worth opening first.", {
+    await expect(homepageMain).toContainText("The stories getting the most attention right now.", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Browse sections", {
+    await expect(homepageMain).toContainText("Find your lane fast", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).toContainText("Creators", {
@@ -243,7 +243,6 @@ test.describe("Homepage merchandising sync", () => {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).not.toContainText("Top Series");
-    await expect(homepageMain).not.toContainText("Trending now");
     await expect(homepageMain).not.toContainText("Read Free");
     await expect(homepageMain).not.toContainText("Membership");
     await expect(homepageMain).not.toContainText("Point packs");
@@ -322,6 +321,9 @@ test.describe("Homepage merchandising sync", () => {
     const startReadingLink = page.getByRole("link", {
       name: /Start Reading/i,
     });
+    const browseAllButton = page.getByRole("button", {
+      name: /Browse all/i,
+    });
     const comicsButton = page
       .getByRole("button", { name: "Comics", exact: true })
       .first();
@@ -333,6 +335,9 @@ test.describe("Homepage merchandising sync", () => {
       .first();
 
     await expect(startReadingLink).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(browseAllButton).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(comicsButton).toBeVisible({
@@ -352,6 +357,13 @@ test.describe("Homepage merchandising sync", () => {
     );
 
     await startReadingLink.press("Tab");
+    await expect(browseAllButton).toBeFocused();
+    await expectVisibleFocusIndicator(
+      browseAllButton,
+      "Homepage Browse all button",
+    );
+
+    await browseAllButton.press("Tab");
     await expect(comicsButton).toBeFocused();
     await expectVisibleFocusIndicator(
       comicsButton,

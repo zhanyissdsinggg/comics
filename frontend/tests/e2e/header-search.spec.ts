@@ -18,8 +18,11 @@ test.describe("Header search", () => {
     });
     await searchInput.focus();
 
-    await expect(page.getByText(/^Browse by$/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /Featured Series/i })).toBeVisible();
+    const featuredLane = page.getByRole("button", { name: /Featured Series/i }).first();
+    const completedLane = page.getByRole("button", { name: /Completed Series/i }).first();
+
+    await expect(featuredLane).toBeVisible();
+    await expect(completedLane).toBeVisible();
 
     await page.evaluate(() => {
       document.dispatchEvent(
@@ -32,7 +35,7 @@ test.describe("Header search", () => {
       );
     });
 
-    await expect(page.getByText(/^Browse by$/)).toHaveCount(0);
+    await expect(featuredLane).toHaveCount(0);
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
 
@@ -54,11 +57,11 @@ test.describe("Header search", () => {
 
     await searchInput.focus();
     await expect(searchInput).toBeFocused();
-    await page.keyboard.press("Tab");
+    await searchInput.press("Tab");
     await expect(featuredLane).toBeFocused();
     await expectVisibleFocusIndicator(featuredLane, "Search discovery Featured Series lane");
 
-    await page.keyboard.press("Tab");
+    await featuredLane.press("Tab");
     await expect(completedLane).toBeFocused();
     await expectVisibleFocusIndicator(completedLane, "Search discovery Completed Series lane");
 

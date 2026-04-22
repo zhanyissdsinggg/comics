@@ -31,7 +31,7 @@ export default function HeaderNav({ variant = "default" }) {
   return (
     <nav className="hidden flex-1 justify-center md:flex">
       <div
-        className="inline-flex items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-white/94 px-1.5 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.05)]"
+        className="inline-flex items-center gap-1 border-[3px] border-black bg-white px-1.5 py-1 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
       >
         {navItems.map((item) => {
           const isActive =
@@ -68,10 +68,10 @@ export default function HeaderNav({ variant = "default" }) {
               key={item.id}
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              className={`relative rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
+              className={`relative px-4 py-2.5 text-sm font-black uppercase tracking-[0.04em] transition-all duration-300 ${
                 isActive
-                  ? "bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_0_0_1px_rgba(29,29,31,0.05)]"
-                  : "text-[color:var(--gush-ink-soft)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
+                  ? "bg-[#ff007a] text-white"
+                  : "text-black/70 hover:bg-[#ffe500] hover:text-black"
               }`}
             >
               {item.label}

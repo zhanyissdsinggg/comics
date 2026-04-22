@@ -989,20 +989,20 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-4 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 sm:px-5">
+          <div className="mb-4 border-[3px] border-black bg-[#fff6c7] px-4 py-3 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:px-5">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff007a]">
                   {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
                 </p>
-                <h2 className="mt-1 text-sm font-semibold tracking-tight text-slate-900 sm:text-base">
+                <h2 className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black sm:text-base">
                   {discoveryContext.title}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={handleReturnToDiscovery}
-                className="shrink-0 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-[color:var(--gush-ink)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]"
+                className="shrink-0 border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
               >
                 {discoveryContext.returnLabel}
               </button>
@@ -1025,20 +1025,20 @@ export default function SeriesPage({
         />
 
         {interactiveStory ? (
-          <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 shadow-[0_8px_18px_rgba(15,23,42,0.04)]">
+          <section className="border-[3px] border-black bg-[#00e5ff] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/60">
                   Interactive Story
                 </p>
-                <p className="mt-1 text-sm font-semibold text-[color:var(--gush-ink)]">
+                <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black">
                   Structured branching mode is available for this title.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
-                className="rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(15,23,42,0.1)] transition hover:bg-black/85"
+                className="border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               >
                 Enter interactive mode
               </button>

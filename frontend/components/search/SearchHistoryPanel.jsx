@@ -122,7 +122,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
   };
 
   return (
-    <section className="rounded-[36px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:p-6">
+    <section className="border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6">
       <div className="space-y-5">
         {history.length > 0 ? (
           <div className="space-y-2.5">
@@ -133,7 +133,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               <button
                 type="button"
                 onClick={clearHistory}
-                className="rounded-full px-2 py-1 text-xs font-medium text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                className="border-2 border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
               >
                 Clear
               </button>
@@ -142,19 +142,19 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               {history.map((keyword, index) => (
                 <div
                   key={`${keyword}-${index}`}
-                  className="inline-flex min-w-0 items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-2 py-1.5 shadow-[0_8px_18px_rgba(15,23,42,0.03)] transition-colors hover:border-[color:var(--gush-border-strong)]"
+                  className="inline-flex min-w-0 items-center gap-1 border-[2px] border-black bg-[#f5f1ea] px-2 py-1.5 transition-all hover:bg-[#fff6c7]"
                 >
                   <button
                     type="button"
                     onClick={() => handleSearch(keyword)}
-                    className="max-w-[12rem] truncate px-2 text-sm text-[color:var(--gush-ink)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                    className="max-w-[12rem] truncate px-2 text-sm font-bold uppercase tracking-[0.04em] text-black transition-colors hover:text-[#ff007a]"
                   >
                     {keyword}
                   </button>
                   <button
                     type="button"
                     onClick={() => removeFromHistory(keyword)}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[color:var(--gush-ink-faint)] transition-colors hover:bg-black/[0.04] hover:text-[color:var(--gush-ink)]"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center border border-transparent text-black/55 transition-colors hover:border-black hover:bg-white hover:text-black"
                   >
                     <svg
                       className="h-4 w-4"
@@ -177,7 +177,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
         ) : null}
 
         {trendingKeywords.length > 0 ? (
-          <div className="space-y-2.5 border-t border-[color:var(--gush-border-faint)] pt-5">
+          <div className="space-y-2.5 border-t-[3px] border-black pt-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
               {normalizedHotKeywords.length > 0
                 ? "Popular right now"
@@ -189,22 +189,22 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                   key={keyword.id}
                   type="button"
                   onClick={() => handleSearch(keyword.value)}
-                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-2 text-left shadow-[0_8px_18px_rgba(15,23,42,0.03)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white active:border-[var(--gush-accent)] active:bg-white"
+                  className="inline-flex max-w-full items-center gap-2 border-[2px] border-black bg-white px-3 py-2 text-left shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none active:bg-[#ffe500]"
                 >
                   <span
                     className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                       index < 3
-                        ? "bg-[var(--gush-accent)] text-white"
-                        : "bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]"
+                        ? "bg-[#ff007a] text-white"
+                        : "bg-[#f5f1ea] text-black/65"
                     }`}
                   >
                     {index + 1}
                   </span>
-                  <span className="max-w-[11rem] truncate text-sm text-[color:var(--gush-ink)]">
+                  <span className="max-w-[11rem] truncate text-sm font-bold uppercase tracking-[0.04em] text-black">
                     {keyword.label}
                   </span>
                   {keyword.hint ? (
-                    <span className="hidden max-w-[10rem] truncate text-xs text-[color:var(--gush-ink-faint)] sm:inline">
+                    <span className="hidden max-w-[10rem] truncate text-xs font-semibold text-black/55 sm:inline">
                       {keyword.hint}
                     </span>
                   ) : null}

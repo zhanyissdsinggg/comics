@@ -39,11 +39,11 @@ export default function HeaderLogo({ variant = "default" }) {
     <RootLink
       {...rootLinkProps}
       aria-label="Go to home"
-      className="group flex shrink-0 items-center gap-3 rounded-full pr-2 text-left transition-all duration-300"
+      className="group flex shrink-0 items-center gap-3 pr-2 text-left transition-all duration-300"
     >
       {hasRenderableLogo ? (
         <span
-          className="flex h-10 items-center rounded-full border border-[color:var(--gush-border)] bg-white px-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)] transition-all duration-300 group-hover:border-[color:var(--gush-border-strong)] group-hover:bg-[color:var(--gush-page-bg-muted)]"
+          className="flex h-11 items-center border-[3px] border-black bg-[#ffe500] px-3 shadow-[4px_4px_0_0_rgba(255,0,122,1)] transition-all duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none"
         >
           <Image
             src={branding.siteLogoUrl}
@@ -57,20 +57,20 @@ export default function HeaderLogo({ variant = "default" }) {
         </span>
       ) : (
         <span
-          className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[14px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_10px_22px_rgba(0,0,0,0.06)] transition-transform duration-300 group-hover:scale-[1.02]"
+          className="relative flex h-11 w-11 items-center justify-center overflow-hidden border-[3px] border-black bg-[#ffe500] shadow-[4px_4px_0_0_rgba(255,0,122,1)] transition-all duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none"
         >
           <span className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.7),transparent_34%)]" />
-          <span className="relative text-xl font-bold tracking-[-0.04em] text-slate-950">
+          <span className="relative text-xl font-black tracking-[-0.04em] text-black">
             {siteConfig.siteName.slice(0, 1)}
           </span>
         </span>
       )}
 
       <span className="hidden min-w-0 flex-col sm:flex">
-        <span className="text-[1.02rem] font-semibold leading-none tracking-[-0.04em] text-[color:var(--gush-ink-strong)]">
+        <span className="text-[1.02rem] font-black uppercase leading-none tracking-[-0.04em] text-black">
           {siteConfig.siteName}
         </span>
-        <span className="mt-1 text-[10px] uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)]">
+        <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-black/55">
           {BRAND_SUBNOTE}
         </span>
       </span>

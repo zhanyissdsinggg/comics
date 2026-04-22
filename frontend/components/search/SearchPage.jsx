@@ -712,7 +712,7 @@ export default function SearchPage() {
   const hasSparseResults =
     Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search the catalog.";
+  const heroTitle = query ? `Results for "${query}"` : "Search the catalog";
   const heroDescription = query
     ? loading
       ? "Updating."
@@ -727,15 +727,15 @@ export default function SearchPage() {
       ? "Try these next."
       : "Browse next.";
   const lightCardAccentClass =
-    "border-[color:var(--gush-border)] bg-white hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6c7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
   const lightFeatureAccentClass =
-    "border-[color:var(--gush-border)] bg-white hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-[#ffe500] shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff07a] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none";
   const accentButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const filterSelectClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm text-[color:var(--gush-ink)] outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
+    "border-[3px] border-black bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.04em] text-black outline-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all focus:ring-4 focus:ring-black/10";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -1086,21 +1086,21 @@ export default function SearchPage() {
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-5">
           <SurfacePanel
-            className="space-y-6 rounded-[36px] px-5 py-5 sm:px-6 sm:py-6"
+            className="space-y-6 border-[3px] border-black bg-[#00e5ff] px-5 py-5 shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:px-6 sm:py-6"
             tone="highlight"
             accent="blue"
             appearance="light"
           >
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2.5">
-                <p className="rounded-full border border-[color:var(--gush-border)] bg-white/72 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
+                <p className="border-[2px] border-black bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-black">
                   Search
                 </p>
               </div>
-              <h1 className="mt-5 font-display text-[2.5rem] font-semibold tracking-[-0.055em] text-slate-950 sm:text-[3.2rem] xl:text-[3.9rem]">
+              <h1 className="mt-5 max-w-4xl text-[2.75rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-black sm:text-[3.5rem] xl:text-[4.4rem]">
                 {heroTitle}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-[0.98rem]">
+              <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-black/70 sm:text-[0.98rem]">
                 {heroDescription}
               </p>
               {heroSecondary ? (
@@ -1108,7 +1108,7 @@ export default function SearchPage() {
               ) : null}
             </div>
 
-            <div className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)] sm:p-5">
+            <div className="border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1122,7 +1122,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
+                      className="border-[2px] border-black bg-[#f5f1ea] px-3 py-2 text-sm font-black uppercase tracking-[0.04em] text-black/72 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
                     >
                       {item}
                     </button>
@@ -1140,7 +1140,7 @@ export default function SearchPage() {
                         key={item.id}
                         type="button"
                         onClick={() => updateParam("q", item.value)}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-2 text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
+                        className="border-[2px] border-black bg-[#f5f1ea] px-3 py-2 text-sm font-black uppercase tracking-[0.04em] text-black/72 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
                       >
                         {item.label}
                       </button>
@@ -1272,7 +1272,7 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-[color:var(--gush-ink)]">
+          <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-3 text-sm font-semibold text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
             Showing saved results. Reconnect to refresh.
           </div>
         ) : null}
@@ -1297,16 +1297,16 @@ export default function SearchPage() {
 
         {shouldShowReco ? (
           <SurfacePanel
-            className="space-y-8 rounded-[36px]"
+            className="space-y-8 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
             appearance="light"
             accent="blue"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                   Browse
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
                   {recoPanelTitle}
                 </h2>
               </div>
@@ -1314,10 +1314,10 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => setHotWindow("day")}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
                     hotWindow === "day"
-                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
-                      : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
+                      ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                      : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
                   }`}
                 >
                   Today
@@ -1325,10 +1325,10 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => setHotWindow("week")}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
                     hotWindow === "week"
-                      ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
-                      : "border-[color:var(--gush-border)] bg-white text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:text-[color:var(--gush-ink-strong)]"
+                      ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                      : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
                   }`}
                 >
                   This Week
@@ -1367,20 +1367,20 @@ export default function SearchPage() {
         {showResultSections ? (
           <>
             <SurfacePanel
-              className="space-y-5 rounded-[36px]"
+              className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
               appearance="light"
               accent="blue"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                     Results
                   </p>
-                  <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-2 text-[2.25rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     {query ? `Results for "${query}"` : "Catalog"}
                   </h2>
                 </div>
-                <p className="text-sm font-medium text-slate-500">
+                <p className="text-sm font-bold uppercase tracking-[0.06em] text-black/55">
                   {total.toLocaleString()} match{total === 1 ? "" : "es"}
                 </p>
               </div>
@@ -1389,12 +1389,12 @@ export default function SearchPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvancedFilters(true)}
-                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]"
+                  className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                 >
                   <SlidersHorizontal size={16} />
                   <span>Filters</span>
                   {activeFilterCount > 0 ? (
-                    <span className="rounded-full bg-[var(--gush-accent)] px-2 py-0.5 text-[11px] font-bold text-white">
+                    <span className="border border-black bg-[#ff007a] px-2 py-0.5 text-[11px] font-black text-white">
                       {activeFilterCount}
                     </span>
                   ) : null}
@@ -1455,15 +1455,15 @@ export default function SearchPage() {
               </NetworkFallback>
             ) : results.length === 0 ? (
               <SurfacePanel
-                className="space-y-4"
+                className="space-y-4 border-[3px] border-black bg-[#fff6c7] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                 appearance="light"
                 accent="blue"
               >
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                     No direct match
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     Try a wider search.
                   </h2>
                 </div>
@@ -1595,11 +1595,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden rounded-[38px] border border-[color:var(--gush-border)] bg-white p-5 text-left shadow-[0_12px_28px_rgba(15,23,42,0.05)] transition-transform duration-300 hover:-translate-y-1 hover:border-[color:var(--gush-border-strong)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
+                      className="group block overflow-hidden border-[3px] border-black bg-white p-5 text-left shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:bg-[#fffdf7] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                       aria-label={`Open ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <div className="overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_14px_32px_rgba(15,23,42,0.08)]">
+                        <div className="overflow-hidden border-[3px] border-black bg-[#f5f1ea] shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1613,23 +1613,23 @@ export default function SearchPage() {
                           />
                         </div>
                         <div className="min-w-0 space-y-3.5">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color:var(--gush-ink-faint)]">
+                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                             {series.type || "Series"}
                           </p>
-                          <h3 className="font-display text-[1.28rem] font-semibold leading-tight tracking-[-0.04em] text-slate-950">
+                          <h3 className="text-[1.32rem] font-black uppercase leading-tight tracking-[-0.04em] text-black">
                             {highlight(series.title, query)}
                           </h3>
-                          <p className="text-sm text-[color:var(--gush-ink-soft)]">
+                          <p className="text-sm font-semibold text-black/65">
                             {formatSearchSeriesMeta(series)}
                           </p>
-                          <p className="line-clamp-2 text-sm leading-6 text-slate-600">
+                          <p className="line-clamp-2 text-sm font-medium leading-6 text-black/68">
                             {summarizeSearchDescription(series)}
                           </p>
-                          <div className="flex items-center justify-between border-t border-[color:var(--gush-border-faint)] pt-3">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--gush-ink-faint)]">
+                          <div className="flex items-center justify-between border-t-[3px] border-black pt-3">
+                            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                               Open title
                             </span>
-                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white/90 text-[color:var(--gush-ink-faint)] transition-all duration-300 group-hover:translate-x-1 group-hover:text-[color:var(--gush-ink)]">
+                            <span className="inline-flex h-8 w-8 items-center justify-center border-[2px] border-black bg-[#ffe500] text-black transition-all duration-300 group-hover:translate-x-1">
                               <ArrowRight className="size-4" />
                             </span>
                           </div>
@@ -1640,7 +1640,7 @@ export default function SearchPage() {
                 </div>
 
                 {total > PAGE_SIZE ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-[color:var(--gush-ink-soft)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-[3px] border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-black/65 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
                     <span>
                       Page {page} of {totalPages}
                     </span>
@@ -1650,7 +1650,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page - 1))}
                         disabled={page <= 1}
                         aria-label="Previous page"
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-sm text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="border-[2px] border-black bg-white px-3 py-1.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Previous
                       </button>
@@ -1659,7 +1659,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page + 1))}
                         disabled={page >= totalPages}
                         aria-label="Next page"
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-sm text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="border-[2px] border-black bg-white px-3 py-1.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Next page
                       </button>

@@ -17,11 +17,11 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <Link
           href="/search"
           aria-label="Open search"
-          className="inline-flex h-10 w-full items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 text-[color:var(--gush-ink-soft)] shadow-[0_8px_18px_rgba(0,0,0,0.05)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-200/80"
+          className="inline-flex h-11 w-full items-center gap-2 border-[3px] border-black bg-white px-3.5 text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-slate-200/80"
           title={placeholder}
         >
           <Search className="size-4" />
-          <span className="min-w-0 truncate text-sm font-medium">Search</span>
+          <span className="min-w-0 truncate text-sm font-black uppercase tracking-[0.06em]">Search</span>
           <span className="sr-only">{placeholder}</span>
         </Link>
       </div>
