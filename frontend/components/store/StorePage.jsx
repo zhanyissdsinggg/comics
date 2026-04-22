@@ -512,15 +512,15 @@ export default function StorePage({
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const fieldClass =
-    "flex-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2.5 text-xs text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/70";
+    "flex-1 border-[3px] border-black bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.06em] text-black outline-none transition focus:bg-[#fff6cf]";
   const quietCardClass =
-    "rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4";
+    "rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]";
   const compareShellClass =
-    "overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]";
+    "overflow-hidden rounded-[30px] border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
@@ -552,11 +552,11 @@ export default function StorePage({
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Checkout
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                   {purchaseActionsEnabled ? "Pick a pack." : "Packs"}
                 </h2>
               </div>
@@ -641,10 +641,10 @@ export default function StorePage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Before you buy
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 {purchaseActionsEnabled
                   ? "Simple checkout."
                   : "Details."}
@@ -672,10 +672,10 @@ export default function StorePage({
             ].map((item) => (
               <div key={item.label} className={quietCardClass}>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
-                  <p className="text-sm font-semibold text-slate-950">
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     {item.label}
                   </p>
-                  <p className="text-sm leading-6 text-slate-600">
+                  <p className="text-sm font-semibold leading-6 text-black/72">
                     {item.detail}
                   </p>
                 </div>
@@ -726,7 +726,7 @@ export default function StorePage({
                 accent="blue"
               >
                 <div>
-                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                     Keep purchases on one account.
                   </h2>
                 </div>
@@ -762,24 +762,24 @@ export default function StorePage({
               accent="blue"
             >
               <div>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Choose a reading model.
                 </h2>
               </div>
               <div className="grid gap-3">
                 <div className={quietCardClass}>
-                  <p className="text-sm font-semibold text-slate-950">
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     Point packs
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                     Buy once and unlock as you go.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
-                  <p className="text-sm font-semibold text-slate-950">
+                <div className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     Membership
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                     {subscriptionStats
                       ? `From ${membershipStartingPrice || "the current plan price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
                       : "Monthly plans."}
@@ -827,14 +827,14 @@ export default function StorePage({
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                       Codes
                     </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                       Redeem a code
                     </h2>
                   </div>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                     {coupons.length} available
                   </span>
                 </div>
@@ -854,14 +854,14 @@ export default function StorePage({
                   </button>
                 </div>
                 {couponMessage ? (
-                  <p className="text-xs text-slate-500">{couponMessage}</p>
+                  <p className="text-xs font-semibold text-black/68">{couponMessage}</p>
                 ) : null}
                 {coupons.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
+                  <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-black/55">
                     {coupons.map((coupon) => (
                       <span
                         key={coupon.id}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1"
+                        className="border-[3px] border-black bg-white px-3 py-1 font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
                       >
                         {coupon.label || coupon.code}
                       </span>
@@ -877,7 +877,7 @@ export default function StorePage({
                 accent="blue"
               >
                 <div>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                     Promo codes
                   </h2>
                 </div>
@@ -916,16 +916,16 @@ export default function StorePage({
           >
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {purchaseActionsEnabled ? "Choose a pack" : "Packs"}
                 </h2>
               </div>
-              <p className="text-xs text-slate-500">{packCountLabel}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">{packCountLabel}</p>
             </div>
 
             {packageComparisonRows.length > 0 ? (
               <details className={compareShellClass}>
-                <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
+                <summary className="cursor-pointer list-none px-4 py-4 text-sm font-black uppercase tracking-[0.06em] text-black">
                   Compare packs
                 </summary>
                 <div className="border-t border-[color:var(--gush-border)] px-4 py-4">
@@ -933,17 +933,17 @@ export default function StorePage({
                     {packageComparisonRows.map((pkg) => (
                       <div
                         key={pkg.id}
-                        className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
+                        className="rounded-[20px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-semibold text-slate-950">
+                          <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                             {pkg.name}
                           </p>
-                          <span className="text-sm font-semibold text-slate-950">
+                          <span className="text-sm font-black uppercase tracking-[0.04em] text-black">
                             {pkg.priceLabel}
                           </span>
                         </div>
-                        <div className="mt-3 grid gap-2 text-sm text-slate-600">
+                        <div className="mt-3 grid gap-2 text-sm font-semibold text-black/72">
                           <p>{formatUSNumber(pkg.totalPts)} total points</p>
                           <p>{pkg.bonusLabel}</p>
                           <p>{pkg.bestFor}</p>
@@ -954,7 +954,7 @@ export default function StorePage({
                   <div className="hidden overflow-x-auto md:block">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-[color:var(--gush-border)] text-left text-slate-500">
+                        <tr className="border-b-[3px] border-black text-left text-black/55">
                           <th className="px-4 py-3 font-semibold">Pack</th>
                           <th className="px-4 py-3 font-semibold">Price</th>
                           <th className="px-4 py-3 font-semibold">
@@ -964,22 +964,22 @@ export default function StorePage({
                           <th className="px-4 py-3 font-semibold">Best for</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[color:var(--gush-border)] bg-white">
+                      <tbody className="divide-y-[3px] divide-black/10 bg-white">
                         {packageComparisonRows.map((pkg) => (
                           <tr key={pkg.id}>
-                            <td className="px-4 py-3 font-semibold text-slate-950">
+                            <td className="px-4 py-3 font-black uppercase tracking-[0.04em] text-black">
                               {pkg.name}
                             </td>
-                            <td className="px-4 py-3 text-slate-600">
+                            <td className="px-4 py-3 font-semibold text-black/72">
                               {pkg.priceLabel}
                             </td>
-                            <td className="px-4 py-3 text-slate-600">
+                            <td className="px-4 py-3 font-semibold text-black/72">
                               {formatUSNumber(pkg.totalPts)} pts
                             </td>
-                            <td className="px-4 py-3 text-slate-600">
+                            <td className="px-4 py-3 font-semibold text-black/72">
                               {pkg.bonusLabel}
                             </td>
-                            <td className="px-4 py-3 text-slate-600">
+                            <td className="px-4 py-3 font-semibold text-black/72">
                               {pkg.bestFor}
                             </td>
                           </tr>

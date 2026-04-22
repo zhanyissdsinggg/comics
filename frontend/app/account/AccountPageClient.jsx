@@ -406,7 +406,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Sign in",
           onClick: openAuthPrompt,
           accentClass:
-            "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+            "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
         {
           id: "recover",
@@ -417,7 +417,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Reset password",
           onClick: () => router.push("/auth/reset"),
           accentClass:
-            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+            "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
         {
           id: "membership",
@@ -434,7 +434,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               }),
             ),
           accentClass:
-            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+            "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
         {
           id: "store",
@@ -444,7 +444,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           cta: "Point packs",
           onClick: () => router.push("/store"),
           accentClass:
-            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+            "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
       ];
     }
@@ -477,7 +477,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+          "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "purchases",
@@ -493,7 +493,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         cta: "Orders",
         onClick: () => router.push("/orders"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "library",
@@ -503,7 +503,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         cta: "Open library",
         onClick: () => router.push("/library"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "support",
@@ -520,7 +520,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
     ];
   }, [
@@ -533,22 +533,22 @@ export default function AccountPage({ initialSignedIn = false }) {
   ]);
 
   const sectionEyebrowClass =
-    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-black/55";
   const sectionTitleClass =
-    "font-display text-2xl font-semibold tracking-tight text-slate-950";
-  const mutedCopyClass = "text-sm leading-6 text-slate-600";
+    "font-display text-2xl font-black uppercase tracking-[-0.05em] text-black";
+  const mutedCopyClass = "text-sm font-semibold leading-6 text-black/72";
   const fieldLabelClass =
-    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-black/55";
   const fieldClass =
-    "mt-2 w-full rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
+    "mt-2 w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-semibold text-black outline-none transition placeholder:text-black/35 focus:bg-[#fff6cf] focus:ring-4 focus:ring-black/10";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[44px] items-center justify-center border-[3px] border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-50";
   const checkboxClass =
-    "h-4 w-4 rounded border-black/12 bg-white text-slate-950 focus:ring-slate-200/80";
+    "h-4 w-4 rounded-none border-[2px] border-black bg-white text-black focus:ring-0";
   const checkboxCardClass =
-    "flex items-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700";
+    "flex items-center gap-3 rounded-[24px] border-[3px] border-black bg-white px-4 py-3 text-sm font-semibold text-black/72 shadow-[6px_6px_0_0_rgba(0,0,0,1)]";
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn
     ? "Your account."
@@ -626,14 +626,14 @@ export default function AccountPage({ initialSignedIn = false }) {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Account desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                   {accountDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-semibold leading-7 text-black/72">
                   {accountDeskCopy}
                 </p>
               </div>
@@ -709,10 +709,10 @@ export default function AccountPage({ initialSignedIn = false }) {
           >
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Keep this on one account.
               </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 text-sm font-semibold leading-6 text-black/72">
                 Device settings work here now. Sign in when you want orders and
                 progress together.
               </p>
@@ -756,12 +756,12 @@ export default function AccountPage({ initialSignedIn = false }) {
             accent={messageIsError ? "rose" : "amber"}
             className={
               messageIsError
-                ? "border border-red-200 bg-red-50"
-                : "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
+                ? "border-[3px] border-black bg-[#ffe7ec] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                : "border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
             }
           >
             <p
-              className={`text-sm ${messageIsError ? "text-red-600" : "text-slate-700"}`}
+              className={`text-sm font-semibold ${messageIsError ? "text-red-600" : "text-black/72"}`}
             >
               {message}
             </p>
@@ -823,7 +823,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                       Legal age: {regionConfig.legalAge}+
                     </p>
                   </div>
@@ -901,7 +901,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <div className="h-3 w-40 animate-pulse rounded-full bg-slate-100" />
                       </div>
                     ) : (
-                      <div className={`${fieldClass} text-slate-600`}>
+                      <div className={`${fieldClass} text-black/68`}>
                         {user?.email || user?.id || "Active account"}
                       </div>
                     )}
@@ -909,11 +909,11 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 {hydrated && isSignedIn ? (
-                  <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
+                  <div className="rounded-[24px] border-[3px] border-black bg-[#fff6cf] px-4 py-4 text-sm font-semibold text-black/72 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         Email status:{" "}
-                        <span className="font-semibold text-slate-950">
+                        <span className="font-black uppercase tracking-[0.06em] text-black">
                           {user?.emailVerified ? "Verified" : "Not verified"}
                         </span>
                       </div>
@@ -940,7 +940,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       </button>
                     </div>
                     {verifyStatus ? (
-                      <div className="mt-2 text-xs text-slate-600">
+                      <div className="mt-2 text-xs font-semibold text-black/68">
                         {verifyStatus}
                       </div>
                     ) : null}
@@ -1014,7 +1014,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                       Legal age: {regionConfig.legalAge}+
                     </p>
                   </div>
@@ -1112,7 +1112,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                       Save these choices to this device.
                     </p>
                   </div>
@@ -1138,14 +1138,14 @@ export default function AccountPage({ initialSignedIn = false }) {
                       Plan, renewal, and cancellation
                     </h2>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600">
+                  <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-black/72">
                     <div>
                       <div className={fieldLabelClass}>Current plan</div>
-                      <div className="mt-1 text-sm font-semibold text-slate-950">
+                      <div className="mt-1 text-sm font-black uppercase tracking-[0.04em] text-black">
                         {subscriptionLabel}
                       </div>
                       {subscription?.renewAt ? (
-                        <div className="mt-1 text-xs text-slate-500">
+                        <div className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                           Renews on{" "}
                           {new Date(subscription.renewAt).toLocaleDateString()}
                         </div>
@@ -1206,14 +1206,14 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
 
                   {hydrated && isSignedIn ? (
-                    <div className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm text-slate-700">
+                    <div className="space-y-3 rounded-[24px] border-[3px] border-black bg-[#fff6cf] px-4 py-4 text-sm font-semibold text-black/72 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span>Email/password</span>
                         <span
                           className={
                             providers.password
-                              ? "text-slate-950"
-                              : "text-slate-500"
+                              ? "text-black font-black uppercase tracking-[0.08em]"
+                              : "text-black/55"
                           }
                         >
                           {providers.password ? "Ready" : "Not set"}
@@ -1230,8 +1230,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                           <span
                             className={
                               providers.google
-                                ? "text-slate-950"
-                                : "text-slate-500"
+                                ? "text-black font-black uppercase tracking-[0.08em]"
+                                : "text-black/55"
                             }
                           >
                             {providers.google ? "Connected" : "Not connected"}
@@ -1292,7 +1292,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   ) : null}
 
                   {hydrated && isSignedIn && !googleAuthEnabled ? (
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                       Google login is not configured.
                     </div>
                   ) : null}
@@ -1306,12 +1306,12 @@ export default function AccountPage({ initialSignedIn = false }) {
                     Send password reset email
                   </button>
                   {securityStatus ? (
-                    <div className="text-xs text-slate-600">
+                    <div className="text-xs font-semibold text-black/68">
                       {securityStatus}
                     </div>
                   ) : null}
                   {providerStatus ? (
-                    <div className="text-xs text-slate-600">
+                    <div className="text-xs font-semibold text-black/68">
                       {providerStatus}
                     </div>
                   ) : null}
@@ -1334,13 +1334,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                   {!hydrated || ordersLoading ? (
                     <div
-                      className="space-y-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4"
+                      className="space-y-3 rounded-[24px] border-[3px] border-black bg-[#fff6cf] p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
                       aria-hidden="true"
                     >
                       {Array.from({ length: 2 }).map((_, index) => (
                         <div
                           key={index}
-                          className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
+                          className="rounded-[20px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                         >
                           <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
                           <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
@@ -1349,7 +1349,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       ))}
                     </div>
                   ) : orders.length === 0 ? (
-                    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 text-sm text-slate-500">
+                    <div className="rounded-[24px] border-[3px] border-black bg-[#fff6cf] p-4 text-sm font-semibold text-black/58 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
                       <p>
                         No purchases yet. Charges show up here after checkout.
                       </p>
@@ -1383,17 +1383,17 @@ export default function AccountPage({ initialSignedIn = false }) {
                       {orders.slice(0, 5).map((order) => (
                         <div
                           key={order.orderId}
-                          className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                          className="rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-950">
+                            <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                               {order.packageId}
                             </p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                               {order.status}
                             </p>
                           </div>
-                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                             <span>
                               {formatOrderAmount(order.amount, order.currency)}
                             </span>
@@ -1437,7 +1437,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                       Save these choices here and to your account.
                     </p>
                   </div>

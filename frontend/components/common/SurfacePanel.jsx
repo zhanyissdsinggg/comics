@@ -4,24 +4,23 @@ import { cn } from "@/lib/utils";
 
 const toneClasses = {
   dark: {
-    default: "border-white/10 bg-[rgba(10,10,12,0.9)] text-white",
-    muted: "border-white/8 bg-[rgba(14,14,16,0.88)] text-white",
-    highlight:
-      "border-white/12 bg-[linear-gradient(180deg,rgba(12,12,14,0.96),rgba(8,8,10,0.94))] text-white",
-    warning: "border-white/10 bg-[rgba(22,18,14,0.9)] text-white",
-    danger: "border-white/10 bg-[rgba(24,16,18,0.9)] text-white",
+    default: "border-[3px] border-black bg-black text-white",
+    muted: "border-[3px] border-black bg-[#141414] text-white",
+    highlight: "border-[3px] border-black bg-black text-white",
+    warning: "border-[3px] border-black bg-[#2b2214] text-white",
+    danger: "border-[3px] border-black bg-[#2a1318] text-white",
   },
   light: {
     default:
-      "border-black/[0.055] bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
+      "border-[3px] border-black bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
     muted:
-      "border-black/[0.055] bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
+      "border-[3px] border-black bg-[#fff6cf] text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
-      "border-black/[0.06] bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
+      "border-[3px] border-black bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
-      "border-[rgba(176,95,0,0.16)] bg-white text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
+      "border-[3px] border-black bg-[#fff1d6] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
-      "border-[rgba(197,40,40,0.16)] bg-white text-slate-900 dark:border-red-300/20 dark:bg-[rgba(66,24,30,0.9)] dark:text-white",
+      "border-[3px] border-black bg-[#ffe7ec] text-slate-900 dark:border-red-300/20 dark:bg-[rgba(66,24,30,0.9)] dark:text-white",
   },
 };
 
@@ -74,7 +73,7 @@ export default function SurfacePanel({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[var(--gush-radius-xl)] border p-5 shadow-[var(--gush-shadow-soft)] sm:p-6",
+        "relative overflow-hidden rounded-[30px] border p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] ||
           toneClasses[resolvedAppearance].default,
         isLight ? "" : "backdrop-blur-[24px]",
@@ -106,7 +105,7 @@ export default function SurfacePanel({
       />
       <div
         className={cn(
-          "pointer-events-none absolute inset-[1px] rounded-[calc(var(--gush-radius-xl)-2px)]",
+          "pointer-events-none absolute inset-[2px] rounded-[26px]",
           isLight
             ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
             : "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",

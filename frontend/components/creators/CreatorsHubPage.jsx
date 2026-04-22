@@ -264,7 +264,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-hero-stat-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
+                className="h-24 animate-pulse rounded-[24px] border-[3px] border-black bg-[#ffe500]"
               />
             ))}
           </SurfacePanel>
@@ -276,7 +276,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-filter-skeleton-${index}`}
-                className="h-11 animate-pulse rounded-full border border-[color:var(--gush-border)] bg-white"
+                className="h-11 animate-pulse border-[3px] border-black bg-white"
               />
             ))}
           </div>
@@ -286,7 +286,7 @@ function CreatorDirectorySkeleton() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`creators-card-skeleton-${index}`}
-              className="h-[360px] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+              className="h-[360px] animate-pulse rounded-[28px] border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
             />
           ))}
         </div>
@@ -828,7 +828,7 @@ export default function CreatorsHubPage({
               className="flex h-full flex-col justify-between space-y-6"
             >
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-[color:var(--gush-ink-strong)] dark:text-white">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black dark:text-white">
                   {fallbackDeskTitle}
                 </h2>
               </div>
@@ -870,10 +870,10 @@ export default function CreatorsHubPage({
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 First picks
               </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
                 Picks
               </h2>
             </div>
@@ -903,10 +903,10 @@ export default function CreatorsHubPage({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
                     </div>
                     <div className="space-y-2.5 px-4 py-4">
-                      <p className="line-clamp-2 text-[15px] font-semibold leading-5 text-slate-900 transition-colors group-hover:text-slate-950">
+                      <p className="line-clamp-2 text-[15px] font-black uppercase leading-5 tracking-[-0.02em] text-black transition-colors group-hover:text-black">
                         {series.title}
                       </p>
-                      <p className="line-clamp-1 text-xs text-slate-500 transition-colors group-hover:text-slate-600">
+                      <p className="line-clamp-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55 transition-colors group-hover:text-black/72">
                         {series.subtitle}
                       </p>
                     </div>
@@ -923,10 +923,10 @@ export default function CreatorsHubPage({
               className="space-y-5"
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                   Browse
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
                   Genres
                 </h2>
               </div>
@@ -949,7 +949,7 @@ export default function CreatorsHubPage({
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm font-semibold text-black/58">
                   Use search.
                 </p>
               )}
@@ -983,7 +983,7 @@ export default function CreatorsHubPage({
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div>
-              <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+              <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                 Creators directory
               </h2>
             </div>
@@ -1286,7 +1286,7 @@ export default function CreatorsHubPage({
                         )}
                       </p>
 
-                      <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                      <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
                         <span className={neutralChipClass}>
                           {series?.type || "Series"}
                         </span>
@@ -1355,7 +1355,7 @@ export default function CreatorsHubPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm font-semibold text-black/58">
               No genres yet.
             </p>
           )}

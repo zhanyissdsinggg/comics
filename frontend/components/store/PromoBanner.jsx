@@ -52,7 +52,7 @@ export default function PromoBanner({ offer, promotion }) {
   const badge = promotion?.coupon?.label || offer?.tag || copy.tag;
 
   return (
-    <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_20px_48px_rgba(15,23,42,0.07)]">
+    <section className="rounded-[30px] border-[3px] border-black bg-[#ff007a] p-6 text-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2">
@@ -61,21 +61,21 @@ export default function PromoBanner({ offer, promotion }) {
             </Pill>
             <Pill appearance="light">{badge}</Pill>
           </div>
-          <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-4 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white">
             {copy.title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/85">
             {copy.description}
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-4 text-left shadow-[0_12px_28px_rgba(15,23,42,0.04)] lg:min-w-[220px]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[24px] border-[3px] border-black bg-[#ffe500] px-5 py-4 text-left text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] lg:min-w-[220px]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
             Ends in
           </p>
-          <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.04em] text-black">
             {formatted || "--:--:--"}
           </p>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm font-semibold text-black/68">
             Best if you already know you are topping up today.
           </p>
         </div>

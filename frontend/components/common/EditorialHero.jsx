@@ -19,13 +19,13 @@ export default function EditorialHero({
   const isLight = resolvedAppearance === "light";
   const statClass = isLight
     ? accent === "rose"
-      ? "border-[rgba(199,40,40,0.12)] bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
+      ? "border-[3px] border-black bg-[#ffe7ec] dark:border-white/10 dark:bg-white/[0.05]"
       : accent === "emerald"
-        ? "border-emerald-200 bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
+        ? "border-[3px] border-black bg-[#d9fff0] dark:border-white/10 dark:bg-white/[0.05]"
         : accent === "cyan"
-          ? "border-cyan-200 bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
-          : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] dark:border-white/10 dark:bg-white/[0.05]"
-    : "border-white/10 bg-white/[0.04] shadow-none";
+          ? "border-[3px] border-black bg-[#dffcff] dark:border-white/10 dark:bg-white/[0.05]"
+          : "border-[3px] border-black bg-[#ffe500] dark:border-white/10 dark:bg-white/[0.05]"
+    : "border-[3px] border-white/20 bg-white/[0.04] shadow-none";
 
   return (
     <SurfacePanel
@@ -41,7 +41,7 @@ export default function EditorialHero({
               className={cn(
                 "text-[11px] font-semibold uppercase tracking-[0.24em]",
                 isLight
-                  ? "text-slate-500 dark:text-neutral-400"
+                  ? "text-black/55 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >
@@ -52,7 +52,9 @@ export default function EditorialHero({
           <h1
             className={cn(
               "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
-              isLight ? "text-slate-950 dark:text-white" : "text-white",
+              isLight
+                ? "text-black font-black uppercase tracking-[-0.05em] dark:text-white"
+                : "text-white font-black uppercase tracking-[-0.05em]",
             )}
           >
             {title}
@@ -63,7 +65,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
                 isLight
-                  ? "text-slate-600 dark:text-neutral-300"
+                  ? "text-black/68 dark:text-neutral-300"
                   : "text-neutral-200",
               )}
             >
@@ -76,7 +78,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-2.5 max-w-xl text-sm leading-6",
                 isLight
-                  ? "text-slate-500 dark:text-neutral-400"
+                  ? "text-black/58 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >
@@ -85,7 +87,7 @@ export default function EditorialHero({
           ) : null}
 
           {actions ? (
-            <div className="mt-5 flex flex-wrap gap-2.5 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:inline-flex [&>a]:min-h-11 [&>a]:rounded-full [&>a]:px-4 sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:rounded-full [&>button]:px-4 sm:[&>button]:px-5">
+            <div className="mt-5 flex flex-wrap gap-3 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:inline-flex [&>a]:min-h-11 [&>a]:px-4 sm:[&>a]:px-5 [&>button]:min-h-11 [&>button]:px-4 sm:[&>button]:px-5">
               {actions}
             </div>
           ) : null}
@@ -97,7 +99,7 @@ export default function EditorialHero({
                   key={stat.label}
                   title={stat.hint || ""}
                   className={cn(
-                    "min-w-[10rem] rounded-[20px] border px-4 py-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
+                    "min-w-[10rem] rounded-[22px] border px-4 py-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]",
                     statClass,
                   )}
                 >
@@ -105,7 +107,7 @@ export default function EditorialHero({
                     className={cn(
                       "text-[11px] font-semibold uppercase tracking-[0.22em]",
                       isLight
-                        ? "text-slate-500 dark:text-neutral-400"
+                        ? "text-black/58 dark:text-neutral-400"
                         : "text-neutral-400",
                     )}
                   >
@@ -113,8 +115,8 @@ export default function EditorialHero({
                   </p>
                   <p
                     className={cn(
-                      "mt-2 font-display text-[1.32rem] font-semibold tracking-tight",
-                      isLight ? "text-slate-950 dark:text-white" : "text-white",
+                      "mt-2 font-display text-[1.32rem] font-black uppercase tracking-[-0.04em]",
+                      isLight ? "text-black dark:text-white" : "text-white",
                     )}
                   >
                     {stat.value}
@@ -124,7 +126,7 @@ export default function EditorialHero({
                       className={cn(
                         "mt-1.5 max-w-[16rem] text-[13px] leading-5",
                         isLight
-                          ? "text-slate-500 dark:text-neutral-400"
+                          ? "text-black/62 dark:text-neutral-400"
                           : "text-neutral-400",
                       )}
                     >

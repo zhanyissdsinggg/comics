@@ -321,13 +321,13 @@ export default function SubscribePage({
   ]);
 
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-50";
   const quietCardClass =
-    "rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4";
+    "rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]";
   const compareShellClass =
-    "overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]";
+    "overflow-hidden rounded-[30px] border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -350,11 +350,11 @@ export default function SubscribePage({
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Membership
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                   {subscriptionActionsEnabled
                     ? "Choose your plan."
                     : "Plan details."}
@@ -397,10 +397,10 @@ export default function SubscribePage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Before you start
               </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {subscriptionActionsEnabled
                     ? "A clear monthly plan."
                     : "Monthly billing details."}
@@ -433,10 +433,10 @@ export default function SubscribePage({
             ].map((item) => (
               <div key={item.title} className={quietCardClass}>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
-                  <h3 className="text-sm font-semibold text-slate-950">
+                  <h3 className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     {item.title}
                   </h3>
-                  <p className="text-sm leading-6 text-slate-600">
+                  <p className="text-sm font-semibold leading-6 text-black/72">
                     {item.body}
                   </p>
                 </div>
@@ -472,10 +472,10 @@ export default function SubscribePage({
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="max-w-3xl">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                       {subscriptionActionsEnabled ? "Sign in first" : "Account"}
                     </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Keep membership on one account.
                 </h2>
               </div>
@@ -506,21 +506,21 @@ export default function SubscribePage({
           accent="blue"
         >
           {feedback ? (
-            <div className="rounded-[24px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="rounded-[24px] border-[3px] border-black bg-[#ffe7ec] px-4 py-3 text-sm font-semibold text-red-600 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
               {feedback}
             </div>
           ) : null}
 
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Plans
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Choose a plan.
               </h2>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
               {isActive
                 ? `Current: ${subscription?.planId}`
                 : `${SUBSCRIPTION_OFFERS.length} plans`}
@@ -547,14 +547,14 @@ export default function SubscribePage({
               return (
                 <div
                   key={plan.id}
-                  className={`relative rounded-[30px] border p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition-all duration-300 ${
+                  className={`relative rounded-[30px] border-[3px] border-black p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] ${
                     isBest
-                      ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(248,250,252,0.96))]"
-                      : "border-[color:var(--gush-border)] bg-white"
-                  } ${isCurrent ? "ring-2 ring-slate-200" : ""}`}
+                      ? "bg-[#ffe500]"
+                      : "bg-white"
+                  } ${isCurrent ? "outline outline-[3px] outline-[#ff007a]" : ""}`}
                 >
                   {isBest ? (
-                    <div className="absolute -top-3 left-5 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-strong)] shadow-[0_10px_20px_rgba(15,23,42,0.05)]">
+                    <div className="absolute -top-3 left-5 border-[3px] border-black bg-[#ff007a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                       Best value
                     </div>
                   ) : null}
@@ -565,66 +565,66 @@ export default function SubscribePage({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
                             isBest
-                              ? "border border-[color:var(--gush-border)] bg-white text-slate-950"
-                              : "bg-[color:var(--gush-page-bg-muted)] text-slate-600"
+                            ? "border-[3px] border-black bg-white text-black"
+                            : "border-[3px] border-black bg-[#dffcff] text-black"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
                         </div>
                         <div>
                           {planBadgeLabel ? (
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                               {planBadgeLabel}
                             </p>
                           ) : null}
-                          <h3 className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950">
+                          <h3 className="mt-2 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black">
                             {plan.title}
                           </h3>
-                          <p className="mt-3 max-w-xs text-sm leading-6 text-slate-600">
+                          <p className="mt-3 max-w-xs text-sm font-semibold leading-6 text-black/72">
                             {PLAN_FIT_GUIDE[key]?.description ||
                               "Built for readers who come back often."}
                           </p>
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-700">
+                        <span className="border-[3px] border-black bg-[#00e5ff] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black">
                           Active
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="space-y-2 border-t border-[color:var(--gush-border)] pt-5">
+                    <div className="space-y-2 border-t-[3px] border-black pt-5">
                       <div className="flex items-end gap-2">
-                        <span className="font-display text-4xl font-semibold tracking-tight text-slate-950">
+                        <span className="font-display text-4xl font-black uppercase tracking-[-0.05em] text-black">
                           {priceLabel}
                         </span>
-                        <span className="pb-1 text-sm text-slate-500">
+                        <span className="pb-1 text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
                           /month
                         </span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs font-semibold text-slate-700">
-                          <Zap className="h-3.5 w-3.5 text-slate-500" />
+                        <div className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+                          <Zap className="h-3.5 w-3.5 text-black/60" />
                           Save {perks.discountPct}% on locked chapters
                         </div>
                       ) : null}
                     </div>
 
-                    <div className="space-y-3 border-t border-[color:var(--gush-border)] pt-5 text-sm text-slate-600">
-                      <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                    <div className="space-y-3 border-t-[3px] border-black pt-5 text-sm text-black/72">
+                      <div className="rounded-2xl border-[3px] border-black bg-white px-4 py-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/55">
                           Best for
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-700">
+                        <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                           {PLAN_FIT_GUIDE[key]?.title || "Recurring readers"}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
-                          <Check className="h-3 w-3 text-slate-700" />
+                          <Check className="h-3 w-3 text-black" />
                         </div>
                         <span>
-                          <span className="font-semibold text-slate-950">
+                          <span className="font-black uppercase tracking-[0.04em] text-black">
                             {perks?.dailyFreeUnlocks ?? "-"}
                           </span>{" "}
                           free reads a day
@@ -632,10 +632,10 @@ export default function SubscribePage({
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
-                          <Check className="h-3 w-3 text-slate-700" />
+                          <Check className="h-3 w-3 text-black" />
                         </div>
                         <span>
-                          <span className="font-semibold text-slate-950">
+                          <span className="font-black uppercase tracking-[0.04em] text-black">
                             {perks?.ttfMultiplier
                               ? `${Math.round(perks.ttfMultiplier * 100)}%`
                               : "-"}
@@ -645,10 +645,10 @@ export default function SubscribePage({
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
-                          <Check className="h-3 w-3 text-slate-700" />
+                          <Check className="h-3 w-3 text-black" />
                         </div>
                         <span>
-                          <span className="font-semibold text-slate-950">
+                          <span className="font-black uppercase tracking-[0.04em] text-black">
                             {perks?.voucherPts ?? "-"}
                           </span>{" "}
                           monthly points
@@ -656,7 +656,7 @@ export default function SubscribePage({
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[rgba(29,29,31,0.04)]">
-                          <Check className="h-3 w-3 text-slate-700" />
+                          <Check className="h-3 w-3 text-black" />
                         </div>
                         <span>Better value if you unlock often</span>
                       </div>
@@ -683,7 +683,7 @@ export default function SubscribePage({
                       </button>
                     ) : null}
                     {planNote ? (
-                      <p className="text-xs leading-5 text-slate-500">
+                      <p className="text-xs font-semibold leading-5 text-black/58">
                         {planNote}
                       </p>
                     ) : null}
@@ -695,7 +695,7 @@ export default function SubscribePage({
         </SurfacePanel>
 
         <details className={compareShellClass}>
-          <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-slate-950">
+          <summary className="cursor-pointer list-none px-4 py-4 text-sm font-black uppercase tracking-[0.06em] text-black">
             Compare plans
           </summary>
           <div className="border-t border-[color:var(--gush-border)] px-4 py-4">
@@ -703,17 +703,17 @@ export default function SubscribePage({
               {planComparisonRows.map((plan) => (
                 <div
                   key={plan.id}
-                  className="rounded-[20px] border border-[color:var(--gush-border)] bg-white px-4 py-4"
+                  className="rounded-[20px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-950">
+                    <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                       {plan.title}
                     </p>
-                    <span className="text-sm font-semibold text-slate-950">
+                    <span className="text-sm font-black uppercase tracking-[0.04em] text-black">
                       {plan.priceLabel}
                     </span>
                   </div>
-                  <div className="mt-3 grid gap-2 text-sm text-slate-600">
+                  <div className="mt-3 grid gap-2 text-sm font-semibold text-black/72">
                     <p>{plan.bestFor}</p>
                     <p>{plan.dailyFreeUnlocks} free reads / day</p>
                     <p>{plan.waitTimeLabel} of the normal wait</p>
@@ -726,28 +726,28 @@ export default function SubscribePage({
             <div className="hidden overflow-x-auto sm:block">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[color:var(--gush-border)] text-left text-slate-500">
+                  <tr className="border-b-[3px] border-black text-left text-black/60">
                     <th className="pb-4 font-semibold">Feature</th>
                     {SUBSCRIPTION_OFFERS.map((plan) => (
                       <th
                         key={plan.id}
-                        className="pb-4 text-center font-semibold text-slate-950"
+                        className="pb-4 text-center font-black uppercase tracking-[0.04em] text-black"
                       >
                         {plan.title}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[color:var(--gush-border)]">
+                <tbody className="divide-y-[3px] divide-black/10">
                   <tr>
-                    <td className="py-4 text-slate-600">Free Reads / Day</td>
+                    <td className="py-4 font-semibold text-black/72">Free Reads / Day</td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
                       return (
                         <td
                           key={plan.id}
-                          className="py-4 text-center font-semibold text-slate-950"
+                          className="py-4 text-center font-black uppercase tracking-[0.04em] text-black"
                         >
                           {perks?.dailyFreeUnlocks ?? "-"}
                         </td>
@@ -755,14 +755,14 @@ export default function SubscribePage({
                     })}
                   </tr>
                   <tr>
-                    <td className="py-4 text-slate-600">Wait Time</td>
+                    <td className="py-4 font-semibold text-black/72">Wait Time</td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
                       return (
                         <td
                           key={plan.id}
-                          className="py-4 text-center font-semibold text-slate-950"
+                          className="py-4 text-center font-black uppercase tracking-[0.04em] text-black"
                         >
                           {perks?.ttfMultiplier
                             ? `${Math.round(perks.ttfMultiplier * 100)}%`
@@ -772,14 +772,14 @@ export default function SubscribePage({
                     })}
                   </tr>
                   <tr>
-                    <td className="py-4 text-slate-600">Monthly Points</td>
+                    <td className="py-4 font-semibold text-black/72">Monthly Points</td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
                       return (
                         <td
                           key={plan.id}
-                          className="py-4 text-center font-semibold text-slate-950"
+                          className="py-4 text-center font-black uppercase tracking-[0.04em] text-black"
                         >
                           {perks?.voucherPts ?? "-"}
                         </td>
@@ -787,18 +787,18 @@ export default function SubscribePage({
                     })}
                   </tr>
                   <tr>
-                    <td className="py-4 text-slate-600">Unlock Savings</td>
+                    <td className="py-4 font-semibold text-black/72">Unlock Savings</td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
                       return (
                         <td key={plan.id} className="py-4 text-center">
                           {perks?.discountPct ? (
-                            <span className="font-semibold text-slate-700">
+                            <span className="font-black uppercase tracking-[0.04em] text-black">
                               {perks.discountPct}%
                             </span>
                           ) : (
-                            <span className="text-slate-400">-</span>
+                            <span className="text-black/40">-</span>
                           )}
                         </td>
                       );
@@ -818,13 +818,13 @@ export default function SubscribePage({
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                   Active membership
                 </p>
-                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {subscription?.planId}
                 </h3>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm font-semibold text-black/68">
                   {subscription?.renewAt
                     ? `Renews on ${formatUSDate(subscription.renewAt)}`
                     : "Renewal date is not available yet."}

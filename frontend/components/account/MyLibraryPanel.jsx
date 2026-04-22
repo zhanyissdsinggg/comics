@@ -118,7 +118,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
         <Image
           src={coverUrl}
           alt={`Cover image for ${title}`}
@@ -133,14 +133,14 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-[color:var(--gush-border)] px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+      className="flex h-[92px] w-[72px] items-end rounded-[18px] border-[3px] border-black px-3 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
       style={{
         background:
           coverTone ||
           "linear-gradient(160deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.96) 100%)",
       }}
     >
-      <span className="line-clamp-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-900/75">
+      <span className="line-clamp-2 text-[11px] font-black uppercase tracking-[0.16em] text-black/75">
         {title}
       </span>
     </div>
@@ -159,7 +159,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
     .join(" / ");
 
   return (
-    <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_14px_32px_rgba(15,23,42,0.05)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white">
+    <article className="rounded-[30px] border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -171,18 +171,22 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="truncate text-base font-semibold tracking-tight text-slate-950">
+                <h3 className="truncate text-base font-black uppercase tracking-[-0.03em] text-black">
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                  <span className="border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black">
                     {item.badge}
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-sm text-slate-600">{item.primaryLine}</p>
+              <p className="mt-1 text-sm font-semibold text-black/72">
+                {item.primaryLine}
+              </p>
               {metaLine ? (
-                <p className="mt-1 text-xs text-slate-500">{metaLine}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                  {metaLine}
+                </p>
               ) : null}
             </div>
 
@@ -193,7 +197,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   ? () => onResume(item)
                   : () => onOpenSeries(item)
               }
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
+              className="inline-flex min-h-[42px] items-center gap-2 border-[3px] border-black bg-[#00e5ff] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
             >
               {actionLabel}
               <ArrowUpRight className="size-4" />
@@ -202,13 +206,13 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
 
           {mode === "continue" ? (
             <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+              <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                 <span>{item.progressLabel}</span>
                 <span>{item.progressPercentLabel}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
+              <div className="h-2 overflow-hidden border-[2px] border-black bg-white">
                 <div
-                  className="h-full rounded-full bg-[var(--gush-accent-strong,#0058cc)]"
+                  className="h-full bg-[#ff007a]"
                   style={{
                     width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
                   }}
@@ -222,7 +226,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               {item.genreLine.map((genre) => (
                 <span
                   key={`${item.seriesId}-${genre}`}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-medium text-slate-600"
+                  className="border-[2px] border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black/70"
                 >
                   {genre}
                 </span>
@@ -241,7 +245,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[26px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
+          className="h-[124px] animate-pulse rounded-[30px] border-[3px] border-black bg-[#fff6cf]"
         />
       ))}
     </div>
@@ -574,19 +578,19 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   );
 
   const buttonBaseClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "inline-flex min-h-[46px] items-center justify-center border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
 
   return (
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
             My Library
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
             Your shelf.
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
             Continue, saves, and unlocked chapters.
           </p>
         </div>
@@ -603,13 +607,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-5">
+        <div className="rounded-[30px] border-[3px] border-black bg-[#ffe500] p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-950">
+              <p className="text-sm font-black uppercase tracking-[0.06em] text-black">
                 Sign in for your shelf
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                 Keep progress, saves, and unlocked chapters on one account.
               </p>
             </div>
@@ -641,15 +645,15 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   aria-selected={isActive}
                   aria-controls={`account-library-panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  className={`inline-flex min-h-[42px] items-center gap-2 border-[3px] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] transition-all ${
                     isActive
-                      ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950"
-                      : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900"
+                      ? "border-black bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                      : "border-black bg-white text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
                   }`}
                 >
                   <Icon className="size-4" />
                   <span>{tab.label}</span>
-                  <span className="rounded-full bg-white/90 px-2 py-0.5 text-[11px] text-slate-500">
+                  <span className={`border-[2px] px-2 py-0.5 text-[10px] font-black tracking-[0.08em] ${isActive ? "border-white bg-white text-black" : "border-black bg-[#fff6cf] text-black/72"}`}>
                     {signedInCount[tab.id]}
                   </span>
                 </button>
@@ -677,14 +681,14 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[26px] border border-dashed border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-[color:var(--gush-border)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+              <div className="rounded-[30px] border-[3px] border-dashed border-black bg-[#fff6cf] px-5 py-8 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-black bg-white text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                   <BookMarked className="size-5" />
                 </div>
-                <p className="mt-4 text-base font-semibold text-slate-950">
+                <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-black">
                   {tabData[activeTab]?.emptyTitle}
                 </p>
-                <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600">
+                <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-black/72">
                   {tabData[activeTab]?.emptyDescription}
                 </p>
               </div>

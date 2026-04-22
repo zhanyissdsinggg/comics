@@ -38,15 +38,17 @@ export default function PackageCard({
 
   return (
     <div
-        className={`group rounded-[28px] border p-5 transition-all duration-300 hover:-translate-y-1 ${
+        className={`group rounded-[30px] border-[3px] border-black p-5 transition-all duration-300 hover:translate-x-1 hover:translate-y-1 ${
           highlighted
-            ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.07)]"
-            : "border-[color:var(--gush-border)] bg-white shadow-[0_12px_28px_rgba(15,23,42,0.045)]"
+            ? "bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            : "bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         }`}
       style={{ willChange: "transform" }}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-950">{pkg.name}</h2>
+        <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-black">
+          {pkg.name}
+        </h2>
         {highlighted ? (
           <Pill appearance="light" tone="accent">
             Best value
@@ -54,17 +56,17 @@ export default function PackageCard({
         ) : null}
       </div>
 
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm font-semibold text-black/70">
         {formatUSNumber(pkg.paidPts)} paid + {formatUSNumber(pkg.bonusPts)}{" "}
         bonus
       </p>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
         Total {formatUSNumber(totalPts)} points
         {bonusPct ? ` - ${bonusPct}% bonus` : ""}
       </p>
 
       {bonusPct > 0 ? (
-        <div className="mt-3 rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-2">
+        <div className="mt-3 rounded-[18px] border-[3px] border-black bg-white px-3 py-2">
           <div className="flex items-center gap-2">
             <svg
               className="h-4 w-4 flex-shrink-0 text-[var(--gush-accent,#3157d6)]"
@@ -79,7 +81,7 @@ export default function PackageCard({
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <p className="text-xs text-slate-700">
+            <p className="text-xs font-semibold text-black/72">
               Includes {bonusPct}% extra points
             </p>
           </div>
@@ -87,7 +89,7 @@ export default function PackageCard({
       ) : null}
 
       {pkg.priceLabel ? (
-        <p className="mt-3 text-sm font-semibold text-slate-950">
+        <p className="mt-3 text-sm font-black uppercase tracking-[0.05em] text-black">
           {pkg.priceLabel}
         </p>
       ) : null}
@@ -104,7 +106,7 @@ export default function PackageCard({
         </div>
       ) : null}
 
-      <div className="mt-3 space-y-1 text-[10px] text-slate-500">
+      <div className="mt-3 space-y-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black/55">
         <BenefitRow>One-time points for later reads</BenefitRow>
         <BenefitRow>Unlock locked chapters as needed</BenefitRow>
         <BenefitRow>No recurring billing</BenefitRow>
@@ -116,10 +118,10 @@ export default function PackageCard({
       {!hideAction ? (
         <button
           type="button"
-          className={`mt-4 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+          className={`mt-4 w-full min-h-[48px] border-[3px] border-black px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition-all ${
             disabled
-              ? "cursor-not-allowed bg-slate-200 text-slate-500"
-              : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82 active:scale-95"
+              ? "cursor-not-allowed bg-slate-200 text-slate-500 shadow-[4px_4px_0_0_rgba(0,0,0,0.45)]"
+              : "bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
           }`}
           onClick={() => onSelect?.(pkg.id)}
           disabled={disabled}
@@ -130,7 +132,7 @@ export default function PackageCard({
       ) : null}
       {statusNote ? (
         <p
-          className={`${hideAction ? "mt-4" : "mt-3"} text-xs leading-5 text-slate-500`}
+          className={`${hideAction ? "mt-4" : "mt-3"} text-xs font-semibold leading-5 text-black/58`}
         >
           {statusNote}
         </p>

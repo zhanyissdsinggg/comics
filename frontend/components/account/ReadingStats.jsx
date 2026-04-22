@@ -100,14 +100,14 @@ const ReadingStats = React.memo(() => {
     <SurfacePanel appearance="light" accent="blue" className="space-y-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
             Reading stats
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
             Reading rhythm.
           </h2>
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
           History, progress, and follows.
         </p>
       </div>
@@ -116,26 +116,26 @@ const ReadingStats = React.memo(() => {
         {statCards.map((card, index) => (
           <div
             key={card.label}
-              className={`rounded-[24px] border px-4 py-4 ${
-                card.highlighted || index === 0
-                  ? "border-[color:var(--gush-border-strong)] bg-white"
-                  : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]"
-              }`}
+            className={`rounded-[24px] border-[3px] border-black px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] ${
+              card.highlighted || index === 0 ? "bg-[#ffe500]" : "bg-white"
+            }`}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
               {card.label}
             </p>
-            <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
+            <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black">
               {card.value}
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{card.hint}</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+              {card.hint}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[24px] border-[3px] border-black bg-[#fff6cf] p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
             Milestones
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -143,24 +143,26 @@ const ReadingStats = React.memo(() => {
               achievements.map((achievement) => (
                 <span
                   key={achievement}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                  className="border-[3px] border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
                 >
                   {achievement}
                 </span>
               ))
             ) : (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm font-semibold text-black/58">
                 Start reading to unlock milestones.
               </p>
             )}
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
             Reading note
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-700">{tip}</p>
+          <p className="mt-3 text-sm font-semibold leading-7 text-black/72">
+            {tip}
+          </p>
         </div>
       </div>
     </SurfacePanel>

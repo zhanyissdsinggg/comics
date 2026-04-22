@@ -228,7 +228,7 @@ function CreatorPageSkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
+                className="h-24 animate-pulse rounded-[24px] border-[3px] border-black bg-[#ffe500]"
               />
             ))}
           </SurfacePanel>
@@ -236,7 +236,7 @@ function CreatorPageSkeleton() {
 
         <SurfacePanel appearance="light" accent="blue">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-[color:var(--gush-border)] bg-white" />
+            <div className="aspect-[3/4] animate-pulse rounded-[28px] border-[3px] border-black bg-white" />
             <div className="space-y-4">
               <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
               <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -245,7 +245,7 @@ function CreatorPageSkeleton() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border border-[color:var(--gush-border)] bg-white"
+                    className="h-28 animate-pulse rounded-[24px] border-[3px] border-black bg-[#fff6cf]"
                   />
                 ))}
               </div>
@@ -467,13 +467,13 @@ export default function CreatorPage({
   }, [spotlightSeries]);
 
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const creatorCardClass =
-    "overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)]";
+    "overflow-hidden rounded-[30px] border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]";
   const neutralChipClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] px-3 py-1 text-xs font-semibold text-[color:var(--gush-ink-soft)]";
+    "border-[3px] border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -544,7 +544,7 @@ export default function CreatorPage({
               cta: "Open series",
               onClick: () => handleOpenTitle(spotlightSeries),
               accentClass:
-                "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+                "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
             }
           : null,
         {
@@ -556,7 +556,7 @@ export default function CreatorPage({
           cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
           onClick: handleBrowseGenre,
           accentClass:
-            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
+            "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
         {
           id: "return",
@@ -565,7 +565,7 @@ export default function CreatorPage({
           cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
           onClick: handleReturn,
           accentClass:
-            "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
+            "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
         },
       ].filter(Boolean),
     [
@@ -589,7 +589,7 @@ export default function CreatorPage({
             `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
           ),
         accentClass:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+          "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "featured-series",
@@ -598,7 +598,7 @@ export default function CreatorPage({
         cta: "Browse Series",
         onClick: () => router.push("/rankings?view=featured"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
+          "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "catalog",
@@ -607,7 +607,7 @@ export default function CreatorPage({
         cta: "Explore Comics",
         onClick: () => router.push("/comics"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
+          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "return",
@@ -616,7 +616,7 @@ export default function CreatorPage({
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)]",
+          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
     ],
     [creatorName, handleReturn, originSeries, router],
@@ -685,11 +685,11 @@ export default function CreatorPage({
               className="flex h-full flex-col justify-between space-y-6"
             >
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                   Next
                 </p>
                 <div>
-                  <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                  <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                     Try another route.
                   </h2>
                 </div>
@@ -716,10 +716,10 @@ export default function CreatorPage({
 
           <SurfacePanel appearance="light" accent="blue" className="space-y-5">
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Next
               </p>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
                 Browse next.
               </h2>
             </div>
@@ -758,11 +758,11 @@ export default function CreatorPage({
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Creator
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                   {creatorName}
                 </h2>
               </div>
@@ -828,13 +828,13 @@ export default function CreatorPage({
               </div>
 
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                   Spotlight
                 </p>
-                <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                <h2 className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black sm:text-4xl">
                   {spotlightSeries.title}
                 </h2>
-                <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+                <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-black/72 sm:text-base">
                   {summarizeSpotlightDescription(
                     spotlightSeries.description,
                     `${spotlightSeries.title} is a strong place to start.`,
@@ -857,7 +857,7 @@ export default function CreatorPage({
                   ) : null}
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-3 text-sm text-slate-500">
+                <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
                   {spotlightMeta.map((item, index) => (
                     <span
                       key={`${spotlightSeries.id}-meta-${index}`}
@@ -892,14 +892,14 @@ export default function CreatorPage({
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Works
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
                 By {creatorName}
               </h2>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
               {formatTitleCountLabel(gridItems.length)} for {creatorName}
             </p>
           </div>
