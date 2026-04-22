@@ -840,9 +840,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
     ];
   }, [openAuthPrompt, router]);
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
   const signedInHeroDescription = viewerSignedIn
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
@@ -967,17 +967,17 @@ export default function LibraryPage({ initialSignedIn = false }) {
             tone="muted"
             accent="blue"
             appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
+            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Shelf
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                   {libraryDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                   {libraryDeskCopy}
                 </p>
               </div>
@@ -1049,7 +1049,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         ) : null}
 
         {showLibraryStale ? (
-          <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
+          <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-3 text-sm font-semibold text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
             Showing saved data while reconnecting.
           </div>
         ) : null}
@@ -1070,16 +1070,16 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    <div className="border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-6">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
                           : "Your Shelf"}
                       </p>
-                      <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                      <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.35rem]">
                         {resumeSpotlight?.title || "Your shelf."}
                       </h2>
-                      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
+                      <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-black/68 sm:text-[15px] sm:leading-7">
                         {resumeSpotlightMeta || "Recent reads."}
                       </p>
 
@@ -1163,14 +1163,14 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] sm:p-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    <div className="border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-6">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                         Your Shelf
                       </p>
-                      <h2 className="mt-3 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950 sm:text-[2.25rem]">
+                      <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.35rem]">
                         Your shelf.
                       </h2>
-                      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px] sm:leading-7">
+                      <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-black/68 sm:text-[15px] sm:leading-7">
                         Your next read and saves land here.
                       </p>
                       <div className="mt-6 flex flex-wrap gap-2">

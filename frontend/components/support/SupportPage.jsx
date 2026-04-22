@@ -347,13 +347,13 @@ export default function SupportPage() {
   };
 
   const fieldLabelClass =
-    "text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+    "text-[11px] font-black uppercase tracking-[0.28em] text-black/55";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 text-sm text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
+    "mt-2 w-full border-[3px] border-black bg-white px-4 py-3.5 text-sm font-semibold text-black outline-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all placeholder:text-black/40 focus:ring-4 focus:ring-black/10";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60";
   const supportHeroStats = [
     {
       label: "Topics",
@@ -384,13 +384,13 @@ export default function SupportPage() {
             tone="muted"
             accent="blue"
             appearance="light"
-            className="space-y-4"
+            className="space-y-4 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
           >
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Topics
               </p>
-              <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                 Choose a topic.
               </h2>
             </div>
@@ -418,10 +418,10 @@ export default function SupportPage() {
                       setSuccessState(null);
                     }}
                     className={[
-                      "rounded-[22px] border px-4 py-3 text-left transition",
+                      "border-[3px] border-black px-4 py-3 text-left transition-all",
                       isActive
-                        ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
-                        : "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                        : "bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
@@ -445,14 +445,14 @@ export default function SupportPage() {
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
             {successState ? (
               <div className="space-y-4">
                 <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent,#0071e3)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ff007a]">
                     Request received
                   </p>
-                  <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-3 text-[2.4rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     Request sent.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
@@ -491,10 +491,10 @@ export default function SupportPage() {
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                     Form
                   </p>
-                  <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     Send a request.
                   </h2>
                 </div>
@@ -642,12 +642,12 @@ export default function SupportPage() {
             )}
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Tips
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                 Keep it simple.
               </h2>
             </div>
@@ -659,15 +659,15 @@ export default function SupportPage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm leading-6 text-slate-600"
+                  className="border-[3px] border-black bg-[#f5f1ea] px-4 py-3 text-sm font-medium leading-6 text-black/68 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 >
                   {item}
                 </div>
               ))}
             </div>
 
-            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Contact
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">

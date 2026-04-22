@@ -500,9 +500,9 @@ export default function SeriesPage({
     }));
   }, [config.fallbackGenres, genreQuickPicks]);
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-xs font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-xs font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
   const showEntrySpotlight =
     Boolean(entrySpotlight) &&
     !isComicPage &&
@@ -517,19 +517,19 @@ export default function SeriesPage({
       <div className="gush-page-main gush-section-stack">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)]">
           <SurfacePanel
-            className="space-y-5 rounded-[34px] px-5 py-5 sm:px-6 sm:py-6"
+            className="space-y-5 border-[3px] border-black bg-[#00e5ff] px-5 py-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:px-6 sm:py-6"
             tone="highlight"
             accent="blue"
             appearance="light"
           >
             <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 {config.eyebrow}
               </p>
-              <h1 className="mt-4 font-display text-[2.55rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[color:var(--gush-ink-strong)] sm:text-[3.1rem] xl:text-[4rem]">
+              <h1 className="mt-4 text-[2.8rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-black sm:text-[3.35rem] xl:text-[4.2rem]">
                 {config.heroTitle}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[color:var(--gush-ink-soft)] sm:text-[0.98rem]">
+              <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-black/68 sm:text-[0.98rem]">
                 {config.description}
               </p>
             </div>
@@ -540,7 +540,7 @@ export default function SeriesPage({
                   key={`hero-genre-${item.genre}`}
                   type="button"
                   onClick={() => updateParams({ genre: item.genre })}
-                  className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.82)] px-3 py-1.5 text-xs font-medium text-[color:var(--gush-ink-soft)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-[color:var(--gush-ink-strong)]"
+                  className="inline-flex items-center border-[2px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.05em] text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
                 >
                   {item.genre}
                 </button>
@@ -559,7 +559,7 @@ export default function SeriesPage({
           </SurfacePanel>
 
           {showEntrySpotlight ? (
-            <section className="rounded-[34px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.05)] sm:p-6">
+            <section className="border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6">
               <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                 <Cover
                   tone={entrySpotlight.coverTone}
@@ -571,17 +571,17 @@ export default function SeriesPage({
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_32px_rgba(15,23,42,0.08)]"
+                  className="aspect-[3/4] w-full overflow-hidden border-[3px] border-black bg-[#f5f1ea] shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                 />
 
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[color:var(--gush-ink-faint)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.26em] text-black/55">
                     Featured title
                   </p>
-                  <h2 className="mt-3 font-display text-[1.6rem] font-semibold leading-tight tracking-tight text-[color:var(--gush-ink-strong)]">
+                  <h2 className="mt-3 text-[1.8rem] font-black uppercase leading-tight tracking-[-0.04em] text-black">
                     {entrySpotlight.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-[color:var(--gush-ink-soft)]">
+                  <p className="mt-3 text-sm font-medium leading-6 text-black/68">
                     {getSeriesSubtitle(entrySpotlight)}
                   </p>
 
@@ -594,7 +594,7 @@ export default function SeriesPage({
                       .map((genre) => (
                         <span
                           key={`spotlight-${entrySpotlight.id}-${genre}`}
-                          className="rounded-full border border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.82)] px-3 py-1 text-xs font-medium text-[color:var(--gush-ink-soft)]"
+                          className="border-[2px] border-black bg-[#f5f1ea] px-3 py-1 text-xs font-black uppercase tracking-[0.05em] text-black/72"
                         >
                           {genre}
                         </span>

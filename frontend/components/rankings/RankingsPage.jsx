@@ -328,9 +328,9 @@ export default function RankingsPage({
   );
 
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
 
   return (
     <main className="gush-home-shell overflow-hidden">
@@ -353,17 +353,17 @@ export default function RankingsPage({
             tone="muted"
             accent="blue"
             appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
+            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 View
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                   {activeView.description}
                 </p>
               </div>
@@ -404,18 +404,18 @@ export default function RankingsPage({
           tone="muted"
           accent="blue"
           appearance="light"
-          className="space-y-4"
+          className="space-y-4 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Views
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                 Views
               </h2>
             </div>
-            <p className="max-w-md text-sm leading-7 text-slate-600">
+            <p className="max-w-md text-sm font-medium leading-7 text-black/68">
               Featured, first picks, completed, comics, novels.
             </p>
           </div>
