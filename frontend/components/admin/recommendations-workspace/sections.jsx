@@ -38,6 +38,7 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
     <AdminPageSection
       title="推荐位"
       description="把入口和作品组合收清楚。"
+      eyebrow="配置入口"
       action={
         <Button type="button" onClick={() => onOpenCreateModal("slot")}>
           <Plus className="size-4" />
@@ -106,6 +107,7 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
     <AdminPageSection
       title="榜单规则"
       description="把策略和范围收清楚。"
+      eyebrow="规则管理"
       action={
         <Button type="button" onClick={() => onOpenCreateModal("ranking")}>
           <Plus className="size-4" />
@@ -182,6 +184,7 @@ export function AnalyticsSection({
     <AdminPageSection
       title="推荐位表现分析"
       description="按推荐位筛选，再看曝光、点击和转化。"
+      eyebrow="效果复盘"
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

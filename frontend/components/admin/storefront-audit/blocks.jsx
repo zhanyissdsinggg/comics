@@ -75,7 +75,8 @@ export function MetricCard({ label, value, hint, tone = "blue" }) {
         toneClasses[tone] || toneClasses.blue,
       )}
     >
-      <p className="text-sm text-slate-600">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">前台巡检</p>
+      <p className="mt-2 text-sm font-semibold text-slate-950">{label}</p>
       <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
       <p className="mt-2 text-xs leading-6 text-slate-500">{hint}</p>
     </div>
@@ -85,6 +86,7 @@ export function MetricCard({ label, value, hint, tone = "blue" }) {
 export function EmptyState({ title, description }) {
   return (
     <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white px-5 py-10 text-center shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">检查结果</p>
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>

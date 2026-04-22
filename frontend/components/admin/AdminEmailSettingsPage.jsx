@@ -34,16 +34,8 @@ const providerOptions = [
 ];
 
 const secretFields = [
-  {
-    key: "resendApiKey",
-    label: "Resend 密钥",
-    placeholder: "re_...",
-  },
-  {
-    key: "sendgridApiKey",
-    label: "SendGrid 密钥",
-    placeholder: "SG...",
-  },
+  { key: "resendApiKey", label: "Resend 密钥", placeholder: "re_..." },
+  { key: "sendgridApiKey", label: "SendGrid 密钥", placeholder: "SG..." },
   {
     key: "smsWebhookUrl",
     label: "短信回调地址",
@@ -141,7 +133,7 @@ export default function AdminEmailSettingsPage() {
   };
 
   const handleClearSecret = async (field) => {
-    await persist({ ...draft, [field]: "" }, "密钥已清空。");
+    await persist({ ...draft, [field]: "" }, "对应密钥已清空。");
   };
 
   const hasUnsavedChanges = useMemo(
@@ -210,10 +202,7 @@ export default function AdminEmailSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback({ type: "", message: "" })}
-      />
+      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
 
       <AdminPageSection
         title="发信通道"
@@ -230,7 +219,12 @@ export default function AdminEmailSettingsPage() {
             >
               {testButtonLabel}
             </Button>
-            <Button type="button" onClick={handleSave} disabled={saving || !hasUnsavedChanges} data-testid="admin-email-save-settings">
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || !hasUnsavedChanges}
+              data-testid="admin-email-save-settings"
+            >
               {saving ? "保存中..." : "保存设置"}
             </Button>
           </div>
@@ -272,10 +266,7 @@ export default function AdminEmailSettingsPage() {
         </div>
       </AdminPageSection>
 
-      <AdminPageSection
-        title="密钥与回调"
-        description="把密钥和回调集中放在一起。"
-      >
+      <AdminPageSection title="密钥与回调" description="把密钥和回调集中放在一起。">
         <div className="space-y-4">
           <AdminFormField label="默认回调地址" helperText="启用回调通道时会使用这里的地址。">
             <input
@@ -292,10 +283,7 @@ export default function AdminEmailSettingsPage() {
                 key={field.key}
                 className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]"
               >
-                <AdminFormField
-                  label={field.label}
-                  helperText="继续沿用当前值时，保持原样即可。"
-                >
+                <AdminFormField label={field.label} helperText="继续沿用当前值时，保持原样即可。">
                   <input
                     value={draft[field.key]}
                     onChange={(event) => handleChange(field.key, event.target.value)}
@@ -320,18 +308,11 @@ export default function AdminEmailSettingsPage() {
         </div>
       </AdminPageSection>
 
-      <AdminPageSection
-        title="测试邮件"
-        description="用当前草稿发一封测试邮件。"
-      >
+      <AdminPageSection title="测试邮件" description="用当前草稿发一封测试邮件。">
         <div className="grid gap-4">
           <AdminFormField
             label="测试收件人"
-            helperText={
-              hasUnsavedChanges
-                ? "发送前会先保存当前草稿。"
-                : "会直接使用当前已保存的配置。"
-            }
+            helperText={hasUnsavedChanges ? "发送前会先保存当前草稿。" : "会直接使用当前已保存的配置。"}
           >
             <input
               value={draft.testRecipient}

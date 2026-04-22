@@ -13,6 +13,8 @@ Use [`operations/`](./operations) for anything related to release safety or live
 
 - `admin-route-inventory.md`: current admin route inventory in readable form
 - `admin-route-inventory.json`: machine-readable admin route inventory output
+- `interactive-story-import-template.json`: baseline import payload for interactive story admin import
+- `interactive-story-launch-checklist.md`: pre-release checklist for interactive story publish readiness
 - `deploy-gate-automation.md`: post-deploy verification and gate flow
 - `staging-environment-blueprint.md`: expected staging environment setup
 - `staging-admin-write-regression-checklist.md`: admin write-path regression checklist

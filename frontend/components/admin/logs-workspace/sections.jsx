@@ -43,6 +43,7 @@ export function LogsFiltersSection({
     <AdminPageSection
       title="日志筛选"
       description="按动作或操作者筛选。"
+      eyebrow="审计筛选"
     >
       <div className="grid gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02] lg:grid-cols-[minmax(0,1.5fr)_220px_220px]">
         <input
@@ -86,6 +87,7 @@ export function LogsTableSection({ logsQuery, logs }) {
     <AdminPageSection
       title="操作记录"
       description="先看时间、操作者和动作摘要。"
+      eyebrow="审计记录"
       action={
         <Button type="button" variant="outline" onClick={() => logsQuery.refetch()}>
           <RefreshCw className="size-4" />

@@ -60,7 +60,7 @@ const NAV_GROUPS = [
     label: "发现与前台",
     items: [
       { label: "前台巡检", href: "/admin/storefront", icon: Search, match: ["/admin/storefront"] },
-      { label: "内容编排", href: "/admin/merchandising", icon: Sparkles, match: ["/admin/merchandising"] },
+      { label: "首页编排", href: "/admin/merchandising", icon: Sparkles, match: ["/admin/merchandising"] },
       { label: "推荐位", href: "/admin/recommendations", icon: Sparkles, match: ["/admin/recommendations"] },
       { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
     ],
@@ -105,7 +105,7 @@ const BREADCRUMB_MAP = [
   { match: "/admin/creators", label: "创作者" },
   { match: "/admin/interactive-stories", label: "互动小说" },
   { match: "/admin/storefront", label: "前台巡检" },
-  { match: "/admin/merchandising", label: "内容编排" },
+  { match: "/admin/merchandising", label: "首页编排" },
   { match: "/admin/recommendations", label: "推荐位" },
   { match: "/admin/comments", label: "评论" },
   { match: "/admin/promotions", label: "活动" },
@@ -131,7 +131,6 @@ function getBreadcrumb(pathname) {
     if (item.exact) {
       return pathname === item.match;
     }
-
     return pathname.startsWith(item.match);
   });
 
@@ -143,11 +142,9 @@ function isChildLinkActive(pathname, searchParams, href) {
   if (pathname !== targetPath) {
     return false;
   }
-
   if (!targetQuery) {
     return true;
   }
-
   return searchParams.toString() === targetQuery;
 }
 
@@ -188,7 +185,6 @@ export default function AdminShell({ title, subtitle, children, actions }) {
           : navItem.match?.some((prefix) => pathname.startsWith(prefix)),
       ),
     );
-
     return group?.label || "工作台";
   }, [pathname, visibleNavGroups]);
 
@@ -279,6 +275,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     当前分区
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
+                  <p className="mt-1 text-sm text-slate-600">侧边导航已经按运营对象分组，优先从这里进入高频工作区。</p>
                 </div>
               ) : null}
             </div>

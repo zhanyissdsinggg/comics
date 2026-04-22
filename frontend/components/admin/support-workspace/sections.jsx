@@ -84,6 +84,7 @@ export function SupportQueueSection(props) {
     <AdminPageSection
       title="客服队列"
       description="按主题、用户或工单编号搜索。"
+      eyebrow="读者支持"
       action={
         <Button type="button" variant="secondary" onClick={onReset}>
           <RefreshCw className="size-4" />
@@ -91,61 +92,71 @@ export function SupportQueueSection(props) {
         </Button>
       }
     >
-      <div className="mb-6 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
-        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
-          <label className="relative">
-            <input
-              value={searchTerm}
-              onChange={(event) => onSearchTermChange(event.target.value)}
-              placeholder="搜索工单编号、用户、主题或消息内容..."
-              className={adminInputClassName}
-            />
-          </label>
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
+        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与筛选</p>
+          <p className="mt-2 text-sm text-slate-600">按主题、用户和状态缩小范围，优先处理最新和未关闭的工单。</p>
+          <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
+            <label className="relative">
+              <input
+                value={searchTerm}
+                onChange={(event) => onSearchTermChange(event.target.value)}
+                placeholder="搜索工单编号、用户、主题或消息内容..."
+                className={adminInputClassName}
+              />
+            </label>
 
-          <select
-            value={statusFilter}
-            onChange={(event) => onStatusFilterChange(event.target.value)}
-            className={adminSelectClassName}
-          >
-            {statusOptions.map((option) => (
-              <option key={option.value || "all"} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <select
+              value={statusFilter}
+              onChange={(event) => onStatusFilterChange(event.target.value)}
+              className={adminSelectClassName}
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value || "all"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={sortBy}
-            onChange={(event) => onSortByChange(event.target.value)}
-            className={adminSelectClassName}
-          >
-            <option value="createdAt">创建时间</option>
-            <option value="updatedAt">更新时间</option>
-            <option value="status">状态</option>
-          </select>
+            <select
+              value={sortBy}
+              onChange={(event) => onSortByChange(event.target.value)}
+              className={adminSelectClassName}
+            >
+              <option value="createdAt">创建时间</option>
+              <option value="updatedAt">更新时间</option>
+              <option value="status">状态</option>
+            </select>
 
-          <Button type="button" variant="outline" onClick={onToggleSortOrder}>
-            {sortOrder === "asc" ? "最早创建优先" : "最新创建优先"}
-          </Button>
+            <Button type="button" variant="outline" onClick={onToggleSortOrder}>
+              {sortOrder === "asc" ? "最早创建优先" : "最新创建优先"}
+            </Button>
+          </div>
+          {!replyEnabled && replyDisabledMessage ? (
+            <p className="mt-3 rounded-2xl border border-amber-200 bg-white px-3.5 py-2.5 text-sm leading-6 text-amber-800 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
+              {replyDisabledMessage}
+            </p>
+          ) : null}
         </div>
-        {!replyEnabled && replyDisabledMessage ? (
-          <p className="mt-3 rounded-2xl border border-amber-200 bg-white px-3.5 py-2.5 text-sm leading-6 text-amber-800 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-            {replyDisabledMessage}
-          </p>
-        ) : null}
-      </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="destructive"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || deletePending}
-        >
-          <Trash2 className="size-4" />
-          删除已选
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前动作</p>
+          <p className="mt-2 text-sm text-slate-600">已选工单的删除动作单独放这里，避免和回复、关单混在一起。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || deletePending}
+              >
+                <Trash2 className="size-4" />
+                删除已选
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}

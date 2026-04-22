@@ -242,7 +242,7 @@ export default function AdminCreatorsPage() {
   return (
     <AdminShell
       title="创作者"
-      subtitle="收口署名和作品归属。"
+      subtitle="统一署名、作品归属和公开展示，避免前台继续靠旧 author 字段硬撑。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -288,7 +288,7 @@ export default function AdminCreatorsPage() {
                 先补齐署名，再收命名。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                先补署名，再回看前台。
+                先把缺失署名补齐，再回收旧 author 兼容层和命名分叉。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">内容优先后台</StatusPill>
@@ -306,7 +306,7 @@ export default function AdminCreatorsPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">覆盖率</p>
               <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">{coverageRate}%</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已接入真实 credits。
+                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已经接入真实 credits。
               </p>
             </div>
           </div>
@@ -316,19 +316,19 @@ export default function AdminCreatorsPage() {
           <MetricCard
             title="创作者条目"
             value={audit.stats.creatorCount.toLocaleString()}
-            hint="已进入真实 Creator / SeriesCredit 模型。"
+            hint="已经进入真实 Creator / SeriesCredit 模型。"
             tone="blue"
           />
           <MetricCard
             title="真实 credits 已接入"
             value={audit.stats.structuredCreatorSeriesCount.toLocaleString()}
-            hint="前台作品页和创作者目录可直接使用。"
+            hint="前台作品页和创作者目录可以直接使用。"
             tone="emerald"
           />
           <MetricCard
             title="旧 author 兼容层"
             value={audit.stats.legacyAuthorOnlySeriesCount.toLocaleString()}
-            hint="还没迁进真实 credits 的作品。"
+            hint="还没有迁进真实 credits 的作品。"
             tone="amber"
           />
           <MetricCard
@@ -344,7 +344,7 @@ export default function AdminCreatorsPage() {
             <div>
               <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">筛选创作者目录</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                按名字、作品或题材快速定位。
+                按名字、作品或题材快速定位要处理的创作者条目。
               </p>
             </div>
             <p className="text-sm text-slate-500">
@@ -416,7 +416,7 @@ export default function AdminCreatorsPage() {
         legacyAuthorPreview.length === 0 ? (
           <EmptyState
             title="当前还没有创作者数据"
-            description="先到作品详情页补署名。"
+            description="先到作品详情页补署名，再回来看目录是否已经建立。"
           />
         ) : null}
 
@@ -427,7 +427,7 @@ export default function AdminCreatorsPage() {
                 建议处理顺序
               </p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                先补署名，再抽查前台页。
+                先补缺失署名，再统一命名，最后回查前台展示。
               </p>
             </div>
 

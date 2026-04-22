@@ -49,6 +49,7 @@ export function GeneratorFormSection({
     <AdminPageSection
       title="演示内容生成器"
       description="只生成测试目录数据。"
+      eyebrow="测试工具"
       action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}
     >
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -108,7 +109,8 @@ export function GeneratorFormSection({
         </div>
 
         <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-          <h3 className="text-base font-semibold text-slate-950">本次将生成的内容</h3>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">生成预览</p>
+          <h3 className="mt-2 text-base font-semibold text-slate-950">本次将生成的内容</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             只生成测试目录，不制造假热度。
           </p>
@@ -137,6 +139,7 @@ export function GeneratorResultSection({ result }) {
     <AdminPageSection
       title="最近一次生成"
       description="只看最近一次结果。"
+      eyebrow="执行结果"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <AdminMetricCard label="任务编号" value={result.runId || "-"} detail="这次生成的唯一标识。" />

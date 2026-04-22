@@ -34,7 +34,8 @@ export function PendingItemsSection({ insights }) {
     <SurfacePanel appearance="light" accent="blue">
       <SectionHeader
         title="待处理事项"
-        description="先处理这些。"
+        description="把会拖慢上架和前台观感的问题优先清掉。"
+        eyebrow="今日优先"
       />
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {PENDING_ITEMS.map((item) => (
@@ -53,6 +54,7 @@ export function PendingItemsSection({ insights }) {
               <ArrowRight className="size-4 text-slate-400" />
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+            <p className="mt-3 text-xs font-medium text-slate-500">点进去直接处理对应作品。</p>
           </Link>
         ))}
       </div>
@@ -63,7 +65,11 @@ export function PendingItemsSection({ insights }) {
 export function LatestSeriesSection({ latestUpdated }) {
   return (
     <SurfacePanel appearance="light" accent="blue">
-      <SectionHeader title="最近更新的作品" description="封面、署名和章节一起看。" />
+      <SectionHeader
+        title="最近更新的作品"
+        description="更新过的作品先看资料完整度，再决定要不要推到前台。"
+        eyebrow="作品跟进"
+      />
       <div className="mt-5 space-y-3">
         {latestUpdated.length > 0 ? (
           latestUpdated.map((series) => {
@@ -84,6 +90,7 @@ export function LatestSeriesSection({ latestUpdated }) {
                 detail={`${series?.type === "novel" ? "小说" : "漫画"} · ${formatSeriesState(series)}${missing ? ` · ${missing}` : ""}`}
                 meta={`${formatDate(series.updatedAt)} · ${relativeTime(series.updatedAt)}`}
                 badge={getSeriesBadge(series)}
+                tone={missing ? "warning" : "success"}
               />
             );
           })
@@ -98,7 +105,11 @@ export function LatestSeriesSection({ latestUpdated }) {
 export function QuickActionsSection() {
   return (
     <SurfacePanel appearance="light" accent="amber">
-      <SectionHeader title="快捷入口" description="常用动作放这里。" />
+      <SectionHeader
+        title="快捷入口"
+        description="把常用运营动作收在一处，少跳页面。"
+        eyebrow="高频动作"
+      />
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {QUICK_ACTIONS.map((item) => {
           const Icon = ACTION_ICONS[item.icon];
@@ -115,6 +126,7 @@ export function QuickActionsSection() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-950">{item.label}</p>
                 <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>
+                <p className="mt-3 text-xs font-medium text-slate-500">进入后可继续编辑和复核。</p>
               </div>
             </Link>
           );
@@ -129,7 +141,8 @@ export function SupportQueueSection({ support }) {
     <SurfacePanel appearance="light" accent="cyan">
       <SectionHeader
         title="客服队列"
-        description="先看最近更新。"
+        description="优先处理刚更新的对话，避免读者等待过久。"
+        eyebrow="支持中心"
         action={
           <Link href="/admin/support" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
             查看全部
@@ -145,6 +158,7 @@ export function SupportQueueSection({ support }) {
               detail={safeText(ticket.userEmail || ticket.replyEmail || ticket.userId) || "未记录联系信息"}
               meta={`${formatTicketState(ticket.status)} · ${relativeTime(ticket.updatedAt || ticket.createdAt)}`}
               badge={formatTicketState(ticket.status)}
+              tone={ticket.status === "open" || ticket.status === "pending" ? "warning" : "accent"}
             />
           ))
         ) : (
@@ -160,7 +174,8 @@ export function OrdersQueueSection({ orders }) {
     <SurfacePanel appearance="light" accent="rose">
       <SectionHeader
         title="最近订单"
-        description="只看真实订单。"
+        description="这里只放最新订单，方便快速确认异常和退款类问题。"
+        eyebrow="交易跟进"
         action={
           <Link href="/admin/orders" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
             查看全部
@@ -176,6 +191,7 @@ export function OrdersQueueSection({ orders }) {
               detail={`${safeText(order.userId) || "未记录用户"} · ${usd.format(safeNumber(order?.amount))}`}
               meta={`${formatOrderState(order.status)} · ${relativeTime(order.createdAt)}`}
               badge={formatOrderState(order.status)}
+              tone={order.status === "paid" || order.status === "completed" ? "success" : "warning"}
             />
           ))
         ) : (
@@ -191,7 +207,8 @@ export function CommentsQueueSection({ comments }) {
     <SurfacePanel appearance="light" accent="emerald">
       <SectionHeader
         title="最新评论"
-        description="最近反馈一眼看完。"
+        description="先看最新反馈，判断是否需要隐藏或继续跟进。"
+        eyebrow="读者反馈"
         action={
           <Link href="/admin/comments" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
             查看全部
@@ -207,6 +224,7 @@ export function CommentsQueueSection({ comments }) {
               detail={safeText(comment.text).slice(0, 72) || "没有可显示的评论内容"}
               meta={relativeTime(comment.createdAt)}
               badge={comment.hidden ? "已隐藏" : "已显示"}
+              tone={comment.hidden ? "warning" : "success"}
             />
           ))
         ) : (

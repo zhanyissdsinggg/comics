@@ -88,6 +88,16 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
     onFiltersChange(DEFAULT_FILTERS);
   };
 
+  const activeSummary = [
+    resolvedFilters.status !== "all" && STATUS_OPTIONS.find((item) => item.value === resolvedFilters.status)?.label,
+    resolvedFilters.publishStatus !== "all" &&
+      PUBLISH_OPTIONS.find((item) => item.value === resolvedFilters.publishStatus)?.label,
+    resolvedFilters.adultContent !== "all" &&
+      ADULT_OPTIONS.find((item) => item.value === resolvedFilters.adultContent)?.label,
+    resolvedFilters.sortBy !== DEFAULT_FILTERS.sortBy &&
+      SORT_OPTIONS.find((item) => item.value === resolvedFilters.sortBy)?.label,
+  ].filter(Boolean);
+
   return (
     <div className="relative">
       <button
@@ -116,10 +126,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
             <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(247,247,249,0.94))] p-6 shadow-[0_20px_44px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.02] backdrop-blur-xl">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">筛选工作区</p>
                   <h3 className="text-base font-semibold text-slate-950">进一步筛选</h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    只看要处理的作品。
-                  </p>
+                  <p className="mt-1 text-sm text-slate-500">只留下当前要处理的作品，减少来回翻列表。</p>
                 </div>
                 <Button
                   type="button"
@@ -130,6 +139,26 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                 >
                   <X size={16} />
                 </Button>
+              </div>
+
+              <div className="mb-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">当前筛选摘要</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {activeSummary.length > 0 ? (
+                    activeSummary.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                      >
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      当前使用默认筛选
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-5">

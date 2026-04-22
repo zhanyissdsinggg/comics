@@ -66,48 +66,63 @@ export function UsersDirectorySection(props) {
     <AdminPageSection
       title="读者目录"
       description="按邮箱或账号编号搜索。"
+      eyebrow="账号管理"
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索账号编号或邮箱..."
-        onOpenFilters={onOpenSortModal}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-        filtersLabel="排序"
-        ascendingLabel="最早创建优先"
-        descendingLabel="最新创建优先"
-      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">按邮箱或账号编号定位用户，再按创建顺序复核账号状态。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索账号编号或邮箱..."
+              onOpenFilters={onOpenSortModal}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+              filtersLabel="排序"
+              ascendingLabel="最早创建优先"
+              descendingLabel="最新创建优先"
+            />
+          </div>
+        </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onBulkBlock}
-          disabled={selectedIds.length === 0 || bulkBlockPending}
-        >
-          <ShieldX className="size-4" />
-          {bulkBlockPending ? "封禁中..." : "封禁"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBulkUnblock}
-          disabled={selectedIds.length === 0 || bulkUnblockPending}
-        >
-          <ShieldOff className="size-4" />
-          {bulkUnblockPending ? "恢复中..." : "恢复"}
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || bulkDeletePending}
-        >
-          <Trash2 className="size-4" />
-          {bulkDeletePending ? "删除中..." : "删除"}
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量动作</p>
+          <p className="mt-2 text-sm text-slate-600">批量封禁、恢复和删除都放在这里，避免和行内操作混在一起。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onBulkBlock}
+                disabled={selectedIds.length === 0 || bulkBlockPending}
+              >
+                <ShieldX className="size-4" />
+                {bulkBlockPending ? "封禁中..." : "封禁"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBulkUnblock}
+                disabled={selectedIds.length === 0 || bulkUnblockPending}
+              >
+                <ShieldOff className="size-4" />
+                {bulkUnblockPending ? "恢复中..." : "恢复"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || bulkDeletePending}
+              >
+                <Trash2 className="size-4" />
+                {bulkDeletePending ? "删除中..." : "删除"}
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}
@@ -228,6 +243,7 @@ export function UsersGuideSection() {
       title="操作要点"
       description="只保留最关键的三件事。"
       accent="amber"
+      eyebrow="使用说明"
     >
       <div className="grid gap-4 lg:grid-cols-3">
         {items.map((item) => (

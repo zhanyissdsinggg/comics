@@ -17,7 +17,7 @@ export function AdminTableShell({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  containerClassName = "overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]",
+  containerClassName = "overflow-hidden rounded-[30px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(246,246,248,0.96))] shadow-[0_16px_38px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]",
   tableWrapperClassName = "overflow-x-auto",
   paginationProps = {},
   children,
@@ -27,7 +27,7 @@ export function AdminTableShell({
   }
 
   if (isLoading) {
-    return loadingFallback || <LoadingState.Spinner size="md" text="正在加载表格" />;
+    return loadingFallback || <LoadingState.Spinner size="md" text="正在加载列表内容" />;
   }
 
   if (!hasItems) {

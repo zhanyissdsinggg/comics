@@ -156,7 +156,7 @@ export default function AdminSeriesPageNew() {
     return sortSeries(items, advancedFilters.sortBy);
   }, [advancedFilters.adultContent, advancedFilters.publishStatus, advancedFilters.sortBy, advancedFilters.status, quickFilter, searchQuery, seriesList, typeFilter]);
 
-  const seriesStats = useMemo(() => {
+  const seriesOverview = useMemo(() => {
     const total = seriesList.length;
     const comics = seriesList.filter((item) => item.type === "comic").length;
     const novels = seriesList.filter((item) => item.type === "novel").length;
@@ -166,14 +166,59 @@ export default function AdminSeriesPageNew() {
     const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
     const noCover = seriesList.filter((item) => !item.coverUrl).length;
 
-    return [
-      { label: "全部作品", value: total, hint: "当前目录总量" },
-      { label: "漫画", value: comics, hint: `另有 ${novels} 部小说` },
-      { label: "可进前台", value: readyCount, hint: `仍有 ${noAuthor} 部缺少创作者署名` },
-      { label: "待补章节", value: noEpisodes, hint: "适合优先做上架前收口" },
-      { label: "待补封面", value: noCover, hint: `另有 ${drafts} 部仍在草稿` },
-    ];
+    return {
+      total,
+      comics,
+      novels,
+      readyCount,
+      noAuthor,
+      drafts,
+      noEpisodes,
+      noCover,
+      stats: [
+        { label: "全部作品", value: total, hint: "当前目录总量" },
+        { label: "漫画", value: comics, hint: `另有 ${novels} 部小说` },
+        { label: "可进前台", value: readyCount, hint: `仍有 ${noAuthor} 部缺少创作者署名` },
+        { label: "待补章节", value: noEpisodes, hint: "适合优先做上架前收口" },
+        { label: "待补封面", value: noCover, hint: `另有 ${drafts} 部仍在草稿` },
+      ],
+    };
   }, [seriesList]);
+
+  const workspaceFocus = useMemo(() => {
+    if (seriesList.length === 0) {
+      return {
+        title: "先建立第一批作品目录",
+        description: "先录入作品，再补封面、署名和章节，后面的排期才会顺。",
+      };
+    }
+
+    if (seriesOverview.noEpisodes > 0) {
+      return {
+        title: `还有 ${seriesOverview.noEpisodes} 部作品缺少章节`,
+        description: "这些作品会直接影响前台可读性，建议优先补完章节目录。",
+      };
+    }
+
+    if (seriesOverview.noCover > 0 || seriesOverview.noAuthor > 0) {
+      return {
+        title: "资料完整度还没收干净",
+        description: "先补齐封面和创作者署名，再安排发布和首页曝光。",
+      };
+    }
+
+    if (seriesOverview.drafts > 0) {
+      return {
+        title: `当前有 ${seriesOverview.drafts} 部作品仍是草稿`,
+        description: "可以逐部复核内容无误后再推到前台，避免临时返工。",
+      };
+    }
+
+    return {
+      title: "目录状态稳定，可以继续上新",
+      description: "当前资料和章节基础较完整，适合继续推进更新和首页编排。",
+    };
+  }, [seriesList.length, seriesOverview.drafts, seriesOverview.noAuthor, seriesOverview.noCover, seriesOverview.noEpisodes]);
 
   const suggestedSeriesId = useMemo(() => `${slugifySeriesTitle(createForm.title)}-xxxxxx`, [createForm.title]);
 
@@ -394,32 +439,56 @@ export default function AdminSeriesPageNew() {
   return (
     <div className="space-y-6">
       <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-          <div className="space-y-2">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] xl:items-start">
+          <div className="space-y-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
-            <h2 className="text-2xl font-semibold text-slate-950">先把作品信息补真，再决定是否发布。</h2>
-            <p className="text-sm leading-6 text-slate-600">先查作品，再进详情页或章节管理。</p>
+            <h2 className="text-2xl font-semibold text-slate-950">先把作品资料和章节补完整，再决定是否发布。</h2>
+            <p className="max-w-2xl text-sm leading-7 text-slate-600">
+              这里负责作品目录的日常整理。先查找、筛选和复核，再进入详情页或章节管理，不用来回跳很多层。
+            </p>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">目录整理</p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">先看草稿和资料缺口</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">减少前台空封面、缺署名和空目录的问题。</p>
+              </div>
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">编辑路径</p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">详情、章节、发布放在一起</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">常用动作就近可点，不需要再去找分散按钮。</p>
+              </div>
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">今天建议</p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">{workspaceFocus.title}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">{workspaceFocus.description}</p>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }}>
-              <Plus className="size-4" />
-              <span>新增作品</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setCreateForm({
-                  ...createEmptyCreateForm(),
-                  type: "comic",
-                  openAfterCreate: "episodes",
-                });
-                setShowCreateModal(true);
-              }}
-            >
-              <BookOpen className="size-4" />
-              <span>新增漫画</span>
-            </Button>
+          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">快捷操作</p>
+            <h3 className="mt-2 text-lg font-semibold text-slate-950">从这里开始新增或补录作品</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">新建后可以直接进入详情页，或者顺着去补章节，不用多走一步。</p>
+            <div className="mt-5 flex flex-col gap-2">
+              <Button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }}>
+                <Plus className="size-4" />
+                <span>新增作品</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCreateForm({
+                    ...createEmptyCreateForm(),
+                    type: "comic",
+                    openAfterCreate: "episodes",
+                  });
+                  setShowCreateModal(true);
+                }}
+              >
+                <BookOpen className="size-4" />
+                <span>新增漫画并去章节</span>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -427,11 +496,12 @@ export default function AdminSeriesPageNew() {
       <Feedback feedback={feedback} onDismiss={dismissFeedback} />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {seriesStats.map((item) => (
-          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
+        {seriesOverview.stats.map((item) => (
+          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#fafafc)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">目录概况</p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">{item.label}</p>
             <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
-            <p className="mt-2 text-sm text-slate-600">{item.hint}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
           </article>
         ))}
       </section>
@@ -455,42 +525,50 @@ export default function AdminSeriesPageNew() {
               </Button>
             </div>
           ) : null}
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="flex flex-wrap gap-2">
-              {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}>{tab.label}</button>)}
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">内容范围</p>
+              <p className="mt-2 text-sm text-slate-600">先切换作品类型，再决定要不要叠加快速筛选。</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}>{tab.label}</button>)}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {QUICK_FILTERS.map((filter) => (
+                  <button
+                    key={filter.value}
+                    type="button"
+                    onClick={() => setQuickFilter(filter.value)}
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-3 xl:items-end">
-              <div className="flex w-full flex-col gap-3 xl:max-w-3xl xl:flex-row xl:justify-end">
-                <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:ring-[3px] focus-within:ring-slate-200/55">
-                  <Search size={16} className="text-slate-400" />
-                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、编号或创作者署名..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
-                </label>
-                <div className="xl:shrink-0">
-                  <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
-                </div>
-              </div>
-
-              <div className="flex w-full flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-                <div className="flex flex-wrap gap-2">
-                  {QUICK_FILTERS.map((filter) => (
-                    <button
-                      key={filter.value}
-                      type="button"
-                      onClick={() => setQuickFilter(filter.value)}
-                      className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${quickFilter === filter.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}
-                    >
-                      {filter.label}
-                    </button>
-                  ))}
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">查找与视图</p>
+              <p className="mt-2 text-sm text-slate-600">搜索、进阶筛选、选择数量和视图切换放在一处，操作更顺手。</p>
+              <div className="mt-4 flex w-full flex-col gap-3">
+                <div className="flex w-full flex-col gap-3 xl:flex-row">
+                  <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:ring-[3px] focus-within:ring-slate-200/55">
+                    <Search size={16} className="text-slate-400" />
+                    <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、编号或创作者署名..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                  </label>
+                  <div className="xl:shrink-0">
+                    <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
-                    <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部作品
+                    当前结果 <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部
+                  </p>
+                  <p className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
+                    已选 <span className="font-semibold text-slate-950">{selectedSeries.length}</span> 部
                   </p>
                   <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
-                    {allVisibleSelected ? "清空选择" : "全选"}
+                    {allVisibleSelected ? "清空选择" : "全选当前结果"}
                   </Button>
                   <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-white p-1 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
                     <Button

@@ -1,0 +1,160 @@
+{
+  "story": {
+    "slug": "novel-interactive-demo",
+    "title": "Interactive Story Demo",
+    "description": "Template for admin import flow",
+    "seriesId": "series-011",
+    "baseContext": "Main story world setup and core cast profile.",
+    "initialState": {
+      "trust": 0,
+      "risk": 0,
+      "clues": 0,
+      "flags": []
+    },
+    "aiEnabled": true
+  },
+  "nodes": [
+    {
+      "nodeKey": "start",
+      "title": "Opening Scene",
+      "baseContext": "Night. The protagonist receives an anonymous envelope.",
+      "basePrompt": "Keep pace tight and suspenseful.",
+      "fallbackText": "You hear footsteps in the hallway. The envelope feels heavier than expected.",
+      "requiredFlags": [],
+      "blockedFlags": [],
+      "stateEffects": {
+        "risk": 1
+      },
+      "sortOrder": 1,
+      "isEnding": false,
+      "aiEnabled": true,
+      "choices": [
+        {
+          "choiceKey": "open_now",
+          "label": "Open the envelope now",
+          "description": "Take immediate action",
+          "stateEffects": {
+            "clues": 1
+          },
+          "sortOrder": 1,
+          "targetNodeKey": "inside_letter"
+        },
+        {
+          "choiceKey": "hide_first",
+          "label": "Hide it and check the room first",
+          "description": "Prioritize safety",
+          "stateEffects": {
+            "risk": -1,
+            "trust": 1
+          },
+          "sortOrder": 2,
+          "targetNodeKey": "check_room"
+        }
+      ]
+    },
+    {
+      "nodeKey": "inside_letter",
+      "title": "Inside the Letter",
+      "baseContext": "The letter reveals a location and a warning.",
+      "basePrompt": "Give one concrete clue and one emotional beat.",
+      "fallbackText": "A map fragment slips out, marked with a red circle by the river.",
+      "requiredFlags": [],
+      "blockedFlags": [],
+      "stateEffects": {
+        "clues": 1
+      },
+      "sortOrder": 2,
+      "isEnding": false,
+      "aiEnabled": true,
+      "choices": [
+        {
+          "choiceKey": "go_river",
+          "label": "Head to the river immediately",
+          "description": "Fast but dangerous",
+          "stateEffects": {
+            "risk": 2
+          },
+          "sortOrder": 1,
+          "targetNodeKey": "ending_river"
+        },
+        {
+          "choiceKey": "call_friend",
+          "label": "Call your trusted friend first",
+          "description": "Delay for support",
+          "stateEffects": {
+            "trust": 2
+          },
+          "sortOrder": 2,
+          "targetNodeKey": "ending_teamup"
+        }
+      ]
+    },
+    {
+      "nodeKey": "check_room",
+      "title": "Room Sweep",
+      "baseContext": "You find signs that someone has been here.",
+      "basePrompt": "Lean into paranoia and detail.",
+      "fallbackText": "A window latch is still warm. Someone left only seconds ago.",
+      "requiredFlags": [],
+      "blockedFlags": [],
+      "stateEffects": {
+        "clues": 1,
+        "risk": 1
+      },
+      "sortOrder": 3,
+      "isEnding": false,
+      "aiEnabled": true,
+      "choices": [
+        {
+          "choiceKey": "follow_trace",
+          "label": "Follow the trace outside",
+          "description": "Track the intruder",
+          "stateEffects": {
+            "risk": 2
+          },
+          "sortOrder": 1,
+          "targetNodeKey": "ending_river"
+        },
+        {
+          "choiceKey": "lockdown",
+          "label": "Lock down and gather evidence",
+          "description": "Slow and careful",
+          "stateEffects": {
+            "trust": 1,
+            "clues": 1
+          },
+          "sortOrder": 2,
+          "targetNodeKey": "ending_teamup"
+        }
+      ]
+    },
+    {
+      "nodeKey": "ending_river",
+      "title": "River Confrontation",
+      "baseContext": "You arrive at the river and confront the unknown.",
+      "basePrompt": "Resolve tension, leave one hook for chapter two.",
+      "fallbackText": "Under the bridge, a voice calls your name before you can speak.",
+      "requiredFlags": [],
+      "blockedFlags": [],
+      "stateEffects": {},
+      "sortOrder": 4,
+      "isEnding": true,
+      "aiEnabled": true,
+      "choices": []
+    },
+    {
+      "nodeKey": "ending_teamup",
+      "title": "Strategic Alliance",
+      "baseContext": "You and your ally prepare for the next move.",
+      "basePrompt": "End with confidence and momentum.",
+      "fallbackText": "By dawn, your plan is set. This was never just your story.",
+      "requiredFlags": [],
+      "blockedFlags": [],
+      "stateEffects": {},
+      "sortOrder": 5,
+      "isEnding": true,
+      "aiEnabled": true,
+      "choices": []
+    }
+  ]
+}

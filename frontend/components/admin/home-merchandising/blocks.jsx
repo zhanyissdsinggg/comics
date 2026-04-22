@@ -50,7 +50,8 @@ export function MetricCard({ label, value, hint, tone = "blue" }) {
         toneClasses[tone] || toneClasses.blue,
       )}
     >
-      <p className="text-sm text-slate-600">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">首页编排</p>
+      <p className="mt-2 text-sm font-semibold text-slate-950">{label}</p>
       <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
       <p className="mt-2 text-xs leading-6 text-slate-500">{hint}</p>
     </div>
@@ -70,6 +71,7 @@ export function MiniMetric({ label, value, hint }) {
 export function EmptyState({ title, description }) {
   return (
     <div className="rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,246,248,0.9))] px-5 py-10 text-center ring-1 ring-black/[0.02]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">工作区</p>
       <p className="text-base font-semibold text-slate-950">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
     </div>

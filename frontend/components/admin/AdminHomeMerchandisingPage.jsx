@@ -19,7 +19,6 @@ import {
   getReaderProof,
 } from "../../lib/homeMerchandising";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
-import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getStorefrontSlotDisplayMeta, normalizeStorefrontSlotToken } from "../../lib/storefrontSlots";
 import {
   ActionButton,
@@ -27,7 +26,6 @@ import {
   getToneClasses,
   LoadingView,
   MetricCard,
-  MiniMetric,
 } from "./home-merchandising/blocks";
 import {
   HeroCandidatesSection,
@@ -37,17 +35,12 @@ import {
 import {
   buildPerformanceQuery,
   buildSlotOptimizationPlan,
-  formatCompactNumber,
   formatDateLabel,
-  formatPercentValue,
   formatSeriesStatusLabel,
-  getPerformanceState,
   getSlotReplacementCandidates,
   normalizePerformance,
   normalizeSeries,
   normalizeSlot,
-  PERFORMANCE_WINDOWS,
-  toNumber,
 } from "./home-merchandising/utils";
 
 export default function AdminHomeMerchandisingPage() {

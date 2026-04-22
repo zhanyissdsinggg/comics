@@ -87,7 +87,12 @@ export default function SeriesCard(props) {
   const readinessHint =
     readiness.missingCount > 0
       ? `优先补齐 ${readiness.topIssues.join("、")}`
-      : "已具备前台展示所需的基础信息";
+      : "已经具备前台展示所需的基础信息";
+  const operationalHighlights = [
+    series.episodeCount > 0 ? `${series.episodeCount} 章` : "尚未添加章节",
+    series.coverUrl ? "封面已补齐" : "缺少封面",
+    series.creatorLabel ? "署名已补齐" : "缺少创作者署名",
+  ];
 
   return (
     <article
@@ -186,30 +191,58 @@ export default function SeriesCard(props) {
               </div>
             </div>
           ) : (
-            <div className="space-y-1">
-              <button
-                type="button"
-                onClick={() => onOpenDetails(series.id)}
-                className="text-left text-lg font-semibold text-slate-950 transition hover:text-slate-700"
-              >
-                {series.title}
-              </button>
-              <p className="text-xs text-slate-400">作品编号：{series.id}</p>
-              <p className="text-sm text-slate-600">
-                创作者：
-                <span className={series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"}>
-                  {creatorLine}
-                </span>
-              </p>
-              <p className="line-clamp-2 text-sm text-slate-600">
-                {series.description || "作品简介待补充。"}
-              </p>
-              <p className="text-xs text-slate-500">
-                前台准备度 {readiness.score} 分 · {readinessHint}
-              </p>
-              <div className="flex flex-wrap gap-2 pt-2 text-[11px] font-medium">
+            <div className="space-y-3">
+              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">作品概览</p>
+                    <button
+                      type="button"
+                      onClick={() => onOpenDetails(series.id)}
+                      className="mt-2 text-left text-lg font-semibold text-slate-950 transition hover:text-slate-700"
+                    >
+                      {series.title}
+                    </button>
+                    <p className="mt-1 text-xs text-slate-400">作品编号：{series.id}</p>
+                  </div>
+                  <div className={`rounded-[18px] border px-3 py-2 text-right ${getReadinessToneClasses(readiness.tone)}`}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">前台准备度</p>
+                    <p className="mt-1 text-lg font-semibold">{readiness.score} 分</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">创作者</p>
+                    <p className={`mt-2 text-sm ${series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"}`}>
+                      {creatorLine}
+                    </p>
+                  </div>
+                  <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">当前状态</p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">{readinessHint}</p>
+                  </div>
+                </div>
+
+                <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-600">
+                  {series.description || "作品简介待补充。"}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-medium">
+                  {operationalHighlights.map((item) => (
+                    <span
+                      key={`${series.id}-${item}`}
+                      className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-slate-600"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 text-[11px] font-medium">
                 <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-600">
-                  {series.episodeCount > 0 ? `${series.episodeCount} 章` : "尚未添加章节"}
+                  {series.updatedAt ? `最近更新 ${formatUpdatedAt(series.updatedAt, true)}` : "暂无更新时间"}
                 </span>
                 {!series.creatorLabel ? (
                   <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
@@ -268,7 +301,7 @@ export default function SeriesCard(props) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 lg:min-w-[258px] lg:items-stretch">
+        <div className="flex flex-col gap-3 lg:min-w-[258px] lg:items-stretch">
           {isEditing ? (
             <div className={actionGroupClassName}>
               <Button
@@ -293,7 +326,9 @@ export default function SeriesCard(props) {
             </div>
           ) : (
             <>
-              <div className={primaryActionGroupClassName}>
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">主操作</p>
+                <div className={primaryActionGroupClassName}>
                 <Button type="button" size="sm" onClick={() => onOpenDetails(series.id)} title="查看详情">
                   <Edit className="size-4" />
                   详情
@@ -313,14 +348,17 @@ export default function SeriesCard(props) {
                   variant={series.isPublished ? "secondary" : "default"}
                   size="sm"
                   onClick={() => onTogglePublish(series)}
-                  title={series.isPublished ? "转为草稿" : "立即发布"}
+                  title={series.isPublished ? "转为草稿" : "立刻发布"}
                 >
                   {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   {series.isPublished ? "转草稿" : "发布"}
                 </Button>
               </div>
+              </div>
 
-              <div className={secondaryActionGroupClassName}>
+              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">辅助操作</p>
+                <div className={secondaryActionGroupClassName}>
                 <Button
                   type="button"
                   variant="secondary"
@@ -353,8 +391,11 @@ export default function SeriesCard(props) {
                   复制
                 </Button>
               </div>
+              </div>
 
-              <div className={quietDangerActionGroupClassName}>
+              <div className="rounded-[22px] border border-rose-200 bg-rose-50/55 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">危险操作</p>
+                <div className={quietDangerActionGroupClassName}>
                 <Button
                   type="button"
                   variant="destructive"
@@ -365,6 +406,7 @@ export default function SeriesCard(props) {
                   <Trash2 className="size-4" />
                   删除
                 </Button>
+              </div>
               </div>
             </>
           )}

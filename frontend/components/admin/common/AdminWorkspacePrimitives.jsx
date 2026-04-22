@@ -31,14 +31,18 @@ export function AdminPageSection({
   accent = "blue",
   className = "",
   tone = "default",
+  eyebrow = "工作区",
 }) {
   return (
     <SurfacePanel appearance="light" tone={tone} accent={accent} className={className}>
       {title || description || action ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
+            {eyebrow ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{eyebrow}</p>
+            ) : null}
             {title ? (
-              <h2 className="text-[1.2rem] font-semibold tracking-tight text-slate-950 sm:text-[1.35rem]">
+              <h2 className="mt-2 text-[1.2rem] font-semibold tracking-tight text-slate-950 sm:text-[1.35rem]">
                 {title}
               </h2>
             ) : null}
@@ -67,7 +71,8 @@ export function AdminMetricCard({ label, value, detail, tone = "default", classN
         className,
       )}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">运营指标</p>
+      <p className="mt-2 text-sm font-semibold text-slate-950">{label}</p>
       <p className="mt-3 text-[1.85rem] font-semibold tracking-tight text-slate-950">{value}</p>
       {detail ? <p className="mt-2 text-sm leading-6 text-slate-600">{detail}</p> : null}
     </div>

@@ -295,10 +295,7 @@ export default function AdminRegionsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback({ type: "", message: "" })}
-      />
+      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
 
       <AdminPageSection
         title="手机号码规则"
@@ -329,9 +326,7 @@ export default function AdminRegionsPage() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  每一条只保留区号和显示名称。
-                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">每一条只保留区号和显示名称。</p>
               </div>
               <Button type="button" variant="outline" onClick={addCode}>
                 新增条目

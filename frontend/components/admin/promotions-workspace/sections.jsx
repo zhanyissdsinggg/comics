@@ -60,27 +60,42 @@ export function PromotionsListSection(props) {
     <AdminPageSection
       title="活动列表"
       description="先看活动内容、当前状态和下一步动作。"
+      eyebrow="活动管理"
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索活动编号或标题"
-        onOpenFilters={onOpenSortModal}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">先按活动编号或标题定位，再按时间顺序复核还在运行的活动。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索活动编号或标题"
+              onOpenFilters={onOpenSortModal}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+            />
+          </div>
+        </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || deletePending}
-        >
-          {deletePending ? "正在删除..." : "删除所选"}
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量清理</p>
+          <p className="mt-2 text-sm text-slate-600">停用动作在行内处理，批量区只保留删除，避免把活动状态操作混乱。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || deletePending}
+              >
+                {deletePending ? "正在删除..." : "删除所选"}
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}

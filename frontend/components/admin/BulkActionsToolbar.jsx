@@ -58,64 +58,74 @@ export default function BulkActionsToolbar({
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 min-w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-sm font-semibold text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+            <div className="flex h-11 min-w-11 items-center justify-center rounded-full border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f6f7fa)] text-sm font-semibold text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
               {selectedCount}
             </div>
             <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">批量操作</p>
               <p className="text-sm font-semibold text-slate-950">已选择 {selectedCount} 部作品</p>
-              <p className="text-xs text-slate-500">批量操作会直接作用到当前选中项。</p>
+              <p className="text-xs text-slate-500">先确认选择无误，再统一发布、转草稿或删除。</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => wrapOperation(onPublish, "publish")}
-              disabled={isProcessing}
-              title="发布已选作品"
-            >
-              <Eye className="size-4" />
-              <span>发布</span>
-            </Button>
+          <div className="grid gap-2 md:grid-cols-[auto_auto_auto] lg:justify-end">
+            <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">发布动作</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => wrapOperation(onPublish, "publish")}
+                  disabled={isProcessing}
+                  title="发布已选作品"
+                >
+                  <Eye className="size-4" />
+                  <span>发布</span>
+                </Button>
 
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => wrapOperation(onUnpublish, "unpublish")}
-              disabled={isProcessing}
-              title="将已选作品转回草稿"
-            >
-              <EyeOff className="size-4" />
-              <span>取消发布</span>
-            </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => wrapOperation(onUnpublish, "unpublish")}
+                  disabled={isProcessing}
+                  title="将已选作品转回草稿"
+                >
+                  <EyeOff className="size-4" />
+                  <span>转草稿</span>
+                </Button>
+              </div>
+            </div>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onCancel}
-              disabled={isProcessing}
-              title="清空选择"
-            >
-              <X className="size-4" />
-              <span>清空</span>
-            </Button>
+            <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">选择控制</p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+                disabled={isProcessing}
+                title="清空选择"
+              >
+                <X className="size-4" />
+                <span>清空选择</span>
+              </Button>
+            </div>
 
-            <div className="hidden h-6 w-px bg-[color:var(--gush-border)] md:block" />
-
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => wrapOperation(onDelete, "delete")}
-              disabled={isProcessing}
-              title="删除已选作品"
-            >
-              <Trash2 className="size-4" />
-              <span>删除</span>
-            </Button>
+            <div className="rounded-[20px] border border-rose-200 bg-rose-50/72 p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">危险操作</p>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => wrapOperation(onDelete, "delete")}
+                disabled={isProcessing}
+                title="删除已选作品"
+              >
+                <Trash2 className="size-4" />
+                <span>删除作品</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

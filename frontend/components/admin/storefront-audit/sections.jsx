@@ -29,10 +29,9 @@ export function PriorityQueueSection({
     <SurfacePanel appearance="light" accent="amber" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">上线优先级</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">优先处理队列</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            这些作品最值得先处理。
-          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">这些作品最值得先处理，能最快改善前台观感和可读性。</p>
         </div>
         <AlertTriangle className="mt-1 h-5 w-5 text-amber-500" />
       </div>
@@ -128,10 +127,9 @@ export function GapDistributionSection({ topGaps }) {
     <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">问题分布</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">缺口分布</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            先看哪类缺口拖住了最多作品。
-          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">先看哪类缺口拖住了最多作品，再决定今天先收哪一批。</p>
         </div>
         <Sparkles className="mt-1 h-5 w-5 text-cyan-500" />
       </div>
@@ -170,10 +168,9 @@ export function RecommendedSequenceSection() {
     <SurfacePanel appearance="light" accent="emerald" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">处理顺序</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">建议处理顺序</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            按这个顺序推进，前台会更快稳定。
-          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">按这个顺序推进，前台会更快稳定，也更不容易反复返工。</p>
         </div>
         <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-500" />
       </div>

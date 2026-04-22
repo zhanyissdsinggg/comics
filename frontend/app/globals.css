@@ -6,6 +6,9 @@
 
 :root {
   color-scheme: light;
+  --font-ui-body:
+    "Avenir Next", "SF Pro Text", "Segoe UI", "Helvetica Neue", "PingFang SC",
+    "Hiragino Sans GB", Arial, sans-serif;
   --font-body:
     var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;

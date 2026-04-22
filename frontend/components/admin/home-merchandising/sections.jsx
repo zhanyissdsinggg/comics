@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ArrowUpRight,
-  BookOpen,
-  Copy,
-  RefreshCw,
-  Star,
-} from "lucide-react";
+import { ArrowUpRight, BookOpen, Copy, RefreshCw, Star } from "lucide-react";
 
 import SurfacePanel from "@/components/common/SurfacePanel";
 import Skeleton from "@/components/common/Skeleton";
@@ -47,8 +41,9 @@ export function PerformanceOverviewSection(props) {
     <SurfacePanel appearance="light" accent="blue" className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">表现复盘</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">推荐位表现</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">看入口有没有拿到曝光和点击。</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">先看入口有没有真正拿到曝光、点击和转化。</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {PERFORMANCE_WINDOWS.map((window) => (
@@ -73,8 +68,26 @@ export function PerformanceOverviewSection(props) {
         </div>
       ) : null}
 
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前重点</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">先看高曝光入口</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">曝光已经起来但点击低的入口，最值得先调整标题和选品。</p>
+        </div>
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">切换窗口</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">按时间窗口复核波动</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">不要只看单日数据，避免因为短时波动误判推荐位好坏。</p>
+        </div>
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">使用建议</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">先看趋势，再改配置</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">先确认问题稳定存在，再去替换作品或调整推荐位内容。</p>
+        </div>
+      </div>
+
       {trackedCurrentSlots.length === 0 ? (
-        <EmptyState title="先完成推荐位配置" description="关键入口上线后，这里才会出现真实数据。" />
+        <EmptyState title="先完成推荐位配置" description="关键入口上线后，这里才会出现真实表现数据。" />
       ) : performanceLoading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -144,11 +157,12 @@ export function OptimizationQueueSection(props) {
     <SurfacePanel appearance="light" accent="emerald" className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">优化动作</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">待优化队列</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">把配置、完整度和表现放在一起看。</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">把配置、完整度和表现放在一起看，先处理最影响首页观感的入口。</p>
         </div>
         <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-          {urgentOptimizationCount} 个高优先级项
+          {urgentOptimizationCount} 个高优先项
         </span>
       </div>
 
@@ -224,20 +238,15 @@ export function OptimizationQueueSection(props) {
 }
 
 export function HeroCandidatesSection(props) {
-  const {
-    heroCandidates,
-    getReaderProof,
-    openSeriesEditor,
-    openSeriesPreview,
-    handleCopyIds,
-  } = props;
+  const { heroCandidates, getReaderProof, openSeriesEditor, openSeriesPreview, handleCopyIds } = props;
 
   return (
     <SurfacePanel appearance="light" accent="amber" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">主视觉挑选</p>
           <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">主视觉候选作品</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">这些作品最接近首页最强曝光位。</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">这些作品最接近首页最强曝光位，适合优先做主视觉编排。</p>
         </div>
         <Star className="mt-1 h-5 w-5 text-amber-500" />
       </div>
@@ -248,6 +257,7 @@ export function HeroCandidatesSection(props) {
         <div className="grid gap-4 xl:grid-cols-2">
           {heroCandidates.map(({ series, score, reasons }) => {
             const readiness = getAdminSeriesReadiness(series);
+            const creatorName = resolveSeriesCreatorName(series);
 
             return (
               <article
@@ -264,9 +274,8 @@ export function HeroCandidatesSection(props) {
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {resolveSeriesCreatorName(series) ? `署名：${resolveSeriesCreatorName(series)}` : "署名待补"} |{" "}
-                  {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} | 更新于{" "}
-                  {formatDateLabel(series.updatedAt)}
+                  {creatorName ? `署名：${creatorName}` : "署名待补"} | {series.type === "novel" ? "小说" : "漫画"} |{" "}
+                  {formatSeriesStatusLabel(series.status)} | 更新于 {formatDateLabel(series.updatedAt)}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {reasons.map((reason) => (

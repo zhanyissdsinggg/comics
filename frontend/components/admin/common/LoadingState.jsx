@@ -11,10 +11,7 @@ const DEFAULT_ERROR_TITLE = "这个页面暂时无法加载";
 const DEFAULT_ERROR_MESSAGE = "这次请求没有正常完成，请稍后再试。";
 const RETRY_LABEL = "重新加载";
 
-export const SkeletonLoader = React.memo(function SkeletonLoader({
-  count = 5,
-  height = "h-12",
-}) {
+export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, height = "h-12" }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, index) => (
@@ -29,10 +26,7 @@ export const SkeletonLoader = React.memo(function SkeletonLoader({
 
 SkeletonLoader.displayName = "SkeletonLoader";
 
-export const Spinner = React.memo(function Spinner({
-  size = "md",
-  text = DEFAULT_LOADING_TEXT,
-}) {
+export const Spinner = React.memo(function Spinner({ size = "md", text = DEFAULT_LOADING_TEXT }) {
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-6 w-6",
@@ -81,9 +75,7 @@ export const EmptyState = React.memo(function AdminEmptyState({
 }) {
   const resolvedTitle = message && title === DEFAULT_EMPTY_TITLE ? message : title;
   const resolvedDescription =
-    message && title === DEFAULT_EMPTY_TITLE && description === DEFAULT_EMPTY_DESCRIPTION
-      ? ""
-      : description;
+    message && title === DEFAULT_EMPTY_TITLE && description === DEFAULT_EMPTY_DESCRIPTION ? "" : description;
 
   return (
     <SharedEmptyState

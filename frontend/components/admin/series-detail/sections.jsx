@@ -53,35 +53,46 @@ export function SeriesHeaderActions({
   isSaving,
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
-      <Button type="button" variant="outline" onClick={onBackToList}>
-        <ArrowLeft className="size-4" />
-        返回作品列表
-      </Button>
-      <Button type="button" variant="outline" onClick={onOpenEpisodes}>
-        <BookOpen className="size-4" />
-        章节管理
-      </Button>
-      <Button type="button" variant="outline" onClick={onOpenStorefront}>
-        <ArrowUpRight className="size-4" />
-        查看前台页
-      </Button>
-      {isEditing ? (
-        <>
-          <Button type="button" variant="secondary" onClick={onCancelEditing}>
-            取消
+    <div className="grid gap-3 lg:grid-cols-[auto_auto]">
+      <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">导航与查看</p>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onBackToList}>
+            <ArrowLeft className="size-4" />
+            返回作品列表
           </Button>
-          <Button type="button" onClick={onSave} disabled={!overallDirty || isSaving}>
-            <Save className="size-4" />
-            {isSaving ? "保存中..." : "保存修改"}
+          <Button type="button" variant="outline" onClick={onOpenEpisodes}>
+            <BookOpen className="size-4" />
+            章节管理
           </Button>
-        </>
-      ) : (
-        <Button type="button" onClick={onStartEditing}>
-          <PencilLine className="size-4" />
-          编辑详情
-        </Button>
-      )}
+          <Button type="button" variant="outline" onClick={onOpenStorefront}>
+            <ArrowUpRight className="size-4" />
+            查看前台页
+          </Button>
+        </div>
+      </div>
+
+      <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">编辑动作</p>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {isEditing ? (
+            <>
+              <Button type="button" variant="secondary" onClick={onCancelEditing}>
+                取消
+              </Button>
+              <Button type="button" onClick={onSave} disabled={!overallDirty || isSaving}>
+                <Save className="size-4" />
+                {isSaving ? "保存中..." : "保存修改"}
+              </Button>
+            </>
+          ) : (
+            <Button type="button" onClick={onStartEditing}>
+              <PencilLine className="size-4" />
+              编辑详情
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -104,7 +115,7 @@ export function BasicInformationSection({
   statusOptions,
 }) {
   return (
-    <AdminPageSection title="基础信息" description="把标题、简介和标签整理清楚。">
+    <AdminPageSection title="基础信息" description="把标题、简介和标签整理清楚。" eyebrow="内容编辑">
       <div className="grid gap-5 lg:grid-cols-2">
         <AdminFormField label="作品标题">
           <input
@@ -180,7 +191,7 @@ export function CoverSection({
   onCoverUpload,
 }) {
   return (
-    <AdminPageSection title="封面" description="保持封面稳定、清晰、可信。">
+    <AdminPageSection title="封面" description="保持封面稳定、清晰、可信。" eyebrow="视觉素材">
       <div className="overflow-hidden rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
         {formData.coverUrl ? (
           <img
@@ -240,7 +251,7 @@ export function CoverSection({
 
 export function ReadinessSection({ readiness }) {
   return (
-    <AdminPageSection title="前台就绪度" description="快速看出还缺什么。">
+    <AdminPageSection title="前台就绪度" description="快速看出还缺什么。" eyebrow="上线检查">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-3xl font-semibold tracking-tight text-slate-950">{readiness.score}</p>
@@ -260,7 +271,7 @@ export function ReadinessSection({ readiness }) {
 
 export function RecordInfoSection({ items }) {
   return (
-    <AdminPageSection title="记录信息" description="核对这部作品当前的后台记录。">
+    <AdminPageSection title="记录信息" description="核对这部作品当前的后台记录。" eyebrow="后台记录">
       <AdminKeyValueList items={items} />
     </AdminPageSection>
   );
@@ -289,6 +300,7 @@ export function CreditsSection({
     <AdminPageSection
       title="创作者署名"
       description="这里维护作品页和创作者页使用的公开署名。"
+      eyebrow="署名管理"
       action={
         <div className="flex flex-wrap gap-2">
           {isCreditsEditing ? (
@@ -369,7 +381,7 @@ export function CreditsSection({
 
 export function PublishingSection({ formData, isEditing, onFieldChange }) {
   return (
-    <AdminPageSection title="发布设置" description="发布状态和分级限制保持明确。">
+    <AdminPageSection title="发布设置" description="发布状态和分级限制保持明确。" eyebrow="可见范围">
       <div className="grid gap-4 md:grid-cols-2">
         <StatusToggleCard
           label="前台可见"

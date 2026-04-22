@@ -195,10 +195,7 @@ export default function AdminEmailJobsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback({ type: "", message: "" })}
-      />
+      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
 
       <AdminPageSection
         title="投递队列"
@@ -211,7 +208,13 @@ export default function AdminEmailJobsPage() {
             <Button type="button" variant="outline" onClick={() => loadData()} data-testid="admin-email-jobs-refresh">
               刷新
             </Button>
-            <Button type="button" variant="outline" onClick={handleExport} disabled={!jobs.length} data-testid="admin-email-jobs-export">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExport}
+              disabled={!jobs.length}
+              data-testid="admin-email-jobs-export"
+            >
               导出 CSV
             </Button>
           </div>

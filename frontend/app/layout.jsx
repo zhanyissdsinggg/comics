@@ -1,18 +1,10 @@
 import dynamic from "next/dynamic";
-import { Manrope } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { siteConfig } from "../lib/siteConfig";
-
-const bodyFont = Manrope({
-  subsets: ["latin"],
-  variable: "--font-ui-body",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
 
 const CookieConsent = dynamic(
   () => import("../components/common/CookieConsent"),
@@ -80,11 +72,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${bodyFont.variable} font-sans`}
-    >
+    <html lang="en" suppressHydrationWarning className="font-sans">
       <body className="min-h-screen font-sans antialiased">
         {GOOGLE_CLIENT_ID ? (
           <Script

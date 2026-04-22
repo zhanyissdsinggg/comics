@@ -30,6 +30,7 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
     <AdminPageSection
       title="读者总览"
       description="看规模、活跃、价值和流失风险。"
+      eyebrow="用户分析"
     >
       {statsQuery.isError ? (
         <AdminDataState
@@ -89,6 +90,7 @@ export function AnalyticsSegmentsSection({
     <AdminPageSection
       title="读者分群"
       description="先看分群，再打开账号。"
+      eyebrow="分群查看"
     >
       <div className="mb-6 flex flex-wrap gap-2 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-3 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
         {segmentFilters.map((segment) => (
@@ -200,6 +202,7 @@ export function AnalyticsUserDetailSection({
     <AdminPageSection
       title="用户详情"
       description={`查看“${getSegmentLabel(selectedSegment)}”分群里的账号表现。`}
+      eyebrow="用户深度视图"
       action={
         <Button type="button" variant="outline" onClick={onBack}>
           返回分群

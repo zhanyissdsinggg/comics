@@ -55,6 +55,7 @@ export function MarketingControlsSection({
     <AdminPageSection
       title="活动控制"
       description="切换视图、调整时间范围并新建活动。"
+      eyebrow="运营控制"
       action={
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="outline" onClick={onRefresh}>
@@ -68,31 +69,39 @@ export function MarketingControlsSection({
         </div>
       }
     >
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
-        <div className="space-y-3">
-          <AdminTabs items={tabs} value={viewMode} onChange={onViewModeChange} />
-          <p className="text-sm leading-6 text-slate-500">{tabContentMeta.description}</p>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_340px] xl:items-start">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">视图切换</p>
+          <p className="mt-2 text-sm text-slate-600">按运营目标切换当前视图，避免把活动、表现和人群数据混在一起看。</p>
+          <div className="mt-4 space-y-3">
+            <AdminTabs items={tabs} value={viewMode} onChange={onViewModeChange} />
+            <p className="text-sm leading-6 text-slate-500">{tabContentMeta.description}</p>
+          </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <AdminFormField label="开始日期">
-            <input
-              type="date"
-              value={dateRange.startDate}
-              onChange={(event) => onRangeValueChange("startDate", event.target.value)}
-              max={dateRange.endDate || undefined}
-              className={adminInputClassName}
-            />
-          </AdminFormField>
-          <AdminFormField label="结束日期">
-            <input
-              type="date"
-              value={dateRange.endDate}
-              onChange={(event) => onRangeValueChange("endDate", event.target.value)}
-              min={dateRange.startDate || undefined}
-              className={adminInputClassName}
-            />
-          </AdminFormField>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">时间范围</p>
+          <p className="mt-2 text-sm text-slate-600">统一切换统计窗口，方便对比最近一段时间的预算和表现。</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <AdminFormField label="开始日期">
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(event) => onRangeValueChange("startDate", event.target.value)}
+                max={dateRange.endDate || undefined}
+                className={adminInputClassName}
+              />
+            </AdminFormField>
+            <AdminFormField label="结束日期">
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(event) => onRangeValueChange("endDate", event.target.value)}
+                min={dateRange.startDate || undefined}
+                className={adminInputClassName}
+              />
+            </AdminFormField>
+          </div>
         </div>
       </div>
     </AdminPageSection>

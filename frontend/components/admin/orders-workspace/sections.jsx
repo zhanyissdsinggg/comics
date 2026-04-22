@@ -64,6 +64,7 @@ export function OrdersTableSection(props) {
     <AdminPageSection
       title="订单队列"
       description="按订单或用户编号搜索，再处理退款或导出。"
+      eyebrow="交易处理"
       action={
         <Button type="button" variant="secondary" onClick={onExport} disabled={exportDisabled}>
           <Download className="size-4" />
@@ -71,38 +72,52 @@ export function OrdersTableSection(props) {
         </Button>
       }
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索订单编号或用户编号"
-        onOpenFilters={onOpenSortModal}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-        filtersLabel="排序"
-        ascendingLabel="最早优先"
-        descendingLabel="最新优先"
-      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">先锁定订单或用户，再按时间顺序复核退款与异常支付。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索订单编号或用户编号"
+              onOpenFilters={onOpenSortModal}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+              filtersLabel="排序"
+              ascendingLabel="最早优先"
+              descendingLabel="最新优先"
+            />
+          </div>
+        </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBulkRefund}
-          disabled={selectedIds.length === 0 || refundPending}
-        >
-          <RotateCcw className="size-4" />
-          {refundPending ? "正在发起退款..." : "发起退款"}
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || deletePending}
-        >
-          <Trash2 className="size-4" />
-          {deletePending ? "正在删除..." : "删除"}
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量动作</p>
+          <p className="mt-2 text-sm text-slate-600">先看清选择范围，再统一退款或删除记录，导出用于复核留档。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBulkRefund}
+                disabled={selectedIds.length === 0 || refundPending}
+              >
+                <RotateCcw className="size-4" />
+                {refundPending ? "正在发起退款..." : "发起退款"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || deletePending}
+              >
+                <Trash2 className="size-4" />
+                {deletePending ? "正在删除..." : "删除"}
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}

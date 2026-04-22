@@ -16,12 +16,7 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { useAdminAuth } from "./AuthContext";
 import { useBrandingStore } from "../../store/useBrandingStore";
-import {
-  adminGet,
-  adminPost,
-  adminUpload,
-  normalizeAdminErrorMessage,
-} from "../../lib/adminApiClient";
+import { adminGet, adminPost, adminUpload, normalizeAdminErrorMessage } from "../../lib/adminApiClient";
 
 const defaultDraft = {
   siteLogoUrl: "",
@@ -36,7 +31,7 @@ const ASSET_FIELDS = [
     field: "siteLogoUrl",
     keyName: "logo",
     label: "站点标识",
-    helperText: "建议用透明 PNG 或 SVG。",
+    helperText: "建议使用透明 PNG 或 SVG。",
     placeholder: "https://cdn.yoursite.com/brand/logo.png",
     emptyText: "还没有上传站点标识。",
     buttonLabel: "上传标识",
@@ -46,7 +41,7 @@ const ASSET_FIELDS = [
     field: "faviconUrl",
     keyName: "favicon",
     label: "站点图标",
-    helperText: "建议用 32x32 或 64x64 图标。",
+    helperText: "建议使用 32x32 或 64x64 图标。",
     placeholder: "https://cdn.yoursite.com/brand/favicon.png",
     emptyText: "还没有上传站点图标。",
     buttonLabel: "上传图标",
@@ -161,7 +156,6 @@ export default function AdminBrandingPage() {
       if (!response.ok) {
         throw new Error(response.error || response.message || "品牌配置保存失败。");
       }
-
       return toDraft(response.data?.branding);
     },
     onSuccess: (nextDraft) => {
@@ -206,12 +200,8 @@ export default function AdminBrandingPage() {
   };
 
   const activeUploadField = uploadMutation.variables?.field || "";
-  const configuredAssetCount = useMemo(
-    () => Object.values(draft).filter(Boolean).length,
-    [draft],
-  );
-  const formBusy =
-    !hasHydratedDraft || brandingQuery.isLoading || uploadMutation.isPending || saveMutation.isPending;
+  const configuredAssetCount = useMemo(() => Object.values(draft).filter(Boolean).length, [draft]);
+  const formBusy = !hasHydratedDraft || brandingQuery.isLoading || uploadMutation.isPending || saveMutation.isPending;
 
   if (isLoading || !isAuthenticated) {
     return (
@@ -265,22 +255,11 @@ export default function AdminBrandingPage() {
           detail="标识、图标和首页横幅。"
           tone="accent"
         />
-        <AdminMetricCard
-          label="上传上限"
-          value="10 MB"
-          detail="兼顾清晰和加载速度。"
-        />
-        <AdminMetricCard
-          label="影响范围"
-          value="前台观感"
-          detail="会影响头部、图标和首页视觉。"
-        />
+        <AdminMetricCard label="上传上限" value="10 MB" detail="兼顾清晰和加载速度。" />
+        <AdminMetricCard label="影响范围" value="前台观感" detail="会影响头部、图标和首页视觉。" />
       </div>
 
-      <AdminFeedbackBanner
-        feedback={feedback}
-        onDismiss={() => setFeedback({ type: "", message: "" })}
-      />
+      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
 
       <AdminPageSection
         title="品牌素材"
@@ -317,9 +296,7 @@ export default function AdminBrandingPage() {
                     <h3 className="text-base font-semibold text-slate-950">{asset.label}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{asset.helperText}</p>
                   </div>
-                  <AdminBadge tone={value ? "success" : "default"}>
-                    {value ? "已配置" : "待补"}
-                  </AdminBadge>
+                  <AdminBadge tone={value ? "success" : "default"}>{value ? "已配置" : "待补"}</AdminBadge>
                 </div>
 
                 <div className="mt-5 space-y-3">
@@ -364,12 +341,7 @@ export default function AdminBrandingPage() {
                   </div>
                 </div>
 
-                <PreviewSurface
-                  value={value}
-                  alt={asset.label}
-                  emptyText={asset.emptyText}
-                  className={asset.previewClassName}
-                />
+                <PreviewSurface value={value} alt={asset.label} emptyText={asset.emptyText} className={asset.previewClassName} />
               </article>
             );
           })}

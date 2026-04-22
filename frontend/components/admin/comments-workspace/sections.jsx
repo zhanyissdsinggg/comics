@@ -63,30 +63,45 @@ export function CommentsListSection(props) {
     <AdminPageSection
       title="评论列表"
       description="先看谁写的、写了什么、要不要处理。"
+      eyebrow="读者反馈"
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索评论编号、读者编号、邮箱或正文"
-        onOpenFilters={onOpenSortModal}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-        filtersLabel="排序"
-        ascendingLabel="更早优先"
-        descendingLabel="最新优先"
-      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">按评论编号、读者或正文关键词查找，再切换时间顺序快速复核。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索评论编号、读者编号、邮箱或正文"
+              onOpenFilters={onOpenSortModal}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+              filtersLabel="排序"
+              ascendingLabel="更早优先"
+              descendingLabel="最新优先"
+            />
+          </div>
+        </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || deletePending}
-        >
-          {deletePending ? "删除中..." : "删除所选"}
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前操作</p>
+          <p className="mt-2 text-sm text-slate-600">先确认选择，再统一删除异常评论，避免误删正常反馈。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || deletePending}
+              >
+                {deletePending ? "删除中..." : "删除所选"}
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}

@@ -62,10 +62,10 @@ const SEARCH_ITEMS = [
   },
   {
     id: "merchandising",
-    label: "内容编排",
+    label: "首页编排",
     href: "/admin/merchandising",
     icon: Sparkles,
-    keywords: ["collections", "home", "curation", "featured", "编排", "推荐", "合集", "首页"],
+    keywords: ["collections", "home", "curation", "featured", "首页编排", "编排", "推荐", "合集", "首页"],
   },
   {
     id: "recommendations",

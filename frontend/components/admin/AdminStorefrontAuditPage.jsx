@@ -107,7 +107,6 @@ export default function AdminStorefrontAuditPage() {
     if (!seriesId) {
       return;
     }
-
     router.push(`/admin/series/${seriesId}`);
   };
 
@@ -115,7 +114,6 @@ export default function AdminStorefrontAuditPage() {
     if (!seriesId) {
       return;
     }
-
     router.push(`/admin/series/${seriesId}/episodes`);
   };
 
@@ -123,7 +121,6 @@ export default function AdminStorefrontAuditPage() {
     if (!seriesId || typeof window === "undefined") {
       return;
     }
-
     window.open(`/series/${seriesId}`, "_blank", "noopener,noreferrer");
   };
 
@@ -134,7 +131,7 @@ export default function AdminStorefrontAuditPage() {
   return (
     <AdminShell
       title="前台巡检"
-      subtitle="按读者视角检查作品页和阅读路径。"
+      subtitle="按读者视角检查作品页、署名、封面和阅读路径。"
       actions={
         <div className="flex flex-wrap gap-2">
           <ActionButton
@@ -167,7 +164,7 @@ export default function AdminStorefrontAuditPage() {
                 先补读者真的会感觉到的缺口。
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">
-                先看资料、署名和阅读路径。
+                先看资料、署名和阅读路径，再决定哪些作品可以放心推到前台。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">读者视角巡检</StatusPill>
@@ -191,35 +188,11 @@ export default function AdminStorefrontAuditPage() {
         </SurfacePanel>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard
-            label="巡检作品数"
-            value={overview.total.toLocaleString()}
-            hint="当前纳入前台巡检的全部作品。"
-          />
-          <MetricCard
-            label="可直接上前台"
-            value={overview.readyCount.toLocaleString()}
-            hint="资料、署名和阅读路径都已达标。"
-            tone="emerald"
-          />
-          <MetricCard
-            label="已上线但仍有缺口"
-            value={overview.publishedRiskCount.toLocaleString()}
-            hint="这些作品已经公开，但页面还不够稳。"
-            tone="rose"
-          />
-          <MetricCard
-            label="接近可发布"
-            value={overview.launchReadyDraftCount.toLocaleString()}
-            hint="只差发布动作或最后一两项补齐。"
-            tone="cyan"
-          />
-          <MetricCard
-            label="署名待补"
-            value={overview.creatorGapCount.toLocaleString()}
-            hint="这些作品会直接拖累创作者发现和读者信任。"
-            tone="amber"
-          />
+          <MetricCard label="巡检作品数" value={overview.total.toLocaleString()} hint="当前纳入前台巡检的全部作品。" />
+          <MetricCard label="可直接上前台" value={overview.readyCount.toLocaleString()} hint="资料、署名和阅读路径都已达标。" tone="emerald" />
+          <MetricCard label="已上线但仍有缺口" value={overview.publishedRiskCount.toLocaleString()} hint="这些作品已经公开，但页面还不够稳。" tone="rose" />
+          <MetricCard label="接近可发布" value={overview.launchReadyDraftCount.toLocaleString()} hint="只差最后一两项补齐就能上线。" tone="cyan" />
+          <MetricCard label="署名待补" value={overview.creatorGapCount.toLocaleString()} hint="这些作品会直接拖累创作者发现和读者信任。" tone="amber" />
         </div>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">

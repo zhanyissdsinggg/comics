@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAdminAuth } from "./AuthContext";
+
 import { Button } from "@/components/ui/button";
+import { useAdminAuth } from "./AuthContext";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -46,12 +47,8 @@ export default function AdminLoginPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
             <ShieldCheck className="size-8" />
           </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            后台
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            登录内容管理后台
-          </h1>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">后台</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">登录内容管理后台</h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             使用后台邮箱和密码进入运营面板。成员身份、角色和两步验证设置会从后台成员目录里读取。
           </p>
@@ -111,7 +108,7 @@ export default function AdminLoginPage() {
               maxLength={6}
               value={totpCode}
               onChange={(event) => {
-                const next = event.target.value.replace(/\\D/g, "").slice(0, 6);
+                const next = event.target.value.replace(/\D/g, "").slice(0, 6);
                 setTotpCode(next);
               }}
               autoComplete="one-time-code"

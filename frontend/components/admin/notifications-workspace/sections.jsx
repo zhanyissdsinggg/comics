@@ -57,27 +57,42 @@ export function NotificationsListSection(props) {
     <AdminPageSection
       title="通知列表"
       description="检查内容并清理过期通知。"
+      eyebrow="站内通知"
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索通知编号、标题或正文"
-        onOpenFilters={onOpenSortModal}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">按标题、正文和通知编号快速定位，再切换时间顺序清理历史通知。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索通知编号、标题或正文"
+              onOpenFilters={onOpenSortModal}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+            />
+          </div>
+        </div>
 
-      <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onOpenDeleteConfirm}
-          disabled={selectedIds.length === 0 || deletePending}
-        >
-          {deletePending ? "正在删除..." : "删除所选"}
-        </Button>
-      </AdminSelectionBar>
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前动作</p>
+          <p className="mt-2 text-sm text-slate-600">先确认已选通知，再统一删除过期或错误下发的消息。</p>
+          <div className="mt-4">
+            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={onOpenDeleteConfirm}
+                disabled={selectedIds.length === 0 || deletePending}
+              >
+                {deletePending ? "正在删除..." : "删除所选"}
+              </Button>
+            </AdminSelectionBar>
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={isError}

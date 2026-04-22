@@ -96,19 +96,31 @@ export function MembersDirectorySection(props) {
     <AdminPageSection
       title="成员目录"
       description="看成员、角色、槽位和两步验证。"
+      eyebrow="团队管理"
     >
-      <AdminListToolbar
-        searchTerm={searchTerm}
-        onSearchTermChange={onSearchTermChange}
-        searchPlaceholder="搜索成员名称、邮箱、角色或成员编号"
-        onOpenFilters={onOpenSort}
-        sortOrder={sortOrder}
-        onToggleSortOrder={onToggleSortOrder}
-        filtersLabel="排序"
-        ascendingLabel="较早优先"
-        descendingLabel="最新优先"
-        extraActions={
-          <>
+      <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
+          <p className="mt-2 text-sm text-slate-600">先按成员、邮箱或角色缩小范围，再按时间顺序复核后台团队状态。</p>
+          <div className="mt-4">
+            <AdminListToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              searchPlaceholder="搜索成员名称、邮箱、角色或成员编号"
+              onOpenFilters={onOpenSort}
+              sortOrder={sortOrder}
+              onToggleSortOrder={onToggleSortOrder}
+              filtersLabel="排序"
+              ascendingLabel="较早优先"
+              descendingLabel="最新优先"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">成员动作</p>
+          <p className="mt-2 text-sm text-slate-600">先同步环境槽位，再补齐成员资料；新建入口单独放在这里更稳。</p>
+          <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={onSync} disabled={syncPending}>
               <RefreshCcw className="size-4" />
               {syncPending ? "同步中..." : "同步槽位"}
@@ -117,9 +129,9 @@ export function MembersDirectorySection(props) {
               <Plus className="size-4" />
               新建成员
             </Button>
-          </>
-        }
-      />
+          </div>
+        </div>
+      </div>
 
       <AdminTableShell
         isError={membersState.isError}
@@ -278,6 +290,7 @@ export function MembersGuideSection() {
       title="操作要点"
       description="只保留最关键的三件事。"
       accent="amber"
+      eyebrow="使用说明"
     >
       <div className="grid gap-4 lg:grid-cols-3">
         {items.map((item) => (
