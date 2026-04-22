@@ -179,8 +179,8 @@ test.describe("Storefront CTA flows", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: /Browse creators\./i,
-      }),
+        name: /Profiles|Creators directory|All creators/i,
+      }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });

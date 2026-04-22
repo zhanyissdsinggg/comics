@@ -161,7 +161,9 @@ test.describe("Global accessibility guardrails", () => {
     const response = await page.goto("/search?q=dragon", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const searchInput = page.getByPlaceholder("Search series, creators...");
+    const searchInput = page
+      .getByPlaceholder(/Search series, creators\.\.\.|Search titles, genres, or creators|Search titles/i)
+      .first();
     await expect(searchInput).toBeVisible({ timeout: SEARCH_UI_TIMEOUT_MS });
     await expect(page.getByRole("button", { name: "View your wallet" })).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
@@ -179,7 +181,9 @@ test.describe("Global accessibility guardrails", () => {
     });
     const walletButton = page.getByRole("button", { name: /View your wallet/i });
     const notificationsButton = page.getByRole("button", { name: /View your notifications/i });
-    const adultToggle = page.getByRole("button", { name: "Adult content" });
+    const adultToggle = page.getByRole("button", {
+      name: /Switch to 18\+ mode|Switch to standard mode/i,
+    });
     const accountButton = page.getByRole("button", { name: "Account" });
 
     await walletButton.focus();

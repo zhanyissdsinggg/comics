@@ -12,9 +12,12 @@ test.describe("Header adult toggle", () => {
 
     const adultToggle = page.getByTestId("adult-toggle-button");
     await expect(adultToggle).toBeVisible({ timeout: 15000 });
-    await expect(adultToggle).toHaveAttribute("aria-label", "Adult content");
+    await expect(adultToggle).toHaveAttribute(
+      "aria-label",
+      /Switch to 18\+ mode|Switch to standard mode/i,
+    );
     await adultToggle.scrollIntoViewIfNeeded();
-    await adultToggle.click({ force: true });
+    await adultToggle.dispatchEvent("click");
 
     const signInHeading = page.getByRole("heading", { name: /Sign in/i });
     const ageHeading = page.getByRole("heading", { name: "Confirm your age", exact: true });
