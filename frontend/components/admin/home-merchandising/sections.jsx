@@ -69,17 +69,17 @@ export function PerformanceOverviewSection(props) {
       ) : null}
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前重点</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">先看高曝光入口</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">曝光已经起来但点击低的入口，最值得先调整标题和选品。</p>
         </div>
-        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">切换窗口</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">按时间窗口复核波动</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">不要只看单日数据，避免因为短时波动误判推荐位好坏。</p>
         </div>
-        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+        <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">使用建议</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">先看趋势，再改配置</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">先确认问题稳定存在，再去替换作品或调整推荐位内容。</p>

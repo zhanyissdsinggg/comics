@@ -64,7 +64,7 @@ export default function PromoBanner({ offer, promotion }) {
           <h2 className="mt-4 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white">
             {copy.title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/85">
+          <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/80">
             {copy.description}
           </p>
         </div>

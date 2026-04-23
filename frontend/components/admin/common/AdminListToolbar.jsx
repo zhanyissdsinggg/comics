@@ -40,7 +40,7 @@ export function AdminListToolbar({
           </label>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 p-2 shadow-[0_10px_24px_rgba(15,23,42,0.03)] xl:justify-end">
+        <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 p-2 shadow-[0_10px_24px_rgba(15,23,42,0.03)] xl:justify-end">
           <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             控制区
           </span>

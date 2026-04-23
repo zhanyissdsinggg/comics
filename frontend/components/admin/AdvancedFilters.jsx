@@ -141,7 +141,7 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                 </Button>
               </div>
 
-              <div className="mb-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white/92 px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+              <div className="mb-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">当前筛选摘要</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {activeSummary.length > 0 ? (

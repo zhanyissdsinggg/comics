@@ -160,7 +160,7 @@ function CoverFallback({
             }}
           >
             {shouldShowKicker ? (
-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/75">
                 <span
                   className="h-1.5 w-1.5"
                   style={{ backgroundColor: artDirection.accent }}
@@ -178,7 +178,7 @@ function CoverFallback({
               </p>
             )}
             {shouldShowSecondaryGenre ? (
-              <p className="mt-3 text-[11px] font-medium leading-5 text-white/74">
+              <p className="mt-3 text-[11px] font-medium leading-5 text-white/70">
                 {artDirection.secondaryGenre}
               </p>
             ) : null}

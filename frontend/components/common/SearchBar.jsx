@@ -254,7 +254,7 @@ const SearchBar = memo(function SearchBar({
               inputRef.current?.blur();
             }
           }}
-          className="min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-white/58 focus:outline-none md:text-sm"
+          className="min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-white/60 focus:outline-none md:text-sm"
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
           aria-label="Search series, creators, or genres"

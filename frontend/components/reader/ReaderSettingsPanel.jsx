@@ -152,7 +152,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                   Tune the page luminance without affecting site theme.
                 </div>
               </div>
-                <span className="text-sm font-semibold text-white/86">{safeBrightness}%</span>
+                <span className="text-sm font-semibold text-white/90">{safeBrightness}%</span>
             </div>
             <input
               type="range"
@@ -186,7 +186,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                     Increase speed when you want a faster glide.
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-white/86">{safeAutoScrollSpeed}x</span>
+                <span className="text-sm font-semibold text-white/90">{safeAutoScrollSpeed}x</span>
               </div>
               <input
                 type="range"
@@ -240,7 +240,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)] transition hover:bg-white/92"
+            className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)] transition hover:bg-white/95"
           >
             Done
           </button>

@@ -288,7 +288,7 @@ function writeLocalTrackingSnapshot(values, savedAt, shouldBroadcast = true) {
 }
 
 const STATUS_STYLES = {
-  neutral: "border-black/8 bg-[rgba(250,247,241,0.9)] text-slate-700",
+  neutral: "border-black/10 bg-[rgba(250,247,241,0.9)] text-slate-700",
   success: "border-emerald-200 bg-emerald-50/90 text-emerald-700",
   warning: "border-amber-200 bg-amber-50/90 text-amber-700",
   danger: "border-red-200 bg-red-50/90 text-red-700",
@@ -538,7 +538,7 @@ export default function TrackingSettings() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-black/10 bg-white/80 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 最近保存
               </p>
@@ -548,7 +548,7 @@ export default function TrackingSettings() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
+            <div className="rounded-[24px] border border-black/10 bg-white/80 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 版本来源
               </p>
@@ -558,7 +558,7 @@ export default function TrackingSettings() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-black/8 bg-white/78 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] sm:col-span-2">
+            <div className="rounded-[24px] border border-black/10 bg-white/80 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] sm:col-span-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 当前模式
               </p>
@@ -626,7 +626,7 @@ export default function TrackingSettings() {
                 })}
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-black/8 bg-[rgba(250,247,241,0.82)] px-4 py-4">
+              <div className="mt-5 rounded-[22px] border border-black/10 bg-[rgba(250,247,241,0.82)] px-4 py-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   示例片段
                 </p>

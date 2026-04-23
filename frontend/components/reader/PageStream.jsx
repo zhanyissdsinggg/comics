@@ -98,7 +98,7 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
 
       <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border border-white/10 bg-white/10 p-5 backdrop-blur-[2px]">
         <div className="h-2.5 w-24 rounded-full" style={{ backgroundColor: accent }} />
-        <div className="mt-5 h-4 w-4/5 rounded-full bg-white/85" />
+        <div className="mt-5 h-4 w-4/5 rounded-full bg-white/80" />
         <div className="mt-3 h-3.5 w-full rounded-full bg-white/20" />
         <div className="mt-2 h-3.5 w-3/4 rounded-full bg-white/20" />
         <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
