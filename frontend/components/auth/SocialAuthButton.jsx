@@ -208,16 +208,18 @@ export default function SocialAuthButton({
 
     return (
       <div className="w-full space-y-2">
-        <div className="flex min-h-[44px] w-full items-center justify-center overflow-hidden rounded-[16px] border border-[color:var(--gush-border)] bg-white px-2 py-1 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+        <div className="flex min-h-[48px] w-full items-center justify-center overflow-hidden rounded-[20px] border-[3px] border-black bg-white px-2 py-1 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
         {GOOGLE_CLIENT_ID && !googleReady ? (
-          <p className="text-center text-xs text-slate-400">
+          <p className="text-center text-xs uppercase tracking-[0.18em] text-black/45">
             Loading Google Sign-In...
           </p>
         ) : null}
         {loading || isLoading ? (
-          <p className="text-center text-xs text-slate-400">Signing in...</p>
+          <p className="text-center text-xs uppercase tracking-[0.18em] text-black/45">
+            Signing in...
+          </p>
         ) : null}
       </div>
     );
@@ -229,7 +231,7 @@ export default function SocialAuthButton({
         type="button"
         onClick={handleAppleLogin}
         disabled={loading || isLoading}
-        className="group relative flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[16px] border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+        className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-[20px] border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition duration-200 hover:-translate-y-0.5 hover:bg-[#fff6cf] disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Apple"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

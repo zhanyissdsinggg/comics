@@ -51,10 +51,10 @@ export const EmptyState = memo(function EmptyState({
   const accentClass =
     icon === "alert"
       ? isLight
-        ? "border-red-200 bg-red-50 text-red-500"
+        ? "border-[3px] border-black bg-[#ffe7ec] text-[#ff007a]"
         : "border-red-400/20 bg-red-500/[0.08] text-red-200"
       : isLight
-        ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-[var(--gush-accent,#0071e3)]"
+        ? "border-[3px] border-black bg-[#ffe500] text-black"
         : "border-sky-400/20 bg-sky-400/[0.08] text-sky-100";
 
   return (
@@ -62,7 +62,7 @@ export const EmptyState = memo(function EmptyState({
       className={cn(
         "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         isLight &&
-          "border-[color:var(--gush-border)] bg-white shadow-[0_16px_36px_rgba(15,23,42,0.05)]",
+          "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
         className,
       )}
     >
@@ -76,7 +76,7 @@ export const EmptyState = memo(function EmptyState({
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
-            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_10px_24px_rgba(15,23,42,0.05)]",
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[5px_5px_0_0_rgba(0,0,0,1)]",
             accentClass,
           )}
         >
@@ -84,20 +84,20 @@ export const EmptyState = memo(function EmptyState({
         </div>
 
         <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-slate-500" : "text-neutral-500"}`}
+          className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isLight ? "text-black/55" : "text-neutral-500"}`}
         >
           {eyebrow}
         </p>
 
         <h3
-          className={`mt-3 font-display text-2xl font-semibold tracking-tight ${isLight ? "text-slate-950" : "text-white"}`}
+          className={`mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] ${isLight ? "text-black" : "text-white"}`}
         >
           {title}
         </h3>
 
         {description ? (
           <p
-            className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-slate-600" : "text-neutral-400"}`}
+            className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-black/68" : "text-neutral-400"}`}
           >
             {description}
           </p>
@@ -107,11 +107,11 @@ export const EmptyState = memo(function EmptyState({
           <button
             type="button"
             onClick={resolvedAction.onClick}
-            className={`mt-6 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200 ${
+            className={`mt-6 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all duration-200 ${
               isLight
                 ? icon === "alert"
-                  ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-                  : "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
+                  ? "border-[3px] border-black bg-[#ffe7ec] text-[#ff007a] hover:-translate-y-0.5 hover:bg-[#ffd3e0]"
+                  : "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:-translate-y-0.5 hover:bg-[#ff007a]"
                 : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/16"
             }`}
           >

@@ -239,7 +239,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
       },
       {
         id: "support",
@@ -248,7 +248,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Billing support",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
       },
     ],
     [router],
@@ -262,7 +262,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
         accentClass:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
       },
       {
         id: "membership",
@@ -278,7 +278,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             }),
           ),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
       },
       {
         id: "support",
@@ -287,7 +287,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Billing support",
         onClick: () => router.push(buildSupportHref("", "billing")),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
       },
     ],
     [router],
@@ -315,7 +315,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           ? () => scrollToSection("purchase-history")
           : signInToOrders,
         accentClass:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-white",
+          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
       },
       {
         id: "membership-charges",
@@ -340,7 +340,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 }),
               ),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
       },
       {
         id: "purchase-issue",
@@ -352,7 +352,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         cta: "Billing support",
         onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
         accentClass:
-          "border-[color:var(--gush-border)] bg-white text-slate-900 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]",
+          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
       },
     ],
     [
@@ -368,9 +368,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-50";
+    "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-50";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className="gush-home-shell overflow-hidden">
@@ -399,11 +399,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Billing desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   {viewerSignedIn ? "Receipts." : "Sign in first."}
                 </h2>
               </div>
@@ -464,12 +464,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent={feedback.type === "error" ? "rose" : "amber"}
             className={
               feedback.type === "error"
-                ? "border border-red-200 bg-red-50 text-red-600"
-                : "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
+                ? "border-[3px] border-black bg-[#ffe3ec] text-[#8f003f] shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                : "border-[3px] border-black bg-[#fff6c7] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             }
           >
             <p
-              className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-slate-700"}`}
+              className={`text-sm font-medium ${feedback.type === "error" ? "text-[#8f003f]" : "text-black/78"}`}
             >
               {feedback.text}
             </p>
@@ -478,17 +478,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel
-            className="border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
+            className="border-[3px] border-black bg-[#fff6c7] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             appearance="light"
             tone="warning"
             accent="blue"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-black uppercase tracking-[0.03em]">
                   Need help with a charge?
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm font-medium text-black/68">
                   You can still review purchases here. Include the order ID if
                   something looks off.
                 </p>
@@ -514,10 +514,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               accent="blue"
             >
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                   Billing tasks
                 </p>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Orders or support.
                 </h2>
               </div>
@@ -532,7 +532,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {!viewerSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
               Sign in for receipts.
             </h2>
             <StorefrontPathwaysGrid
@@ -561,7 +561,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                  className="border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                   aria-hidden="true"
                 >
                   <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
@@ -573,10 +573,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           </SurfacePanel>
         ) : orders.length === 0 ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
               No purchases yet.
             </h2>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm font-medium leading-6 text-black/68">
               Receipts appear here after checkout.
             </p>
             <StorefrontPathwaysGrid
@@ -594,15 +594,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           >
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                   Receipts and charges
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Purchase history
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs font-medium text-black/58">
                   {orders.length} purchase{orders.length === 1 ? "" : "s"}{" "}
                   loaded
                 </p>
@@ -626,31 +626,31 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 return (
                   <div
                     key={order.orderId}
-                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                    className="border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">
+                        <p className="text-sm font-black uppercase tracking-[-0.02em] text-black">
                           {formatOrderPackageLabel(order.packageId)}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs font-medium text-black/58">
                           {formatOrderAmount(order.amount, order.currency)} |
                           Order ID {order.orderId}
                         </p>
                       </div>
-                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
+                      <span className="border-[3px] border-black bg-[#fff6c7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-black/68">
                         {order.status}
                       </span>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1">
+                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-black/58">
+                      <span className="border-[3px] border-black bg-[#00e5ff] px-3 py-1 font-black uppercase tracking-[0.08em] text-black">
                         {orderGuide.eyebrow}
                       </span>
-                      <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1">
+                      <span className="border-[3px] border-black bg-[#f5f1ea] px-3 py-1 font-black uppercase tracking-[0.08em] text-black/68">
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                    <p className="mt-3 text-sm font-medium leading-6 text-black/68">
                       {orderGuide.description}
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -692,10 +692,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                             }
                             setWorkingId("");
                           }}
-                          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                          className={`px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition ${
                             workingId === order.orderId
-                              ? "cursor-not-allowed bg-slate-300 text-slate-500"
-                              : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
+                              ? "cursor-not-allowed border-[3px] border-black bg-slate-300 text-black/45 shadow-[4px_4px_0_0_rgba(0,0,0,0.45)]"
+                              : "border-[3px] border-black bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
                           }`}
                           disabled={workingId === order.orderId}
                         >
@@ -709,7 +709,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           onClick={() =>
                             router.push(buildSupportHref(order.orderId))
                           }
-                          className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                          className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                         >
                           Billing support
                         </button>
@@ -717,7 +717,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                       <button
                         type="button"
                         onClick={() => router.push(orderGuide.nextHref)}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                        className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
                       >
                         {orderGuide.nextCta}
                       </button>

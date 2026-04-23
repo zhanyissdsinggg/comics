@@ -90,7 +90,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-[rgba(255,255,255,0.98)] px-1 text-slate-950">
+      <mark className="rounded border border-black bg-[#ffe500] px-1 text-black">
         {match}
       </mark>
       {after}
@@ -1104,7 +1104,7 @@ export default function SearchPage() {
                 {heroDescription}
               </p>
               {heroSecondary ? (
-                <p className="mt-2 text-sm text-slate-500">{heroSecondary}</p>
+                <p className="mt-2 text-sm font-medium text-black/55">{heroSecondary}</p>
               ) : null}
             </div>
 
@@ -1157,14 +1157,14 @@ export default function SearchPage() {
               accent="blue"
               appearance="light"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                 Search view
               </p>
 
               {leadSearchResult ? (
-                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+                <div className="rounded-[32px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                   <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_14px_28px_rgba(15,23,42,0.08)]">
+                    <div className="overflow-hidden rounded-[20px] border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                       <Cover
                         tone={leadSearchResult.coverTone}
                         coverUrl={leadSearchResult.coverUrl}
@@ -1178,13 +1178,13 @@ export default function SearchPage() {
                       />
                     </div>
                     <div className="min-w-0">
-                      <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
+                      <h2 className="text-[1.55rem] font-black uppercase tracking-[0.03em] text-black">
                         {leadSearchResult.title}
                       </h2>
-                      <p className="mt-2 text-sm text-slate-500">
+                      <p className="mt-2 text-sm text-black/55">
                         {formatSearchSeriesMeta(leadSearchResult)}
                       </p>
-                      <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600">
+                      <p className="mt-3 line-clamp-3 text-sm leading-7 text-black/68">
                         {summarizeSearchDescription(leadSearchResult)}
                       </p>
                       <button
@@ -1198,7 +1198,7 @@ export default function SearchPage() {
                               : "search_masthead_featured",
                           )
                         }
-                        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-slate-950"
+                        className="mt-4 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.06em] text-[#ff007a] transition-colors hover:text-black"
                       >
                         Open title
                         <ArrowRight className="size-4" />
@@ -1207,11 +1207,11 @@ export default function SearchPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-                <h2 className="font-display text-[1.55rem] font-semibold tracking-[-0.04em] text-slate-950">
+                <div className="rounded-[32px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <h2 className="text-[1.55rem] font-black uppercase tracking-[0.03em] text-black">
                   {query ? "Closest result." : "Popular now."}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm leading-7 text-black/68">
                   {query
                     ? "Use filters."
                     : mastheadLeadKeyword
@@ -1221,30 +1221,30 @@ export default function SearchPage() {
                 </div>
               )}
 
-              <div className="grid gap-4 border-t border-[color:var(--gush-border-faint)] pt-4 sm:grid-cols-3">
-                <div className="sm:border-l sm:border-[color:var(--gush-border)] sm:pl-4 first:sm:border-l-0 first:sm:pl-0">
-                  <p className="text-lg font-semibold tracking-tight text-slate-950">
+              <div className="grid gap-4 border-t-[3px] border-black pt-4 sm:grid-cols-3">
+                <div className="sm:border-l-[3px] sm:border-black sm:pl-4 first:sm:border-l-0 first:sm:pl-0">
+                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
                     {query
                       ? total.toLocaleString()
                       : catalog.length.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
                     {query ? "Matches" : "Titles"}
                   </p>
                 </div>
-                <div className="sm:border-l sm:border-[color:var(--gush-border)] sm:pl-4">
-                  <p className="text-lg font-semibold tracking-tight text-slate-950">
+                <div className="sm:border-l-[3px] sm:border-black sm:pl-4">
+                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
                     {hotKeywords.length.toLocaleString()}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
                     Hot terms
                   </p>
                 </div>
-                <div className="sm:border-l sm:border-[color:var(--gush-border)] sm:pl-4">
-                  <p className="text-lg font-semibold tracking-tight text-slate-950">
+                <div className="sm:border-l-[3px] sm:border-black sm:pl-4">
+                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
                     {page}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
                     Page
                   </p>
                 </div>
@@ -1339,7 +1339,7 @@ export default function SearchPage() {
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
                 <section key={rail.id} className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-950">
+                  <h3 className="text-lg font-black uppercase tracking-[0.03em] text-black">
                     {rail.title}
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

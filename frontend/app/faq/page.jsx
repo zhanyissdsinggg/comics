@@ -76,13 +76,13 @@ export default function FAQPage() {
               <>
                 <Link
                   href="/support"
-                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                  className="border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
                 >
                   Support
                 </Link>
                 <a
                   href={`mailto:${siteConfig.supportEmail}`}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                 >
                   Email support
                 </a>
@@ -107,11 +107,11 @@ export default function FAQPage() {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Support
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   Support.
                 </h2>
               </div>
@@ -120,13 +120,13 @@ export default function FAQPage() {
             <div className="flex flex-col gap-2.5">
               <Link
                 href="/support"
-                className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                className="border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               >
                 Support
               </Link>
               <Link
                 href="/how-it-works"
-                className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
               >
                 Guide
               </Link>
@@ -137,10 +137,10 @@ export default function FAQPage() {
         <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 FAQ
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Answers.
               </h2>
             </div>
@@ -148,12 +148,12 @@ export default function FAQPage() {
               {FAQ.map((item) => (
                 <div
                   key={item.q}
-                  className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.03)]"
+                  className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                 >
-                  <h3 className="text-base font-semibold text-slate-950">
+                  <h3 className="text-base font-black uppercase tracking-[-0.02em] text-black">
                     {item.q}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                  <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                     {item.a}
                   </p>
                 </div>
@@ -169,18 +169,18 @@ export default function FAQPage() {
                 appearance="light"
                 accent="blue"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                   Next
                 </p>
-                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {item.title}
                 </h2>
-                <p className="mt-4 text-sm leading-7 text-slate-600">
+                <p className="mt-4 text-sm font-medium leading-7 text-black/68">
                   {item.description}
                 </p>
                 <Link
                   href={item.href}
-                  className="mt-6 inline-flex rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="mt-6 inline-flex border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                 >
                   {item.label}
                 </Link>

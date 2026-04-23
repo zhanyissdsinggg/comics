@@ -98,12 +98,12 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "rounded-[18px] border border-[color:var(--gush-border)] bg-white px-3 py-2.5 shadow-none"
-      : "rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3.5 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+      ? "rounded-[18px] border-[3px] border-black bg-white px-3 py-2.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+      : "rounded-[22px] border-[3px] border-black bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
     : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
-  const labelClass = isLight ? "text-slate-500" : "text-neutral-400";
+  const labelClass = isLight ? "text-black/55" : "text-neutral-400";
   const subtleButtonClass = isLight
-    ? "border-[color:var(--gush-border)] bg-white text-slate-500 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900"
+    ? "border-[3px] border-black bg-white text-black/60 hover:-translate-y-0.5 hover:bg-[#fff6cf] hover:text-black"
     : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
@@ -133,7 +133,7 @@ export default function FilterBar({
                   className={cn(
                     "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
-                      ? "border-[color:var(--gush-border)] bg-white text-slate-500"
+                      ? "border-[3px] border-black bg-[#fff6cf] text-black/55"
                       : "border-white/10 bg-white/[0.04] text-neutral-300",
                   )}
                 >
@@ -146,7 +146,7 @@ export default function FilterBar({
               className={cn(
                 "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
-                  ? "border-[color:var(--gush-border)] bg-white text-slate-400"
+                  ? "border-[3px] border-black bg-[#fff6cf] text-black/45"
                   : "border-white/10 bg-white/[0.04] text-neutral-300",
               )}
             >
@@ -166,7 +166,7 @@ export default function FilterBar({
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  ? "border-[3px] border-black bg-white text-black hover:-translate-y-0.5 hover:bg-[#dffcff]"
                   : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
               }`}
             >
@@ -231,7 +231,7 @@ export default function FilterBar({
           <div
             className={cn(
               `${isQuiet ? "pt-2.5" : "space-y-3 pt-3"} border-t`,
-              isLight ? "border-[color:var(--gush-border)]" : "border-white/10",
+              isLight ? "border-black" : "border-white/10",
             )}
           >
             {isQuiet ? (
@@ -250,7 +250,7 @@ export default function FilterBar({
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-[color:var(--gush-border-strong)] bg-white text-slate-900"
+                          ? "border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                           : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
                     )}
                   >
@@ -279,7 +279,7 @@ export default function FilterBar({
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] rounded-[18px] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
                       isLight
-                        ? "border-[color:var(--gush-border)] bg-white"
+                        ? "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                         : "border-white/10 bg-black/90",
                     )}
                   >

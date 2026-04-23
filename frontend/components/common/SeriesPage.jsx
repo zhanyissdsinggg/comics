@@ -551,7 +551,7 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                className="rounded-full border-[3px] border-black bg-black px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
               >
                 Search the catalog
               </button>
@@ -604,7 +604,7 @@ export default function SeriesPage({
                   <button
                     type="button"
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
-                    className="mt-5 rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                    className="mt-5 rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
                   >
                     Open series
                   </button>
@@ -647,10 +647,10 @@ export default function SeriesPage({
                   accent="blue"
                 >
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                       {card.eyebrow}
                     </p>
-                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                       {card.title}
                     </h2>
                   </div>
@@ -671,10 +671,10 @@ export default function SeriesPage({
               accent="blue"
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                   Browse
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Browse by genre
                 </h2>
               </div>
@@ -689,7 +689,7 @@ export default function SeriesPage({
                         `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
                       )
                     }
-                    className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
+                    className="rounded-full border-[3px] border-black bg-white px-3 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#ffe500]"
                   >
                     {item.genre}
                   </button>
@@ -702,15 +702,15 @@ export default function SeriesPage({
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Browse shelf
               </p>
-              <h2 className="mt-2 font-display text-[1.95rem] font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 font-display text-[1.95rem] font-black uppercase tracking-[-0.05em] text-black">
                 {config.title}
               </h2>
             </div>
             {showCatalogCount ? (
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium uppercase tracking-[0.12em] text-black/55">
                 {formatTitleCount(filteredAndSortedSeries.length)}
               </p>
             ) : null}

@@ -37,17 +37,17 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80";
+    "w-full rounded-2xl border-[3px] border-black bg-white px-4 py-3 text-sm text-black placeholder:text-black/35 transition focus:outline-none";
   const secondaryPillClass =
-    "border border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
+    "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff] hover:text-black";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95";
+    "rounded-full border-[3px] border-black bg-white px-6 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] active:scale-95";
   const activePillClass =
-    "border border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]";
+    "border-[3px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
   const dividerClass =
-    "h-px flex-1 bg-[color:var(--gush-border)]";
+    "h-[3px] flex-1 bg-black";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-300 hover:scale-[1.01] hover:bg-black/82 active:scale-95";
+    "rounded-full border-[3px] border-black bg-[#ff007a] px-6 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95";
 
   useEffect(() => {
     if (open) {
@@ -176,7 +176,7 @@ export default function LoginGateModal({
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <p className="text-slate-500">{description}</p>
+        <p className="text-sm leading-7 text-black/65">{description}</p>
         <div className="mt-6 space-y-4">
           <input
             type="email"
@@ -232,7 +232,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm text-slate-700 transition focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-200/80"
+                    className="rounded-2xl border-[3px] border-black bg-white px-3 py-3 text-sm font-semibold text-black transition focus:outline-none"
                   >
                     {(
                       config?.countryCodes || [
@@ -272,7 +272,7 @@ export default function LoginGateModal({
 
           {step !== "otp" && googleAuthEnabled ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-3 text-xs text-slate-400">
+              <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.08em] text-black/40">
                 <div className={dividerClass} />
                 <span>or continue with</span>
                 <div className={dividerClass} />
@@ -287,24 +287,24 @@ export default function LoginGateModal({
         </div>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
+          <p className="mt-4 rounded-[18px] border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black">
             {errorMessage}
           </p>
         ) : null}
 
         {socialError ? (
-          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-600">
+          <p className="mt-4 rounded-[18px] border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black">
             {socialError}
           </p>
         ) : null}
 
         {step === "otp" ? (
-          <div className="mt-3 text-xs text-slate-500">
+          <div className="mt-3 text-xs font-medium text-black/55">
             {otpStatus}
             <button
               type="button"
               onClick={handleResendOtp}
-              className="ml-2 font-semibold text-[var(--gush-accent,#0071e3)] transition-colors duration-300 hover:text-[var(--gush-accent-strong,#0058cc)]"
+              className="ml-2 font-black uppercase tracking-[0.06em] text-[#ff007a] transition-colors duration-300 hover:text-black"
             >
               Resend
             </button>
@@ -342,19 +342,19 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-              className="font-semibold text-slate-500 transition-colors duration-300 hover:text-slate-950"
+              className="font-black uppercase tracking-[0.06em] text-black/55 transition-colors duration-300 hover:text-black"
           >
             Forgot password?
           </button>
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-lg border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-xs text-slate-600">
+          <div className="mt-3 rounded-[18px] border-[3px] border-black bg-[#eefcff] px-4 py-2 text-xs font-semibold text-black/72">
             {resetStatus}
           </div>
         ) : null}
 
-        <p className="mt-4 text-[11px] text-slate-400">
+        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-black/40">
           If your email is not verified yet, use the link in your inbox first.
         </p>
 

@@ -90,43 +90,43 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   const primaryButtonClass =
-    "rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-200 hover:bg-black/82 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
 
   return (
-    <div className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
+    <div className="gush-home-shell min-h-screen overflow-hidden text-black">
       <div className="gush-page-ambient" />
       <SiteHeader variant="home" />
       <main className="gush-page-main gush-section-stack">
         <section className="grid gap-5 pt-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-          <section className="rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_22px_52px_rgba(15,23,42,0.08)] sm:p-7">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+          <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/55">
               18+ access
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-slate-600">
+              <span className="border-[3px] border-black bg-[#ffe500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
                 Private
               </span>
-              <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-slate-600">
+              <span className="border-[3px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
                 One check
               </span>
-              <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-xs text-slate-600">
+              <span className="border-[3px] border-black bg-[#fff6c7] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
                 Easy off
               </span>
             </div>
-            <h1 className="mt-5 font-display text-[2.1rem] font-semibold tracking-tight text-slate-950 sm:text-[2.6rem]">
+            <h1 className="mt-5 text-[2.1rem] font-black uppercase tracking-[-0.05em] text-black sm:text-[2.6rem]">
               {titleMap[reason]}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-black/68">
               {descriptionMap[reason]}
             </p>
 
-            <div className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-left">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <div className="mt-5 border-[3px] border-black bg-[#f5f1ea] px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Next
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
+              <p className="mt-2 text-sm font-medium leading-6 text-black/68">
                 Sign in if needed, confirm your age once, then return.
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function AdultGatePage() {
             </div>
 
             {isSignedIn && reason === "NEED_LOGIN" ? (
-              <p className="mt-4 text-xs text-slate-500">
+              <p className="mt-4 text-xs font-medium text-black/58">
                 You're already signed in. Continue to finish the 18+ check.
               </p>
             ) : null}
@@ -162,34 +162,34 @@ export default function AdultGatePage() {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Access desk
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   18+ stays separate until you ask.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                   Sign in if needed, confirm once, then return to the page you
                   meant to open.
                 </p>
               </div>
             </div>
 
-            <div className="space-y-3 text-sm text-slate-600">
-              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            <div className="space-y-3 text-sm text-black/68">
+              <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                   Return target
                 </p>
-                <p className="mt-2 break-all text-sm text-slate-800">
+                <p className="mt-2 break-all text-sm font-medium text-black/78">
                   {returnTo}
                 </p>
               </div>
-              <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                   Current reason
                 </p>
-                <p className="mt-2 text-sm text-slate-800">
+                <p className="mt-2 text-sm font-medium text-black/78">
                   {reason.replaceAll("_", " ")}
                 </p>
               </div>

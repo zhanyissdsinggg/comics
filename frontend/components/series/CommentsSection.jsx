@@ -239,26 +239,26 @@ export default function CommentsSection({
   );
 
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]";
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const inputClass =
-    "flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80";
+    "flex-1 rounded-full border-[3px] border-black bg-white px-4 py-3 text-sm text-black outline-none transition focus:outline-none";
 
   return (
     <section
       data-comments-section
-      className="mt-8 rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
+      className="mt-8 rounded-[30px] border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
             Reader notes
           </p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-950">
+          <h3 className="mt-2 text-lg font-black uppercase tracking-[0.04em] text-black">
             Comments
           </h3>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-black/55">
             Share a quick take on the story or latest episode.
           </p>
         </div>
@@ -269,8 +269,8 @@ export default function CommentsSection({
               onClick={onFollowToggle}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 isFollowing
-                  ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 hover:border-[color:var(--gush-border-strong)] hover:bg-white"
-                  : "border-[color:var(--gush-border)] bg-white text-slate-700 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  ? "border-[3px] border-black bg-[#ffe500] text-black"
+                  : "border-[3px] border-black bg-white text-black hover:-translate-y-0.5 hover:bg-[#fff7cf]"
               }`}
             >
               {isFollowing ? "Saved" : "Save"}
@@ -292,15 +292,15 @@ export default function CommentsSection({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-black/45">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setSortKey("latest")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "latest"
-                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
-                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                ? "border-[3px] border-black bg-[#ffe500] text-black"
+                : "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff]"
             }`}
           >
             Latest
@@ -310,8 +310,8 @@ export default function CommentsSection({
             onClick={() => setSortKey("top")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "top"
-                ? "border-[color:var(--gush-border-strong)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
-                : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                ? "border-[3px] border-black bg-[#ffe500] text-black"
+                : "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff]"
             }`}
           >
             Top
@@ -321,20 +321,20 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setActiveModal(true)}
-            className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-xs text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+            className="rounded-full border-[3px] border-black bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.06em] text-black transition hover:bg-[#fff1f7]"
           >
             Sign in to comment
           </button>
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+      <div className="mt-5 rounded-[26px] border-[3px] border-black bg-[#fffdf7] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
               Start the conversation
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-black/68">
               Keep it short. Mention a favorite moment, a recent chapter, or who
               should read it.
             </p>
@@ -345,7 +345,7 @@ export default function CommentsSection({
                 key={prompt.id}
                 type="button"
                 onClick={() => focusComposer(prompt.text)}
-                className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                className="rounded-full border-[3px] border-black bg-white px-3 py-2 text-sm font-bold uppercase tracking-[0.05em] text-black transition hover:bg-[#fff7cf]"
               >
                 {prompt.label}
               </button>
@@ -374,11 +374,11 @@ export default function CommentsSection({
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-5">
-            <p className="text-sm font-semibold text-slate-950">
+          <div className="rounded-[24px] border-[3px] border-black bg-[#fff7cf] p-5">
+            <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
               No comments yet.
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-black/55">
               Start the first note.
             </p>
           </div>
@@ -386,21 +386,21 @@ export default function CommentsSection({
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+              className="rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             >
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.08em] text-black/45">
                 <span>{getCommentAuthor(comment)}</span>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
-              <p className="mt-2 text-sm text-slate-700">{comment.text}</p>
-              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <p className="mt-2 text-sm text-black/72">{comment.text}</p>
+              <div className="mt-3 flex items-center gap-2 text-xs text-black/45">
                 <button
                   type="button"
                   onClick={() => handleLike(comment.id)}
                   className={`rounded-full border px-3 py-1 transition ${
                     getCommentLikedByUser(comment)
-                      ? "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700"
-                      : "border-[color:var(--gush-border)] bg-white text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                      ? "border-[3px] border-black bg-[#ffe500] text-black"
+                      : "border-[3px] border-black bg-white text-black/65 hover:bg-[#eefcff]"
                   }`}
                 >
                   Like {getCommentLikeCount(comment)}
@@ -412,21 +412,21 @@ export default function CommentsSection({
                       prev === comment.id ? "" : comment.id,
                     )
                   }
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="rounded-full border-[3px] border-black bg-white px-3 py-1 font-bold uppercase tracking-[0.05em] text-black/65 transition hover:bg-[#fff1f7]"
                 >
                   Reply{" "}
                   {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-3 text-xs text-slate-600">
+                <div className="mt-3 space-y-2 rounded-[18px] border-[3px] border-black bg-[#f3f0ea] p-3 text-xs text-black/68">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
-                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                      <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.08em] text-black/45">
                         <span>{getCommentAuthor(reply)}</span>
                         <span>{formatDate(reply.createdAt)}</span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-700">
+                      <p className="mt-1 text-xs text-black/72">
                         {reply.text}
                       </p>
                     </div>
@@ -444,12 +444,12 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[color:var(--gush-border-strong)] focus:ring-2 focus:ring-slate-200/80"
+                    className="flex-1 rounded-full border-[3px] border-black bg-white px-3 py-2 text-xs text-black outline-none transition focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleReply(comment.id)}
-                    className="rounded-full bg-[color:var(--gush-ink-strong)] px-3 py-2 text-xs font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                    className="rounded-full border-[3px] border-black bg-[#ff007a] px-3 py-2 text-xs font-black uppercase tracking-[0.05em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
                   >
                     Reply
                   </button>

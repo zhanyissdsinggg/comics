@@ -11,55 +11,52 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
-    lightAccent: "text-slate-500",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/55",
+    lightPanel: "border-black bg-white",
   },
   continue: {
-    lightAccent: "text-slate-500",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/55",
+    lightPanel: "border-black bg-white",
   },
   trending: {
-    lightAccent: "text-[color:var(--gush-ink-soft)]",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/65",
+    lightPanel: "border-black bg-white",
   },
   completed: {
-    lightAccent: "text-[color:var(--gush-ink-soft)]",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/65",
+    lightPanel: "border-black bg-white",
   },
   new: {
-    lightAccent: "text-slate-500",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/55",
+    lightPanel: "border-black bg-white",
   },
   ttf: {
-    lightAccent: "text-[color:var(--gush-ink-soft)]",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/65",
+    lightPanel: "border-black bg-white",
   },
   adult: {
-    lightAccent: "text-[color:var(--gush-danger)]",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-[#ff007a]",
+    lightPanel: "border-black bg-white",
   },
   history: {
-    lightAccent: "text-slate-700",
-    lightPanel:
-      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
+    lightAccent: "text-black/65",
+    lightPanel: "border-black bg-[#fff6cf]",
   },
   starter: {
-    lightAccent: "text-slate-500",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/55",
+    lightPanel: "border-black bg-white",
   },
   "ai-recommended": {
-    lightAccent: "text-slate-500",
-    lightPanel: "border-[color:var(--gush-border)] bg-white",
+    lightAccent: "text-black/55",
+    lightPanel: "border-black bg-white",
   },
   recommended: {
-    lightAccent: "text-slate-700",
-    lightPanel:
-      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
+    lightAccent: "text-black/65",
+    lightPanel: "border-black bg-[#dffcff]",
   },
   default: {
-    lightAccent: "text-slate-600",
-    lightPanel:
-      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]",
+    lightAccent: "text-black/60",
+    lightPanel: "border-black bg-[#fff6cf]",
   },
 };
 
@@ -90,7 +87,10 @@ export default function Rail({
   return (
     <section>
       <Card
-        className="relative overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white py-0 shadow-[0_12px_24px_rgba(15,23,42,0.05)]"
+        className={cn(
+          "relative overflow-hidden rounded-[32px] border-[3px] py-0 shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
+          railTheme.lightPanel,
+        )}
       >
         <div
           className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),transparent_42%)]"
@@ -110,8 +110,8 @@ export default function Rail({
               ) : null}
               <h2
                 className={cn(
-                  "font-display text-2xl font-semibold tracking-tight md:text-[1.95rem]",
-                  "text-slate-950",
+                  "font-display text-2xl font-black uppercase tracking-[-0.05em] md:text-[1.95rem]",
+                  "text-black",
                 )}
               >
                 {title}
@@ -120,7 +120,7 @@ export default function Rail({
                 <p
                   className={cn(
                     "max-w-2xl text-sm leading-7",
-                    "text-slate-500",
+                    "text-black/68",
                   )}
                 >
                   {reason}
@@ -133,7 +133,7 @@ export default function Rail({
                 type="button"
                 variant="ghost"
                 onClick={() => router.push(href)}
-                className="h-10 justify-start gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm font-semibold text-slate-800 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                className="h-10 justify-start gap-2 rounded-full border-[3px] border-black bg-white px-4 text-sm font-semibold uppercase tracking-[0.12em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
               >
                 {ctaLabel}
                 <ArrowRight className="size-4" />
@@ -143,7 +143,7 @@ export default function Rail({
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
             <Card
-              className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-white py-0 shadow-none"
+              className="mt-5 rounded-[24px] border-[3px] border-black bg-white py-0 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             >
               <CardContent className="p-4">
                 <CreatorShelfLinks
@@ -161,10 +161,10 @@ export default function Rail({
 
           {safeItems.length === 0 ? (
             <Card
-              className="mt-5 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] py-0 shadow-none"
+              className="mt-5 rounded-[24px] border-[3px] border-black bg-[#fff6cf] py-0 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             >
               <CardContent className="p-8 text-center">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm font-semibold text-black/55">
                   Nothing is live here yet.
                 </p>
               </CardContent>

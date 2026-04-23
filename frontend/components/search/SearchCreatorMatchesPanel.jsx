@@ -224,10 +224,10 @@ export default function SearchCreatorMatchesPanel({
     <SurfacePanel className="space-y-4" appearance="light" accent="blue">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
             Creators
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
             {creatorPanelTitle}
           </h2>
         </div>
@@ -235,7 +235,7 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82"
+            className="rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,229,255,1)] transition hover:-translate-y-0.5 hover:bg-[#00b7d1]"
           >
             Open creator
           </Link>
@@ -248,38 +248,38 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+            className="rounded-[30px] border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
               coverUrl={creator.spotlightSeries?.coverUrl}
-              className="h-48 rounded-[22px]"
+              className="h-48 rounded-[22px] border-[3px] border-black"
             />
             <div className="mt-4 space-y-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-black/55">
                   {creator.matchLabel}
                 </p>
-                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+                <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {highlight(creator.name, query)}
                 </h3>
               </div>
 
               {creator.spotlightSeries?.title ? (
-                <p className="text-sm leading-6 text-slate-600">
+                <p className="text-sm leading-6 text-black/68">
                   Start with{" "}
-                  <span className="font-medium text-slate-950">
+                  <span className="font-medium text-black">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
                   .
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-slate-600">
+                <p className="text-sm leading-6 text-black/68">
                   Creator page
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+              <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-black/55">
                 <span>
                   {creator.titleCount} title
                   {creator.titleCount === 1 ? "" : "s"}
@@ -296,7 +296,7 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="rounded-full border-[3px] border-black bg-white px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#ffe500]"
                 >
                   Open creator
                 </Link>

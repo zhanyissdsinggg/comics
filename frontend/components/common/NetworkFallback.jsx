@@ -9,16 +9,16 @@ function MascotPlaceholder() {
       aria-hidden="true"
       className="relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32"
     >
-      <div className="absolute inset-0 rounded-[30px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_16px_36px_rgba(15,23,42,0.06)]" />
-      <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-[#d9ecff]" />
-      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-slate-200/80" />
-      <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-[#e8f2ff]" />
-      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border border-slate-200/70 bg-white" />
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+      <div className="absolute inset-0 rounded-[30px] border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]" />
+      <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-[#ffe500]" />
+      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-[#ff007a]" />
+      <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-[#00e5ff]" />
+      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border-[2px] border-black bg-white" />
+      <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-black/30" />
+          <span className="h-2.5 w-2.5 rounded-full bg-black/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-black/30" />
         </div>
       </div>
     </div>
@@ -53,27 +53,29 @@ export default function NetworkFallback({
     >
       <div
         className={cn(
-          "relative w-full max-w-xl overflow-hidden rounded-[32px] border border-[color:var(--gush-border)] bg-white px-6 py-8 text-center shadow-[0_22px_52px_rgba(15,23,42,0.06)] sm:px-8 sm:py-10",
+          "relative w-full max-w-xl overflow-hidden rounded-[32px] border-[3px] border-black bg-white px-6 py-8 text-center shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:px-8 sm:py-10",
           cardClassName,
         )}
       >
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_30%)]" />
+        <div className="pointer-events-none absolute right-0 top-0 h-24 w-24 rounded-full bg-[#00e5ff]/20 blur-3xl" />
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
             Connection issue
           </p>
 
           <h2
             className={cn(
-              "max-w-md text-balance font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]",
+              "max-w-md text-balance font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-[2rem]",
               showIllustration ? "mt-3" : "mt-0",
             )}
           >
             {title}
           </h2>
 
-          <p className="mt-3 max-w-md text-sm leading-6 text-slate-500 sm:text-[15px]">
+          <p className="mt-3 max-w-md text-sm leading-6 text-black/68 sm:text-[15px]">
             {description}
           </p>
 
@@ -82,10 +84,10 @@ export default function NetworkFallback({
             onClick={canRetry ? onRetry : undefined}
             disabled={!canRetry}
             className={cn(
-              "mt-6 inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200",
+              "mt-6 inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all duration-200",
               canRetry
-                ? "border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82"
-                : "cursor-not-allowed border-[color:var(--gush-border)] bg-slate-200 text-slate-500",
+                ? "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:-translate-y-0.5 hover:bg-[#ff007a]"
+                : "cursor-not-allowed border-[3px] border-black bg-black/10 text-black/45",
             )}
           >
             <RefreshCw className="size-4" />

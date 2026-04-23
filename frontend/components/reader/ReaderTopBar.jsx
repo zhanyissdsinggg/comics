@@ -42,13 +42,13 @@ export default function ReaderTopBar({
       className={`sticky top-0 z-40 backdrop-blur-xl shadow-glass ${
         isNightMode
           ? "border-b border-white/10 bg-neutral-950/80 text-neutral-100"
-          : "border-b border-[color:var(--gush-border)] bg-white/92 text-[color:var(--gush-ink-strong)]"
+          : "border-b-[3px] border-black bg-[rgba(255,255,255,0.96)] text-black shadow-[0_6px_0_0_rgba(0,0,0,1)]"
       }`}
     >
       {typeof progress === "number" ? (
         <div
           className={`h-1 w-full ${
-            isNightMode ? "bg-neutral-900" : "bg-[color:var(--gush-page-bg-muted)]"
+            isNightMode ? "bg-neutral-900" : "bg-[#f5f1ea]"
           }`}
         >
           <div
@@ -65,8 +65,8 @@ export default function ReaderTopBar({
           className={`shrink-0 rounded-full border px-2 py-1 text-xs transition-all duration-300 hover:shadow-glow-sm active:scale-95 md:px-3 ${
             isNightMode
               ? "border-neutral-800 text-neutral-200 hover:border-brand-primary/50 hover:bg-neutral-800 hover:text-brand-primary"
-              : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
-          }`}
+              : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:text-black hover:shadow-none"
+            }`}
         >
           Back
         </button>
@@ -75,7 +75,7 @@ export default function ReaderTopBar({
           <p className="truncate text-sm font-semibold">{title}</p>
           <p
             className={`text-xs ${
-              isNightMode ? "text-neutral-400" : "text-[color:var(--gush-ink-faint)]"
+              isNightMode ? "text-neutral-400" : "text-black/50"
             }`}
           >
             {episodeLabel}
@@ -89,7 +89,7 @@ export default function ReaderTopBar({
             className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
               isNightMode
                 ? "border-neutral-800 text-neutral-200"
-                : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
             }`}
           >
             Chapters
@@ -100,7 +100,7 @@ export default function ReaderTopBar({
             className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
               isNightMode
                 ? "border-neutral-800 text-neutral-200"
-                : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
             }`}
           >
             Bookmark
@@ -118,7 +118,7 @@ export default function ReaderTopBar({
               className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
                 isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
               }`}
               title="Reader Settings"
               aria-label="Reader Settings"
@@ -134,8 +134,8 @@ export default function ReaderTopBar({
                 ? "border-emerald-400/60 text-emerald-200"
                 : isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
-            }`}
+                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+              }`}
           >
             Night {nightMode ? "ON" : "OFF"}
           </button>
@@ -148,7 +148,7 @@ export default function ReaderTopBar({
                   ? "border-emerald-400/60 text-emerald-200"
                   : isNightMode
                     ? "border-neutral-800 text-neutral-200"
-                    : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                    : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
               }`}
             >
               Auto {autoScroll ? "ON" : "OFF"}
@@ -162,11 +162,11 @@ export default function ReaderTopBar({
               disableLayoutToggle
                 ? isNightMode
                   ? "border-neutral-900 text-neutral-600"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-faint)]"
+                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 : isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
-            }`}
+                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+              }`}
           >
             {layoutMode === "horizontal" ? "Horizontal" : "Vertical"}
           </button>
@@ -179,11 +179,11 @@ export default function ReaderTopBar({
               hasPrev
                 ? isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 : isNightMode
                   ? "border-neutral-900 text-neutral-600"
-                  : "border-[color:var(--gush-border)] text-[color:var(--gush-ink-faint)]"
-            }`}
+                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+              }`}
           >
             Previous
           </button>
@@ -196,12 +196,12 @@ export default function ReaderTopBar({
               !hasNext
                 ? isNightMode
                   ? "border border-neutral-900 text-neutral-600"
-                  : "border border-[color:var(--gush-border)] text-[color:var(--gush-ink-faint)]"
+                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 : nextLocked
-                ? "border border-red-700 text-red-300"
+                ? "border-[3px] border-black bg-[#ffe3ec] text-[#8f003f] shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 : isNightMode
                   ? "border border-neutral-800 text-neutral-200"
-                  : "border border-[color:var(--gush-border)] text-[color:var(--gush-ink-soft)]"
+                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
             }`}
           >
             {!hasNext ? "End" : nextLocked ? "Locked ahead" : "Forward"}

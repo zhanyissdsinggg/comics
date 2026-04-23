@@ -1434,21 +1434,21 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
+      <main className="min-h-screen bg-[#f5f1ea] text-black">
         <ReaderTopBar
           title="Opening your chapter"
           episodeLabel="Reader"
           onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
-          <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_18px_42px_rgba(15,23,42,0.08)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[color:var(--gush-ink-faint)]">
+          <div className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
               Opening chapter
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--gush-ink-strong)] sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-black sm:text-4xl">
               Opening your chapter.
             </h1>
-            <p className="mt-3 text-sm leading-7 text-[color:var(--gush-ink-soft)]">
+            <p className="mt-3 text-sm font-medium leading-7 text-black/68">
               Access, progress, and unlock checks are loading. If this takes too
               long, go back to the series page or open support.
             </p>
@@ -1456,7 +1456,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               <button
                 type="button"
                 onClick={() => router.push(buildSeriesHref())}
-                className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/82"
+                className="border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               >
                 Back to series
               </button>
@@ -1470,7 +1470,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                     }),
                   )
                 }
-                className="rounded-full border border-[color:var(--gush-border)] px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
+                className="border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
               >
                 Support
               </button>
@@ -1479,7 +1479,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`reader-loading-${index}`}
-                  className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
+                  className="border-[3px] border-black bg-[#f5f1ea] px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 >
                   <div className="h-3 w-20 animate-pulse rounded-full bg-[rgba(29,29,31,0.08)]" />
                   <div className="mt-3 h-4 w-28 animate-pulse rounded-full bg-[rgba(29,29,31,0.08)]" />
@@ -1495,7 +1495,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (error === "ADULT_GATED") {
     return (
-      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
+      <main className="min-h-screen bg-[#f5f1ea] text-black">
         <ReaderTopBar
           title="Adult content"
           episodeLabel="..."
@@ -1531,7 +1531,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]">
+      <main className="min-h-screen bg-[#f5f1ea] text-black">
         <ReaderTopBar
           title="Error"
           episodeLabel="..."
@@ -1547,7 +1547,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-              className="rounded-full border border-[color:var(--gush-border)] bg-transparent px-4 py-2 text-xs font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
+              className="border-[3px] border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
             >
               Back to Series
             </button>
@@ -1561,7 +1561,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   }),
                 )
               }
-              className="rounded-full border border-[color:var(--gush-border)] bg-transparent px-4 py-2 text-xs font-semibold text-[color:var(--gush-ink-soft)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-[color:var(--gush-ink-strong)]"
+              className="border-[3px] border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
             >
               Support
             </button>
@@ -1573,7 +1573,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
   return (
     <main
-      className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-[color:var(--gush-page-bg)] text-[color:var(--gush-ink-strong)]"}`}
+      className={`min-h-screen ${nightMode ? "bg-black text-neutral-100" : "bg-[#f5f1ea] text-black"}`}
     >
       <ReaderTopBar
         title={seriesData?.series?.title || "Series"}
@@ -1667,74 +1667,74 @@ export default function ReaderPage({ seriesId, episodeId }) {
 
       {showPaywall ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-[32px] border border-[color:var(--gush-border)] bg-white p-6 text-center shadow-[0_20px_52px_rgba(15,23,42,0.12)]">
+          <div className="w-full max-w-lg border-[3px] border-black bg-white p-6 text-center shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
             {commerceNotice ? (
-              <div className="mb-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+              <div className="mb-4 border-[3px] border-black bg-[#fff6c7] px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-accent-strong,#0058cc)]">
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#00a6c7]">
                       {commerceNotice.eyebrow}
                     </p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">
+                    <p className="mt-2 text-base font-black uppercase tracking-[-0.02em] text-black">
                       {commerceNotice.title}
                     </p>
-                    <p className="mt-2 text-xs leading-6 text-slate-600">
+                    <p className="mt-2 text-xs font-medium leading-6 text-black/68">
                       {commerceNotice.description}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setCommerceNotice(null)}
-                    className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                    className="border-[3px] border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                   >
                     Dismiss
                   </button>
                 </div>
               </div>
             ) : null}
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
               Continue this episode
             </h2>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
+            <p className="mt-2 text-sm font-medium leading-7 text-black/68">
               {previewCount || previewParagraphs
                 ? "Preview is over. Unlock this episode to continue."
                 : "Unlock this episode to continue."}
             </p>
             {previewCount ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs font-medium text-black/58">
                 Preview ended after {previewCount} page
                 {previewCount === 1 ? "" : "s"}.
               </p>
             ) : previewParagraphs ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs font-medium text-black/58">
                 Preview ended after {previewParagraphs} section
                 {previewParagraphs === 1 ? "" : "s"}.
               </p>
             ) : null}
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <div className="border-[3px] border-black bg-white px-4 py-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                   Your balance
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">
+                <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
                   {isSignedIn ? `${walletBalance} points` : "Sign in"}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs font-medium text-black/58">
                   {isSignedIn
                     ? "Points ready on this account."
                     : "Sign in to keep unlocks and progress on one account."}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <div className="border-[3px] border-black bg-white px-4 py-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                   This episode
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">
+                <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
                   {currentPricing.finalPrice === 0
                     ? "Free"
                     : `${currentPricing.finalPrice} points`}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs font-medium text-black/58">
                   {currentPricing.appliedDailyFree
                     ? "Free now."
                     : currentPricing.discountPct
@@ -1742,14 +1742,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       : "Unlock with points."}
                 </p>
               </div>
-              <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              <div className="border-[3px] border-black bg-white px-4 py-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
                   Your access
                 </p>
-                <p className="mt-2 text-lg font-semibold text-slate-950">
+                <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
                   {!isSignedIn ? "Guest" : isSubscriber ? "Member" : "Points"}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs font-medium text-black/58">
                   {!isSignedIn
                     ? "Sign in first, then choose points or membership."
                     : isSubscriber
@@ -1759,28 +1759,28 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </div>
             </div>
             {currentPricing.appliedDailyFree ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.08em] text-[#00a6c7]">
                 Free now
               </p>
             ) : currentPricing.discountPct ? (
-              <p className="mt-3 text-xs font-semibold text-[var(--gush-accent-strong,#0058cc)]">
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.08em] text-[#00a6c7]">
                 Member {currentPricing.discountPct}% off
               </p>
             ) : null}
             {upcomingEpisodes.length > 0 ? (
-              <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                <p className="text-sm font-semibold text-slate-950">Up next</p>
+              <div className="mt-4 border-[3px] border-black bg-white px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <p className="text-sm font-black uppercase tracking-[0.04em] text-black">Up next</p>
                 <div className="mt-3 space-y-2">
                   {upcomingEpisodes.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-3 text-sm"
+                      className="flex items-center justify-between gap-3 border-[3px] border-black bg-[#f5f1ea] px-3 py-3 text-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                     >
                       <div>
-                        <p className="font-medium text-slate-950">
+                        <p className="font-black uppercase tracking-[-0.02em] text-black">
                           {item.title}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs font-medium text-black/58">
                           {item.unlocked
                             ? "Already unlocked"
                             : item.ttfEligible
@@ -1788,7 +1788,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                               : "Locked chapter"}
                         </p>
                       </div>
-                      <span className="text-xs font-semibold text-slate-600">
+                      <span className="text-xs font-black uppercase tracking-[0.08em] text-black/62">
                         {item.unlocked
                           ? "Ready"
                           : item.pricePts
@@ -1804,10 +1804,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
               ref={unlockCurrentButtonRef}
               type="button"
               onClick={handleUnlockCurrent}
-              className={`mt-6 w-full min-h-[44px] rounded-full px-4 py-2 text-sm font-semibold text-neutral-900 transition-all active:scale-95 ${
+              className={`mt-6 w-full min-h-[44px] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] transition-all active:scale-95 ${
                 commerceNotice
-                  ? "border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] text-white shadow-[0_0_0_4px_rgba(15,23,42,0.05),0_16px_30px_rgba(15,23,42,0.12)] hover:bg-black/82"
-                  : "bg-[color:var(--gush-ink-strong)] text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] hover:bg-black/82"
+                  ? "border-[3px] border-black bg-[#ff007a] text-white shadow-[0_0_0_4px_rgba(255,0,122,0.18),6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
+                  : "border-[3px] border-black bg-[#ff007a] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               }`}
               style={{ willChange: "transform" }}
             >
@@ -1817,14 +1817,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ? "Continue free"
                   : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
-            <div className="mt-4 flex flex-wrap gap-2 text-left text-[11px] text-slate-600">
-              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+            <div className="mt-4 flex flex-wrap gap-2 text-left text-[11px] text-black/62">
+              <div className="border-[3px] border-black bg-[#fff6c7] px-3 py-1.5 font-black uppercase tracking-[0.08em]">
                 Unlocks stay in your library.
               </div>
-              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+              <div className="border-[3px] border-black bg-[#fff6c7] px-3 py-1.5 font-black uppercase tracking-[0.08em]">
                 Packs can lower the cost per episode.
               </div>
-              <div className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1.5">
+              <div className="border-[3px] border-black bg-[#fff6c7] px-3 py-1.5 font-black uppercase tracking-[0.08em]">
                 Membership adds free reads and lower prices.
               </div>
             </div>
@@ -1842,7 +1842,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ),
                 );
               }}
-              className="mt-3 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+              className="mt-3 w-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
             >
               {STOREFRONT_TERMS.compareMembership}
             </button>
@@ -1861,14 +1861,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   ),
                 );
               }}
-              className="mt-2 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+              className="mt-2 w-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
             >
               {STOREFRONT_TERMS.viewPointPacks}
             </button>
             <button
               type="button"
               onClick={() => router.push(buildSeriesHref())}
-              className="mt-2 w-full rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+              className="mt-2 w-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
             >
               Back to series
             </button>

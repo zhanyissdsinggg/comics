@@ -13,17 +13,17 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   const toneMap = {
     neutral:
-      "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    error: "border-red-200 bg-red-50 text-red-600",
+      "border-[3px] border-black bg-[#dffcff] text-black/70",
+    success: "border-[3px] border-black bg-[#d9fff0] text-black/70",
+    error: "border-[3px] border-black bg-[#ffe7ec] text-black/70",
   };
 
   return (
-    <div
-      className={`rounded-2xl border px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
-    >
+    <div className={`rounded-[24px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}>
       {title ? (
-        <p className="text-sm font-semibold text-slate-950">{title}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
+          {title}
+        </p>
       ) : null}
       {message ? <p className="mt-1 text-sm leading-6">{message}</p> : null}
     </div>
@@ -46,11 +46,11 @@ function ResetPageContent() {
 
   const hasToken = Boolean(token);
   const inputClassName =
-    "w-full rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[color:var(--gush-border-strong)] focus:ring-4 focus:ring-slate-200/80";
+    "w-full rounded-[22px] border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:-translate-y-0.5 focus:bg-[#fffef7]";
   const primaryButtonClass =
-    "w-full rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full rounded-full border-[3px] border-black bg-black px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a] disabled:cursor-not-allowed disabled:opacity-60";
   const secondaryButtonClass =
-    "w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full rounded-full border-[3px] border-black bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf] disabled:cursor-not-allowed disabled:opacity-60";
 
   const handleSendResetLink = async () => {
     const normalizedEmail = String(email || "").trim();
@@ -151,13 +151,13 @@ function ResetPageContent() {
     >
       <div className="space-y-6">
         <div className="relative">
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-black/55">
             Password reset
           </p>
-          <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+          <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
             {hasToken ? "Choose a new password" : "Need another reset email?"}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
+          <p className="mt-3 text-sm leading-6 text-black/68">
             {hasToken
               ? "The reset link is already loaded from the email you opened."
               : "If the old link expired or opened on another device, send a new one here."}
@@ -166,7 +166,7 @@ function ResetPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-700">
+            <div className="rounded-[22px] border-[3px] border-black bg-[#fff6cf] px-4 py-3 text-sm font-medium text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
               Reset link loaded from your email. No code field required.
             </div>
             <input
@@ -225,18 +225,18 @@ function ResetPageContent() {
           message={status?.message}
         />
 
-        <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-sm leading-6 text-slate-600">
+        <div className="rounded-[24px] border-[3px] border-black bg-[#dffcff] px-4 py-4 text-sm leading-6 text-black/70 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
           Signed in already? Head back to{" "}
           <Link
             href="/account"
-            className="font-semibold text-slate-950 hover:text-slate-700"
+            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
           >
             your account
           </Link>
           . Need help with a missing email? Contact{" "}
           <Link
             href="/support"
-            className="font-semibold text-slate-950 hover:text-slate-700"
+            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
           >
             us
           </Link>

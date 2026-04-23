@@ -426,7 +426,7 @@ export default function SupportPage() {
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
                     <p
-                      className={`mt-1 text-xs leading-5 ${isActive ? "text-[color:var(--gush-ink-soft)]" : "text-slate-500"}`}
+                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/78" : "text-black/56"}`}
                     >
                       {item.context}
                     </p>
@@ -448,16 +448,16 @@ export default function SupportPage() {
           <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
             {successState ? (
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5">
+                <div className="border-[3px] border-black bg-[#fff6c7] p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
                   <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ff007a]">
                     Request received
                   </p>
                   <h2 className="mt-3 text-[2.4rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     Request sent.
                   </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+                  <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-black/68">
                     We will reply at{" "}
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-black text-black">
                       {successState.replyEmail}
                     </span>
                     .
@@ -513,10 +513,10 @@ export default function SupportPage() {
                   ) : (
                     <div
                       className={[
-                        "rounded-[24px] border px-4 py-3 text-sm",
+                        "border-[3px] px-4 py-3 text-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
                         feedback.type === "success"
-                          ? "border-[color:var(--gush-border-strong)] bg-white text-slate-700"
-                          : "border-red-200 bg-red-50 text-red-600",
+                          ? "border-black bg-[#fff6c7] font-semibold text-black"
+                          : "border-black bg-[#ffe3ec] font-semibold text-[#8f003f]",
                       ].join(" ")}
                     >
                       {feedback.text}
@@ -670,9 +670,9 @@ export default function SupportPage() {
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Contact
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm font-medium leading-6 text-black/68">
                 Reply email:{" "}
-                <span className="font-semibold text-slate-900">
+                <span className="font-black text-black">
                   {siteConfig.supportEmail}
                 </span>
               </p>

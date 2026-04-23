@@ -38,8 +38,8 @@ import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b border-[color:var(--gush-border)] pb-4">
+    <section className="mt-6 rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-4 w-10 rounded-full" />
@@ -682,9 +682,9 @@ export default function SeriesPage({
     );
   }, [episodes]);
   const primaryButtonClass =
-    "rounded-full border border-[color:var(--gush-ink-strong)] bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all duration-200 hover:bg-black/82 hover:shadow-[0_16px_30px_rgba(15,23,42,0.12)]";
+    "rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-200 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black transition-colors hover:-translate-y-0.5 hover:bg-[#eefcff]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -798,7 +798,7 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="home" />
         <div className="gush-page-main">
-          <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:p-7">
+          <section className="rounded-[30px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
               <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
               <div className="space-y-4">
@@ -828,8 +828,8 @@ export default function SeriesPage({
               </div>
             </div>
           </section>
-          <section className="mt-6 rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-            <div className="mb-4 flex items-center justify-between border-b border-[color:var(--gush-border)] pb-4">
+          <section className="mt-6 rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-28 rounded-full" />
                 <Skeleton className="h-4 w-12 rounded-full" />
@@ -859,11 +859,11 @@ export default function SeriesPage({
         <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
         <SiteHeader variant="home" />
         <div className="gush-page-main max-w-[960px]">
-          <div className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+          <div className="rounded-[30px] border-[3px] border-black bg-[#fff7cf] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
               Series unavailable
             </p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-black uppercase tracking-[0.03em] text-black sm:text-4xl">
               Title unavailable.
             </h1>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -1063,7 +1063,7 @@ export default function SeriesPage({
         {showSecondarySections ? (
           <>
             <SimilarSeriesSection seriesId={seriesId} series={series} />
-            <div className="mt-8 border-t border-[color:var(--gush-border)] pt-6" />
+            <div className="mt-8 border-t-[3px] border-black pt-6" />
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}

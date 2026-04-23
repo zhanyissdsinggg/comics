@@ -68,9 +68,9 @@ export default function SeriesTrustPanel({
 }) {
   const router = useRouter();
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-[0.08em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]";
 
   const latestEpisode = useMemo(() => getLatestEpisode(episodes), [episodes]);
   const shareUrl = useMemo(() => {
@@ -161,22 +161,22 @@ export default function SeriesTrustPanel({
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
             At a glance
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
             Why this one feels worth the click.
           </h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/65">
             Creator, momentum, and update cadence should all be obvious before
             someone gives a story their time.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Quick take
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
+          <p className="mt-3 text-sm leading-6 text-black/75">
             {trustNarrative}
           </p>
         </div>
@@ -189,33 +189,33 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4 text-left transition hover:border-[color:var(--gush-border-strong)] hover:bg-white"
+              className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition hover:-translate-y-1 hover:bg-[#fffdf7]"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                 {card.label}
               </p>
-              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-black/65">
                 {card.hint}
               </p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gush-accent-strong,#0058cc)]">
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[#ff007a]">
                 More by this creator
               </p>
             </button>
           ) : (
             <div
               key={card.label}
-              className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
+              className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                 {card.label}
               </p>
-              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-black/65">
                 {card.hint}
               </p>
             </div>
@@ -224,11 +224,11 @@ export default function SeriesTrustPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#eefcff] px-4 py-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Best if you want
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 text-sm leading-7 text-black/70">
             {series?.title || "This title"} is positioned best for readers who
             want{" "}
             {status === "completed"
@@ -238,11 +238,11 @@ export default function SeriesTrustPanel({
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#fff1f7] px-4 py-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Easy to share
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 text-sm leading-7 text-black/70">
             This page is easier to share when it already shows the creator,
             latest update, reader interest, and a clear way to start reading.
           </p>

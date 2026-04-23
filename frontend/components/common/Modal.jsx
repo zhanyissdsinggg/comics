@@ -101,7 +101,7 @@ export const Modal = memo(function Modal({
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
         isAnimating
-          ? "bg-[rgba(15,23,42,0.34)] backdrop-blur-md"
+          ? "bg-black/72 backdrop-blur-md"
           : "bg-black/0"
       }`}
       onClick={handleOverlayClick}
@@ -113,7 +113,7 @@ export const Modal = memo(function Modal({
       <div
         ref={modalRef}
         onClick={handleContentClick}
-        className={`relative w-full ${sizeClasses[size]} border border-[color:var(--gush-border)] bg-white shadow-[0_20px_48px_rgba(15,23,42,0.12)] transition-all duration-300 sm:rounded-3xl ${
+        className={`relative w-full ${sizeClasses[size]} overflow-hidden border-[3px] border-black bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)] transition-all duration-300 sm:rounded-3xl ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
@@ -123,16 +123,17 @@ export const Modal = memo(function Modal({
           borderTopRightRadius: "1.5rem",
         }}
       >
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
         <div className="flex justify-center pb-2 pt-3 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-black/8" />
+          <div className="h-1.5 w-12 rounded-full bg-black/18" />
         </div>
 
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between border-b border-[color:var(--gush-border)] px-6 py-4">
+          <div className="relative flex items-center justify-between border-b-[3px] border-black px-6 py-4">
             {title ? (
               <h2
                 id="modal-title"
-                className="font-display text-xl font-semibold tracking-tight text-slate-950"
+                className="font-display text-xl font-black uppercase tracking-[-0.05em] text-black"
               >
                 {title}
               </h2>
@@ -141,7 +142,7 @@ export const Modal = memo(function Modal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-400 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-700 active:scale-95"
+                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[3px] border-black bg-white p-2 text-black/55 transition duration-200 hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black active:scale-95"
                 aria-label="Close dialog"
               >
                 <X size={20} />
@@ -150,10 +151,10 @@ export const Modal = memo(function Modal({
           </div>
         )}
 
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
+        <div className="relative max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
 
         {footer ? (
-          <div className="border-t border-[color:var(--gush-border)] px-6 py-4">
+          <div className="relative border-t-[3px] border-black px-6 py-4">
             {footer}
           </div>
         ) : null}
@@ -174,9 +175,11 @@ export const ConfirmModal = memo(function ConfirmModal({
 }) {
   const variantClasses = {
     default:
-      "bg-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(15,23,42,0.08)] hover:bg-black/82",
-    danger: "bg-red-600 hover:bg-red-700",
-    warning: "bg-slate-800 hover:bg-slate-700",
+      "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:-translate-y-0.5 hover:bg-[#ff007a]",
+    danger:
+      "border-[3px] border-black bg-[#ff007a] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#e0006b]",
+    warning:
+      "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#f5d800]",
   };
 
   const handleConfirm = () => {
@@ -195,21 +198,21 @@ export const ConfirmModal = memo(function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-[color:var(--gush-border)] bg-white px-6 py-3 text-sm font-medium text-slate-700 transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95"
+            className="flex-1 rounded-full border-[3px] border-black bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition duration-200 hover:-translate-y-0.5 hover:bg-[#fff6cf] active:scale-95"
           >
             {cancelText}
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-300 active:scale-95 ${variantClasses[variant]}`}
+            className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all duration-300 active:scale-95 ${variantClasses[variant]}`}
           >
             {confirmText}
           </button>
         </div>
       }
     >
-      <p className="text-sm leading-7 text-slate-600">{message}</p>
+      <p className="text-sm leading-7 text-black/68">{message}</p>
     </Modal>
   );
 });

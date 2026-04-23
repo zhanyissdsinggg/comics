@@ -121,9 +121,9 @@ export default function SeriesFitPanel({
 }) {
   const router = useRouter();
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82";
+    "rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-[0.08em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff7cf]";
 
   const fitModel = useMemo(() => {
     const leadGenre =
@@ -203,23 +203,23 @@ export default function SeriesFitPanel({
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
             Before you start
           </p>
-          <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
             Is this your kind of read?
           </h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/65">
             The best title pages make it easy to feel the vibe, the commitment,
             and the easiest way in.
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Best way in
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
-            <span className="font-semibold text-slate-950">
+          <p className="mt-3 text-sm leading-6 text-black/75">
+            <span className="font-black uppercase tracking-[0.04em] text-black">
               {fitModel.starterLane.label}.
             </span>{" "}
             {fitModel.starterLane.body}
@@ -231,25 +231,25 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-4"
+            className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
               {card.label}
             </p>
-            <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
               {card.value}
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{card.body}</p>
+            <p className="mt-2 text-sm leading-6 text-black/65">{card.body}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#eefcff] px-4 py-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Best if you want
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 text-sm leading-7 text-black/70">
             {series?.title || "This title"} works best when the reader wants{" "}
             {fitModel.status === "completed"
               ? "continuity and payoff in a longer session"
@@ -260,11 +260,11 @@ export default function SeriesFitPanel({
             .
           </p>
         </div>
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-[#fff1f7] px-4 py-4">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             What to compare next
           </p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
+          <p className="mt-3 text-sm leading-7 text-black/70">
             {fitModel.secondaryGenre
               ? `If you like ${fitModel.leadGenre}, ${fitModel.secondaryGenre} is the easiest adjacent genre to compare next.`
               : "If you want more to compare, open the genre page or the creator page before committing."}
@@ -273,12 +273,12 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="rounded-[26px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Recommended next step
           </p>
           <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="max-w-3xl text-sm leading-7 text-slate-700">
+            <p className="max-w-3xl text-sm leading-7 text-black/70">
               {fitModel.primaryAction.hint}
             </p>
             <button

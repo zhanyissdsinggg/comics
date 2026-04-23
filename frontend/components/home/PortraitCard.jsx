@@ -98,14 +98,14 @@ function PortraitCard({
       className={cn(
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
         isCompact ? "rounded-[24px]" : "rounded-[30px]",
-        "border border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(15,23,42,0.04)] group-hover:border-[color:var(--gush-border-strong)] group-hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)]",
+        "border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:bg-[#fffdf7] group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
             "relative aspect-[3/4] overflow-hidden",
-            "bg-[color:var(--gush-page-bg-muted)]",
+            "bg-[#f5f1ea]",
             isCompact ? "rounded-[20px]" : "rounded-[24px]",
           )}
         >
@@ -157,7 +157,7 @@ function PortraitCard({
               className={cn(
                 "line-clamp-1 font-semibold uppercase tracking-[0.2em] transition-colors",
                 isCompact ? "text-[10px]" : "text-[11px]",
-                "text-[color:var(--gush-ink-faint)] group-hover:text-[color:var(--gush-ink-soft)]",
+                "text-black/45 group-hover:text-black/60",
               )}
             >
               {metaLine}
@@ -169,7 +169,7 @@ function PortraitCard({
               isCompact
                 ? "text-[1.08rem] leading-5"
                 : "text-[1.12rem] leading-6",
-              "text-[color:var(--gush-ink-strong)] group-hover:text-[color:var(--gush-ink-strong)]",
+              "text-black group-hover:text-black",
             )}
           >
             {item.title}
@@ -186,7 +186,7 @@ function PortraitCard({
                   isCompact
                     ? "px-2.5 py-1 text-[10px]"
                     : "px-3 py-1 text-[11px]",
-                  "border-[color:var(--gush-border-faint)] bg-[color:var(--gush-page-bg-muted)] text-[color:var(--gush-ink-soft)]",
+                  "border-[2px] border-black bg-[#fff6cf] text-black/60",
                 )}
               >
                 {genre}
@@ -200,7 +200,7 @@ function PortraitCard({
             className={cn(
               "line-clamp-1 transition-colors",
               isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
-              "text-[color:var(--gush-ink-soft)] group-hover:text-[color:var(--gush-ink)]",
+              "text-black/60 group-hover:text-black/72",
             )}
           >
             {detailText}
@@ -209,7 +209,7 @@ function PortraitCard({
 
         <div
           className={cn(
-            "flex items-center border-t border-[color:var(--gush-border-faint)] pt-3",
+            "flex items-center border-t-[3px] border-black pt-3",
             typeof item.progressPercent === "number" && item.progressPercent > 0
               ? "justify-between"
               : showActionLabel
@@ -222,7 +222,7 @@ function PortraitCard({
             <p
               className={cn(
                 "text-[11px] font-medium",
-                "text-[color:var(--gush-ink-faint)]",
+                "text-black/45",
               )}
             >
               {Math.round(progressWidth)}% read
@@ -232,7 +232,7 @@ function PortraitCard({
               className={cn(
                 isCompact ? "text-[10px]" : "text-[11px]",
                 "font-medium uppercase tracking-[0.16em]",
-                "text-[color:var(--gush-ink-faint)]",
+                "text-black/45",
               )}
             >
               {actionLabel}
@@ -241,7 +241,7 @@ function PortraitCard({
           <span
             className={cn(
               "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1",
-              "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-elevated)] text-[color:var(--gush-ink-faint)]",
+              "border-[2px] border-black bg-[#ffe500] text-black",
             )}
           >
             <ArrowRight className="size-4" />

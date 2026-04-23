@@ -71,14 +71,15 @@ class ErrorBoundary extends Component {
           <div className="gush-page-ambient" />
           <div className="gush-page-main flex min-h-screen items-center justify-center">
             <div className="w-full max-w-xl">
-              <div className="relative rounded-[32px] border border-red-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.98))] p-7 shadow-[0_26px_70px_rgba(15,23,42,0.08)]">
-                <div className="mb-5 inline-flex rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-red-500">
+              <div className="relative overflow-hidden rounded-[32px] border-[3px] border-black bg-white p-7 shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),transparent_32%)]" />
+                <div className="relative mb-5 inline-flex rounded-full border-[3px] border-black bg-[#ffe7ec] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/60">
                   Client error
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="relative flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <svg
-                      className="h-6 w-6 text-red-500"
+                      className="h-6 w-6 text-[#ff007a]"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -92,10 +93,10 @@ class ErrorBoundary extends Component {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display text-[1.9rem] font-semibold tracking-tight text-slate-950">
+                    <h3 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                       {this.props.title || "Something went wrong"}
                     </h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                    <p className="mt-3 text-sm leading-7 text-black/68">
                       {this.props.message ||
                         "An unexpected error occurred. Please try again."}
                     </p>
@@ -103,10 +104,10 @@ class ErrorBoundary extends Component {
                     {process.env.NODE_ENV === "development" &&
                     this.state.error ? (
                       <details className="mt-4">
-                        <summary className="cursor-pointer text-xs text-red-500 hover:text-red-600">
+                        <summary className="cursor-pointer text-xs uppercase tracking-[0.16em] text-[#ff007a] hover:text-[#d70068]">
                           Error details (dev only)
                         </summary>
-                        <pre className="mt-2 overflow-auto rounded-2xl bg-white p-3 text-[10px] text-slate-600">
+                        <pre className="mt-2 overflow-auto rounded-[20px] border-[3px] border-black bg-[#fff6cf] p-3 text-[10px] text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                           {this.state.error.toString()}
                           {"\n\n"}
                           {this.state.errorInfo?.componentStack}
@@ -117,13 +118,13 @@ class ErrorBoundary extends Component {
                     <div className="mt-6 flex flex-wrap gap-2.5">
                       <button
                         onClick={this.handleReset}
-                        className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                        className="rounded-full border-[3px] border-black bg-black px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
                       >
                         Try again
                       </button>
                       <button
                         onClick={() => window.location.reload()}
-                        className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                        className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
                       >
                         Reload page
                       </button>

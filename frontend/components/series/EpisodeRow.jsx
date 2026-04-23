@@ -51,19 +51,19 @@ function formatDate(value) {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700";
+    return "border-[2px] border-black bg-[#eefcff] text-black";
   }
   if (tone === "preview") {
-    return "border-[color:var(--gush-border)] bg-white text-slate-700";
+    return "border-[2px] border-black bg-white text-black";
   }
   if (tone === "points") {
-    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-700";
+    return "border-[2px] border-black bg-[#fff7cf] text-black";
   }
   if (tone === "locked") {
-    return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500";
+    return "border-[2px] border-black bg-[#f3f0ea] text-black/55";
   }
 
-  return "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-500";
+  return "border-[2px] border-black bg-[#f3f0ea] text-black/55";
 }
 
 function EpisodeRow({
@@ -376,10 +376,10 @@ function EpisodeRow({
     accessState.actionKind === "claim" ||
     accessState.actionKind === "read" ||
     accessState.actionKind === "preview"
-      ? "min-h-[44px] w-full rounded-full bg-[var(--gush-accent,#3157d6)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--gush-accent-strong,#2444af)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+      ? "min-h-[46px] w-full rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
       : accessState.actionKind === "subscribe"
-        ? "min-h-[44px] w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] transition-all hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-elevated)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : "min-h-[44px] w-full rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_22px_rgba(15,23,42,0.06)] transition-all hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
+        ? "min-h-[46px] w-full rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:-translate-y-0.5 hover:bg-[#eefcff] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+        : "min-h-[46px] w-full rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#ffe500] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
 
   const actionNode = (
     <button
@@ -398,10 +398,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[22px] border border-[color:var(--gush-border)] bg-white p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.045)] transition-all duration-300 hover:border-[color:var(--gush-border-strong)] hover:shadow-[0_12px_26px_rgba(15,23,42,0.07)]"
+      className="group overflow-hidden rounded-[22px] border-[3px] border-black bg-white p-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffdf7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
     >
       <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[18px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] shadow-[0_8px_18px_rgba(15,23,42,0.04)] sm:h-[108px]">
+        <div className="relative h-24 overflow-hidden rounded-[18px] border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:h-[108px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -412,8 +412,8 @@ function EpisodeRow({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,#f8fafc_0%,#eef2f7_100%)] text-slate-400">
-              <span className="text-lg font-semibold tracking-tight">
+            <div className="flex h-full w-full items-center justify-center bg-[#fff7cf] text-black/55">
+              <span className="text-lg font-black uppercase tracking-[0.04em]">
                 Ep {episode?.number}
               </span>
             </div>
@@ -426,7 +426,7 @@ function EpisodeRow({
           {hasCustomEpisodeTitle ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                <span className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                   {episodeNumberLabel}
                 </span>
                 {showStateBadge ? (
@@ -437,18 +437,18 @@ function EpisodeRow({
                   </span>
                 ) : null}
                 {progress?.lastEpisodeId === episode?.id ? (
-                  <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                  <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
                     Last read
                   </span>
                 ) : null}
               </div>
-              <strong className="mt-2 block text-base font-semibold tracking-tight text-slate-950">
+              <strong className="mt-2 block text-base font-black uppercase tracking-[0.03em] text-black">
                 {episodeHeading}
               </strong>
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <strong className="text-base font-semibold tracking-tight text-slate-950">
+              <strong className="text-base font-black uppercase tracking-[0.03em] text-black">
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
@@ -459,20 +459,20 @@ function EpisodeRow({
                 </span>
               ) : null}
               {progress?.lastEpisodeId === episode?.id ? (
-                <span className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
                   Last read
                 </span>
               ) : null}
             </div>
           )}
 
-          <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+          <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium uppercase tracking-[0.08em] text-black/45">
             <span>{formatDate(episode?.releasedAt)}</span>
             {progressMetaLabel ? <span>{progressMetaLabel}</span> : null}
           </div>
 
           {supportDetail && supportDetail !== rowHelperText ? (
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-black/68">
               {supportDetail}
             </p>
           ) : null}
@@ -491,7 +491,7 @@ function EpisodeRow({
 
         <div className="flex flex-col gap-2 sm:min-w-[172px] sm:items-end">
           {sideLabel ? (
-            <p className="text-xs font-medium text-slate-500 sm:text-right">
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-black/45 sm:text-right">
               {sideLabel}
             </p>
           ) : null}

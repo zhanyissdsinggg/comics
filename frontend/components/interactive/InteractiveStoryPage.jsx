@@ -150,8 +150,8 @@ export default function InteractiveStoryPage({ seriesId }) {
       <main className="gush-page-shell gush-home-shell overflow-hidden">
         <SiteHeader variant="home" />
         <div className="gush-page-main">
-          <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-            <p className="text-sm text-[color:var(--gush-ink-soft)]">Loading interactive mode...</p>
+          <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <p className="text-sm font-medium text-black/58">Loading interactive mode...</p>
           </section>
         </div>
       </main>
@@ -162,22 +162,22 @@ export default function InteractiveStoryPage({ seriesId }) {
     <main className="gush-page-shell gush-home-shell overflow-hidden">
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+        <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--gush-ink-faint)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
                 Interactive Mode
               </p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[color:var(--gush-ink-strong)]">
+              <h1 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 text-sm text-[color:var(--gush-ink-soft)]">{storyDescription}</p>
+                <p className="mt-2 text-sm font-medium text-black/68">{storyDescription}</p>
               ) : null}
             </div>
             <Link
               href={`/series/${encodeURIComponent(seriesId)}`}
-              className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--gush-ink)] hover:border-[color:var(--gush-border-strong)]"
+              className="border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
             >
               Back to series
             </Link>
@@ -185,14 +185,14 @@ export default function InteractiveStoryPage({ seriesId }) {
         </section>
 
         {error ? (
-          <section className="rounded-[24px] border border-[rgba(239,68,68,0.25)] bg-[rgba(254,242,242,0.9)] p-4 text-sm text-[#991b1b]">
+          <section className="border-[3px] border-black bg-[#ffe3ec] p-4 text-sm font-medium text-[#8f003f] shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span>{error}</span>
               {authRequired ? (
                 <button
                   type="button"
                   onClick={openAuthModal}
-                  className="rounded-full border border-[#ef4444] bg-white px-3 py-1.5 text-xs font-semibold text-[#991b1b]"
+                  className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#8f003f] shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
                 >
                   Sign in
                 </button>
@@ -202,24 +202,24 @@ export default function InteractiveStoryPage({ seriesId }) {
         ) : null}
 
         {degradedNotice ? (
-          <section className="rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4 text-sm text-[color:var(--gush-ink-soft)]">
+          <section className="border-[3px] border-black bg-[#fff6c7] p-4 text-sm font-medium text-black/68 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
             {degradedNotice}
           </section>
         ) : null}
 
         {node ? (
           <>
-            <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--gush-ink-faint)]">
+            <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
                 {normalizeText(node.title || "Current Node")}
               </p>
-              <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-[color:var(--gush-ink)]">
+              <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-black/82">
                 {normalizeText(node.content)}
               </p>
             </section>
 
-            <section className="rounded-[30px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-              <h2 className="text-base font-semibold text-[color:var(--gush-ink-strong)]">Choose your next move</h2>
+            <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+              <h2 className="text-base font-black uppercase tracking-[0.04em] text-black">Choose your next move</h2>
               <div className="mt-4 grid gap-3">
                 {(node.choices || []).map((choice) => {
                   const disabled = Boolean(submittingChoiceId) || authRequired;
@@ -230,14 +230,14 @@ export default function InteractiveStoryPage({ seriesId }) {
                       type="button"
                       disabled={disabled}
                       onClick={() => handleChoose(choice.id)}
-                      className="rounded-2xl border border-[color:var(--gush-border)] bg-white px-4 py-3 text-left text-sm font-medium text-[color:var(--gush-ink)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="border-[3px] border-black bg-white px-4 py-3 text-left text-sm font-medium text-black transition-all shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {busy ? "Generating next segment..." : normalizeText(choice.label)}
                     </button>
                   );
                 })}
                 {node.choices?.length === 0 ? (
-                  <p className="text-sm text-[color:var(--gush-ink-soft)]">
+                  <p className="text-sm font-medium text-black/58">
                     End of current branch. More chapters can be configured in story nodes.
                   </p>
                 ) : null}
@@ -245,17 +245,17 @@ export default function InteractiveStoryPage({ seriesId }) {
             </section>
 
             {storyStateRows.length > 0 ? (
-              <section className="rounded-[24px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--gush-ink-faint)]">
+              <section className="border-[3px] border-black bg-[#f5f1ea] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <h3 className="text-xs font-black uppercase tracking-[0.16em] text-black/55">
                   Story State
                 </h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {storyStateRows.map((item) => (
                     <div
                       key={item.key}
-                      className="rounded-xl border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-[color:var(--gush-ink)]"
+                      className="border-[3px] border-black bg-white px-3 py-2 text-sm text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                     >
-                      <span className="font-semibold">{item.key}</span>: {item.value}
+                      <span className="font-black uppercase tracking-[0.06em]">{item.key}</span>: {item.value}
                     </div>
                   ))}
                 </div>

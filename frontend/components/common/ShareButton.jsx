@@ -63,7 +63,7 @@ const ShareButton = React.memo(function ShareButton({
   const shareableUrl = useMemo(() => sanitizeShareUrl(url), [url]);
   const buttonClassName = className
     ? `inline-flex items-center gap-2 ${className}`
-    : "inline-flex items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
+    : "inline-flex items-center gap-2 rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition hover:-translate-y-0.5 hover:bg-[#fff6cf]";
 
   const platforms = useMemo(
     () => [
@@ -80,7 +80,7 @@ const ShareButton = React.memo(function ShareButton({
         id: "twitter",
         name: "X",
         icon: "X",
-        badgeClass: "border-black/10 bg-[rgba(15,23,42,0.06)] text-slate-700",
+        badgeClass: "border-black bg-white text-black",
         getUrl: (shareUrl, shareTitle) =>
           `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`,
       },
@@ -174,22 +174,23 @@ const ShareButton = React.memo(function ShareButton({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.28)] p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={handleClose}
         >
           <div
-            className="w-full max-w-md rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_18px_44px_rgba(15,23,42,0.1)]"
+            className="relative w-full max-w-md overflow-hidden rounded-[28px] border-[3px] border-black bg-white p-6 shadow-[10px_10px_0_0_rgba(0,0,0,1)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-6 flex items-center justify-between">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
+            <div className="relative mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                   Share
                 </p>
-                <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                <h3 className="mt-2 font-display text-xl font-black uppercase tracking-[-0.04em] text-black">
                   Send this title
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-black/68">
                   Copy the link or open a sharing app without leaving the page
                   feeling noisy.
                 </p>
@@ -197,23 +198,23 @@ const ShareButton = React.memo(function ShareButton({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full border border-[color:var(--gush-border)] p-2 text-slate-500 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950"
+                className="rounded-full border-[3px] border-black p-2 text-black/55 transition hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black"
                 aria-label="Close"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <div className="mb-6 grid grid-cols-3 gap-3">
+            <div className="relative mb-6 grid grid-cols-3 gap-3">
               {platforms.map((platform) => (
                 <button
                   key={platform.id}
                   type="button"
                   onClick={() => handleShare(platform)}
-                  className="flex flex-col items-center gap-2 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-4 text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
+                  className="flex flex-col items-center gap-2 rounded-[20px] border-[3px] border-black bg-white p-4 text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
                 >
                   <span
-                    className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold ${platform.badgeClass}`}
+                    className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border-[2px] px-2 text-xs font-semibold ${platform.badgeClass}`}
                   >
                     {platform.icon}
                   </span>
@@ -222,8 +223,8 @@ const ShareButton = React.memo(function ShareButton({
               ))}
             </div>
 
-            <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-4">
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+            <div className="relative rounded-[22px] border-[3px] border-black bg-[#dffcff] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-black/55">
                 <Link2 size={14} />
                 <span>Copy link</span>
               </div>
@@ -232,15 +233,15 @@ const ShareButton = React.memo(function ShareButton({
                   type="text"
                   value={shareableUrl}
                   readOnly
-                  className="flex-1 rounded-xl border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[var(--gush-accent,#0071e3)]"
+                  className="flex-1 rounded-xl border-[3px] border-black bg-white px-3 py-2 text-sm text-black outline-none"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-xl border-[3px] border-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] transition-colors ${
                     copied
-                      ? "bg-[var(--gush-accent,#0071e3)] text-white"
-                      : "bg-[color:var(--gush-ink-strong)] text-white hover:bg-black/82"
+                      ? "bg-[#00e5ff] text-black"
+                      : "bg-black text-white hover:bg-[#ff007a]"
                   }`}
                 >
                   {copied ? "Copied" : "Copy"}

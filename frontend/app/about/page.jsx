@@ -29,9 +29,9 @@ const CONTACT_LINKS = [
 
 export default function AboutPage() {
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:shadow-none";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -63,11 +63,11 @@ export default function AboutPage() {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Contact
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   Support and legal.
                 </h2>
               </div>
@@ -90,14 +90,14 @@ export default function AboutPage() {
         <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Principles
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Readers first.
               </h2>
             </div>
-            <p className="text-sm leading-7 text-slate-600">
+            <p className="text-sm leading-7 text-black/68">
               {siteConfig.companyName} is for readers who want to open a chapter
               and stay in the story. Discovery, purchases, and account flows
               stay simple.
@@ -106,29 +106,29 @@ export default function AboutPage() {
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Details
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Contact details.
               </h2>
             </div>
-            <div className="space-y-3 text-sm text-slate-600">
+            <div className="space-y-3 text-sm text-black/68">
               <p>
-                <span className="font-semibold text-slate-950">Support:</span>{" "}
+                <span className="font-semibold text-black">Support:</span>{" "}
                 {siteConfig.supportEmail}
               </p>
               <p>
-                <span className="font-semibold text-slate-950">Privacy:</span>{" "}
+                <span className="font-semibold text-black">Privacy:</span>{" "}
                 {siteConfig.privacyEmail}
               </p>
               <p>
-                <span className="font-semibold text-slate-950">Legal:</span>{" "}
+                <span className="font-semibold text-black">Legal:</span>{" "}
                 {siteConfig.legalEmail}
               </p>
               {siteConfig.companyAddress ? (
                 <p>
-                  <span className="font-semibold text-slate-950">Address:</span>{" "}
+                  <span className="font-semibold text-black">Address:</span>{" "}
                   {siteConfig.companyAddress}
                 </p>
               ) : null}

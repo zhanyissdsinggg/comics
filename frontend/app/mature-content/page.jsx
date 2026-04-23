@@ -114,13 +114,13 @@ export default function MatureContentPage() {
               <>
                 <Link
                   href="/adult-gate"
-                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                  className="border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
                 >
                   18+ access
                 </Link>
                 <Link
                   href="/support"
-                  className="rounded-full border border-[color:var(--gush-border)] bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
                 >
                   Support
                 </Link>
@@ -135,14 +135,14 @@ export default function MatureContentPage() {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Access
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   Age gate and privacy.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                   Keep 18+ hidden by default, confirm the age check once, and
                   control whether mature history stays visible on this device.
                 </p>
@@ -152,13 +152,13 @@ export default function MatureContentPage() {
             <div className="flex flex-col gap-2.5">
               <Link
                 href="/adult-gate"
-                className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+                className="border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               >
                 18+ gate
               </Link>
               <Link
                 href="/account"
-                className="rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
               >
                 Open account
               </Link>
@@ -169,10 +169,10 @@ export default function MatureContentPage() {
         <section className="grid gap-4 lg:grid-cols-2">
           {CONTROL_CARDS.map((card) => (
             <SurfacePanel key={card.title} appearance="light" accent="blue">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 {card.title}
               </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">
+              <p className="mt-4 text-sm font-medium leading-7 text-black/68">
                 {card.body}
               </p>
             </SurfacePanel>
@@ -182,14 +182,14 @@ export default function MatureContentPage() {
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Checklist
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 If 18+ stays hidden.
               </h2>
             </div>
-            <ul className="space-y-3 text-sm leading-7 text-slate-600">
+            <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
               <li>Sign in if the gate asks for account access.</li>
               <li>Confirm the age check for your current region.</li>
               <li>
@@ -209,10 +209,10 @@ export default function MatureContentPage() {
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Related pages
               </p>
-              <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Related.
               </h2>
             </div>
@@ -237,12 +237,12 @@ export default function MatureContentPage() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]"
+                  className="block border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
                 >
-                  <h3 className="text-base font-semibold text-slate-950">
+                  <h3 className="text-base font-black uppercase tracking-[-0.02em] text-black">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                  <p className="mt-2 text-sm font-medium leading-7 text-black/68">
                     {item.body}
                   </p>
                 </Link>
@@ -253,10 +253,10 @@ export default function MatureContentPage() {
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
               FAQ
             </p>
-            <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
               Answers.
             </h2>
           </div>
@@ -264,12 +264,12 @@ export default function MatureContentPage() {
             {FAQ_ITEMS.map((item) => (
               <div
                 key={item.question}
-                className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]"
+                className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
               >
-                <h3 className="text-base font-semibold text-slate-950">
+                <h3 className="text-base font-black uppercase tracking-[-0.02em] text-black">
                   {item.question}
                 </h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
                   {item.answer}
                 </p>
               </div>

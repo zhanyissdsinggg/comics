@@ -57,29 +57,30 @@ export default function CookieConsent() {
   return (
     <div className="pointer-events-none fixed inset-x-4 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.85rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
       <div className="pointer-events-auto mx-auto max-w-md">
-        <div className="relative rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 text-slate-800 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <div className="relative overflow-hidden rounded-[28px] border-[3px] border-black bg-white p-5 text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),transparent_32%)]" />
           <button
             onClick={handleDecline}
-            className="absolute right-3 top-3 rounded-full border border-[color:var(--gush-border)] bg-white p-2 text-slate-400 transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-900"
+            className="absolute right-3 top-3 z-10 rounded-full border-[3px] border-black bg-white p-2 text-black/55 transition hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black"
             aria-label="Close"
           >
             <X size={16} />
           </button>
 
-          <div className="flex items-start gap-4 pr-8">
+          <div className="relative flex items-start gap-4 pr-8">
             <div className="mt-0.5 flex-shrink-0">
-              <div className="rounded-2xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-3 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-                <Cookie size={20} className="text-[var(--gush-accent)]" />
+              <div className="rounded-2xl border-[3px] border-black bg-[#ffe500] p-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <Cookie size={20} className="text-black" />
               </div>
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[color:var(--gush-ink-faint)]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Privacy
               </p>
-              <h3 className="text-base font-semibold text-slate-900">
+              <h3 className="font-display text-lg font-black uppercase tracking-[-0.04em] text-black">
                 Cookies
               </h3>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-black/68">
                 We use cookies for sign-in, reading progress, and basic
                 preferences.{" "}
                 {useDocumentNavigation ? (
@@ -89,14 +90,14 @@ export default function CookieConsent() {
                       event.preventDefault();
                       navigateWithDocument("/privacy-policy");
                     }}
-                    className="font-semibold text-[var(--gush-accent)] underline-offset-4 transition hover:text-[var(--gush-accent-strong)] hover:underline"
+                    className="font-semibold text-black underline decoration-black/25 underline-offset-4 transition hover:text-[#ff007a]"
                   >
                     Policy
                   </a>
                 ) : (
                   <Link
                     href="/privacy-policy"
-                    className="font-semibold text-[var(--gush-accent)] underline-offset-4 transition hover:text-[var(--gush-accent-strong)] hover:underline"
+                    className="font-semibold text-black underline decoration-black/25 underline-offset-4 transition hover:text-[#ff007a]"
                   >
                     Policy
                   </Link>
@@ -108,13 +109,13 @@ export default function CookieConsent() {
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               onClick={handleDecline}
-              className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-900"
+              className="rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
             >
               Not now
             </button>
             <button
               onClick={handleAccept}
-              className="rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition hover:bg-black/82"
+              className="rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
             >
               Allow
             </button>

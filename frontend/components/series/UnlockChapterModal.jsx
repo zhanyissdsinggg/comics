@@ -281,22 +281,22 @@ export default function UnlockChapterModal({
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-end justify-center bg-[rgba(2,6,23,0.76)] p-3 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-[130] flex items-end justify-center bg-black/45 p-3 backdrop-blur-[6px] sm:items-center sm:p-6"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Unlock Chapter${chapterSuffix}`}
-        className="relative w-full max-w-[32rem] overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(3,7,18,0.98))] text-white shadow-[0_32px_120px_rgba(0,0,0,0.48)]"
+        className="relative w-full max-w-[32rem] overflow-hidden rounded-[30px] border-[3px] border-black bg-[#fffdf7] text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.18),transparent_38%),radial-gradient(circle_at_18%_18%,rgba(56,189,248,0.12),transparent_28%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,229,0,0.25),transparent_36%),radial-gradient(circle_at_18%_18%,rgba(0,229,255,0.12),transparent_24%)]" />
 
         <div className="relative p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/8 text-[var(--gush-accent,#0071e3)]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                 {view === "packs" ? (
                   <Wallet size={20} />
                 ) : (
@@ -304,10 +304,10 @@ export default function UnlockChapterModal({
                 )}
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                   {view === "packs" ? "More points" : "Secure unlock"}
                 </p>
-                <p className="mt-1 text-sm text-white/60">
+                <p className="mt-1 text-sm text-black/60">
                   {view === "packs"
                     ? "Pick a pack and keep reading."
                     : "Unlock stays on this account after checkout."}
@@ -318,7 +318,7 @@ export default function UnlockChapterModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-white/12 bg-white/6 text-white/70 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border-[3px] border-black bg-white text-black transition hover:bg-[#fff1f7]"
               aria-label="Close unlock modal"
             >
               <X size={18} />
@@ -327,11 +327,11 @@ export default function UnlockChapterModal({
 
           {view === "confirm" ? (
             <div className="mt-6">
-              <h2 className="font-display text-[1.9rem] font-semibold tracking-tight text-white">
+              <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-black">
                 Unlock Chapter{chapterSuffix} for{" "}
                 {formatUSNumber(resolvedPrice)} Points
               </h2>
-              <p className="mt-3 text-sm leading-7 text-white/68">
+              <p className="mt-3 text-sm leading-7 text-black/68">
                 {!isSignedIn
                   ? "Sign in to use points, unlock this chapter, and keep your reading progress on one account."
                   : insufficient
@@ -340,27 +340,27 @@ export default function UnlockChapterModal({
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                <div className="rounded-[22px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                     Your balance
                   </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
                     {isSignedIn ? formatUSNumber(resolvedWalletBalance) : "--"}
                   </p>
-                  <p className="mt-1 text-xs text-white/55">
+                  <p className="mt-1 text-xs text-black/55">
                     {isSignedIn
                       ? "Available points on this account."
                       : "Sign in to view your points balance."}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/6 px-4 py-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                <div className="rounded-[22px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                     Chapter price
                   </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
                     {formatUSNumber(resolvedPrice)}
                   </p>
-                  <p className="mt-1 text-xs text-white/55">
+                  <p className="mt-1 text-xs text-black/55">
                     {insufficient
                       ? `${formatUSNumber(computedShortfall)} more points needed.`
                       : "Charged in points after you confirm."}
@@ -368,14 +368,14 @@ export default function UnlockChapterModal({
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-emerald-400/15 bg-emerald-400/8 px-4 py-4 text-sm text-white/78">
+              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/78">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-emerald-300">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-[2px] border-black bg-[#ffe500] text-black">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Secure unlock</p>
-                    <p className="mt-1 text-xs leading-6 text-white/60">
+                    <p className="font-black uppercase tracking-[0.05em] text-black">Secure unlock</p>
+                    <p className="mt-1 text-xs leading-6 text-black/60">
                       Point options are shown in USD and stay tied to your
                       current account.
                     </p>
@@ -388,7 +388,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-semibold text-white/78 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Not now
                 </button>
@@ -396,7 +396,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full bg-[color:var(--gush-ink-strong)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)] transition hover:bg-black/82 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {primaryButtonLabel}
                 </button>
@@ -406,10 +406,10 @@ export default function UnlockChapterModal({
             <div className="mt-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-display text-[1.9rem] font-semibold tracking-tight text-white">
+                  <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-black">
                     Get More Points
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-white/68">
+                  <p className="mt-3 text-sm leading-7 text-black/68">
                     Add a pack to unlock Chapter{chapterSuffix}. Prices are
                     shown in US dollars.
                   </p>
@@ -418,19 +418,19 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={() => onViewChange?.("confirm")}
                   disabled={Boolean(busyAction)}
-                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3.5 py-2 text-sm font-semibold text-white/78 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border-[3px] border-black bg-white px-3.5 py-2 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-sky-300/18 bg-sky-300/10 px-4 py-3 text-sm text-white/76">
+              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#fff7cf] px-4 py-3 text-sm text-black/76">
                 <div className="flex items-center justify-between gap-3">
                   <span>
                     Need {formatUSNumber(computedShortfall)} more points
                   </span>
-                  <span className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/68">
+                  <span className="rounded-full border-[2px] border-black bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black/68">
                     Secure checkout
                   </span>
                 </div>
@@ -448,30 +448,30 @@ export default function UnlockChapterModal({
                   return (
                     <div
                       key={pkg.id}
-                      className={`rounded-[24px] border px-4 py-4 transition ${
+                      className={`rounded-[24px] border-[3px] px-4 py-4 transition ${
                         isHighlighted
-                          ? "border-[color:var(--gush-border-strong)] bg-[rgba(255,255,255,0.98)] shadow-[0_18px_42px_rgba(15,23,42,0.1)]"
-                          : "border-white/10 bg-white/6"
+                          ? "border-black bg-[#ffe500] shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                          : "border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                       }`}
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-lg font-semibold text-white">
+                            <span className="text-lg font-black uppercase tracking-[0.03em] text-black">
                               {pkg.name}
                             </span>
                             {pkg.tag ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/62">
+                              <span className="inline-flex items-center gap-1 rounded-full border-[2px] border-black bg-[#fff1f7] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black">
                                 <Sparkles size={10} />
                                 {pkg.tag}
                               </span>
                             ) : null}
                           </div>
-                          <p className="mt-2 text-2xl font-semibold text-white">
+                          <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
                             {pkg.priceLabel} for {formatUSNumber(pkg.totalPts)}{" "}
                             Points
                           </p>
-                          <p className="mt-1 text-xs text-white/55">
+                          <p className="mt-1 text-xs text-black/55">
                             {bonusLabel}
                           </p>
                         </div>
@@ -480,7 +480,7 @@ export default function UnlockChapterModal({
                           type="button"
                           onClick={() => onBuyPack?.(pkg.id)}
                           disabled={Boolean(busyAction)}
-                          className="min-h-[42px] rounded-full border border-white/14 bg-white/8 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-white/24 hover:bg-white/12 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="min-h-[42px] rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {busyAction === currentPackAction
                             ? "Buying..."
@@ -492,16 +492,16 @@ export default function UnlockChapterModal({
                 })}
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-white/10 bg-white/6 px-4 py-4 text-sm text-white/72">
+              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/72">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 text-emerald-300">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-[2px] border-black bg-[#ffe500] text-black">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">
+                    <p className="font-black uppercase tracking-[0.05em] text-black">
                       Safe to check out
                     </p>
-                    <p className="mt-1 text-xs leading-6 text-white/58">
+                    <p className="mt-1 text-xs leading-6 text-black/58">
                       {packagesUsingFallback
                         ? "Showing current pack defaults while live pricing refreshes."
                         : "USD pricing is ready here, and your points land on the same account after purchase."}
@@ -515,7 +515,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-semibold text-white/78 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Close
                 </button>
@@ -524,12 +524,12 @@ export default function UnlockChapterModal({
                     type="button"
                     onClick={onOpenStore}
                     disabled={Boolean(busyAction)}
-                    className="rounded-full border border-white/12 bg-white/6 px-4 py-2.5 text-sm font-semibold text-white/78 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     View all options
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full bg-[var(--gush-accent,#0071e3)] px-5 py-2.5 text-sm font-semibold text-white/85 opacity-90">
+                <span className="inline-flex items-center justify-center rounded-full border-[3px] border-black bg-[#00e5ff] px-5 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black">
                   {isLoadingPackages ? "Refreshing prices..." : "Point options"}
                 </span>
               </div>

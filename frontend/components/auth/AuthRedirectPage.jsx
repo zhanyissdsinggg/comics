@@ -8,16 +8,19 @@ export default function AuthRedirectPage({
     <div className="gush-home-shell relative min-h-screen overflow-hidden">
       <div className="gush-page-ambient" />
       <main className="gush-page-main flex min-h-screen items-center justify-center">
-        <div className="relative w-full max-w-md rounded-[32px] border border-[color:var(--gush-border)] bg-white px-8 py-8 text-center shadow-[0_20px_48px_rgba(15,23,42,0.08)]">
-          <div className="mx-auto inline-flex rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        <div className="relative w-full max-w-md overflow-hidden rounded-[32px] border-[3px] border-black bg-white px-8 py-8 text-center shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),transparent_30%)]" />
+          <div className="relative mx-auto inline-flex rounded-full border-[3px] border-black bg-[#dffcff] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
             Redirecting
           </div>
-          <div className="mx-auto mt-5 h-9 w-9 animate-spin rounded-full border-[3px] border-[var(--gush-accent-strong,#0058cc)] border-t-transparent" />
-          <h1 className="mt-5 font-display text-[1.9rem] font-semibold tracking-tight text-slate-950">
+          <div className="mx-auto mt-5 h-9 w-9 animate-spin rounded-full border-[4px] border-black border-t-transparent" />
+          <h1 className="relative mt-5 font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
             {title}
           </h1>
-          <p className="mt-3 text-sm leading-7 text-slate-600">{description}</p>
-          <p className="mt-6 text-xs uppercase tracking-[0.2em] text-slate-400">
+          <p className="relative mt-3 text-sm leading-7 text-black/68">
+            {description}
+          </p>
+          <p className="relative mt-6 text-xs uppercase tracking-[0.24em] text-black/40">
             Getting things ready
           </p>
         </div>

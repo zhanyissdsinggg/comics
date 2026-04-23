@@ -80,15 +80,11 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
-function FooterAgeBadge({ isHome }) {
+function FooterAgeBadge() {
   return (
     <span
       aria-label="18 plus only"
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.22em] opacity-60 ${
-        isHome
-          ? "border-slate-400/40 text-slate-600"
-          : "border-white/15 text-neutral-200"
-      }`}
+      className="inline-flex items-center rounded-full border-[2px] border-black bg-[#ffe500] px-3 py-1 text-[11px] font-black tracking-[0.22em] text-black"
     >
       18+
     </span>
@@ -134,8 +130,8 @@ function MastercardIcon() {
   );
 }
 
-function PaymentIconRow({ isHome }) {
-  const iconTone = "border-slate-300/70 bg-white/60 text-slate-500";
+function PaymentIconRow() {
+  const iconTone = "border-[2px] border-black bg-white text-black";
 
   return (
     <div className="flex flex-wrap items-center gap-2 opacity-60">
@@ -243,43 +239,39 @@ export default function SiteFooter({
   if (isCompact) {
     return (
       <footer
-        className="mt-16 border-t border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.92)] text-slate-900"
+        className="mt-16 border-t-[3px] border-black bg-[#fffdf7] text-black"
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-md space-y-2">
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className={`font-display text-[1.95rem] font-semibold tracking-[-0.045em] ${isHome ? "text-slate-950" : "text-white"}`}
+                className="text-[1.95rem] font-black uppercase tracking-[0.04em] text-black"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
               {showTagline && footerTagline ? (
-                <p
-                  className={`text-sm leading-6 ${isHome ? "text-[color:var(--gush-ink-soft)]" : "text-neutral-300"}`}
-                >
+                <p className="text-sm leading-6 text-black/65">
                   {footerTagline}
                 </p>
               ) : null}
             </div>
 
-            <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm">
+            <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm font-semibold uppercase tracking-[0.08em]">
               {footerPrimaryLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
+                  "text-black/60 transition-colors hover:text-[#ff007a]",
                 ),
               )}
             </nav>
           </div>
 
-          <div
-          className="mt-4 flex flex-col gap-3 border-t border-[color:var(--gush-border)] pt-3 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between"
-          >
+          <div className="mt-4 flex flex-col gap-3 border-t-[3px] border-black pt-3 text-sm text-black/55 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                className="font-medium text-black/55 transition-colors hover:text-[#ff007a]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -287,14 +279,14 @@ export default function SiteFooter({
                 {footerMetaLinks.map((link) =>
                   renderInternalLink(
                     link,
-                    "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
+                    "font-medium text-black/55 transition-colors hover:text-[#ff007a]",
                   ),
                 )}
-                <FooterAgeBadge isHome={isHome} />
+                <FooterAgeBadge />
               </div>
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
-              <PaymentIconRow isHome={isHome} />
+              <PaymentIconRow />
               <p>
                 (c) {currentYear} {siteConfig.companyName}
               </p>
@@ -307,25 +299,25 @@ export default function SiteFooter({
 
   return (
     <footer
-      className="mt-16 border-t border-[color:var(--gush-border)] bg-[rgba(251,251,253,0.96)] text-slate-900"
+      className="mt-16 border-t-[3px] border-black bg-[#fffdf7] text-black"
     >
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
               <p
-                className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[color:var(--gush-ink-faint)]"
+                className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45"
               >
                 Stories
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className="font-display text-[2.45rem] font-semibold tracking-[-0.05em] text-slate-950"
+                className="text-[2.45rem] font-black uppercase tracking-[0.04em] text-black"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
               {showTagline && footerTagline ? (
-                <p className="text-sm leading-6 text-[color:var(--gush-ink-soft)]">
+                <p className="text-sm leading-6 text-black/65">
                   {footerTagline}
                 </p>
               ) : null}
@@ -334,7 +326,7 @@ export default function SiteFooter({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                className="font-medium text-black/60 transition-colors hover:text-[#ff007a]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -343,14 +335,14 @@ export default function SiteFooter({
                   <a
                     key={item.label}
                     href={item.href}
-                    className="text-slate-600 transition-colors hover:text-slate-950"
+                    className="font-medium text-black/60 transition-colors hover:text-[#ff007a]"
                   >
                     {item.label}
                   </a>
                 ) : (
                   renderInternalLink(
                     item,
-                    "text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
+                    "font-medium text-black/60 transition-colors hover:text-[#ff007a]",
                   )
                 ),
               )}
@@ -361,7 +353,7 @@ export default function SiteFooter({
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
                 <h4
-                  className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[color:var(--gush-ink-faint)]"
+                  className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45"
                 >
                   {section.title}
                 </h4>
@@ -370,7 +362,7 @@ export default function SiteFooter({
                     <li key={link.href}>
                       {renderInternalLink(
                         link,
-                        "text-sm text-[color:var(--gush-ink-soft)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
+                        "text-sm font-medium text-black/62 transition-colors hover:text-[#ff007a]",
                       )}
                     </li>
                   ))}
@@ -380,16 +372,16 @@ export default function SiteFooter({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-[color:var(--gush-border)] pt-4 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-6 flex flex-col gap-3 border-t-[3px] border-black pt-4 text-sm text-black/55 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {footerMetaLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]",
+                  "font-medium text-black/55 transition-colors hover:text-[#ff007a]",
                 ),
               )}
-              <FooterAgeBadge isHome={isHome} />
+              <FooterAgeBadge />
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {socialLinks.map((item) => (
@@ -398,7 +390,7 @@ export default function SiteFooter({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[color:var(--gush-ink-faint)] transition-colors hover:text-[color:var(--gush-ink-strong)]"
+                  className="font-medium text-black/55 transition-colors hover:text-[#ff007a]"
                 >
                   {item.label}
                 </a>
@@ -406,7 +398,7 @@ export default function SiteFooter({
             </div>
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
-            <PaymentIconRow isHome={isHome} />
+            <PaymentIconRow />
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <span>
                 (c) {currentYear} {siteConfig.companyName}

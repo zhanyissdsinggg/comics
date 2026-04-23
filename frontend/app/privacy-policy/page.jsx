@@ -81,15 +81,15 @@ function LegalSection({
 }) {
   return (
     <SurfacePanel className={className} appearance="light" accent="blue">
-      <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
+      <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
         {title}
       </h2>
-      <div className="mt-4 space-y-4 text-sm leading-7 text-slate-600">
+      <div className="mt-4 space-y-4 text-sm font-medium leading-7 text-black/68">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-slate-600 marker:text-[var(--gush-accent)]">
+          <ul className="list-disc space-y-2 pl-5 text-black/68 marker:text-[#ff007a]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -103,19 +103,19 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-5 py-4 shadow-[0_8px_18px_rgba(15,23,42,0.03)]">
-      <p className="text-sm text-slate-600">
-        <span className="font-semibold text-slate-950">Email:</span>{" "}
+    <div className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+      <p className="text-sm font-medium text-black/68">
+        <span className="font-black text-black">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
-          className="text-[var(--gush-accent)] transition hover:text-[var(--gush-accent)]"
+          className="font-black text-[#ff007a] transition hover:text-[#e1006d]"
         >
           {siteConfig.privacyEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm text-slate-600">
-          <span className="font-semibold text-slate-950">Address:</span>{" "}
+        <p className="mt-3 text-sm font-medium text-black/68">
+          <span className="font-black text-black">Address:</span>{" "}
           {siteConfig.companyAddress}
         </p>
       ) : null}
@@ -125,9 +125,9 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   const primaryButtonClass =
-    "rounded-full bg-[color:var(--gush-ink-strong)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82";
+    "border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[color:var(--gush-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.82)] transition-colors hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+    "border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -159,11 +159,11 @@ export default function PrivacyPolicyPage() {
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Contact
               </p>
               <div>
-                <h2 className="font-display text-[1.7rem] font-semibold tracking-tight text-slate-950">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
                   Privacy contact.
                 </h2>
               </div>

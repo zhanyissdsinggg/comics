@@ -65,13 +65,13 @@ const SearchBar = memo(function SearchBar({
   const discoveryLanes = HOME_DISCOVERY_LANES;
   const discoveryHeading = "Browse";
   const shellClass = isFocused
-    ? "border-[color:var(--gush-border-strong)] bg-white shadow-[0_0_0_4px_rgba(15,23,42,0.06)]"
+    ? "border-black bg-white shadow-[0_0_0_4px_rgba(255,229,0,0.45)]"
     : isHome
-      ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.92)] shadow-[0_10px_22px_rgba(0,0,0,0.045)] hover:border-[color:var(--gush-border-strong)] hover:bg-white"
-      : "border-[color:var(--gush-border)] bg-white shadow-[0_10px_22px_rgba(0,0,0,0.045)] hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)]";
+      ? "border-black bg-[rgba(255,255,255,0.96)] shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-white"
+      : "border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#fffef7]";
   const searchIconClass = isFocused
-    ? "text-slate-700"
-    : "text-[color:var(--gush-ink-faint)]";
+    ? "text-black"
+    : "text-black/45";
 
   useEffect(() => {
     setSearchHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
@@ -216,7 +216,7 @@ const SearchBar = memo(function SearchBar({
     <div ref={containerRef} className="relative w-full">
       <div
         className={cn(
-          "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation focus-within:ring-[3px] focus-within:ring-[rgba(49,87,214,0.16)]",
+          "relative flex items-center gap-2 rounded-full border-[3px] px-4 py-2.5 transition-all duration-200 touch-manipulation",
           shellClass,
         )}
         style={{ WebkitTapHighlightColor: "transparent" }}
@@ -231,10 +231,7 @@ const SearchBar = memo(function SearchBar({
         {isSearching ? (
           <Loader2
             size={16}
-            className={cn(
-              "animate-spin",
-              "text-slate-700",
-            )}
+            className="animate-spin text-black"
           />
         ) : null}
         <input
@@ -261,7 +258,7 @@ const SearchBar = memo(function SearchBar({
             "min-w-0 flex-1 bg-transparent text-base focus:outline-none md:text-sm",
             isHome
               ? "text-[color:var(--gush-ink-strong)] placeholder:text-[color:var(--gush-ink-faint)]"
-              : "text-slate-900 placeholder:text-slate-400",
+              : "text-black placeholder:text-black/32",
           )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
@@ -277,7 +274,7 @@ const SearchBar = memo(function SearchBar({
               "rounded-full",
               isHome
                 ? "text-[color:var(--gush-ink-faint)] hover:bg-black/[0.04] hover:text-[color:var(--gush-ink-strong)]"
-                : "text-slate-400 hover:bg-black/[0.04] hover:text-slate-900",
+                : "text-black/40 hover:bg-[#ffe7ec] hover:text-black",
             )}
             aria-label="Clear search"
           >
@@ -289,8 +286,8 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
               isHome
-                ? "border border-[color:var(--gush-border)] bg-[rgba(248,248,250,0.96)] text-[color:var(--gush-ink-faint)]"
-                : "border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-400",
+                ? "border-[3px] border-black bg-[#fff6cf] text-black/45"
+                : "border-[3px] border-black bg-[#fff6cf] text-black/45",
             )}
           >
             {shortcutLabel}
@@ -302,10 +299,10 @@ const SearchBar = memo(function SearchBar({
         <div
           id={listboxId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border backdrop-blur-md",
+            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border-[3px] border-black bg-white shadow-[10px_10px_0_0_rgba(0,0,0,1)] backdrop-blur-md",
             isHome
-              ? "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.96)] shadow-[0_18px_38px_rgba(0,0,0,0.08)]"
-              : "border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.95)] shadow-[0_18px_38px_rgba(0,0,0,0.08)]",
+              ? ""
+              : "",
           )}
         >
           <div className="p-2">
@@ -315,18 +312,14 @@ const SearchBar = memo(function SearchBar({
                   <div className="flex items-center gap-2">
                     <Search
                       size={14}
-                      className={cn(
-                        isHome
-                          ? "text-slate-700"
-                          : "text-slate-700",
-                      )}
+                      className="text-black/55"
                     />
                     <span
                       className={cn(
                         "text-xs font-semibold",
                         isHome
-                          ? "text-[color:var(--gush-ink-soft)]"
-                          : "text-slate-500",
+                          ? "text-black/55"
+                          : "text-black/55",
                       )}
                     >
                       Recent
@@ -341,7 +334,7 @@ const SearchBar = memo(function SearchBar({
                       "h-7 rounded-full px-2.5 text-[11px]",
                       isHome
                         ? "text-[color:var(--gush-ink-faint)] hover:bg-red-500/10 hover:text-red-500"
-                        : "text-slate-400 hover:bg-red-500/10 hover:text-red-500",
+                        : "text-black/40 hover:bg-red-500/10 hover:text-red-500",
                     )}
                     aria-label="Clear all history"
                   >
@@ -355,8 +348,7 @@ const SearchBar = memo(function SearchBar({
                     <div
                       key={`${query}-${index}`}
                       className={cn(
-                        "flex items-center gap-2 rounded-[16px] px-2 py-1",
-                        "hover:bg-[rgba(244,244,246,0.92)]",
+                        "flex items-center gap-2 rounded-[16px] px-2 py-1 hover:bg-[#fff6cf]",
                       )}
                     >
                       <Button
@@ -367,7 +359,7 @@ const SearchBar = memo(function SearchBar({
                           "h-auto flex-1 justify-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm hover:bg-transparent",
                           isHome
                             ? "text-[color:var(--gush-ink)] hover:text-[color:var(--gush-ink-strong)]"
-                            : "text-slate-700 hover:text-slate-950",
+                            : "text-black/68 hover:text-black",
                         )}
                       >
                         <Search
@@ -375,7 +367,7 @@ const SearchBar = memo(function SearchBar({
                             "size-3.5",
                             isHome
                               ? "text-[color:var(--gush-ink-faint)]"
-                              : "text-slate-400",
+                              : "text-black/40",
                           )}
                         />
                         <span className="truncate">{query}</span>
@@ -389,7 +381,7 @@ const SearchBar = memo(function SearchBar({
                           "rounded-full",
                           isHome
                             ? "text-[color:var(--gush-ink-faint)] hover:bg-red-500/10 hover:text-red-500"
-                            : "text-slate-400 hover:bg-red-500/10 hover:text-red-500",
+                            : "text-black/40 hover:bg-red-500/10 hover:text-red-500",
                         )}
                         aria-label={`Delete ${query} from recent searches`}
                       >
@@ -404,7 +396,7 @@ const SearchBar = memo(function SearchBar({
             <div
               className={cn(
                 searchHistory.length > 0
-                  ? "mt-2 border-t border-[color:var(--gush-border)] pt-2"
+                  ? "mt-2 border-t-[3px] border-black pt-2"
                   : "",
               )}
             >
@@ -414,15 +406,15 @@ const SearchBar = memo(function SearchBar({
                   className={cn(
                     isHome
                       ? "text-[color:var(--gush-ink-faint)]"
-                      : "text-slate-400",
+                      : "text-black/40",
                   )}
                 />
                 <span
                   className={cn(
                     "text-xs font-semibold",
                     isHome
-                      ? "text-[color:var(--gush-ink-soft)]"
-                      : "text-slate-500",
+                      ? "text-black/55"
+                      : "text-black/55",
                   )}
                 >
                   {discoveryHeading}
@@ -436,8 +428,7 @@ const SearchBar = memo(function SearchBar({
                     variant="ghost"
                     onClick={() => handleLaneClick(lane)}
                     className={cn(
-                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left",
-                      "hover:bg-[rgba(244,244,246,0.92)]",
+                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left hover:bg-[#dffcff]",
                     )}
                   >
                     <span className="min-w-0">
@@ -446,7 +437,7 @@ const SearchBar = memo(function SearchBar({
                           "block text-sm font-medium",
                           isHome
                             ? "text-[color:var(--gush-ink)]"
-                            : "text-slate-800",
+                            : "text-black",
                         )}
                       >
                         {lane.label}
@@ -456,7 +447,7 @@ const SearchBar = memo(function SearchBar({
                           "mt-0.5 block text-xs",
                           isHome
                             ? "text-[color:var(--gush-ink-faint)]"
-                            : "text-slate-500",
+                            : "text-black/55",
                         )}
                       >
                         {lane.hint}
@@ -467,7 +458,7 @@ const SearchBar = memo(function SearchBar({
                         "inline-flex items-center gap-1 text-xs font-semibold",
                         isHome
                           ? "text-[color:var(--gush-ink-faint)]"
-                          : "text-slate-400",
+                          : "text-black/40",
                       )}
                     >
                       Open
