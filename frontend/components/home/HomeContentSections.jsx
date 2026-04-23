@@ -215,7 +215,7 @@ function ShelfComicCard({ item, onClick, actionLabel = "Open series" }) {
             {title}
           </p>
           {author ? (
-            <p className="mt-1 line-clamp-1 text-xs font-semibold uppercase tracking-[0.1em] text-white/72">
+            <p className="mt-1 line-clamp-1 text-xs font-semibold uppercase tracking-[0.1em] text-white/70">
               {author}
             </p>
           ) : null}
@@ -365,7 +365,7 @@ function LeaderboardCard({ item, rank, onClick }) {
           </p>
         ) : null}
         {meta ? (
-          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-white/68">
+          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-white/70">
             {meta}
           </p>
         ) : null}
@@ -390,7 +390,7 @@ function LeaderboardSection({ items, onItemClick }) {
             <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
               Top 10 chart
             </h2>
-            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/68">
+            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/70">
               A fast-moving shelf of the titles readers keep opening first.
             </p>
           </div>
@@ -454,7 +454,7 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/72">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/70">
               Browse
             </p>
             <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-white">
@@ -612,7 +612,7 @@ export default function HomeContentSections({
             <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
               Find your lane fast
             </h2>
-            <p className="mt-3 text-sm font-semibold leading-6 text-white/68">
+            <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
               Jump into the shelf, format, or credit lane that matches how you
               like to browse.
             </p>
@@ -633,7 +633,7 @@ export default function HomeContentSections({
             ))}
           </div>
 
-          <div className="mt-8 border-[3px] border-white/16 bg-black/40 p-5 text-white shadow-[8px_8px_0_0_rgba(255,255,255,0.08)] sm:flex sm:items-center sm:justify-between">
+          <div className="mt-8 border-[3px] border-white/20 bg-black/40 p-5 text-white shadow-[8px_8px_0_0_rgba(255,255,255,0.08)] sm:flex sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center border-[3px] border-black bg-[#ffe500] text-black">
                 <Sparkles className="size-5" />
@@ -642,7 +642,7 @@ export default function HomeContentSections({
                 <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
                   Need a faster start?
                 </p>
-                <p className="mt-2 max-w-[34rem] text-sm font-semibold leading-6 text-white/66">
+                <p className="mt-2 max-w-[34rem] text-sm font-semibold leading-6 text-white/70">
                   Open the search page when you already know the mood, genre, or
                   creator you want.
                 </p>
@@ -682,7 +682,7 @@ export default function HomeContentSections({
                   Obsess.
                 </span>
               </h2>
-              <p className="mt-5 max-w-[40rem] text-sm font-semibold leading-6 text-white/82">
+              <p className="mt-5 max-w-[40rem] text-sm font-semibold leading-6 text-white/80">
                 Jump from featured shelves to creators and search without leaving the reading mood.
               </p>
               <button

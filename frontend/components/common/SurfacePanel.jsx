@@ -12,9 +12,9 @@ const toneClasses = {
   },
   light: {
     default:
-      "border-[3px] border-black bg-white text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
+      "border-[3px] border-black bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
     muted:
-      "border-[3px] border-black bg-[#fff6cf] text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
+      "border-[3px] border-black bg-[#fff6cf] text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
       "border-[3px] border-black bg-[#ff007a] text-white backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:

@@ -310,7 +310,7 @@ export default function SeriesHeader({
                   </p>
                 </div>
                 <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/72">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
                     Latest
                   </p>
                   <p className="mt-2 text-sm font-black uppercase tracking-[0.04em]">

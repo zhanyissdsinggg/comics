@@ -127,7 +127,7 @@ function PortraitCard({
           <div
             className={cn(
               "absolute inset-[1px]",
-              "border border-white/38",
+              "border border-white/40",
             )}
           />
 

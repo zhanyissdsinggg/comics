@@ -48,7 +48,7 @@ function ToastItem({ toast, onClose }) {
     error: {
       panel: "border-black bg-[#ffe7ec]",
       iconWrap:
-        "border-black bg-[#ff007a]/10 text-[#ff007a]",
+        "border-black bg-[#ff007a] text-white",
       icon: <AlertCircle size={18} />,
     },
     warning: {
@@ -79,7 +79,7 @@ function ToastItem({ toast, onClose }) {
         {style.icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-black/45">
+        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-black/68">
           {resolvedLabel}
         </p>
         <p className="mt-1 text-sm font-bold leading-6 text-black">

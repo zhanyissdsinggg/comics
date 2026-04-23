@@ -261,17 +261,17 @@ export default function SiteFooter({
               {footerPrimaryLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "text-white/64 transition-colors hover:text-[#ff007a]",
+                  "text-white/60 transition-colors hover:text-[#ff007a]",
                 ),
               )}
             </nav>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t-[2px] border-white/12 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-4 flex flex-col gap-3 border-t-[2px] border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-3">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="font-medium text-white/55 transition-colors hover:text-[#ff007a]"
+                className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -279,7 +279,7 @@ export default function SiteFooter({
                 {footerMetaLinks.map((link) =>
                   renderInternalLink(
                     link,
-                    "font-medium text-white/55 transition-colors hover:text-[#ff007a]",
+                    "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
                   ),
                 )}
                 <FooterAgeBadge />
@@ -326,7 +326,7 @@ export default function SiteFooter({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="font-medium text-white/62 transition-colors hover:text-[#ff007a]"
+                className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -335,14 +335,14 @@ export default function SiteFooter({
                   <a
                     key={item.label}
                     href={item.href}
-                    className="font-medium text-white/62 transition-colors hover:text-[#ff007a]"
+                    className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
                   >
                     {item.label}
                   </a>
                 ) : (
                   renderInternalLink(
                     item,
-                    "font-medium text-white/62 transition-colors hover:text-[#ff007a]",
+                    "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
                   )
                 ),
               )}
@@ -362,7 +362,7 @@ export default function SiteFooter({
                     <li key={link.href}>
                       {renderInternalLink(
                         link,
-                        "text-sm font-medium text-white/66 transition-colors hover:text-[#ff007a]",
+                        "text-sm font-medium text-white/70 transition-colors hover:text-[#ff007a]",
                       )}
                     </li>
                   ))}
@@ -372,13 +372,13 @@ export default function SiteFooter({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t-[2px] border-white/12 pt-4 text-sm text-white/55 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-6 flex flex-col gap-3 border-t-[2px] border-white/10 pt-4 text-sm text-white/60 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {footerMetaLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "font-medium text-white/55 transition-colors hover:text-[#ff007a]",
+                  "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
                 ),
               )}
               <FooterAgeBadge />
@@ -390,7 +390,7 @@ export default function SiteFooter({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-white/55 transition-colors hover:text-[#ff007a]"
+                  className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
                 >
                   {item.label}
                 </a>

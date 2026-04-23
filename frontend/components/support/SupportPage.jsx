@@ -415,7 +415,7 @@ export default function SupportPage() {
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
                     <p
-                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/78" : "text-black/56"}`}
+                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/80" : "text-black/60"}`}
                     >
                       {item.context}
                     </p>

@@ -778,7 +778,7 @@ export default function CreatorPage({
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {creatorName}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/70">
                   Open the lead title, pivot by genre, or jump back to the title that brought you here.
                 </p>
               </div>

@@ -47,7 +47,7 @@ export default function ReaderDrawer({
               className={`rounded-full px-3 py-1 ${
                 tab === "toc"
                   ? "border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                  : "border-[3px] border-white/14 bg-white/[0.06] text-neutral-300 hover:bg-white/[0.12]"
+                  : "border-[3px] border-white/20 bg-white/10 text-neutral-300 hover:bg-white/20"
               }`}
             >
               Contents
@@ -58,7 +58,7 @@ export default function ReaderDrawer({
               className={`rounded-full px-3 py-1 ${
                 tab === "bookmarks"
                   ? "border-[3px] border-black bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                  : "border-[3px] border-white/14 bg-white/[0.06] text-neutral-300 hover:bg-white/[0.12]"
+                  : "border-[3px] border-white/20 bg-white/10 text-neutral-300 hover:bg-white/20"
               }`}
             >
               Bookmarks
@@ -67,13 +67,13 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="border-[3px] border-white/14 bg-white/[0.06] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-neutral-200 transition hover:bg-white/[0.12]"
+            className="border-[3px] border-white/20 bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-neutral-200 transition hover:bg-white/20"
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 border-[3px] border-white/14 bg-white/[0.06] p-3 text-xs text-neutral-300 backdrop-blur-sm">
+          <div className="mt-4 border-[3px] border-white/20 bg-white/10 p-3 text-xs text-neutral-300 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
               <span>Members get free reads and lower prices.</span>
               <button
@@ -105,7 +105,7 @@ export default function ReaderDrawer({
                       onSelectEpisode(episode.id);
                     }
                   }}
-                  className="w-full border-[3px] border-white/14 bg-white/[0.06] px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-white/[0.12]"
+                  className="w-full border-[3px] border-white/20 bg-white/10 px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-white/20"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -125,7 +125,7 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
-              <div className="border-[3px] border-white/14 bg-white/[0.06] p-4 backdrop-blur-sm">
+              <div className="border-[3px] border-white/20 bg-white/10 p-4 backdrop-blur-sm">
                 <div className="text-sm font-black uppercase tracking-[0.04em] text-neutral-100">No bookmarks yet.</div>
                 <div className="mt-1 text-xs leading-5 text-neutral-400">
                   Save a spot and it will show up here.
@@ -135,7 +135,7 @@ export default function ReaderDrawer({
               bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="border-[3px] border-white/14 bg-white/[0.06] px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
+                  className="border-[3px] border-white/20 bg-white/10 px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div>

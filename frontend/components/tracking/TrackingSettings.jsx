@@ -577,7 +577,7 @@ export default function TrackingSettings() {
           {TRACKING_GROUPS.map((group) => (
             <section
               key={group.id}
-              className="rounded-[26px] border border-black/8 bg-white/82 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
+              className="rounded-[26px] border border-black/10 bg-white/80 p-5 shadow-[0_10px_24px_rgba(15,23,42,0.03)]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

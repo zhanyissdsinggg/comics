@@ -12,7 +12,7 @@ function clamp(value, min, max, fallback) {
 
 function ToggleRow({ label, description, enabled, onToggle }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 backdrop-blur-sm">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-sm">
       <div className="min-w-0">
         <div className="text-sm font-semibold text-white">{label}</div>
         <div className="mt-1 text-xs text-neutral-400">{description}</div>
@@ -46,7 +46,7 @@ function ModeButton({ active, disabled, onClick, children }) {
           ? "border-white/20 bg-white text-slate-950 shadow-[0_10px_24px_rgba(255,255,255,0.08)]"
           : disabled
             ? "border-white/6 bg-white/[0.03] text-neutral-600"
-            : "border-white/8 bg-white/[0.04] text-neutral-200 hover:border-white/16 hover:bg-white/[0.08]"
+            : "border-white/10 bg-white/5 text-neutral-200 hover:border-white/20 hover:bg-white/10"
       }`}
     >
       {children}
@@ -85,7 +85,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
       onClick={onClose}
     >
       <section
-        className="flex max-h-[min(92vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-white/8 bg-[rgba(12,12,14,0.94)] shadow-[0_28px_72px_rgba(0,0,0,0.36)] backdrop-blur-xl"
+        className="flex max-h-[min(92vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(12,12,14,0.94)] shadow-[0_28px_72px_rgba(0,0,0,0.36)] backdrop-blur-xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
@@ -95,7 +95,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/8 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-neutral-300 transition hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
           >
             Close
           </button>
@@ -110,7 +110,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           />
 
           {showLayoutControls ? (
-            <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 backdrop-blur-sm">
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
               <div>
                 <div className="text-sm font-semibold text-white">Layout</div>
                 <div className="mt-1 text-xs text-neutral-400">
@@ -144,7 +144,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             </div>
           ) : null}
 
-          <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 backdrop-blur-sm">
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-white">Brightness</div>
@@ -178,7 +178,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           />
 
           {autoScroll ? (
-            <div className="space-y-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 backdrop-blur-sm">
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-sm font-semibold text-white">Auto Scroll Speed</div>
@@ -233,7 +233,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 onAutoScrollSpeedChange?.(1);
               }
             }}
-            className="flex-1 rounded-full border border-white/8 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/16 hover:bg-white/[0.08]"
+            className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
           >
             Reset
           </button>

@@ -41,7 +41,7 @@ export default function EditorialHero({
               className={cn(
                 "text-[11px] font-semibold uppercase tracking-[0.24em]",
                 isLight
-                  ? "text-white/78 dark:text-neutral-400"
+                  ? "text-white/80 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >
@@ -65,7 +65,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
                 isLight
-                  ? "text-white/88 dark:text-neutral-300"
+                  ? "text-white/90 dark:text-neutral-300"
                   : "text-neutral-200",
               )}
             >
@@ -78,7 +78,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-2.5 max-w-xl text-sm leading-6",
                 isLight
-                  ? "text-white/72 dark:text-neutral-400"
+                  ? "text-white/70 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >

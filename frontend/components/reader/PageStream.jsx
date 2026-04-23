@@ -83,7 +83,7 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(96,165,250,0.18),transparent_28%),radial-gradient(circle_at_18%_82%,rgba(52,211,153,0.18),transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]" />
       <div className="absolute inset-[6%] rounded-[28px] border border-white/10 bg-white/[0.04] shadow-[0_30px_80px_rgba(2,6,23,0.55)]" />
-      <div className="absolute left-[10%] top-[9%] rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/78" style={{ backgroundColor: `${accent}33` }}>
+      <div className="absolute left-[10%] top-[9%] rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/80" style={{ backgroundColor: `${accent}33` }}>
         Reader Preview
       </div>
 
@@ -91,16 +91,16 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
         <p className="text-[clamp(1.4rem,3vw,2.35rem)] font-semibold leading-tight text-white">
           {title}
         </p>
-        <p className="mt-3 text-sm uppercase tracking-[0.22em] text-white/55">
+        <p className="mt-3 text-sm uppercase tracking-[0.22em] text-white/60">
           {episodeLabel} · {pageLabel}
         </p>
       </div>
 
-      <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border border-white/12 bg-white/[0.08] p-5 backdrop-blur-[2px]">
+      <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border border-white/10 bg-white/10 p-5 backdrop-blur-[2px]">
         <div className="h-2.5 w-24 rounded-full" style={{ backgroundColor: accent }} />
         <div className="mt-5 h-4 w-4/5 rounded-full bg-white/85" />
         <div className="mt-3 h-3.5 w-full rounded-full bg-white/20" />
-        <div className="mt-2 h-3.5 w-3/4 rounded-full bg-white/15" />
+        <div className="mt-2 h-3.5 w-3/4 rounded-full bg-white/20" />
         <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
           Story beat
         </div>
@@ -110,8 +110,8 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
       <div className="absolute right-[10%] top-[56%] h-[18%] w-[35%] rounded-[24px] border border-white/10 bg-white/[0.03]" />
       <div className="absolute left-[10%] right-[10%] bottom-[12%] rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-6">
         <div className="h-3.5 w-2/5 rounded-full bg-white/80" />
-        <div className="mt-4 h-4 w-full rounded-full bg-white/18" />
-        <div className="mt-2 h-3.5 w-4/5 rounded-full bg-white/14" />
+        <div className="mt-4 h-4 w-full rounded-full bg-white/20" />
+        <div className="mt-2 h-3.5 w-4/5 rounded-full bg-white/20" />
       </div>
     </div>
   );

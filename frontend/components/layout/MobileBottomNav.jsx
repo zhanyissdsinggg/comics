@@ -130,7 +130,7 @@ export default function MobileBottomNav() {
                 "relative flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-[1.35rem] px-2 py-2 text-center transition-all duration-200",
                 isActive
                   ? "border-[2px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(255,255,255,0.18)]"
-                  : "text-white/45 hover:bg-white/10 hover:text-white",
+                  : "text-white/50 hover:bg-white/10 hover:text-white",
               )}
             >
               <span

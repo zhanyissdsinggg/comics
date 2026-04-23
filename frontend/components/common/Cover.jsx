@@ -144,7 +144,7 @@ function CoverFallback({
           style={{ borderColor: artDirection.border }}
         />
         <div
-          className="absolute mt-6 h-20 w-20 rounded-full border-[3px] bg-white/6 blur-[0.5px]"
+          className="absolute mt-6 h-20 w-20 rounded-full border-[3px] bg-white/10 blur-[0.5px]"
           style={{ borderColor: artDirection.border }}
         />
       </div>
@@ -173,7 +173,7 @@ function CoverFallback({
                 {title}
               </p>
             ) : (
-              <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/82`.trim()}>
+              <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/80`.trim()}>
                 {chipLabel}
               </p>
             )}

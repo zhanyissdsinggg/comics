@@ -1,9 +1,9 @@
 const palette = {
   dark: {
     default: "border-white/10 bg-white/[0.05] text-neutral-200",
-    accent: "border-white/14 bg-white/[0.08] text-white",
+    accent: "border-white/20 bg-white/10 text-white",
     success: "border-emerald-400/25 bg-emerald-400/10 text-emerald-200",
-    subtle: "border-white/8 bg-white/[0.03] text-neutral-400",
+    subtle: "border-white/10 bg-white/[0.03] text-neutral-400",
   },
   light: {
     default: "border-black bg-white text-black/68",

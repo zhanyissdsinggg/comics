@@ -70,7 +70,7 @@ export default function GlobalErrorToast() {
           <AlertCircle size={isNetworkMessage ? 16 : 18} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#ff007a]">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-black">
             {label}
           </p>
           <p

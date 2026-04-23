@@ -241,7 +241,7 @@ function HeroRailPreviewCard({ item, tone = "light", onClick }) {
         <p
           className={cn(
             "text-[10px] font-black uppercase tracking-[0.18em]",
-            isLight ? "text-black/55" : "text-white/45",
+            isLight ? "text-black/55" : "text-white/50",
           )}
         >
           Next
@@ -258,7 +258,7 @@ function HeroRailPreviewCard({ item, tone = "light", onClick }) {
           <p
             className={cn(
               "mt-1 line-clamp-1 text-[11px] font-semibold",
-              isLight ? "text-black/68" : "text-white/64",
+              isLight ? "text-black/68" : "text-white/60",
             )}
           >
             {meta}
@@ -268,7 +268,7 @@ function HeroRailPreviewCard({ item, tone = "light", onClick }) {
       <ArrowRight
         className={cn(
           "size-4 shrink-0 transition-transform group-hover:translate-x-1",
-          isLight ? "text-black/55" : "text-white/64",
+          isLight ? "text-black/55" : "text-white/60",
         )}
       />
     </button>
@@ -652,12 +652,12 @@ function HomeContent({ initialSearchParams = {} }) {
                   </h1>
 
                   <div className="mt-5 max-w-[34rem] space-y-4">
-                    <p className="text-base font-semibold leading-7 text-white/92">
+                    <p className="text-base font-black leading-7 text-black/80">
                       {heroSeries?.description ||
                         "Pick a lead title, open the latest episode, and move straight into reading without digging through a noisy storefront."}
                     </p>
                     {heroMetaLine ? (
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/72">
                         {heroMetaLine}
                       </p>
                     ) : null}
@@ -704,16 +704,26 @@ function HomeContent({ initialSearchParams = {} }) {
                     </button>
                   </div>
 
-                  <div className="mt-7 flex flex-wrap items-center gap-4 text-sm font-black uppercase tracking-[0.08em] text-white">
-                    <button type="button" onClick={() => router.push("/comics")}>
+                  <div className="mt-7 flex flex-wrap items-center gap-2.5 text-sm font-black uppercase tracking-[0.08em] text-black">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/comics")}
+                      className="border-[2px] border-black bg-[#ffe500] px-3 py-1.5 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none"
+                    >
                       Comics
                     </button>
-                    <span aria-hidden="true">/</span>
-                    <button type="button" onClick={() => router.push("/novels")}>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/novels")}
+                      className="border-[2px] border-black bg-white px-3 py-1.5 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
+                    >
                       Novels
                     </button>
-                    <span aria-hidden="true">/</span>
-                    <button type="button" onClick={() => router.push("/creators")}>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/creators")}
+                      className="border-[2px] border-black bg-[#00e5ff] px-3 py-1.5 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none"
+                    >
                       Creators
                     </button>
                   </div>
@@ -760,7 +770,7 @@ function HomeContent({ initialSearchParams = {} }) {
                         {heroSeries?.title || "Lead story"}
                       </p>
                       {heroCreatorName ? (
-                        <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-white/78">
+                        <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-white/80">
                           {heroCreatorName}
                         </p>
                       ) : null}

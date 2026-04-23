@@ -41,7 +41,7 @@ export default function ThemeToggle({ variant = "default" }) {
       className={cn(
         "relative h-10 w-10 rounded-full border-[3px]",
         isLight
-          ? "border-black bg-white text-black/60 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#fff6cf] hover:text-black dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-200 dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] dark:hover:border-white/18 dark:hover:bg-white/[0.1] dark:hover:text-white"
+          ? "border-black bg-white text-black/60 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#fff6cf] hover:text-black dark:border-white/10 dark:bg-white/10 dark:text-neutral-200 dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
           : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
       )}
       aria-label={`Switch to ${isDark ? "day" : "night"} mode`}

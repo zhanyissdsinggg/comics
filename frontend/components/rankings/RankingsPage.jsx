@@ -396,7 +396,7 @@ export default function RankingsPage({
                 <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-white/88">
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/90">
                   Use this shelf when you want a fast editorial read lane instead of a broad search.
                 </p>
               </div>
@@ -422,7 +422,7 @@ export default function RankingsPage({
             </div>
 
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/62">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                 Next
               </p>
               <div className="flex flex-col gap-2.5">
@@ -569,13 +569,13 @@ export default function RankingsPage({
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/72">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                         Lead pick
                       </p>
                       <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/84">
+                      <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/80">
                         {leadEntry.description || "A strong place to begin."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
@@ -588,7 +588,7 @@ export default function RankingsPage({
                           </span>
                         ))}
                       </div>
-                      <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-white/72">
+                      <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-white/70">
                         Open story
                       </p>
                     </div>
