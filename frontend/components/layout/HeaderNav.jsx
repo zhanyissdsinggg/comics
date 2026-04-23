@@ -30,9 +30,7 @@ export default function HeaderNav({ variant = "default" }) {
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">
-      <div
-        className="inline-flex items-center gap-1 border-[3px] border-white bg-black/50 px-1.5 py-1 shadow-[4px_4px_0_0_rgba(255,229,0,1)]"
-      >
+      <div className="inline-flex items-center gap-1 border-[3px] border-[#ffe500] bg-black px-1.5 py-1 shadow-[4px_4px_0_0_rgba(255,0,122,1)]">
         {navItems.map((item) => {
           const isActive =
             item.href === "/"
@@ -70,8 +68,8 @@ export default function HeaderNav({ variant = "default" }) {
               aria-current={isActive ? "page" : undefined}
               className={`relative px-4 py-2.5 text-sm font-black uppercase tracking-[0.04em] transition-all duration-300 ${
                 isActive
-                  ? "bg-[#ff007a] text-white"
-                  : "text-white/72 hover:bg-[#ffe500] hover:text-black"
+                  ? "bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(255,0,122,1)]"
+                  : "text-white hover:bg-[#ff007a] hover:text-white"
               }`}
             >
               {item.label}

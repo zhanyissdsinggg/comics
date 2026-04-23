@@ -37,17 +37,17 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full rounded-2xl border-[3px] border-black bg-white px-4 py-3 text-sm text-black placeholder:text-black/35 transition focus:outline-none";
+    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] placeholder:text-black/35 transition focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fff6cf] focus:shadow-none focus:outline-none";
   const secondaryPillClass =
-    "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff] hover:text-black";
+    "border-[3px] border-black bg-white text-black/70 shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:text-black hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border-[3px] border-black bg-white px-6 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] active:scale-95";
+    "border-[3px] border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none active:scale-95";
   const activePillClass =
     "border-[3px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
   const dividerClass =
     "h-[3px] flex-1 bg-black";
   const primaryButtonClass =
-    "rounded-full border-[3px] border-black bg-[#ff007a] px-6 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95";
+    "border-[3px] border-black bg-[#ff007a] px-6 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95";
 
   useEffect(() => {
     if (open) {
@@ -176,7 +176,9 @@ export default function LoginGateModal({
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <p className="text-sm leading-7 text-black/65">{description}</p>
+        <p className="border-[3px] border-black bg-[#eefcff] px-4 py-3 text-sm font-semibold leading-6 text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          {description}
+        </p>
         <div className="mt-6 space-y-4">
           <input
             type="email"
@@ -232,7 +234,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-2xl border-[3px] border-black bg-white px-3 py-3 text-sm font-semibold text-black transition focus:outline-none"
+                    className="border-[3px] border-black bg-white px-3 py-3 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition focus:outline-none"
                   >
                     {(
                       config?.countryCodes || [
@@ -287,13 +289,13 @@ export default function LoginGateModal({
         </div>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-[18px] border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black">
+          <p className="mt-4 border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
             {errorMessage}
           </p>
         ) : null}
 
         {socialError ? (
-          <p className="mt-4 rounded-[18px] border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black">
+          <p className="mt-4 border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
             {socialError}
           </p>
         ) : null}
@@ -316,7 +318,7 @@ export default function LoginGateModal({
             <button
               type="button"
               onClick={() => setMode("login")}
-              className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+              className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "login"
                   ? activePillClass
                   : secondaryPillClass
@@ -327,7 +329,7 @@ export default function LoginGateModal({
             <button
               type="button"
               onClick={() => setMode("register")}
-              className={`flex-1 rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
+              className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
                 mode === "register"
                   ? activePillClass
                   : secondaryPillClass
@@ -349,7 +351,7 @@ export default function LoginGateModal({
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-[18px] border-[3px] border-black bg-[#eefcff] px-4 py-2 text-xs font-semibold text-black/72">
+          <div className="mt-3 border-[3px] border-black bg-[#eefcff] px-4 py-2 text-xs font-semibold text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
             {resetStatus}
           </div>
         ) : null}

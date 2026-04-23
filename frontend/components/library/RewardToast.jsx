@@ -19,7 +19,7 @@ export default function RewardToast({ message, onClose }) {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 right-6 z-50 max-w-sm border-[3px] border-black bg-[#fff6c7] px-4 py-3.5 text-sm text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+      className="fixed bottom-6 right-6 z-50 max-w-sm border-[3px] border-black bg-[#ffe500] px-4 py-3.5 text-sm text-black shadow-[6px_6px_0_0_rgba(255,0,122,1)]"
     >
       <p className="text-[10px] font-black uppercase tracking-[0.24em] text-black/55">
         Rewards

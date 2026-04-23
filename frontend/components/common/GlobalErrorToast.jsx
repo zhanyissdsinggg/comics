@@ -56,15 +56,15 @@ export default function GlobalErrorToast() {
       <div
         role="alert"
         aria-live="assertive"
-        className={`pointer-events-auto flex w-full items-start rounded-[24px] border-[3px] border-black text-black backdrop-blur-2xl dark:bg-[linear-gradient(180deg,rgba(24,24,27,0.96),rgba(17,17,20,0.96))] ${
+        className={`pointer-events-auto flex w-full items-start border-[3px] border-black text-black backdrop-blur-2xl ${
           isNetworkMessage
-            ? "max-w-sm gap-2.5 bg-[#ffe7ec] px-3.5 py-3 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
-            : "max-w-md gap-3 bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            ? "max-w-sm gap-2.5 bg-[#ffe7ec] px-3.5 py-3 shadow-[8px_8px_0_0_rgba(255,0,122,1)]"
+            : "max-w-md gap-3 bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(255,0,122,1)]"
         }`}
       >
         <div
           className={`mt-0.5 flex flex-shrink-0 items-center justify-center border-[3px] border-black bg-[#ff007a]/10 text-[#ff007a] ${
-            isNetworkMessage ? "h-8 w-8 rounded-full" : "h-9 w-9 rounded-2xl"
+            isNetworkMessage ? "h-8 w-8" : "h-9 w-9"
           }`}
         >
           <AlertCircle size={isNetworkMessage ? 16 : 18} />

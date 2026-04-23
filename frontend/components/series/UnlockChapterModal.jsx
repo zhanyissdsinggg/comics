@@ -281,22 +281,20 @@ export default function UnlockChapterModal({
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-end justify-center bg-black/45 p-3 backdrop-blur-[6px] sm:items-center sm:p-6"
+      className="fixed inset-0 z-[130] flex items-end justify-center bg-black/82 p-3 backdrop-blur-[6px] sm:items-center sm:p-6"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Unlock Chapter${chapterSuffix}`}
-        className="relative w-full max-w-[32rem] overflow-hidden rounded-[30px] border-[3px] border-black bg-[#fffdf7] text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+        className="relative w-full max-w-[32rem] overflow-hidden border-[4px] border-black bg-white text-black shadow-[14px_14px_0_0_rgba(255,0,122,1)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,229,0,0.25),transparent_36%),radial-gradient(circle_at_18%_18%,rgba(0,229,255,0.12),transparent_24%)]" />
-
-        <div className="relative p-5 sm:p-6">
+        <div className="relative border-b-[4px] border-black bg-[#ffe500] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+              <div className="flex h-11 w-11 items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                 {view === "packs" ? (
                   <Wallet size={20} />
                 ) : (
@@ -304,10 +302,10 @@ export default function UnlockChapterModal({
                 )}
               </div>
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+                <p className="inline-flex -rotate-1 border-[2px] border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#ffe500]">
                   {view === "packs" ? "More points" : "Secure unlock"}
                 </p>
-                <p className="mt-1 text-sm text-black/60">
+                <p className="mt-3 text-sm font-bold text-black/62">
                   {view === "packs"
                     ? "Pick a pack and keep reading."
                     : "Unlock stays on this account after checkout."}
@@ -318,13 +316,16 @@ export default function UnlockChapterModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border-[3px] border-black bg-white text-black transition hover:bg-[#fff1f7]"
+              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:text-white hover:shadow-none"
               aria-label="Close unlock modal"
             >
               <X size={18} />
             </button>
           </div>
 
+        </div>
+
+        <div className="relative p-5 sm:p-6">
           {view === "confirm" ? (
             <div className="mt-6">
               <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-black">
@@ -340,7 +341,7 @@ export default function UnlockChapterModal({
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[22px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                     Your balance
                   </p>
@@ -353,7 +354,7 @@ export default function UnlockChapterModal({
                       : "Sign in to view your points balance."}
                   </p>
                 </div>
-                <div className="rounded-[22px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                <div className="border-[3px] border-black bg-[#fff7cf] px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                     Chapter price
                   </p>
@@ -368,9 +369,9 @@ export default function UnlockChapterModal({
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/78">
+              <div className="mt-5 border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/78">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-[2px] border-black bg-[#ffe500] text-black">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center border-[2px] border-black bg-[#ffe500] text-black">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
@@ -388,7 +389,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Not now
                 </button>
@@ -396,7 +397,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {primaryButtonLabel}
                 </button>
@@ -418,19 +419,19 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={() => onViewChange?.("confirm")}
                   disabled={Boolean(busyAction)}
-                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border-[3px] border-black bg-white px-3.5 py-2 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-[40px] items-center gap-2 border-[3px] border-black bg-white px-3.5 py-2 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#fff7cf] px-4 py-3 text-sm text-black/76">
+              <div className="mt-5 border-[3px] border-black bg-[#fff7cf] px-4 py-3 text-sm text-black/76">
                 <div className="flex items-center justify-between gap-3">
                   <span>
                     Need {formatUSNumber(computedShortfall)} more points
                   </span>
-                  <span className="rounded-full border-[2px] border-black bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black/68">
+                  <span className="border-[2px] border-black bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black/68">
                     Secure checkout
                   </span>
                 </div>
@@ -448,7 +449,7 @@ export default function UnlockChapterModal({
                   return (
                     <div
                       key={pkg.id}
-                      className={`rounded-[24px] border-[3px] px-4 py-4 transition ${
+                      className={`border-[3px] px-4 py-4 transition ${
                         isHighlighted
                           ? "border-black bg-[#ffe500] shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                           : "border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
@@ -461,7 +462,7 @@ export default function UnlockChapterModal({
                               {pkg.name}
                             </span>
                             {pkg.tag ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border-[2px] border-black bg-[#fff1f7] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black">
+                              <span className="inline-flex items-center gap-1 border-[2px] border-black bg-[#fff1f7] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black">
                                 <Sparkles size={10} />
                                 {pkg.tag}
                               </span>
@@ -480,7 +481,7 @@ export default function UnlockChapterModal({
                           type="button"
                           onClick={() => onBuyPack?.(pkg.id)}
                           disabled={Boolean(busyAction)}
-                          className="min-h-[42px] rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="min-h-[42px] border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {busyAction === currentPackAction
                             ? "Buying..."
@@ -492,9 +493,9 @@ export default function UnlockChapterModal({
                 })}
               </div>
 
-              <div className="mt-5 rounded-[22px] border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/72">
+              <div className="mt-5 border-[3px] border-black bg-[#eefcff] px-4 py-4 text-sm text-black/72">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-[2px] border-black bg-[#ffe500] text-black">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center border-[2px] border-black bg-[#ffe500] text-black">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
@@ -515,7 +516,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Close
                 </button>
@@ -524,12 +525,12 @@ export default function UnlockChapterModal({
                     type="button"
                     onClick={onOpenStore}
                     disabled={Boolean(busyAction)}
-                    className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     View all options
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full border-[3px] border-black bg-[#00e5ff] px-5 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black">
+                <span className="inline-flex items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-2.5 text-sm font-black uppercase tracking-[0.05em] text-black">
                   {isLoadingPackages ? "Refreshing prices..." : "Point options"}
                 </span>
               </div>

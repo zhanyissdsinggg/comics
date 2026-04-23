@@ -119,11 +119,10 @@ const PWAInstallPrompt = React.memo(() => {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
-      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden rounded-[28px] border-[3px] border-black bg-white shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
-        <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
+      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden border-[4px] border-black bg-white shadow-[10px_10px_0_0_rgba(255,0,122,1)]">
+        <div className="relative flex flex-col gap-4 border-b-[4px] border-black bg-[#ffe500] p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[16px] border-[3px] border-black bg-[#dffcff] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center border-[3px] border-black bg-[#dffcff] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
             <div className="relative">
@@ -153,7 +152,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,229,255,1)] transition hover:-translate-y-0.5 hover:bg-[#00b7d1]"
+                className="min-h-[44px] border-[3px] border-black bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[5px_5px_0_0_rgba(0,229,255,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none"
               >
                 Install
               </button>
@@ -161,14 +160,14 @@ const PWAInstallPrompt = React.memo(() => {
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
+              className="min-h-[44px] border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:shadow-none"
             >
               Not now
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[3px] border-black bg-white text-black/55 transition hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center border-[3px] border-black bg-white text-black/70 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:text-white hover:shadow-none"
               aria-label="Close"
             >
               <X size={16} />

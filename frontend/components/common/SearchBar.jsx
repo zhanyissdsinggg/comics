@@ -65,13 +65,13 @@ const SearchBar = memo(function SearchBar({
   const discoveryLanes = HOME_DISCOVERY_LANES;
   const discoveryHeading = "Browse";
   const shellClass = isFocused
-    ? "border-black bg-white shadow-[0_0_0_4px_rgba(255,229,0,0.45)]"
+    ? "border-[#ffe500] bg-black text-white shadow-[0_0_0_4px_rgba(255,0,122,0.35)]"
     : isHome
-      ? "border-black bg-[rgba(255,255,255,0.96)] shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-white"
-      : "border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#fffef7]";
+      ? "border-white/25 bg-white/10 shadow-[5px_5px_0_0_rgba(255,229,0,1)] hover:-translate-y-0.5 hover:border-[#ffe500] hover:bg-white/15"
+      : "border-white/25 bg-white/10 shadow-[5px_5px_0_0_rgba(255,229,0,1)] hover:-translate-y-0.5 hover:border-[#ffe500] hover:bg-white/15";
   const searchIconClass = isFocused
-    ? "text-black"
-    : "text-black/45";
+    ? "text-[#ffe500]"
+    : "text-white/70";
 
   useEffect(() => {
     setSearchHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
@@ -254,12 +254,7 @@ const SearchBar = memo(function SearchBar({
               inputRef.current?.blur();
             }
           }}
-          className={cn(
-            "min-w-0 flex-1 bg-transparent text-base focus:outline-none md:text-sm",
-            isHome
-              ? "text-[color:var(--gush-ink-strong)] placeholder:text-[color:var(--gush-ink-faint)]"
-              : "text-black placeholder:text-black/32",
-          )}
+          className="min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-white/58 focus:outline-none md:text-sm"
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
           aria-label="Search series, creators, or genres"
@@ -273,8 +268,8 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "rounded-full",
               isHome
-                ? "text-[color:var(--gush-ink-faint)] hover:bg-black/[0.04] hover:text-[color:var(--gush-ink-strong)]"
-                : "text-black/40 hover:bg-[#ffe7ec] hover:text-black",
+                ? "text-white/70 hover:bg-white/10 hover:text-white"
+                : "text-white/70 hover:bg-white/10 hover:text-white",
             )}
             aria-label="Clear search"
           >
@@ -286,8 +281,8 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
               isHome
-                ? "border-[3px] border-black bg-[#fff6cf] text-black/45"
-                : "border-[3px] border-black bg-[#fff6cf] text-black/45",
+                ? "border-[2px] border-[#ffe500] bg-black text-[#ffe500]"
+                : "border-[2px] border-[#ffe500] bg-black text-[#ffe500]",
             )}
           >
             {shortcutLabel}

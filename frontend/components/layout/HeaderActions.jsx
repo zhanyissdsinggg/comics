@@ -18,7 +18,7 @@ function AuthSkeleton({ variant = "default" }) {
 }
 
 const ICON_BUTTON_CLASS =
-  "relative h-11 w-11 border-[3px] border-white bg-white text-black/70 shadow-[4px_4px_0_0_rgba(255,229,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none hover:text-black";
+  "relative h-11 w-11 border-[3px] border-[#ffe500] bg-black text-white shadow-[4px_4px_0_0_rgba(255,0,122,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none hover:text-white";
 
 export default function HeaderActions({
   onWalletClick,
@@ -45,7 +45,7 @@ export default function HeaderActions({
           size="sm"
           variant="outline"
           onClick={onWalletClick}
-          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-4 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none lg:inline-flex"
+          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-4 text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none lg:inline-flex"
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
@@ -140,7 +140,7 @@ export default function HeaderActions({
           size="sm"
           variant="outline"
           onClick={() => router.push("/account")}
-          className="hidden h-11 border-[3px] border-black bg-white px-4 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none sm:inline-flex"
+          className="hidden h-11 border-[3px] border-[#ffe500] bg-black px-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[4px_4px_0_0_rgba(255,0,122,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none sm:inline-flex"
           >
             <User className="size-4" />
             Account
@@ -152,7 +152,7 @@ export default function HeaderActions({
           size="sm"
           variant="default"
           onClick={onLoginClick}
-          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none sm:inline-flex"
+          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none sm:inline-flex"
         >
           Sign In
         </Button>

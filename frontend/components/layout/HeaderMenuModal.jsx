@@ -97,34 +97,36 @@ export default function HeaderMenuModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/35 backdrop-blur-[6px] md:hidden"
+      className="fixed inset-0 z-50 bg-black/82 backdrop-blur-[6px] md:hidden"
       onClick={onClose}
     >
       <div
         className="absolute inset-x-0 top-0 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mx-auto max-w-[30rem] rounded-[28px] border-[3px] border-black bg-[#fffdf7] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="mx-auto max-w-[30rem] overflow-hidden border-[4px] border-black bg-white shadow-[10px_10px_0_0_rgba(255,0,122,1)]">
+          <div className="border-b-[4px] border-black bg-[#ffe500] p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+              <p className="inline-flex -rotate-1 border-[2px] border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#ffe500]">
                 Menu
               </p>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-black">
+              <h2 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-black">
                 Quick links.
               </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-black bg-white text-black transition hover:bg-[#ffe500]"
+              className="inline-flex h-11 w-11 items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:text-white hover:shadow-none"
               aria-label="Close menu"
             >
               <ChevronRight className="size-5 rotate-45" />
             </button>
           </div>
+          </div>
 
-          <div className="mt-5 rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+          <div className="m-4 border-[3px] border-black bg-[#fff6cf] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -138,7 +140,7 @@ export default function HeaderMenuModal({
                         : "Signed in and ready to pick up fast."}
                     </p>
                   </div>
-                  <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+                  <span className="border-[2px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
                     {walletTotal.toLocaleString()} pts
                   </span>
                 </div>
@@ -161,16 +163,16 @@ export default function HeaderMenuModal({
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border-[3px] border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-black transition hover:-translate-y-0.5 hover:bg-[#fffdf7]",
+                      "flex min-h-12 items-center justify-between gap-3 border-[3px] border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none",
                       <>
                         <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-black bg-[#eefcff] text-black">
+                          <span className="inline-flex h-9 w-9 items-center justify-center border-[2px] border-black bg-[#eefcff] text-black">
                             <Icon className="size-4" />
                           </span>
                           {item.label}
                         </span>
                         {item.badge ? (
-                          <span className="rounded-full border-[2px] border-black bg-[#ff007a] px-2 py-0.5 text-[10px] font-black text-white">
+                          <span className="border-[2px] border-black bg-[#ff007a] px-2 py-0.5 text-[10px] font-black text-white">
                             {item.badge}
                           </span>
                         ) : (
@@ -198,13 +200,13 @@ export default function HeaderMenuModal({
                       onClose();
                       onOpenLogin?.();
                     }}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center border-[3px] border-black bg-[#ff007a] px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-none"
                   >
                     Sign In
                   </button>
                   {renderMenuLink(
                     { label: "Get Help", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-[3px] border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]",
+                    "inline-flex min-h-11 flex-1 items-center justify-center border-[3px] border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none",
                     "Get Help",
                   )}
                 </div>
@@ -212,7 +214,7 @@ export default function HeaderMenuModal({
             )}
           </div>
 
-          <div className="mt-5">
+          <div className="m-4 mt-5">
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
               Browse
             </p>
@@ -223,15 +225,15 @@ export default function HeaderMenuModal({
                 return renderMenuLink(
                   item,
                   cn(
-                    "flex min-h-12 items-center justify-between gap-3 rounded-[18px] border-[3px] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] transition",
+                    "flex min-h-12 items-center justify-between gap-3 border-[3px] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] transition",
                     isActive
                       ? "border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                      : "border-black bg-white text-black/75 hover:-translate-y-0.5 hover:bg-[#fffdf7]",
+                      : "border-black bg-white text-black/75 shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:shadow-none",
                   ),
                   <>
                     <span className="flex items-center gap-3">
                       {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-[2px] border-black bg-[#eefcff] text-black">
+                        <span className="inline-flex h-9 w-9 items-center justify-center border-[2px] border-black bg-[#eefcff] text-black">
                           <Icon className="size-4" />
                         </span>
                       ) : null}
