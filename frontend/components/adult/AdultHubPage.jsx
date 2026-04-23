@@ -142,7 +142,7 @@ export default function AdultHubPage() {
   }, [isAdultMode, panelStatus]);
 
   useEffect(() => {
-    if (!isAdultMode) {
+    if (!isAdultMode || panelStatus !== "OK") {
       setSeriesList([]);
       setSeriesResponse(null);
       setLoading(false);
@@ -202,7 +202,7 @@ export default function AdultHubPage() {
         clearTimeout(retryTimer);
       }
     };
-  }, [forceDisableAdultMode, isAdultMode, shouldRetry]);
+  }, [forceDisableAdultMode, isAdultMode, panelStatus, shouldRetry]);
 
   const spotlightItems = useMemo(
     () =>

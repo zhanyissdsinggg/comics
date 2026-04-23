@@ -783,6 +783,11 @@ export default function SeriesPage({
   const isFollowing = followedSeriesIds.includes(seriesId);
 
   const handleFollowToggle = async () => {
+    if (!hydrated || !isSignedIn) {
+      openAuthModal();
+      return;
+    }
+
     if (isFollowing) {
       await unfollow(seriesId);
       return;
