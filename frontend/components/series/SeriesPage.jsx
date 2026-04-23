@@ -794,11 +794,10 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="gush-page-shell gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main">
-          <section className="rounded-[30px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
+        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+          <section className="border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
               <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
               <div className="space-y-4">
@@ -828,7 +827,7 @@ export default function SeriesPage({
               </div>
             </div>
           </section>
-          <section className="mt-6 rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <section className="mt-6 border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-28 rounded-full" />
@@ -855,11 +854,10 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="gush-page-shell gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main max-w-[960px]">
-          <div className="rounded-[30px] border-[3px] border-black bg-[#fff7cf] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
+          <div className="border-[3px] border-black bg-[#fff7cf] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
               Series unavailable
             </p>
@@ -899,10 +897,9 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="gush-page-shell gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main">
+        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
             compact
             title={
@@ -941,8 +938,7 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="gush-page-shell gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
 
         <AdultGateBlockingPanel
@@ -974,10 +970,9 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient h-[clamp(21rem,40vw,30rem)]" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
           <div className="pt-6">
             <CommerceSuccessBanner

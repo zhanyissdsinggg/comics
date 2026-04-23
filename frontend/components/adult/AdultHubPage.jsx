@@ -274,10 +274,9 @@ export default function AdultHubPage() {
     "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
 
   return (
-    <main className="gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="18+ catalog"

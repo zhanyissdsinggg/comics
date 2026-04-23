@@ -7,9 +7,8 @@ export default function AuthRedirectPage({
   description = "You'll be back to reading in a moment.",
 }) {
   return (
-    <div className="gush-home-shell relative min-h-screen overflow-hidden">
-      <div className="gush-page-ambient" />
-      <main className="gush-page-main flex min-h-screen items-center justify-center">
+    <div className="relative min-h-screen overflow-hidden bg-black text-black">
+      <main className="mx-auto flex min-h-screen max-w-[1320px] items-center justify-center px-4 py-8 md:px-8">
         <SurfacePanel
           appearance="light"
           accent="cyan"

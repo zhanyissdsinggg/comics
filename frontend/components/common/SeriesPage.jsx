@@ -510,11 +510,10 @@ export default function SeriesPage({
   const showCatalogCount = !isComicPage;
 
   return (
-    <main className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
 
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)]">
           <SurfacePanel
             className="space-y-5 border-[3px] border-black bg-[#00e5ff] px-5 py-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:px-6 sm:py-6"

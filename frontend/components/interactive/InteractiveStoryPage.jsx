@@ -147,9 +147,9 @@ export default function InteractiveStoryPage({ seriesId }) {
 
   if (loading) {
     return (
-      <main className="gush-page-shell gush-home-shell overflow-hidden">
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main">
+        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <p className="text-sm font-medium text-black/58">Loading interactive mode...</p>
           </section>
@@ -159,9 +159,9 @@ export default function InteractiveStoryPage({ seriesId }) {
   }
 
   return (
-    <main className="gush-page-shell gush-home-shell overflow-hidden">
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

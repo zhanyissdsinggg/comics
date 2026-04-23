@@ -239,7 +239,7 @@ export default function SiteFooter({
   if (isCompact) {
     return (
       <footer
-        className="mt-16 border-t-[4px] border-[#ffe500] bg-black text-white"
+        className={`${isHome ? "mt-0" : "mt-16"} border-t-[4px] border-[#ffe500] bg-black text-white`}
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

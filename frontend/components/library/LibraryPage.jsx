@@ -895,10 +895,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
     ) : null;
 
   return (
-    <div className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient h-[clamp(20rem,40vw,30rem)]" />
+    <div className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <main className="gush-page-main gush-section-stack">
+      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Library"

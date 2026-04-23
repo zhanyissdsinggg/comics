@@ -6,8 +6,7 @@ import Skeleton from "../../components/common/Skeleton";
 const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
   ssr: false,
   loading: () => (
-    <div className="gush-page-shell gush-home-shell min-h-screen overflow-hidden">
-      <div className="gush-page-ambient h-[clamp(24rem,42vw,36rem)]" />
+    <div className="min-h-screen overflow-hidden bg-black text-black">
       <main className="mx-auto w-full max-w-[1320px] space-y-5 px-4 py-10">
         <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">

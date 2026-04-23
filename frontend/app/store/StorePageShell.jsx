@@ -6,9 +6,8 @@ import Skeleton from "../../components/common/Skeleton";
 const StorePage = dynamic(() => import("../../components/store/StorePage"), {
   ssr: false,
   loading: () => (
-    <div className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
-      <main className="gush-page-main gush-section-stack">
+    <div className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
             Store

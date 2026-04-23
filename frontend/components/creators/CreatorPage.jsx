@@ -207,10 +207,9 @@ function summarizeSpotlightDescription(text, fallback) {
 
 function CreatorPageSkeleton() {
   return (
-    <main className="gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel appearance="light" accent="blue" className="space-y-6">
             <div className="space-y-3">
@@ -645,10 +644,9 @@ export default function CreatorPage({
 
   if (error) {
     return (
-      <main className="gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main">
+        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
             compact
             title="This creator page is unavailable right now."
@@ -670,10 +668,9 @@ export default function CreatorPage({
 
   if (!creatorItems.length) {
     return (
-      <main className="gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main gush-section-stack">
+        <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
               accent="blue"
@@ -752,11 +749,10 @@ export default function CreatorPage({
   }
 
   return (
-    <main className="gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
 
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             accent="blue"

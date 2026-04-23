@@ -243,10 +243,9 @@ function buildCreatorWorksSummary(creator) {
 
 function CreatorDirectorySkeleton() {
   return (
-    <main className="gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel appearance="light" accent="blue" className="space-y-6">
             <div className="space-y-3">
@@ -792,10 +791,9 @@ export default function CreatorsHubPage({
       : "Browse titles";
 
     return (
-      <main className="gush-home-shell overflow-hidden">
-        <div className="gush-page-ambient" />
+      <main className="min-h-screen overflow-hidden bg-black text-black">
         <SiteHeader variant="home" />
-        <div className="gush-page-main gush-section-stack">
+        <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
               accent="blue"
@@ -961,11 +959,10 @@ export default function CreatorsHubPage({
   }
 
   return (
-    <main className="gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
 
-      <div className="gush-page-main gush-section-stack">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             accent="blue"

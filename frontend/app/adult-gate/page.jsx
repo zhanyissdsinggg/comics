@@ -17,11 +17,10 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <div className="gush-home-shell min-h-screen overflow-hidden">
-          <div className="gush-page-ambient" />
-          <div className="gush-page-main max-w-2xl space-y-4 px-4 py-16">
+        <div className="min-h-screen overflow-hidden bg-black text-black">
+          <div className="mx-auto max-w-2xl space-y-4 px-4 py-16">
             <Skeleton className="h-10 w-48 rounded-2xl bg-slate-200" />
-            <Skeleton className="h-40 w-full rounded-3xl bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]" />
+            <Skeleton className="h-40 w-full rounded-3xl border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" />
           </div>
         </div>
       }

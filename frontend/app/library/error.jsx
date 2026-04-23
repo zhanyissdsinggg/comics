@@ -5,9 +5,8 @@ import SurfacePanel from "../../components/common/SurfacePanel";
 
 export default function LibraryError({ error, reset }) {
   return (
-    <main className="gush-home-shell min-h-screen overflow-hidden text-black">
-      <div className="gush-page-ambient" />
-      <div className="gush-page-main flex min-h-screen items-center justify-center px-6">
+    <main className="min-h-screen overflow-hidden bg-black text-black">
+      <div className="mx-auto flex min-h-screen max-w-[1320px] items-center justify-center px-6">
         <SurfacePanel
           appearance="light"
           accent="amber"

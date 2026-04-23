@@ -256,9 +256,7 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="gush-home-shell min-h-screen overflow-hidden">
-          <div className="gush-page-ambient" />
-        </div>
+        <div className="min-h-screen overflow-hidden bg-black text-black" />
       }
     >
       <VerifyPageContent />

@@ -13,10 +13,9 @@ export default function EmailLinkActionShell({
   children,
 }) {
   return (
-    <main className="gush-home-shell min-h-screen overflow-hidden text-slate-900">
-      <div className="gush-page-ambient" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main">
+      <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-6 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.84fr)] lg:py-10">
           <section className="max-w-3xl self-start">
             <EditorialHero

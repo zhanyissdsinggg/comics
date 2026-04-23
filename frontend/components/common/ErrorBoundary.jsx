@@ -67,9 +67,8 @@ class ErrorBoundary extends Component {
       }
 
       return (
-        <div className="gush-home-shell relative min-h-screen overflow-hidden p-4 text-slate-900">
-          <div className="gush-page-ambient" />
-          <div className="gush-page-main flex min-h-screen items-center justify-center">
+        <div className="relative min-h-screen overflow-hidden bg-black p-4 text-black">
+          <div className="mx-auto flex min-h-screen max-w-[1320px] items-center justify-center">
             <div className="w-full max-w-xl">
               <div className="relative overflow-hidden rounded-[32px] border-[3px] border-black bg-white p-7 shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),transparent_32%)]" />

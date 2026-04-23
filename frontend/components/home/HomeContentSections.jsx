@@ -330,8 +330,16 @@ function LeaderboardCard({ item, rank, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group grid grid-cols-[56px_minmax(0,1fr)] gap-4 border-[3px] border-black bg-white p-3 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+      className="group grid grid-cols-[3rem_64px_minmax(0,1fr)] items-center gap-4 border-[2px] border-white/10 bg-white/5 p-3 text-left transition-all hover:border-[#ffe500] hover:bg-white/10"
     >
+      <div
+        className={cn(
+          "text-center text-[2.5rem] font-black leading-none tracking-[-0.06em]",
+          rank <= 3 ? "text-[#ffe500]" : "text-white",
+        )}
+      >
+        {rank}
+      </div>
       <div className="relative aspect-[3/4] overflow-hidden border-[3px] border-black bg-black">
         {coverUrl ? (
           <img
@@ -347,20 +355,17 @@ function LeaderboardCard({ item, rank, onClick }) {
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-7 min-w-[2rem] items-center justify-center border-[2px] border-black bg-[#ff007a] px-2 text-[11px] font-black text-white">
-            #{rank}
-          </span>
-          <p className="line-clamp-1 text-sm font-black uppercase tracking-[-0.03em] text-black">
+          <p className="line-clamp-1 text-sm font-black uppercase tracking-[-0.03em] text-white">
             {title}
           </p>
         </div>
         {author ? (
-          <p className="mt-2 line-clamp-1 text-[11px] font-black uppercase tracking-[0.1em] text-black/60">
+          <p className="mt-2 line-clamp-1 text-[11px] font-black uppercase tracking-[0.1em] text-white/60">
             {author}
           </p>
         ) : null}
         {meta ? (
-          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-black/68">
+          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-white/68">
             {meta}
           </p>
         ) : null}
@@ -375,17 +380,17 @@ function LeaderboardSection({ items, onItemClick }) {
   }
 
   return (
-    <section className="border-y-[4px] border-black bg-white py-12">
+    <section className="border-y-[4px] border-[#ffe500] bg-black py-16">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[38rem]">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
-              Top 10
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff007a]">
+              This week
             </p>
-            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
-              Reader favorites
+            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+              Top 10 chart
             </h2>
-            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-black/68">
+            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/68">
               A fast-moving shelf of the titles readers keep opening first.
             </p>
           </div>
@@ -395,7 +400,7 @@ function LeaderboardSection({ items, onItemClick }) {
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {items.slice(0, 6).map((item, index) => (
             <LeaderboardCard
               key={item.id}
@@ -655,28 +660,79 @@ export default function HomeContentSections({
         </div>
       </section>
 
-      <section className="border-y-[4px] border-black bg-[#ff007a] py-14">
+      <section className="relative overflow-hidden border-y-[4px] border-black bg-[#8b00ff] py-16">
+        <div className="absolute right-20 top-5 hidden rotate-12 text-[5rem] font-black text-[#ffe500] md:block">
+          +
+        </div>
+        <div className="absolute bottom-5 left-20 hidden -rotate-12 text-[4rem] font-black text-[#00e5ff] md:block">
+          *
+        </div>
         <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-          <div className="grid gap-6 border-[4px] border-black bg-white p-6 shadow-[10px_10px_0_0_rgba(0,0,0,1)] md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-8">
+          <div className="relative grid gap-8 md:grid-cols-2 md:items-center">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
+              <p className="inline-block -rotate-2 border-[2px] border-black bg-[#ffe500] px-3 py-1 text-sm font-black uppercase tracking-[0.14em] text-black">
                 Community
               </p>
-              <h2 className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
-                Follow the stories people keep passing around
+              <h2 className="mt-5 text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+                Read.
+                <br />
+                Follow.
+                <br />
+                <span className="inline-block rotate-1 border-[4px] border-black bg-[#ff007a] px-2 text-white">
+                  Obsess.
+                </span>
               </h2>
-              <p className="mt-3 max-w-[40rem] text-sm font-semibold leading-6 text-black/70">
+              <p className="mt-5 max-w-[40rem] text-sm font-semibold leading-6 text-white/82">
                 Jump from featured shelves to creators and search without leaving the reading mood.
               </p>
+              <button
+                type="button"
+                onClick={() => onGuideClick?.("/creators")}
+                className="mt-7 inline-flex items-center justify-center gap-2 border-[3px] border-black bg-[#ffe500] px-6 py-4 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >
+                Meet creators
+                <ArrowRight className="size-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => onGuideClick?.("/creators")}
-              className="inline-flex items-center justify-center gap-2 border-[3px] border-black bg-[#00e5ff] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-            >
-              Meet creators
-              <ArrowRight className="size-4" />
-            </button>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                ["Creators", "Credits"],
+                ["Fresh", "Drops"],
+                ["Search", "Fast"],
+                ["Library", "Saved"],
+              ].map(([value, label], index) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() =>
+                    onGuideClick?.(
+                      index === 0
+                        ? "/creators"
+                        : index === 2
+                          ? "/search"
+                          : "/library",
+                    )
+                  }
+                  className={[
+                    "border-[3px] border-black p-5 text-left shadow-[6px_6px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+                    index === 1
+                      ? "mt-8 bg-[#00e5ff]"
+                      : index === 2
+                        ? "bg-[#ff007a] text-white"
+                        : index === 3
+                          ? "mt-8 bg-black text-white"
+                          : "bg-white text-black",
+                  ].join(" ")}
+                >
+                  <div className="text-[2rem] font-black uppercase tracking-[-0.04em]">
+                    {value}
+                  </div>
+                  <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] opacity-70">
+                    {label}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>

@@ -621,16 +621,15 @@ function HomeContent({ initialSearchParams = {} }) {
       : "Browse Stories";
 
   return (
-    <div className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient h-[clamp(21rem,42vw,34rem)]" />
+    <div className="min-h-screen overflow-hidden bg-white text-black">
       <SiteHeader variant="home" />
 
-      <main className="gush-page-main gush-page-main--wide">
-        <section className="pb-12 pt-2 md:pb-14">
+      <main className="relative">
+        <section className="p-0">
           {loading ? (
             <div className="aspect-[5/6] w-full animate-pulse border-[4px] border-black bg-[#ff007a] shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <section className="relative overflow-hidden border-b-[4px] border-black bg-[#ff007a] shadow-[0_18px_48px_rgba(0,0,0,0.08)]">
+            <section className="relative overflow-hidden border-b-[4px] border-black bg-[#ff007a]">
               <div
                 className="absolute inset-0 opacity-20"
                 style={{
@@ -642,7 +641,7 @@ function HomeContent({ initialSearchParams = {} }) {
               <div className="absolute -right-8 top-10 hidden h-32 w-32 rounded-full border-[4px] border-black bg-[#ffe500] md:block" />
               <div className="absolute bottom-14 left-4 hidden h-20 w-20 rotate-12 border-[4px] border-black bg-[#00e5ff] md:block" />
 
-              <div className="relative grid min-h-[520px] gap-10 px-5 py-10 sm:px-8 md:px-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-12 lg:py-14 xl:min-h-[640px] xl:px-16">
+              <div className="relative mx-auto grid min-h-[520px] max-w-7xl gap-10 px-4 py-12 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
                 <div className="flex flex-col justify-center">
                   <div className="inline-block w-fit -rotate-2 border-[3px] border-black bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-[#ffe500]">
                     {resumeSeries ? "Continue reading" : "New episode dropped"}

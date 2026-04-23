@@ -1134,13 +1134,12 @@ export default function SearchPage() {
     },
   ];
   return (
-    <main className="gush-page-shell gush-home-shell overflow-hidden">
-      <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
+    <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="gush-page-main gush-section-stack">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+      <div className="space-y-0">
+        <section className="grid border-b-[4px] border-black bg-[#00e5ff] xl:grid-cols-[minmax(0,1fr)_380px]">
           <SurfacePanel
-            className="space-y-6 border-[3px] border-black bg-[#00e5ff] px-5 py-5 shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:px-6 sm:py-6"
+            className="space-y-6 border-0 border-black bg-[#00e5ff] px-5 py-10 shadow-none sm:px-8 sm:py-14 lg:px-12 xl:px-16"
             tone="highlight"
             accent="blue"
             appearance="light"
@@ -1205,7 +1204,7 @@ export default function SearchPage() {
           </SurfacePanel>
 
           <SurfacePanel
-            className="h-full space-y-5 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)] sm:p-6"
+            className="h-full space-y-5 border-0 border-l-[4px] border-black bg-black p-5 text-white shadow-none sm:p-6 xl:p-8"
             tone="default"
             accent="amber"
             appearance="dark"
