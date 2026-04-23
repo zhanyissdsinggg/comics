@@ -5,6 +5,7 @@ import {
   BookOpen,
   BookOpenText,
   Compass,
+  Crown,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -319,6 +320,96 @@ function HomeGuideCard({
   );
 }
 
+function LeaderboardCard({ item, rank, onClick }) {
+  const coverUrl = String(item?.coverUrl || "").trim();
+  const title = String(item?.title || "Story").trim();
+  const author = String(item?.author || "").trim();
+  const meta = String(item?.metaLabel || "").trim();
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group grid grid-cols-[56px_minmax(0,1fr)] gap-4 border-[3px] border-black bg-white p-3 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+    >
+      <div className="relative aspect-[3/4] overflow-hidden border-[3px] border-black bg-black">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={title}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="h-full w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
+        )}
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-7 min-w-[2rem] items-center justify-center border-[2px] border-black bg-[#ff007a] px-2 text-[11px] font-black text-white">
+            #{rank}
+          </span>
+          <p className="line-clamp-1 text-sm font-black uppercase tracking-[-0.03em] text-black">
+            {title}
+          </p>
+        </div>
+        {author ? (
+          <p className="mt-2 line-clamp-1 text-[11px] font-black uppercase tracking-[0.1em] text-black/60">
+            {author}
+          </p>
+        ) : null}
+        {meta ? (
+          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-black/68">
+            {meta}
+          </p>
+        ) : null}
+      </div>
+    </button>
+  );
+}
+
+function LeaderboardSection({ items, onItemClick }) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="border-y-[4px] border-black bg-white py-12">
+      <div className="mx-auto max-w-[1320px] px-4 md:px-8">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-[38rem]">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
+              Top 10
+            </p>
+            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
+              Reader favorites
+            </h2>
+            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-black/68">
+              A fast-moving shelf of the titles readers keep opening first.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 border-[3px] border-black bg-[#ffe500] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <Crown className="size-4" />
+            Live board
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {items.slice(0, 6).map((item, index) => (
+            <LeaderboardCard
+              key={item.id}
+              item={item}
+              rank={index + 1}
+              onClick={() => onItemClick?.(item)}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function GenreKeywordBar({ keywords = [], onGuideClick }) {
   const visibleKeywords = Array.isArray(keywords)
     ? keywords
@@ -414,6 +505,17 @@ export default function HomeContentSections({
   const hasFormatShelves =
     (Array.isArray(comicSpotlightItems) && comicSpotlightItems.length > 0) ||
     (Array.isArray(novelSpotlightItems) && novelSpotlightItems.length > 0);
+  const leaderboardItems = [
+    ...(Array.isArray(featuredSeriesItems) ? featuredSeriesItems : []),
+    ...(Array.isArray(startHereItems) ? startHereItems : []),
+    ...(Array.isArray(comicSpotlightItems) ? comicSpotlightItems : []),
+    ...(Array.isArray(novelSpotlightItems) ? novelSpotlightItems : []),
+  ]
+    .filter((item, index, source) => {
+      const itemId = String(item?.id || "").trim();
+      return itemId && source.findIndex((entry) => entry?.id === itemId) === index;
+    })
+    .slice(0, 6);
 
   return (
     <div className="space-y-0 overflow-hidden">
@@ -439,8 +541,8 @@ export default function HomeContentSections({
         <>
           <HomeShelfSection
             eyebrow="Trending now"
-            title="Featured"
-            description="The stories getting the most attention right now."
+            title="Trending now"
+            description="The titles readers are landing on first right now."
             ctaLabel="View all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
@@ -449,12 +551,17 @@ export default function HomeContentSections({
             onItemClick={onFeaturedItemClick}
           />
 
+          <LeaderboardSection
+            items={leaderboardItems}
+            onItemClick={onFeaturedItemClick}
+          />
+
           {Array.isArray(comicSpotlightItems) &&
           comicSpotlightItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Comics"
+              eyebrow="Fresh drops"
               title="Comics"
-              description="Fast-entry visual stories built for bingeable sessions."
+              description="Poster-led stories built for quick entry and bingeable reading."
               items={comicSpotlightItems}
               actionLabel="Open comic"
               sectionTone="comics"
@@ -465,9 +572,9 @@ export default function HomeContentSections({
           {Array.isArray(novelSpotlightItems) &&
           novelSpotlightItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Novels"
+              eyebrow="Long reads"
               title="Novels"
-              description="Serial fiction for readers who want longer arcs and quieter immersion."
+              description="Serial fiction for readers who want longer arcs and a slower burn."
               items={novelSpotlightItems}
               actionLabel="Open novel"
               sectionTone="novels"
@@ -542,6 +649,32 @@ export default function HomeContentSections({
               className="mt-5 inline-flex items-center gap-2 border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(255,255,255,0.18)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:mt-0"
             >
               Open search
+              <ArrowRight className="size-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y-[4px] border-black bg-[#ff007a] py-14">
+        <div className="mx-auto max-w-[1320px] px-4 md:px-8">
+          <div className="grid gap-6 border-[4px] border-black bg-white p-6 shadow-[10px_10px_0_0_rgba(0,0,0,1)] md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:p-8">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
+                Community
+              </p>
+              <h2 className="mt-2 text-[clamp(2rem,5vw,3.6rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
+                Follow the stories people keep passing around
+              </h2>
+              <p className="mt-3 max-w-[40rem] text-sm font-semibold leading-6 text-black/70">
+                Jump from featured shelves to creators and search without leaving the reading mood.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onGuideClick?.("/creators")}
+              className="inline-flex items-center justify-center gap-2 border-[3px] border-black bg-[#00e5ff] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+            >
+              Meet creators
               <ArrowRight className="size-4" />
             </button>
           </div>

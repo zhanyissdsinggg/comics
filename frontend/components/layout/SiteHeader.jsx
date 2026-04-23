@@ -166,8 +166,8 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b-[3px] transition-all duration-500 ease-out ${
           scrolled
-            ? "border-black bg-[rgba(255,255,255,0.96)] shadow-[0_12px_0_0_rgba(0,0,0,1)] backdrop-blur-xl"
-            : "border-black bg-[rgba(255,255,255,0.92)] shadow-[0_8px_0_0_rgba(0,0,0,1)] backdrop-blur-lg"
+            ? "border-[#ffe500] bg-[rgba(0,0,0,0.96)] shadow-[0_10px_0_0_rgba(255,229,0,1)] backdrop-blur-xl"
+            : "border-[#ffe500] bg-[rgba(0,0,0,0.92)] shadow-[0_6px_0_0_rgba(255,229,0,1)] backdrop-blur-lg"
         }`}
       >
         <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">

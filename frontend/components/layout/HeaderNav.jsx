@@ -31,7 +31,7 @@ export default function HeaderNav({ variant = "default" }) {
   return (
     <nav className="hidden flex-1 justify-center md:flex">
       <div
-        className="inline-flex items-center gap-1 border-[3px] border-black bg-white px-1.5 py-1 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+        className="inline-flex items-center gap-1 border-[3px] border-white bg-black/50 px-1.5 py-1 shadow-[4px_4px_0_0_rgba(255,229,0,1)]"
       >
         {navItems.map((item) => {
           const isActive =
@@ -71,7 +71,7 @@ export default function HeaderNav({ variant = "default" }) {
               className={`relative px-4 py-2.5 text-sm font-black uppercase tracking-[0.04em] transition-all duration-300 ${
                 isActive
                   ? "bg-[#ff007a] text-white"
-                  : "text-black/70 hover:bg-[#ffe500] hover:text-black"
+                  : "text-white/72 hover:bg-[#ffe500] hover:text-black"
               }`}
             >
               {item.label}

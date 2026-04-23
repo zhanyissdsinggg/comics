@@ -38,11 +38,11 @@ const CommerceSuccessBanner = dynamic(
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
   loading: () => (
-    <div className="sticky top-0 z-40 border-b border-[color:var(--gush-border)] bg-[rgba(255,255,255,0.94)] backdrop-blur-lg">
+    <div className="sticky top-0 z-40 border-b-[3px] border-[#ffe500] bg-black/90 backdrop-blur-lg">
       <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]" />
-        <div className="hidden h-10 flex-1 rounded-full border border-[color:var(--gush-border)] bg-white md:block" />
-        <div className="h-10 w-24 rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.05)]" />
+        <div className="h-10 w-28 border-[3px] border-black bg-[#ffe500] shadow-[4px_4px_0_0_rgba(255,0,122,1)]" />
+        <div className="hidden h-10 flex-1 border-[3px] border-white bg-white md:block" />
+        <div className="h-10 w-24 border-[3px] border-white bg-white shadow-[4px_4px_0_0_rgba(255,229,0,1)]" />
       </div>
     </div>
   ),
@@ -628,7 +628,7 @@ function HomeContent({ initialSearchParams = {} }) {
       <main className="gush-page-main gush-page-main--wide">
         <section className="pb-12 pt-2 md:pb-14">
           {loading ? (
-            <div className="aspect-[5/6] w-full animate-pulse rounded-[38px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)] sm:aspect-[21/11] lg:aspect-[21/8]" />
+            <div className="aspect-[5/6] w-full animate-pulse border-[4px] border-black bg-[#ff007a] shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
             <section className="relative overflow-hidden border-b-[4px] border-black bg-[#ff007a] shadow-[0_18px_48px_rgba(0,0,0,0.08)]">
               <div
@@ -648,14 +648,14 @@ function HomeContent({ initialSearchParams = {} }) {
                     {resumeSeries ? "Continue reading" : "New episode dropped"}
                   </div>
 
-                  <h1 className="mt-6 max-w-[8.6ch] text-[clamp(3.1rem,8vw,6.4rem)] font-black uppercase leading-[0.84] tracking-[-0.06em] text-white">
-                    {resumeSeries ? "Pick up your story" : "Start with a story worth opening"}
+                  <h1 className="mt-6 max-w-[8.4ch] text-[clamp(3.1rem,8vw,6.4rem)] font-black uppercase leading-[0.84] tracking-[-0.06em] text-white">
+                    {resumeSeries ? "Jump right back in" : "Comics and novels with bite"}
                   </h1>
 
                   <div className="mt-5 max-w-[34rem] space-y-4">
                     <p className="text-base font-semibold leading-7 text-white/92">
                       {heroSeries?.description ||
-                        "Open the lead story, jump into a fresh favorite, and move straight into reading without digging around."}
+                        "Pick a lead title, open the latest episode, and move straight into reading without digging through a noisy storefront."}
                     </p>
                     {heroMetaLine ? (
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">
@@ -722,7 +722,7 @@ function HomeContent({ initialSearchParams = {} }) {
 
                 <div className="relative flex items-center justify-center lg:justify-end">
                   {heroRailItems[0] ? (
-                    <div className="absolute left-0 top-6 hidden w-32 -rotate-6 lg:block">
+                    <div className="absolute left-0 top-6 hidden w-36 -rotate-6 xl:block">
                       <HeroRailPreviewCard
                         item={heroRailItems[0]}
                         tone="dark"
@@ -769,7 +769,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   </div>
 
                   {heroRailItems[1] ? (
-                    <div className="absolute bottom-6 right-0 hidden w-32 rotate-6 lg:block">
+                    <div className="absolute bottom-6 right-0 hidden w-36 rotate-6 xl:block">
                       <HeroRailPreviewCard
                         item={heroRailItems[1]}
                         tone="dark"

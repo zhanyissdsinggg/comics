@@ -13,42 +13,44 @@
     var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
   --font-display: var(--font-ui-body), var(--font-body);
-  --gush-accent: #0071e3;
-  --gush-accent-strong: #0058cc;
+  --gush-accent: #ff007a;
+  --gush-accent-strong: #e0006b;
+  --gush-accent-secondary: #00e5ff;
+  --gush-accent-tertiary: #ffe500;
   --gush-page-bg: #ffffff;
   --gush-page-bg-elevated: #ffffff;
-  --gush-page-bg-muted: #f5f5f7;
-  --gush-surface: rgba(255, 255, 255, 0.96);
-  --gush-surface-strong: rgba(255, 255, 255, 1);
-  --gush-surface-muted: rgba(248, 248, 250, 0.98);
-  --gush-surface-accent: rgba(0, 113, 227, 0.03);
-  --gush-border: rgba(29, 29, 31, 0.08);
-  --gush-border-strong: rgba(29, 29, 31, 0.12);
-  --gush-border-faint: rgba(29, 29, 31, 0.05);
-  --gush-ink-strong: #1d1d1f;
-  --gush-ink: #2f2f33;
-  --gush-ink-soft: #6e6e73;
-  --gush-ink-faint: #8f8f94;
-  --gush-success: #0a7d5c;
-  --gush-warning: #b05f00;
-  --gush-danger: #c52828;
-  --gush-shadow-soft: 0 8px 22px rgba(15, 23, 42, 0.04);
-  --gush-shadow-panel: 0 18px 46px rgba(15, 23, 42, 0.05);
-  --gush-shadow-floating: 0 14px 32px rgba(15, 23, 42, 0.05);
-  --gush-shadow-button: 0 12px 28px rgba(0, 113, 227, 0.14);
-  --gush-shadow-card: 0 8px 20px rgba(15, 23, 42, 0.04);
-  --gush-shadow-header: 0 10px 24px rgba(15, 23, 42, 0.06);
-  --gush-radius-sm: 14px;
-  --gush-radius-md: 18px;
-  --gush-radius-lg: 28px;
-  --gush-radius-xl: 36px;
-  --gush-home-bg: #050507;
-  --gush-home-surface: rgba(255, 255, 255, 0.72);
+  --gush-page-bg-muted: #fff8dd;
+  --gush-surface: #ffffff;
+  --gush-surface-strong: #ffffff;
+  --gush-surface-muted: #fffdf7;
+  --gush-surface-accent: #fff0f7;
+  --gush-border: rgba(0, 0, 0, 0.14);
+  --gush-border-strong: rgba(0, 0, 0, 0.92);
+  --gush-border-faint: rgba(0, 0, 0, 0.08);
+  --gush-ink-strong: #000000;
+  --gush-ink: #171717;
+  --gush-ink-soft: rgba(0, 0, 0, 0.68);
+  --gush-ink-faint: rgba(0, 0, 0, 0.5);
+  --gush-success: #00c767;
+  --gush-warning: #ff9100;
+  --gush-danger: #e11d48;
+  --gush-shadow-soft: 4px 4px 0 0 rgba(0, 0, 0, 1);
+  --gush-shadow-panel: 10px 10px 0 0 rgba(0, 0, 0, 1);
+  --gush-shadow-floating: 8px 8px 0 0 rgba(0, 0, 0, 1);
+  --gush-shadow-button: 4px 4px 0 0 rgba(0, 0, 0, 1);
+  --gush-shadow-card: 6px 6px 0 0 rgba(0, 0, 0, 1);
+  --gush-shadow-header: 0 8px 0 0 rgba(0, 0, 0, 1);
+  --gush-radius-sm: 0px;
+  --gush-radius-md: 0px;
+  --gush-radius-lg: 0px;
+  --gush-radius-xl: 0px;
+  --gush-home-bg: #ffffff;
+  --gush-home-surface: #ffffff;
   --gush-home-surface-strong: #ffffff;
-  --gush-home-border: rgba(255, 255, 255, 0.12);
-  --gush-home-ink: #f5f5f7;
-  --gush-home-ink-soft: rgba(245, 245, 247, 0.72);
-  --gush-home-accent: #2997ff;
+  --gush-home-border: rgba(0, 0, 0, 0.12);
+  --gush-home-ink: #000000;
+  --gush-home-ink-soft: rgba(0, 0, 0, 0.68);
+  --gush-home-accent: #ff007a;
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
@@ -67,31 +69,33 @@
 
 html.dark {
   color-scheme: dark;
-  --gush-accent: #2997ff;
-  --gush-accent-strong: #58adff;
-  --gush-page-bg: #000000;
-  --gush-page-bg-elevated: #0a0a0c;
-  --gush-page-bg-muted: #111113;
-  --gush-surface: rgba(16, 16, 18, 0.78);
-  --gush-surface-strong: rgba(22, 22, 24, 0.92);
-  --gush-surface-muted: rgba(20, 20, 23, 0.88);
-  --gush-surface-accent: rgba(41, 151, 255, 0.12);
-  --gush-border: rgba(255, 255, 255, 0.1);
-  --gush-border-strong: rgba(255, 255, 255, 0.16);
-  --gush-border-faint: rgba(255, 255, 255, 0.05);
-  --gush-ink-strong: #f5f5f7;
-  --gush-ink: #e8e8ed;
-  --gush-ink-soft: #a1a1aa;
-  --gush-ink-faint: #86868b;
-  --gush-success: #3dd5a2;
-  --gush-warning: #ffae35;
-  --gush-danger: #ff6b6b;
-  --gush-shadow-soft: 0 22px 52px rgba(0, 0, 0, 0.28);
-  --gush-shadow-panel: 0 38px 102px rgba(0, 0, 0, 0.36);
-  --gush-shadow-floating: 0 26px 62px rgba(0, 0, 0, 0.34);
-  --gush-shadow-button: 0 18px 40px rgba(0, 0, 0, 0.34);
-  --gush-shadow-card: 0 18px 42px rgba(0, 0, 0, 0.28);
-  --gush-shadow-header: 0 24px 58px rgba(0, 0, 0, 0.34);
+  --gush-accent: #ff4aa4;
+  --gush-accent-strong: #ff6cb6;
+  --gush-accent-secondary: #2befff;
+  --gush-accent-tertiary: #ffe500;
+  --gush-page-bg: #080808;
+  --gush-page-bg-elevated: #111111;
+  --gush-page-bg-muted: #181818;
+  --gush-surface: #111111;
+  --gush-surface-strong: #121212;
+  --gush-surface-muted: #181818;
+  --gush-surface-accent: #29101f;
+  --gush-border: rgba(255, 255, 255, 0.16);
+  --gush-border-strong: rgba(255, 255, 255, 0.94);
+  --gush-border-faint: rgba(255, 255, 255, 0.08);
+  --gush-ink-strong: #ffffff;
+  --gush-ink: #f3f3f3;
+  --gush-ink-soft: rgba(255, 255, 255, 0.74);
+  --gush-ink-faint: rgba(255, 255, 255, 0.52);
+  --gush-success: #00d47e;
+  --gush-warning: #ffb300;
+  --gush-danger: #ff5f8a;
+  --gush-shadow-soft: 4px 4px 0 0 rgba(255, 255, 255, 0.18);
+  --gush-shadow-panel: 10px 10px 0 0 rgba(255, 255, 255, 0.18);
+  --gush-shadow-floating: 8px 8px 0 0 rgba(255, 255, 255, 0.16);
+  --gush-shadow-button: 4px 4px 0 0 rgba(255, 255, 255, 0.16);
+  --gush-shadow-card: 6px 6px 0 0 rgba(255, 255, 255, 0.16);
+  --gush-shadow-header: 0 8px 0 0 rgba(255, 255, 255, 0.16);
 }
 
 html.light {
@@ -125,13 +129,10 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.76) 16%,
-    transparent 42%
-  );
-  opacity: 1;
+  background:
+    radial-gradient(circle at top right, rgba(255, 229, 0, 0.18), transparent 28%),
+    radial-gradient(circle at top left, rgba(255, 0, 122, 0.14), transparent 34%);
+  opacity: 0.85;
   z-index: 0;
 }
 
@@ -140,13 +141,10 @@ html.dark body {
 }
 
 html.dark body::before {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.76) 16%,
-    transparent 42%
-  );
-  opacity: 1;
+  background:
+    radial-gradient(circle at top right, rgba(255, 229, 0, 0.18), transparent 28%),
+    radial-gradient(circle at top left, rgba(255, 0, 122, 0.14), transparent 34%);
+  opacity: 0.42;
 }
 
 * {
@@ -251,7 +249,7 @@ button:disabled,
 
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(49, 87, 214, 0.14);
+  box-shadow: 0 0 0 4px rgba(255, 0, 122, 0.18);
 }
 
 input,
@@ -345,23 +343,17 @@ html.dark .gush-page-ambient {
 
 .gush-home-shell .gush-page-ambient {
   height: clamp(24rem, 40vw, 35rem);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.98) 18%,
-    rgba(255, 255, 255, 0.92) 34%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background:
+    radial-gradient(circle at top right, rgba(255, 229, 0, 0.24), transparent 24%),
+    radial-gradient(circle at top left, rgba(0, 229, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.2) 100%);
 }
 
 html.dark .gush-home-shell .gush-page-ambient {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.98) 18%,
-    rgba(255, 255, 255, 0.92) 34%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background:
+    radial-gradient(circle at top right, rgba(255, 229, 0, 0.16), transparent 24%),
+    radial-gradient(circle at top left, rgba(0, 229, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .gush-page-main {

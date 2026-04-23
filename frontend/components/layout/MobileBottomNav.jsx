@@ -100,7 +100,7 @@ export default function MobileBottomNav() {
     <nav
       aria-label="Mobile bottom navigation"
       data-mobile-bottom-nav="1"
-      className="fixed inset-x-0 bottom-0 z-50 border-t-[3px] border-black bg-[#fffdf7] shadow-[0_-6px_0_0_rgba(0,0,0,1)] backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t-[3px] border-[#ffe500] bg-black shadow-[0_-6px_0_0_rgba(255,229,0,1)] backdrop-blur-xl md:hidden"
     >
       <div className="mx-auto grid max-w-[1320px] grid-cols-4 gap-1.5 px-2 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] pt-2.5">
         {TAB_ITEMS.map((item) => {
@@ -129,8 +129,8 @@ export default function MobileBottomNav() {
               className={cn(
                 "relative flex min-h-[60px] flex-col items-center justify-center gap-1 rounded-[1.35rem] px-2 py-2 text-center transition-all duration-200",
                 isActive
-                  ? "border-[2px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
-                  : "text-black/45 hover:bg-[#f3f0ea] hover:text-black",
+                  ? "border-[2px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(255,255,255,0.18)]"
+                  : "text-white/45 hover:bg-white/10 hover:text-white",
               )}
             >
               <span

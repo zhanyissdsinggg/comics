@@ -8,7 +8,7 @@ function Card({ className, size = "default", ...props }) {
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-[color:var(--gush-surface-strong)] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] dark:bg-[rgba(16,16,18,0.92)] dark:ring-white/5 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[28px] *:[img:last-child]:rounded-b-[28px]",
+        "group/card flex flex-col gap-4 overflow-hidden border-[3px] border-black bg-[color:var(--gush-surface-strong)] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
         className,
       )}
       {...props}
@@ -21,7 +21,7 @@ function CardHeader({ className, ...props }) {
     <div
       data-slot="card-header"
       className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 rounded-t-[28px] px-5 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:border-[color:var(--gush-border)] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
+        "group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 px-5 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:border-[color:var(--gush-border-strong)] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3",
         className,
       )}
       {...props}
@@ -34,7 +34,7 @@ function CardTitle({ className, ...props }) {
     <div
       data-slot="card-title"
       className={cn(
-        "text-[1.02rem] leading-snug font-semibold tracking-[-0.035em] text-[color:var(--gush-ink-strong)] group-data-[size=sm]/card:text-sm",
+        "text-[1.02rem] leading-snug font-black uppercase tracking-[-0.035em] text-[color:var(--gush-ink-strong)] group-data-[size=sm]/card:text-sm",
         className,
       )}
       {...props}
@@ -83,7 +83,7 @@ function CardFooter({ className, ...props }) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-[28px] border-t border-[color:var(--gush-border)] bg-white p-5 group-data-[size=sm]/card:p-4",
+        "flex items-center border-t-[3px] border-[color:var(--gush-border-strong)] bg-[#fffdf7] p-5 group-data-[size=sm]/card:p-4",
         className,
       )}
       {...props}
