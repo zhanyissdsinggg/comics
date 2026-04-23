@@ -59,34 +59,33 @@ export default function CookieConsent() {
   if (isAdminRoute || isReaderRoute || !showBanner) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-4 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.85rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
+    <div className="pointer-events-none fixed inset-x-3 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.45rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
       <div className="pointer-events-auto mx-auto max-w-md">
-        <div className="relative overflow-hidden border-[3px] border-black bg-white p-5 text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="relative overflow-hidden border-[3px] border-black bg-white p-3 text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),transparent_32%)]" />
           <button
             onClick={handleDecline}
-            className="absolute right-3 top-3 z-10 border-[3px] border-black bg-white p-2 text-black/55 transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black hover:shadow-none"
+            className="absolute right-2 top-2 z-10 border-[2px] border-black bg-white p-1.5 text-black/55 transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black hover:shadow-none sm:right-3 sm:top-3 sm:border-[3px] sm:p-2"
             aria-label="Close"
           >
             <X size={16} />
           </button>
 
-          <div className="relative flex items-start gap-4 pr-8">
+          <div className="relative flex items-start gap-3 pr-8 sm:gap-4">
             <div className="mt-0.5 flex-shrink-0">
-              <div className="rounded-2xl border-[3px] border-black bg-[#ffe500] p-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-                <Cookie size={20} className="text-black" />
+              <div className="rounded-2xl border-[3px] border-black bg-[#ffe500] p-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:p-3 sm:shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                <Cookie size={18} className="text-black sm:size-5" />
               </div>
             </div>
-            <div className="min-w-0 flex-1 space-y-2">
+            <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-black/55">
                 Privacy
               </p>
-              <h3 className="font-display text-lg font-black uppercase tracking-[-0.04em] text-black">
+              <h3 className="font-display text-base font-black uppercase tracking-[-0.04em] text-black sm:text-lg">
                 Cookies
               </h3>
-              <p className="text-sm leading-6 text-black/68">
-                We use cookies for sign-in, reading progress, and basic
-                preferences.{" "}
+              <p className="text-xs font-semibold leading-5 text-black/68 sm:text-sm sm:font-normal sm:leading-6">
+                Cookies keep sign-in and reading progress working.{" "}
                 {useDocumentNavigation ? (
                   <a
                     href="/privacy-policy"
@@ -110,16 +109,16 @@ export default function CookieConsent() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2.5">
+          <div className="mt-3 flex flex-nowrap gap-2 sm:mt-4 sm:flex-wrap sm:gap-2.5">
             <button
               onClick={handleDecline}
-              className={storefrontSecondaryButtonClass}
+              className={`${storefrontSecondaryButtonClass} min-w-0 flex-1 px-3 py-2 text-xs sm:flex-none sm:px-4 sm:py-2 sm:text-sm`}
             >
               Not now
             </button>
             <button
               onClick={handleAccept}
-              className={storefrontPrimaryButtonClass}
+              className={`${storefrontPrimaryButtonClass} min-w-0 flex-1 px-3 py-2 text-xs sm:flex-none sm:px-4 sm:py-2 sm:text-sm`}
             >
               Allow
             </button>

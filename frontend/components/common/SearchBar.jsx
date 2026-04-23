@@ -67,7 +67,7 @@ const SearchBar = memo(function SearchBar({
   const shellClass = isFocused
     ? "border-[#ffe500] bg-black text-white shadow-[0_0_0_4px_rgba(255,0,122,0.35)]"
     : isHome
-      ? "border-white/25 bg-white/10 shadow-[5px_5px_0_0_rgba(255,229,0,1)] hover:-translate-y-0.5 hover:border-[#ffe500] hover:bg-white/20"
+      ? "border-black bg-black text-white shadow-[5px_5px_0_0_rgba(255,229,0,1)] hover:-translate-y-0.5 hover:border-[#ffe500]"
       : "border-white/25 bg-white/10 shadow-[5px_5px_0_0_rgba(255,229,0,1)] hover:-translate-y-0.5 hover:border-[#ffe500] hover:bg-white/20";
   const searchIconClass = isFocused
     ? "text-[#ffe500]"
@@ -231,7 +231,7 @@ const SearchBar = memo(function SearchBar({
         {isSearching ? (
           <Loader2
             size={16}
-            className="animate-spin text-black"
+            className="animate-spin text-[#ffe500]"
           />
         ) : null}
         <input
