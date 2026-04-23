@@ -37,7 +37,7 @@ const accentEdgeClasses = {
     cyan: "bg-[#00e5ff]",
     amber: "bg-[#ffe500]",
     rose: "bg-[#ff7db6]",
-    blue: "bg-[#ffe500]",
+    blue: "bg-[#00e5ff]",
   },
 };
 
@@ -52,13 +52,13 @@ const accentWashClasses = {
     rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_34%)]",
   },
   light: {
-    blue: "bg-[radial-gradient(circle_at_top_right,rgba(255,229,0,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(0,229,255,0.16),transparent_28%)]",
+    blue: "bg-[radial-gradient(circle_at_top_right,rgba(0,229,255,0.08),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.08),transparent_30%)]",
     emerald:
-      "bg-[radial-gradient(circle_at_top_right,rgba(0,255,136,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.16),transparent_28%)]",
-    cyan: "bg-[radial-gradient(circle_at_top_right,rgba(0,229,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.16),transparent_28%)]",
+      "bg-[radial-gradient(circle_at_top_right,rgba(0,255,136,0.1),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.08),transparent_30%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_right,rgba(0,229,255,0.1),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.07),transparent_30%)]",
     amber:
-      "bg-[radial-gradient(circle_at_top_right,rgba(255,229,0,0.24),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.12),transparent_28%)]",
-    rose: "bg-[radial-gradient(circle_at_top_right,rgba(255,0,122,0.18),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.16),transparent_28%)]",
+      "bg-[radial-gradient(circle_at_top_right,rgba(255,229,0,0.1),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.06),transparent_30%)]",
+    rose: "bg-[radial-gradient(circle_at_top_right,rgba(255,0,122,0.08),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.08),transparent_30%)]",
   },
 };
 

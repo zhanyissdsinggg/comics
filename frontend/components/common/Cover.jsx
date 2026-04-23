@@ -112,7 +112,7 @@ function CoverFallback({
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
-            <span className="inline-flex whitespace-nowrap rounded-full border border-white/14 bg-black/18 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/78">
+            <span className="inline-flex whitespace-nowrap border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black">
               {minimalChipLabel}
             </span>
           ) : null}
@@ -120,18 +120,18 @@ function CoverFallback({
       ) : (
         <div className="absolute left-3 right-4 top-3 flex flex-wrap items-start gap-2">
           {artDirection.badgeLabel ? (
-            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-white/15 bg-black/20 pl-2.5 pr-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82">
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap border-[2px] border-black bg-[#ffe500] py-1 pl-2.5 pr-3 text-[10px] font-black uppercase tracking-[0.18em] text-black">
               {artDirection.badgeLabel}
             </span>
           ) : null}
           <div className="order-2 flex w-full flex-wrap gap-2">
             {shouldShowTypeLabel ? (
-              <span className="rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/82">
+              <span className="border-[2px] border-black bg-[#00e5ff] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
                 {artDirection.typeLabel}
               </span>
             ) : null}
             {artDirection.primaryGenre ? (
-              <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/75">
+              <span className="border-[2px] border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black">
                 {artDirection.primaryGenre}
               </span>
             ) : null}
@@ -162,7 +162,7 @@ function CoverFallback({
             {shouldShowKicker ? (
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/76">
                 <span
-                  className="h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5"
                   style={{ backgroundColor: artDirection.accent }}
                 />
                 <span>{artDirection.kicker}</span>

@@ -9,16 +9,16 @@ function MascotPlaceholder() {
       aria-hidden="true"
       className="relative flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32"
     >
-      <div className="absolute inset-0 rounded-[30px] border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]" />
-      <div className="absolute left-5 top-5 h-4 w-4 rounded-full bg-[#ffe500]" />
-      <div className="absolute right-5 top-7 h-3 w-3 rounded-full bg-[#ff007a]" />
-      <div className="absolute bottom-5 left-6 h-5 w-5 rounded-full bg-[#00e5ff]" />
-      <div className="absolute bottom-6 right-6 h-6 w-6 rounded-full border-[2px] border-black bg-white" />
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+      <div className="absolute inset-0 rotate-[-2deg] border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(255,0,122,1)]" />
+      <div className="absolute left-5 top-5 h-4 w-4 border-[2px] border-black bg-white" />
+      <div className="absolute right-5 top-7 h-3 w-3 border-[2px] border-black bg-[#ff007a]" />
+      <div className="absolute bottom-5 left-6 h-5 w-5 border-[2px] border-black bg-[#00e5ff]" />
+      <div className="absolute bottom-6 right-6 h-6 w-6 border-[2px] border-black bg-white" />
+      <div className="relative flex h-16 w-16 items-center justify-center border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-black/30" />
-          <span className="h-2.5 w-2.5 rounded-full bg-black/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-black/30" />
+          <span className="h-2.5 w-2.5 bg-black/30" />
+          <span className="h-2.5 w-2.5 bg-black/60" />
+          <span className="h-2.5 w-2.5 bg-black/30" />
         </div>
       </div>
     </div>
@@ -53,16 +53,16 @@ export default function NetworkFallback({
     >
       <div
         className={cn(
-          "relative w-full max-w-xl overflow-hidden rounded-[32px] border-[3px] border-black bg-white px-6 py-8 text-center shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:px-8 sm:py-10",
+          "relative w-full max-w-xl overflow-hidden border-[4px] border-black bg-white px-6 py-8 text-center shadow-[12px_12px_0_0_rgba(255,0,122,1)] sm:px-8 sm:py-10",
           cardClassName,
         )}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_30%)]" />
-        <div className="pointer-events-none absolute right-0 top-0 h-24 w-24 rounded-full bg-[#00e5ff]/20 blur-3xl" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-4 border-b-[3px] border-black bg-[#ffe500]" />
+        <div className="pointer-events-none absolute -right-8 top-8 h-20 w-20 rotate-12 border-[3px] border-black bg-[#00e5ff]" />
         <div className="relative flex flex-col items-center justify-center">
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
+          <p className="mt-5 border-[3px] border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
             Connection issue
           </p>
 
@@ -84,9 +84,9 @@ export default function NetworkFallback({
             onClick={canRetry ? onRetry : undefined}
             disabled={!canRetry}
             className={cn(
-              "mt-6 inline-flex items-center justify-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all duration-200",
+              "mt-6 inline-flex items-center justify-center gap-2 border px-5 py-3 text-sm font-black uppercase tracking-[0.14em] transition-all duration-200",
               canRetry
-                ? "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:-translate-y-0.5 hover:bg-[#ff007a]"
+                ? "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none"
                 : "cursor-not-allowed border-[3px] border-black bg-black/10 text-black/45",
             )}
           >

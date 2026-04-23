@@ -1216,7 +1216,7 @@ export default function SearchPage() {
               <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                 {query ? "Lead match" : "Start fast"}
               </h2>
-              <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+              <p className="mt-3 text-sm font-semibold leading-7 text-white/88">
                 {query
                   ? "Refine the current query, jump into the lead title, or pivot into a stronger shelf."
                   : "Use hot terms, filters, and the lead pick to get into reading without dead clicks."}

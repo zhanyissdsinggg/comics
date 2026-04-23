@@ -396,7 +396,7 @@ export default function RankingsPage({
                 <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/88">
                   Use this shelf when you want a fast editorial read lane instead of a broad search.
                 </p>
               </div>
@@ -649,11 +649,7 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                <SurfacePanel
-                  className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
-                  appearance="light"
-                  accent="blue"
-                >
+                <section className="space-y-5 border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6">
                   <RankingsSectionHeader
                     eyebrow="More titles"
                     title="Keep browsing"
@@ -672,7 +668,7 @@ export default function RankingsPage({
                             "FEATURED_LIST",
                           )
                         }
-                        className="flex w-full items-center gap-4 border-[3px] border-black bg-white p-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
+                        className="flex w-full items-center gap-4 border-[3px] border-black bg-white p-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
                         aria-label={`Open ${series.title}`}
                       >
                         <Cover
@@ -707,7 +703,7 @@ export default function RankingsPage({
                       </Link>
                     ))}
                   </div>
-                </SurfacePanel>
+                </section>
               ) : null}
             </div>
 

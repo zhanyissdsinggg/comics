@@ -56,25 +56,25 @@ export default function GlobalErrorToast() {
       <div
         role="alert"
         aria-live="assertive"
-        className={`pointer-events-auto flex w-full items-start border-[3px] border-black text-black backdrop-blur-2xl ${
+        className={`pointer-events-auto flex w-full items-start border-[3px] border-black text-black ${
           isNetworkMessage
-            ? "max-w-sm gap-2.5 bg-[#ffe7ec] px-3.5 py-3 shadow-[8px_8px_0_0_rgba(255,0,122,1)]"
+            ? "max-w-sm gap-2.5 bg-[#ffe500] px-3.5 py-3 shadow-[8px_8px_0_0_rgba(255,0,122,1)]"
             : "max-w-md gap-3 bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(255,0,122,1)]"
         }`}
       >
         <div
-          className={`mt-0.5 flex flex-shrink-0 items-center justify-center border-[3px] border-black bg-[#ff007a]/10 text-[#ff007a] ${
+          className={`mt-0.5 flex flex-shrink-0 items-center justify-center border-[3px] border-black bg-[#ff007a] text-white ${
             isNetworkMessage ? "h-8 w-8" : "h-9 w-9"
           }`}
         >
           <AlertCircle size={isNetworkMessage ? 16 : 18} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#ff007a]">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#ff007a]">
             {label}
           </p>
           <p
-            className={`mt-1 font-medium text-black ${
+            className={`mt-1 font-black text-black ${
               isNetworkMessage ? "text-[13px] leading-5" : "text-sm leading-6"
             }`}
           >
