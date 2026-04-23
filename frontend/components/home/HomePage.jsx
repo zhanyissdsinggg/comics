@@ -613,7 +613,7 @@ function HomeContent({ initialSearchParams = {} }) {
     return "/search";
   }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
 
-  const heroEyebrow = resumeSeries ? "Continue" : "Lead Story";
+  const heroEyebrow = resumeSeries ? "Continue" : "Featured";
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue Reading"
     : heroSeries?.id
@@ -644,17 +644,17 @@ function HomeContent({ initialSearchParams = {} }) {
               <div className="relative mx-auto grid min-h-[520px] max-w-7xl gap-10 px-4 py-12 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
                 <div className="flex flex-col justify-center">
                   <div className="inline-block w-fit -rotate-2 border-[3px] border-black bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-[#ffe500]">
-                    {resumeSeries ? "Continue reading" : "New episode dropped"}
+                    {resumeSeries ? "Continue reading" : "Featured now"}
                   </div>
 
                   <h1 className="mt-6 max-w-[8.4ch] text-[clamp(3.1rem,8vw,6.4rem)] font-black uppercase leading-[0.84] tracking-[-0.06em] text-white">
-                    {resumeSeries ? "Jump right back in" : "Comics and novels with bite"}
+                    {resumeSeries ? "Back to reading" : "Read something good"}
                   </h1>
 
                   <div className="mt-5 max-w-[34rem] space-y-4">
                     <p className="text-base font-black leading-7 text-black/80">
                       {heroSeries?.description ||
-                        "Pick a lead title, open the latest episode, and move straight into reading without digging through a noisy storefront."}
+                        "Open a title and start reading."}
                     </p>
                     {heroMetaLine ? (
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/72">
@@ -700,7 +700,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       onClick={() => router.push("/search")}
                       className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-6 py-3 text-base font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
                     >
-                      Browse all
+                      Browse
                     </button>
                   </div>
 

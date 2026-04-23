@@ -24,7 +24,7 @@ const VIEWS = [
   {
     id: "featured",
     label: "Featured",
-    description: "Editorial picks.",
+    description: "Top picks.",
   },
   {
     id: "start-here",
@@ -34,17 +34,17 @@ const VIEWS = [
   {
     id: "completed",
     label: "Completed",
-    description: "Complete stories.",
+    description: "Full runs.",
   },
   {
     id: "comics",
     label: "Comics",
-    description: "Comic picks.",
+    description: "Comics only.",
   },
   {
     id: "novels",
     label: "Novels",
-    description: "Novel picks.",
+    description: "Novels only.",
   },
 ];
 
@@ -396,9 +396,6 @@ export default function RankingsPage({
                 <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-white/90">
-                  Use this shelf when you want a fast editorial read lane instead of a broad search.
-                </p>
               </div>
             </div>
 
@@ -460,8 +457,8 @@ export default function RankingsPage({
         >
           <RankingsSectionHeader
             eyebrow="Views"
-            title="Switch the shelf"
-            description="Move between editorial views without leaving the ranked browsing flow."
+            title="Switch shelves"
+            description=""
           />
           <div className="flex flex-wrap gap-2.5">
             {VIEWS.map((item) => (
@@ -498,9 +495,6 @@ export default function RankingsPage({
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   No titles yet.
                 </h2>
-                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  Browse catalog or switch views.
-                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -532,9 +526,6 @@ export default function RankingsPage({
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   Creators
                 </h2>
-                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  Browse creator profiles.
-                </p>
               </div>
               <button
                 type="button"
@@ -576,7 +567,7 @@ export default function RankingsPage({
                         {leadEntry.title}
                       </h2>
                       <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/80">
-                        {leadEntry.description || "A strong place to begin."}
+                        {leadEntry.description || "Start here."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
                         {getSeriesMeta(leadEntry).map((item) => (
@@ -653,7 +644,7 @@ export default function RankingsPage({
                   <RankingsSectionHeader
                     eyebrow="More titles"
                     title="Keep browsing"
-                    description="The next ranked titles in this view."
+                    description=""
                   />
 
                   <div className="space-y-3">

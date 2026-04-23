@@ -130,7 +130,7 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
     <EmptyState
       icon="book"
       title="Your library is empty"
-      description="Save series here to keep your place."
+      description="Saved titles appear here."
       action={onBrowse}
       actionText="Browse Series"
       eyebrow="Library"
@@ -158,7 +158,7 @@ export const EmptyFavorites = memo(function EmptyFavorites({ onBrowse }) {
     <EmptyState
       icon="heart"
       title="No favorites yet"
-      description="Save favorites here for quick returns."
+      description="Favorites appear here."
       action={onBrowse}
       actionText="Discover Series"
       eyebrow="Favorites"
@@ -195,7 +195,7 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
     <EmptyState
       icon="file"
       title="No reading history"
-      description="Open a series and your recent reading will appear here."
+      description="Recent reading appears here."
       action={onBrowse}
       actionText="Start Reading"
       eyebrow="History"

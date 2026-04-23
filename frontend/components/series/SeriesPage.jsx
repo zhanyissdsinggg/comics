@@ -1032,7 +1032,7 @@ export default function SeriesPage({
                   Interactive Story
                 </p>
                 <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black">
-                  Structured branching mode is available for this title.
+                  Interactive mode is live for this title.
                 </p>
               </div>
               <button
@@ -1040,7 +1040,7 @@ export default function SeriesPage({
                 onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
                 className="border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
               >
-                Enter interactive mode
+                Open interactive mode
               </button>
             </div>
           </section>

@@ -42,21 +42,21 @@ function summarizeSeriesDescription(text, fallback) {
     return fallback;
   }
 
-  if (source.length <= 180) {
+  if (source.length <= 120) {
     return source;
   }
 
-  return `${source.slice(0, 177).trimEnd()}...`;
+  return `${source.slice(0, 117).trimEnd()}...`;
 }
 
 function formatUpdateLabel(value) {
   if (!value) {
-    return "Update timing unavailable";
+    return "Date unavailable";
   }
 
   const timestamp = Date.parse(value);
   if (Number.isNaN(timestamp)) {
-    return "Update timing unavailable";
+    return "Date unavailable";
   }
 
   return `Updated ${new Date(timestamp).toLocaleDateString("en-US", {
@@ -112,19 +112,19 @@ export default function SeriesHeader({
       detail:
         Array.isArray(genres) && genres.length > 0
           ? genres.slice(0, 2).join(" / ")
-          : "Story format",
+          : "Format",
     },
     {
       label: "Status",
       value: isCompleted
         ? "Completed"
         : capitalize(series.status || "updating"),
-      detail: isCompleted ? "Full run" : "Updating",
+      detail: isCompleted ? "Full run" : "Ongoing",
     },
     {
       label: "Episodes",
       value: episodeCount > 0 ? `${episodeCount}` : "Soon",
-      detail: episodeCount > 0 ? "Listed now" : "No episodes yet",
+      detail: episodeCount > 0 ? "Available now" : "Coming soon",
     },
     {
       label: "Latest",
@@ -208,7 +208,7 @@ export default function SeriesHeader({
                     href={creatorHref}
                     className="font-black uppercase tracking-[0.04em] text-black transition-colors hover:text-[#ff007a]"
                   >
-                    Creator page
+                    Creator
                   </Link>
                 </>
               ) : null}
@@ -231,7 +231,7 @@ export default function SeriesHeader({
               <p className="text-[15px] font-semibold leading-8 text-black/72 sm:text-base">
                 {summarizeSeriesDescription(
                   series.description,
-                  "Open the first episode and see if it lands.",
+                  "Start with chapter one.",
                 )}
               </p>
             </div>
@@ -296,7 +296,7 @@ export default function SeriesHeader({
                   {creatorPresentation.value}
                 </p>
                 <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
-                  {creatorHref ? "Open the creator profile from this title." : creatorPresentation.detail}
+                  {creatorHref ? "Open creator page." : creatorPresentation.detail}
                 </p>
               </div>
 
@@ -306,7 +306,7 @@ export default function SeriesHeader({
                     Read lane
                   </p>
                   <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
-                    {isCompleted ? "Full run ready" : "Follow the latest release"}
+                    {isCompleted ? "Full run" : "Latest updates"}
                   </p>
                 </div>
                 <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">

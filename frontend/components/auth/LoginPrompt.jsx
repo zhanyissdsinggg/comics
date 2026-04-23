@@ -11,7 +11,7 @@ const LoginPrompt = memo(function LoginPrompt({
   onClose,
   eyebrow = "Member access",
   title = "Sign in to continue",
-  message = "Save your place and keep reading anywhere.",
+  message = "Sign in to keep your place.",
   returnTo = "/",
   primaryLabel = "Sign In",
   secondaryLabel = "Create Account",
@@ -155,7 +155,7 @@ const LoginPrompt = memo(function LoginPrompt({
           </div>
 
           <p className="mt-4 text-center text-xs uppercase tracking-[0.18em] text-black/40">
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            Terms and Privacy apply
           </p>
         </div>
       </div>

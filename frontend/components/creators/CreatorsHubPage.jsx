@@ -231,14 +231,14 @@ function buildCreatorWorksSummary(creator) {
     : [];
 
   if (leadSeries?.title) {
-    return `Known for ${leadSeries.title}`;
+    return leadSeries.title;
   }
 
   if (genres.length > 0) {
-    return `Works across ${genres.join(" / ")}`;
+    return genres.join(" / ");
   }
 
-  return "Live in the catalog";
+  return "In the catalog";
 }
 
 function CreatorDirectorySkeleton() {
@@ -991,14 +991,14 @@ export default function CreatorsHubPage({
                 onClick={jumpToCreatorList}
                 className={primaryButtonClass}
               >
-                View creators
+                Open creators
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                Browse stories
+                Open stories
               </button>
             </div>
           </SurfacePanel>
@@ -1018,7 +1018,7 @@ export default function CreatorsHubPage({
                 Search
               </p>
               <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                Search
+                Find creators
               </h2>
             </div>
             {query || activeGenre !== "All" || creditFilter !== "all" ? (
@@ -1040,7 +1040,7 @@ export default function CreatorsHubPage({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators, studios, or titles"
+              placeholder="Search creators or titles"
               className="border-[3px] border-black bg-white px-4 py-3.5 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] outline-none transition-all placeholder:text-black/40 focus:ring-4 focus:ring-black/10"
             />
 
@@ -1089,7 +1089,7 @@ export default function CreatorsHubPage({
                 Featured
               </p>
               <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                Featured
+                Highlights
               </h2>
           </div>
 
@@ -1386,7 +1386,7 @@ export default function CreatorsHubPage({
               appearance="light"
               icon="search"
               eyebrow="No match"
-              title="Try a broader search"
+              title="No match"
               description=""
               action={{
                 label: "Show all",

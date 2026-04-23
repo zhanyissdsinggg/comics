@@ -18,7 +18,7 @@ const GUIDE_CARDS = [
     icon: Compass,
     eyebrow: "Browse",
     title: "Featured",
-    description: "Go straight to the biggest shelf on the site.",
+    description: "",
     ctaLabel: "Open Featured",
     href: "/rankings",
     accent: "bg-[#ffe500]",
@@ -28,7 +28,7 @@ const GUIDE_CARDS = [
     icon: BookOpenText,
     eyebrow: "Format",
     title: "Comics",
-    description: "Pick up illustrated stories with a strong visual lead.",
+    description: "",
     ctaLabel: "Browse Comics",
     href: "/comics",
     accent: "bg-[#00e5ff]",
@@ -38,7 +38,7 @@ const GUIDE_CARDS = [
     icon: BookOpen,
     eyebrow: "Format",
     title: "Novels",
-    description: "Open serialized fiction built for long reading sessions.",
+    description: "",
     ctaLabel: "Browse Novels",
     href: "/novels",
     accent: "bg-[#ff8a00]",
@@ -48,7 +48,7 @@ const GUIDE_CARDS = [
     icon: Users,
     eyebrow: "Credits",
     title: "Creators",
-    description: "Browse the people and studios behind the stories.",
+    description: "",
     ctaLabel: "Open creators",
     href: "/creators",
     accent: "bg-[#ff69b4]",
@@ -391,7 +391,7 @@ function LeaderboardSection({ items, onItemClick }) {
               Top 10 chart
             </h2>
             <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/70">
-              A fast-moving shelf of the titles readers keep opening first.
+              The week&apos;s fastest movers.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 border-[3px] border-black bg-[#ffe500] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
@@ -458,7 +458,7 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
               Browse
             </p>
             <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-white">
-              Pick your vibe
+              Browse genres
             </h2>
           </div>
           <Button
@@ -547,7 +547,7 @@ export default function HomeContentSections({
           <HomeShelfSection
             eyebrow="Trending now"
             title="Trending now"
-            description="The titles readers are landing on first right now."
+            description=""
             ctaLabel="View all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
@@ -566,7 +566,7 @@ export default function HomeContentSections({
             <HomeShelfSection
               eyebrow="Fresh drops"
               title="Comics"
-              description="Poster-led stories built for quick entry and bingeable reading."
+              description=""
               items={comicSpotlightItems}
               actionLabel="Open comic"
               sectionTone="comics"
@@ -579,7 +579,7 @@ export default function HomeContentSections({
             <HomeShelfSection
               eyebrow="Long reads"
               title="Novels"
-              description="Serial fiction for readers who want longer arcs and a slower burn."
+              description=""
               items={novelSpotlightItems}
               actionLabel="Open novel"
               sectionTone="novels"
@@ -593,7 +593,7 @@ export default function HomeContentSections({
             <HomeShelfSection
               eyebrow="Fresh starts"
               title="First picks"
-              description="Good entry points when you want a chapter-one start."
+              description=""
               items={startHereItems}
               actionLabel="Read Chapter 1"
               sectionTone="start"
@@ -607,15 +607,11 @@ export default function HomeContentSections({
         <div className="mx-auto max-w-[1320px] px-4 md:px-8">
           <div className="mb-8 max-w-[36rem]">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-white/60">
-              Guide
+              Browse
             </p>
             <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
-              Find your lane fast
+              Go by shelf
             </h2>
-            <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
-              Jump into the shelf, format, or credit lane that matches how you
-              like to browse.
-            </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -640,11 +636,7 @@ export default function HomeContentSections({
               </div>
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
-                  Need a faster start?
-                </p>
-                <p className="mt-2 max-w-[34rem] text-sm font-semibold leading-6 text-white/70">
-                  Open the search page when you already know the mood, genre, or
-                  creator you want.
+                  Know what you want?
                 </p>
               </div>
             </div>
@@ -653,7 +645,7 @@ export default function HomeContentSections({
               onClick={() => onGuideClick?.("/search")}
               className="mt-5 inline-flex items-center gap-2 border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(255,255,255,0.18)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:mt-0"
             >
-              Open search
+              Search
               <ArrowRight className="size-4" />
             </button>
           </div>
@@ -676,15 +668,12 @@ export default function HomeContentSections({
               <h2 className="mt-5 text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
                 Read.
                 <br />
-                Follow.
+                Save.
                 <br />
                 <span className="inline-block rotate-1 border-[4px] border-black bg-[#ff007a] px-2 text-white">
-                  Obsess.
+                  Repeat.
                 </span>
               </h2>
-              <p className="mt-5 max-w-[40rem] text-sm font-semibold leading-6 text-white/80">
-                Jump from featured shelves to creators and search without leaving the reading mood.
-              </p>
               <button
                 type="button"
                 onClick={() => onGuideClick?.("/creators")}
