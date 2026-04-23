@@ -16,7 +16,7 @@ const toneClasses = {
     muted:
       "border-[3px] border-black bg-[#fff6cf] text-slate-900 backdrop-blur-none dark:border-white/8 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
-      "border-[3px] border-black bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
+      "border-[3px] border-black bg-[#ff007a] text-white backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
       "border-[3px] border-black bg-[#fff1d6] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
@@ -33,11 +33,11 @@ const accentEdgeClasses = {
     blue: "bg-sky-300/55",
   },
   light: {
-    emerald: "bg-transparent",
-    cyan: "bg-transparent",
-    amber: "bg-transparent",
-    rose: "bg-transparent",
-    blue: "bg-transparent",
+    emerald: "bg-[#00ff88]",
+    cyan: "bg-[#00e5ff]",
+    amber: "bg-[#ffe500]",
+    rose: "bg-[#ff7db6]",
+    blue: "bg-[#ffe500]",
   },
 };
 
@@ -52,11 +52,13 @@ const accentWashClasses = {
     rose: "bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.12),transparent_34%)]",
   },
   light: {
-    blue: "bg-transparent",
-    emerald: "bg-transparent",
-    cyan: "bg-transparent",
-    amber: "bg-transparent",
-    rose: "bg-transparent",
+    blue: "bg-[radial-gradient(circle_at_top_right,rgba(255,229,0,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(0,229,255,0.16),transparent_28%)]",
+    emerald:
+      "bg-[radial-gradient(circle_at_top_right,rgba(0,255,136,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.16),transparent_28%)]",
+    cyan: "bg-[radial-gradient(circle_at_top_right,rgba(0,229,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.16),transparent_28%)]",
+    amber:
+      "bg-[radial-gradient(circle_at_top_right,rgba(255,229,0,0.24),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,0,122,0.12),transparent_28%)]",
+    rose: "bg-[radial-gradient(circle_at_top_right,rgba(255,0,122,0.18),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,229,0,0.16),transparent_28%)]",
   },
 };
 
@@ -73,7 +75,7 @@ export default function SurfacePanel({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[30px] border p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6",
+        "relative overflow-hidden border p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] ||
           toneClasses[resolvedAppearance].default,
         isLight ? "" : "backdrop-blur-[24px]",
@@ -83,7 +85,6 @@ export default function SurfacePanel({
       <div
         className={cn(
           "pointer-events-none absolute left-5 top-5 h-12 w-12 rounded-full blur-2xl sm:left-6 sm:top-6 sm:h-14 sm:w-14",
-          isLight && "hidden",
           accentEdgeClasses[resolvedAppearance]?.[accent] ||
             accentEdgeClasses[resolvedAppearance].blue,
         )}
@@ -99,16 +100,8 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,255,255,0)_18%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0)_18%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
             : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
-        )}
-      />
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-[2px] rounded-[26px]",
-          isLight
-            ? "shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
-            : "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
         )}
       />
       <div className="relative">{children}</div>

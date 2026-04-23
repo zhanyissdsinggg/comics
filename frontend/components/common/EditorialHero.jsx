@@ -41,7 +41,7 @@ export default function EditorialHero({
               className={cn(
                 "text-[11px] font-semibold uppercase tracking-[0.24em]",
                 isLight
-                  ? "text-black/55 dark:text-neutral-400"
+                  ? "text-white/78 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >
@@ -50,14 +50,14 @@ export default function EditorialHero({
           ) : null}
 
           <h1
-            className={cn(
-              "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
-              isLight
-                ? "text-black font-black uppercase tracking-[-0.05em] dark:text-white"
-                : "text-white font-black uppercase tracking-[-0.05em]",
-            )}
-          >
-            {title}
+              className={cn(
+                "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
+                isLight
+                  ? "text-white font-black uppercase tracking-[-0.05em] dark:text-white"
+                  : "text-white font-black uppercase tracking-[-0.05em]",
+              )}
+            >
+              {title}
           </h1>
 
           {description ? (
@@ -65,7 +65,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
                 isLight
-                  ? "text-black/68 dark:text-neutral-300"
+                  ? "text-white/88 dark:text-neutral-300"
                   : "text-neutral-200",
               )}
             >
@@ -78,7 +78,7 @@ export default function EditorialHero({
               className={cn(
                 "mt-2.5 max-w-xl text-sm leading-6",
                 isLight
-                  ? "text-black/58 dark:text-neutral-400"
+                  ? "text-white/72 dark:text-neutral-400"
                   : "text-neutral-400",
               )}
             >
@@ -100,6 +100,7 @@ export default function EditorialHero({
                   title={stat.hint || ""}
                   className={cn(
                     "min-w-[10rem] rounded-[22px] border px-4 py-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]",
+                    "rounded-none",
                     statClass,
                   )}
                 >

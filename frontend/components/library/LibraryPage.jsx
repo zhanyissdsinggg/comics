@@ -11,6 +11,11 @@ import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
+import {
+  StorefrontDesk,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
@@ -839,10 +844,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
       },
     ];
   }, [openAuthPrompt, router]);
-  const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
-  const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
+  const primaryButtonClass = storefrontPrimaryButtonClass;
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
@@ -963,27 +966,13 @@ export default function LibraryPage({ initialSignedIn = false }) {
             }
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Shelf
-              </p>
-              <div>
-                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                  {libraryDeskTitle}
-                </h2>
-                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  {libraryDeskCopy}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
+          <StorefrontDesk
+            eyebrow="Shelf"
+            title={libraryDeskTitle}
+            description={libraryDeskCopy}
+            className="bg-[#ffe500]"
+            actions={
+              <>
               {resumeSpotlightReadHref ? (
                 <button
                   type="button"
@@ -1037,8 +1026,9 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     : "Browse more"
                   : "Sign in"}
               </button>
-            </div>
-          </SurfacePanel>
+              </>
+            }
+          />
         </section>
 
         {commerceNotice ? (

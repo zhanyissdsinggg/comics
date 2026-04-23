@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+
 export default function NotificationList({
   notifications,
   onMarkRead,
@@ -52,7 +57,7 @@ export default function NotificationList({
 
   if (!notifications) {
     return (
-      <section className="rounded-[30px] border-[3px] border-black bg-white p-6 text-black/68 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+      <section className="border-[3px] border-black bg-white p-6 text-black/68 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
         <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
           Inbox
         </p>
@@ -65,7 +70,7 @@ export default function NotificationList({
 
   if (notifications.length === 0) {
     return (
-      <section className="rounded-[30px] border-[3px] border-black bg-[#ffe500] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+      <section className="border-[3px] border-black bg-[#ffe500] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
         <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/60">
           Inbox
         </p>
@@ -85,7 +90,7 @@ export default function NotificationList({
         <div
           key={item.id}
           className={[
-            "rounded-[30px] border-[3px] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
+            "border-[3px] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
             item.read
               ? "border-black bg-white"
               : "border-black bg-[#fff6cf]",
@@ -120,7 +125,7 @@ export default function NotificationList({
               <button
                 type="button"
                 onClick={() => onMarkRead(item.id)}
-                className="border-[3px] border-black bg-white px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-50"
+                className={`${storefrontSecondaryButtonClass} h-10 px-3 text-[11px] tracking-[0.08em] disabled:opacity-50`}
                 disabled={
                   item.read || workingId === item.id || workingId === "__all__"
                 }
@@ -137,7 +142,7 @@ export default function NotificationList({
                 <button
                   type="button"
                   onClick={() => onNavigate?.(item)}
-                  className="border-[3px] border-black bg-[#00e5ff] px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                  className={`${storefrontPrimaryButtonClass} h-10 bg-[#00e5ff] px-3 text-[11px] tracking-[0.08em] text-black hover:bg-[#00d2ea]`}
                 >
                   {getCtaLabel(item)}
                 </button>

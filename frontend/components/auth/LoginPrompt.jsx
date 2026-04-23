@@ -2,6 +2,10 @@
 
 import { memo, useEffect, useState } from "react";
 import { X, LogIn, Sparkles, Gift, BookOpen } from "lucide-react";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
@@ -63,9 +67,6 @@ const LoginPrompt = memo(function LoginPrompt({
     return null;
   }
 
-  const secondaryButtonClass =
-    "w-full min-h-[52px] rounded-full border-[3px] border-black bg-white px-6 py-3 text-base font-semibold uppercase tracking-[0.14em] text-black transition duration-200 hover:-translate-y-0.5 hover:bg-[#fff6cf] active:translate-y-0 active:scale-[0.99]";
-
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
@@ -76,15 +77,11 @@ const LoginPrompt = memo(function LoginPrompt({
     >
       <div
         onClick={handleContentClick}
-        className={`relative w-full overflow-hidden border-[3px] border-black bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)] transition-all duration-300 sm:max-w-md sm:rounded-[32px] ${
+        className={`relative w-full overflow-hidden border-[3px] border-black bg-white shadow-[12px_12px_0_0_rgba(0,0,0,1)] transition-all duration-300 sm:max-w-md ${
           isAnimating
             ? "translate-y-0 opacity-100 scale-100"
             : "translate-y-full sm:translate-y-0 opacity-0 sm:scale-95"
         }`}
-        style={{
-          borderTopLeftRadius: "1.5rem",
-          borderTopRightRadius: "1.5rem",
-        }}
       >
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_30%)]" />
         <div className="pointer-events-none absolute -left-10 top-4 h-24 w-24 rounded-full bg-[#ffe500]/50 blur-3xl" />
@@ -96,7 +93,7 @@ const LoginPrompt = memo(function LoginPrompt({
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-[3px] border-black bg-white p-2 text-black/55 transition hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black active:translate-y-0 active:scale-95"
+          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center border-[3px] border-black bg-white p-2 text-black/55 transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black hover:shadow-none active:translate-y-0 active:scale-95"
           aria-label="Close sign-in prompt"
         >
           <X size={20} />
@@ -148,14 +145,14 @@ const LoginPrompt = memo(function LoginPrompt({
             <button
               type="button"
               onClick={handleLogin}
-              className="w-full min-h-[52px] rounded-full border-[3px] border-black bg-black px-6 py-3 text-base font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#ff007a] active:translate-y-0 active:scale-[0.99]"
+              className={`w-full min-h-[52px] text-base ${storefrontPrimaryButtonClass}`}
             >
               {primaryLabel}
             </button>
             <button
               type="button"
               onClick={handleSignup}
-              className={secondaryButtonClass}
+              className={`w-full min-h-[52px] text-base ${storefrontSecondaryButtonClass}`}
             >
               {secondaryLabel}
             </button>

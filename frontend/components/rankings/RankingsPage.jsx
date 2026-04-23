@@ -216,6 +216,40 @@ function isModifiedEvent(event) {
   );
 }
 
+function RankingsSectionHeader({
+  eyebrow,
+  title,
+  description = "",
+  meta = "",
+  actions = null,
+}) {
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="max-w-[42rem]">
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+          {eyebrow}
+        </p>
+        <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-black/68">
+            {description}
+          </p>
+        ) : null}
+      </div>
+      <div className="flex flex-wrap items-center gap-2.5">
+        {meta ? (
+          <span className="border-[3px] border-black bg-white px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            {meta}
+          </span>
+        ) : null}
+        {actions}
+      </div>
+    </div>
+  );
+}
+
 export default function RankingsPage({
   initialSearchParams = {},
   initialSeries = [],
@@ -350,27 +384,46 @@ export default function RankingsPage({
           />
 
           <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            tone="default"
+            accent="amber"
+            appearance="dark"
+            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                View
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
+                Ranking desk
               </p>
               <div>
-                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
+                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                   {activeView.label}
                 </h2>
-                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  {activeView.description}
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+                  Use this shelf when you want a fast editorial read lane instead of a broad search.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="border-[3px] border-black bg-[#ffe500] px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                  Shelf
+                </p>
+                <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
+                  {activeView.label}
+                </p>
+              </div>
+              <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                  Titles
+                </p>
+                <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
+                  {loading ? "..." : curatedSeries.length.toLocaleString()}
                 </p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/62">
                 Next
               </p>
               <div className="flex flex-col gap-2.5">
@@ -406,19 +459,11 @@ export default function RankingsPage({
           appearance="light"
           className="space-y-4 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Views
-              </p>
-              <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                Views
-              </h2>
-            </div>
-            <p className="max-w-md text-sm font-medium leading-7 text-black/68">
-              Featured, first picks, completed, comics, novels.
-            </p>
-          </div>
+          <RankingsSectionHeader
+            eyebrow="Views"
+            title="Switch the shelf"
+            description="Move between editorial views without leaving the ranked browsing flow."
+          />
           <div className="flex flex-wrap gap-2.5">
             {VIEWS.map((item) => (
               <button
@@ -510,7 +555,7 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full border-[3px] border-black bg-white p-5 text-left shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
+                  className="group w-full border-[3px] border-black bg-[#ff007a] p-5 text-left text-white shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                   aria-label={`Open ${leadEntry.title}`}
                 >
                   <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -525,13 +570,13 @@ export default function RankingsPage({
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/72">
                         Lead pick
                       </p>
-                      <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-black sm:text-4xl">
+                      <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-black/68">
+                      <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/84">
                         {leadEntry.description || "A strong place to begin."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
@@ -544,7 +589,7 @@ export default function RankingsPage({
                           </span>
                         ))}
                       </div>
-                      <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-black/55">
+                      <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-white/72">
                         Open story
                       </p>
                     </div>
@@ -606,13 +651,15 @@ export default function RankingsPage({
 
               {boardEntries.length > 0 ? (
                 <SurfacePanel
-                  className="space-y-5"
+                  className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                   appearance="light"
                   accent="blue"
                 >
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                    More titles
-                  </p>
+                  <RankingsSectionHeader
+                    eyebrow="More titles"
+                    title="Keep browsing"
+                    description="The next ranked titles in this view."
+                  />
 
                   <div className="space-y-3">
                     {boardEntries.map((series) => (
@@ -679,7 +726,7 @@ export default function RankingsPage({
               />
 
               <SurfacePanel
-                className="space-y-4"
+                className="space-y-4 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                 appearance="light"
                 accent="blue"
               >

@@ -1,6 +1,12 @@
 import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import {
+  StorefrontDesk,
+  StorefrontSectionHeading,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
@@ -28,10 +34,6 @@ const CONTACT_LINKS = [
 ];
 
 export default function AboutPage() {
-  const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
-  const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:shadow-none";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -46,57 +48,41 @@ export default function AboutPage() {
             description="Comics and serialized fiction, kept clear."
             actions={
               <>
-                <Link href="/support" className={primaryButtonClass}>
+                <Link href="/support" className={storefrontPrimaryButtonClass}>
                   Support
                 </Link>
-                <Link href="/faq" className={secondaryButtonClass}>
+                <Link href="/faq" className={storefrontSecondaryButtonClass}>
                   FAQ
                 </Link>
               </>
             }
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
-                Contact
-              </p>
-              <div>
-                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
-                  Support and legal.
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <Link href="/support" className={primaryButtonClass}>
-                Support
-              </Link>
-              <a
-                href={`mailto:${siteConfig.legalEmail}`}
-                className={secondaryButtonClass}
-              >
-                Email legal
-              </a>
-            </div>
-          </SurfacePanel>
+          <StorefrontDesk
+            eyebrow="Contact"
+            title="Support and legal."
+            actions={
+              <>
+                <Link href="/support" className={storefrontPrimaryButtonClass}>
+                  Support
+                </Link>
+                <a
+                  href={`mailto:${siteConfig.legalEmail}`}
+                  className={storefrontSecondaryButtonClass}
+                >
+                  Email legal
+                </a>
+              </>
+            }
+          />
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
-                Principles
-              </p>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                Readers first.
-              </h2>
-            </div>
+            <StorefrontSectionHeading
+              eyebrow="Principles"
+              title="Readers first."
+            />
             <p className="text-sm leading-7 text-black/68">
               {siteConfig.companyName} is for readers who want to open a chapter
               and stay in the story. Discovery, purchases, and account flows
@@ -105,14 +91,10 @@ export default function AboutPage() {
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
-                Details
-              </p>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                Contact details.
-              </h2>
-            </div>
+            <StorefrontSectionHeading
+              eyebrow="Details"
+              title="Contact details."
+            />
             <div className="space-y-3 text-sm text-black/68">
               <p>
                 <span className="font-semibold text-black">Support:</span>{" "}
@@ -139,7 +121,7 @@ export default function AboutPage() {
                   <a
                     key={item.label}
                     href={item.href}
-                    className={secondaryButtonClass}
+                    className={storefrontSecondaryButtonClass}
                   >
                     {item.label}
                   </a>
@@ -147,7 +129,7 @@ export default function AboutPage() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={secondaryButtonClass}
+                    className={storefrontSecondaryButtonClass}
                   >
                     {item.label}
                   </Link>

@@ -7,6 +7,13 @@ import EditorialHero from "../common/EditorialHero";
 import NetworkFallback from "../common/NetworkFallback";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import {
+  StorefrontDesk,
+  StorefrontInfoCard,
+  StorefrontSectionHeading,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { apiPost } from "../../lib/apiClient";
 import {
   consumeCommerceSuccessForPath,
@@ -350,10 +357,7 @@ export default function SupportPage() {
     "text-[11px] font-black uppercase tracking-[0.28em] text-black/55";
   const fieldClass =
     "mt-2 w-full border-[3px] border-black bg-white px-4 py-3.5 text-sm font-semibold text-black outline-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all placeholder:text-black/40 focus:ring-4 focus:ring-black/10";
-  const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
-  const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60";
+  const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const supportHeroStats = [
     {
       label: "Topics",
@@ -380,21 +384,7 @@ export default function SupportPage() {
             accent="blue"
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="space-y-4 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
-          >
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Topics
-              </p>
-              <h2 className="mt-2 text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                Choose a topic.
-              </h2>
-            </div>
-
+          <StorefrontDesk eyebrow="Topics" title="Choose a topic." className="bg-[#ffe500]">
             <div className="grid gap-2.5 sm:grid-cols-2">
               {quickIssueCards.map((item) => {
                 const isActive = activeTopic === item.topic;
@@ -434,7 +424,7 @@ export default function SupportPage() {
                 );
               })}
             </div>
-          </SurfacePanel>
+          </StorefrontDesk>
         </section>
 
         {commerceNotice ? (
@@ -475,14 +465,14 @@ export default function SupportPage() {
                   <button
                     type="button"
                     onClick={() => router.push("/orders")}
-                    className={secondaryButtonClass}
+                    className={storefrontSecondaryButtonClass}
                   >
                     Orders
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/faq")}
-                    className={secondaryButtonClass}
+                    className={storefrontSecondaryButtonClass}
                   >
                     FAQ
                   </button>
@@ -490,14 +480,7 @@ export default function SupportPage() {
               </div>
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                    Form
-                  </p>
-                  <h2 className="text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    Send a request.
-                  </h2>
-                </div>
+                <StorefrontSectionHeading eyebrow="Form" title="Send a request." />
 
                 {feedback.text ? (
                   feedback.type === "error" && feedback.mode === "network" ? (
@@ -505,7 +488,7 @@ export default function SupportPage() {
                       compact
                       showIllustration={false}
                       className="px-0 py-0"
-                      cardClassName="max-w-none rounded-[24px] px-4 py-4 sm:px-5 sm:py-5"
+                      cardClassName="max-w-none rounded-none border-[3px] border-black px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:px-5 sm:py-5"
                       title="Support hit a network snag."
                       description={`${feedback.text} Try again.`}
                       onRetry={retrySupportRequest}
@@ -632,7 +615,7 @@ export default function SupportPage() {
                           window.dispatchEvent(new CustomEvent("auth:open"));
                         }
                       }}
-                      className={secondaryButtonClass}
+                      className={storefrontSecondaryButtonClass}
                     >
                       Sign in instead
                     </button>
@@ -643,53 +626,43 @@ export default function SupportPage() {
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Tips
-              </p>
-              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                Keep it simple.
-              </h2>
-            </div>
+            <StorefrontSectionHeading eyebrow="Tips" title="Keep it simple." />
 
             <div className="space-y-3">
               {[
                 "Pick the closest issue type.",
                 "Add any page, title, episode, or order ID.",
               ].map((item) => (
-                <div
+                <StorefrontInfoCard
                   key={item}
-                  className="border-[3px] border-black bg-[#f5f1ea] px-4 py-3 text-sm font-medium leading-6 text-black/68 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  title={item}
+                  className="bg-[#f5f1ea] px-4 py-3"
                 >
-                  {item}
-                </div>
+                </StorefrontInfoCard>
               ))}
             </div>
 
-            <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Contact
-              </p>
-              <p className="mt-2 text-sm font-medium leading-6 text-black/68">
+            <StorefrontInfoCard title="Contact" eyebrow="Desk" className="bg-[#fff6c7]">
+              <p className="mt-3 text-sm font-medium leading-6 text-black/68">
                 Reply email:{" "}
                 <span className="font-black text-black">
                   {siteConfig.supportEmail}
                 </span>
               </p>
-            </div>
+            </StorefrontInfoCard>
 
             <div className="flex flex-col gap-2.5">
               <button
                 type="button"
                 onClick={() => router.push("/faq")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 FAQ
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/orders")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Orders
               </button>

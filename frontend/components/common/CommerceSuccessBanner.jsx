@@ -1,6 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontInfoCardClass,
+} from "./StorefrontPagePrimitives";
 
 export default function CommerceSuccessBanner({
   notice,
@@ -15,7 +20,7 @@ export default function CommerceSuccessBanner({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[30px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] ${className}`}
+      className={`relative overflow-hidden border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] ${className}`}
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -34,7 +39,7 @@ export default function CommerceSuccessBanner({
               {notice.metaItems.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border-[3px] border-black bg-[#fff6cf] px-3 py-1"
+                  className={`${storefrontInfoCardClass} px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] shadow-[4px_4px_0_0_rgba(0,0,0,1)]`}
                 >
                   {item}
                 </span>
@@ -48,7 +53,7 @@ export default function CommerceSuccessBanner({
             <button
               type="button"
               onClick={() => router.push(notice.primaryAction.href)}
-              className="rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
+              className={storefrontPrimaryButtonClass}
             >
               {notice.primaryAction.label}
             </button>
@@ -57,7 +62,7 @@ export default function CommerceSuccessBanner({
             <button
               type="button"
               onClick={() => router.push(notice.secondaryAction.href)}
-              className="rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#dffcff]"
+              className={storefrontSecondaryButtonClass}
             >
               {notice.secondaryAction.label}
             </button>
@@ -66,7 +71,7 @@ export default function CommerceSuccessBanner({
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black/68 transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
+              className={storefrontSecondaryButtonClass}
             >
               Dismiss
             </button>

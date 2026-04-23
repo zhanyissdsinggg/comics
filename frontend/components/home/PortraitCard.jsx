@@ -97,7 +97,6 @@ function PortraitCard({
     <div
       className={cn(
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
-        isCompact ? "rounded-[24px]" : "rounded-[30px]",
         "border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:bg-[#fffdf7] group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       )}
     >
@@ -106,7 +105,6 @@ function PortraitCard({
           className={cn(
             "relative aspect-[3/4] overflow-hidden",
             "bg-[#f5f1ea]",
-            isCompact ? "rounded-[20px]" : "rounded-[24px]",
           )}
         >
           <Cover
@@ -129,7 +127,6 @@ function PortraitCard({
           <div
             className={cn(
               "absolute inset-[1px]",
-              isCompact ? "rounded-[19px]" : "rounded-[23px]",
               "border border-white/38",
             )}
           />
@@ -163,12 +160,12 @@ function PortraitCard({
               {metaLine}
             </p>
           ) : null}
-          <p
-            className={cn(
-              "line-clamp-2 font-semibold tracking-[-0.04em] transition-colors",
-              isCompact
-                ? "text-[1.08rem] leading-5"
-                : "text-[1.12rem] leading-6",
+            <p
+              className={cn(
+                "line-clamp-2 font-black uppercase tracking-[-0.04em] transition-colors",
+                isCompact
+                  ? "text-[1.08rem] leading-5"
+                  : "text-[1.12rem] leading-6",
               "text-black group-hover:text-black",
             )}
           >

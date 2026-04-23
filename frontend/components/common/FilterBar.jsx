@@ -98,12 +98,12 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "rounded-[18px] border-[3px] border-black bg-white px-3 py-2.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
-      : "rounded-[22px] border-[3px] border-black bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+      ? "border-[3px] border-black bg-white px-3 py-2.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+      : "border-[3px] border-black bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
     : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
   const labelClass = isLight ? "text-black/55" : "text-neutral-400";
   const subtleButtonClass = isLight
-    ? "border-[3px] border-black bg-white text-black/60 hover:-translate-y-0.5 hover:bg-[#fff6cf] hover:text-black"
+    ? "border-[3px] border-black bg-white text-black/60 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:text-black hover:shadow-none"
     : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
@@ -131,7 +131,7 @@ export default function FilterBar({
               {activeFilterCount > 0 ? (
                 <span
                   className={cn(
-                    "rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                    "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
                       ? "border-[3px] border-black bg-[#fff6cf] text-black/55"
                       : "border-white/10 bg-white/[0.04] text-neutral-300",
@@ -144,7 +144,7 @@ export default function FilterBar({
           ) : activeFilterCount > 0 ? (
             <span
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
+                "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
                   ? "border-[3px] border-black bg-[#fff6cf] text-black/45"
                   : "border-white/10 bg-white/[0.04] text-neutral-300",
@@ -160,13 +160,13 @@ export default function FilterBar({
             <button
               type="button"
               onClick={onReset}
-              className={`inline-flex items-center gap-2 rounded-full border ${
+              className={`inline-flex items-center gap-2 border ${
                 isQuiet
                   ? "px-3 py-1.5 text-[11px]"
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "border-[3px] border-black bg-white text-black hover:-translate-y-0.5 hover:bg-[#dffcff]"
+                  ? "border-[3px] border-black bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#dffcff] hover:shadow-none"
                   : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
               }`}
             >
@@ -246,7 +246,7 @@ export default function FilterBar({
                     aria-expanded={showGenrePicker}
                     aria-haspopup="dialog"
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                      "inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-semibold transition-colors",
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
@@ -277,7 +277,7 @@ export default function FilterBar({
                 {showGenrePicker ? (
                   <div
                     className={cn(
-                      "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] rounded-[18px] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
+                      "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
                       isLight
                         ? "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                         : "border-white/10 bg-black/90",
@@ -309,7 +309,7 @@ export default function FilterBar({
                           type="button"
                           onClick={() => setShowAllGenres(!showAllGenres)}
                           className={cn(
-                            "rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors",
+                            "border px-3 py-1.5 text-[11px] font-semibold transition-colors",
                             subtleButtonClass,
                           )}
                         >
@@ -329,7 +329,7 @@ export default function FilterBar({
                       type="button"
                       onClick={() => setShowAllGenres(!showAllGenres)}
                       className={cn(
-                        "rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors",
+                        "border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors",
                         subtleButtonClass,
                       )}
                     >

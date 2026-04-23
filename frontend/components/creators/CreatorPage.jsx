@@ -577,6 +577,23 @@ export default function CreatorPage({
       topGenres,
     ],
   );
+  const creatorDeskStats = [
+    {
+      label: "Profile",
+      value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
+      tone: "bg-[#ffe500]",
+    },
+    {
+      label: "Titles",
+      value: String(creatorItems.length || 0),
+      tone: "bg-white",
+    },
+    {
+      label: "Top genre",
+      value: topGenres[0] || "Mixed",
+      tone: "bg-[#00e5ff]",
+    },
+  ];
   const emptyCreatorPathways = useMemo(
     () => [
       {
@@ -752,20 +769,39 @@ export default function CreatorPage({
           />
 
           <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
+            tone="default"
+            accent="amber"
+            appearance="dark"
+            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Creator
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#ffe500]">
+                Creator desk
               </p>
               <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {creatorName}
                 </h2>
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+                  Open the lead title, pivot by genre, or jump back to the title that brought you here.
+                </p>
               </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+              {creatorDeskStats.map((item) => (
+                <div
+                  key={item.label}
+                  className={`${item.tone} border-[3px] border-black px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]`}
+                >
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -812,7 +848,7 @@ export default function CreatorPage({
         ) : null}
 
         {spotlightSeries ? (
-          <SurfacePanel appearance="light" accent="blue" className="space-y-6">
+          <SurfacePanel appearance="light" accent="cyan" className="space-y-6 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
               <div className={creatorCardClass}>
                 <div className="aspect-[3/4] w-full overflow-hidden">
@@ -889,15 +925,18 @@ export default function CreatorPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                 Works
               </p>
-              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
+              <h2 className="mt-2 font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-black sm:text-[2.8rem]">
                 By {creatorName}
               </h2>
+              <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-black/68">
+                Every live title currently tied to this public creator credit.
+              </p>
             </div>
             <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
               {formatTitleCountLabel(gridItems.length)} for {creatorName}

@@ -172,7 +172,7 @@ export default function SeriesHeader({
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,229,0,0.94)_0%,rgba(255,255,255,0.96)_44%,rgba(255,255,255,0.94)_100%)]" />
         <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.32),transparent)]" />
 
-        <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_300px] lg:gap-12 xl:p-10">
+        <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="border-[2px] border-black bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black">
@@ -185,11 +185,11 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
-            <h1 className="mt-5 max-w-4xl text-[2.8rem] font-black uppercase leading-[0.9] tracking-[-0.065em] text-black sm:text-[3.6rem] lg:text-[4.65rem]">
+            <h1 className="mt-5 max-w-4xl text-[2.8rem] font-black uppercase leading-[0.88] tracking-[-0.07em] text-black sm:text-[3.6rem] lg:text-[4.9rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold text-black/65">
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold uppercase tracking-[0.06em] text-black/65">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
@@ -227,8 +227,8 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-8 max-w-3xl">
-              <p className="text-[15px] font-medium leading-8 text-black/72 sm:text-base">
+            <div className="mt-8 max-w-3xl border-[3px] border-black bg-white px-5 py-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+              <p className="text-[15px] font-semibold leading-8 text-black/72 sm:text-base">
                 {summarizeSeriesDescription(
                   series.description,
                   "Open the first episode and see if it lands.",
@@ -287,18 +287,37 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Public credit
-              </p>
-              <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
-                {creatorPresentation.value}
-              </p>
-              <p className="mt-3 text-sm font-medium leading-6 text-black/68">
-                {creatorHref
-                  ? "Creator page"
-                  : creatorPresentation.detail}
-              </p>
+            <div className="space-y-3 border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                  Public credit
+                </p>
+                <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
+                  {creatorPresentation.value}
+                </p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
+                  {creatorHref ? "Open the creator profile from this title." : creatorPresentation.detail}
+                </p>
+              </div>
+
+              <div className="grid gap-3 border-t-[3px] border-black pt-3">
+                <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                    Read lane
+                  </p>
+                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
+                    {isCompleted ? "Full run ready" : "Follow the latest release"}
+                  </p>
+                </div>
+                <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/72">
+                    Latest
+                  </p>
+                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em]">
+                    {latestEpisodeValue}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -318,7 +337,7 @@ export default function SeriesHeader({
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/68">
+                      <p className="mt-2 text-sm font-semibold leading-6 text-black/68">
                         {item.detail}
                       </p>
                     </Link>
@@ -333,7 +352,7 @@ export default function SeriesHeader({
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm font-medium leading-6 text-black/68">
+                      <p className="mt-2 text-sm font-semibold leading-6 text-black/68">
                         {item.detail}
                       </p>
                     </div>

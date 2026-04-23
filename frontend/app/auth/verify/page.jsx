@@ -4,6 +4,11 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import EmailLinkActionShell from "../../../components/auth/EmailLinkActionShell";
+import {
+  StorefrontInfoCard,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../../components/common/StorefrontPagePrimitives";
 import { apiPost } from "../../../lib/apiClient";
 
 function StatusNotice({ tone = "neutral", title = "", message = "" }) {
@@ -19,7 +24,9 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div className={`rounded-[24px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}>
+    <div
+      className={`border-[3px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}
+    >
       {title ? (
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
           {title}
@@ -39,11 +46,7 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full rounded-[22px] border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:-translate-y-0.5 focus:bg-[#fffef7]";
-  const primaryButtonClass =
-    "w-full rounded-full border-[3px] border-black bg-black px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,229,255,1)] transition hover:-translate-y-0.5 hover:bg-[#00b7d1] disabled:cursor-not-allowed disabled:opacity-60";
-  const secondaryButtonClass =
-    "w-full rounded-full border-[3px] border-black bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#dffcff] disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fffef7] focus:shadow-none";
 
   useEffect(() => {
     const queryToken = String(searchParams.get("token") || "").trim();
@@ -173,14 +176,16 @@ function VerifyPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-[22px] border-[3px] border-black bg-[#dffcff] px-4 py-3 text-sm font-medium text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-              Verification link loaded from your email. No code field required.
-            </div>
+            <StorefrontInfoCard
+              title="Verification link loaded"
+              description="Verification link loaded from your email. No code field required."
+              className="bg-[#dffcff]"
+            />
             <button
               type="button"
               disabled={submitting}
               onClick={handleVerify}
-              className={primaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00b7d1]`}
             >
               {submitting ? "Verifying..." : "Verify again"}
             </button>
@@ -191,7 +196,7 @@ function VerifyPageContent() {
                 setToken("");
                 setStatus(null);
               }}
-              className={secondaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
             >
               Send me a new verification email
             </button>
@@ -210,7 +215,7 @@ function VerifyPageContent() {
               type="button"
               disabled={submitting}
               onClick={handleSendVerifyLink}
-              className={primaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00b7d1]`}
             >
               {submitting ? "Sending..." : "Send verification email"}
             </button>
@@ -223,23 +228,25 @@ function VerifyPageContent() {
           message={status?.message}
         />
 
-        <div className="rounded-[24px] border-[3px] border-black bg-[#fff6cf] px-4 py-4 text-sm leading-6 text-black/70 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-          Already confirmed? Go to{" "}
-          <Link
-            href="/account"
-            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
-          >
-            your account
-          </Link>
-          . Need help with a missing email? Contact{" "}
-          <Link
-            href="/support"
-            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
-          >
-            us
-          </Link>
-          .
-        </div>
+        <StorefrontInfoCard title="Already confirmed?" className="bg-[#fff6cf]">
+          <p className="mt-3 text-sm leading-6 text-black/70">
+            Go to{" "}
+            <Link
+              href="/account"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
+            >
+              your account
+            </Link>
+            . Need help with a missing email? Contact{" "}
+            <Link
+              href="/support"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
+            >
+              us
+            </Link>
+            .
+          </p>
+        </StorefrontInfoCard>
       </div>
     </EmailLinkActionShell>
   );

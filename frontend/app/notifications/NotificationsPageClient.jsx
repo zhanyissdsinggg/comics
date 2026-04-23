@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import SiteHeader from "../../components/layout/SiteHeader";
 import EditorialHero from "../../components/common/EditorialHero";
 import SurfacePanel from "../../components/common/SurfacePanel";
+import {
+  StorefrontDesk,
+  StorefrontSectionHeading,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
 import NotificationList from "../../components/notifications/NotificationList";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -196,10 +202,6 @@ export default function NotificationsPage() {
     ];
   }, [isAdultMode, loading, notifications, unreadCount]);
 
-  const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-50";
-  const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:cursor-not-allowed disabled:opacity-50";
   const inboxDeskTitle = loading
     ? "Inbox is loading."
     : unreadCount > 0
@@ -230,7 +232,7 @@ export default function NotificationsPage() {
                 <button
                   type="button"
                   onClick={() => router.push("/library")}
-                  className={primaryButtonClass}
+                  className={`${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00d2ea]`}
                 >
                   Library
                 </button>
@@ -240,7 +242,7 @@ export default function NotificationsPage() {
                   disabled={
                     loading || unreadCount === 0 || workingId === "__all__"
                   }
-                  className={secondaryButtonClass}
+                  className={`${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {workingId === "__all__" ? "Saving..." : "Mark all read"}
                 </button>
@@ -248,43 +250,29 @@ export default function NotificationsPage() {
             }
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Inbox desk
-              </p>
-              <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
-                  {inboxDeskTitle}
-                </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-black/70">
-                  {inboxDeskCopy}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
+          <StorefrontDesk
+            eyebrow="Inbox desk"
+            title={inboxDeskTitle}
+            description={inboxDeskCopy}
+            actions={
+              <>
               <button
                 type="button"
                 onClick={() => router.push("/library")}
-                className={primaryButtonClass}
+                className={`${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00d2ea]`}
               >
                 Library
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Browse titles
               </button>
-            </div>
-          </SurfacePanel>
+              </>
+            }
+          />
         </section>
 
         {loading ? (
@@ -307,7 +295,7 @@ export default function NotificationsPage() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[30px] border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                  className="border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                   aria-hidden="true"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -316,7 +304,7 @@ export default function NotificationsPage() {
                       <div className="h-4 w-full animate-pulse rounded-full bg-slate-100" />
                       <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-100" />
                     </div>
-                    <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200" />
+                    <div className="h-9 w-24 animate-pulse bg-slate-200" />
                   </div>
                 </div>
               ))}
@@ -342,7 +330,7 @@ export default function NotificationsPage() {
               <button
                 type="button"
                 onClick={loadInbox}
-                className="border-[3px] border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-red-600 shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className={`${storefrontSecondaryButtonClass} text-xs text-red-600`}
               >
                 Try again
               </button>
@@ -351,14 +339,7 @@ export default function NotificationsPage() {
         ) : (
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                  Inbox
-                </p>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                  Latest
-                </h2>
-              </div>
+              <StorefrontSectionHeading eyebrow="Inbox" title="Latest" />
               <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
                 {notifications.length} updates loaded
               </p>

@@ -211,6 +211,43 @@ function getSearchSeriesBadge(series) {
   return "";
 }
 
+function SearchSectionHeader({
+  eyebrow,
+  title,
+  description = "",
+  meta = "",
+  actions = null,
+}) {
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="max-w-[42rem]">
+        {eyebrow ? (
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-black/68">
+            {description}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        {meta ? (
+          <span className="border-[3px] border-black bg-white px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            {meta}
+          </span>
+        ) : null}
+        {actions}
+      </div>
+    </div>
+  );
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1079,12 +1116,29 @@ export default function SearchPage() {
     loadingResultLabel,
     updateParams,
   ]);
+  const heroStatCards = [
+    {
+      label: query ? "Matches" : "Titles",
+      value: query ? total.toLocaleString() : catalog.length.toLocaleString(),
+      tone: "bg-[#ffe500]",
+    },
+    {
+      label: "Hot terms",
+      value: hotKeywords.length.toLocaleString(),
+      tone: "bg-white",
+    },
+    {
+      label: "Page",
+      value: String(page),
+      tone: "bg-[#00e5ff]",
+    },
+  ];
   return (
     <main className="gush-page-shell gush-home-shell overflow-hidden">
       <div className="gush-page-ambient h-[clamp(20rem,40vw,32rem)]" />
       <SiteHeader variant="home" />
       <div className="gush-page-main gush-section-stack">
-        <section className="grid gap-5">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
           <SurfacePanel
             className="space-y-6 border-[3px] border-black bg-[#00e5ff] px-5 py-5 shadow-[10px_10px_0_0_rgba(0,0,0,1)] sm:px-6 sm:py-6"
             tone="highlight"
@@ -1150,107 +1204,102 @@ export default function SearchPage() {
             </div>
           </SurfacePanel>
 
-          <div className="hidden">
-            <SurfacePanel
-              className="h-full space-y-5 rounded-[36px] p-5 sm:p-6"
-              tone="muted"
-              accent="blue"
-              appearance="light"
-            >
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
-                Search view
+          <SurfacePanel
+            className="h-full space-y-5 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)] sm:p-6"
+            tone="default"
+            accent="amber"
+            appearance="dark"
+          >
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
+                Search desk
               </p>
+              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
+                {query ? "Lead match" : "Start fast"}
+              </h2>
+              <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+                {query
+                  ? "Refine the current query, jump into the lead title, or pivot into a stronger shelf."
+                  : "Use hot terms, filters, and the lead pick to get into reading without dead clicks."}
+              </p>
+            </div>
 
-              {leadSearchResult ? (
-                <div className="rounded-[32px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-                  <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded-[20px] border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-                      <Cover
-                        tone={leadSearchResult.coverTone}
-                        coverUrl={leadSearchResult.coverUrl}
-                        label={leadSearchResult.title}
-                        eyebrow=""
-                        badge={getSearchSeriesBadge(leadSearchResult)}
-                        genres={leadSearchResult.genres}
-                        seriesType={leadSearchResult.type}
-                        className="aspect-[3/4] w-full"
-                        sizes="88px"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h2 className="text-[1.55rem] font-black uppercase tracking-[0.03em] text-black">
-                        {leadSearchResult.title}
-                      </h2>
-                      <p className="mt-2 text-sm text-black/55">
-                        {formatSearchSeriesMeta(leadSearchResult)}
-                      </p>
-                      <p className="mt-3 line-clamp-3 text-sm leading-7 text-black/68">
-                        {summarizeSearchDescription(leadSearchResult)}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleSeriesClick(
-                            leadSearchResult.id,
-                            "SEARCH_MASTHEAD",
-                            query
-                              ? "search_masthead_result"
-                              : "search_masthead_featured",
-                          )
-                        }
-                        className="mt-4 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.06em] text-[#ff007a] transition-colors hover:text-black"
-                      >
-                        Open title
-                        <ArrowRight className="size-4" />
-                      </button>
-                    </div>
+            {leadSearchResult ? (
+              <button
+                type="button"
+                onClick={() =>
+                  handleSeriesClick(
+                    leadSearchResult.id,
+                    "SEARCH_MASTHEAD",
+                    query
+                      ? "search_masthead_result"
+                      : "search_masthead_featured",
+                  )
+                }
+                className="group w-full border-[3px] border-black bg-white p-4 text-left text-black shadow-[6px_6px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >
+                <div className="grid gap-4 grid-cols-[88px_minmax(0,1fr)]">
+                  <div className="overflow-hidden border-[3px] border-black bg-[#f5f1ea]">
+                    <Cover
+                      tone={leadSearchResult.coverTone}
+                      coverUrl={leadSearchResult.coverUrl}
+                      label={leadSearchResult.title}
+                      eyebrow=""
+                      badge={getSearchSeriesBadge(leadSearchResult)}
+                      genres={leadSearchResult.genres}
+                      seriesType={leadSearchResult.type}
+                      className="aspect-[3/4] w-full"
+                      sizes="88px"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+                      {query ? "Closest read" : "Lead title"}
+                    </p>
+                    <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
+                      {leadSearchResult.title}
+                    </h3>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/58">
+                      {formatSearchSeriesMeta(leadSearchResult)}
+                    </p>
+                    <p className="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-black/70">
+                      {summarizeSearchDescription(leadSearchResult)}
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div className="rounded-[32px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-                <h2 className="text-[1.55rem] font-black uppercase tracking-[0.03em] text-black">
-                  {query ? "Closest result." : "Popular now."}
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-black/68">
-                  {query
-                    ? "Use filters."
-                    : mastheadLeadKeyword
-                        ? `"${mastheadLeadKeyword.label}"`
-                        : ""}
+              </button>
+            ) : (
+              <div className="border-[3px] border-black bg-white p-4 text-black shadow-[6px_6px_0_0_rgba(255,229,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+                  Live term
                 </p>
-                </div>
-              )}
-
-              <div className="grid gap-4 border-t-[3px] border-black pt-4 sm:grid-cols-3">
-                <div className="sm:border-l-[3px] sm:border-black sm:pl-4 first:sm:border-l-0 first:sm:pl-0">
-                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
-                    {query
-                      ? total.toLocaleString()
-                      : catalog.length.toLocaleString()}
-                  </p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
-                    {query ? "Matches" : "Titles"}
-                  </p>
-                </div>
-                <div className="sm:border-l-[3px] sm:border-black sm:pl-4">
-                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
-                    {hotKeywords.length.toLocaleString()}
-                  </p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
-                    Hot terms
-                  </p>
-                </div>
-                <div className="sm:border-l-[3px] sm:border-black sm:pl-4">
-                  <p className="text-lg font-black uppercase tracking-[0.03em] text-black">
-                    {page}
-                  </p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] text-black/45">
-                    Page
-                  </p>
-                </div>
+                <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
+                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Browse the shelf"}
+                </h3>
+                <p className="mt-3 text-sm font-semibold leading-6 text-black/70">
+                  {query
+                    ? "Use filters to widen the match."
+                    : "Open a hot term or jump into a curated shelf."}
+                </p>
               </div>
-            </SurfacePanel>
-          </div>
+            )}
+
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+              {heroStatCards.map((item) => (
+                <div
+                  key={item.label}
+                  className={`${item.tone} border-[3px] border-black px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]`}
+                >
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </SurfacePanel>
         </section>
 
         {!query &&
@@ -1297,44 +1346,41 @@ export default function SearchPage() {
 
         {shouldShowReco ? (
           <SurfacePanel
-            className="space-y-8 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            className="space-y-8 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
             appearance="light"
-            accent="blue"
+            accent="amber"
           >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                  Browse
-                </p>
-                <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                  {recoPanelTitle}
-                </h2>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setHotWindow("day")}
-                  className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
-                    hotWindow === "day"
-                      ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                      : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
-                  }`}
-                >
-                  Today
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setHotWindow("week")}
-                  className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
-                    hotWindow === "week"
-                      ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                      : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
-                  }`}
-                >
-                  This Week
-                </button>
-              </div>
-            </div>
+            <SearchSectionHeader
+              eyebrow="Browse next"
+              title={recoPanelTitle}
+              description="If the direct result set is thin, these shelves keep the search flow moving."
+              actions={
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHotWindow("day")}
+                    className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
+                      hotWindow === "day"
+                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                        : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none"
+                    }`}
+                  >
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHotWindow("week")}
+                    className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
+                      hotWindow === "week"
+                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                        : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none"
+                    }`}
+                  >
+                    This Week
+                  </button>
+                </div>
+              }
+            />
 
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
@@ -1371,65 +1417,59 @@ export default function SearchPage() {
               appearance="light"
               accent="blue"
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                    Results
-                  </p>
-                  <h2 className="mt-2 text-[2.25rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    {query ? `Results for "${query}"` : "Catalog"}
-                  </h2>
-                </div>
-                <p className="text-sm font-bold uppercase tracking-[0.06em] text-black/55">
-                  {total.toLocaleString()} match{total === 1 ? "" : "es"}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvancedFilters(true)}
-                  className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
-                >
-                  <SlidersHorizontal size={16} />
-                  <span>Filters</span>
-                  {activeFilterCount > 0 ? (
-                    <span className="border border-black bg-[#ff007a] px-2 py-0.5 text-[11px] font-black text-white">
-                      {activeFilterCount}
-                    </span>
-                  ) : null}
-                </button>
-                <select
-                  value={sort}
-                  onChange={(event) => updateParam("sort", event.target.value)}
-                  className={filterSelectClass}
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {activeFilterCount > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateParams(
-                        {
-                          type: "",
-                          status: "",
-                          genre: "",
-                          sort: "relevance",
-                        },
-                        { resetPage: true },
-                      )
-                    }
-                    className={secondaryButtonClass}
-                  >
-                    Clear filters
-                  </button>
-                ) : null}
-              </div>
+              <SearchSectionHeader
+                eyebrow="Results"
+                title={query ? `Results for "${query}"` : "Catalog"}
+                description="Use filters only when you need them. The default grid stays focused on getting you into a title fast."
+                meta={`${total.toLocaleString()} match${total === 1 ? "" : "es"}`}
+                actions={
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedFilters(true)}
+                      className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                    >
+                      <SlidersHorizontal size={16} />
+                      <span>Filters</span>
+                      {activeFilterCount > 0 ? (
+                        <span className="border border-black bg-[#ff007a] px-2 py-0.5 text-[11px] font-black text-white">
+                          {activeFilterCount}
+                        </span>
+                      ) : null}
+                    </button>
+                    <select
+                      value={sort}
+                      onChange={(event) => updateParam("sort", event.target.value)}
+                      className={filterSelectClass}
+                    >
+                      {SORT_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {activeFilterCount > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateParams(
+                            {
+                              type: "",
+                              status: "",
+                              genre: "",
+                              sort: "relevance",
+                            },
+                            { resetPage: true },
+                          )
+                        }
+                        className={secondaryButtonClass}
+                      >
+                        Clear filters
+                      </button>
+                    ) : null}
+                  </>
+                }
+              />
             </SurfacePanel>
 
             {loading ? (

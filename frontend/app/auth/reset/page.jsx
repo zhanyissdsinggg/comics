@@ -4,6 +4,11 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import EmailLinkActionShell from "../../../components/auth/EmailLinkActionShell";
+import {
+  StorefrontInfoCard,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../../components/common/StorefrontPagePrimitives";
 import { apiPost } from "../../../lib/apiClient";
 
 function StatusNotice({ tone = "neutral", title = "", message = "" }) {
@@ -19,7 +24,9 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div className={`rounded-[24px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}>
+    <div
+      className={`border-[3px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}
+    >
       {title ? (
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
           {title}
@@ -46,11 +53,7 @@ function ResetPageContent() {
 
   const hasToken = Boolean(token);
   const inputClassName =
-    "w-full rounded-[22px] border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:-translate-y-0.5 focus:bg-[#fffef7]";
-  const primaryButtonClass =
-    "w-full rounded-full border-[3px] border-black bg-black px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a] disabled:cursor-not-allowed disabled:opacity-60";
-  const secondaryButtonClass =
-    "w-full rounded-full border-[3px] border-black bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf] disabled:cursor-not-allowed disabled:opacity-60";
+    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fffef7] focus:shadow-none";
 
   const handleSendResetLink = async () => {
     const normalizedEmail = String(email || "").trim();
@@ -166,9 +169,11 @@ function ResetPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <div className="rounded-[22px] border-[3px] border-black bg-[#fff6cf] px-4 py-3 text-sm font-medium text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-              Reset link loaded from your email. No code field required.
-            </div>
+            <StorefrontInfoCard
+              title="Reset link loaded"
+              description="Reset link loaded from your email. No code field required."
+              className="bg-[#fff6cf]"
+            />
             <input
               type="password"
               value={password}
@@ -181,7 +186,7 @@ function ResetPageContent() {
               type="button"
               disabled={submitting}
               onClick={handleResetPassword}
-              className={primaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
               {submitting ? "Saving..." : "Save new password"}
             </button>
@@ -193,7 +198,7 @@ function ResetPageContent() {
                 setPassword("");
                 setStatus(null);
               }}
-              className={secondaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
             >
               Send me a new reset email
             </button>
@@ -212,7 +217,7 @@ function ResetPageContent() {
               type="button"
               disabled={submitting}
               onClick={handleSendResetLink}
-              className={primaryButtonClass}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
               {submitting ? "Sending..." : "Email me a reset link"}
             </button>
@@ -225,23 +230,25 @@ function ResetPageContent() {
           message={status?.message}
         />
 
-        <div className="rounded-[24px] border-[3px] border-black bg-[#dffcff] px-4 py-4 text-sm leading-6 text-black/70 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-          Signed in already? Head back to{" "}
-          <Link
-            href="/account"
-            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
-          >
-            your account
-          </Link>
-          . Need help with a missing email? Contact{" "}
-          <Link
-            href="/support"
-            className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
-          >
-            us
-          </Link>
-          .
-        </div>
+        <StorefrontInfoCard title="Need another route?" className="bg-[#dffcff]">
+          <p className="mt-3 text-sm leading-6 text-black/70">
+            Signed in already? Head back to{" "}
+            <Link
+              href="/account"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
+            >
+              your account
+            </Link>
+            . Need help with a missing email? Contact{" "}
+            <Link
+              href="/support"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
+            >
+              us
+            </Link>
+            .
+          </p>
+        </StorefrontInfoCard>
       </div>
     </EmailLinkActionShell>
   );

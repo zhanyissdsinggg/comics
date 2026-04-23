@@ -11,6 +11,10 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
@@ -159,7 +163,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
     .join(" / ");
 
   return (
-    <article className="rounded-[30px] border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+    <article className="border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -197,7 +201,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   ? () => onResume(item)
                   : () => onOpenSeries(item)
               }
-              className="inline-flex min-h-[42px] items-center gap-2 border-[3px] border-black bg-[#00e5ff] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              className={`${storefrontPrimaryButtonClass} min-h-[42px] gap-2 bg-[#00e5ff] px-4 py-2 text-black hover:bg-[#00d2ea]`}
             >
               {actionLabel}
               <ArrowUpRight className="size-4" />
@@ -245,7 +249,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[30px] border-[3px] border-black bg-[#fff6cf]"
+          className="h-[124px] animate-pulse border-[3px] border-black bg-[#fff6cf]"
         />
       ))}
     </div>
@@ -577,8 +581,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     [openSeries, router],
   );
 
-  const buttonBaseClass =
-    "inline-flex min-h-[46px] items-center justify-center border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+  const buttonBaseClass = storefrontSecondaryButtonClass;
 
   return (
     <SurfacePanel className="space-y-5" appearance="light" accent="blue">
@@ -607,7 +610,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[30px] border-[3px] border-black bg-[#ffe500] p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="border-[3px] border-black bg-[#ffe500] p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.06em] text-black">
@@ -620,7 +623,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             <button
               type="button"
               onClick={onOpenAuth}
-              className={buttonBaseClass}
+              className={storefrontPrimaryButtonClass}
             >
               Sign in
             </button>
@@ -681,8 +684,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[30px] border-[3px] border-dashed border-black bg-[#fff6cf] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-black bg-white text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+              <div className="border-[3px] border-dashed border-black bg-[#fff6cf] px-5 py-8 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center border-[3px] border-black bg-white text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-black">

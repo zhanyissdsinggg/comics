@@ -14,6 +14,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { storefrontPrimaryButtonClass } from "./StorefrontPagePrimitives";
 
 const iconMap = {
   inbox: Inbox,
@@ -60,7 +61,7 @@ export const EmptyState = memo(function EmptyState({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[28px] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
+        "relative overflow-hidden border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         isLight &&
           "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
         className,
@@ -107,12 +108,12 @@ export const EmptyState = memo(function EmptyState({
           <button
             type="button"
             onClick={resolvedAction.onClick}
-            className={`mt-6 inline-flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-all duration-200 ${
+            className={`mt-6 ${
               isLight
                 ? icon === "alert"
-                  ? "border-[3px] border-black bg-[#ffe7ec] text-[#ff007a] hover:-translate-y-0.5 hover:bg-[#ffd3e0]"
-                  : "border-[3px] border-black bg-black text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] hover:-translate-y-0.5 hover:bg-[#ff007a]"
-                : "border-emerald-400/30 bg-emerald-400/10 text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-400/16"
+                  ? "inline-flex items-center gap-2 border-[3px] border-black bg-[#ffe7ec] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#ff007a] transition-all duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffd3e0] hover:shadow-none"
+                  : `${storefrontPrimaryButtonClass} gap-2`
+                : "inline-flex items-center gap-2 border border-emerald-400/30 bg-emerald-400/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-emerald-100 transition-all duration-200 hover:border-emerald-300/50 hover:bg-emerald-400/16"
             }`}
           >
             <span>{resolvedAction.label}</span>

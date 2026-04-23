@@ -9,6 +9,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
 import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
+import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
@@ -57,11 +61,11 @@ export default function CookieConsent() {
   return (
     <div className="pointer-events-none fixed inset-x-4 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.85rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
       <div className="pointer-events-auto mx-auto max-w-md">
-        <div className="relative overflow-hidden rounded-[28px] border-[3px] border-black bg-white p-5 text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="relative overflow-hidden border-[3px] border-black bg-white p-5 text-black shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),transparent_32%)]" />
           <button
             onClick={handleDecline}
-            className="absolute right-3 top-3 z-10 rounded-full border-[3px] border-black bg-white p-2 text-black/55 transition hover:-translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black"
+            className="absolute right-3 top-3 z-10 border-[3px] border-black bg-white p-2 text-black/55 transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black hover:shadow-none"
             aria-label="Close"
           >
             <X size={16} />
@@ -109,13 +113,13 @@ export default function CookieConsent() {
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               onClick={handleDecline}
-              className="rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
+              className={storefrontSecondaryButtonClass}
             >
               Not now
             </button>
             <button
               onClick={handleAccept}
-              className="rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
+              className={storefrontPrimaryButtonClass}
             >
               Allow
             </button>

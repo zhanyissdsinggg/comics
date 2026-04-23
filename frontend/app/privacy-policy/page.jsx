@@ -1,4 +1,10 @@
 import EditorialHero from "../../components/common/EditorialHero";
+import {
+  StorefrontDesk,
+  StorefrontInfoCard,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
@@ -103,8 +109,8 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-      <p className="text-sm font-medium text-black/68">
+    <StorefrontInfoCard title="Privacy contact">
+      <p className="mt-3 text-sm font-medium text-black/68">
         <span className="font-black text-black">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
@@ -119,15 +125,11 @@ function ContactCard() {
           {siteConfig.companyAddress}
         </p>
       ) : null}
-    </div>
+    </StorefrontInfoCard>
   );
 }
 
 export default function PrivacyPolicyPage() {
-  const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
-  const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
   return (
     <div className="gush-home-shell overflow-hidden">
       <div className="gush-page-ambient" />
@@ -152,38 +154,26 @@ export default function PrivacyPolicyPage() {
             ]}
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Contact
-              </p>
-              <div>
-                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
-                  Privacy contact.
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
+          <StorefrontDesk
+            eyebrow="Contact"
+            title="Privacy contact."
+            actions={
+              <>
               <a
                 href={`mailto:${siteConfig.privacyEmail}`}
-                className={primaryButtonClass}
+                className={storefrontPrimaryButtonClass}
               >
                 Email privacy
               </a>
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Support
               </a>
-            </div>
-          </SurfacePanel>
+              </>
+            }
+          />
         </section>
 
         <div className="grid gap-4 xl:grid-cols-2">

@@ -398,10 +398,10 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[22px] border-[3px] border-black bg-white p-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffdf7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+      className="group overflow-hidden border-[3px] border-black bg-white p-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffdf7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
     >
       <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden rounded-[18px] border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:h-[108px]">
+        <div className="relative h-24 overflow-hidden border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:h-[108px]">
           {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
             <Image
               src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
@@ -442,13 +442,13 @@ function EpisodeRow({
                   </span>
                 ) : null}
               </div>
-              <strong className="mt-2 block text-base font-black uppercase tracking-[0.03em] text-black">
+              <strong className="mt-2 block text-[1.02rem] font-black uppercase tracking-[0.01em] text-black">
                 {episodeHeading}
               </strong>
             </>
           ) : (
             <div className="flex flex-wrap items-center gap-2">
-              <strong className="text-base font-black uppercase tracking-[0.03em] text-black">
+              <strong className="text-[1.02rem] font-black uppercase tracking-[0.01em] text-black">
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
@@ -472,7 +472,7 @@ function EpisodeRow({
           </div>
 
           {supportDetail && supportDetail !== rowHelperText ? (
-            <p className="mt-3 text-sm leading-6 text-black/68">
+            <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
               {supportDetail}
             </p>
           ) : null}
@@ -491,7 +491,7 @@ function EpisodeRow({
 
         <div className="flex flex-col gap-2 sm:min-w-[172px] sm:items-end">
           {sideLabel ? (
-            <p className="text-xs font-bold uppercase tracking-[0.08em] text-black/45 sm:text-right">
+            <p className="border-[2px] border-black bg-[#fff6cf] px-2.5 py-1 text-xs font-black uppercase tracking-[0.08em] text-black/55 sm:text-right">
               {sideLabel}
             </p>
           ) : null}

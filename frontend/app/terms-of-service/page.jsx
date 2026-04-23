@@ -1,5 +1,11 @@
 import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
+import {
+  StorefrontDesk,
+  StorefrontInfoCard,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import SiteHeader from "../../components/layout/SiteHeader";
 import { createPageMetadata } from "../../lib/seo";
@@ -109,8 +115,8 @@ function LegalSection({
 
 function ContactCard() {
   return (
-    <div className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-      <p className="text-sm font-medium text-black/68">
+    <StorefrontInfoCard title="Legal contact">
+      <p className="mt-3 text-sm font-medium text-black/68">
         <span className="font-black text-black">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.legalEmail}`}
@@ -125,7 +131,7 @@ function ContactCard() {
           {siteConfig.companyAddress}
         </p>
       ) : null}
-    </div>
+    </StorefrontInfoCard>
   );
 }
 
@@ -166,38 +172,26 @@ export default function TermsOfServicePage() {
             ]}
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Legal
-              </p>
-              <div>
-                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
-                  Legal contact.
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
+          <StorefrontDesk
+            eyebrow="Legal"
+            title="Legal contact."
+            actions={
+              <>
               <a
                 href={`mailto:${siteConfig.legalEmail}`}
-                className="border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
+                className={storefrontPrimaryButtonClass}
               >
                 Email legal
               </a>
               <Link
                 href="/privacy-policy"
-                className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                className={storefrontSecondaryButtonClass}
               >
                 View privacy
               </Link>
-            </div>
-          </SurfacePanel>
+              </>
+            }
+          />
         </section>
 
         <div className="grid gap-4 xl:grid-cols-2">

@@ -1,5 +1,12 @@
 import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
+import {
+  StorefrontDesk,
+  StorefrontInfoCard,
+  StorefrontSectionHeading,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../../components/common/StorefrontPagePrimitives";
 import StructuredDataScript from "../../components/common/StructuredDataScript";
 import SurfacePanel from "../../components/common/SurfacePanel";
 import SiteHeader from "../../components/layout/SiteHeader";
@@ -106,15 +113,12 @@ export default function HowItWorksPage() {
             ]}
             actions={
               <>
-                <Link
-                  href="/store"
-                  className="border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
-                >
+                <Link href="/store" className={storefrontPrimaryButtonClass}>
                   Store
                 </Link>
                 <Link
                   href="/subscribe"
-                  className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                  className={storefrontSecondaryButtonClass}
                 >
                   Plans
                 </Link>
@@ -122,66 +126,40 @@ export default function HowItWorksPage() {
             }
           />
 
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Overview
-              </p>
-              <div>
-                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
-                  Free, then points or plans.
-                </h2>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <Link
-                href="/orders"
-                className="border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
-              >
-                Orders
-              </Link>
-              <Link
-                href="/support"
-                className="border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
-              >
-                Support
-              </Link>
-            </div>
-          </SurfacePanel>
+          <StorefrontDesk
+            eyebrow="Overview"
+            title="Free, then points or plans."
+            actions={
+              <>
+                <Link href="/orders" className={storefrontPrimaryButtonClass}>
+                  Orders
+                </Link>
+                <Link
+                  href="/support"
+                  className={storefrontSecondaryButtonClass}
+                >
+                  Support
+                </Link>
+              </>
+            }
+          />
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
           {HOW_IT_WORKS_STEPS.map((step) => (
             <SurfacePanel key={step.title} appearance="light" accent="blue">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                {step.eyebrow}
-              </p>
-              <h2 className="mt-3 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                {step.title}
-              </h2>
-              <p className="mt-4 text-sm font-medium leading-7 text-black/68">
-                {step.body}
-              </p>
+              <StorefrontSectionHeading
+                eyebrow={step.eyebrow}
+                title={step.title}
+                description={step.body}
+              />
             </SurfacePanel>
           ))}
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Access
-              </p>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                Access.
-              </h2>
-            </div>
+            <StorefrontSectionHeading eyebrow="Access" title="Access." />
             <div className="space-y-4 text-sm font-medium leading-7 text-black/68">
               <p>Free access depends on the title.</p>
               <p>Locked episodes use points.</p>
@@ -190,29 +168,19 @@ export default function HowItWorksPage() {
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Billing
-              </p>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                Billing.
-              </h2>
-            </div>
+            <StorefrontSectionHeading eyebrow="Billing" title="Billing." />
             <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
               <li>Open Orders for packs, plans, and order IDs.</li>
               <li>Open Account to manage your plan.</li>
               <li>Use Support if a charge looks wrong.</li>
             </ul>
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/orders"
-                className="border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
-              >
+              <Link href="/orders" className={storefrontPrimaryButtonClass}>
                 Orders
               </Link>
               <Link
                 href="/support"
-                className="border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
+                className={storefrontSecondaryButtonClass}
               >
                 Support
               </Link>
@@ -221,27 +189,15 @@ export default function HowItWorksPage() {
         </section>
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-              FAQ
-            </p>
-            <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-              Answers.
-            </h2>
-          </div>
+          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
-              <div
+              <StorefrontInfoCard
                 key={item.question}
-                className="border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                title={item.question}
+                description={item.answer}
               >
-                <h3 className="text-base font-black uppercase tracking-[-0.02em] text-black">
-                  {item.question}
-                </h3>
-                <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  {item.answer}
-                </p>
-              </div>
+              </StorefrontInfoCard>
             ))}
           </div>
         </SurfacePanel>
