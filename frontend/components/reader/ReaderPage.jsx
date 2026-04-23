@@ -1097,6 +1097,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
     });
   }, [addBookmark, episodeId, activePageIndex, seriesId]);
 
+  const handleToggleNight = useCallback(() => {
+    toggleNightMode();
+    setUiToast(`Night ${nightMode ? "OFF" : "ON"}`);
+  }, [nightMode, toggleNightMode]);
+
   const handleToggleAutoScroll = useCallback(() => {
     const next = !autoScroll;
     setAutoScroll(next);
@@ -1143,8 +1148,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       }
       const key = event.key.toLowerCase();
       if (key === "n") {
-        toggleNightMode();
-        setUiToast(`Night ${nightMode ? "OFF" : "ON"}`);
+        handleToggleNight();
       }
       if (key === "t") {
         setDrawerOpen(true);
@@ -1182,8 +1186,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
     prevEpisode,
     router,
     seriesId,
-    toggleNightMode,
-    nightMode,
+    handleToggleNight,
   ]);
 
   useEffect(() => {
@@ -1581,7 +1584,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onBack={() => router.push(buildSeriesHref())}
         onOpenToc={() => setDrawerOpen(true)}
         onAddBookmark={handleAddBookmark}
-        onToggleNight={toggleNightMode}
+        onToggleNight={handleToggleNight}
         onToggleLayout={handleToggleLayout}
         onOpenSettings={() => setSettingsPanelOpen(true)} //
         onToggleAutoScroll={handleToggleAutoScroll}
@@ -2328,7 +2331,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           isOpen
           onClose={() => setSettingsPanelOpen(false)}
           nightMode={nightMode}
-          onToggleNight={toggleNightMode}
+          onToggleNight={handleToggleNight}
           layoutMode={layoutModeForView}
           onToggleLayout={handleToggleLayout}
           disableLayoutToggle={!isComic}

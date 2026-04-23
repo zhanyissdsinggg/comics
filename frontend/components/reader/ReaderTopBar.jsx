@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 const ShareButton = dynamic(() => import("../common/ShareButton"), {
   ssr: false,
@@ -36,6 +37,16 @@ export default function ReaderTopBar({
         ? window.location.href
         : "";
   const isNightMode = Boolean(nightMode);
+  const [nightState, setNightState] = useState(Boolean(nightMode));
+  const [autoScrollState, setAutoScrollState] = useState(Boolean(autoScroll));
+
+  useEffect(() => {
+    setNightState(Boolean(nightMode));
+  }, [nightMode]);
+
+  useEffect(() => {
+    setAutoScrollState(Boolean(autoScroll));
+  }, [autoScroll]);
 
   return (
     <header
@@ -128,30 +139,42 @@ export default function ReaderTopBar({
           ) : null}
           <button
             type="button"
-            onClick={onToggleNight}
+            onClick={() => {
+              setNightState((current) => !current);
+              onToggleNight?.();
+            }}
+            aria-pressed={nightState}
             className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-              nightMode
-                ? "border-emerald-400/60 text-emerald-200"
+              nightState
+                ? isNightMode
+                  ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
+                  : "border-[3px] border-black bg-[#d9ffe8] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                 : isNightMode
                   ? "border-neutral-800 text-neutral-200"
                   : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
               }`}
           >
-            Night {nightMode ? "ON" : "OFF"}
+            Night {nightState ? "ON" : "OFF"}
           </button>
           {onToggleAutoScroll ? (
             <button
               type="button"
-              onClick={onToggleAutoScroll}
+              onClick={() => {
+                setAutoScrollState((current) => !current);
+                onToggleAutoScroll?.();
+              }}
+              aria-pressed={autoScrollState}
               className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-                autoScroll
-                  ? "border-emerald-400/60 text-emerald-200"
+                autoScrollState
+                  ? isNightMode
+                    ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
+                    : "border-[3px] border-black bg-[#d9ffe8] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
                   : isNightMode
                     ? "border-neutral-800 text-neutral-200"
                     : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
               }`}
             >
-              Auto {autoScroll ? "ON" : "OFF"}
+              Auto {autoScrollState ? "ON" : "OFF"}
             </button>
           ) : null}
           <button
