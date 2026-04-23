@@ -32,18 +32,43 @@ export default function ReaderDrawer({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, open]);
+
   if (!open) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-[rgba(15,23,42,0.46)] backdrop-blur-sm">
-      <div className="flex h-full w-full max-w-full flex-col border-l-[3px] border-black bg-[#111111] px-4 py-5 shadow-[-10px_0_0_0_rgba(0,0,0,1)] sm:max-w-sm">
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-[rgba(15,23,42,0.46)] backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-full w-full max-w-full flex-col border-l-[3px] border-black bg-[#111111] px-4 py-5 shadow-[-10px_0_0_0_rgba(0,0,0,1)] sm:max-w-sm"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Reader contents"
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <button
               type="button"
               onClick={() => setTab("toc")}
+              aria-pressed={tab === "toc"}
               className={`rounded-full px-3 py-1 ${
                 tab === "toc"
                   ? "border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
@@ -55,6 +80,7 @@ export default function ReaderDrawer({
             <button
               type="button"
               onClick={() => setTab("bookmarks")}
+              aria-pressed={tab === "bookmarks"}
               className={`rounded-full px-3 py-1 ${
                 tab === "bookmarks"
                   ? "border-[3px] border-black bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
@@ -96,6 +122,11 @@ export default function ReaderDrawer({
             {episodes.map((episode) => {
               const isCurrentEpisode = episode.id === currentEpisodeId;
               const unlocked = unlockedIds.includes(episode.id);
+              const helperLabel = isCurrentEpisode
+                ? "Now reading"
+                : unlocked
+                  ? "Tap to open"
+                  : "Locked from the reader";
               return (
                 <button
                   key={episode.id}
@@ -113,7 +144,7 @@ export default function ReaderDrawer({
                         Ep {episode.number} {episode.title}
                       </div>
                       <div className="text-xs text-neutral-400">
-                        {isCurrentEpisode ? "Now reading" : "Tap to open"}
+                        {helperLabel}
                       </div>
                     </div>
                     {isCurrentEpisode ? <Pill>Reading</Pill> : unlocked ? <Pill>Unlocked</Pill> : <Pill>Locked</Pill>}

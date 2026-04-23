@@ -45,7 +45,7 @@ export default function ReaderChapterNavBar({
           type="button"
           onClick={onNext}
           disabled={!hasNext}
-          aria-label="Next Chapter"
+          aria-label={!hasNext ? "End of chapter" : nextLocked ? "Unlock next chapter" : "Next Chapter"}
           className={cn(
             "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200",
             !hasNext
@@ -55,7 +55,7 @@ export default function ReaderChapterNavBar({
                 : "border-white/10 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]",
           )}
         >
-          <span>Next Chapter</span>
+          <span>{nextLocked ? "Unlock Next" : "Next Chapter"}</span>
           <ChevronRight className="size-4" strokeWidth={2.2} />
         </button>
       </div>
