@@ -13,7 +13,7 @@ const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
             Search
           </p>
           <h1 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-black">
-            Find titles fast.
+            Titles
           </h1>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <a

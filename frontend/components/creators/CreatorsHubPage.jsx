@@ -200,7 +200,7 @@ function buildCreatorShelfMeta(creator) {
     meta.push(formatDateLabel(creator.latestUpdatedAt));
   }
 
-  return meta.length > 0 ? meta : ["Featured creator"];
+  return meta.length > 0 ? meta : ["Featured"];
 }
 
 function formatSeriesTypeLabel(value) {
@@ -238,7 +238,7 @@ function buildCreatorWorksSummary(creator) {
     return genres.join(" / ");
   }
 
-  return "In the catalog";
+  return "";
 }
 
 function CreatorDirectorySkeleton() {
@@ -783,12 +783,10 @@ export default function CreatorsHubPage({
   }
 
   if (error || !creators.length) {
-    const fallbackDescription = error
-      ? "Creator pages are unavailable right now."
-      : "A full creator directory is not live yet.";
+    const fallbackDescription = "";
     const fallbackDeskTitle = error
-      ? "Try again or browse titles."
-      : "Browse titles";
+      ? "Try again"
+      : "Titles";
 
     return (
       <main className="min-h-screen overflow-hidden bg-black text-black">
@@ -809,12 +807,12 @@ export default function CreatorsHubPage({
                 {
                   label: "Story picks",
                   value: fallbackEntryTitles.length.toLocaleString(),
-                  hint: "Live catalog picks.",
+                  hint: "",
                 },
                 {
                   label: "Genre lanes",
                   value: fallbackGenrePicks.length.toLocaleString(),
-                  hint: "Live genre lanes.",
+                  hint: "",
                 },
               ]}
             />
@@ -837,7 +835,7 @@ export default function CreatorsHubPage({
                   onClick={() => router.push("/comics")}
                   className={primaryButtonClass}
                 >
-                  Browse Comics
+                  Comics
                 </button>
                 <button
                   type="button"
@@ -1040,7 +1038,7 @@ export default function CreatorsHubPage({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators or titles"
+              placeholder="Search creators"
               className="border-[3px] border-black bg-white px-4 py-3.5 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] outline-none transition-all placeholder:text-black/40 focus:ring-4 focus:ring-black/10"
             />
 
@@ -1331,7 +1329,7 @@ export default function CreatorsHubPage({
         <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Browse
+                Genres
               </p>
               <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
                 Genres
@@ -1353,7 +1351,7 @@ export default function CreatorsHubPage({
             </div>
           ) : (
             <p className="text-sm font-semibold text-black/58">
-              No genres yet.
+              No genres
             </p>
           )}
         </SurfacePanel>

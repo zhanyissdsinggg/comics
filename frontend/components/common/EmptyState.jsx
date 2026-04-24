@@ -129,10 +129,10 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
   return (
     <EmptyState
       icon="book"
-      title="Your library is empty"
-      description="Saved titles appear here."
+      title="Library is empty"
+      description=""
       action={onBrowse}
-      actionText="Browse Series"
+      actionText="Browse"
       eyebrow="Library"
     />
   );
@@ -143,11 +143,7 @@ export const EmptySearch = memo(function EmptySearch({ query }) {
     <EmptyState
       icon="search"
       title="No results"
-      description={
-        query
-          ? `No match for "${query}". Try another keyword.`
-          : "Try another keyword."
-      }
+      description={query ? `No match for "${query}".` : ""}
       eyebrow="Search"
     />
   );
@@ -158,9 +154,9 @@ export const EmptyFavorites = memo(function EmptyFavorites({ onBrowse }) {
     <EmptyState
       icon="heart"
       title="No favorites yet"
-      description="Favorites appear here."
+      description=""
       action={onBrowse}
-      actionText="Discover Series"
+      actionText="Browse"
       eyebrow="Favorites"
     />
   );
@@ -171,9 +167,9 @@ export const EmptyOrders = memo(function EmptyOrders({ onShop }) {
     <EmptyState
       icon="cart"
       title="No orders yet"
-      description="Store purchases will appear here."
+      description=""
       action={onShop}
-      actionText="Browse Store"
+      actionText="Store"
       eyebrow="Orders"
     />
   );
@@ -184,7 +180,7 @@ export const EmptyNotifications = memo(function EmptyNotifications() {
     <EmptyState
       icon="bell"
       title="No notifications"
-      description="You're caught up."
+      description=""
       eyebrow="Notifications"
     />
   );
@@ -195,7 +191,7 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
     <EmptyState
       icon="file"
       title="No reading history"
-      description="Recent reading appears here."
+      description=""
       action={onBrowse}
       actionText="Start Reading"
       eyebrow="History"

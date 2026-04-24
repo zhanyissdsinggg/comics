@@ -161,31 +161,23 @@ function formatCreatorCreditTypeLabel(creditType) {
 }
 
 function getCreatorHeroCopy(creatorName, creditType, topGenres) {
-  const genreLabel = topGenres.slice(0, 2).join(" and ");
-
   if (creditType === "studio") {
     return {
-      title: "From this studio.",
-      description: genreLabel
-        ? `${genreLabel} stories from the same studio.`
-        : "Stories from the same studio.",
+      title: "Studio",
+      description: "",
     };
   }
 
   if (creditType === "team") {
     return {
-      title: "From this team.",
-      description: genreLabel
-        ? `${genreLabel} stories from the same team.`
-        : "Stories from the same team.",
+      title: "Team",
+      description: "",
     };
   }
 
   return {
-    title: `From ${creatorName}.`,
-    description: genreLabel
-      ? `${creatorName}'s ${genreLabel} work in one place.`
-      : `${creatorName}'s stories in one place.`,
+    title: creatorName,
+    description: "",
   };
 }
 
@@ -610,17 +602,17 @@ export default function CreatorPage({
       {
         id: "featured-series",
         eyebrow: "Featured Series",
-        title: "Featured Series",
-        cta: "Browse Series",
+        title: "Featured",
+        cta: "Featured",
         onClick: () => router.push("/rankings?view=featured"),
         accentClass:
           "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
       },
       {
         id: "catalog",
-        eyebrow: "Browse",
-        title: "Explore the catalog.",
-        cta: "Explore Comics",
+        eyebrow: "Comics",
+        title: "Comics",
+        cta: "Comics",
         onClick: () => router.push("/comics"),
         accentClass:
           "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
@@ -650,7 +642,7 @@ export default function CreatorPage({
           <NetworkFallback
             compact
             title="This creator page is unavailable right now."
-            description="Try again or head back to Search."
+            description=""
             onRetry={retryCreatorPage}
           >
             <button
@@ -677,7 +669,7 @@ export default function CreatorPage({
               appearance="light"
               eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
               title={`${creatorName} is not live here yet.`}
-              description="Search or browse for now."
+              description=""
               stats={[
                 {
                   label: formatCreatorCreditTypeLabel(
@@ -704,7 +696,7 @@ export default function CreatorPage({
                 </p>
                 <div>
                   <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
-                    Try another route.
+                    Next
                   </h2>
                 </div>
               </div>
@@ -734,7 +726,7 @@ export default function CreatorPage({
                 Next
               </p>
               <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
-                Browse next.
+                Picks
               </h2>
             </div>
             <StorefrontPathwaysGrid
@@ -778,9 +770,6 @@ export default function CreatorPage({
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {creatorName}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-white/70">
-                  Open the lead title, pivot by genre, or jump back to the title that brought you here.
-                </p>
               </div>
             </div>
 
@@ -815,7 +804,7 @@ export default function CreatorPage({
                   onClick={() => router.push("/rankings?view=featured")}
                   className={primaryButtonClass}
                 >
-                  Browse Series
+                  Featured
                 </button>
               )}
               <button
@@ -823,7 +812,7 @@ export default function CreatorPage({
                 onClick={handleBrowseGenre}
                 className={secondaryButtonClass}
               >
-                {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
+                {topGenres[0] ? topGenres[0] : "Genres"}
               </button>
               <button
                 type="button"
@@ -913,7 +902,7 @@ export default function CreatorPage({
                     onClick={handleBrowseGenre}
                     className={secondaryButtonClass}
                   >
-                    {topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads"}
+                    {topGenres[0] ? topGenres[0] : "Genres"}
                   </button>
                 </div>
               </div>
@@ -930,9 +919,6 @@ export default function CreatorPage({
               <h2 className="mt-2 font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-black sm:text-[2.8rem]">
                 By {creatorName}
               </h2>
-              <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-black/68">
-                Every live title currently tied to this public creator credit.
-              </p>
             </div>
             <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
               {formatTitleCountLabel(gridItems.length)} for {creatorName}

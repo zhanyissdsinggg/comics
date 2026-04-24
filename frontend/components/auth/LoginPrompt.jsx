@@ -9,18 +9,18 @@ import {
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
-  eyebrow = "Member access",
-  title = "Sign in to continue",
-  message = "Sign in to keep your place.",
+  eyebrow = "",
+  title = "Sign in",
+  message = "",
   returnTo = "/",
   primaryLabel = "Sign In",
   secondaryLabel = "Create Account",
   features = [
-    { icon: BookOpen, text: "Save your reading progress" },
-    { icon: Gift, text: "Claim daily rewards and bonus points" },
-    { icon: Sparkles, text: "Personalized recommendations" },
+    { icon: BookOpen, text: "Save progress" },
+    { icon: Gift, text: "Daily rewards" },
+    { icon: Sparkles, text: "Personal picks" },
   ],
-  showFeatures = true,
+  showFeatures = false,
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -153,10 +153,6 @@ const LoginPrompt = memo(function LoginPrompt({
               {secondaryLabel}
             </button>
           </div>
-
-          <p className="mt-4 text-center text-xs uppercase tracking-[0.18em] text-black/40">
-            Terms and Privacy apply
-          </p>
         </div>
       </div>
     </div>

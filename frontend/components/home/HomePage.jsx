@@ -614,11 +614,12 @@ function HomeContent({ initialSearchParams = {} }) {
   }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
 
   const heroEyebrow = resumeSeries ? "Continue" : "Featured";
+  const heroDescription = String(heroSeries?.description || "").trim();
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue Reading"
     : heroSeries?.id
       ? "Start Reading"
-      : "Browse Stories";
+      : "Open Titles";
 
   return (
     <div className="min-h-screen overflow-hidden bg-white text-black">
@@ -648,14 +649,15 @@ function HomeContent({ initialSearchParams = {} }) {
                   </div>
 
                   <h1 className="mt-5 max-w-[8.8ch] text-[clamp(2.35rem,10vw,6.4rem)] font-black uppercase leading-[0.86] tracking-[-0.06em] text-white">
-                    {resumeSeries ? "Back to reading" : "Read something good"}
+                    {resumeSeries ? "Back to reading" : "Start reading"}
                   </h1>
 
                   <div className="mt-4 max-w-[34rem] space-y-3">
-                    <p className="text-sm font-black leading-6 text-black/80 sm:text-base sm:leading-7">
-                      {heroSeries?.description ||
-                        "Open a title and start reading."}
-                    </p>
+                    {heroDescription ? (
+                      <p className="text-sm font-black leading-6 text-black/80 sm:text-base sm:leading-7">
+                        {heroDescription}
+                      </p>
+                    ) : null}
                     {heroMetaLine ? (
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/72">
                         {heroMetaLine}
@@ -852,11 +854,11 @@ function HomeContent({ initialSearchParams = {} }) {
           isOpen={showLoginPrompt}
           onClose={() => setShowLoginPrompt(false)}
           eyebrow=""
-          title="Save your library"
-          message="Sign in to sync your library and reading progress."
+          title="Sign in"
+          message=""
           returnTo="/"
-          primaryLabel="Sign in and sync"
-          secondaryLabel="Create free account"
+          primaryLabel="Sign In"
+          secondaryLabel="Create Account"
           showFeatures={false}
         />
       </main>

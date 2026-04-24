@@ -112,7 +112,7 @@ export default function HeaderMenuModal({
                 Menu
               </p>
               <h2 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-black">
-                Quick links.
+                Menu
               </h2>
             </div>
             <button
@@ -135,9 +135,7 @@ export default function HeaderMenuModal({
                       Account
                     </p>
                     <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-black">
-                      {isHome
-                        ? "Signed in and ready to keep reading."
-                        : "Signed in and ready to pick up fast."}
+                      Signed in
                     </p>
                   </div>
                   <span className="border-[2px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
@@ -189,9 +187,7 @@ export default function HeaderMenuModal({
                   Account
                 </p>
                 <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-black">
-                  {isHome
-                    ? "Sign in to keep your library and progress together."
-                    : "Sign in to keep your library and progress in one place."}
+                  Sign in
                 </p>
                 <div className="mt-4 flex gap-2">
                   <button
@@ -205,9 +201,9 @@ export default function HeaderMenuModal({
                     Sign In
                   </button>
                   {renderMenuLink(
-                    { label: "Get Help", href: "/support" },
+                    { label: "Help", href: "/support" },
                     "inline-flex min-h-11 flex-1 items-center justify-center border-[3px] border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none",
-                    "Get Help",
+                    "Help",
                   )}
                 </div>
               </>
@@ -216,7 +212,7 @@ export default function HeaderMenuModal({
 
           <div className="m-4 mt-5">
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-              Browse
+              Sections
             </p>
             <div className="mt-3 grid gap-2">
               {menuLinks.map((item) => {
