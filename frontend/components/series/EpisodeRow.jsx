@@ -2,7 +2,6 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import ActionModal from "./ActionModal";
 import UnlockChapterModal from "./UnlockChapterModal";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -400,26 +399,7 @@ function EpisodeRow({
       id={`episode-${episode?.id}`}
       className="group overflow-hidden border-[3px] border-black bg-white p-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffdf7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
     >
-      <div className="grid gap-3 sm:grid-cols-[84px_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
-        <div className="relative h-24 overflow-hidden border-[3px] border-black bg-[#f5f1ea] shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:h-[108px]">
-          {episode?.thumbnailUrl || episode?.pages?.[0]?.url ? (
-            <Image
-              src={episode?.thumbnailUrl || episode?.pages?.[0]?.url}
-              alt={`Episode ${episode?.number} thumbnail`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 76px, 96px"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#fff7cf] text-black/55">
-              <span className="text-lg font-black uppercase tracking-[0.04em]">
-                Ep {episode?.number}
-              </span>
-            </div>
-          )}
-        </div>
-
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
         <div className="min-w-0">
           <span className="sr-only">{episodeDisplayTitle}</span>
 
