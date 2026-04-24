@@ -146,10 +146,10 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-6 overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:mt-8"
+      className="mt-5 overflow-hidden border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:mt-8 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
       data-wallet-total={walletTotal}
     >
-      <div className="border-b-[3px] border-black px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+      <div className="border-b-[3px] border-black px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
@@ -159,12 +159,12 @@ export default function EpisodeList({
               </span>
             </div>
             <div className="space-y-2">
-              <h2 className="text-[2.15rem] font-black uppercase tracking-[-0.04em] text-black">
+              <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.04em] text-black sm:text-[2.15rem]">
                 Episode list
               </h2>
               {availabilitySummary.entryHint ||
               availabilitySummary.entryLabel ? (
-                <p className="max-w-2xl text-sm font-semibold leading-7 text-black/68">
+                <p className="max-w-2xl text-sm font-semibold leading-6 text-black/68 sm:leading-7">
                   {availabilitySummary.entryHint ||
                     availabilitySummary.entryLabel}
                 </p>
@@ -219,7 +219,7 @@ export default function EpisodeList({
         </div>
       </div>
 
-      <div className="px-5 py-5 sm:px-6 sm:py-6">
+      <div className="px-4 py-4 sm:px-6 sm:py-6">
         {sortedEpisodes.length === 0 ? (
           <div className="border-[3px] border-black bg-[#fff7cf] p-6 text-sm text-black/68 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
             <p className="text-base font-black uppercase tracking-[0.03em] text-black">
@@ -232,7 +232,7 @@ export default function EpisodeList({
             </p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-2.5 sm:space-y-3">
             {sortedEpisodes.map((episode, index) => {
               const key = episode?.id || `${series.id || "series"}-${index}`;
               const unlocked = unlockedEpisodeIds.includes(episode?.id);

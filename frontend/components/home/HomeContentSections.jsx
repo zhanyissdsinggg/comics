@@ -248,12 +248,7 @@ function HomeShelfSection({
   const styles = SECTION_STYLES[sectionTone] || SECTION_STYLES.featured;
 
   return (
-    <section
-      className={cn(
-        "border-y-[4px] border-black py-12",
-        styles.shell,
-      )}
-    >
+    <section className={cn("border-y-[4px] border-black py-9 sm:py-12", styles.shell)}>
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <HomeSectionHeader
           eyebrow={eyebrow}
@@ -263,7 +258,7 @@ function HomeShelfSection({
           onCtaClick={onCtaClick}
           sectionTone={sectionTone}
         />
-        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {items.map((item) => (
             <ShelfComicCard
               key={item.id}
@@ -291,7 +286,7 @@ function HomeGuideCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-full flex-col border-[3px] border-black bg-white p-6 text-left shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+      className="group flex h-full flex-col border-[3px] border-black bg-white p-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:p-6 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
     >
       <div
         className={cn(
@@ -301,10 +296,10 @@ function HomeGuideCard({
       >
         <Icon className="size-5" />
       </div>
-      <p className="mt-6 text-xs font-black uppercase tracking-[0.18em] text-black/65">
+      <p className="mt-4 text-[11px] font-black uppercase tracking-[0.18em] text-black/65 sm:mt-6 sm:text-xs">
         {eyebrow}
       </p>
-      <h3 className="mt-2 text-[1.7rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
+      <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.96] tracking-[-0.04em] text-black sm:text-[1.7rem]">
         {title}
       </h3>
       {description ? (
@@ -312,7 +307,7 @@ function HomeGuideCard({
           {description}
         </p>
       ) : null}
-      <div className="mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.08em] text-black">
+      <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-black sm:mt-6 sm:text-sm">
         {ctaLabel}
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </div>
@@ -380,9 +375,9 @@ function LeaderboardSection({ items, onItemClick }) {
   }
 
   return (
-    <section className="border-y-[4px] border-[#ffe500] bg-black py-16">
+    <section className="border-y-[4px] border-[#ffe500] bg-black py-12 sm:py-16">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[38rem]">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff007a]">
               This week
@@ -400,7 +395,7 @@ function LeaderboardSection({ items, onItemClick }) {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:gap-4 md:grid-cols-2">
           {items.slice(0, 6).map((item, index) => (
             <LeaderboardCard
               key={item.id}
@@ -450,7 +445,7 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
   ];
 
   return (
-    <section className="border-y-[4px] border-[#ffe500] bg-black py-6">
+    <section className="border-y-[4px] border-[#ffe500] bg-black py-5 sm:py-6">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
@@ -471,14 +466,14 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
           </Button>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
           {pills.map((pill, index) => (
             <button
               key={`${pill}-${index}`}
               type="button"
               onClick={() => onGuideClick?.(`/search?genre=${encodeURIComponent(pill)}`)}
               className={cn(
-                "shrink-0 border-[3px] border-black px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                "shrink-0 border-[3px] border-black px-4 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:px-5 sm:py-3 sm:text-sm",
                 colors[index % colors.length],
               )}
             >
@@ -603,7 +598,7 @@ export default function HomeContentSections({
         </>
       )}
 
-      <section className="border-y-[4px] border-black bg-[#111111] py-14">
+      <section className="border-y-[4px] border-black bg-[#111111] py-10 sm:py-14">
         <div className="mx-auto max-w-[1320px] px-4 md:px-8">
           <div className="mb-8 max-w-[36rem]">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-white/60">
@@ -614,7 +609,7 @@ export default function HomeContentSections({
             </h2>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {GUIDE_CARDS.map((card) => (
               <HomeGuideCard
                 key={card.id}
@@ -629,7 +624,7 @@ export default function HomeContentSections({
             ))}
           </div>
 
-          <div className="mt-8 border-[3px] border-white/20 bg-black/40 p-5 text-white shadow-[8px_8px_0_0_rgba(255,255,255,0.08)] sm:flex sm:items-center sm:justify-between">
+          <div className="mt-6 border-[3px] border-white/20 bg-black/40 p-4 text-white shadow-[8px_8px_0_0_rgba(255,255,255,0.08)] sm:mt-8 sm:flex sm:items-center sm:justify-between sm:p-5">
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center border-[3px] border-black bg-[#ffe500] text-black">
                 <Sparkles className="size-5" />
@@ -652,7 +647,7 @@ export default function HomeContentSections({
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-y-[4px] border-black bg-[#8b00ff] py-16">
+      <section className="relative overflow-hidden border-y-[4px] border-black bg-[#8b00ff] py-12 sm:py-16">
         <div className="absolute right-20 top-5 hidden rotate-12 text-[5rem] font-black text-[#ffe500] md:block">
           +
         </div>
@@ -665,7 +660,7 @@ export default function HomeContentSections({
               <p className="inline-block -rotate-2 border-[2px] border-black bg-[#ffe500] px-3 py-1 text-sm font-black uppercase tracking-[0.14em] text-black">
                 Community
               </p>
-              <h2 className="mt-5 text-[clamp(2.5rem,6vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+              <h2 className="mt-4 text-[clamp(2.1rem,8vw,4.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:mt-5">
                 Read.
                 <br />
                 Save.
@@ -677,13 +672,13 @@ export default function HomeContentSections({
               <button
                 type="button"
                 onClick={() => onGuideClick?.("/creators")}
-                className="mt-7 inline-flex items-center justify-center gap-2 border-[3px] border-black bg-[#ffe500] px-6 py-4 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                className="mt-6 inline-flex min-h-[50px] w-full items-center justify-center gap-2 border-[3px] border-black bg-[#ffe500] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:mt-7 sm:w-auto sm:px-6 sm:py-4 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
               >
                 Meet creators
                 <ArrowRight className="size-4" />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[
                 ["Creators", "Credits"],
                 ["Fresh", "Drops"],
@@ -703,7 +698,7 @@ export default function HomeContentSections({
                     )
                   }
                   className={[
-                    "border-[3px] border-black p-5 text-left shadow-[6px_6px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+                    "border-[3px] border-black p-4 text-left shadow-[5px_5px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:p-5 sm:shadow-[6px_6px_0_0_rgba(255,229,0,1)]",
                     index === 1
                       ? "mt-8 bg-[#00e5ff]"
                       : index === 2

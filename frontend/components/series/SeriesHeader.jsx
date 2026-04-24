@@ -161,7 +161,7 @@ export default function SeriesHeader({
     .slice(0, 2);
 
   return (
-    <header className="py-4 sm:py-6">
+    <header className="py-3 sm:py-6">
       <section className="relative overflow-hidden border-[3px] border-black bg-[#ffe500] shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
         {coverBackdropUrl ? (
           <div
@@ -172,7 +172,7 @@ export default function SeriesHeader({
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,229,0,0.94)_0%,rgba(255,255,255,0.96)_44%,rgba(255,255,255,0.94)_100%)]" />
         <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.32),transparent)]" />
 
-        <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
+        <div className="relative grid gap-5 p-4 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="border-[2px] border-black bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black">
@@ -185,11 +185,11 @@ export default function SeriesHeader({
               ) : null}
             </div>
 
-            <h1 className="mt-5 max-w-4xl text-[2.8rem] font-black uppercase leading-[0.88] tracking-[-0.07em] text-black sm:text-[3.6rem] lg:text-[4.9rem]">
+            <h1 className="mt-4 max-w-4xl text-[2.15rem] font-black uppercase leading-[0.9] tracking-[-0.07em] text-black sm:text-[3.6rem] lg:text-[4.9rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold uppercase tracking-[0.06em] text-black/65">
+            <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-xs font-semibold uppercase tracking-[0.06em] text-black/65 sm:text-sm">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
@@ -227,8 +227,8 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-8 max-w-3xl border-[3px] border-black bg-white px-5 py-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-              <p className="text-[15px] font-semibold leading-8 text-black/72 sm:text-base">
+            <div className="mt-6 max-w-3xl border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] sm:px-5 sm:py-5 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+              <p className="text-sm font-semibold leading-6 text-black/72 sm:text-base sm:leading-8">
                 {summarizeSeriesDescription(
                   series.description,
                   "Start with chapter one.",
@@ -237,15 +237,15 @@ export default function SeriesHeader({
             </div>
 
             {primaryActions ? (
-              <div className="mt-8 max-w-xs">{primaryActions}</div>
+              <div className="mt-6 max-w-none sm:mt-8 sm:max-w-xs">{primaryActions}</div>
             ) : null}
 
-            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+            <div className="mt-5 grid gap-3 sm:mt-7 sm:flex sm:flex-wrap sm:items-center">
               {onFollowToggle ? (
                 <button
                   type="button"
                   onClick={onFollowToggle}
-                  className={`group relative inline-flex min-h-[44px] items-center justify-center gap-2 border-[3px] border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] transition-all duration-200 ${
+                  className={`group relative inline-flex min-h-[48px] w-full items-center justify-center gap-2 border-[3px] border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] transition-all duration-200 sm:min-h-[44px] sm:w-auto ${
                     isFollowing
                       ? "bg-[#ffe500] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                       : "bg-white text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:text-black hover:shadow-none"
@@ -267,14 +267,14 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[44px] border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none"
+                className="min-h-[48px] w-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none sm:min-h-[44px] sm:w-auto"
               />
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="order-first space-y-3 lg:order-none lg:space-y-4">
             <div className="overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-              <div className="aspect-[3/4] w-full overflow-hidden">
+              <div className="aspect-[4/5] w-full overflow-hidden sm:aspect-[3/4]">
                 <Cover
                   tone={series.coverTone}
                   coverUrl={series.coverUrl}
@@ -287,7 +287,7 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="space-y-3 border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+            <div className="space-y-3 border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] sm:p-5 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
                   Public credit
@@ -322,8 +322,8 @@ export default function SeriesHeader({
           </div>
 
           <div className="lg:col-span-2">
-            <div className="border-[3px] border-black bg-white px-5 py-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:px-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {heroFacts.map((item) =>
                   item.href ? (
                     <Link

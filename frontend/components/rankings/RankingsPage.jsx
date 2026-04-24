@@ -369,8 +369,8 @@ export default function RankingsPage({
   return (
     <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:gap-8 md:px-8 md:py-10">
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
             eyebrow="Editor's shelf"
             title={`${activeView.label}.`}
@@ -386,7 +386,7 @@ export default function RankingsPage({
             tone="default"
             accent="amber"
             appearance="dark"
-            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
+            className="flex h-full flex-col justify-between space-y-5 border-[3px] border-black bg-black p-4 text-white shadow-[7px_7px_0_0_rgba(255,229,0,1)] sm:p-5 sm:shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
           >
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
@@ -453,7 +453,7 @@ export default function RankingsPage({
           tone="muted"
           accent="blue"
           appearance="light"
-          className="space-y-4 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+          className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         >
           <RankingsSectionHeader
             eyebrow="Views"
@@ -482,7 +482,7 @@ export default function RankingsPage({
         {loading ? (
           <RankingsLoadingState />
         ) : curatedSeries.length === 0 ? (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_360px]">
             <SurfacePanel
               className="space-y-4"
               appearance="light"
@@ -537,7 +537,7 @@ export default function RankingsPage({
             </SurfacePanel>
           </div>
         ) : (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.28fr)_360px]">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_360px]">
             <div className="space-y-6">
               {leadEntry ? (
                 <Link
@@ -545,10 +545,10 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full border-[3px] border-black bg-[#ff007a] p-5 text-left text-white shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  className="group w-full border-[3px] border-black bg-[#ff007a] p-4 text-left text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:p-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                   aria-label={`Open ${leadEntry.title}`}
                 >
-                  <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+                    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
                     <Cover
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
@@ -563,7 +563,7 @@ export default function RankingsPage({
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                         Lead pick
                       </p>
-                      <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
+                      <h2 className="mt-3 text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
                         {leadEntry.title}
                       </h2>
                       <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/80">
@@ -588,7 +588,7 @@ export default function RankingsPage({
               ) : null}
 
               {supportingEntries.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 md:gap-4">
                   {supportingEntries.map((series) => (
                     <Link
                       key={series.id}
@@ -600,7 +600,7 @@ export default function RankingsPage({
                           "FEATURED_SUPPORTING",
                         )
                       }
-                      className="group border-[3px] border-black bg-white p-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
+                      className="group border-[3px] border-black bg-white p-3.5 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none sm:p-4 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
                       aria-label={`Open ${series.title}`}
                     >
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
@@ -640,7 +640,7 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                <section className="space-y-5 border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-6">
+                  <section className="space-y-4 border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:p-6 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
                   <RankingsSectionHeader
                     eyebrow="More titles"
                     title="Keep browsing"

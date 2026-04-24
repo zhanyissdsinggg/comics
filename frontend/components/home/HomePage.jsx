@@ -641,18 +641,18 @@ function HomeContent({ initialSearchParams = {} }) {
               <div className="absolute -right-8 top-10 hidden h-32 w-32 rounded-full border-[4px] border-black bg-[#ffe500] md:block" />
               <div className="absolute bottom-14 left-4 hidden h-20 w-20 rotate-12 border-[4px] border-black bg-[#00e5ff] md:block" />
 
-              <div className="relative mx-auto grid min-h-[520px] max-w-7xl gap-10 px-4 py-12 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
+              <div className="relative mx-auto grid min-h-[480px] max-w-7xl gap-7 px-4 py-8 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
                 <div className="flex flex-col justify-center">
-                  <div className="inline-block w-fit -rotate-2 border-[3px] border-black bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.12em] text-[#ffe500]">
+                  <div className="inline-block w-fit -rotate-2 border-[3px] border-black bg-black px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-[#ffe500] sm:px-4 sm:py-2 sm:text-sm">
                     {resumeSeries ? "Continue reading" : "Featured now"}
                   </div>
 
-                  <h1 className="mt-6 max-w-[8.4ch] text-[clamp(3.1rem,8vw,6.4rem)] font-black uppercase leading-[0.84] tracking-[-0.06em] text-white">
+                  <h1 className="mt-5 max-w-[8.8ch] text-[clamp(2.35rem,10vw,6.4rem)] font-black uppercase leading-[0.86] tracking-[-0.06em] text-white">
                     {resumeSeries ? "Back to reading" : "Read something good"}
                   </h1>
 
-                  <div className="mt-5 max-w-[34rem] space-y-4">
-                    <p className="text-base font-black leading-7 text-black/80">
+                  <div className="mt-4 max-w-[34rem] space-y-3">
+                    <p className="text-sm font-black leading-6 text-black/80 sm:text-base sm:leading-7">
                       {heroSeries?.description ||
                         "Open a title and start reading."}
                     </p>
@@ -664,11 +664,11 @@ function HomeContent({ initialSearchParams = {} }) {
                   </div>
 
                   {heroGenrePills.length > 0 || heroSignals.length > 0 ? (
-                    <div className="mt-6 flex flex-wrap gap-2.5">
+                    <div className="mt-5 flex flex-wrap gap-2">
                       {heroGenrePills.map((genre) => (
                         <span
                           key={`hero-genre-${genre}`}
-                          className="border-[2px] border-black bg-[#ffe500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black"
+                          className="border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black sm:px-3 sm:text-[11px]"
                         >
                           {genre}
                         </span>
@@ -677,7 +677,7 @@ function HomeContent({ initialSearchParams = {} }) {
                         <span
                           key={signal.id}
                           className={cn(
-                            "border-[2px] border-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black",
+                            "border-[2px] border-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black sm:px-3 sm:text-[11px]",
                             index % 2 === 0 ? "bg-[#00e5ff]" : "bg-white",
                           )}
                         >
@@ -687,10 +687,10 @@ function HomeContent({ initialSearchParams = {} }) {
                     </div>
                   ) : null}
 
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                     <Link
                       href={primaryHeroHref}
-                      className="inline-flex items-center gap-2 border-[3px] border-black bg-[#00e5ff] px-6 py-3 text-base font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-6 sm:text-base sm:shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                     >
                       {primaryHeroCtaLabel}
                       <ArrowRight className="size-4" />
@@ -698,13 +698,13 @@ function HomeContent({ initialSearchParams = {} }) {
                     <button
                       type="button"
                       onClick={() => router.push("/search")}
-                      className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-6 py-3 text-base font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-6 sm:text-base sm:shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                     >
                       Browse
                     </button>
                   </div>
 
-                  <div className="mt-7 flex flex-wrap items-center gap-2.5 text-sm font-black uppercase tracking-[0.08em] text-black">
+                  <div className="mt-6 flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-black sm:text-sm">
                     <button
                       type="button"
                       onClick={() => router.push("/comics")}
@@ -746,7 +746,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     </div>
                   ) : null}
 
-                  <div className="relative w-full max-w-[360px] border-[4px] border-black bg-black shadow-[12px_12px_0_0_rgba(0,0,0,1)] lg:max-w-[390px]">
+                  <div className="relative w-full max-w-[300px] border-[4px] border-black bg-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:max-w-[340px] lg:max-w-[390px] lg:shadow-[12px_12px_0_0_rgba(0,0,0,1)]">
                     {heroSeries?.coverUrl ? (
                       <img
                         src={heroSeries.coverUrl}
@@ -759,14 +759,14 @@ function HomeContent({ initialSearchParams = {} }) {
                       <div className="aspect-[3/4] w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/86 via-black/18 to-transparent" />
-                    <div className="absolute left-4 top-4 -rotate-6 border-[3px] border-black bg-[#ffe500] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-black">
+                    <div className="absolute left-3 top-3 -rotate-6 border-[3px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
                       {resumeSeries ? "Resume" : heroEyebrow}
                     </div>
-                    <div className="absolute bottom-4 right-4 rotate-3 border-[3px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-black">
+                    <div className="absolute bottom-3 right-3 rotate-3 border-[3px] border-black bg-[#00e5ff] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black sm:bottom-4 sm:right-4 sm:px-3 sm:text-xs">
                       {heroSeries?.latestEpisodeId ? formatEpisodeLabel(heroSeries.latestEpisodeId) : "Featured"}
                     </div>
-                    <div className="absolute inset-x-0 bottom-0 p-5">
-                      <p className="line-clamp-2 text-[1.8rem] font-black uppercase leading-[0.92] tracking-[-0.04em] text-white">
+                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                      <p className="line-clamp-2 text-[1.45rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-white sm:text-[1.8rem]">
                         {heroSeries?.title || "Lead story"}
                       </p>
                       {heroCreatorName ? (

@@ -962,8 +962,8 @@ export default function CreatorsHubPage({
     <main className="min-h-screen overflow-hidden bg-black text-black">
       <SiteHeader variant="home" />
 
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:gap-8 md:px-8 md:py-10">
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
             accent="blue"
             appearance="light"
@@ -977,7 +977,7 @@ export default function CreatorsHubPage({
             tone="muted"
             accent="blue"
             appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
+            className="flex h-full flex-col justify-between space-y-5"
           >
             <div>
               <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
@@ -1011,7 +1011,7 @@ export default function CreatorsHubPage({
           />
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
@@ -1036,7 +1036,7 @@ export default function CreatorsHubPage({
             ) : null}
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center xl:gap-4">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -1083,7 +1083,7 @@ export default function CreatorsHubPage({
           </div>
         </SurfacePanel>
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Featured
@@ -1093,7 +1093,7 @@ export default function CreatorsHubPage({
               </h2>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-3 xl:grid-cols-2 xl:gap-4">
             {featuredCreatorCards.map((creator) => {
               const leadSeries = getCreatorLeadSeries(creator);
               const creatorGenres = Array.isArray(creator?.topGenres)
@@ -1114,7 +1114,7 @@ export default function CreatorsHubPage({
                   className={creatorCardClass}
                   aria-label={`Open ${creator.name}`}
                 >
-                  <div className="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)]">
+                  <div className="grid gap-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-4">
                     <div className="overflow-hidden border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
                       <Cover
                         tone={leadSeries?.coverTone}
@@ -1173,7 +1173,7 @@ export default function CreatorsHubPage({
         </SurfacePanel>
 
         {guidedDiscoveryEntries.length > 0 ? (
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-[#fff6c7] shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-[#fff6c7] shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 First picks
@@ -1183,7 +1183,7 @@ export default function CreatorsHubPage({
               </h2>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 xl:gap-4">
               {guidedDiscoveryEntries.map(
                 ({
                   id,
@@ -1193,7 +1193,7 @@ export default function CreatorsHubPage({
                 }) => (
                   <div
                     key={id}
-                    className="border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                    className="border-[3px] border-black bg-white p-3.5 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-4 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
                   >
                     <Link
                       href={
@@ -1328,7 +1328,7 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
           <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                 Browse
@@ -1358,11 +1358,11 @@ export default function CreatorsHubPage({
           )}
         </SurfacePanel>
 
-        <SurfacePanel
+          <SurfacePanel
           id="creator-list"
           appearance="light"
           accent="blue"
-          className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+          className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -1399,8 +1399,8 @@ export default function CreatorsHubPage({
             />
           </SurfacePanel>
         ) : (
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <SurfacePanel appearance="light" accent="blue" className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 xl:gap-4">
               {filteredCreators.map((creator) => {
                 const leadSeries = getCreatorLeadSeries(creator);
                 const creatorGenres = Array.isArray(creator?.topGenres)

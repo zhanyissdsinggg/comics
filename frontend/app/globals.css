@@ -64,7 +64,7 @@
   --gush-text-body-sm: 0.875rem;
   --gush-leading-display: 0.94;
   --gush-leading-copy: 1.7;
-  --gush-mobile-bottom-nav-height: 5.4rem;
+  --gush-mobile-bottom-nav-height: 5.9rem;
 }
 
 html.dark {
@@ -183,6 +183,18 @@ main {
 
   html {
     font-size: 16px;
+  }
+
+  :root {
+    --gush-page-gutter: 0.9rem;
+    --gush-section-gap: 1.6rem;
+  }
+
+  body::before {
+    background:
+      radial-gradient(circle at top right, rgba(255, 229, 0, 0.12), transparent 24%),
+      radial-gradient(circle at top left, rgba(255, 0, 122, 0.1), transparent 28%);
+    opacity: 0.78;
   }
 }
 

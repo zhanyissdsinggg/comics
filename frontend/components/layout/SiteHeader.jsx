@@ -166,12 +166,12 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
         className={`sticky top-0 z-40 border-b-[3px] transition-all duration-500 ease-out ${
           scrolled
-            ? "border-[#ffe500] bg-[rgba(0,0,0,0.96)] shadow-[0_10px_0_0_rgba(255,229,0,1)] backdrop-blur-xl"
-            : "border-[#ffe500] bg-[rgba(0,0,0,0.92)] shadow-[0_6px_0_0_rgba(255,229,0,1)] backdrop-blur-lg"
+            ? "border-[#ffe500] bg-[rgba(0,0,0,0.96)] shadow-[0_8px_0_0_rgba(255,229,0,1)] backdrop-blur-xl md:shadow-[0_10px_0_0_rgba(255,229,0,1)]"
+            : "border-[#ffe500] bg-[rgba(0,0,0,0.92)] shadow-[0_4px_0_0_rgba(255,229,0,1)] backdrop-blur-lg md:shadow-[0_6px_0_0_rgba(255,229,0,1)]"
         }`}
       >
         <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
-          <div className="flex min-h-[62px] items-center gap-2 py-2 sm:min-h-[68px] sm:gap-4 sm:py-2.5 lg:gap-6">
+          <div className="flex min-h-[56px] items-center gap-2 py-1.5 sm:min-h-[68px] sm:gap-4 sm:py-2.5 lg:gap-6">
             <HeaderLogo variant={variant} />
             <HomeProvider>
               <HeaderNav variant={variant} />
