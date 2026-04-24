@@ -117,7 +117,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "membership") {
-    return "Available now";
+      return "Ready to read";
   }
 
   if (firstState.primaryState === "points") {
