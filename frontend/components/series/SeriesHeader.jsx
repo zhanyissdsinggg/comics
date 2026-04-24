@@ -49,6 +49,14 @@ function summarizeSeriesDescription(text, fallback) {
   return `${source.slice(0, 117).trimEnd()}...`;
 }
 
+function getLatestLabel(latestEpisode, updatedAt) {
+  if (latestEpisode?.releasedAt) {
+    return formatUpdateLabel(latestEpisode.releasedAt);
+  }
+
+  return formatUpdateLabel(updatedAt);
+}
+
 function formatUpdateLabel(value) {
   if (!value) {
     return "Date unavailable";
@@ -105,6 +113,7 @@ export default function SeriesHeader({
     : "Coming soon";
   const creatorPresentation = getCreatorPresentation(series);
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
+  const latestUpdateLabel = getLatestLabel(latestEpisode, series.updatedAt);
   const heroFacts = [
     {
       label: "Format",
@@ -124,14 +133,12 @@ export default function SeriesHeader({
     {
       label: "Episodes",
       value: episodeCount > 0 ? `${episodeCount}` : "Soon",
-      detail: episodeCount > 0 ? "Available now" : "Coming soon",
+      detail: episodeCount > 0 ? "Ready to read" : "Coming soon",
     },
     {
       label: "Latest",
       value: latestEpisodeValue,
-      detail: latestEpisode?.releasedAt
-        ? formatUpdateLabel(latestEpisode.releasedAt)
-        : formatUpdateLabel(series.updatedAt),
+      detail: latestUpdateLabel,
     },
   ];
   const primaryActionClassName = [
@@ -288,30 +295,30 @@ export default function SeriesHeader({
               </div>
             </div>
             <div className="space-y-3 border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] sm:p-5 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                  Public credit
-                </p>
-                <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
-                  {creatorPresentation.value}
-                </p>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                    Creator
+                  </p>
+                  <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
+                    {creatorPresentation.value}
+                  </p>
                 <p className="mt-3 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
                   {creatorHref ? "Open creator page." : creatorPresentation.detail}
                 </p>
               </div>
 
-              <div className="grid gap-3 border-t-[3px] border-black pt-3 sm:grid-cols-2">
-                <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
-                    Read lane
-                  </p>
-                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
-                    {isCompleted ? "Full run" : "Latest updates"}
-                  </p>
-                </div>
-                <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
-                    Latest
+                <div className="grid gap-3 border-t-[3px] border-black pt-3 sm:grid-cols-2">
+                  <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                      Reading
+                    </p>
+                    <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
+                      {isCompleted ? "Full run" : "Ongoing"}
+                    </p>
+                  </div>
+                  <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
+                      Latest
                   </p>
                   <p className="mt-2 text-sm font-black uppercase tracking-[0.04em]">
                     {latestEpisodeValue}

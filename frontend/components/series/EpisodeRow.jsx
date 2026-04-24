@@ -166,9 +166,6 @@ function EpisodeRow({
   const hasCustomEpisodeTitle =
     Boolean(episode?.title) && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title);
   const episodeNumberLabel = `Episode ${episode?.number}`;
-  const episodeDisplayTitle = hasCustomEpisodeTitle
-    ? `${episodeNumberLabel} - ${episode.title}`
-    : episodeNumberLabel;
   const episodeHeading = hasCustomEpisodeTitle
     ? episode.title
     : episodeNumberLabel;
@@ -197,6 +194,9 @@ function EpisodeRow({
         : accessState.kind === "membership"
           ? accessState.supportLabel || ""
           : "";
+  const isLastReadEpisode = progress?.lastEpisodeId === episode?.id;
+  const helperLabel =
+    isLastReadEpisode && progressMetaLabel ? progressMetaLabel : supportDetail;
 
   useEffect(() => {
     if (modalState?.type !== "UNLOCK" || modalState?.view !== "packs") {
@@ -398,7 +398,7 @@ function EpisodeRow({
                     {accessState.stateLabel}
                   </span>
                 ) : null}
-                {progress?.lastEpisodeId === episode?.id ? (
+                {isLastReadEpisode ? (
                   <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
                     Last read
                   </span>
@@ -420,7 +420,7 @@ function EpisodeRow({
                   {accessState.stateLabel}
                 </span>
               ) : null}
-              {progress?.lastEpisodeId === episode?.id ? (
+              {isLastReadEpisode ? (
                 <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
                   Last read
                 </span>
@@ -428,13 +428,13 @@ function EpisodeRow({
             </div>
           )}
 
-          {supportDetail && supportDetail !== rowHelperText ? (
+          {helperLabel && helperLabel !== rowHelperText ? (
             <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
-              {supportDetail}
+              {helperLabel}
             </p>
           ) : null}
 
-          {progress?.lastEpisodeId === episode?.id ? (
+          {isLastReadEpisode ? (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
               <div
                 className="h-full rounded-full bg-[var(--gush-accent,#3157d6)]"
