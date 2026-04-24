@@ -295,12 +295,12 @@ export default function SeriesHeader({
                 <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
                   {creatorPresentation.value}
                 </p>
-                <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
+                <p className="mt-3 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
                   {creatorHref ? "Open creator page." : creatorPresentation.detail}
                 </p>
               </div>
 
-              <div className="grid gap-3 border-t-[3px] border-black pt-3">
+              <div className="grid gap-3 border-t-[3px] border-black pt-3 sm:grid-cols-2">
                 <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                     Read lane
@@ -337,7 +337,7 @@ export default function SeriesHeader({
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-black/68">
+                      <p className="mt-2 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
                         {item.detail}
                       </p>
                     </Link>
@@ -352,7 +352,7 @@ export default function SeriesHeader({
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
                       </p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-black/68">
+                      <p className="mt-2 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
                         {item.detail}
                       </p>
                     </div>

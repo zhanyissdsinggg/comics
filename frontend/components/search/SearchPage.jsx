@@ -1211,16 +1211,11 @@ export default function SearchPage() {
           >
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
-                Search desk
+                Search
               </p>
               <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                {query ? "Lead match" : "Start fast"}
+                {query ? "Best match" : "Start here"}
               </h2>
-              <p className="mt-3 text-sm font-semibold leading-7 text-white/90">
-                {query
-                  ? "Refine the current query, jump into the lead title, or pivot into a stronger shelf."
-                  : "Use hot terms, filters, and the lead pick to get into reading without dead clicks."}
-              </p>
             </div>
 
             {leadSearchResult ? (
@@ -1253,7 +1248,7 @@ export default function SearchPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
-                      {query ? "Closest read" : "Lead title"}
+                      {query ? "Top result" : "Lead title"}
                     </p>
                     <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
                       {leadSearchResult.title}
@@ -1270,16 +1265,11 @@ export default function SearchPage() {
             ) : (
               <div className="border-[3px] border-black bg-white p-4 text-black shadow-[6px_6px_0_0_rgba(255,229,0,1)]">
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
-                  Live term
+                  Search
                 </p>
                 <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
-                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Browse the shelf"}
+                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Open a shelf"}
                 </h3>
-                <p className="mt-3 text-sm font-semibold leading-6 text-black/70">
-                  {query
-                    ? "Use filters to widen the match."
-                    : "Open a hot term or jump into a curated shelf."}
-                </p>
               </div>
             )}
 
@@ -1328,7 +1318,7 @@ export default function SearchPage() {
         {shouldShowEventHub ? (
           <StorefrontEventHub
             eyebrow={query ? "Search picks" : "Featured"}
-            title={query ? "Open the lead match." : "Popular now."}
+            title={query ? "Top result." : "Popular now."}
             description=""
             events={searchEventCards}
             appearance="light"
@@ -1350,9 +1340,9 @@ export default function SearchPage() {
             accent="amber"
           >
             <SearchSectionHeader
-              eyebrow="Browse next"
+              eyebrow="More to read"
               title={recoPanelTitle}
-              description="If the direct result set is thin, these shelves keep the search flow moving."
+              description=""
               actions={
                 <div className="flex gap-2">
                   <button
@@ -1419,7 +1409,7 @@ export default function SearchPage() {
               <SearchSectionHeader
                 eyebrow="Results"
                 title={query ? `Results for "${query}"` : "Catalog"}
-                description="Use filters only when you need them. The default grid stays focused on getting you into a title fast."
+                description=""
                 meta={`${total.toLocaleString()} match${total === 1 ? "" : "es"}`}
                 actions={
                   <>
@@ -1503,7 +1493,7 @@ export default function SearchPage() {
                     No direct match
                   </p>
                   <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    Try a wider search.
+                    Try another search.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -1546,7 +1536,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=featured")}
                       className={secondaryButtonClass}
                     >
-                      Browse Series
+                      Open Featured
                     </button>
                   )}
                   {completedPick ? (
@@ -1580,7 +1570,7 @@ export default function SearchPage() {
                       }
                       className={secondaryButtonClass}
                     >
-                      Browse Completed
+                      Open Completed
                     </button>
                   )}
                   {freeStartPick ? (
@@ -1603,7 +1593,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=start-here")}
                       className={accentButtonClass}
                     >
-                      Browse First Picks
+                      Open First Picks
                     </button>
                   )}
                 </div>

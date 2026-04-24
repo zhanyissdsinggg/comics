@@ -385,8 +385,6 @@ function EpisodeRow({
     >
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="min-w-0 w-full">
-          <span className="sr-only">{episodeDisplayTitle}</span>
-
           {hasCustomEpisodeTitle ? (
             <>
               <div className="flex flex-wrap items-center justify-center gap-2">

@@ -697,10 +697,10 @@ function HomeContent({ initialSearchParams = {} }) {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => router.push("/search")}
+                      onClick={() => router.push("/rankings")}
                       className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:w-auto sm:px-6 sm:text-base sm:shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
                     >
-                      Browse
+                      Open Featured
                     </button>
                   </div>
 
