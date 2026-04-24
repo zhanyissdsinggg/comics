@@ -128,7 +128,7 @@ export default function SeriesHeader({
       value: isCompleted
         ? "Completed"
         : capitalize(series.status || "updating"),
-      detail: isCompleted ? "Full run" : "Ongoing",
+      detail: isCompleted ? "Full run" : "New chapters",
     },
     {
       label: "Episodes",
