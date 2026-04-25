@@ -57,6 +57,13 @@ export default function ReaderTopBar({
   const lightLockedButtonClass =
     "border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-700 shadow-[0_10px_24px_rgba(244,63,94,0.1)]";
 
+  const canOpenToc = typeof onOpenToc === "function";
+  const canBookmark = typeof onAddBookmark === "function";
+  const canToggleNight = typeof onToggleNight === "function";
+  const canToggleLayout = typeof onToggleLayout === "function";
+  const canPrev = typeof onPrev === "function";
+  const canNext = typeof onNext === "function";
+
   return (
     <header
       className={`sticky top-0 z-40 backdrop-blur-xl shadow-glass ${
@@ -103,29 +110,33 @@ export default function ReaderTopBar({
         </div>
 
         <div className="flex basis-full flex-wrap items-center justify-center gap-2 sm:basis-auto sm:justify-end">
-          <button
-            type="button"
-            onClick={onOpenToc}
-            className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-              isNightMode
-                ? "border-neutral-800 text-neutral-200"
-                : lightButtonClass
-            }`}
-            aria-label="Chapters"
-          >
-            Chapters
-          </button>
-          <button
-            type="button"
-            onClick={onAddBookmark}
-            className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-              isNightMode
-                ? "border-neutral-800 text-neutral-200"
-                : lightButtonClass
-            }`}
-          >
-            Save
-          </button>
+          {canOpenToc ? (
+            <button
+              type="button"
+              onClick={onOpenToc}
+              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
+                isNightMode
+                  ? "border-neutral-800 text-neutral-200"
+                  : lightButtonClass
+              }`}
+              aria-label="Chapters"
+            >
+              Chapters
+            </button>
+          ) : null}
+          {canBookmark ? (
+            <button
+              type="button"
+              onClick={onAddBookmark}
+              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
+                isNightMode
+                  ? "border-neutral-800 text-neutral-200"
+                  : lightButtonClass
+              }`}
+            >
+              Save
+            </button>
+          ) : null}
           <ShareButton
             url={shareUrl}
             title={`${title} - ${episodeLabel}`}
@@ -147,25 +158,27 @@ export default function ReaderTopBar({
               Display
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              setNightState((current) => !current);
-              onToggleNight?.();
-            }}
-            aria-pressed={nightState}
-            className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-              nightState
-                ? isNightMode
-                  ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
-                  : lightActiveButtonClass
-                : isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-              }`}
-          >
-            Night {nightState ? "On" : "Off"}
-          </button>
+          {canToggleNight ? (
+            <button
+              type="button"
+              onClick={() => {
+                setNightState((current) => !current);
+                onToggleNight?.();
+              }}
+              aria-pressed={nightState}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
+                nightState
+                  ? isNightMode
+                    ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
+                    : lightActiveButtonClass
+                  : isNightMode
+                    ? "border-neutral-800 text-neutral-200"
+                    : lightButtonClass
+                }`}
+            >
+              Night {nightState ? "On" : "Off"}
+            </button>
+          ) : null}
           {onToggleAutoScroll ? (
             <button
               type="button"
@@ -187,58 +200,70 @@ export default function ReaderTopBar({
               Auto {autoScrollState ? "On" : "Off"}
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={onToggleLayout}
-            disabled={disableLayoutToggle}
-            className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-              disableLayoutToggle
-                ? isNightMode
-                  ? "border-neutral-900 text-neutral-600"
-                  : lightMutedButtonClass
-                : isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
+          {canToggleLayout ? (
+            <button
+              type="button"
+              onClick={onToggleLayout}
+              disabled={disableLayoutToggle}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
+                disableLayoutToggle
+                  ? isNightMode
+                    ? "border-neutral-900 text-neutral-600"
+                    : lightMutedButtonClass
+                  : isNightMode
+                    ? "border-neutral-800 text-neutral-200"
+                    : lightButtonClass
+                }`}
+            >
+              {layoutMode === "horizontal" ? "Wide" : "Scroll"}
+            </button>
+          ) : null}
+          {canPrev ? (
+            <button
+              type="button"
+              onClick={onPrev}
+              aria-label="Previous episode"
+              disabled={!hasPrev}
+              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
+                hasPrev
+                  ? isNightMode
+                    ? "border-neutral-800 text-neutral-200"
+                    : lightButtonClass
+                  : isNightMode
+                    ? "border-neutral-900 text-neutral-600"
+                    : lightMutedButtonClass
+                }`}
+            >
+              Prev
+            </button>
+          ) : null}
+          {canNext ? (
+            <button
+              type="button"
+              onClick={onNext}
+              aria-label={
+                !hasNext
+                  ? "End of chapter"
+                  : nextLocked
+                    ? "Locked upcoming episode"
+                    : "Forward episode"
+              }
+              disabled={!hasNext}
+              className={`shrink-0 rounded-full px-3 py-1 text-xs ${
+                !hasNext
+                  ? isNightMode
+                    ? "border border-neutral-900 text-neutral-600"
+                    : lightMutedButtonClass
+                  : nextLocked
+                    ? lightLockedButtonClass
+                    : isNightMode
+                      ? "border border-neutral-800 text-neutral-200"
+                      : lightButtonClass
               }`}
-          >
-            {layoutMode === "horizontal" ? "Wide" : "Scroll"}
-          </button>
-          <button
-            type="button"
-            onClick={onPrev}
-            aria-label="Previous episode"
-            disabled={!hasPrev}
-            className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-              hasPrev
-                ? isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-                : isNightMode
-                  ? "border-neutral-900 text-neutral-600"
-                  : lightMutedButtonClass
-              }`}
-          >
-            Prev
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            aria-label={!hasNext ? "End of chapter" : nextLocked ? "Locked upcoming episode" : "Forward episode"}
-            disabled={!hasNext}
-            className={`shrink-0 rounded-full px-3 py-1 text-xs ${
-              !hasNext
-                ? isNightMode
-                  ? "border border-neutral-900 text-neutral-600"
-                  : lightMutedButtonClass
-                : nextLocked
-                ? lightLockedButtonClass
-                : isNightMode
-                  ? "border border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-            }`}
-          >
-            {!hasNext ? "End" : nextLocked ? "Locked" : "Next"}
-          </button>
+            >
+              {!hasNext ? "End" : nextLocked ? "Locked" : "Next"}
+            </button>
+          ) : null}
         </div>
       </div>
     </header>
