@@ -1090,6 +1090,17 @@ async function seedInteractiveStories() {
 }
 
 async function main() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "1") {
+    console.error(
+      [
+        "Refusing to run full seed in production without explicit override.",
+        "If you only need the demo smoke routes, run: npm run seed:demo",
+        "If you truly intend to seed a production database, set ALLOW_PROD_SEED=1 and rerun.",
+      ].join("\n"),
+    );
+    process.exit(1);
+  }
+
   console.log("seeding backend fixtures...");
   await seedSeries();
   await seedEpisodes();
