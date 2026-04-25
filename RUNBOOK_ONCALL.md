@@ -17,6 +17,8 @@
    - `GET /api/meta/version`
    - `GET /api/health/live`
    - `GET /api/series?adult=0`
+   - `GET /api/series/demo-series?adult=0`
+   - `GET /api/episode?seriesId=demo-series&episodeId=demo-episode`
    - `GET /`
    - `GET /admin`
 3. Check latest automated reports:
@@ -40,6 +42,7 @@ npm --prefix frontend run smoke:routes
 $env:BACKEND_URL='https://www.gushcomics.com'
 $env:FRONTEND_URL='https://www.gushcomics.com'
 npm run ops:post-deploy
+npm run ops:reader-live
 npm run ops:oncall-watchdog
 ```
 
@@ -136,6 +139,25 @@ $env:EXPECT_BACKEND_COMMIT='<target_backend_commit>'
 $env:EXPECT_FRONTEND_COMMIT='<target_frontend_commit>'
 npm run ops:rollback-verify
 ```
+
+## Seeding Demo Routes (Production)
+Railway's UI may not expose a shell/exec console on all plans. Use Railway CLI to run the demo-only seed safely.
+
+```powershell
+cd "c:/Users/86133/Downloads/tappytoon-nextjs"
+
+# One-time: login and link (interactive)
+railway login
+railway link
+
+# Demo-only seed (safe in production)
+railway run -- npm --prefix backend run seed:demo
+```
+
+Verify:
+- `GET /api/series/demo-series?adult=0` -> 200
+- `GET /api/episode?seriesId=demo-series&episodeId=demo-episode` -> 200
+- `GET /read/demo-series/demo-episode` -> contents drawer opens
 
 ## Post-incident Record
 - Incident start/end time

@@ -61,6 +61,7 @@ async function run() {
   }
 
   await runStep("post-deploy", npmCommand, npmArgs("ops:post-deploy"), env);
+  await runStep("reader-live-smoke", npmCommand, npmArgs("ops:reader-live"), env);
   await runStep("security-baseline", npmCommand, npmArgs("ops:security-baseline"), env);
   await runStep("watchdog", npmCommand, npmArgs("ops:oncall-watchdog"), env);
   await runStep("admin-session", npmCommand, npmArgs("ops:admin-smoke"), env);

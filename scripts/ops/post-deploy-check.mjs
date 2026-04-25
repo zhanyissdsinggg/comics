@@ -198,6 +198,15 @@ function buildFrontendAuditSpecs(seriesCatalog) {
         },
   ];
 
+  // Demo route must be stable in production so we always have a reliable reader smoke target.
+  const demoSeriesId = String(process.env.OPS_SMOKE_SERIES_ID || "demo-series").trim() || "demo-series";
+  specs.push({
+    route: `/series/${demoSeriesId}`,
+    required: ["Demo Series"],
+    requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
+    forbidden: LEGACY_TERMS,
+  });
+
   for (const seriesId of ["series-008", "series-010", "series-005"]) {
     const series = getSeriesById(seriesCatalog, seriesId);
     if (!series) {
@@ -333,6 +342,9 @@ async function run() {
     .filter(Boolean)
     .map(ensureLeadingSlash);
 
+  const smokeSeriesId = String(process.env.OPS_SMOKE_SERIES_ID || "demo-series").trim() || "demo-series";
+  const smokeEpisodeId = String(process.env.OPS_SMOKE_EPISODE_ID || "demo-episode").trim() || "demo-episode";
+
   const backendPaths = [
     { path: "/api/health", required: true },
     { path: "/api/health/live", required: false },
@@ -340,6 +352,12 @@ async function run() {
     { path: "/api/health/detail", required: requireAdvancedHealth },
     { path: "/api/meta/version", required: true },
     { path: "/api/series?adult=0", required: true },
+    // Keep a stable demo reader target in prod so UI smoke tests always have a known-good story.
+    { path: `/api/series/${encodeURIComponent(smokeSeriesId)}?adult=0`, required: true },
+    {
+      path: `/api/episode?seriesId=${encodeURIComponent(smokeSeriesId)}&episodeId=${encodeURIComponent(smokeEpisodeId)}`,
+      required: true,
+    },
   ];
 
   const latencyByRoute = new Map();
