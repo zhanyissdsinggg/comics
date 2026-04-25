@@ -102,7 +102,7 @@ export default function MobileBottomNav() {
       data-mobile-bottom-nav="1"
       className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom,0px))] md:hidden"
     >
-      <div className="mx-auto grid max-w-[720px] grid-cols-4 gap-1 rounded-[1.75rem] border-[3px] border-[#ffe500] bg-black/96 px-1.5 py-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.35),0_6px_0_0_rgba(255,229,0,1)] backdrop-blur-xl">
+      <div className="mx-auto grid max-w-[720px] grid-cols-4 gap-1 border-2 border-[#FFE500] bg-black px-1.5 py-1.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-xl">
         {TAB_ITEMS.map((item) => {
           const isActive = item.isActive(pathname);
           const Icon = item.icon;
@@ -127,23 +127,23 @@ export default function MobileBottomNav() {
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[1.15rem] px-1.5 py-2 text-center transition-all duration-200",
+                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-all duration-150",
                 isActive
-                  ? "border-[2px] border-black bg-[#ffe500] text-black shadow-[2px_2px_0_0_rgba(255,255,255,0.18)]"
-                  : "text-white/48 hover:bg-white/8 hover:text-white",
+                  ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "text-white/70 hover:bg-white/10 hover:text-white",
               )}
             >
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-[#ff007a] opacity-100" : "bg-transparent",
+                  isActive ? "bg-black opacity-100" : "bg-transparent",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />
               <span
                 className={cn(
                   "text-[10px] leading-none",
-                  isActive ? "font-black uppercase tracking-[0.05em]" : "font-semibold uppercase tracking-[0.04em]",
+                  isActive ? "font-semibold uppercase tracking-[0.08em]" : "font-medium uppercase tracking-[0.06em]",
                 )}
               >
                 {item.label}

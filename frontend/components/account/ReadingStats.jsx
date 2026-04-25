@@ -116,8 +116,10 @@ const ReadingStats = React.memo(() => {
         {statCards.map((card, index) => (
           <div
             key={card.label}
-            className={`rounded-[24px] border-[3px] border-black px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] ${
-              card.highlighted || index === 0 ? "bg-[#ffe500]" : "bg-white"
+            className={`rounded-[24px] border px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)] ${
+              card.highlighted || index === 0
+                ? "border-black/10 bg-[#f6f7f9]"
+                : "border-black/10 bg-white"
             }`}
           >
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
@@ -134,7 +136,7 @@ const ReadingStats = React.memo(() => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[24px] border-[3px] border-black bg-[#fff6cf] p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[24px] border border-black/10 bg-[#f6f7f9] p-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
             Milestones
           </p>
@@ -143,7 +145,7 @@ const ReadingStats = React.memo(() => {
               achievements.map((achievement) => (
                 <span
                   key={achievement}
-                  className="border-[3px] border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                  className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
                 >
                   {achievement}
                 </span>
@@ -156,11 +158,14 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        <div className="rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
             Reading note
           </p>
-          <p className="mt-3 text-sm font-semibold leading-7 text-black/72">
+          <h3 className="mt-3 text-base font-black tracking-[-0.02em] text-black">
+            Keep your next read closer than the settings.
+          </h3>
+          <p className="mt-2 text-sm font-semibold leading-7 text-black/72">
             {tip}
           </p>
         </div>

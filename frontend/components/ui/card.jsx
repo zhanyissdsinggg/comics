@@ -8,7 +8,7 @@ function Card({ className, size = "default", ...props }) {
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden border-[3px] border-black bg-[color:var(--gush-surface-strong)] py-4 text-sm text-[color:var(--gush-ink-strong)] shadow-[var(--gush-shadow-card)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
+        "group/card flex flex-col gap-4 overflow-hidden border-2 border-black bg-white py-4 text-sm text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
         className,
       )}
       {...props}
@@ -83,7 +83,7 @@ function CardFooter({ className, ...props }) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center border-t-[3px] border-[color:var(--gush-border-strong)] bg-[#fffdf7] p-5 group-data-[size=sm]/card:p-4",
+        "flex items-center border-t-2 border-black bg-white p-5 group-data-[size=sm]/card:p-4",
         className,
       )}
       {...props}

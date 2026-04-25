@@ -21,12 +21,12 @@ export default function OfflineNotice() {
 
   return (
     <div className="pointer-events-none fixed inset-x-4 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-40 flex justify-center sm:top-[calc(env(safe-area-inset-top,0px)+5rem)]">
-      <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 border-[3px] border-black bg-white px-4 py-2.5 text-sm shadow-[8px_8px_0_0_rgba(255,0,122,1)]">
+      <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-[24px] border border-black/10 bg-white px-4 py-2.5 text-sm shadow-[0_20px_40px_rgba(15,23,42,0.14)]">
         <div
-          className={`flex h-8 w-8 flex-shrink-0 items-center justify-center border-[3px] border-black ${
+          className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl border border-black/10 ${
             online
-              ? "bg-[#d9fff0] text-black"
-              : "bg-[#fff6cf] text-black"
+              ? "bg-emerald-50 text-black"
+              : "bg-amber-50 text-black"
           }`}
         >
           {online ? <Wifi size={16} /> : <WifiOff size={16} />}

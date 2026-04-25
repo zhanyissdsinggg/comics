@@ -2,8 +2,8 @@ import InteractiveStoryPage from "../../../../components/interactive/Interactive
 import { createPageMetadata } from "../../../../lib/seo";
 
 export const metadata = createPageMetadata({
-  title: "Interactive Story",
-  description: "Read structured interactive fiction with branching choices.",
+  title: "Interactive",
+  description: "Read interactive fiction with branching choices.",
   path: "/series",
   robots: {
     index: false,

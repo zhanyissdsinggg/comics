@@ -20,7 +20,7 @@ export default function CommerceSuccessBanner({
 
   return (
     <div
-      className={`relative overflow-hidden border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] ${className}`}
+      className={`relative overflow-hidden rounded-[30px] border border-black/10 bg-white p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)] ${className}`}
     >
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -39,7 +39,7 @@ export default function CommerceSuccessBanner({
               {notice.metaItems.map((item) => (
                 <span
                   key={item}
-                  className={`${storefrontInfoCardClass} px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] shadow-[4px_4px_0_0_rgba(0,0,0,1)]`}
+                  className={`${storefrontInfoCardClass} px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]`}
                 >
                   {item}
                 </span>

@@ -18,14 +18,16 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   const toneMap = {
     neutral:
-      "border-[3px] border-black bg-[#dffcff] text-black/70",
-    success: "border-[3px] border-black bg-[#d9fff0] text-black/70",
-    error: "border-[3px] border-black bg-[#ffe7ec] text-black/70",
+      "rounded-[22px] border border-sky-200/70 bg-sky-50 text-black/70 shadow-[0_12px_24px_rgba(125,211,252,0.16)]",
+    success:
+      "rounded-[22px] border border-emerald-200/70 bg-emerald-50 text-black/70 shadow-[0_12px_24px_rgba(16,185,129,0.12)]",
+    error:
+      "rounded-[22px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-black/70 shadow-[0_12px_24px_rgba(244,63,94,0.1)]",
   };
 
   return (
     <div
-      className={`border-[3px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}
+      className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
     >
       {title ? (
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
@@ -53,7 +55,7 @@ function ResetPageContent() {
 
   const hasToken = Boolean(token);
   const inputClassName =
-    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fffef7] focus:shadow-none";
+    "w-full rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-black/32 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)]";
 
   const handleSendResetLink = async () => {
     const normalizedEmail = String(email || "").trim();
@@ -61,8 +63,7 @@ function ResetPageContent() {
       setStatus({
         tone: "error",
         title: "Enter a valid email",
-        message:
-          "Use the address attached to your account so we can send a fresh password reset link.",
+        message: "Use your account email.",
       });
       return;
     }
@@ -76,14 +77,13 @@ function ResetPageContent() {
       setStatus({
         tone: "success",
         title: "Check your inbox",
-        message:
-          "If that address is registered, we just sent a fresh password reset link. Open it on this device to finish in one step.",
+        message: "If that address is registered, we sent a fresh reset link.",
       });
     } else {
       setStatus({
         tone: "error",
         title: "We could not send the link",
-        message: response.error || "Please wait a moment and try again.",
+        message: response.error || "Retry in a moment.",
       });
     }
     setSubmitting(false);
@@ -94,8 +94,7 @@ function ResetPageContent() {
       setStatus({
         tone: "error",
         title: "This reset link is missing",
-        message:
-          "Request a fresh password reset email and reopen the newest link.",
+        message: "Request a new reset email.",
       });
       return;
     }
@@ -104,7 +103,7 @@ function ResetPageContent() {
       setStatus({
         tone: "error",
         title: "Choose a longer password",
-        message: "Use at least 6 characters so the new password can be saved.",
+        message: "Use at least 6 characters.",
       });
       return;
     }
@@ -116,8 +115,7 @@ function ResetPageContent() {
       setStatus({
         tone: "success",
         title: "Password updated",
-        message:
-          "Redirecting you to sign in so you can jump straight back into your library.",
+        message: "Redirecting you to sign in.",
       });
       setTimeout(() => router.push("/?openLogin=1"), 1100);
     } else {
@@ -129,7 +127,7 @@ function ResetPageContent() {
           ? "This link has expired"
           : "We could not reset the password",
         message: shouldRefreshLink
-          ? "Request a fresh email below and open the newest reset link."
+          ? "Request a new email below."
           : message,
       });
       if (shouldRefreshLink) {
@@ -144,12 +142,10 @@ function ResetPageContent() {
     <EmailLinkActionShell
       eyebrow="Account access"
       title="Reset your password"
-      description="Get back into your account in a minute."
-      asideTitle="What to do"
+      description=""
+      asideTitle="Next"
       asideBody={
-        hasToken
-          ? "Your reset link is already here. Choose a new password and we'll send you back to sign in."
-          : "Enter your account email and we'll send a fresh reset link. For security, the message looks the same whether the address exists or not."
+        hasToken ? "Set a new password." : "Send a reset link."
       }
     >
       <div className="space-y-6">
@@ -158,21 +154,19 @@ function ResetPageContent() {
             Password reset
           </p>
           <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-            {hasToken ? "Choose a new password" : "Need another reset email?"}
+            {hasToken ? "Choose a new password" : "Send another email?"}
           </h2>
           <p className="mt-3 text-sm leading-6 text-black/68">
-            {hasToken
-              ? "The reset link is already loaded from the email you opened."
-              : "If the old link expired or opened on another device, send a new one here."}
+            {hasToken ? "Link ready." : "Enter your email."}
           </p>
         </div>
 
         {hasToken ? (
           <div className="space-y-4">
             <StorefrontInfoCard
-              title="Reset link loaded"
-              description="Reset link loaded from your email. No code field required."
-              className="bg-[#fff6cf]"
+              title="Link loaded"
+              description=""
+              className="border-black/10 bg-[#f6f7f9]"
             />
             <input
               type="password"
@@ -200,7 +194,7 @@ function ResetPageContent() {
               }}
               className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
             >
-              Send me a new reset email
+              Send a new email
             </button>
           </div>
         ) : (
@@ -230,21 +224,21 @@ function ResetPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="Need another route?" className="bg-[#dffcff]">
+        <StorefrontInfoCard title="More" className="border-black/10 bg-[#f6f7f9]">
           <p className="mt-3 text-sm leading-6 text-black/70">
-            Signed in already? Head back to{" "}
+            Go to{" "}
             <Link
               href="/account"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
             >
-              your account
+              Account
             </Link>
-            . Need help with a missing email? Contact{" "}
+            .{" "}
             <Link
               href="/support"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#ff007a]"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
             >
-              us
+              Support
             </Link>
             .
           </p>
@@ -258,7 +252,7 @@ export default function ResetPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen overflow-hidden bg-black text-black" />
+        <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black" />
       }
     >
       <ResetPageContent />

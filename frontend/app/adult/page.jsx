@@ -3,7 +3,7 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "18+ Series",
-  description: "Browse mature titles after your age check is complete.",
+  description: "18+ titles.",
   path: "/adult",
   robots: {
     index: false,

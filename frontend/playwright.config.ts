@@ -28,8 +28,8 @@ export default defineConfig({
   ],
   webServer: {
     command: usePrebuiltServer
-      ? "npx next start -p 4173 -H 127.0.0.1"
-      : "npm run build && npx next start -p 4173 -H 127.0.0.1",
+      ? "cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1"
+      : "cross-env NEXT_DIST_DIR=.next-playwright npm run build && cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: usePrebuiltServer ? 60000 : 180000,

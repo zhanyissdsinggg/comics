@@ -5,8 +5,7 @@ import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Comics",
-  description:
-    "Browse original comics, recent releases, and finished series on Gush.",
+  description: "Comics on Gush.",
   path: "/comics",
 });
 
@@ -18,7 +17,7 @@ export default async function Page({ searchParams }) {
   return (
     <ErrorBoundary
       title="Failed to load comics page"
-      message="We couldn't load the comics page. Please try again."
+      message="We couldn't load the comics page."
     >
       <ComicsPage
         initialSearchParams={initialSearchParams}

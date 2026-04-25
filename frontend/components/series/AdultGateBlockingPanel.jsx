@@ -22,12 +22,12 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
   const trustItems = [
     "Private by default",
     "Age-gated before access",
-    "You can turn 18+ browsing off anytime",
+    "18+ can be turned off anytime",
   ];
 
   return (
     <section className="flex min-h-[50vh] items-center justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
+      <div className="w-full max-w-2xl rounded-[32px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.12)] sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/45">
@@ -40,12 +40,12 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
               {description}
             </p>
           </div>
-          <div className="rounded-[24px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
               Access
             </p>
             <p className="mt-2 text-sm leading-6 text-black/72">
-              Sign in and confirm age if needed.
+              Sign in and confirm age.
             </p>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="rounded-full border-[2px] border-black bg-[#eefcff] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-black/68"
+              className="rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1.5 text-xs font-semibold tracking-[0.03em] text-black/68"
             >
               {item}
             </span>
@@ -65,7 +65,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           <button
             type="button"
             onClick={onOpenModal}
-            className="rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
           >
             {ADULT_GATE_ACTION_LABELS[status] || "Continue"}
           </button>
@@ -76,16 +76,16 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
                 event.preventDefault();
                 navigateWithDocument("/");
               }}
-              className="inline-flex items-center justify-center rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]"
+              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
             >
-              Browse standard catalog
+              Catalog
             </a>
           ) : (
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]"
+              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
             >
-              Browse standard catalog
+              Catalog
             </Link>
           )}
         </div>

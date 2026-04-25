@@ -19,25 +19,24 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
     return null;
   }
 
+  const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
+
   return (
-    <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-3 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+    <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#00a6c7]">
-            Opened from
+          <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
+            From
           </p>
           <p className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-black">
-            {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-black/58">
-            {discoveryContext.returnHint}
+            {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
           </p>
         </div>
         {onReturnToSource ? (
           <button
             type="button"
             onClick={onReturnToSource}
-            className="border-[3px] border-black bg-white px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
+            className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.03em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
           >
             {discoveryContext.returnLabel}
           </button>
@@ -50,10 +49,10 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
 function MetaPill({ children, accent = false }) {
   return (
     <span
-      className={`border-[3px] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
+      className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] ${
           accent
-            ? "border-black bg-[#00e5ff] text-black"
-            : "border-black bg-white text-black/64"
+            ? "border-black/10 bg-[#f6f7fb] text-black"
+            : "border-black/10 bg-white text-black/64"
         }`}
     >
       {children}
@@ -114,7 +113,7 @@ export default function EndOfEpisodeOverlay({
   const primaryLabel = showPackPrimary
     ? `Unlock ${formatPackLabel(packOffer?.episodes || 3)}`
     : singlePrice === 0
-      ? "Read next free"
+      ? "Read free"
       : `Unlock next for ${formatPointsLabel(singlePrice)}`;
   const secondaryLabel = showPackPrimary
     ? singlePrice === 0
@@ -127,15 +126,15 @@ export default function EndOfEpisodeOverlay({
   const pricingNote = pricing?.appliedDailyFree
     ? "Free now"
     : pricing?.appliedCoupon?.label ||
-      (pricing?.discountPct ? `Member ${pricing.discountPct}% off` : "");
+      (pricing?.discountPct ? `${pricing.discountPct}% off` : "");
   const packNote =
     packPricing?.appliedCoupon?.label ||
-    (packPricing?.discountPct ? `Member ${packPricing.discountPct}% off` : "");
+    (packPricing?.discountPct ? `${packPricing.discountPct}% off` : "");
   const subscriptionNote =
-    "Members get free unlocks, shorter waits, and better prices.";
-  const upsellBadge = showSubscribe ? "Recommended" : "";
+    "Free reads. Lower prices.";
+  const upsellBadge = showSubscribe ? "Best" : "";
   const nextEpisodeStatusLabel = nextUnlocked
-    ? "Ready to read now"
+    ? "Ready now"
     : showTtf && isReady
       ? "Free now"
       : showTtf && !isReady
@@ -164,14 +163,15 @@ export default function EndOfEpisodeOverlay({
     onPackOffer?.(packOffer);
   };
   const primaryButtonClass = highlightPrimaryAction
-    ? "border-[3px] border-black bg-[#ff007a] text-white shadow-[0_0_0_4px_rgba(255,0,122,0.18),6px_6px_0_0_rgba(0,0,0,1)]"
-    : "border-[3px] border-black bg-[#ff007a] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
+    ? "rounded-full border border-black bg-black text-white shadow-[0_0_0_4px_rgba(15,23,42,0.08),0_16px_36px_rgba(15,23,42,0.18)]"
+    : "rounded-full border border-black bg-black text-white shadow-[0_16px_36px_rgba(15,23,42,0.18)] hover:bg-black/90";
   const secondaryButtonClass =
-    "border-[3px] border-black bg-white text-black transition-all shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
+    "rounded-full border border-black/12 bg-white text-black transition-all shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]";
+  const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
-      <div className="w-full max-w-2xl border-[3px] border-black bg-[#f5f1ea] p-5 shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
+      <div className="w-full max-w-2xl rounded-[32px] border border-black/10 bg-white p-5 shadow-[0_28px_70px_rgba(15,23,42,0.16)]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.26em] text-black/55">
@@ -189,7 +189,7 @@ export default function EndOfEpisodeOverlay({
           <ShareButton
             url={typeof window !== "undefined" ? window.location.href : ""}
             title={`${seriesTitle || "Series"} - ${episodeTitle || "Episode"}`}
-            description="I just finished reading this episode! Check it out."
+            description=""
             className=""
           />
         </div>
@@ -201,10 +201,10 @@ export default function EndOfEpisodeOverlay({
           />
 
           {nextUnlocked ? (
-            <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+            <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#00a6c7]">
+                  <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
                     Ready now
                   </p>
                   <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-black">
@@ -214,8 +214,8 @@ export default function EndOfEpisodeOverlay({
                     <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
                     <MetaPill>
                       {isSubscriber
-                        ? "Member perks active"
-                        : "Ready when you are"}
+                        ? "Member"
+                        : "Ready"}
                     </MetaPill>
                   </div>
                 </div>
@@ -227,7 +227,7 @@ export default function EndOfEpisodeOverlay({
                     onClick={onNext}
                     className={`px-4 py-2 text-sm font-semibold transition ${primaryButtonClass}`}
                   >
-                    Read next
+                    Next
                   </button>
                   {onViewSeries ? (
                     <button
@@ -235,17 +235,17 @@ export default function EndOfEpisodeOverlay({
                       onClick={onViewSeries}
                       className={`px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
                     >
-                      Open series
+                      Series
                     </button>
                   ) : null}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+            <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#00a6c7]">
+                  <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
                     Continue
                   </p>
                   <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-black">
@@ -263,16 +263,16 @@ export default function EndOfEpisodeOverlay({
                       <button
                         type="button"
                         onClick={onClaim}
-                        className="mt-4 border-[3px] border-black bg-[#00e5ff] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00cde4] hover:shadow-none"
+                        className="mt-4 rounded-full border border-black/12 bg-[#f6f7fb] px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
                       >
-                        Open now
+                        Claim now
                       </button>
                     ) : (
                       <div
                         className={`mt-4 ${
                           countdownVariant === "B"
-                            ? "flex flex-col gap-2 border-[3px] border-black bg-[#fff6c7] px-4 py-3 text-xs font-semibold text-black/66 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                            : "flex flex-wrap items-center gap-3 border-[3px] border-black bg-[#fff6c7] px-4 py-2 text-xs font-semibold text-black/66 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                            ? "flex flex-col gap-2 rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-xs font-semibold text-black/66 shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
+                            : "flex flex-wrap items-center gap-3 rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-2 text-xs font-semibold text-black/66 shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
                         }`}
                       >
                         <span>Free in {formatted || "--:--:--"}</span>
@@ -299,7 +299,7 @@ export default function EndOfEpisodeOverlay({
                   </button>
 
                   {showPackPrimary && packSavingsText ? (
-                    <p className="text-xs font-black uppercase tracking-[0.08em] text-[#00a6c7]">
+                    <p className={`text-xs font-black uppercase tracking-[0.08em] ${accentTextClass}`}>
                       {packSavingsText}
                     </p>
                   ) : null}
@@ -316,14 +316,12 @@ export default function EndOfEpisodeOverlay({
                       >
                         {STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
-                          <span className="ml-2 text-[10px] font-black uppercase tracking-[0.08em] text-[#00a6c7]">
+                          <span className={`ml-2 text-[10px] font-black uppercase tracking-[0.08em] ${accentTextClass}`}>
                             {upsellBadge}
                           </span>
                         ) : null}
                       </button>
-                      <p className="text-xs font-medium leading-5 text-black/58">
-                        {subscriptionNote}
-                      </p>
+                      <p className="text-xs font-medium leading-5 text-black/58">{subscriptionNote}</p>
                     </>
                   ) : (
                     <>
@@ -351,7 +349,7 @@ export default function EndOfEpisodeOverlay({
                 onClick={onViewSeries}
                 className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
-                Open series
+                Series
               </button>
             ) : null}
             {onOpenStore ? (

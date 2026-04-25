@@ -144,7 +144,7 @@ export default function StorePage({
   const sourcePath = routeAttribution?.sourcePath || "/store";
   const isSubscriber = Boolean(subscription?.active);
   const returnLabel = getReturnLabel(returnTo, sourceEntry);
-  const launchAccessLabel = isSignedIn ? "Open account" : "Sign in";
+  const launchAccessLabel = isSignedIn ? "Account" : "Sign in";
   const handleLaunchAccess = () => {
     if (isSignedIn) {
       router.push("/account");
@@ -361,15 +361,13 @@ export default function StorePage({
     setRetryPackageId("");
 
     if (!isSignedIn) {
-      setErrorMessage("Sign in to buy points and keep them on your account.");
+      setErrorMessage("Sign in to buy points.");
       openAuthPrompt();
       return;
     }
 
     if (!purchaseActionsEnabled) {
-      setErrorMessage(
-        "Point-pack checkout opens later. Sign in or contact billing support.",
-      );
+      setErrorMessage("Point-pack checkout opens later.");
       return;
     }
 
@@ -424,7 +422,7 @@ export default function StorePage({
     }
 
     if (response.status === 401) {
-      setErrorMessage("Sign in to buy points and keep them on your account.");
+      setErrorMessage("Sign in to buy points.");
       setRetryPackageId("");
       openAuthPrompt();
       return;
@@ -434,7 +432,7 @@ export default function StorePage({
     setErrorMessage(
       getFriendlyMessage(
         response.error,
-        response.message || "Top up failed. Please try again.",
+        response.message || "Top up failed.",
       ),
     );
   };
@@ -453,7 +451,7 @@ export default function StorePage({
     }
 
     if (!isSignedIn) {
-      setCouponMessage("Sign in to redeem codes on your account.");
+      setCouponMessage("Sign in to redeem.");
       openAuthPrompt();
       return;
     }
@@ -512,26 +510,26 @@ export default function StorePage({
   );
 
   const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black/12 bg-white px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
   const fieldClass =
-    "flex-1 border-[3px] border-black bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.06em] text-black outline-none transition focus:bg-[#fff6cf]";
+    "flex-1 rounded-full border border-black/10 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.06em] text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition focus:border-black/14 focus:bg-[#fcfcfd]";
   const quietCardClass =
-    "rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]";
+    "rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]";
   const compareShellClass =
-    "overflow-hidden rounded-[30px] border-[3px] border-black bg-[#fff6cf] shadow-[8px_8px_0_0_rgba(0,0,0,1)]";
+    "overflow-hidden rounded-[30px] border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Point packs"
             title={
-              purchaseActionsEnabled ? "Buy points." : "Point packs"
+              purchaseActionsEnabled ? "Buy points." : "Point packs preview."
             }
             description={
               purchaseActionsEnabled
@@ -571,7 +569,7 @@ export default function StorePage({
                 }
                 className={primaryButtonClass}
               >
-                {purchaseActionsEnabled ? "Buy point packs" : launchAccessLabel}
+                {purchaseActionsEnabled ? "Point packs" : launchAccessLabel}
               </button>
               {subscriptionStats ? (
                 <button
@@ -627,7 +625,7 @@ export default function StorePage({
                 }
                 className={secondaryButtonClass}
               >
-                Billing support
+                Support
               </button>
             </NetworkFallback>
           ) : (
@@ -641,15 +639,44 @@ export default function StorePage({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Before you buy
+                Overview
               </p>
               <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                {purchaseActionsEnabled
-                  ? "Simple checkout."
-                  : "Details."}
+                {purchaseActionsEnabled ? "Checkout." : "Details."}
               </h2>
             </div>
           </div>
+
+          {!purchaseActionsEnabled ? (
+            <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+              <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-black">
+                Point packs open soon.
+              </h3>
+              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                Prices are visible. Checkout is not live yet.
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                Receipts show up in Purchases after launch.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildSupportPath({
+                        topic: "billing",
+                        context: "Point packs are in preview. Checkout is not live yet.",
+                      }),
+                    )
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Billing support
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <div className="grid gap-3 md:grid-cols-3">
             {[
               {
@@ -666,7 +693,7 @@ export default function StorePage({
               },
               {
                 label: "Help",
-                detail: "Need help? Contact support.",
+                detail: "Support.",
               },
             ].map((item) => (
               <div key={item.label} className={quietCardClass}>
@@ -694,14 +721,14 @@ export default function StorePage({
               }
               className={secondaryButtonClass}
             >
-              Billing support
+              {purchaseActionsEnabled ? "Support" : "Billing support"}
             </button>
             <button
               type="button"
               onClick={() => router.push("/orders")}
               className={secondaryButtonClass}
             >
-              Receipt location
+              Orders
             </button>
           </div>
         </SurfacePanel>
@@ -726,7 +753,7 @@ export default function StorePage({
               >
                 <div>
                   <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                    Keep purchases on one account.
+                    One account.
                   </h2>
                 </div>
                 <button
@@ -742,7 +769,7 @@ export default function StorePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                    First picks
+                    Start here
                   </button>
                   <button
                     type="button"
@@ -760,27 +787,27 @@ export default function StorePage({
               appearance="light"
               accent="blue"
             >
-              <div>
-                <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                  Choose a reading model.
-                </h2>
-              </div>
+                <div>
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                    Reading options.
+                  </h2>
+                </div>
               <div className="grid gap-3">
                 <div className={quietCardClass}>
                   <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     Point packs
                   </p>
                   <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                    Buy once and unlock as you go.
+                    Buy once.
                   </p>
                 </div>
-                <div className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+                <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
                   <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
                     Membership
                   </p>
                   <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
                     {subscriptionStats
-                      ? `From ${membershipStartingPrice || "the current plan price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
+                      ? `From ${membershipStartingPrice || "current price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
                       : "Monthly plans."}
                   </p>
                 </div>
@@ -841,7 +868,7 @@ export default function StorePage({
                   <input
                     value={couponCode}
                     onChange={(event) => setCouponCode(event.target.value)}
-                    placeholder="Enter your code"
+                    placeholder="Code"
                     className={fieldClass}
                   />
                   <button
@@ -849,7 +876,7 @@ export default function StorePage({
                     onClick={handleClaim}
                     className={secondaryButtonClass}
                   >
-                    {isSignedIn ? "Redeem" : "Sign in to redeem"}
+                    {isSignedIn ? "Redeem" : "Sign in"}
                   </button>
                 </div>
                 {couponMessage ? (
@@ -860,7 +887,7 @@ export default function StorePage({
                     {coupons.map((coupon) => (
                       <span
                         key={coupon.id}
-                        className="border-[3px] border-black bg-white px-3 py-1 font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                        className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 font-semibold uppercase tracking-[0.1em] text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.05)]"
                       >
                         {coupon.label || coupon.code}
                       </span>
@@ -900,7 +927,7 @@ export default function StorePage({
                     }
                     className={secondaryButtonClass}
                   >
-                    Ask about a code
+                    Support
                   </button>
                 </div>
               </SurfacePanel>
@@ -932,7 +959,7 @@ export default function StorePage({
                     {packageComparisonRows.map((pkg) => (
                       <div
                         key={pkg.id}
-                        className="rounded-[20px] border-[3px] border-black bg-white px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                        className="rounded-[20px] border border-black/10 bg-white px-4 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
@@ -953,17 +980,17 @@ export default function StorePage({
                   <div className="hidden overflow-x-auto md:block">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b-[3px] border-black text-left text-black/55">
+                        <tr className="border-b border-black/10 text-left text-black/55">
                           <th className="px-4 py-3 font-semibold">Pack</th>
                           <th className="px-4 py-3 font-semibold">Price</th>
                           <th className="px-4 py-3 font-semibold">
                             Total points
                           </th>
                           <th className="px-4 py-3 font-semibold">Bonus</th>
-                          <th className="px-4 py-3 font-semibold">Best for</th>
+                          <th className="px-4 py-3 font-semibold">Fit</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y-[3px] divide-black/10 bg-white">
+                      <tbody className="divide-y divide-black/10 bg-white">
                         {packageComparisonRows.map((pkg) => (
                           <tr key={pkg.id}>
                             <td className="px-4 py-3 font-black uppercase tracking-[0.04em] text-black">
@@ -1005,7 +1032,7 @@ export default function StorePage({
                     statusLabel=""
                     statusNote=""
                     ctaLabel={
-                      isSignedIn ? "Get this pack" : "Sign in to get it"
+                      isSignedIn ? "Get this pack" : "Sign in"
                     }
                   />
                 </div>
@@ -1033,7 +1060,7 @@ export default function StorePage({
                   }
                   className={secondaryButtonClass}
                 >
-                  Billing support
+                  Support
                 </button>
               </div>
             ) : null}

@@ -25,7 +25,7 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
 
 const TABS = [
-  { id: "continue", label: "Continue", icon: BookOpen },
+  { id: "continue", label: "Continue Reading", icon: BookOpen },
   { id: "bookmarks", label: "Bookmarks", icon: Bookmark },
   { id: "unlocked", label: "Unlocked", icon: LockKeyhole },
 ];
@@ -122,7 +122,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-black/10 bg-white shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
         <Image
           src={coverUrl}
           alt={`Cover image for ${title}`}
@@ -137,7 +137,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border-[3px] border-black px-3 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-black/10 px-3 py-3 shadow-[0_12px_24px_rgba(15,23,42,0.08)]"
       style={{
         background:
           coverTone ||
@@ -157,13 +157,13 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
       ? "Resume"
       : item.resumeEpisodeId
         ? "Resume"
-        : "Open series";
+        : "Series";
   const metaLine = [item.summary, item.updatedLabel]
     .filter(Boolean)
     .join(" / ");
 
   return (
-    <article className="border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+    <article className="rounded-[28px] border border-black/10 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(15,23,42,0.1)]">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -179,7 +179,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black">
+                  <span className="rounded-full border border-black/10 bg-[#f6f7f9] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
                     {item.badge}
                   </span>
                 ) : null}
@@ -201,7 +201,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   ? () => onResume(item)
                   : () => onOpenSeries(item)
               }
-              className={`${storefrontPrimaryButtonClass} min-h-[42px] gap-2 bg-[#00e5ff] px-4 py-2 text-black hover:bg-[#00d2ea]`}
+              className={`${storefrontPrimaryButtonClass} min-h-[42px] gap-2 px-4 py-2`}
             >
               {actionLabel}
               <ArrowUpRight className="size-4" />
@@ -214,9 +214,9 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                 <span>{item.progressLabel}</span>
                 <span>{item.progressPercentLabel}</span>
               </div>
-              <div className="h-2 overflow-hidden border-[2px] border-black bg-white">
+              <div className="h-2 overflow-hidden rounded-full border border-black/10 bg-[#f3f4f6]">
                 <div
-                  className="h-full bg-[#ff007a]"
+                  className="h-full rounded-full bg-black"
                   style={{
                     width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
                   }}
@@ -230,7 +230,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               {item.genreLine.map((genre) => (
                 <span
                   key={`${item.seriesId}-${genre}`}
-                  className="border-[2px] border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black/70"
+                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/70"
                 >
                   {genre}
                 </span>
@@ -249,7 +249,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse border-[3px] border-black bg-[#fff6cf]"
+          className="h-[124px] animate-pulse rounded-[28px] border border-black/10 bg-[#f6f7f9]"
         />
       ))}
     </div>
@@ -375,7 +375,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               progress.updatedAt || historyEntry?.createdAt,
             ),
             progressPercent,
-            progressLabel: `Resume Chapter ${currentChapter || "?"}`,
+            progressLabel: `Read Chapter ${currentChapter || "?"} of ${totalChapters || "?"}`,
             progressPercentLabel: `${Math.round(progressPercent * 100)}%`,
             resumeEpisodeId: progress.lastEpisodeId,
             updatedAt: Math.max(
@@ -515,20 +515,18 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     () => ({
       continue: {
         items: continueItems,
-        emptyTitle: "Nothing in progress yet",
-        emptyDescription:
-          "Start a series and your next chapter will show up here.",
+        emptyTitle: "Nothing in progress",
+        emptyDescription: "Start a series.",
       },
       bookmarks: {
         items: bookmarkItems,
-        emptyTitle: "No saved series yet",
-        emptyDescription: "Save a few titles to build your shelf.",
+        emptyTitle: "No saved series",
+        emptyDescription: "Save a few titles.",
       },
       unlocked: {
         items: unlockedItems,
-        emptyTitle: "No unlocked series yet",
-        emptyDescription:
-          "Unlocked chapters will collect here once you open them.",
+        emptyTitle: "No unlocked series",
+        emptyDescription: "Unlocked titles appear here.",
       },
     }),
     [bookmarkItems, continueItems, unlockedItems],
@@ -591,10 +589,10 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             My Library
           </p>
           <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-            Your shelf.
+            Your shelf
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-            Continue, saves, and unlocked chapters.
+            Continue, saves, and unlocks.
           </p>
         </div>
 
@@ -610,14 +608,14 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!viewerSignedIn ? (
-        <div className="border-[3px] border-black bg-[#ffe500] p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.06em] text-black">
                 Sign in for your shelf
               </p>
               <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Keep progress, saves, and unlocked chapters on one account.
+                Keep progress, saves, and unlocks together.
               </p>
             </div>
             <button
@@ -648,15 +646,15 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   aria-selected={isActive}
                   aria-controls={`account-library-panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex min-h-[42px] items-center gap-2 border-[3px] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] transition-all ${
+                  className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                     isActive
-                      ? "border-black bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                      : "border-black bg-white text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                      ? "border border-black bg-black text-white shadow-[0_12px_24px_rgba(15,23,42,0.16)]"
+                      : "border border-black/10 bg-white text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
                   }`}
                 >
                   <Icon className="size-4" />
                   <span>{tab.label}</span>
-                  <span className={`border-[2px] px-2 py-0.5 text-[10px] font-black tracking-[0.08em] ${isActive ? "border-white bg-white text-black" : "border-black bg-[#fff6cf] text-black/72"}`}>
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-white/20 bg-white text-black" : "border-black/10 bg-[#f6f7f9] text-black/72"}`}>
                     {signedInCount[tab.id]}
                   </span>
                 </button>
@@ -684,8 +682,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="border-[3px] border-dashed border-black bg-[#fff6cf] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center border-[3px] border-black bg-white text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+              <div className="rounded-[28px] border border-dashed border-black/14 bg-[#f6f7f9] px-5 py-8 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-black/10 bg-white text-black shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-black">

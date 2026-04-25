@@ -6,9 +6,9 @@ import Skeleton from "../../components/common/Skeleton";
 const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <main className="mx-auto w-full max-w-[1320px] space-y-5 px-4 py-10">
-        <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
             Search
           </p>
@@ -18,26 +18,26 @@ const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <a
               href="/comics"
-              className="border-[3px] border-black bg-[#00e5ff] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black"
+              className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/72"
             >
               Comics
             </a>
             <a
               href="/novels"
-              className="border-[3px] border-black bg-[#fff6c7] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black"
+              className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/72"
             >
               Novels
             </a>
             <a
               href="/creators"
-              className="border-[3px] border-black bg-white px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black"
+              className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/72"
             >
               Creators
             </a>
           </div>
         </section>
-        <Skeleton className="h-14 w-full rounded-[24px] border-[3px] border-black bg-white shadow-[5px_5px_0_0_rgba(0,0,0,1)]" />
-        <Skeleton className="h-72 w-full rounded-[30px] border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" />
+        <Skeleton className="h-14 w-full rounded-[24px] border border-black/10 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.06)]" />
+        <Skeleton className="h-72 w-full rounded-[30px] border border-black/10 bg-white shadow-[0_20px_46px_rgba(15,23,42,0.08)]" />
       </main>
     </div>
   ),

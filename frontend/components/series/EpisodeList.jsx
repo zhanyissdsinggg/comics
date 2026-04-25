@@ -34,9 +34,9 @@ export default function EpisodeList({
 }) {
   const { getProgress } = useProgressStore();
   const neutralChipClass =
-    "rounded-full border-[2px] border-black bg-[#fff6cf] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/60";
+    "rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/60";
   const filterControlClass =
-    "min-h-[48px] rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-bold uppercase tracking-[0.05em] text-black outline-none transition hover:bg-[#fffdf7] focus:outline-none";
+    "min-h-[48px] rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black outline-none transition hover:border-black/18 hover:bg-black/[0.03] focus:outline-none";
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filter, setFilter] = useState("all");
   const unlockedEpisodeIds = useMemo(
@@ -146,15 +146,15 @@ export default function EpisodeList({
 
   return (
     <section
-      className="mt-5 overflow-hidden border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:mt-8 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+      className="mt-5 overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:mt-8"
       data-wallet-total={walletTotal}
     >
-      <div className="border-b-[3px] border-black px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
+      <div className="border-b border-black/10 px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
               <span>Episodes</span>
-              <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black">
+                <span className="rounded-full border border-black/10 bg-[#f8f9fb] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black">
                 {totalEpisodes.toLocaleString()}
               </span>
             </div>
@@ -221,14 +221,14 @@ export default function EpisodeList({
 
       <div className="px-4 py-4 sm:px-6 sm:py-6">
         {sortedEpisodes.length === 0 ? (
-          <div className="border-[3px] border-black bg-[#fff7cf] p-6 text-sm text-black/68 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] p-6 text-sm text-black/68 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
             <p className="text-base font-black uppercase tracking-[0.03em] text-black">
               No episodes yet.
             </p>
             <p className="mt-2 text-sm font-semibold text-black/55">
               {filter === "all"
                 ? "Episodes will appear here once available."
-                : "Try another filter."}
+                : "Pick another filter."}
             </p>
           </div>
         ) : (

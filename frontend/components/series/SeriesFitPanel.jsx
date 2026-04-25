@@ -47,7 +47,7 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
     return {
       label: "Continue reading",
       href: continueHref,
-      hint: "Jump straight back in from where you left off.",
+      hint: "Pick up where you left off.",
     };
   }
 
@@ -93,22 +93,22 @@ function getStarterLane(series, leadGenre) {
   if (freeEpisodeCount > 0) {
     return {
       label: "Easy first try",
-      body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} make this easy to sample before you commit.`,
+      body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} to start.`,
     };
   }
 
   if (status === "completed") {
     return {
       label: "Built for a binge",
-      body: "A completed run is best if you want the full story without waiting for another update.",
+      body: "A completed run with no wait between chapters.",
     };
   }
 
   return {
     label: "Good to come back to",
     body: leadGenre
-      ? `This title works well for readers who like coming back for more ${leadGenre.toLowerCase()} over time.`
-      : "This title works well for readers who like coming back over time instead of finishing everything in one sitting.",
+      ? `A ${leadGenre.toLowerCase()} pick worth coming back to.`
+      : "A title worth coming back to.",
   };
 }
 
@@ -121,9 +121,9 @@ export default function SeriesFitPanel({
 }) {
   const router = useRouter();
   const primaryButtonClass =
-    "rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90";
   const secondaryButtonClass =
-    "rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-[0.08em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff7cf]";
+    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]";
 
   const fitModel = useMemo(() => {
     const leadGenre =
@@ -180,7 +180,7 @@ export default function SeriesFitPanel({
 
   const fitCards = [
     {
-      label: "Best for",
+      label: "Fit",
       value: fitModel.cadence,
       body: fitModel.bestFor,
     },
@@ -204,19 +204,15 @@ export default function SeriesFitPanel({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
-            Before you start
+            Fit
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
             Is this your kind of read?
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/65">
-            The best title pages make it easy to feel the vibe, the commitment,
-            and the easiest way in.
-          </p>
         </div>
-        <div className="rounded-[26px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Best way in
+            Start
           </p>
           <p className="mt-3 text-sm leading-6 text-black/75">
             <span className="font-black uppercase tracking-[0.04em] text-black">
@@ -231,7 +227,7 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+            className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
           >
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
               {card.label}
@@ -245,9 +241,9 @@ export default function SeriesFitPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[26px] border-[3px] border-black bg-[#eefcff] px-4 py-4">
+        <div className="rounded-[26px] border border-black/10 bg-[#f6f7fb] px-4 py-4">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Best if you want
+            Read style
           </p>
           <p className="mt-3 text-sm leading-7 text-black/70">
             {series?.title || "This title"} works best when the reader wants{" "}
@@ -260,7 +256,7 @@ export default function SeriesFitPanel({
             .
           </p>
         </div>
-        <div className="rounded-[26px] border-[3px] border-black bg-[#fff1f7] px-4 py-4">
+        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             What to compare next
           </p>
@@ -273,9 +269,9 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[26px] border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Recommended next step
+            Next
           </p>
           <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <p className="max-w-3xl text-sm leading-7 text-black/70">
@@ -308,7 +304,7 @@ export default function SeriesFitPanel({
             onClick={() => router.push(creatorHref)}
             className={secondaryButtonClass}
           >
-            More by this creator
+            Creator
           </button>
         ) : null}
         <button
@@ -316,7 +312,7 @@ export default function SeriesFitPanel({
           onClick={() => router.push("/rankings?type=popular&window=week")}
           className={secondaryButtonClass}
         >
-          See what's hot
+          Popular
         </button>
       </div>
     </SurfacePanel>

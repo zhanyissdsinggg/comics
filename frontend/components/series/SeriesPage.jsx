@@ -38,8 +38,8 @@ import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
+    <section className="mt-6 rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)] sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-black/8 pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-4 w-10 rounded-full" />
@@ -682,9 +682,9 @@ export default function SeriesPage({
     );
   }, [episodes]);
   const primaryButtonClass =
-    "rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-200 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all duration-200 hover:bg-black/90";
   const secondaryButtonClass =
-    "rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black transition-colors hover:-translate-y-0.5 hover:bg-[#eefcff]";
+    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-colors hover:border-black/18 hover:bg-black/[0.03]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -799,10 +799,10 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <section className="border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
+          <section className="rounded-[30px] border border-black/10 bg-white p-5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
               <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
               <div className="space-y-4">
@@ -832,7 +832,7 @@ export default function SeriesPage({
               </div>
             </div>
           </section>
-          <section className="mt-6 border-[3px] border-black bg-white p-5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <section className="mt-6 rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
             <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-28 rounded-full" />
@@ -859,10 +859,10 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
-          <div className="border-[3px] border-black bg-[#fff7cf] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <div className="rounded-[28px] border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
               Series unavailable
             </p>
@@ -875,14 +875,14 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?view=featured")}
                 className={primaryButtonClass}
               >
-                Open series
+                Featured
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
                 className={secondaryButtonClass}
               >
-                Explore Comics
+                Comics
               </button>
               <button
                 type="button"
@@ -902,7 +902,7 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
@@ -924,7 +924,7 @@ export default function SeriesPage({
               onClick={() => router.push("/rankings?view=featured")}
               className={secondaryButtonClass}
             >
-              Browse Series
+              Featured
             </button>
             <button
               type="button"
@@ -943,7 +943,7 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
 
         <AdultGateBlockingPanel
@@ -975,7 +975,7 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
@@ -989,11 +989,11 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-4 border-[3px] border-black bg-[#fff6c7] px-4 py-3 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:px-5">
+          <div className="mb-4 rounded-[22px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] px-4 py-3 shadow-[0_14px_30px_rgba(15,23,42,0.06)] sm:px-5">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff007a]">
-                  {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
+                  {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                 </p>
                 <h2 className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black sm:text-base">
                   {discoveryContext.title}
@@ -1002,7 +1002,7 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={handleReturnToDiscovery}
-                className="shrink-0 border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                className="shrink-0 rounded-full border border-black/12 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.02em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
               >
                 {discoveryContext.returnLabel}
               </button>
@@ -1025,22 +1025,22 @@ export default function SeriesPage({
         />
 
         {interactiveStory ? (
-          <section className="border-[3px] border-black bg-[#00e5ff] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <section className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/60">
-                  Interactive Story
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/50">
+                  Interactive
                 </p>
                 <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black">
-                  Interactive mode is live for this title.
+                  Interactive is live.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
-                className="border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
+                className="rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
               >
-                Open interactive mode
+                Open
               </button>
             </div>
           </section>

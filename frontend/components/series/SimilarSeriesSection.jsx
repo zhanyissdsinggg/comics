@@ -35,9 +35,9 @@ export default function SimilarSeriesSection({ seriesId }) {
     error,
   } = useSimilarRecommendations(seriesId, 6);
   const cardClass =
-    "group overflow-hidden rounded-[28px] border-[3px] border-black bg-white text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#fffdf7] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]";
+    "group overflow-hidden rounded-[28px] border border-black/10 bg-white text-left shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-black/15 hover:bg-black/[0.02]";
   const chipClass =
-    "rounded-full border-[2px] border-black bg-[#fff6cf] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/60";
+    "rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/60";
 
   if (loading) {
     return (
@@ -47,7 +47,7 @@ export default function SimilarSeriesSection({ seriesId }) {
             More stories
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black">
-            More to read.
+            More to try.
           </h2>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-12">
@@ -74,11 +74,8 @@ export default function SimilarSeriesSection({ seriesId }) {
             More stories
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black">
-            More to read.
+            More to try.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/65">
-            A few nearby titles if you want the same mood or pace next.
-          </p>
         </div>
       </div>
 
@@ -107,7 +104,7 @@ export default function SimilarSeriesSection({ seriesId }) {
                   isLeadCard ? "aspect-[1.2/1] w-full" : "aspect-[3/4] w-full"
                 }
               />
-              <div className="space-y-2 border-t-[3px] border-black p-4">
+              <div className="space-y-2 border-t border-black/10 p-4">
                 <h3
                   className={`line-clamp-2 font-black uppercase tracking-[0.03em] text-black ${isLeadCard ? "text-base" : "text-sm"}`}
                 >
@@ -126,8 +123,8 @@ export default function SimilarSeriesSection({ seriesId }) {
                   </div>
                 ) : null}
                 {isLeadCard ? (
-                  <p className="pt-1 text-xs font-black uppercase tracking-[0.22em] text-[#ff007a]">
-                    Open title
+                  <p className="pt-1 text-xs font-black uppercase tracking-[0.22em] text-black/45">
+                    Read
                   </p>
                 ) : null}
               </div>

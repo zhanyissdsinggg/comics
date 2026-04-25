@@ -108,11 +108,11 @@ function CoverFallback({
           backgroundImage: `radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.16) 0%, transparent 24%), radial-gradient(circle at 82% 18%, ${artDirection.accentSoft} 0%, transparent 26%), linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.52) 100%)`,
         }}
       />
-      <div className="absolute inset-3 border-[3px]" style={{ borderColor: artDirection.border }} />
+      <div className="absolute inset-3 rounded-[22px] border" style={{ borderColor: artDirection.border }} />
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
-            <span className="inline-flex whitespace-nowrap border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black">
+            <span className="inline-flex whitespace-nowrap rounded-full border border-black/10 bg-[#f6f7f9] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-black">
               {minimalChipLabel}
             </span>
           ) : null}
@@ -120,18 +120,18 @@ function CoverFallback({
       ) : (
         <div className="absolute left-3 right-4 top-3 flex flex-wrap items-start gap-2">
           {artDirection.badgeLabel ? (
-            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap border-[2px] border-black bg-[#ffe500] py-1 pl-2.5 pr-3 text-[10px] font-black uppercase tracking-[0.18em] text-black">
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-black/10 bg-[#f6f7f9] py-1 pl-2.5 pr-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-black">
               {artDirection.badgeLabel}
             </span>
           ) : null}
           <div className="order-2 flex w-full flex-wrap gap-2">
             {shouldShowTypeLabel ? (
-              <span className="border-[2px] border-black bg-[#00e5ff] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
+              <span className="rounded-full border border-sky-200/70 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-700">
                 {artDirection.typeLabel}
               </span>
             ) : null}
             {artDirection.primaryGenre ? (
-              <span className="border-[2px] border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black">
+              <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-black">
                 {artDirection.primaryGenre}
               </span>
             ) : null}
@@ -140,20 +140,20 @@ function CoverFallback({
       )}
       <div className="absolute inset-x-0 top-[25%] flex justify-center">
         <div
-          className="relative h-28 w-40 border-[3px] bg-black/10 shadow-[6px_6px_0_0_rgba(0,0,0,0.45)] backdrop-blur-[2px]"
+          className="relative h-28 w-40 rounded-[28px] border bg-black/10 shadow-[0_18px_36px_rgba(0,0,0,0.24)] backdrop-blur-[2px]"
           style={{ borderColor: artDirection.border }}
         />
         <div
-          className="absolute mt-6 h-20 w-20 rounded-full border-[3px] bg-white/10 blur-[0.5px]"
+          className="absolute mt-6 h-20 w-20 rounded-full border bg-white/10 blur-[0.5px]"
           style={{ borderColor: artDirection.border }}
         />
       </div>
       {isMinimalCard ? (
-        <div className="absolute inset-x-4 bottom-4 h-16 border-[3px] backdrop-blur-[3px]" style={{ borderColor: artDirection.border, background: `linear-gradient(180deg, rgba(8, 12, 18, 0.08) 0%, ${artDirection.panel} 100%)` }} />
+        <div className="absolute inset-x-4 bottom-4 h-16 rounded-[22px] border backdrop-blur-[3px]" style={{ borderColor: artDirection.border, background: `linear-gradient(180deg, rgba(8, 12, 18, 0.08) 0%, ${artDirection.panel} 100%)` }} />
       ) : (
         <div className="absolute inset-x-4 bottom-4">
           <div
-            className="border-[3px] px-4 py-4 backdrop-blur-[3px]"
+            className="rounded-[24px] border px-4 py-4 backdrop-blur-[3px]"
             style={{
               borderColor: artDirection.border,
               background: `linear-gradient(180deg, rgba(8, 12, 18, 0.12) 0%, ${artDirection.panel} 100%)`,
@@ -169,11 +169,15 @@ function CoverFallback({
               </div>
             ) : null}
             {title ? (
-              <p className={`${shouldShowKicker ? "mt-2" : ""} line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]`.trim()}>
+              <p
+                className={`${shouldShowKicker ? "mt-2" : ""} line-clamp-3 text-lg font-semibold leading-tight text-white drop-shadow-[0_10px_28px_rgba(0,0,0,0.42)]`.trim()}
+              >
                 {title}
               </p>
             ) : (
-              <p className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/80`.trim()}>
+              <p
+                className={`${shouldShowKicker ? "mt-2" : ""} text-sm font-semibold uppercase tracking-[0.18em] text-white/80`.trim()}
+              >
                 {chipLabel}
               </p>
             )}
@@ -276,7 +280,7 @@ export default function Cover({
               priority={false}
             />
             <div className="pointer-events-none absolute inset-0" style={overlayStyle} />
-            <div className="pointer-events-none absolute inset-0 border-[3px] border-black/20" />
+            <div className="pointer-events-none absolute inset-0 border border-black/20" />
           </>
         )}
       </div>

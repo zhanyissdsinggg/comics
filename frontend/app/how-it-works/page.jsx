@@ -18,26 +18,26 @@ import {
 import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
-  title: "How Gush Works",
-  description: "Free reads, points, and plans on Gush.",
+  title: "Access",
+  description: "Free reads, points, and plans.",
   path: "/how-it-works",
 });
 
 const HOW_IT_WORKS_STEPS = [
   {
-    eyebrow: "1. Browse",
-    title: "Start free where a title allows it.",
-    body: "Some titles start free or with previews.",
+    eyebrow: "1. Start",
+    title: "Start free.",
+    body: "",
   },
   {
     eyebrow: "2. Unlock",
-    title: "Use points to unlock more episodes.",
-    body: "Use points for locked episodes.",
+    title: "Unlock.",
+    body: "",
   },
   {
     eyebrow: "3. Keep reading",
-    title: "Keep progress and purchases on your account.",
-    body: "Sign in to keep progress, purchases, and settings together.",
+    title: "Keep reading.",
+    body: "",
   },
 ];
 
@@ -61,12 +61,11 @@ const FAQ_ITEMS = [
   },
   {
     question: "How do I cancel membership?",
-    answer:
-      "Open Account to manage or end your plan. Use Support if anything looks wrong.",
+    answer: "Open Account to manage or end your plan.",
   },
   {
     question: "Where do I find receipts and order IDs?",
-    answer: "Open Orders for packs, plans, charges, and order IDs.",
+    answer: "Open Orders.",
   },
 ];
 
@@ -74,18 +73,18 @@ export default function HowItWorksPage() {
   const structuredData = [
     buildBreadcrumbStructuredData([
       { name: "Home", path: "/" },
-      { name: "How It Works", path: "/how-it-works" },
+      { name: "Access", path: "/how-it-works" },
     ]),
     buildFaqStructuredData({
       path: "/how-it-works",
-      name: `How Gush Works | ${siteConfig.siteName}`,
+      name: `Access | ${siteConfig.siteName}`,
       description: "Free reads, points, and plans on Gush.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <StructuredDataScript id="how-it-works-jsonld" data={structuredData} />
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -93,9 +92,9 @@ export default function HowItWorksPage() {
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow="How it works"
-            title="How reading works."
-            description="Free where available. Then points or plans."
+            eyebrow="Access"
+            title="Access."
+            description=""
             stats={[
               {
                 label: "Free access",
@@ -127,7 +126,7 @@ export default function HowItWorksPage() {
 
           <StorefrontDesk
             eyebrow="Overview"
-            title="Free, then points or plans."
+            title="Access."
             actions={
               <>
                 <Link href="/orders" className={storefrontPrimaryButtonClass}>
@@ -150,7 +149,6 @@ export default function HowItWorksPage() {
               <StorefrontSectionHeading
                 eyebrow={step.eyebrow}
                 title={step.title}
-                description={step.body}
               />
             </SurfacePanel>
           ))}
@@ -159,19 +157,14 @@ export default function HowItWorksPage() {
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <StorefrontSectionHeading eyebrow="Access" title="Access." />
-            <div className="space-y-4 text-sm font-medium leading-7 text-black/68">
-              <p>Free access depends on the title.</p>
-              <p>Locked episodes use points.</p>
-              <p>Plans renew monthly.</p>
-            </div>
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <StorefrontSectionHeading eyebrow="Billing" title="Billing." />
             <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
-              <li>Open Orders for packs, plans, and order IDs.</li>
-              <li>Open Account to manage your plan.</li>
-              <li>Use Support if a charge looks wrong.</li>
+              <li>Orders shows packs, plans, and order IDs.</li>
+              <li>Account shows your plan.</li>
+              <li>Support handles billing issues.</li>
             </ul>
             <div className="flex flex-wrap gap-3">
               <Link href="/orders" className={storefrontPrimaryButtonClass}>
@@ -188,7 +181,7 @@ export default function HowItWorksPage() {
         </section>
 
         <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
+          <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <StorefrontInfoCard

@@ -23,10 +23,10 @@ export default function StorefrontPathwaysGrid({
         <Card
           key={card.id}
           className={cn(
-            "h-full rounded-[30px] border-[3px] py-0 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5",
+            "h-full rounded-[30px] py-0 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]",
             card.accentClass ||
               (isLight
-                ? "border-black bg-white hover:bg-[#fff6cf]"
+                ? "border-black/10 bg-white hover:bg-[#fcfcfd]"
                 : "border-white/10 bg-white/[0.03]"),
           )}
         >
@@ -34,9 +34,9 @@ export default function StorefrontPathwaysGrid({
             <Badge
               variant="outline"
               className={cn(
-                "w-fit rounded-full border-[3px] px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-current shadow-none",
+                "w-fit rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-current shadow-none",
                 isLight
-                  ? "border-black bg-[#ffe500]"
+                  ? "border-black/10 bg-[#f8fafc]"
                   : "border-white/10 bg-black/20",
               )}
             >
@@ -65,9 +65,9 @@ export default function StorefrontPathwaysGrid({
               variant="ghost"
               onClick={card.onClick}
               className={cn(
-                "mt-auto h-10 justify-start gap-2 px-0 pt-4 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
+                "mt-auto h-10 justify-start gap-2 px-0 pt-5 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
                 isLight
-                  ? "text-black/70 hover:text-[#ff007a]"
+                  ? "text-black/70 hover:text-black"
                   : "text-white hover:text-[var(--gush-accent)]",
               )}
             >

@@ -34,19 +34,19 @@ function openAuthModal() {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border-[2px] border-black bg-[#eefcff] text-black";
+    return "border border-sky-200/70 bg-sky-50 text-slate-700";
   }
   if (tone === "preview") {
-    return "border-[2px] border-black bg-white text-black";
+    return "border border-black/12 bg-white text-slate-700";
   }
   if (tone === "points") {
-    return "border-[2px] border-black bg-[#fff7cf] text-black";
+    return "border border-amber-200/70 bg-amber-50 text-slate-700";
   }
   if (tone === "locked") {
-    return "border-[2px] border-black bg-[#f3f0ea] text-black/55";
+    return "border border-black/10 bg-[#f3f4f6] text-black/50";
   }
 
-  return "border-[2px] border-black bg-[#f3f0ea] text-black/55";
+  return "border border-black/10 bg-[#f3f4f6] text-black/50";
 }
 
 function EpisodeRow({
@@ -190,7 +190,7 @@ function EpisodeRow({
       ? accessState.supportLabel || ""
       : accessState.kind === "points"
         ? accessState.supportLabel ||
-          (shortfallValue > 0 ? `Need ${shortfallValue} more points` : "")
+          (shortfallValue > 0 ? `${shortfallValue} more points` : "")
         : accessState.kind === "membership"
           ? accessState.supportLabel || ""
           : "";
@@ -229,7 +229,7 @@ function EpisodeRow({
       setModalState({
         type: "SUCCESS",
         title: "Episode unlocked",
-        description: "You're all set. Start reading.",
+        description: "",
       });
       setBusyAction("");
       return;
@@ -251,7 +251,7 @@ function EpisodeRow({
       description:
         response.status === 409
           ? "That free read is not ready yet."
-          : response.error || "We couldn't open that free read right now.",
+          : response.error || "Couldn't open that free read.",
     });
     setBusyAction("");
   };
@@ -293,7 +293,7 @@ function EpisodeRow({
       setModalState({
         type: "SUCCESS",
         title: "Episode unlocked",
-        description: "You're all set. Start reading.",
+        description: "",
       });
       setBusyAction("");
       return;
@@ -312,7 +312,7 @@ function EpisodeRow({
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Sign in to unlock this episode and keep your place.",
+        description: "Sign in to unlock it.",
       });
     } else if (response.status === 402) {
       openUnlockModal(
@@ -323,7 +323,7 @@ function EpisodeRow({
       setModalState({
         type: "ERROR",
         title: "Couldn't unlock",
-        description: response.error || "Please try again in a moment.",
+        description: response.error || "Retry in a moment.",
       });
     }
     setBusyAction("");
@@ -359,10 +359,10 @@ function EpisodeRow({
     accessState.actionKind === "claim" ||
     accessState.actionKind === "read" ||
     accessState.actionKind === "preview"
-      ? "min-h-[46px] w-full rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+      ? "min-h-[46px] w-full rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_12px_24px_rgba(15,23,42,0.14)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
       : accessState.actionKind === "subscribe"
-        ? "min-h-[46px] w-full rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:-translate-y-0.5 hover:bg-[#eefcff] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : "min-h-[46px] w-full rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#ffe500] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
+        ? "min-h-[46px] w-full rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-sky-50/70 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+        : "min-h-[46px] w-full rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
 
   const actionNode = (
     <button
@@ -381,7 +381,7 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden border-[3px] border-black bg-white p-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fffdf7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+      className="group overflow-hidden rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_48px_rgba(15,23,42,0.1)]"
     >
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="min-w-0 w-full">
@@ -399,18 +399,18 @@ function EpisodeRow({
                   </span>
                 ) : null}
                 {isLastReadEpisode ? (
-                  <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
+                  <span className="rounded-full border border-black/12 bg-[#f6f7f9] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/68">
                     Last read
                   </span>
                 ) : null}
               </div>
-              <strong className="mt-2 block text-[1.02rem] font-black uppercase tracking-[0.01em] text-black">
+              <strong className="mt-2 block text-[1.02rem] font-semibold tracking-[-0.02em] text-black">
                 {episodeHeading}
               </strong>
             </>
           ) : (
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <strong className="text-[1.02rem] font-black uppercase tracking-[0.01em] text-black">
+              <strong className="text-[1.02rem] font-semibold tracking-[-0.02em] text-black">
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
@@ -421,7 +421,7 @@ function EpisodeRow({
                 </span>
               ) : null}
               {isLastReadEpisode ? (
-                <span className="rounded-full border-[2px] border-black bg-[#ffe500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black">
+                <span className="rounded-full border border-black/12 bg-[#f6f7f9] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/68">
                   Last read
                 </span>
               ) : null}
@@ -448,7 +448,7 @@ function EpisodeRow({
 
         <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
           {sideLabel ? (
-            <p className="border-[2px] border-black bg-[#fff6cf] px-2.5 py-1 text-xs font-black uppercase tracking-[0.08em] text-black/55">
+            <p className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/55">
               {sideLabel}
             </p>
           ) : null}
@@ -521,7 +521,7 @@ function EpisodeRow({
               setModalState({
                 type: "SUCCESS",
                 title: "Episode unlocked",
-                description: "You're all set. Start reading.",
+                description: "",
               });
               setBusyAction("");
               return;

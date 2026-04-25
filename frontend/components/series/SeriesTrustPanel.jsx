@@ -68,9 +68,9 @@ export default function SeriesTrustPanel({
 }) {
   const router = useRouter();
   const primaryButtonClass =
-    "rounded-full border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90";
   const secondaryButtonClass =
-    "rounded-full border-[3px] border-black bg-white px-5 py-2.5 text-sm font-bold uppercase tracking-[0.08em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]";
+    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]";
 
   const latestEpisode = useMemo(() => getLatestEpisode(episodes), [episodes]);
   const shareUrl = useMemo(() => {
@@ -107,7 +107,7 @@ export default function SeriesTrustPanel({
       label: "Creator",
       value: creatorIdentity.displayName,
       hint: creatorHref
-        ? "View the creator page and browse related series."
+        ? "Creator."
         : creatorIdentity.detail,
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
@@ -119,12 +119,12 @@ export default function SeriesTrustPanel({
           : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0
-          ? "Readers already keeping up with this series."
+          ? "Following now."
           : views > 0
-            ? "Reader interest already building around this series."
+            ? "Reader buzz."
             : ratingCount > 0
-              ? "Ratings from readers who already tried it."
-              : "Early readers can shape the first impression.",
+              ? "Early ratings."
+              : "Finding readers.",
     },
     {
       label: "Latest chapter",
@@ -134,23 +134,23 @@ export default function SeriesTrustPanel({
           ? "Completed"
           : "Live",
       hint: latestEpisode
-        ? `Most recent visible release. Updated ${formatDateLabel(series?.updatedAt)}.`
+        ? `Updated ${formatDateLabel(series?.updatedAt)}.`
         : status === "completed"
-          ? "Finished run ready for uninterrupted reading."
+          ? "Completed."
           : `Updated ${formatDateLabel(series?.updatedAt)}.`,
     },
   ];
 
   const trustNarrative = useMemo(() => {
     if (status === "completed") {
-      return "Completed series are easier to commit to because the full story is already there to read.";
+      return "Complete and ready.";
     }
 
     if (latestEpisode) {
-      return `${formatEpisodeLabel(latestEpisode)} is the latest visible chapter, so readers can see this series is still active.`;
+      return `${formatEpisodeLabel(latestEpisode)} is live.`;
     }
 
-    return "Ongoing series feel more trustworthy when updates and reader activity are easy to spot.";
+    return "Easy to jump in.";
   }, [latestEpisode, status]);
 
   const genreLaneHref = leadGenre
@@ -165,14 +165,10 @@ export default function SeriesTrustPanel({
             At a glance
           </p>
           <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
-            Why this one feels worth the click.
+            Worth a click.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-black/65">
-            Creator, momentum, and update cadence should all be obvious before
-            someone gives a story their time.
-          </p>
         </div>
-        <div className="rounded-[26px] border-[3px] border-black bg-[#fff7cf] px-4 py-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
             Quick take
           </p>
@@ -189,7 +185,7 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition hover:-translate-y-1 hover:bg-[#fffdf7]"
+              className="rounded-[24px] border border-black/10 bg-white px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition hover:border-black/15 hover:bg-black/[0.02]"
             >
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                 {card.label}
@@ -200,14 +196,14 @@ export default function SeriesTrustPanel({
               <p className="mt-2 text-sm leading-6 text-black/65">
                 {card.hint}
               </p>
-              <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[#ff007a]">
-                More by this creator
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-black/45">
+                Creator
               </p>
             </button>
           ) : (
             <div
               key={card.label}
-              className="rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+              className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
             >
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
                 {card.label}
@@ -224,27 +220,25 @@ export default function SeriesTrustPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[26px] border-[3px] border-black bg-[#eefcff] px-4 py-4">
+        <div className="rounded-[26px] border border-black/10 bg-[#f6f7fb] px-4 py-4">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Best if you want
+            Fit
           </p>
           <p className="mt-3 text-sm leading-7 text-black/70">
-            {series?.title || "This title"} is positioned best for readers who
-            want{" "}
+            {series?.title || "This title"} works best for readers who want{" "}
             {status === "completed"
-              ? "a finished run with immediate payoff"
-              : "a title they can return to regularly"}
+              ? "a finished run"
+              : "something to follow"}
             {leadGenre ? `, especially inside ${leadGenre}` : ""}
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[26px] border-[3px] border-black bg-[#fff1f7] px-4 py-4">
+        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4">
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Easy to share
+            Share
           </p>
           <p className="mt-3 text-sm leading-7 text-black/70">
-            This page is easier to share when it already shows the creator,
-            latest update, reader interest, and a clear way to start reading.
+            Easy to pass along.
           </p>
         </div>
       </div>
@@ -262,7 +256,7 @@ export default function SeriesTrustPanel({
           onClick={() => router.push("/rankings?view=featured")}
           className={secondaryButtonClass}
         >
-          Featured Series
+          Popular
         </button>
         {onFollowToggle ? (
           <button
@@ -272,7 +266,7 @@ export default function SeriesTrustPanel({
             }
             className={secondaryButtonClass}
           >
-            {isFollowing ? "Open library" : "Save"}
+            {isFollowing ? "Library" : "Save"}
           </button>
         ) : null}
         <ShareButton

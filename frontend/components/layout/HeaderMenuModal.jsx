@@ -104,11 +104,11 @@ export default function HeaderMenuModal({
         className="absolute inset-x-0 top-0 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mx-auto max-w-[30rem] overflow-hidden border-[4px] border-black bg-white shadow-[10px_10px_0_0_rgba(255,0,122,1)]">
-          <div className="border-b-[4px] border-black bg-[#ffe500] p-4">
+        <div className="mx-auto max-w-[30rem] overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.16)]">
+          <div className="border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="inline-flex -rotate-1 border-[2px] border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#ffe500]">
+              <p className="inline-flex rounded-full border border-black/10 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
                 Menu
               </p>
               <h2 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-black">
@@ -118,7 +118,7 @@ export default function HeaderMenuModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 w-11 items-center justify-center border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:text-white hover:shadow-none"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/16 hover:bg-black/[0.03] hover:text-black"
               aria-label="Close menu"
             >
               <ChevronRight className="size-5 rotate-45" />
@@ -126,7 +126,7 @@ export default function HeaderMenuModal({
           </div>
           </div>
 
-          <div className="m-4 border-[3px] border-black bg-[#fff6cf] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+          <div className="m-4 rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]">
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -138,7 +138,7 @@ export default function HeaderMenuModal({
                       Signed in
                     </p>
                   </div>
-                  <span className="border-[2px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+                  <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/72">
                     {walletTotal.toLocaleString()} pts
                   </span>
                 </div>
@@ -161,16 +161,16 @@ export default function HeaderMenuModal({
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,
-                      "flex min-h-12 items-center justify-between gap-3 border-[3px] border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none",
+                      "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:border-black/16 hover:bg-black/[0.02]",
                       <>
                         <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center border-[2px] border-black bg-[#eefcff] text-black">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black">
                             <Icon className="size-4" />
                           </span>
                           {item.label}
                         </span>
                         {item.badge ? (
-                          <span className="border-[2px] border-black bg-[#ff007a] px-2 py-0.5 text-[10px] font-black text-white">
+                          <span className="rounded-full border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-2 py-0.5 text-[10px] font-semibold text-rose-700">
                             {item.badge}
                           </span>
                         ) : (
@@ -196,13 +196,13 @@ export default function HeaderMenuModal({
                       onClose();
                       onOpenLogin?.();
                     }}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center border-[3px] border-black bg-[#ff007a] px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-none"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black bg-black px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
                   >
                     Sign In
                   </button>
                   {renderMenuLink(
                     { label: "Help", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center border-[3px] border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none",
+                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/12 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/16 hover:bg-black/[0.03]",
                     "Help",
                   )}
                 </div>
@@ -221,15 +221,15 @@ export default function HeaderMenuModal({
                 return renderMenuLink(
                   item,
                   cn(
-                    "flex min-h-12 items-center justify-between gap-3 border-[3px] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] transition",
+                    "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border px-4 py-3 text-sm font-semibold tracking-[0.02em] transition",
                     isActive
-                      ? "border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                      : "border-black bg-white text-black/75 shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:shadow-none",
+                      ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+                      : "border-black/10 bg-white text-black/75 shadow-[0_10px_24px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.02]",
                   ),
                   <>
                     <span className="flex items-center gap-3">
                       {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center border-[2px] border-black bg-[#eefcff] text-black">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black">
                           <Icon className="size-4" />
                         </span>
                       ) : null}

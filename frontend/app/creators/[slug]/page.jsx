@@ -22,8 +22,8 @@ export async function generateMetadata({ params }) {
   return createPageMetadata({
     title: creatorName,
     description: hasCreatorItems
-      ? `Browse stories from ${creatorName} on ${siteConfig.siteName}.`
-      : "Start with the stories first while public creator credits are added title by title.",
+      ? `${creatorName} on ${siteConfig.siteName}.`
+      : "Creator.",
     path: hasCreatorItems ? buildCreatorPathFromSlug(creatorSlug) : "/creators",
     image: hasCreatorItems ? creatorPayload?.items?.[0]?.coverUrl || null : null,
   });

@@ -48,18 +48,27 @@ export default function ReaderTopBar({
     setAutoScrollState(Boolean(autoScroll));
   }, [autoScroll]);
 
+  const lightButtonClass =
+    "border border-black/10 bg-white text-black/62 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black";
+  const lightActiveButtonClass =
+    "border border-emerald-200/80 bg-[linear-gradient(180deg,#f4fff8_0%,#ecfdf3_100%)] text-emerald-700 shadow-[0_10px_24px_rgba(16,185,129,0.12)]";
+  const lightMutedButtonClass =
+    "border border-black/8 bg-[#f3f4f6] text-black/35 shadow-none";
+  const lightLockedButtonClass =
+    "border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-700 shadow-[0_10px_24px_rgba(244,63,94,0.1)]";
+
   return (
     <header
       className={`sticky top-0 z-40 backdrop-blur-xl shadow-glass ${
         isNightMode
           ? "border-b border-white/10 bg-neutral-950/80 text-neutral-100"
-          : "border-b-[3px] border-black bg-[rgba(255,255,255,0.96)] text-black shadow-[0_6px_0_0_rgba(0,0,0,1)]"
+          : "border-b border-black/8 bg-[rgba(255,255,255,0.94)] text-black shadow-[0_16px_40px_rgba(15,23,42,0.08)]"
       }`}
     >
       {typeof progress === "number" ? (
         <div
           className={`h-1 w-full ${
-            isNightMode ? "bg-neutral-900" : "bg-[#f5f1ea]"
+            isNightMode ? "bg-neutral-900" : "bg-[#f6f7f9]"
           }`}
         >
           <div
@@ -76,7 +85,7 @@ export default function ReaderTopBar({
           className={`shrink-0 rounded-full border px-2 py-1 text-xs transition-all duration-300 hover:shadow-glow-sm active:scale-95 md:px-3 ${
             isNightMode
               ? "border-neutral-800 text-neutral-200 hover:border-brand-primary/50 hover:bg-neutral-800 hover:text-brand-primary"
-              : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:text-black hover:shadow-none"
+              : lightButtonClass
             }`}
         >
           Back
@@ -100,8 +109,9 @@ export default function ReaderTopBar({
             className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
               isNightMode
                 ? "border-neutral-800 text-neutral-200"
-                : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                : lightButtonClass
             }`}
+            aria-label="Chapters"
           >
             Chapters
           </button>
@@ -111,10 +121,10 @@ export default function ReaderTopBar({
             className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
               isNightMode
                 ? "border-neutral-800 text-neutral-200"
-                : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                : lightButtonClass
             }`}
           >
-            Bookmark
+            Save
           </button>
           <ShareButton
             url={shareUrl}
@@ -129,12 +139,12 @@ export default function ReaderTopBar({
               className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
                 isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightButtonClass
               }`}
               title="Reader Settings"
               aria-label="Reader Settings"
             >
-              Settings
+              Display
             </button>
           ) : null}
           <button
@@ -148,13 +158,13 @@ export default function ReaderTopBar({
               nightState
                 ? isNightMode
                   ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
-                  : "border-[3px] border-black bg-[#d9ffe8] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightActiveButtonClass
                 : isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightButtonClass
               }`}
           >
-            Night {nightState ? "ON" : "OFF"}
+            Night {nightState ? "On" : "Off"}
           </button>
           {onToggleAutoScroll ? (
             <button
@@ -166,15 +176,15 @@ export default function ReaderTopBar({
               aria-pressed={autoScrollState}
               className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
                 autoScrollState
-                  ? isNightMode
+                ? isNightMode
                     ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
-                    : "border-[3px] border-black bg-[#d9ffe8] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                    : lightActiveButtonClass
                   : isNightMode
                     ? "border-neutral-800 text-neutral-200"
-                    : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                    : lightButtonClass
               }`}
             >
-              Auto {autoScrollState ? "ON" : "OFF"}
+              Auto {autoScrollState ? "On" : "Off"}
             </button>
           ) : null}
           <button
@@ -185,13 +195,13 @@ export default function ReaderTopBar({
               disableLayoutToggle
                 ? isNightMode
                   ? "border-neutral-900 text-neutral-600"
-                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightMutedButtonClass
                 : isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightButtonClass
               }`}
           >
-            {layoutMode === "horizontal" ? "Horizontal" : "Vertical"}
+            {layoutMode === "horizontal" ? "Wide" : "Scroll"}
           </button>
           <button
             type="button"
@@ -202,13 +212,13 @@ export default function ReaderTopBar({
               hasPrev
                 ? isNightMode
                   ? "border-neutral-800 text-neutral-200"
-                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightButtonClass
                 : isNightMode
                   ? "border-neutral-900 text-neutral-600"
-                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightMutedButtonClass
               }`}
           >
-            Previous
+            Prev
           </button>
           <button
             type="button"
@@ -219,15 +229,15 @@ export default function ReaderTopBar({
               !hasNext
                 ? isNightMode
                   ? "border border-neutral-900 text-neutral-600"
-                  : "border-[3px] border-black bg-[#f5f1ea] text-black/35 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightMutedButtonClass
                 : nextLocked
-                ? "border-[3px] border-black bg-[#ffe3ec] text-[#8f003f] shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                ? lightLockedButtonClass
                 : isNightMode
                   ? "border border-neutral-800 text-neutral-200"
-                  : "border-[3px] border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                  : lightButtonClass
             }`}
           >
-            {!hasNext ? "End" : nextLocked ? "Locked ahead" : "Forward"}
+            {!hasNext ? "End" : nextLocked ? "Locked" : "Next"}
           </button>
         </div>
       </div>

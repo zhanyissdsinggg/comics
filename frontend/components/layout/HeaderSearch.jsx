@@ -9,7 +9,7 @@ const SearchBar = dynamic(() => import("../common/SearchBar"), {
 });
 
 export default function HeaderSearch({ onSearch, variant = "default" }) {
-  const placeholder = "Search titles";
+  const placeholder = "Search";
 
   return (
     <>
@@ -17,11 +17,13 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <Link
           href="/search"
           aria-label="Open search"
-          className="inline-flex h-11 w-full items-center gap-2 border-[3px] border-[#ffe500] bg-black px-3.5 text-white shadow-[4px_4px_0_0_rgba(255,0,122,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[rgba(255,229,0,0.35)]"
+          className="inline-flex h-11 w-full items-center gap-2 border-2 border-white/20 bg-white/10 px-3.5 text-white transition-colors focus-within:border-[#FFE500]"
           title={placeholder}
         >
           <Search className="size-4" />
-          <span className="min-w-0 truncate text-sm font-black uppercase tracking-[0.06em]">Search</span>
+          <span className="min-w-0 truncate text-sm font-semibold tracking-[0.02em] text-white/80">
+            Search
+          </span>
           <span className="sr-only">{placeholder}</span>
         </Link>
       </div>
@@ -29,7 +31,7 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <SearchBar
           onSearch={onSearch}
           placeholder={placeholder}
-          variant="light"
+          variant="dark"
           showShortcut={false}
         />
       </div>

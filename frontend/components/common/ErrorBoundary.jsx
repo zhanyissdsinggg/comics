@@ -67,12 +67,12 @@ class ErrorBoundary extends Component {
       }
 
       return (
-        <div className="relative min-h-screen overflow-hidden bg-black p-4 text-black">
+        <div className="relative min-h-screen overflow-hidden bg-[#f6f7f9] p-4 text-black">
           <div className="mx-auto flex min-h-screen max-w-[1320px] items-center justify-center">
             <div className="w-full max-w-xl">
-              <div className="relative overflow-hidden rounded-[32px] border-[3px] border-black bg-white p-7 shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
+              <div className="relative overflow-hidden rounded-[32px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] p-7 shadow-[0_28px_60px_rgba(15,23,42,0.14)]">
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),transparent_32%)]" />
-                <div className="relative mb-5 inline-flex rounded-full border-[3px] border-black bg-[#ffe7ec] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/60">
+                <div className="relative mb-5 inline-flex rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-black/60">
                   Client error
                 </div>
                 <div className="relative flex items-start gap-3">
@@ -97,16 +97,16 @@ class ErrorBoundary extends Component {
                     </h3>
                     <p className="mt-3 text-sm leading-7 text-black/68">
                       {this.props.message ||
-                        "An unexpected error occurred. Please try again."}
+                        "An unexpected error occurred."}
                     </p>
 
                     {process.env.NODE_ENV === "development" &&
                     this.state.error ? (
                       <details className="mt-4">
-                        <summary className="cursor-pointer text-xs uppercase tracking-[0.16em] text-[#ff007a] hover:text-[#d70068]">
+                        <summary className="cursor-pointer text-xs uppercase tracking-[0.16em] text-black/55 hover:text-black">
                           Error details (dev only)
                         </summary>
-                        <pre className="mt-2 overflow-auto rounded-[20px] border-[3px] border-black bg-[#fff6cf] p-3 text-[10px] text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                        <pre className="mt-2 overflow-auto rounded-[20px] border border-black/10 bg-[#f6f7f9] p-3 text-[10px] text-black/72 shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
                           {this.state.error.toString()}
                           {"\n\n"}
                           {this.state.errorInfo?.componentStack}
@@ -117,13 +117,13 @@ class ErrorBoundary extends Component {
                     <div className="mt-6 flex flex-wrap gap-2.5">
                       <button
                         onClick={this.handleReset}
-                        className="rounded-full border-[3px] border-black bg-black px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(255,0,122,1)] transition hover:-translate-y-0.5 hover:bg-[#ff007a]"
+                        className="rounded-full border border-black bg-black px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px"
                       >
-                        Try again
+                        Retry
                       </button>
                       <button
                         onClick={() => window.location.reload()}
-                        className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#fff6cf]"
+                        className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-[0.14em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
                       >
                         Reload page
                       </button>

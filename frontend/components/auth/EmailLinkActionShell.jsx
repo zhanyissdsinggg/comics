@@ -13,7 +13,7 @@ export default function EmailLinkActionShell({
   children,
 }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-6 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.84fr)] lg:py-10">

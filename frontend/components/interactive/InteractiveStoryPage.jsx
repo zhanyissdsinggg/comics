@@ -142,16 +142,16 @@ export default function InteractiveStoryPage({ seriesId }) {
 
   const storyStateRows = useMemo(() => toStateRows(progress?.state), [progress?.state]);
   const node = progress?.node || null;
-  const storyTitle = normalizeText(story?.title || "Interactive Story");
+  const storyTitle = normalizeText(story?.title || "Interactive");
   const storyDescription = normalizeText(story?.description);
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-            <p className="text-sm font-medium text-black/58">Loading interactive mode...</p>
+          <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
+            <p className="text-sm font-medium text-black/58">Loading...</p>
           </section>
         </div>
       </main>
@@ -159,16 +159,16 @@ export default function InteractiveStoryPage({ seriesId }) {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <section className="rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
-                Interactive Mode
+                Interactive
               </p>
-              <h1 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-black">
                 {storyTitle}
               </h1>
               {storyDescription ? (
@@ -177,7 +177,7 @@ export default function InteractiveStoryPage({ seriesId }) {
             </div>
             <Link
               href={`/series/${encodeURIComponent(seriesId)}`}
-              className="border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
             >
               Back to series
             </Link>
@@ -185,14 +185,14 @@ export default function InteractiveStoryPage({ seriesId }) {
         </section>
 
         {error ? (
-          <section className="border-[3px] border-black bg-[#ffe3ec] p-4 text-sm font-medium text-[#8f003f] shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+          <section className="rounded-[24px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] p-4 text-sm font-medium text-rose-700 shadow-[0_16px_34px_rgba(244,63,94,0.1)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span>{error}</span>
               {authRequired ? (
                 <button
                   type="button"
                   onClick={openAuthModal}
-                  className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-[#8f003f] shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none"
+                  className="rounded-full border border-rose-200/70 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-rose-700 shadow-[0_10px_20px_rgba(244,63,94,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-rose-50 hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
                 >
                   Sign in
                 </button>
@@ -202,14 +202,14 @@ export default function InteractiveStoryPage({ seriesId }) {
         ) : null}
 
         {degradedNotice ? (
-          <section className="border-[3px] border-black bg-[#fff6c7] p-4 text-sm font-medium text-black/68 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+          <section className="rounded-[24px] border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] p-4 text-sm font-medium text-black/68 shadow-[0_16px_34px_rgba(245,158,11,0.08)]">
             {degradedNotice}
           </section>
         ) : null}
 
         {node ? (
           <>
-            <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
                 {normalizeText(node.title || "Current Node")}
               </p>
@@ -218,8 +218,8 @@ export default function InteractiveStoryPage({ seriesId }) {
               </p>
             </section>
 
-            <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-              <h2 className="text-base font-black uppercase tracking-[0.04em] text-black">Choose your next move</h2>
+            <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
+              <h2 className="text-base font-semibold tracking-[0.01em] text-black">Choose your next move</h2>
               <div className="mt-4 grid gap-3">
                 {(node.choices || []).map((choice) => {
                   const disabled = Boolean(submittingChoiceId) || authRequired;
@@ -230,7 +230,7 @@ export default function InteractiveStoryPage({ seriesId }) {
                       type="button"
                       disabled={disabled}
                       onClick={() => handleChoose(choice.id)}
-                      className="border-[3px] border-black bg-white px-4 py-3 text-left text-sm font-medium text-black transition-all shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] px-4 py-3 text-left text-sm font-medium text-black shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-white hover:shadow-[0_16px_34px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {busy ? "Generating next segment..." : normalizeText(choice.label)}
                     </button>
@@ -245,7 +245,7 @@ export default function InteractiveStoryPage({ seriesId }) {
             </section>
 
             {storyStateRows.length > 0 ? (
-              <section className="border-[3px] border-black bg-[#f5f1ea] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+              <section className="rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fa_100%)] p-4 shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
                 <h3 className="text-xs font-black uppercase tracking-[0.16em] text-black/55">
                   Story State
                 </h3>
@@ -253,9 +253,9 @@ export default function InteractiveStoryPage({ seriesId }) {
                   {storyStateRows.map((item) => (
                     <div
                       key={item.key}
-                      className="border-[3px] border-black bg-white px-3 py-2 text-sm text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                      className="rounded-[20px] border border-black/10 bg-white px-3 py-2 text-sm text-black shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
                     >
-                      <span className="font-black uppercase tracking-[0.06em]">{item.key}</span>: {item.value}
+                      <span className="font-semibold uppercase tracking-[0.08em] text-black/72">{item.key}</span>: {item.value}
                     </div>
                   ))}
                 </div>

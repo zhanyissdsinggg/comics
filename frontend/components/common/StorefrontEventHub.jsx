@@ -18,10 +18,10 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
   return (
     <Card
       className={cn(
-        "h-full rounded-[28px] border-[3px] py-0 shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-transform duration-300 hover:-translate-y-0.5",
+        "h-full rounded-[28px] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]",
         event.accentClass ||
           (isLight
-            ? "border-black bg-white hover:bg-[#fff6cf]"
+            ? "border-black/10 bg-white hover:bg-[#fcfcfd]"
             : "border-white/10 bg-white/[0.03]"),
       )}
     >
@@ -31,9 +31,9 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
             <Badge
               variant="outline"
               className={cn(
-                "rounded-full border-[3px] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
+                "rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
                 isLight
-                  ? "border-black bg-[#dffcff]"
+                  ? "border-black/10 bg-[#f8fafc]"
                   : "border-white/10 bg-black/20",
               )}
             >
@@ -65,9 +65,9 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           {event.signalValue ? (
             <div
               className={cn(
-                "min-w-[120px] rounded-[18px] border-[3px] px-3 py-2.5 text-left shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
+                "min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)]",
                 isLight
-                  ? "border-black bg-[#ffe500]"
+                  ? "border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
                   : "border-white/10 bg-black/25",
               )}
             >
@@ -98,7 +98,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           className={cn(
             "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
             isLight
-              ? "text-black hover:text-[#ff007a]"
+              ? "text-black/70 hover:text-black"
               : "text-white hover:text-[var(--gush-accent)]",
           )}
         >
@@ -131,7 +131,7 @@ export default function StorefrontEventHub({
         className={cn(
           "relative overflow-hidden rounded-[32px] py-0",
           isLight
-            ? "border-[3px] border-black bg-white shadow-[10px_10px_0_0_rgba(0,0,0,1)]"
+            ? "border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.1)]"
             : "border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
         )}
       >

@@ -51,6 +51,38 @@
     "GHSA-qffp-2rhf-9h96": {
       "expiresOn": "2026-10-31",
       "reason": "Nested tar dependency, not used in runtime request path."
+    },
+    "GHSA-j3q9-mxjg-w52f": {
+      "expiresOn": "2026-10-31",
+      "reason": "path-to-regexp is transitive; tracked for dependency refresh. Not exposed to attacker-controlled routes in our own code."
+    },
+    "GHSA-27v5-c462-wpq7": {
+      "expiresOn": "2026-10-31",
+      "reason": "path-to-regexp is transitive; tracked for dependency refresh. Not exposed to attacker-controlled routes in our own code."
+    },
+    "GHSA-3v7f-55p6-f55p": {
+      "expiresOn": "2026-10-31",
+      "reason": "picomatch is transitive; tracked for dependency refresh. Used only for internal build/runtime globbing."
+    },
+    "GHSA-c2c7-rcm5-vvqj": {
+      "expiresOn": "2026-10-31",
+      "reason": "picomatch is transitive; tracked for dependency refresh. Used only for internal build/runtime globbing."
+    },
+    "GHSA-xxjr-mmjv-4gpg": {
+      "expiresOn": "2026-10-31",
+      "reason": "lodash is transitive via framework deps; tracked for major framework upgrade."
+    },
+    "GHSA-r5fr-rjxr-66jc": {
+      "expiresOn": "2026-10-31",
+      "reason": "lodash is transitive via framework deps; tracked for major framework upgrade."
+    },
+    "GHSA-f23m-r3pf-42rh": {
+      "expiresOn": "2026-10-31",
+      "reason": "lodash is transitive via framework deps; tracked for major framework upgrade."
+    },
+    "GHSA-37ch-88jc-xwx2": {
+      "expiresOn": "2026-10-31",
+      "reason": "path-to-regexp is transitive via express; tracked for dependency refresh."
     }
   },
   "packages": {

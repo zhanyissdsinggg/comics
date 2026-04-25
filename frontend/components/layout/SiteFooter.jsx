@@ -84,7 +84,7 @@ function FooterAgeBadge() {
   return (
     <span
       aria-label="18 plus only"
-      className="inline-flex items-center rounded-full border-[2px] border-black bg-[#ffe500] px-3 py-1 text-[11px] font-black tracking-[0.22em] text-black"
+      className="inline-flex items-center rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[11px] font-semibold tracking-[0.22em] text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.06)]"
     >
       18+
     </span>

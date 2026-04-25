@@ -199,7 +199,7 @@ function summarizeSpotlightDescription(text, fallback) {
 
 function CreatorPageSkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -219,7 +219,7 @@ function CreatorPageSkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border-[3px] border-black bg-[#ffe500]"
+                className="h-24 animate-pulse rounded-[24px] border border-black/10 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
               />
             ))}
           </SurfacePanel>
@@ -227,7 +227,7 @@ function CreatorPageSkeleton() {
 
         <SurfacePanel appearance="light" accent="blue">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border-[3px] border-black bg-white" />
+            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]" />
             <div className="space-y-4">
               <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
               <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
@@ -236,7 +236,7 @@ function CreatorPageSkeleton() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border-[3px] border-black bg-[#fff6cf]"
+                    className="h-28 animate-pulse rounded-[24px] border border-black/10 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
                   />
                 ))}
               </div>
@@ -453,18 +453,20 @@ export default function CreatorPage({
       Array.isArray(spotlightSeries?.genres) &&
       spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
-        : "Lead title on this page",
+        : "Featured",
     ].filter(Boolean);
   }, [spotlightSeries]);
 
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-[#00e5ff] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
   const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black/12 bg-white px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
   const creatorCardClass =
-    "overflow-hidden rounded-[30px] border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]";
+    "overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)]";
   const neutralChipClass =
-    "border-[3px] border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/70 shadow-[0_8px_18px_rgba(15,23,42,0.05)]";
+  const softActionClass = secondaryButtonClass;
+  const strongActionClass = primaryButtonClass;
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -531,11 +533,10 @@ export default function CreatorPage({
           ? {
               id: "lead-title",
               eyebrow: "Spotlight",
-              title: `View ${spotlightSeries.title}.`,
-              cta: "Open series",
+              title: `${spotlightSeries.title}.`,
+              cta: "Series",
               onClick: () => handleOpenTitle(spotlightSeries),
-              accentClass:
-                "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+              accentClass: strongActionClass,
             }
           : null,
         {
@@ -546,8 +547,7 @@ export default function CreatorPage({
             : "Explore similar reads.",
           cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
           onClick: handleBrowseGenre,
-          accentClass:
-            "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+          accentClass: softActionClass,
         },
         {
           id: "return",
@@ -555,8 +555,7 @@ export default function CreatorPage({
           title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
           cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
           onClick: handleReturn,
-          accentClass:
-            "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+          accentClass: softActionClass,
         },
       ].filter(Boolean),
     [
@@ -572,7 +571,7 @@ export default function CreatorPage({
     {
       label: "Profile",
       value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
-      tone: "bg-[#ffe500]",
+      tone: "bg-[#f6f7f9]",
     },
     {
       label: "Titles",
@@ -582,7 +581,7 @@ export default function CreatorPage({
     {
       label: "Top genre",
       value: topGenres[0] || "Mixed",
-      tone: "bg-[#00e5ff]",
+      tone: "bg-[#f6f7f9]",
     },
   ];
   const emptyCreatorPathways = useMemo(
@@ -596,8 +595,7 @@ export default function CreatorPage({
           router.push(
             `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
           ),
-        accentClass:
-          "border-[3px] border-black bg-[#ffe500] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+        accentClass: strongActionClass,
       },
       {
         id: "featured-series",
@@ -605,8 +603,7 @@ export default function CreatorPage({
         title: "Featured",
         cta: "Featured",
         onClick: () => router.push("/rankings?view=featured"),
-        accentClass:
-          "border-[3px] border-black bg-[#00e5ff] text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+        accentClass: softActionClass,
       },
       {
         id: "catalog",
@@ -614,8 +611,7 @@ export default function CreatorPage({
         title: "Comics",
         cta: "Comics",
         onClick: () => router.push("/comics"),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+        accentClass: softActionClass,
       },
       {
         id: "return",
@@ -623,11 +619,10 @@ export default function CreatorPage({
         title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
         cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
         onClick: handleReturn,
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6cf] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+        accentClass: softActionClass,
       },
     ],
-    [creatorName, handleReturn, originSeries, router],
+    [creatorName, handleReturn, originSeries, router, softActionClass, strongActionClass],
   );
 
   if (loading) {
@@ -636,7 +631,7 @@ export default function CreatorPage({
 
   if (error) {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
@@ -660,7 +655,7 @@ export default function CreatorPage({
 
   if (!creatorItems.length) {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-black">
+      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
         <SiteHeader variant="home" />
         <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -741,7 +736,7 @@ export default function CreatorPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -757,13 +752,13 @@ export default function CreatorPage({
           />
 
           <SurfacePanel
-            tone="default"
+            tone="highlight"
             accent="amber"
-            appearance="dark"
-            className="flex h-full flex-col justify-between space-y-6 border-[3px] border-black bg-black p-5 text-white shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#ffe500]">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                 Creator desk
               </p>
               <div>
@@ -777,7 +772,7 @@ export default function CreatorPage({
               {creatorDeskStats.map((item) => (
                 <div
                   key={item.label}
-                  className={`${item.tone} border-[3px] border-black px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]`}
+                  className="rounded-[24px] border border-white/12 bg-white/90 px-4 py-3 text-black shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
                 >
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                     {item.label}
@@ -796,7 +791,7 @@ export default function CreatorPage({
                   onClick={() => handleOpenTitle(spotlightSeries)}
                   className={primaryButtonClass}
                 >
-                  Open {spotlightSeries.title}
+                  Series
                 </button>
               ) : (
                 <button
@@ -833,7 +828,7 @@ export default function CreatorPage({
         ) : null}
 
         {spotlightSeries ? (
-          <SurfacePanel appearance="light" accent="cyan" className="space-y-6 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <SurfacePanel appearance="light" accent="cyan" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
               <div className={creatorCardClass}>
                 <div className="aspect-[3/4] w-full overflow-hidden">
@@ -895,7 +890,7 @@ export default function CreatorPage({
                     onClick={() => handleOpenTitle(spotlightSeries)}
                     className={primaryButtonClass}
                   >
-                    Open series
+                    Series
                   </button>
                   <button
                     type="button"
@@ -910,7 +905,7 @@ export default function CreatorPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">

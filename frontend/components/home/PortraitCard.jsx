@@ -28,7 +28,7 @@ function PortraitCard({
   density = "default",
   href = "",
   showActionLabel = true,
-  actionLabel = "Open series",
+  actionLabel = "Series",
   coverFallbackVariant = "default",
   interactionMode = "link",
 }) {
@@ -97,14 +97,14 @@ function PortraitCard({
     <div
       className={cn(
         "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
-        "border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:bg-[#fffdf7] group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+        "rounded-[28px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)] group-hover:border-black/14 group-hover:bg-[#fcfcfd] group-hover:shadow-[0_24px_50px_rgba(15,23,42,0.12)]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
             "relative aspect-[3/4] overflow-hidden",
-            "bg-[#f5f1ea]",
+            "bg-[#f6f7f9]",
           )}
         >
           <Cover
@@ -162,7 +162,7 @@ function PortraitCard({
           ) : null}
             <p
               className={cn(
-                "line-clamp-2 font-black uppercase tracking-[-0.04em] transition-colors",
+                "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
                 isCompact
                   ? "text-[1.08rem] leading-5"
                   : "text-[1.12rem] leading-6",
@@ -183,7 +183,7 @@ function PortraitCard({
                   isCompact
                     ? "px-2.5 py-1 text-[10px]"
                     : "px-3 py-1 text-[11px]",
-                  "border-[2px] border-black bg-[#fff6cf] text-black/60",
+                  "border-black/10 bg-[#f6f7f9] text-black/60",
                 )}
               >
                 {genre}
@@ -206,7 +206,7 @@ function PortraitCard({
 
         <div
           className={cn(
-            "flex items-center border-t-[3px] border-black pt-3",
+            "flex items-center border-t border-black/8 pt-3",
             typeof item.progressPercent === "number" && item.progressPercent > 0
               ? "justify-between"
               : showActionLabel
@@ -238,13 +238,13 @@ function PortraitCard({
           <span
             className={cn(
               "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1",
-              "border-[2px] border-black bg-[#ffe500] text-black",
+              "border border-black/10 bg-[#f6f7f9] text-black/70 shadow-[0_10px_20px_rgba(15,23,42,0.06)] group-hover:bg-white",
             )}
           >
             <ArrowRight className="size-4" />
           </span>
         </div>
-        <div className="sr-only">Open series</div>
+        <div className="sr-only">Series</div>
       </div>
     </div>
   );
@@ -256,7 +256,7 @@ function PortraitCard({
         onClick={handleClick}
         className="group relative block w-full text-left"
         style={{ WebkitTapHighlightColor: "transparent" }}
-        aria-label={item?.title ? `Open ${item.title}` : "Open title"}
+        aria-label={item?.title ? `Series ${item.title}` : "Series"}
       >
         {cardContent}
       </button>
@@ -269,7 +269,7 @@ function PortraitCard({
       onClick={handleClick}
       className="group relative block w-full text-left"
       style={{ WebkitTapHighlightColor: "transparent" }}
-      aria-label={item?.title ? `Open ${item.title}` : "Open title"}
+      aria-label={item?.title ? `Series ${item.title}` : "Series"}
     >
       {cardContent}
     </Link>

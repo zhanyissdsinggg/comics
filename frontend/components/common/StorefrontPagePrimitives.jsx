@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import SurfacePanel from "./SurfacePanel";
 
 export const storefrontPrimaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap border-[3px] border-black bg-[#ff007a] px-5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e0006b] hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-[rgba(255,0,122,0.18)] active:translate-y-px h-11 px-5";
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black bg-black px-5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-black/10 active:translate-y-px h-11";
 
 export const storefrontSecondaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap border-[3px] border-black bg-white px-5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-[rgba(255,0,122,0.18)] active:translate-y-px h-11 px-5";
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black/12 bg-white px-5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:border-black/18 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-black/10 active:translate-y-px h-11";
 
 export const storefrontInfoCardClass =
-  "border-[3px] border-black bg-white px-5 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]";
+  "rounded-[22px] border border-black/10 bg-white px-5 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]";
 
 export function StorefrontSectionHeading({
   eyebrow,

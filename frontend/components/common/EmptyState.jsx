@@ -52,10 +52,10 @@ export const EmptyState = memo(function EmptyState({
   const accentClass =
     icon === "alert"
       ? isLight
-        ? "border-[3px] border-black bg-[#ffe7ec] text-[#ff007a]"
+        ? "border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-600"
         : "border-red-400/20 bg-red-500/[0.08] text-red-200"
       : isLight
-        ? "border-[3px] border-black bg-[#ffe500] text-black"
+        ? "border border-black/10 bg-[#f6f7f9] text-black"
         : "border-sky-400/20 bg-sky-400/[0.08] text-sky-100";
 
   return (
@@ -63,7 +63,7 @@ export const EmptyState = memo(function EmptyState({
       className={cn(
         "relative overflow-hidden border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         isLight &&
-          "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
+          "rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] shadow-[0_20px_46px_rgba(15,23,42,0.08)]",
         className,
       )}
     >
@@ -77,7 +77,7 @@ export const EmptyState = memo(function EmptyState({
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
-            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[5px_5px_0_0_rgba(0,0,0,1)]",
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_12px_28px_rgba(15,23,42,0.08)]",
             accentClass,
           )}
         >
@@ -91,7 +91,7 @@ export const EmptyState = memo(function EmptyState({
         </p>
 
         <h3
-          className={`mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] ${isLight ? "text-black" : "text-white"}`}
+          className={`mt-3 font-display text-2xl font-semibold tracking-[-0.05em] ${isLight ? "text-black" : "text-white"}`}
         >
           {title}
         </h3>
@@ -111,7 +111,7 @@ export const EmptyState = memo(function EmptyState({
             className={`mt-6 ${
               isLight
                 ? icon === "alert"
-                  ? "inline-flex items-center gap-2 border-[3px] border-black bg-[#ffe7ec] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-[#ff007a] transition-all duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffd3e0] hover:shadow-none"
+                  ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
                   : `${storefrontPrimaryButtonClass} gap-2`
                 : "inline-flex items-center gap-2 border border-emerald-400/30 bg-emerald-400/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-emerald-100 transition-all duration-200 hover:border-emerald-300/50 hover:bg-emerald-400/16"
             }`}
@@ -202,7 +202,7 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
 export const ErrorState = memo(function ErrorState({
   onRetry,
   title = "We couldn't load this yet.",
-  description = "Connection looks shaky. Your data is safe. Try again.",
+  description = "Connection looks shaky. Your data is safe.",
   retryLabel = "Retry",
   className = "",
 }) {

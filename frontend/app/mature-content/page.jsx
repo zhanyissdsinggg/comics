@@ -18,9 +18,8 @@ import {
 import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
-  title: "Mature Content",
-  description:
-    "See how 18+ access, age checks, and visibility controls work on Gush.",
+  title: "18+ Access",
+  description: "18+ access and controls.",
   path: "/mature-content",
 });
 
@@ -47,27 +46,26 @@ const FAQ_ITEMS = [
   },
   {
     question: "What if age check fails or 18+ titles still look hidden?",
-    answer:
-      "Try the age check again, confirm your region in Account, and contact Support if access still looks wrong.",
+    answer: "Check the gate, region, and support.",
   },
 ];
 
 const CONTROL_CARDS = [
   {
-    title: "Turn 18+ on or off",
-    body: "Use the 18+ toggle in the site header when you want access.",
+    title: "18+ toggle",
+    body: "",
   },
   {
-    title: "Confirm age once",
-    body: "The site may ask for a one-time age check for your region.",
+    title: "Age check",
+    body: "",
   },
   {
-    title: "Hide 18+ history",
-    body: "Use the account setting to hide mature history on that device.",
+    title: "Hide history",
+    body: "",
   },
   {
-    title: "Get support",
-    body: "Support can help if access still looks wrong.",
+    title: "Support",
+    body: "",
   },
 ];
 
@@ -87,7 +85,7 @@ export default function MatureContentPage() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <StructuredDataScript id="mature-content-jsonld" data={structuredData} />
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -95,9 +93,9 @@ export default function MatureContentPage() {
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow="Mature content"
+            eyebrow="18+"
             title="18+ access."
-            description="Mature titles stay hidden until you turn them on."
+            description=""
             stats={[
               {
                 label: "Default",
@@ -132,9 +130,9 @@ export default function MatureContentPage() {
           />
 
           <StorefrontDesk
-            eyebrow="Access"
-            title="Age gate and privacy."
-            description="Keep 18+ hidden by default, confirm the age check once, and control whether mature history stays visible on this device."
+            eyebrow="Controls"
+            title="18+."
+            description=""
             actions={
               <>
                 <Link
@@ -147,7 +145,7 @@ export default function MatureContentPage() {
                   href="/account"
                   className={storefrontSecondaryButtonClass}
                 >
-                  Open account
+                  Account
                 </Link>
               </>
             }
@@ -156,68 +154,71 @@ export default function MatureContentPage() {
 
         <section className="grid gap-4 lg:grid-cols-2">
           {CONTROL_CARDS.map((card) => (
-            <SurfacePanel key={card.title} appearance="light" accent="blue">
+            <SurfacePanel
+              key={card.title}
+              appearance="light"
+              accent="blue"
+              className="border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
+            >
               <StorefrontSectionHeading
                 title={card.title}
-                description={card.body}
               />
             </SurfacePanel>
           ))}
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel
+            className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
+            appearance="light"
+            accent="blue"
+          >
             <StorefrontSectionHeading
-              eyebrow="Checklist"
-              title="If 18+ stays hidden."
+              eyebrow="Check"
+              title="Before you enter."
             />
             <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
-              <li>Sign in if the gate asks for account access.</li>
-              <li>Confirm the age check for your current region.</li>
-              <li>
-                Review the region setting in Account if the threshold looks
-                wrong.
-              </li>
-              <li>
-                Check whether Hide 18+ history is changing what appears in your
-                account view.
-              </li>
-              <li>
-                If access still looks wrong, contact Support and name the page
-                or title.
-              </li>
+              <li>Sign in.</li>
+              <li>Confirm age.</li>
+              <li>Check region.</li>
+              <li>Check 18+ history.</li>
+              <li>Support.</li>
             </ul>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <StorefrontSectionHeading eyebrow="Related pages" title="Related." />
+          <SurfacePanel
+            className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
+            appearance="light"
+            accent="blue"
+          >
+            <StorefrontSectionHeading eyebrow="More" title="Pages." />
             <div className="space-y-3">
               {[
                 {
                   href: "/account",
                   title: "Account settings",
-                  body: "Check region, language, and 18+ history settings.",
+                  body: "",
                 },
                 {
                   href: "/faq",
                   title: "FAQ",
-                  body: "Quick answers on age checks and account access.",
+                  body: "",
                 },
                 {
                   href: "/support",
                   title: "Support",
-                  body: "Contact us if a mature title is still missing after the age check.",
+                  body: "",
                 },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  className="block transition-all"
                 >
                   <StorefrontInfoCard
                     title={item.title}
                     description={item.body}
-                    className="hover:bg-[#fff6c7]"
+                    className="border border-black/10 bg-black/[0.03] hover:bg-black/[0.05]"
                   />
                 </Link>
               ))}
@@ -225,8 +226,12 @@ export default function MatureContentPage() {
           </SurfacePanel>
         </section>
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
+        <SurfacePanel
+          className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
+          appearance="light"
+          accent="blue"
+        >
+          <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <StorefrontInfoCard

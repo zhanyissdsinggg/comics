@@ -367,9 +367,7 @@ export default function PageStream({
       {visiblePages.length === 0 && visibleParagraphs.length === 0 ? (
         <div className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-6 text-sm text-neutral-300">
           <p className="text-base font-semibold text-neutral-100">No content</p>
-          <p className="mt-2 text-xs text-neutral-400">
-            This episode has no pages yet. Please check back later.
-          </p>
+          <p className="mt-2 text-xs text-neutral-400">Pages are not live yet.</p>
         </div>
       ) : visiblePages.length > 0
         ? visiblePages.map((page, index) => {
@@ -402,9 +400,6 @@ export default function PageStream({
                 <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
                   <p className="text-base font-semibold text-neutral-100">
                     Page {index + 1} failed to load
-                  </p>
-                  <p className="text-xs text-neutral-400">
-                    Check your connection and try again.
                   </p>
                   <button
                     type="button"

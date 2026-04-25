@@ -30,13 +30,13 @@ import {
 function buildSupportBody(message, topicLabel, replyEmail, orderId) {
   const notes = [];
   if (topicLabel) {
-    notes.push(`Issue type: ${topicLabel}`);
+    notes.push(`Topic: ${topicLabel}`);
   }
   if (replyEmail) {
     notes.push(`Reply email: ${replyEmail}`);
   }
   if (orderId) {
-    notes.push(`Order ID: ${orderId}`);
+    notes.push(`Order: ${orderId}`);
   }
   if (notes.length === 0) {
     return message;
@@ -283,7 +283,7 @@ export default function SupportPage() {
     } catch {
       setFeedback({
         type: "error",
-        text: "Could not send your request. Please try again.",
+        text: "Could not send your request.",
         mode: "network",
       });
     } finally {
@@ -297,7 +297,7 @@ export default function SupportPage() {
     if (!activePreset) {
       setFeedback({
         type: "error",
-        text: "Choose an issue type so we can route this faster.",
+        text: "Pick a topic.",
         mode: "inline",
       });
       return;
@@ -356,7 +356,7 @@ export default function SupportPage() {
   const fieldLabelClass =
     "text-[11px] font-black uppercase tracking-[0.28em] text-black/55";
   const fieldClass =
-    "mt-2 w-full border-[3px] border-black bg-white px-4 py-3.5 text-sm font-semibold text-black outline-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all placeholder:text-black/40 focus:ring-4 focus:ring-black/10";
+    "mt-2 w-full rounded-[22px] border border-black/10 bg-white px-4 py-3.5 text-sm font-semibold text-black outline-none shadow-[0_12px_28px_rgba(15,23,42,0.06)] transition-all placeholder:text-black/40 focus:border-black/14 focus:ring-4 focus:ring-black/5";
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const supportHeroStats = [
     {
@@ -364,26 +364,30 @@ export default function SupportPage() {
       value: SUPPORT_TOPICS.length.toLocaleString(),
     },
     {
-      label: "Reply window",
+      label: "Replies",
       value: "1-2 days",
     },
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <EditorialHero
             eyebrow="Support"
             title="Support."
-            description="Pick a topic and send one note."
+            description=""
             stats={supportHeroStats}
             appearance="light"
             accent="blue"
           />
 
-          <StorefrontDesk eyebrow="Topics" title="Choose a topic." className="bg-[#ffe500]">
+          <StorefrontDesk
+            eyebrow="Topics"
+            title="Topics."
+            className="border-black/10 bg-white/92"
+          >
             <div className="grid gap-2.5 sm:grid-cols-2">
               {quickIssueCards.map((item) => {
                 const isActive = activeTopic === item.topic;
@@ -407,18 +411,13 @@ export default function SupportPage() {
                       setSuccessState(null);
                     }}
                     className={[
-                      "border-[3px] border-black px-4 py-3 text-left transition-all",
+                      "rounded-[24px] border border-black/10 px-4 py-3 text-left transition-all",
                       isActive
-                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                        : "bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none",
+                        ? "bg-[#f6f7f9] text-black shadow-[0_18px_40px_rgba(15,23,42,0.12)] ring-1 ring-black/8"
+                        : "bg-white text-black shadow-[0_12px_28px_rgba(15,23,42,0.08)] hover:border-black/15 hover:bg-black/[0.03]",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
-                    <p
-                      className={`mt-1 text-xs leading-5 ${isActive ? "text-white/80" : "text-black/60"}`}
-                    >
-                      {item.context}
-                    </p>
                   </button>
                 );
               })}
@@ -434,22 +433,24 @@ export default function SupportPage() {
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
+          <SurfacePanel
+            className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
+            appearance="light"
+            accent="blue"
+          >
             {successState ? (
               <div className="space-y-4">
-                <div className="border-[3px] border-black bg-[#fff6c7] p-5 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ff007a]">
+                <div className="rounded-[28px] border border-black/10 bg-[#f6f7f9] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                     Request received
                   </p>
                   <h2 className="mt-3 text-[2.4rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                     Request sent.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-black/68">
-                    We will reply at{" "}
                     <span className="font-black text-black">
                       {successState.replyEmail}
                     </span>
-                    .
                   </p>
                 </div>
 
@@ -487,18 +488,18 @@ export default function SupportPage() {
                       compact
                       showIllustration={false}
                       className="px-0 py-0"
-                      cardClassName="max-w-none rounded-none border-[3px] border-black px-4 py-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:px-5 sm:py-5"
+                      cardClassName="max-w-none rounded-[24px] border border-black/10 px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)] sm:px-5 sm:py-5"
                       title="Support hit a network snag."
-                      description={`${feedback.text} Try again.`}
+                      description={feedback.text}
                       onRetry={retrySupportRequest}
                     />
                   ) : (
                     <div
                       className={[
-                        "border-[3px] px-4 py-3 text-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
+                        "rounded-[22px] border px-4 py-3 text-sm shadow-[0_14px_32px_rgba(15,23,42,0.08)]",
                         feedback.type === "success"
-                          ? "border-black bg-[#fff6c7] font-semibold text-black"
-                          : "border-black bg-[#ffe3ec] font-semibold text-[#8f003f]",
+                          ? "border-black/10 bg-[#f6f7f9] font-semibold text-black"
+                          : "border-[#f0b7c8] bg-[#fff3f6] font-semibold text-[#8f003f]",
                       ].join(" ")}
                     >
                       {feedback.text}
@@ -523,7 +524,7 @@ export default function SupportPage() {
                       }}
                       className={fieldClass}
                     >
-                      <option value="">Choose an issue type</option>
+                      <option value="">Pick a topic</option>
                       {SUPPORT_TOPICS.map((preset) => (
                         <option key={preset.id} value={preset.id}>
                           {preset.title}
@@ -578,7 +579,7 @@ export default function SupportPage() {
                       type="text"
                       value={subject}
                       onChange={(event) => setSubject(event.target.value)}
-                      placeholder="Billing issue / Login help / Technical issue"
+                      placeholder="Billing, login, or technical"
                       className={fieldClass}
                     />
                   </div>
@@ -593,7 +594,7 @@ export default function SupportPage() {
                     rows={7}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    placeholder="Tell us what happened and include any page, title, episode, or order ID."
+                    placeholder="What happened? Add any page, title, episode, or order ID."
                     className={fieldClass}
                   />
                 </div>
@@ -624,26 +625,19 @@ export default function SupportPage() {
             )}
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]" appearance="light" accent="blue">
-            <StorefrontSectionHeading eyebrow="Tips" title="Keep it simple." />
+          <SurfacePanel
+            className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
+            appearance="light"
+            accent="blue"
+          >
+            <StorefrontSectionHeading eyebrow="Contact" title="Contact." />
 
-            <div className="space-y-3">
-              {[
-                "Pick the closest issue type.",
-                "Add any page, title, episode, or order ID.",
-              ].map((item) => (
-                <StorefrontInfoCard
-                  key={item}
-                  title={item}
-                  className="bg-[#f5f1ea] px-4 py-3"
-                >
-                </StorefrontInfoCard>
-              ))}
-            </div>
-
-            <StorefrontInfoCard title="Contact" eyebrow="Desk" className="bg-[#fff6c7]">
+            <StorefrontInfoCard
+              title="Email"
+              eyebrow="Desk"
+              className="border border-black/10 bg-[#f6f7f9]"
+            >
               <p className="mt-3 text-sm font-medium leading-6 text-black/68">
-                Reply email:{" "}
                 <span className="font-black text-black">
                   {siteConfig.supportEmail}
                 </span>

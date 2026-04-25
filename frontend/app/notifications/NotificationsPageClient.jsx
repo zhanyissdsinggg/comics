@@ -180,41 +180,34 @@ export default function NotificationsPage() {
       {
         label: "Unread",
         value: loading ? "--" : unreadCount.toLocaleString(),
-        hint: "Messages still waiting for you.",
+        hint: "",
       },
       {
         label: "Episodes",
         value: loading ? "--" : episodes.toLocaleString(),
-        hint: "Chapter and free unlock updates.",
+        hint: "",
       },
       {
         label: "Offers",
         value: loading ? "--" : promo.toLocaleString(),
-        hint: "Promos and member offers in this inbox.",
+        hint: "",
       },
       {
         label: "Total",
         value: loading ? "--" : total.toLocaleString(),
-        hint: isAdultMode
-          ? "18+ filtering is on."
-          : "Standard catalog is showing.",
+        hint: "",
       },
     ];
-  }, [isAdultMode, loading, notifications, unreadCount]);
+  }, [loading, notifications, unreadCount]);
 
   const inboxDeskTitle = loading
-    ? "Inbox is loading."
+    ? "Inbox"
     : unreadCount > 0
-      ? "Unread updates are waiting."
-      : "You're caught up.";
-  const inboxDeskCopy = loading
-    ? "Recent updates are loading."
-    : unreadCount > 0
-      ? "Clear a few, then jump back in."
-      : "New chapters and offers land here.";
+      ? "Inbox"
+      : "Inbox";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -223,7 +216,7 @@ export default function NotificationsPage() {
             accent="blue"
             eyebrow="Notifications"
             title="Inbox."
-            description="Chapter alerts, offers, and free unlocks."
+            description=""
             secondary=""
             stats={notificationStats}
             actions={
@@ -231,7 +224,7 @@ export default function NotificationsPage() {
                 <button
                   type="button"
                   onClick={() => router.push("/library")}
-                  className={`${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00d2ea]`}
+                  className={storefrontPrimaryButtonClass}
                 >
                   Library
                 </button>
@@ -243,22 +236,22 @@ export default function NotificationsPage() {
                   }
                   className={`${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
-                  {workingId === "__all__" ? "Saving..." : "Mark all read"}
+                  {workingId === "__all__" ? "Saving..." : "Mark read"}
                 </button>
               </>
             }
           />
 
           <StorefrontDesk
-            eyebrow="Inbox desk"
+            eyebrow="Inbox"
             title={inboxDeskTitle}
-            description={inboxDeskCopy}
+            description=""
             actions={
               <>
               <button
                 type="button"
                 onClick={() => router.push("/library")}
-                className={`${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00d2ea]`}
+                className={storefrontPrimaryButtonClass}
               >
                 Library
               </button>
@@ -267,7 +260,7 @@ export default function NotificationsPage() {
                 onClick={() => router.push("/search")}
                 className={storefrontSecondaryButtonClass}
               >
-                Browse titles
+                Search
               </button>
               </>
             }
@@ -294,7 +287,7 @@ export default function NotificationsPage() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="border-[3px] border-black bg-white p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                  className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
                   aria-hidden="true"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -308,11 +301,10 @@ export default function NotificationsPage() {
                 </div>
               ))}
             </div>
-            <p className="text-sm font-semibold text-black/60">Loading inbox.</p>
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel
-            className="border-[3px] border-black bg-[#ffe7ec] text-red-600 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            className="border border-[#f0b7c8] bg-[#fff3f6] text-red-600 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
             appearance="light"
             tone="danger"
             accent="rose"
@@ -322,16 +314,13 @@ export default function NotificationsPage() {
                 <p className="text-sm font-semibold text-red-600">
                   Couldn't load notifications.
                 </p>
-                <p className="mt-1 text-sm font-semibold text-red-500">
-                  Try again to refresh your inbox.
-                </p>
               </div>
               <button
                 type="button"
                 onClick={loadInbox}
                 className={`${storefrontSecondaryButtonClass} text-xs text-red-600`}
               >
-                Try again
+                Retry
               </button>
             </div>
           </SurfacePanel>
@@ -340,7 +329,7 @@ export default function NotificationsPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <StorefrontSectionHeading eyebrow="Inbox" title="Latest" />
               <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
-                {notifications.length} updates loaded
+                {notifications.length} updates
               </p>
             </div>
             <NotificationList

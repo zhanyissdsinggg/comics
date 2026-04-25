@@ -6,6 +6,7 @@ pnpm-lock.yaml
 
 # Build output
 .next/
+frontend/.next-playwright/
 dist/
 build/
 out/
@@ -67,6 +68,7 @@ backend/.outdated-backend.json
 backend/logs/.*-audit.json
 backend/data/creator-credits.import.json
 backend/data/creator-credits.import.csv
+backend/contracts/.openapi.current*.json
 frontend/.audit-frontend.json
 frontend/.outdated-frontend.json
 frontend/.lighthouse-*.json
