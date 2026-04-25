@@ -40,6 +40,9 @@ type SeriesSeed = {
   credits: CreditSeed[];
 };
 
+const DEMO_SERIES_ID = "demo-series";
+const DEMO_EPISODE_ID = "demo-episode";
+
 type InteractiveStorySeed = {
   id: string;
   seriesId: string;
@@ -792,6 +795,121 @@ async function seedEpisodes() {
   }
 }
 
+async function seedDemoSeries() {
+  // This demo fixture exists purely so production can reliably open the
+  // canonical smoke-check routes: /series/demo-series and /read/demo-series/demo-episode.
+  // It is safe to run multiple times (upsert) and intentionally minimal.
+  const credits: CreditSeed[] = [
+    {
+      name: "Gush Demo Studio",
+      role: CreditRole.STUDIO,
+      type: CreatorType.STUDIO,
+      isPrimary: true,
+      bio: "Demo creator used for smoke checks.",
+    },
+  ];
+  const author = buildSeriesAuthor(credits);
+  const coverTone = "#0ea5e9";
+
+  await prisma.series.upsert({
+    where: { id: DEMO_SERIES_ID },
+    update: {
+      title: "Demo Series",
+      author,
+      type: "comic",
+      adult: false,
+      isPublished: true,
+      genres: ["Demo", "Action"],
+      coverTone,
+      coverUrl: "/mock-covers/series-001.jpg",
+      status: "Ongoing",
+      description:
+        "A lightweight demo series used for platform smoke tests and reader QA.",
+      episodePrice: 0,
+      ttfEnabled: false,
+      ttfIntervalHours: 24,
+      latestEpisodeId: DEMO_EPISODE_ID,
+    },
+    create: {
+      id: DEMO_SERIES_ID,
+      title: "Demo Series",
+      author,
+      type: "comic",
+      adult: false,
+      isPublished: true,
+      genres: ["Demo", "Action"],
+      coverTone,
+      coverUrl: "/mock-covers/series-001.jpg",
+      status: "Ongoing",
+      description:
+        "A lightweight demo series used for platform smoke tests and reader QA.",
+      episodePrice: 0,
+      ttfEnabled: false,
+      ttfIntervalHours: 24,
+      latestEpisodeId: DEMO_EPISODE_ID,
+    },
+  });
+
+  await upsertCreatorCredits({
+    id: DEMO_SERIES_ID,
+    title: "Demo Series",
+    type: "comic",
+    adult: false,
+    genres: ["Demo", "Action"],
+    coverUrl: "/mock-covers/series-001.jpg",
+    coverTone,
+    status: "Ongoing",
+    description:
+      "A lightweight demo series used for platform smoke tests and reader QA.",
+    episodePrice: 0,
+    ttfEnabled: false,
+    ttfIntervalHours: 24,
+    credits,
+  });
+
+  const releasedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  await prisma.episode.upsert({
+    where: { id: DEMO_EPISODE_ID },
+    update: {
+      seriesId: DEMO_SERIES_ID,
+      number: 1,
+      title: "Demo Episode",
+      releasedAt,
+      pricePts: 0,
+      ttfEligible: false,
+      ttfReadyAt: null,
+      previewFreePages: 3,
+      pages: buildEpisodePages(
+        { title: "Demo Series", coverTone },
+        1,
+      ),
+      paragraphs: [],
+      text: null,
+      isDeleted: false,
+    },
+    create: {
+      id: DEMO_EPISODE_ID,
+      seriesId: DEMO_SERIES_ID,
+      number: 1,
+      title: "Demo Episode",
+      releasedAt,
+      pricePts: 0,
+      ttfEligible: false,
+      ttfReadyAt: null,
+      previewFreePages: 3,
+      pages: buildEpisodePages(
+        { title: "Demo Series", coverTone },
+        1,
+      ),
+      paragraphs: [],
+      text: null,
+      isDeleted: false,
+    },
+  });
+
+  console.log(`seeded demo series ${DEMO_SERIES_ID} + episode ${DEMO_EPISODE_ID}`);
+}
+
 async function seedTopupPackages() {
   const topupPackages = [
     {
@@ -975,6 +1093,7 @@ async function main() {
   console.log("seeding backend fixtures...");
   await seedSeries();
   await seedEpisodes();
+  await seedDemoSeries();
   await seedInteractiveStories();
   await seedRecommendationSlots();
   await seedTopupPackages();
