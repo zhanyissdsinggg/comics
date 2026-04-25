@@ -21,9 +21,9 @@ export default function ThemeToggle({ variant = "default" }) {
       <div
         aria-hidden="true"
         className={cn(
-          "h-10 w-10 animate-pulse rounded-full border-[3px]",
+          "h-10 w-10 animate-pulse rounded-full border",
           isLight
-            ? "border-black bg-white"
+            ? "border-black/10 bg-white"
             : "border-white/10 bg-white/[0.04]",
         )}
       />
@@ -39,9 +39,9 @@ export default function ThemeToggle({ variant = "default" }) {
       variant="outline"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "relative h-10 w-10 rounded-full border-[3px]",
+        "relative h-10 w-10 rounded-full border",
         isLight
-          ? "border-black bg-white text-black/60 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:bg-[#fff6cf] hover:text-black dark:border-white/10 dark:bg-white/10 dark:text-neutral-200 dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
+          ? "border-black/10 bg-white text-black/60 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black dark:border-white/10 dark:bg-white/10 dark:text-neutral-200 dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
           : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
       )}
       aria-label={`Switch to ${isDark ? "day" : "night"} mode`}
@@ -52,13 +52,13 @@ export default function ThemeToggle({ variant = "default" }) {
         className={`absolute size-4 transition-all duration-300 ${
           isDark
             ? "rotate-90 scale-0 opacity-0"
-            : "rotate-0 scale-100 opacity-100 text-[#ff007a]"
+            : "rotate-0 scale-100 opacity-100 text-amber-500"
         }`}
       />
       <Moon
         className={`absolute size-4 transition-all duration-300 ${
           isDark
-            ? "rotate-0 scale-100 opacity-100 text-[#00b7d1]"
+            ? "rotate-0 scale-100 opacity-100 text-sky-500"
             : "-rotate-90 scale-0 opacity-0"
         }`}
       />

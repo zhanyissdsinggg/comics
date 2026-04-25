@@ -18,14 +18,16 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   const toneMap = {
     neutral:
-      "border-[3px] border-black bg-[#dffcff] text-black/70",
-    success: "border-[3px] border-black bg-[#d9fff0] text-black/70",
-    error: "border-[3px] border-black bg-[#ffe7ec] text-black/70",
+      "rounded-[22px] border border-sky-200/70 bg-sky-50 text-black/70 shadow-[0_12px_24px_rgba(125,211,252,0.16)]",
+    success:
+      "rounded-[22px] border border-emerald-200/70 bg-emerald-50 text-black/70 shadow-[0_12px_24px_rgba(16,185,129,0.12)]",
+    error:
+      "rounded-[22px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-black/70 shadow-[0_12px_24px_rgba(244,63,94,0.1)]",
   };
 
   return (
     <div
-      className={`border-[3px] px-4 py-3 shadow-[5px_5px_0_0_rgba(0,0,0,1)] ${toneMap[tone] || toneMap.neutral}`}
+      className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
     >
       {title ? (
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
@@ -46,7 +48,7 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-medium text-black outline-none transition placeholder:text-black/32 focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fffef7] focus:shadow-none";
+    "w-full rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-black/32 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)]";
 
   useEffect(() => {
     const queryToken = String(searchParams.get("token") || "").trim();
@@ -62,8 +64,7 @@ function VerifyPageContent() {
       setStatus({
         tone: "error",
         title: "Enter a valid email",
-        message:
-          "Use the email on your account so we can send the newest verification link.",
+        message: "Use your account email.",
       });
       return;
     }
@@ -77,14 +78,13 @@ function VerifyPageContent() {
       setStatus({
         tone: "success",
         title: "Verification email sent",
-        message:
-          "If that address can receive account mail, a fresh verification link is on the way. Open the newest email on this device to finish instantly.",
+        message: "If that address can receive account mail, a fresh link is on the way.",
       });
     } else {
       setStatus({
         tone: "error",
         title: "We could not send the email",
-        message: response.error || "Please wait a moment and try again.",
+        message: response.error || "Retry in a moment.",
       });
     }
     setSubmitting(false);
@@ -95,7 +95,7 @@ function VerifyPageContent() {
       setStatus({
         tone: "error",
         title: "Verification link missing",
-        message: "Request a fresh email below and open the newest link.",
+        message: "Request a new email below.",
       });
       return;
     }
@@ -104,8 +104,7 @@ function VerifyPageContent() {
     setStatus({
       tone: "neutral",
       title: "Verifying your email",
-      message:
-        "This usually takes a moment, then we will send you to your account.",
+      message: "This only takes a moment.",
     });
 
     const response = await apiPost("/api/auth/verify", { token });
@@ -126,7 +125,7 @@ function VerifyPageContent() {
           ? "This link has expired"
           : "We could not verify this email",
         message: shouldRefreshLink
-          ? "Request a fresh verification email below and open the newest link."
+          ? "Request a new verification email below."
           : message,
       });
       if (shouldRefreshLink) {
@@ -149,12 +148,10 @@ function VerifyPageContent() {
     <EmailLinkActionShell
       eyebrow="Account access"
       title="Confirm your email"
-      description="One quick step and your account is ready."
-      asideTitle="What to do"
+      description=""
+      asideTitle="Next"
       asideBody={
-        hasToken
-          ? "We found the verification link from your email and are checking it now."
-          : "If your last email expired, send a new one and open the newest link from your inbox."
+        hasToken ? "Check the link." : "Send a new link."
       }
     >
       <div className="space-y-6">
@@ -165,27 +162,25 @@ function VerifyPageContent() {
           <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
             {hasToken
               ? "Verifying your email link"
-              : "Need another verification email?"}
+              : "Send another email?"}
           </h2>
           <p className="mt-3 text-sm leading-6 text-black/68">
-            {hasToken
-              ? "Keep this page open for a moment while we confirm your account."
-              : "Enter your account email and we will send the latest confirmation link."}
+            {hasToken ? "Checking your account." : "Enter your email."}
           </p>
         </div>
 
         {hasToken ? (
           <div className="space-y-4">
             <StorefrontInfoCard
-              title="Verification link loaded"
-              description="Verification link loaded from your email. No code field required."
-              className="bg-[#dffcff]"
+              title="Link loaded"
+              description=""
+              className="border-sky-200/70 bg-sky-50"
             />
             <button
               type="button"
               disabled={submitting}
               onClick={handleVerify}
-              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00b7d1]`}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
               {submitting ? "Verifying..." : "Verify again"}
             </button>
@@ -198,7 +193,7 @@ function VerifyPageContent() {
               }}
               className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
             >
-              Send me a new verification email
+              Send a new email
             </button>
           </div>
         ) : (
@@ -215,9 +210,9 @@ function VerifyPageContent() {
               type="button"
               disabled={submitting}
               onClick={handleSendVerifyLink}
-              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass} bg-[#00e5ff] text-black hover:bg-[#00b7d1]`}
+              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
-              {submitting ? "Sending..." : "Send verification email"}
+              {submitting ? "Sending..." : "Send email"}
             </button>
           </div>
         )}
@@ -228,21 +223,21 @@ function VerifyPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="Already confirmed?" className="bg-[#fff6cf]">
+        <StorefrontInfoCard title="More" className="border-black/10 bg-[#f6f7f9]">
           <p className="mt-3 text-sm leading-6 text-black/70">
             Go to{" "}
             <Link
               href="/account"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
             >
-              your account
+              Account
             </Link>
-            . Need help with a missing email? Contact{" "}
+            .{" "}
             <Link
               href="/support"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-[#00b7d1]"
+              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
             >
-              us
+              Support
             </Link>
             .
           </p>
@@ -256,7 +251,7 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen overflow-hidden bg-black text-black" />
+        <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black" />
       }
     >
       <VerifyPageContent />

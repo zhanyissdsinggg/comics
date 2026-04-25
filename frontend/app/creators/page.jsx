@@ -18,8 +18,8 @@ export async function generateMetadata() {
   return createPageMetadata({
     title: hasRealCreators ? "Creators" : "Behind the Stories",
     description: hasRealCreators
-      ? "Meet the writers, artists, and studios behind the stories on Gush."
-      : "Start with the stories first while public creator credits are added title by title.",
+      ? "Writers, artists, and studios behind the stories on Gush."
+      : "Creator credits are still rolling out title by title.",
     path: "/creators",
     image: leadCover,
   });

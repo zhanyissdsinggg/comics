@@ -35,7 +35,7 @@ const CONTACT_LINKS = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -44,7 +44,7 @@ export default function AboutPage() {
             accent="blue"
             eyebrow="About Gush"
             title="Built for reading."
-            description="Comics and serialized fiction, kept clear."
+            description=""
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -59,7 +59,7 @@ export default function AboutPage() {
 
           <StorefrontDesk
             eyebrow="Contact"
-            title="Support and legal."
+            title="Contact."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -82,17 +82,12 @@ export default function AboutPage() {
               eyebrow="Principles"
               title="Readers first."
             />
-            <p className="text-sm leading-7 text-black/68">
-              {siteConfig.companyName} is for readers who want to open a chapter
-              and stay in the story. Discovery, purchases, and account flows
-              stay simple.
-            </p>
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="light" accent="blue">
             <StorefrontSectionHeading
               eyebrow="Details"
-              title="Contact details."
+              title="Contact."
             />
             <div className="space-y-3 text-sm text-black/68">
               <p>

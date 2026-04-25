@@ -86,10 +86,10 @@ export default function CreatorShelfLinks({
 
   const baseClassName = compact
     ? isLight
-      ? "rounded-[24px] border-[3px] border-black bg-white px-3 py-3 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+      ? "rounded-[24px] border border-black/10 bg-white px-3 py-3 shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
       : "rounded-[24px] border border-white/10 bg-white/[0.025] px-3 py-3"
     : isLight
-      ? "rounded-[24px] border-[3px] border-black bg-white px-4 py-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:px-5"
+      ? "rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_20px_40px_rgba(15,23,42,0.08)] sm:px-5"
       : "rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5";
 
   const handleClick = (creator) => {
@@ -151,7 +151,7 @@ export default function CreatorShelfLinks({
               onClick={() => handleClick(creator)}
               className={`group rounded-full px-3.5 py-2 text-left transition ${
                 isLight
-                  ? "border-[3px] border-black bg-[#fff6cf] hover:-translate-y-0.5 hover:bg-[#ffe500]"
+                  ? "border border-black/10 bg-[#f6f7f9] shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-white hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
                   : "border border-white/10 bg-white/[0.05] hover:border-white/20 hover:bg-white/[0.08]"
               }`}
             >

@@ -15,7 +15,7 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[30px] border-[3px] border-black bg-[#fffdf7] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+        className="w-full max-w-md rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.14)]"
         onClick={(event) => event.stopPropagation()}
       >
         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
@@ -32,14 +32,14 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]"
+            className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="rounded-full border border-black bg-black px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
           >
             I confirm
           </button>

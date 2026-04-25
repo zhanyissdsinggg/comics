@@ -11,14 +11,14 @@ import { Button } from "@/components/ui/button";
 function AuthSkeleton({ variant = "default" }) {
   return (
     <div
-      className="hidden h-11 w-24 animate-pulse border-[3px] border-black bg-white sm:block"
+      className="hidden h-11 w-24 animate-pulse border-2 border-white/20 bg-white/10 sm:block"
       aria-hidden="true"
     />
   );
 }
 
 const ICON_BUTTON_CLASS =
-  "relative h-11 w-11 border-[3px] border-[#ffe500] bg-black text-white shadow-[4px_4px_0_0_rgba(255,0,122,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none hover:text-white";
+  "relative h-11 w-11 border-2 border-white/20 bg-white/10 text-white hover:border-[#FFE500]";
 
 export default function HeaderActions({
   onWalletClick,
@@ -45,12 +45,12 @@ export default function HeaderActions({
           size="sm"
           variant="outline"
           onClick={onWalletClick}
-          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-4 text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none lg:inline-flex"
+          className="hidden h-11 border-2 border-white/20 bg-white/10 px-4 text-white hover:border-[#FFE500] lg:inline-flex"
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
           <span className="text-sm font-black uppercase tracking-[0.05em]">Wallet</span>
-          <span className="text-xs font-bold tabular-nums text-black/60">
+          <span className="text-xs font-bold tabular-nums text-white/70">
             {walletTotal.toLocaleString()}
           </span>
         </Button>
@@ -84,10 +84,10 @@ export default function HeaderActions({
         variant="outline"
         onClick={onAdultToggleClick}
         className={cn(
-          "h-11 min-w-[4.75rem] border-[3px] border-black px-3 text-xs font-black uppercase tracking-[0.05em] shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:min-w-[5.75rem] sm:px-3.5",
+          "h-11 min-w-[4.75rem] border-2 px-3 text-xs font-semibold uppercase tracking-[0.08em] transition-all sm:min-w-[5.75rem] sm:px-3.5",
           isAdultMode
-            ? "bg-[#ff007a] text-white"
-            : "bg-white text-black/70 hover:bg-[#ffe500] hover:text-black",
+            ? "border-[#FF007A] bg-[#FF007A] text-white"
+            : "border-white/20 bg-white/10 text-white hover:border-[#FFE500]",
         )}
         aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
         aria-pressed={isAdultMode}
@@ -99,8 +99,8 @@ export default function HeaderActions({
             className={cn(
               "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(15,23,42,0.06)]",
               isAdultMode
-                ? "bg-current opacity-90 shadow-[0_0_0_4px_rgba(239,68,68,0.14)]"
-                : "bg-slate-400",
+                ? "bg-white opacity-90 shadow-[0_0_0_4px_rgba(255,0,122,0.22)]"
+                : "bg-white/50 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]",
             )}
           />
           <span>{legalAge}+</span>
@@ -140,7 +140,7 @@ export default function HeaderActions({
           size="sm"
           variant="outline"
           onClick={() => router.push("/account")}
-          className="hidden h-11 border-[3px] border-[#ffe500] bg-black px-4 text-sm font-black uppercase tracking-[0.05em] text-white shadow-[4px_4px_0_0_rgba(255,0,122,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff007a] hover:shadow-none sm:inline-flex"
+          className="hidden h-11 border-2 border-black bg-[#00E5FF] px-4 text-sm font-semibold tracking-[0.02em] text-black sm:inline-flex"
           >
             <User className="size-4" />
             Account
@@ -152,7 +152,7 @@ export default function HeaderActions({
           size="sm"
           variant="default"
           onClick={onLoginClick}
-          className="hidden h-11 border-[3px] border-black bg-[#00e5ff] px-5 text-sm font-black uppercase tracking-[0.05em] text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00d0e8] hover:shadow-none sm:inline-flex"
+          className="hidden h-11 border-2 border-black bg-[#00E5FF] px-5 text-sm font-semibold tracking-[0.02em] text-black sm:inline-flex"
         >
           Sign In
         </Button>

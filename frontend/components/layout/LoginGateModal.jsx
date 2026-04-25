@@ -37,17 +37,17 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full border-[3px] border-black bg-white px-4 py-3 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] placeholder:text-black/35 transition focus:translate-x-0.5 focus:translate-y-0.5 focus:bg-[#fff6cf] focus:shadow-none focus:outline-none";
+    "w-full rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] placeholder:text-black/35 transition-[border-color,box-shadow,background-color] duration-200 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)] focus:outline-none";
   const secondaryPillClass =
-    "border-[3px] border-black bg-white text-black/70 shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:text-black hover:shadow-none";
+    "rounded-full border border-black/12 bg-white text-black/70 shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/18 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px";
   const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#eefcff] hover:shadow-none active:scale-95";
+    "rounded-full border border-black/12 bg-white px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px";
   const activePillClass =
-    "border-[3px] border-black bg-[#ffe500] text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]";
   const dividerClass =
-    "h-[3px] flex-1 bg-black";
+    "h-px flex-1 bg-black/10";
   const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-6 py-3 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:scale-95";
+    "rounded-full border border-black bg-black px-6 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px";
 
   useEffect(() => {
     if (open) {
@@ -98,7 +98,7 @@ export default function LoginGateModal({
         await refresh();
         onClose?.();
       } else {
-        setOtpStatus(response.error || "OTP failed.");
+        setOtpStatus(response.error || "Code failed.");
       }
       return;
     }
@@ -106,13 +106,13 @@ export default function LoginGateModal({
     const response = await onSubmit?.({ email, password, mode });
     if (response?.status === 202 || response?.data?.requiresOtp) {
       setStep("otp");
-      setOtpStatus("We sent a code to your email.");
+      setOtpStatus("Code sent.");
     }
   };
 
   const handleResendOtp = async () => {
     if (!email) {
-      setOtpStatus("Please enter your email first.");
+      setOtpStatus("Enter your email first.");
       return;
     }
     if (otpChannel === "sms") {
@@ -145,14 +145,14 @@ export default function LoginGateModal({
 
   const handleReset = async () => {
     if (!email) {
-      setResetStatus("Please enter your email first.");
+      setResetStatus("Enter your email.");
       return;
     }
     const response = await apiPost("/api/auth/request-reset", { email });
     if (response.ok) {
-      setResetStatus("Reset link sent. Please check your email.");
+      setResetStatus("Reset link sent.");
     } else {
-      setResetStatus(response.error || "Reset failed.");
+      setResetStatus(response.error || "Couldn't send reset link.");
     }
   };
 
@@ -165,20 +165,22 @@ export default function LoginGateModal({
       return;
     }
     setSocialError(
-      "Google sign-in succeeded, but session refresh failed. Please try again.",
+      "Google sign-in worked, but the session did not refresh.",
     );
   }, [onClose, refresh]);
 
   const handleSocialError = useCallback((message) => {
-    setSocialError(message || "Social sign-in failed. Please try again later.");
+    setSocialError(message || "Social sign-in failed.");
   }, []);
 
   return (
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <p className="border-[3px] border-black bg-[#eefcff] px-4 py-3 text-sm font-semibold leading-6 text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-          {description}
-        </p>
+        {description ? (
+          <p className="rounded-[22px] border border-sky-200/70 bg-sky-50 px-4 py-3 text-sm font-medium leading-6 text-black/72 shadow-[0_12px_24px_rgba(125,211,252,0.16)]">
+            {description}
+          </p>
+        ) : null}
         <div className="mt-6 space-y-4">
           <input
             type="email"
@@ -234,7 +236,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="border-[3px] border-black bg-white px-3 py-3 text-sm font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition focus:outline-none"
+                    className="rounded-[20px] border border-black/10 bg-white px-3 py-3 text-sm font-medium text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-200 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)] focus:outline-none"
                   >
                     {(
                       config?.countryCodes || [
@@ -276,7 +278,7 @@ export default function LoginGateModal({
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.08em] text-black/40">
                 <div className={dividerClass} />
-                <span>or continue with</span>
+                <span>or</span>
                 <div className={dividerClass} />
               </div>
               <SocialAuthButton
@@ -289,13 +291,13 @@ export default function LoginGateModal({
         </div>
 
         {errorMessage ? (
-          <p className="mt-4 border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <p className="mt-4 rounded-[20px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-4 py-2 text-xs font-semibold text-black shadow-[0_12px_24px_rgba(244,63,94,0.1)]">
             {errorMessage}
           </p>
         ) : null}
 
         {socialError ? (
-          <p className="mt-4 border-[3px] border-black bg-[#fff1f7] px-4 py-2 text-xs font-semibold text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <p className="mt-4 rounded-[20px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-4 py-2 text-xs font-semibold text-black shadow-[0_12px_24px_rgba(244,63,94,0.1)]">
             {socialError}
           </p>
         ) : null}
@@ -306,7 +308,7 @@ export default function LoginGateModal({
             <button
               type="button"
               onClick={handleResendOtp}
-              className="ml-2 font-black uppercase tracking-[0.06em] text-[#ff007a] transition-colors duration-300 hover:text-black"
+              className="ml-2 font-semibold uppercase tracking-[0.08em] text-black transition-colors duration-200 hover:text-black/68"
             >
               Resend
             </button>
@@ -351,13 +353,13 @@ export default function LoginGateModal({
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 border-[3px] border-black bg-[#eefcff] px-4 py-2 text-xs font-semibold text-black/72 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <div className="mt-3 rounded-[20px] border border-sky-200/70 bg-sky-50 px-4 py-2 text-xs font-semibold text-black/72 shadow-[0_12px_24px_rgba(125,211,252,0.16)]">
             {resetStatus}
           </div>
         ) : null}
 
         <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-black/40">
-          If your email is not verified yet, use the link in your inbox first.
+          Need email verification? Use the link in your inbox.
         </p>
 
         <div className="mt-6 flex justify-end gap-3">

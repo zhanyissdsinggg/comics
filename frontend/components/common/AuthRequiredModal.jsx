@@ -68,7 +68,7 @@ export default function AuthRequiredModal() {
       onSubmit={handleSubmit}
       allowRegister
       title="Sign in"
-      description="Please sign in to continue."
+      description="Sign in to continue."
       errorMessage={errorMessage}
     />
   );

@@ -90,27 +90,27 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
+    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)] transition-all hover:bg-black/90";
   const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
+    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.01em] text-black shadow-[0_14px_32px_rgba(15,23,42,0.10)] transition-all hover:border-black/20 hover:bg-black/[0.03]";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 pt-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-          <section className="border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:p-7">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/55">
+          <section className="rounded-[36px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)] sm:p-7">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/45">
               18+ access
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="border-[3px] border-black bg-[#ffe500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+              <span className="rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold tracking-[0.08em] text-black">
                 Private
               </span>
-              <span className="border-[3px] border-black bg-[#00e5ff] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+              <span className="rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold tracking-[0.08em] text-black">
                 One check
               </span>
-              <span className="border-[3px] border-black bg-[#fff6c7] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black">
+              <span className="rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-semibold tracking-[0.08em] text-black">
                 Easy off
               </span>
             </div>
@@ -121,12 +121,12 @@ export default function AdultGatePage() {
               {descriptionMap[reason]}
             </p>
 
-            <div className="mt-5 border-[3px] border-black bg-[#f5f1ea] px-4 py-4 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Next
+            <div className="mt-5 rounded-[28px] border border-black/10 bg-black/[0.03] px-4 py-4 text-left shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                Access
               </p>
               <p className="mt-2 text-sm font-medium leading-6 text-black/68">
-                Sign in if needed, confirm your age once, then return.
+                Sign in if needed, confirm once, then return.
               </p>
             </div>
 
@@ -149,7 +149,7 @@ export default function AdultGatePage() {
 
             {isSignedIn && reason === "NEED_LOGIN" ? (
               <p className="mt-4 text-xs font-medium text-black/58">
-                You're already signed in. Continue to finish the 18+ check.
+                Signed in. Finish the 18+ check.
               </p>
             ) : null}
           </section>
@@ -158,34 +158,33 @@ export default function AdultGatePage() {
             tone="muted"
             accent="blue"
             appearance="light"
-            className="flex h-full flex-col justify-between space-y-6"
+            className="flex h-full flex-col justify-between space-y-6 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                 Access desk
               </p>
               <div>
                 <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-black">
-                  18+ stays separate until you ask.
+                  18+ stays separate.
                 </h2>
                 <p className="mt-3 text-sm font-medium leading-7 text-black/68">
-                  Sign in if needed, confirm once, then return to the page you
-                  meant to open.
+                  Sign in if needed, confirm once, then return.
                 </p>
               </div>
             </div>
 
             <div className="space-y-3 text-sm text-black/68">
-              <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+              <div className="rounded-[24px] border border-black/10 bg-black/[0.03] px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/45">
                   Return target
                 </p>
                 <p className="mt-2 break-all text-sm font-medium text-black/78">
                   {returnTo}
                 </p>
               </div>
-              <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+              <div className="rounded-[24px] border border-black/10 bg-black/[0.03] px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/45">
                   Current reason
                 </p>
                 <p className="mt-2 text-sm font-medium text-black/78">

@@ -19,9 +19,8 @@ import {
 import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
-  title: "Help & FAQ",
-  description:
-    "Quick answers on billing, access, membership, and 18+ settings.",
+  title: "FAQ",
+  description: "Quick answers.",
   path: "/faq",
 });
 
@@ -33,19 +32,19 @@ const FAQ = getSiteFaqItems().map((item) => ({
 const QUICK_LINKS = [
   {
     title: "Support",
-    description: "Billing or access help.",
+    description: "",
     href: "/support",
     label: "Support",
   },
   {
-    title: "How it works",
-    description: "Points and plans.",
+    title: "Access",
+    description: "",
     href: "/how-it-works",
-    label: "Guide",
+    label: "Access",
   },
   {
     title: "Mature content",
-    description: "18+ access settings.",
+    description: "",
     href: "/mature-content",
     label: "18+ access",
   },
@@ -60,14 +59,13 @@ export default function FAQPage() {
     buildFaqStructuredData({
       path: "/faq",
       name: `Help & FAQ | ${siteConfig.siteName}`,
-      description:
-        "Quick answers on billing, access, membership, and 18+ settings.",
+      description: "Quick answers.",
       items: FAQ,
     }),
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <StructuredDataScript id="faq-jsonld" data={structuredData} />
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -75,9 +73,9 @@ export default function FAQPage() {
           <EditorialHero
             appearance="light"
             accent="blue"
-            eyebrow="Help"
-            title="Answers first."
-            description="Billing, access, membership, and 18+."
+            eyebrow="FAQ"
+            title="FAQ."
+            description=""
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -93,7 +91,7 @@ export default function FAQPage() {
             }
             stats={[
               {
-                label: "Answers",
+                label: "Items",
                 value: String(FAQ.length),
               },
               {
@@ -104,8 +102,8 @@ export default function FAQPage() {
           />
 
           <StorefrontDesk
-            eyebrow="Support"
-            title="Support."
+            eyebrow="More"
+            title="FAQ."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -115,7 +113,7 @@ export default function FAQPage() {
                   href="/how-it-works"
                   className={storefrontSecondaryButtonClass}
                 >
-                  Guide
+                  Access
                 </Link>
               </>
             }
@@ -124,7 +122,7 @@ export default function FAQPage() {
 
         <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
+            <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
             <div className="space-y-3">
               {FAQ.map((item) => (
                 <StorefrontInfoCard
@@ -146,9 +144,8 @@ export default function FAQPage() {
                 accent="blue"
               >
                 <StorefrontSectionHeading
-                  eyebrow="Next"
+                  eyebrow="More"
                   title={item.title}
-                  description={item.description}
                 />
                 <Link
                   href={item.href}

@@ -52,17 +52,14 @@ export default function NotificationList({
     if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
       return "See offer";
     }
-    return "Open series";
+    return "Series";
   };
 
   if (!notifications) {
     return (
-      <section className="border-[3px] border-black bg-white p-6 text-black/68 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+      <section className="rounded-[28px] border border-black/10 bg-white p-6 text-black/68 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
         <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
           Inbox
-        </p>
-        <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
-          Loading inbox.
         </p>
       </section>
     );
@@ -70,15 +67,12 @@ export default function NotificationList({
 
   if (notifications.length === 0) {
     return (
-      <section className="border-[3px] border-black bg-[#ffe500] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+      <section className="rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
         <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/60">
           Inbox
         </p>
         <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
           You're caught up.
-        </p>
-        <p className="mt-2 text-xs font-semibold leading-5 text-black/70">
-          New chapters and offers land here.
         </p>
       </section>
     );
@@ -90,10 +84,10 @@ export default function NotificationList({
         <div
           key={item.id}
           className={[
-            "border-[3px] p-4 shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]",
+            "rounded-[26px] border p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(15,23,42,0.1)]",
             item.read
-              ? "border-black bg-white"
-              : "border-black bg-[#fff6cf]",
+              ? "border-black/10 bg-white"
+              : "border-black/10 bg-[#f6f7f9]",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -104,7 +98,7 @@ export default function NotificationList({
                 </p>
                 {!item.read ? (
                   <span
-                    className="border-2 border-black bg-[#ff007a] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-white"
+                    className="rounded-full border border-black/10 bg-black px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white"
                   >
                     Unread
                   </span>
@@ -142,7 +136,7 @@ export default function NotificationList({
                 <button
                   type="button"
                   onClick={() => onNavigate?.(item)}
-                  className={`${storefrontPrimaryButtonClass} h-10 bg-[#00e5ff] px-3 text-[11px] tracking-[0.08em] text-black hover:bg-[#00d2ea]`}
+                  className={`${storefrontPrimaryButtonClass} h-10 px-3 text-[11px] tracking-[0.08em]`}
                 >
                   {getCtaLabel(item)}
                 </button>

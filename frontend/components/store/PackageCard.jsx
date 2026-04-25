@@ -38,10 +38,10 @@ export default function PackageCard({
 
   return (
     <div
-        className={`group rounded-[30px] border-[3px] border-black p-5 transition-all duration-300 hover:translate-x-1 hover:translate-y-1 ${
+        className={`group rounded-[30px] border border-black/10 p-5 transition-all duration-300 hover:border-black/15 hover:bg-black/[0.02] ${
           highlighted
-            ? "bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
-            : "bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            ? "bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.10)]"
+            : "bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
         }`}
       style={{ willChange: "transform" }}
     >
@@ -66,7 +66,7 @@ export default function PackageCard({
       </p>
 
       {bonusPct > 0 ? (
-        <div className="mt-3 rounded-[18px] border-[3px] border-black bg-white px-3 py-2">
+        <div className="mt-3 rounded-[18px] border border-black/10 bg-[#f8f9fb] px-3 py-2">
           <div className="flex items-center gap-2">
             <svg
               className="h-4 w-4 flex-shrink-0 text-[var(--gush-accent,#3157d6)]"
@@ -107,8 +107,8 @@ export default function PackageCard({
       ) : null}
 
       <div className="mt-3 space-y-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black/55">
-        <BenefitRow>One-time points for later reads</BenefitRow>
-        <BenefitRow>Unlock locked chapters as needed</BenefitRow>
+        <BenefitRow>One-time points</BenefitRow>
+        <BenefitRow>Unlock as you go</BenefitRow>
         <BenefitRow>No recurring billing</BenefitRow>
         {bonusPct > 0 ? (
           <BenefitRow>{bonusPct}% bonus included</BenefitRow>
@@ -118,10 +118,10 @@ export default function PackageCard({
       {!hideAction ? (
         <button
           type="button"
-          className={`mt-4 w-full min-h-[48px] border-[3px] border-black px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition-all ${
+          className={`mt-4 w-full min-h-[48px] px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition-all ${
             disabled
-              ? "cursor-not-allowed bg-slate-200 text-slate-500 shadow-[4px_4px_0_0_rgba(0,0,0,0.45)]"
-              : "bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              ? "cursor-not-allowed rounded-full border border-black/10 bg-slate-100 text-slate-500 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+              : "rounded-full border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] hover:bg-black/90"
           }`}
           onClick={() => onSelect?.(pkg.id)}
           disabled={disabled}

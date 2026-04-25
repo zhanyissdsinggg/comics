@@ -98,12 +98,12 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "border-[3px] border-black bg-white px-3 py-2.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
-      : "border-[3px] border-black bg-white px-4 py-3.5 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+      ? "rounded-[24px] border border-black/10 bg-white px-3 py-2.5 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
+      : "rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] px-4 py-3.5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
     : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
   const labelClass = isLight ? "text-black/55" : "text-neutral-400";
   const subtleButtonClass = isLight
-    ? "border-[3px] border-black bg-white text-black/60 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6cf] hover:text-black hover:shadow-none"
+    ? "rounded-full border border-black/10 bg-white text-black/60 shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
     : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
@@ -133,7 +133,7 @@ export default function FilterBar({
                   className={cn(
                     "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
-                      ? "border-[3px] border-black bg-[#fff6cf] text-black/55"
+                      ? "rounded-full border-black/10 bg-[#f6f7f9] text-black/55"
                       : "border-white/10 bg-white/[0.04] text-neutral-300",
                   )}
                 >
@@ -146,7 +146,7 @@ export default function FilterBar({
               className={cn(
                 "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
-                  ? "border-[3px] border-black bg-[#fff6cf] text-black/45"
+                  ? "rounded-full border-black/10 bg-[#f6f7f9] text-black/45"
                   : "border-white/10 bg-white/[0.04] text-neutral-300",
               )}
             >
@@ -166,7 +166,7 @@ export default function FilterBar({
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "border-[3px] border-black bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#dffcff] hover:shadow-none"
+                  ? "rounded-full border-black/10 bg-white text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
                   : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
               }`}
             >
@@ -231,7 +231,7 @@ export default function FilterBar({
           <div
             className={cn(
               `${isQuiet ? "pt-2.5" : "space-y-3 pt-3"} border-t`,
-              isLight ? "border-black" : "border-white/10",
+              isLight ? "border-black/8" : "border-white/10",
             )}
           >
             {isQuiet ? (
@@ -250,7 +250,7 @@ export default function FilterBar({
                       subtleButtonClass,
                       (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                          ? "border-black/12 bg-[#f6f7f9] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
                           : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
                     )}
                   >
@@ -279,7 +279,7 @@ export default function FilterBar({
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
                       isLight
-                        ? "border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                        ? "rounded-[24px] border-black/10 bg-white"
                         : "border-white/10 bg-black/90",
                     )}
                   >

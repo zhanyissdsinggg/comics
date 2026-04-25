@@ -40,27 +40,27 @@ function ToastItem({ toast, onClose }) {
 
   const styles = {
     success: {
-      panel: "border-black bg-white",
+      panel: "border-black/10 bg-white shadow-[0_20px_40px_rgba(15,23,42,0.14)]",
       iconWrap:
-        "border-black bg-[#d9fff0] text-black",
+        "border-black/10 bg-emerald-50 text-black",
       icon: <CheckCircle2 size={18} />,
     },
     error: {
-      panel: "border-black bg-[#ffe7ec]",
+      panel: "border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] shadow-[0_20px_40px_rgba(244,63,94,0.12)]",
       iconWrap:
-        "border-black bg-[#ff007a] text-white",
+        "border-rose-200/70 bg-white text-rose-700",
       icon: <AlertCircle size={18} />,
     },
     warning: {
-      panel: "border-black bg-[#fff6cf]",
+      panel: "border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] shadow-[0_20px_40px_rgba(245,158,11,0.12)]",
       iconWrap:
-        "border-black bg-[#ffe500] text-black",
+        "border-amber-200/70 bg-white text-black",
       icon: <TriangleAlert size={18} />,
     },
     info: {
-      panel: "border-black bg-white",
+      panel: "border-black/10 bg-white shadow-[0_20px_40px_rgba(15,23,42,0.14)]",
       iconWrap:
-        "border-black bg-[#dffcff] text-black",
+        "border-sky-200/70 bg-sky-50 text-black",
       icon: <Info size={18} />,
     },
   };
@@ -71,10 +71,10 @@ function ToastItem({ toast, onClose }) {
     <div
       role="status"
       aria-live={type === "error" ? "assertive" : "polite"}
-      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 border-[3px] px-4 py-3.5 text-black shadow-[8px_8px_0_0_rgba(255,0,122,1)] duration-300`}
+      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 rounded-[24px] border px-4 py-3.5 text-black duration-300`}
     >
       <div
-        className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center border-[3px] ${style.iconWrap}`}
+        className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl border ${style.iconWrap}`}
       >
         {style.icon}
       </div>
@@ -89,7 +89,7 @@ function ToastItem({ toast, onClose }) {
       <button
         type="button"
         onClick={onClose}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center border-[3px] border-black bg-white text-black/60 transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe7ec] hover:text-black"
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black/60 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
         aria-label="Close"
       >
         <X size={16} />

@@ -67,7 +67,7 @@ function formatUpdateLabel(value) {
     return "Date unavailable";
   }
 
-  return `Updated ${new Date(timestamp).toLocaleDateString("en-US", {
+  return `${new Date(timestamp).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -106,7 +106,7 @@ export default function SeriesHeader({
     .slice(0, 2)
     .map((genre) => ({ label: genre, tone: "genre" }));
   const primaryAction = onPrimaryAction || null;
-  const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
+  const primaryActionLabel = primaryActionLabelOverride || "Read";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
   const latestEpisodeValue = latestEpisodeNumber
     ? `Episode ${latestEpisodeNumber}`
@@ -142,10 +142,10 @@ export default function SeriesHeader({
     },
   ];
   const primaryActionClassName = [
-    "inline-flex w-full min-h-[52px] items-center justify-center gap-2 border-[3px] border-black px-5 py-3 text-sm font-black uppercase tracking-[0.06em] transition-all duration-200",
+    "inline-flex w-full min-h-[52px] items-center justify-center gap-2 rounded-full border border-black px-5 py-3 text-sm font-semibold tracking-[0.02em] transition-all duration-200",
     highlightPrimaryAction
-      ? "bg-[#ff007a] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
-      : "bg-[#ff007a] text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#e1006d] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]",
+      ? "bg-black text-white shadow-[0_16px_36px_rgba(15,23,42,0.18)]"
+      : "bg-black text-white shadow-[0_16px_36px_rgba(15,23,42,0.18)] hover:bg-black/90",
   ].join(" ");
   const primaryActions = primaryAction ? (
     <div className="grid gap-3">
@@ -168,35 +168,35 @@ export default function SeriesHeader({
     .slice(0, 2);
 
   return (
-    <header className="py-3 sm:py-6">
-      <section className="relative overflow-hidden border-[3px] border-black bg-[#ffe500] shadow-[10px_10px_0_0_rgba(0,0,0,1)]">
+    <header className="py-2 sm:py-6">
+      <section className="relative overflow-hidden rounded-[36px] border border-black/10 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
         {coverBackdropUrl ? (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-[0.05]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,229,0,0.94)_0%,rgba(255,255,255,0.96)_44%,rgba(255,255,255,0.94)_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.32),transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.98)_0%,rgba(251,251,253,0.97)_48%,rgba(246,247,251,0.94)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.46),transparent)]" />
 
-        <div className="relative grid gap-5 p-4 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
+        <div className="relative grid gap-4 p-4 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="border-[2px] border-black bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black">
-                {formatSeriesKind(series.type)}
-              </span>
+                <span className="rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black">
+                  {formatSeriesKind(series.type)}
+                </span>
               {isAdult ? (
-                <span className="border-[2px] border-black bg-[#ff007a] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white">
+                <span className="rounded-full border border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white">
                   18+
                 </span>
               ) : null}
             </div>
 
-            <h1 className="mt-4 max-w-4xl text-[2.15rem] font-black uppercase leading-[0.9] tracking-[-0.07em] text-black sm:text-[3.6rem] lg:text-[4.9rem]">
+            <h1 className="mt-3 max-w-4xl text-[1.72rem] font-black uppercase leading-[0.94] tracking-[-0.06em] text-black sm:mt-4 sm:text-[3.6rem] lg:text-[4.9rem]">
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-xs font-semibold uppercase tracking-[0.06em] text-black/65 sm:text-sm">
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-black/65 sm:mt-3 sm:text-sm sm:gap-x-2.5 sm:gap-y-2 sm:tracking-[0.06em]">
               <span>{creatorPresentation.value}</span>
               {latestEpisodeValue ? (
                 <>
@@ -213,7 +213,7 @@ export default function SeriesHeader({
                   </span>
                   <Link
                     href={creatorHref}
-                    className="font-black uppercase tracking-[0.04em] text-black transition-colors hover:text-[#ff007a]"
+                    className="font-black uppercase tracking-[0.04em] text-black transition-colors hover:text-black/68"
                   >
                     Creator
                   </Link>
@@ -222,11 +222,11 @@ export default function SeriesHeader({
             </div>
 
             {visibleHighlights.length > 0 ? (
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {visibleHighlights.map((item) => (
                   <span
                     key={`${item.tone}-${item.label}`}
-                    className="border-[2px] border-black bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.06em] text-black"
+                    className="rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1 text-xs font-black uppercase tracking-[0.06em] text-black"
                   >
                     {item.label}
                   </span>
@@ -234,28 +234,19 @@ export default function SeriesHeader({
               </div>
             ) : null}
 
-            <div className="mt-6 max-w-3xl border-[3px] border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] sm:px-5 sm:py-5 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-              <p className="text-sm font-semibold leading-6 text-black/72 sm:text-base sm:leading-8">
-                {summarizeSeriesDescription(
-                  series.description,
-                  "Start with chapter one.",
-                )}
-              </p>
-            </div>
-
             {primaryActions ? (
-              <div className="mt-6 max-w-none sm:mt-8 sm:max-w-xs">{primaryActions}</div>
+              <div className="mt-5 max-w-none sm:mt-8 sm:max-w-xs">{primaryActions}</div>
             ) : null}
 
-            <div className="mt-5 grid gap-3 sm:mt-7 sm:flex sm:flex-wrap sm:items-center">
+            <div className="mt-4 grid grid-cols-2 gap-2.5 sm:mt-7 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
               {onFollowToggle ? (
                 <button
                   type="button"
                   onClick={onFollowToggle}
-                  className={`group relative inline-flex min-h-[48px] w-full items-center justify-center gap-2 border-[3px] border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] transition-all duration-200 sm:min-h-[44px] sm:w-auto ${
+                  className={`group relative inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[0.02em] transition-[background-color,border-color,box-shadow,transform] duration-200 sm:min-h-[44px] sm:w-auto ${
                     isFollowing
-                      ? "bg-[#ffe500] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
-                      : "bg-white text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:text-black hover:shadow-none"
+                      ? "rounded-full border border-black/10 bg-[#f8f9fb] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+                      : "rounded-full border border-black/10 bg-white text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03] hover:text-black active:translate-y-px"
                   }`}
                   aria-label={
                     isFollowing ? "Remove from library" : "Save to library"
@@ -274,13 +265,13 @@ export default function SeriesHeader({
                 url={typeof window !== "undefined" ? window.location.href : ""}
                 title={series.title || "Check out this series"}
                 description={series.description || ""}
-                className="min-h-[48px] w-full border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black/72 shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none sm:min-h-[44px] sm:w-auto"
+                className="col-span-1 min-h-[48px] w-full rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03] hover:text-black sm:min-h-[44px] sm:w-auto"
               />
             </div>
           </div>
 
           <div className="order-first space-y-3 lg:order-none lg:space-y-4">
-            <div className="overflow-hidden border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <div className="overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
               <div className="aspect-[4/5] w-full overflow-hidden sm:aspect-[3/4]">
                 <Cover
                   tone={series.coverTone}
@@ -294,31 +285,28 @@ export default function SeriesHeader({
                 />
               </div>
             </div>
-            <div className="space-y-3 border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)] sm:p-5 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                    Creator
-                  </p>
-                  <p className="mt-3 text-base font-black uppercase tracking-[0.02em] text-black">
-                    {creatorPresentation.value}
-                  </p>
-                <p className="mt-3 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
-                  {creatorHref ? "Open creator page." : creatorPresentation.detail}
+            <div className="space-y-3 rounded-[26px] border border-black/10 bg-white p-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)] sm:p-5">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                  Creator
+                </p>
+                <p className="mt-2.5 text-[15px] font-black uppercase leading-[1.15] tracking-[0.02em] text-black sm:mt-3 sm:text-base">
+                  {creatorPresentation.value}
                 </p>
               </div>
 
-                <div className="grid gap-3 border-t-[3px] border-black pt-3 sm:grid-cols-2">
-                  <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
-                      Reading
-                    </p>
-                    <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
-                      {isCompleted ? "Full run" : "Ongoing"}
-                    </p>
-                  </div>
-                  <div className="border-[3px] border-black bg-[#ff007a] px-4 py-3 text-white">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
-                      Latest
+              <div className="grid gap-2.5 border-t border-black/8 pt-3 sm:grid-cols-2 sm:gap-3">
+                <div className="rounded-[22px] border border-black/10 bg-[#f6f7fb] px-4 py-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                    Reading
+                  </p>
+                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
+                    {isCompleted ? "Complete" : "Ongoing"}
+                  </p>
+                </div>
+                <div className="rounded-[22px] border border-black bg-black px-4 py-3 text-white">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
+                    Latest
                   </p>
                   <p className="mt-2 text-sm font-black uppercase tracking-[0.04em]">
                     {latestEpisodeValue}
@@ -329,7 +317,7 @@ export default function SeriesHeader({
           </div>
 
           <div className="lg:col-span-2">
-            <div className="border-[3px] border-black bg-white px-4 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:px-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] sm:px-5">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {heroFacts.map((item) =>
                   item.href ? (
@@ -344,9 +332,6 @@ export default function SeriesHeader({
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
                       </p>
-                      <p className="mt-2 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
-                        {item.detail}
-                      </p>
                     </Link>
                   ) : (
                     <div
@@ -358,9 +343,6 @@ export default function SeriesHeader({
                       </p>
                       <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-black">
                         {item.value}
-                      </p>
-                      <p className="mt-2 hidden text-sm font-semibold leading-6 text-black/68 sm:block">
-                        {item.detail}
                       </p>
                     </div>
                   ),

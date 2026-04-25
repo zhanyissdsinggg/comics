@@ -6,7 +6,6 @@ import {
   BookOpenText,
   Compass,
   Crown,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,12 +15,12 @@ const GUIDE_CARDS = [
   {
     id: "guide-featured",
     icon: Compass,
-    eyebrow: "Browse",
+    eyebrow: "Now",
     title: "Featured",
     description: "",
-    ctaLabel: "Open Featured",
+    ctaLabel: "Open",
     href: "/rankings",
-    accent: "bg-[#ffe500]",
+    accent: "bg-black/[0.04]",
   },
   {
     id: "guide-comics",
@@ -29,9 +28,9 @@ const GUIDE_CARDS = [
     eyebrow: "Format",
     title: "Comics",
     description: "",
-    ctaLabel: "Browse Comics",
+    ctaLabel: "Comics",
     href: "/comics",
-    accent: "bg-[#00e5ff]",
+    accent: "bg-black/[0.04]",
   },
   {
     id: "guide-novels",
@@ -39,9 +38,9 @@ const GUIDE_CARDS = [
     eyebrow: "Format",
     title: "Novels",
     description: "",
-    ctaLabel: "Browse Novels",
+    ctaLabel: "Novels",
     href: "/novels",
-    accent: "bg-[#ff8a00]",
+    accent: "bg-black/[0.04]",
   },
   {
     id: "guide-creators",
@@ -49,36 +48,36 @@ const GUIDE_CARDS = [
     eyebrow: "Credits",
     title: "Creators",
     description: "",
-    ctaLabel: "Open creators",
+    ctaLabel: "Creators",
     href: "/creators",
-    accent: "bg-[#ff69b4]",
+    accent: "bg-black/[0.04]",
   },
 ];
 
 const SECTION_STYLES = {
   featured: {
-    shell: "bg-[#ffe500]",
+    shell: "bg-white",
     panel: "bg-white",
-    shadow: "shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
-    buttonShadow: "shadow-[4px_4px_0_0_rgba(255,255,255,1)]",
+    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
+    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
   },
   comics: {
-    shell: "bg-[#00e5ff]",
+    shell: "bg-[#fbfbfd]",
     panel: "bg-white",
-    shadow: "shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
-    buttonShadow: "shadow-[4px_4px_0_0_rgba(255,255,255,1)]",
+    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
+    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
   },
   novels: {
-    shell: "bg-[#ff8a00]",
+    shell: "bg-white",
     panel: "bg-white",
-    shadow: "shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
-    buttonShadow: "shadow-[4px_4px_0_0_rgba(255,255,255,1)]",
+    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
+    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
   },
   start: {
-    shell: "bg-[#00ff88]",
+    shell: "bg-[#fbfbfd]",
     panel: "bg-white",
-    shadow: "shadow-[8px_8px_0_0_rgba(0,0,0,1)]",
-    buttonShadow: "shadow-[4px_4px_0_0_rgba(255,255,255,1)]",
+    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
+    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
   },
 };
 
@@ -99,14 +98,14 @@ function HomeSectionHeader({
   const styles = SECTION_STYLES[sectionTone] || SECTION_STYLES.featured;
 
   return (
-    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="mb-6 flex flex-col gap-3 sm:mb-8 md:flex-row md:items-end md:justify-between">
       <div className="max-w-[38rem]">
         {eyebrow ? (
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/72 sm:text-sm">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
+        <h2 className="mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-black sm:mt-2">
           {title}
         </h2>
         {description ? (
@@ -121,7 +120,7 @@ function HomeSectionHeader({
           type="button"
           onClick={onCtaClick}
           className={cn(
-            "inline-flex items-center gap-2 border-[3px] border-black bg-black px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+            "inline-flex items-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2.5 text-xs font-semibold tracking-[0.02em] text-black transition-all hover:border-black/20 hover:bg-black/[0.03] sm:px-5 sm:py-3 sm:text-sm",
             styles.buttonShadow,
           )}
         >
@@ -146,14 +145,14 @@ function DiscoveryFallbackCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group w-full border-[3px] border-black p-6 text-left shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:p-8",
+        "group w-full rounded-[32px] border border-black/10 p-5 text-left shadow-[0_22px_54px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02] sm:p-8",
         accentClass,
       )}
     >
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-black/72">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/72 sm:text-sm">
         {eyebrow}
       </p>
-      <h3 className="mt-3 text-[clamp(1.8rem,4vw,2.8rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-black">
+      <h3 className="mt-2.5 text-[clamp(1.45rem,4vw,2.8rem)] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:mt-3">
         {title}
       </h3>
       {description ? (
@@ -161,7 +160,7 @@ function DiscoveryFallbackCard({
           {description}
         </p>
       ) : null}
-      <div className="mt-6 inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.08em] text-black">
+      <div className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-black sm:mt-6 sm:text-sm">
         {label}
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </div>
@@ -169,7 +168,7 @@ function DiscoveryFallbackCard({
   );
 }
 
-function ShelfComicCard({ item, onClick, actionLabel = "Open series" }) {
+function ShelfComicCard({ item, onClick, actionLabel = "Series" }) {
   const coverUrl = String(item?.coverUrl || "").trim();
   const title = String(item?.title || "Story").trim();
   const author = String(item?.author || item?.eyebrow || "").trim();
@@ -184,7 +183,7 @@ function ShelfComicCard({ item, onClick, actionLabel = "Open series" }) {
       className="group text-left"
       aria-label={actionLabel ? `${actionLabel} ${title}` : `Open ${title}`}
     >
-      <div className="relative aspect-[3/4] overflow-hidden border-[3px] border-black bg-black shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[26px] border border-black/10 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]">
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -199,30 +198,30 @@ function ShelfComicCard({ item, onClick, actionLabel = "Open series" }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
         {badge ? (
-          <div className="absolute left-2 top-2 border-2 border-black bg-[#ff007a] px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+          <div className="absolute left-2 top-2 rounded-full border border-black/10 bg-white/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/72 backdrop-blur-sm">
             {badge}
           </div>
         ) : null}
 
         {genres.length > 0 ? (
-          <div className="absolute right-2 top-2 border-2 border-black bg-[#ffe500] px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black">
+          <div className="absolute right-2 top-2 rounded-full border border-black/10 bg-white/92 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/72 backdrop-blur-sm">
             {genres[0]}
           </div>
         ) : null}
 
-        <div className="absolute inset-x-0 bottom-0 p-3">
-          <p className="line-clamp-2 text-base font-black leading-5 tracking-[-0.03em] text-white">
+        <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3">
+          <p className="line-clamp-2 text-[15px] font-black leading-[1.15] tracking-[-0.03em] text-white sm:text-base sm:leading-5">
             {title}
           </p>
           {author ? (
-            <p className="mt-1 line-clamp-1 text-xs font-semibold uppercase tracking-[0.1em] text-white/70">
+            <p className="mt-1 line-clamp-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70 sm:text-xs sm:tracking-[0.1em]">
               {author}
             </p>
           ) : null}
           {meta ? (
-            <p className="mt-2 line-clamp-1 text-[11px] font-semibold text-white/80">
-              {meta}
-            </p>
+          <p className="mt-1 line-clamp-1 text-[10px] font-semibold text-white/78 sm:mt-2 sm:text-[11px]">
+            {meta}
+          </p>
           ) : null}
         </div>
       </div>
@@ -238,7 +237,7 @@ function HomeShelfSection({
   onCtaClick,
   items,
   onItemClick,
-  actionLabel = "Open series",
+  actionLabel = "Series",
   sectionTone = "featured",
 }) {
   if (!Array.isArray(items) || items.length === 0) {
@@ -248,7 +247,7 @@ function HomeShelfSection({
   const styles = SECTION_STYLES[sectionTone] || SECTION_STYLES.featured;
 
   return (
-    <section className={cn("border-y-[4px] border-black py-9 sm:py-12", styles.shell)}>
+    <section className={cn("border-y-[4px] border-black py-9 sm:py-14", styles.shell)}>
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <HomeSectionHeader
           eyebrow={eyebrow}
@@ -258,7 +257,7 @@ function HomeShelfSection({
           onCtaClick={onCtaClick}
           sectionTone={sectionTone}
         />
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {items.map((item) => (
             <ShelfComicCard
               key={item.id}
@@ -286,11 +285,11 @@ function HomeGuideCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-full flex-col border-[3px] border-black bg-white p-4 text-left shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] sm:p-6 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+      className="group flex h-full flex-col rounded-[30px] border border-black/10 bg-white p-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02] sm:p-6"
     >
       <div
         className={cn(
-          "inline-flex h-12 w-12 items-center justify-center border-[3px] border-black text-black",
+          "inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-black/10 text-black",
           accent,
         )}
       >
@@ -299,7 +298,7 @@ function HomeGuideCard({
       <p className="mt-4 text-[11px] font-black uppercase tracking-[0.18em] text-black/65 sm:mt-6 sm:text-xs">
         {eyebrow}
       </p>
-      <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.96] tracking-[-0.04em] text-black sm:text-[1.7rem]">
+      <h3 className="mt-2 text-[1.2rem] font-black uppercase leading-[0.96] tracking-[-0.04em] text-black sm:text-[1.7rem]">
         {title}
       </h3>
       {description ? (
@@ -307,7 +306,7 @@ function HomeGuideCard({
           {description}
         </p>
       ) : null}
-      <div className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-black sm:mt-6 sm:text-sm">
+      <div className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.08em] text-black sm:mt-6 sm:text-sm">
         {ctaLabel}
         <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
       </div>
@@ -325,17 +324,19 @@ function LeaderboardCard({ item, rank, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group grid grid-cols-[3rem_64px_minmax(0,1fr)] items-center gap-4 border-[2px] border-white/10 bg-white/5 p-3 text-left transition-all hover:border-[#ffe500] hover:bg-white/10"
+      className="group grid grid-cols-[2.25rem_56px_minmax(0,1fr)] items-center gap-3 rounded-[24px] border border-black/10 bg-white p-3 text-left shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition-all hover:border-black/14 hover:bg-[#fcfcfd] sm:grid-cols-[3rem_64px_minmax(0,1fr)] sm:gap-4"
     >
       <div
         className={cn(
-          "text-center text-[2.5rem] font-black leading-none tracking-[-0.06em]",
-          rank <= 3 ? "text-[#ffe500]" : "text-white",
+          "text-center text-[2rem] font-black leading-none tracking-[-0.06em] sm:text-[2.5rem]",
+          rank <= 3
+            ? "text-[color:var(--gush-accent,#3157d6)]"
+            : "text-black/35",
         )}
       >
         {rank}
       </div>
-      <div className="relative aspect-[3/4] overflow-hidden border-[3px] border-black bg-black">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-black/10 bg-[#f6f7f9] shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -345,22 +346,22 @@ function LeaderboardCard({ item, rank, onClick }) {
             decoding="async"
           />
         ) : (
-          <div className="h-full w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
+          <div className="h-full w-full bg-[linear-gradient(135deg,#f8fafc,#eef2ff,#ffffff)]" />
         )}
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <p className="line-clamp-1 text-sm font-black uppercase tracking-[-0.03em] text-white">
+          <p className="line-clamp-2 text-[13px] font-black uppercase leading-[1.1] tracking-[-0.03em] text-black sm:line-clamp-1 sm:text-sm">
             {title}
           </p>
         </div>
         {author ? (
-          <p className="mt-2 line-clamp-1 text-[11px] font-black uppercase tracking-[0.1em] text-white/60">
+          <p className="mt-2 line-clamp-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black/55">
             {author}
           </p>
         ) : null}
         {meta ? (
-          <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-white/70">
+          <p className="mt-1.5 line-clamp-2 text-[11px] font-semibold leading-4 text-black/62 sm:mt-2 sm:text-xs sm:leading-5">
             {meta}
           </p>
         ) : null}
@@ -375,23 +376,23 @@ function LeaderboardSection({ items, onItemClick }) {
   }
 
   return (
-    <section className="border-y-[4px] border-[#ffe500] bg-black py-12 sm:py-16">
+    <section className="border-y border-black/8 bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[38rem]">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff007a]">
-              This week
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-black/55">
+              Weekly
             </p>
-            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
-              Top 10 chart
+            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
+              Top 10
             </h2>
-            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/70">
-              The week&apos;s fastest movers.
+            <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-black/68">
+              Strong reads this week.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 border-[3px] border-black bg-[#ffe500] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-[#f6f7f9] px-4 py-2 text-sm font-semibold tracking-[0.04em] text-black/72 shadow-[0_14px_32px_rgba(15,23,42,0.06)]">
             <Crown className="size-4" />
-            Live board
+            Weekly
           </div>
         </div>
 
@@ -434,33 +435,33 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
 
   const pills = visibleKeywords.length > 0 ? visibleKeywords : fallbackKeywords;
   const colors = [
-    "bg-[#ff007a]",
-    "bg-[#ffe500]",
-    "bg-[#8b00ff]",
-    "bg-[#00e5ff]",
-    "bg-[#ff6b00]",
-    "bg-[#00ff88]",
-    "bg-[#ff69b4]",
-    "bg-[#ffd700]",
+    "bg-white",
+    "bg-[#f8f9fb]",
+    "bg-[#f3f5f8]",
+    "bg-white",
+    "bg-[#f8f9fb]",
+    "bg-[#f3f5f8]",
+    "bg-white",
+    "bg-[#f8f9fb]",
   ];
 
   return (
-    <section className="border-y-[4px] border-[#ffe500] bg-black py-5 sm:py-6">
+    <section className="border-y border-black/8 bg-[#111318] py-5 sm:py-6">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/70">
-              Browse
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/55">
+              Genres
             </p>
             <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-white">
-              Browse genres
+              Pick a lane
             </h2>
           </div>
           <Button
             type="button"
             variant="ghost"
             onClick={() => onGuideClick?.("/search")}
-            className="h-auto rounded-none border-b-2 border-[#ffe500] px-0 py-0 text-sm font-black uppercase tracking-[0.08em] text-[#ffe500] hover:bg-transparent hover:text-white"
+            className="h-auto rounded-full border border-white/14 bg-white/8 px-4 py-2 text-sm font-semibold tracking-[0.03em] text-white hover:bg-white/12"
           >
             Search
           </Button>
@@ -473,7 +474,7 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
               type="button"
               onClick={() => onGuideClick?.(`/search?genre=${encodeURIComponent(pill)}`)}
               className={cn(
-                "shrink-0 border-[3px] border-black px-4 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:px-5 sm:py-3 sm:text-sm",
+                "shrink-0 rounded-full border border-black/10 px-4 py-2.5 text-xs font-semibold tracking-[0.03em] text-black shadow-[0_12px_28px_rgba(15,23,42,0.10)] transition-all hover:border-black/15 hover:bg-black/[0.03] sm:px-5 sm:py-3 sm:text-sm",
                 colors[index % colors.length],
               )}
             >
@@ -532,7 +533,7 @@ export default function HomeContentSections({
                 description={card.description}
                 label={card.label}
                 onClick={() => onFallbackClick?.(card.href)}
-                accentClass={index % 2 === 0 ? "bg-[#ffe500]" : "bg-[#00e5ff]"}
+                accentClass={index % 2 === 0 ? "bg-white" : "bg-[#f8f9fb]"}
               />
             ))}
           </div>
@@ -540,13 +541,13 @@ export default function HomeContentSections({
       ) : (
         <>
           <HomeShelfSection
-            eyebrow="Trending now"
-            title="Trending now"
+            eyebrow="Popular"
+            title="Popular"
             description=""
-            ctaLabel="View all"
+            ctaLabel="See all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
-            actionLabel="Open series"
+            actionLabel="Series"
             sectionTone="featured"
             onItemClick={onFeaturedItemClick}
           />
@@ -559,11 +560,11 @@ export default function HomeContentSections({
           {Array.isArray(comicSpotlightItems) &&
           comicSpotlightItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Fresh drops"
+              eyebrow="New"
               title="Comics"
               description=""
               items={comicSpotlightItems}
-              actionLabel="Open comic"
+              actionLabel="Read"
               sectionTone="comics"
               onItemClick={onComicSpotlightItemClick}
             />
@@ -572,11 +573,11 @@ export default function HomeContentSections({
           {Array.isArray(novelSpotlightItems) &&
           novelSpotlightItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Long reads"
+              eyebrow="Read"
               title="Novels"
               description=""
               items={novelSpotlightItems}
-              actionLabel="Open novel"
+              actionLabel="Read"
               sectionTone="novels"
               onItemClick={onNovelSpotlightItemClick}
             />
@@ -586,11 +587,11 @@ export default function HomeContentSections({
           Array.isArray(startHereItems) &&
           startHereItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Fresh starts"
+              eyebrow="Start"
               title="First picks"
               description=""
               items={startHereItems}
-              actionLabel="Read Chapter 1"
+              actionLabel="Read"
               sectionTone="start"
               onItemClick={onStartHereItemClick}
             />
@@ -598,15 +599,25 @@ export default function HomeContentSections({
         </>
       )}
 
-      <section className="border-y-[4px] border-black bg-[#111111] py-10 sm:py-14">
+      <section className="border-y border-black/8 bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-          <div className="mb-8 max-w-[36rem]">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/60">
-              Browse
-            </p>
-            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
-              Go by shelf
-            </h2>
+          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-[36rem]">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/45 sm:text-sm">
+                Paths
+              </p>
+              <h2 className="mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-black sm:mt-2">
+                Shortcuts
+              </h2>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onGuideClick?.("/search")}
+              className="h-auto w-fit rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.03em] text-black hover:bg-black/[0.03] sm:text-sm"
+            >
+              Search
+            </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -624,57 +635,22 @@ export default function HomeContentSections({
             ))}
           </div>
 
-          <div className="mt-6 border-[3px] border-white/20 bg-black/40 p-4 text-white shadow-[8px_8px_0_0_rgba(255,255,255,0.08)] sm:mt-8 sm:flex sm:items-center sm:justify-between sm:p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center border-[3px] border-black bg-[#ffe500] text-black">
-                <Sparkles className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-white">
-                  Know what you want?
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => onGuideClick?.("/search")}
-              className="mt-5 inline-flex items-center gap-2 border-[3px] border-black bg-[#ff007a] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(255,255,255,0.18)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:mt-0"
-            >
-              Search
-              <ArrowRight className="size-4" />
-            </button>
-          </div>
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-y-[4px] border-black bg-[#8b00ff] py-12 sm:py-16">
-        <div className="absolute right-20 top-5 hidden rotate-12 text-[5rem] font-black text-[#ffe500] md:block">
-          +
-        </div>
-        <div className="absolute bottom-5 left-20 hidden -rotate-12 text-[4rem] font-black text-[#00e5ff] md:block">
-          *
-        </div>
+      <section className="relative overflow-hidden border-y border-black/8 bg-[#f6f7fb] py-10 sm:py-14">
         <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-          <div className="relative grid gap-8 md:grid-cols-2 md:items-center">
+          <div className="relative grid gap-6 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] md:items-start">
             <div>
-              <p className="inline-block -rotate-2 border-[2px] border-black bg-[#ffe500] px-3 py-1 text-sm font-black uppercase tracking-[0.14em] text-black">
-                Community
+              <p className="inline-block rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-semibold tracking-[0.08em] text-black sm:text-sm">
+                Creators
               </p>
-              <h2 className="mt-4 text-[clamp(2.1rem,8vw,4.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:mt-5">
-                Read.
-                <br />
-                Save.
-                <br />
-                <span className="inline-block rotate-1 border-[4px] border-black bg-[#ff007a] px-2 text-white">
-                  Repeat.
-                </span>
-              </h2>
               <button
                 type="button"
                 onClick={() => onGuideClick?.("/creators")}
-                className="mt-6 inline-flex min-h-[50px] w-full items-center justify-center gap-2 border-[3px] border-black bg-[#ffe500] px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:mt-7 sm:w-auto sm:px-6 sm:py-4 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+                className="mt-4 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_16px_36px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 sm:mt-5 sm:w-auto sm:px-6"
               >
-                Meet creators
+                Creators
                 <ArrowRight className="size-4" />
               </button>
             </div>
@@ -698,20 +674,20 @@ export default function HomeContentSections({
                     )
                   }
                   className={[
-                    "border-[3px] border-black p-4 text-left shadow-[5px_5px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none sm:p-5 sm:shadow-[6px_6px_0_0_rgba(255,229,0,1)]",
+                    "rounded-[28px] border border-black/10 p-4 text-left shadow-[0_16px_36px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02] sm:p-5",
                     index === 1
-                      ? "mt-8 bg-[#00e5ff]"
+                      ? "mt-4 bg-white sm:mt-8"
                       : index === 2
-                        ? "bg-[#ff007a] text-white"
+                        ? "bg-black text-white"
                         : index === 3
-                          ? "mt-8 bg-black text-white"
+                          ? "mt-4 bg-[#f8f9fb] text-black sm:mt-8"
                           : "bg-white text-black",
                   ].join(" ")}
                 >
-                  <div className="text-[2rem] font-black uppercase tracking-[-0.04em]">
+                  <div className="text-[1.55rem] font-black uppercase tracking-[-0.04em] sm:text-[2rem]">
                     {value}
                   </div>
-                  <div className="mt-1 text-sm font-black uppercase tracking-[0.16em] opacity-70">
+                  <div className="mt-1 text-[11px] font-black uppercase tracking-[0.16em] opacity-70 sm:text-sm">
                     {label}
                   </div>
                 </button>

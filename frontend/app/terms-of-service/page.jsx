@@ -13,7 +13,7 @@ import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
   title: "Terms of Service",
-  description: `Read the rules for using ${siteConfig.siteName}, buying content, and keeping your account in good standing.`,
+  description: `Terms for ${siteConfig.siteName}.`,
   path: "/terms-of-service",
 });
 
@@ -137,7 +137,7 @@ function ContactCard() {
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -148,8 +148,7 @@ export default function TermsOfServicePage() {
             title="Terms of service."
             description={
               <>
-                Rules for using {siteConfig.siteName} and buying content. By
-                using the site, you agree to these Terms and our{" "}
+                Using {siteConfig.siteName} means you agree to these Terms and our{" "}
                 <Link
                   href="/privacy-policy"
                   className="font-black text-[#ff007a] transition hover:text-[#e1006d]"

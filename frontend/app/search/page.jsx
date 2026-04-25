@@ -15,8 +15,8 @@ export async function generateMetadata({ searchParams }) {
   return createPageMetadata({
     title: query ? `Search: ${query}` : "Search Comics & Novels",
     description: query
-      ? `Browse search results for ${query}.`
-      : "Search the catalog by title, genre, or keyword.",
+      ? `Search results for ${query}.`
+      : "Search Gush.",
     path: query ? `/search?q=${encodeURIComponent(query)}` : "/search",
     robots: {
       index: false,

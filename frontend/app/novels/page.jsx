@@ -5,8 +5,7 @@ import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Novels",
-  description:
-    "Browse serialized novels, recent chapters, and finished stories on Gush.",
+  description: "Novels on Gush.",
   path: "/novels",
 });
 
@@ -18,7 +17,7 @@ export default async function Page({ searchParams }) {
   return (
     <ErrorBoundary
       title="Failed to load novels page"
-      message="We couldn't load the novels page. Please try again."
+      message="We couldn't load the novels page."
     >
       <NovelsPage
         initialSearchParams={initialSearchParams}

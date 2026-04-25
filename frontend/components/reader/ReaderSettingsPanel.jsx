@@ -15,7 +15,9 @@ function ToggleRow({ label, description, enabled, onToggle }) {
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-sm">
       <div className="min-w-0">
         <div className="text-sm font-semibold text-white">{label}</div>
-        <div className="mt-1 text-xs text-neutral-400">{description}</div>
+        {description ? (
+          <div className="mt-1 text-xs text-neutral-400">{description}</div>
+        ) : null}
       </div>
       <button
         type="button"
@@ -90,7 +92,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
       >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">Reader Settings</h2>
+            <h2 className="text-lg font-semibold text-white">Display</h2>
           </div>
           <button
             type="button"
@@ -104,7 +106,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
         <div className="space-y-6 overflow-y-auto px-5 py-5">
           <ToggleRow
             label="Night Mode"
-            description="Reduce glare for long reading sessions."
+            description=""
             enabled={nightMode}
             onToggle={onToggleNight}
           />
@@ -113,9 +115,6 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
               <div>
                 <div className="text-sm font-semibold text-white">Layout</div>
-                <div className="mt-1 text-xs text-neutral-400">
-                  Switch between continuous scroll and side-by-side paging.
-                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <ModeButton
@@ -127,7 +126,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                     }
                   }}
                 >
-                  Vertical
+                  Scroll
                 </ModeButton>
                 <ModeButton
                   active={layoutMode === "horizontal"}
@@ -138,7 +137,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                     }
                   }}
                 >
-                  Horizontal
+                  Wide
                 </ModeButton>
               </div>
             </div>
@@ -148,9 +147,6 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-white">Brightness</div>
-                <div className="mt-1 text-xs text-neutral-400">
-                  Tune the page luminance without affecting site theme.
-                </div>
               </div>
                 <span className="text-sm font-semibold text-white/90">{safeBrightness}%</span>
             </div>
@@ -172,7 +168,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
 
           <ToggleRow
             label="Auto Scroll"
-            description="Keep the chapter moving hands-free."
+            description=""
             enabled={autoScroll}
             onToggle={onToggleAutoScroll}
           />
@@ -181,10 +177,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-semibold text-white">Auto Scroll Speed</div>
-                  <div className="mt-1 text-xs text-neutral-400">
-                    Increase speed when you want a faster glide.
-                  </div>
+                  <div className="text-sm font-semibold text-white">Auto speed</div>
                 </div>
                 <span className="text-sm font-semibold text-white/90">{safeAutoScrollSpeed}x</span>
               </div>
@@ -207,7 +200,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
 
           <ToggleRow
             label="Fullscreen"
-            description="Hide browser chrome for an immersive pass."
+            description=""
             enabled={fullscreen}
             onToggle={onToggleFullscreen}
           />

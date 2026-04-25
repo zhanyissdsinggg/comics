@@ -90,7 +90,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded border border-black bg-[#ffe500] px-1 text-black">
+      <mark className="rounded border border-black/10 bg-[rgba(49,87,214,0.14)] px-1 text-black">
         {match}
       </mark>
       {after}
@@ -177,15 +177,15 @@ function summarizeSearchDescription(series) {
   }
 
   if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed series ready for a full-session read.";
+    return "Completed series.";
   }
 
   if (Number(series?.episodeCount || 0) > 0) {
     const episodeCount = Number(series.episodeCount || 0);
-    return `${episodeCount} episode${episodeCount === 1 ? "" : "s"} currently listed.`;
+    return `${episodeCount} episode${episodeCount === 1 ? "" : "s"}.`;
   }
 
-  return "Open the title page to see the latest chapters and creator credits.";
+  return "";
 }
 
 function getSearchSeriesBadge(series) {
@@ -238,7 +238,7 @@ function SearchSectionHeader({
 
       <div className="flex flex-wrap items-center gap-2.5">
         {meta ? (
-          <span className="border-[3px] border-black bg-white px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <span className="rounded-full border border-black/10 bg-white px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
             {meta}
           </span>
         ) : null}
@@ -759,20 +759,20 @@ export default function SearchPage() {
   const loadingResultLabel = "Updating";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
   const recoPanelTitle = !query
-    ? "Popular now."
+    ? "Popular."
     : results.length === 0
-      ? "Try these next."
-      : "Browse next.";
+      ? "Next picks."
+      : "Next picks.";
   const lightCardAccentClass =
-    "border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff6c7] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
+    "border border-black/10 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:bg-[#fcfcfd] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]";
   const lightFeatureAccentClass =
-    "border-[3px] border-black bg-[#ffe500] shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:bg-[#fff07a] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]";
+    "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] shadow-[0_18px_40px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,#fffdf7_0%,#fff3de_100%)] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]";
   const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none";
+    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
   const accentButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
+    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
   const filterSelectClass =
-    "border-[3px] border-black bg-white px-4 py-2 text-sm font-bold uppercase tracking-[0.04em] text-black outline-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all focus:ring-4 focus:ring-black/10";
+    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all focus:ring-4 focus:ring-black/10";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -801,9 +801,9 @@ export default function SearchPage() {
         : {
             id: "free-unlock",
             eyebrow: "First picks",
-            title: "Open a strong first pick.",
+            title: "First picks.",
             description: "",
-            ctaLabel: "Browse First Picks",
+            ctaLabel: "First Picks",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
@@ -811,7 +811,7 @@ export default function SearchPage() {
         ? {
             id: "completed-binge-slot",
             eyebrow: "Binge path",
-            title: `Read ${completedPick.title} straight through.`,
+            title: `${completedPick.title}.`,
             description: "",
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () =>
@@ -825,9 +825,9 @@ export default function SearchPage() {
         : {
             id: "completed-binge",
             eyebrow: "Binge path",
-            title: "Browse completed series.",
+            title: "Completed series.",
             description: "",
-            ctaLabel: "Browse Completed",
+            ctaLabel: "Completed",
             onClick: () =>
               updateParams(
                 {
@@ -881,9 +881,9 @@ export default function SearchPage() {
         ? {
             id: "adult-desk",
             eyebrow: "18+ page",
-            title: "Open the 18+ shelf.",
+            title: "18+ shelf.",
             description: "",
-            ctaLabel: "Open 18+ page",
+            ctaLabel: "18+",
             onClick: () => router.push("/adult"),
             accentClass: lightCardAccentClass,
           }
@@ -943,22 +943,22 @@ export default function SearchPage() {
                 ? "lead-editorial-rescue"
                 : "lead-editorial-push",
             eyebrow: hasDirectMatch
-              ? "Best match"
+              ? "Top match"
               : query
-                ? "Try this next"
+                ? "Next"
                 : "Featured",
             title: hasDirectMatch
               ? `${leadSearchResult.title} is the closest match.`
               : query
-                ? `${leadSearchResult.title} is worth a look.`
-                : `${leadSearchResult.title} is a strong place to begin.`,
+                ? `${leadSearchResult.title}.`
+                : `${leadSearchResult.title}.`,
             description: hasDirectMatch
               ? hasSparseResults
-                ? "A short list, with a clear lead."
-                : "The clearest result in this search."
+                ? ""
+                : ""
               : query
-                ? "No direct match, but this stays close."
-                : "A strong pick from the catalog.",
+                ? ""
+                : "",
             signalLabel: hasDirectMatch ? "Results" : "Featured",
             signalValue: hasDirectMatch
               ? loading
@@ -969,8 +969,7 @@ export default function SearchPage() {
                 : "Editors' pick",
             signalHint: hasDirectMatch
               ? `Sorted by ${sortLabel}`
-              : leadHotKeyword?.hint ||
-                "Picked from one of the strongest home recommendations",
+              : leadHotKeyword?.hint || "",
             ctaLabel: `Open ${leadSearchResult.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -985,15 +984,15 @@ export default function SearchPage() {
         : {
             id: "lead-trend",
             eyebrow: "Popular search",
-            title: `${leadHotLabel} is trending right now.`,
-            description: "A live search term.",
+            title: `${leadHotLabel}.`,
+            description: "",
             signalLabel: "Hot keyword",
             signalValue: leadHotLabel,
             signalHint:
               leadHotKeyword?.hint ||
               (hotWindow === "week"
-                ? "Most searched this week"
-                : "Most searched today"),
+                ? "This week"
+                : "Today"),
             ctaLabel: `Search ${leadHotLabel}`,
             onClick: () =>
               updateParams(
@@ -1016,14 +1015,13 @@ export default function SearchPage() {
             description:
               startHereEpisodeCount > 0
                 ? `${startHereEpisodeCount} episode${startHereEpisodeCount === 1 ? "" : "s"} listed.`
-                : "A lighter place to start.",
+                : "",
             signalLabel: "Episodes",
             signalValue:
               startHereEpisodeCount > 0
                 ? String(startHereEpisodeCount)
                 : "Live",
-            signalHint:
-              "A lighter commitment than restarting your search from scratch",
+            signalHint: "",
             ctaLabel: `Open ${freeStartPick.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -1036,12 +1034,12 @@ export default function SearchPage() {
         : {
             id: "free-start-desk",
             eyebrow: "First picks",
-            title: "Try an editorial first pick.",
-            description: "A lighter place to start.",
+            title: "First pick.",
+            description: "",
             signalLabel: "Shelf",
             signalValue: "First Picks",
-            signalHint: "Editorial picks with a cleaner first step",
-            ctaLabel: "Browse First Picks",
+            signalHint: "",
+            ctaLabel: "First Picks",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: lightFeatureAccentClass,
           },
@@ -1049,13 +1047,13 @@ export default function SearchPage() {
         ? {
             id: "binge-desk-slot",
             eyebrow: "Binge pick",
-            title: `${completedPick.title} is ready for a full binge.`,
-            description: `${completedPick.title} is complete, so it is easier to commit to than restarting your search from scratch.`,
+            title: `${completedPick.title}.`,
+            description: "",
             signalLabel: "Status",
             signalValue: "Completed",
             signalHint: completedPick?.episodeCount
               ? `${completedPick.episodeCount} episodes ready`
-              : "Ready for a full-session read",
+              : "",
             ctaLabel: `Open ${completedPick.title}`,
             onClick: () =>
               handleSeriesClick(
@@ -1068,16 +1066,16 @@ export default function SearchPage() {
         : {
             id: isAdultMode ? "protected-desk" : "binge-desk",
             eyebrow: isAdultMode ? "18+ read" : "Completed pick",
-            title: isAdultMode ? "Open the 18+ shelf." : "Browse completed.",
+            title: isAdultMode ? "18+ shelf." : "Completed.",
             description: isAdultMode
-              ? "Browse from the protected shelf."
-              : "Finished stories.",
+              ? ""
+              : "",
             signalLabel: isAdultMode ? "Mode" : "Finished",
             signalValue: isAdultMode ? "18+" : "Runs",
             signalHint: isAdultMode
-              ? "18+ titles are available"
-              : "Ready for a longer read",
-            ctaLabel: isAdultMode ? "Open 18+ shelf" : "Browse Completed",
+              ? ""
+              : "",
+            ctaLabel: isAdultMode ? "18+" : "Completed",
             onClick: () =>
               isAdultMode
                 ? router.push("/adult")
@@ -1120,7 +1118,7 @@ export default function SearchPage() {
     {
       label: query ? "Matches" : "Titles",
       value: query ? total.toLocaleString() : catalog.length.toLocaleString(),
-      tone: "bg-[#ffe500]",
+      tone: "bg-[#f6f7f9]",
     },
     {
       label: "Hot terms",
@@ -1130,23 +1128,23 @@ export default function SearchPage() {
     {
       label: "Page",
       value: String(page),
-      tone: "bg-[#00e5ff]",
+      tone: "bg-[#f6f7f9]",
     },
   ];
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <div className="space-y-0">
-        <section className="grid border-b-[4px] border-black bg-[#00e5ff] xl:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="grid border-b border-black/8 bg-[#f6f7f9] xl:grid-cols-[minmax(0,1fr)_380px]">
           <SurfacePanel
-            className="space-y-6 border-0 border-black bg-[#00e5ff] px-5 py-10 shadow-none sm:px-8 sm:py-14 lg:px-12 xl:px-16"
+            className="space-y-6 border-0 bg-transparent px-5 py-10 shadow-none sm:px-8 sm:py-14 lg:px-12 xl:px-16"
             tone="highlight"
             accent="blue"
             appearance="light"
           >
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2.5">
-                <p className="border-[2px] border-black bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-black">
+                <p className="rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/70 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
                   Search
                 </p>
               </div>
@@ -1161,7 +1159,7 @@ export default function SearchPage() {
               ) : null}
             </div>
 
-            <div className="border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:p-5">
+            <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1175,7 +1173,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="border-[2px] border-black bg-[#f5f1ea] px-3 py-2 text-sm font-black uppercase tracking-[0.04em] text-black/72 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
+                      className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-2 text-sm font-semibold tracking-[0.02em] text-black/72 transition-all hover:border-black/16 hover:bg-black/[0.03] hover:text-black"
                     >
                       {item}
                     </button>
@@ -1193,7 +1191,7 @@ export default function SearchPage() {
                         key={item.id}
                         type="button"
                         onClick={() => updateParam("q", item.value)}
-                        className="border-[2px] border-black bg-[#f5f1ea] px-3 py-2 text-sm font-black uppercase tracking-[0.04em] text-black/72 transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:text-black hover:shadow-none"
+                        className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-2 text-sm font-semibold tracking-[0.02em] text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition-all hover:border-black/16 hover:bg-black/[0.03] hover:text-black active:translate-y-px"
                       >
                         {item.label}
                       </button>
@@ -1204,17 +1202,17 @@ export default function SearchPage() {
           </SurfacePanel>
 
           <SurfacePanel
-            className="h-full space-y-5 border-0 border-l-[4px] border-black bg-black p-5 text-white shadow-none sm:p-6 xl:p-8"
-            tone="default"
-            accent="amber"
-            appearance="dark"
+            className="h-full space-y-5 border border-black/10 bg-white p-5 text-black shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-6 xl:p-8"
+            tone="muted"
+            accent="blue"
+            appearance="light"
           >
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                 Search
               </p>
-              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                {query ? "Best match" : "Start here"}
+              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
+                {query ? "Best match" : "Pick"}
               </h2>
             </div>
 
@@ -1230,10 +1228,10 @@ export default function SearchPage() {
                       : "search_masthead_featured",
                   )
                 }
-                className="group w-full border-[3px] border-black bg-white p-4 text-left text-black shadow-[6px_6px_0_0_rgba(255,229,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                className="group w-full rounded-[28px] border border-black/10 bg-white p-4 text-left text-black shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02]"
               >
                 <div className="grid gap-4 grid-cols-[88px_minmax(0,1fr)]">
-                  <div className="overflow-hidden border-[3px] border-black bg-[#f5f1ea]">
+                  <div className="overflow-hidden rounded-[24px] border border-black/10 bg-[#f6f7f9]">
                     <Cover
                       tone={leadSearchResult.coverTone}
                       coverUrl={leadSearchResult.coverUrl}
@@ -1247,8 +1245,8 @@ export default function SearchPage() {
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
-                      {query ? "Top result" : "Lead title"}
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/45">
+                      {query ? "Best" : "Pick"}
                     </p>
                     <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
                       {leadSearchResult.title}
@@ -1263,12 +1261,12 @@ export default function SearchPage() {
                 </div>
               </button>
             ) : (
-              <div className="border-[3px] border-black bg-white p-4 text-black shadow-[6px_6px_0_0_rgba(255,229,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+              <div className="rounded-[28px] border border-black/10 bg-[#f8f9fb] p-4 text-black shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/45">
                   Search
                 </p>
                 <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
-                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Open a shelf"}
+                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Start"}
                 </h3>
               </div>
             )}
@@ -1277,9 +1275,9 @@ export default function SearchPage() {
               {heroStatCards.map((item) => (
                 <div
                   key={item.label}
-                  className={`${item.tone} border-[3px] border-black px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]`}
+                  className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-black shadow-[0_14px_32px_rgba(15,23,42,0.06)]"
                 >
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/45">
                     {item.label}
                   </p>
                   <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
@@ -1310,15 +1308,15 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="border-[3px] border-black bg-[#fff6c7] px-4 py-3 text-sm font-semibold text-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm font-semibold text-black shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
             Showing saved results. Reconnect to refresh.
           </div>
         ) : null}
 
         {shouldShowEventHub ? (
           <StorefrontEventHub
-            eyebrow={query ? "Search picks" : "Featured"}
-            title={query ? "Top result." : "Popular now."}
+            eyebrow={query ? "Search" : "Pick"}
+            title={query ? "Best match." : "Popular."}
             description=""
             events={searchEventCards}
             appearance="light"
@@ -1335,12 +1333,12 @@ export default function SearchPage() {
 
         {shouldShowReco ? (
           <SurfacePanel
-            className="space-y-8 border-[3px] border-black bg-[#ffe500] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+            className="space-y-8 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
             appearance="light"
             accent="amber"
           >
             <SearchSectionHeader
-              eyebrow="More to read"
+              eyebrow="Next"
               title={recoPanelTitle}
               description=""
               actions={
@@ -1348,10 +1346,10 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setHotWindow("day")}
-                    className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.03em] transition-all ${
                       hotWindow === "day"
-                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                        : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none"
+                        ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+                        : "border-black/12 bg-white text-black/70 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]"
                     }`}
                   >
                     Today
@@ -1359,13 +1357,13 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setHotWindow("week")}
-                    className={`border-[2px] border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition-all ${
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.03em] transition-all ${
                       hotWindow === "week"
-                        ? "bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                        : "bg-white text-black/70 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:text-black hover:shadow-none"
+                        ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+                        : "border-black/12 bg-white text-black/70 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]"
                     }`}
                   >
-                    This Week
+                    Week
                   </button>
                 </div>
               }
@@ -1402,7 +1400,7 @@ export default function SearchPage() {
         {showResultSections ? (
           <>
             <SurfacePanel
-              className="space-y-5 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+              className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
               appearance="light"
               accent="blue"
             >
@@ -1416,12 +1414,12 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => setShowAdvancedFilters(true)}
-                      className="inline-flex items-center gap-2 border-[3px] border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                      className="inline-flex items-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_12px_28px_rgba(15,23,42,0.10)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
                     >
                       <SlidersHorizontal size={16} />
                       <span>Filters</span>
                       {activeFilterCount > 0 ? (
-                        <span className="border border-black bg-[#ff007a] px-2 py-0.5 text-[11px] font-black text-white">
+                        <span className="rounded-full border border-black bg-black px-2 py-0.5 text-[11px] font-black text-white">
                           {activeFilterCount}
                         </span>
                       ) : null}
@@ -1470,7 +1468,7 @@ export default function SearchPage() {
             ) : error ? (
               <NetworkFallback
                 compact
-                title="Search is unavailable right now."
+                title="Search is unavailable."
                 description=""
                 onRetry={retrySearch}
               >
@@ -1484,16 +1482,16 @@ export default function SearchPage() {
               </NetworkFallback>
             ) : results.length === 0 ? (
               <SurfacePanel
-                className="space-y-4 border-[3px] border-black bg-[#fff6c7] shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                className="space-y-4 border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
                 appearance="light"
                 accent="blue"
               >
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                    No direct match
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+                    No match
                   </p>
                   <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    Try another search.
+                    No match.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -1528,7 +1526,7 @@ export default function SearchPage() {
                       }
                       className={secondaryButtonClass}
                     >
-                      Open {breakoutPick.title}
+                      {breakoutPick.title}
                     </button>
                   ) : (
                     <button
@@ -1536,7 +1534,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=featured")}
                       className={secondaryButtonClass}
                     >
-                      Open Featured
+                      Popular
                     </button>
                   )}
                   {completedPick ? (
@@ -1551,7 +1549,7 @@ export default function SearchPage() {
                       }
                       className={secondaryButtonClass}
                     >
-                      Open {completedPick.title}
+                      {completedPick.title}
                     </button>
                   ) : (
                     <button
@@ -1570,7 +1568,7 @@ export default function SearchPage() {
                       }
                       className={secondaryButtonClass}
                     >
-                      Open Completed
+                      Completed
                     </button>
                   )}
                   {freeStartPick ? (
@@ -1585,7 +1583,7 @@ export default function SearchPage() {
                       }
                       className={accentButtonClass}
                     >
-                      Open {freeStartPick.title}
+                      {freeStartPick.title}
                     </button>
                   ) : (
                     <button
@@ -1593,7 +1591,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=start-here")}
                       className={accentButtonClass}
                     >
-                      Open First Picks
+                      First Picks
                     </button>
                   )}
                 </div>
@@ -1624,11 +1622,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden border-[3px] border-black bg-white p-5 text-left shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:bg-[#fffdf7] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                      className="group block overflow-hidden rounded-[30px] border border-black/10 bg-white p-5 text-left shadow-[0_20px_46px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fcfcfd] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]"
                       aria-label={`Open ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <div className="overflow-hidden border-[3px] border-black bg-[#f5f1ea] shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+                        <div className="overflow-hidden rounded-[22px] border border-black/10 bg-[#f8fafc] shadow-[0_14px_30px_rgba(15,23,42,0.06)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1654,11 +1652,11 @@ export default function SearchPage() {
                           <p className="line-clamp-2 text-sm font-medium leading-6 text-black/68">
                             {summarizeSearchDescription(series)}
                           </p>
-                          <div className="flex items-center justify-between border-t-[3px] border-black pt-3">
+                          <div className="flex items-center justify-between border-t border-black/8 pt-3">
                             <span className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
-                              Open title
+                              Read
                             </span>
-                            <span className="inline-flex h-8 w-8 items-center justify-center border-[2px] border-black bg-[#ffe500] text-black transition-all duration-300 group-hover:translate-x-1">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black/72 transition-all duration-300 group-hover:translate-x-0.5">
                               <ArrowRight className="size-4" />
                             </span>
                           </div>
@@ -1669,7 +1667,7 @@ export default function SearchPage() {
                 </div>
 
                 {total > PAGE_SIZE ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-[3px] border-black bg-white px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-black/65 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black/65 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
                     <span>
                       Page {page} of {totalPages}
                     </span>
@@ -1679,7 +1677,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page - 1))}
                         disabled={page <= 1}
                         aria-label="Previous page"
-                        className="border-[2px] border-black bg-white px-3 py-1.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-sm font-semibold tracking-[0.02em] text-black transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Previous
                       </button>
@@ -1688,7 +1686,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page + 1))}
                         disabled={page >= totalPages}
                         aria-label="Next page"
-                        className="border-[2px] border-black bg-white px-3 py-1.5 text-sm font-black uppercase tracking-[0.06em] text-black transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-sm font-semibold tracking-[0.02em] text-black transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Next page
                       </button>

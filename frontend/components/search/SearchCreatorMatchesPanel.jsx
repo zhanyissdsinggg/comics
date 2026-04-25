@@ -121,7 +121,7 @@ export default function SearchCreatorMatchesPanel({
 
         if (spotlightTitleMatch) {
           if (!hasPrimaryMatch) {
-            matchLabel = "Lead title";
+            matchLabel = "Featured";
             matchDescription =
               "The strongest title match comes from this creator, so their page keeps related work close.";
           }
@@ -235,9 +235,9 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border-[3px] border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[6px_6px_0_0_rgba(0,229,255,1)] transition hover:-translate-y-0.5 hover:bg-[#00b7d1]"
+            className="rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
           >
-            Open creator
+            Creator
           </Link>
         ) : null}
       </div>
@@ -248,12 +248,12 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[30px] border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+            className="rounded-[30px] border border-black/10 bg-white p-4 shadow-[0_20px_44px_rgba(15,23,42,0.08)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
               coverUrl={creator.spotlightSeries?.coverUrl}
-              className="h-48 rounded-[22px] border-[3px] border-black"
+              className="h-48 rounded-[22px] border border-black/10"
             />
             <div className="mt-4 space-y-3">
               <div>
@@ -267,15 +267,13 @@ export default function SearchCreatorMatchesPanel({
 
               {creator.spotlightSeries?.title ? (
                 <p className="text-sm leading-6 text-black/68">
-                  Start with{" "}
                   <span className="font-medium text-black">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
-                  .
                 </p>
               ) : (
                 <p className="text-sm leading-6 text-black/68">
-                  Creator page
+                  Creator
                 </p>
               )}
 
@@ -296,9 +294,9 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border-[3px] border-black bg-white px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:-translate-y-0.5 hover:bg-[#ffe500]"
+                  className="rounded-full border border-black/10 bg-white px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:bg-[#f6f7f9]"
                 >
-                  Open creator
+                  Creator
                 </Link>
               </div>
             </div>

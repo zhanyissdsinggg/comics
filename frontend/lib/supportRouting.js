@@ -5,8 +5,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Billing & receipts",
     subject: "Billing issue",
     description: "Wrong charge, missing points, duplicate payment, receipts, renewals, or taxes that look off.",
-    draft:
-      "Tell us what happened, what you expected to see, and whether the issue involves a point pack, renewal, or one-time charge.",
+    draft: "What happened? Include the charge, receipt, or order details.",
   },
   login: {
     id: "login",
@@ -14,8 +13,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Login & account access",
     subject: "Login help",
     description: "Email verification, password reset, sign-in trouble, account recovery, or sync issues.",
-    draft:
-      "Tell us what part of sign-in or account access is failing, what you already tried, and which email or sign-in method should be attached to the account.",
+    draft: "What part of sign-in or account access is failing?",
   },
   subscription: {
     id: "subscription",
@@ -23,8 +21,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Membership & subscription",
     subject: "Membership help",
     description: "Membership charges, plan changes, renewals, perks, or access that looks wrong.",
-    draft:
-      "Tell us which plan or renewal is involved, what you expected membership to include, and whether the issue is about billing, access, or cancellation timing.",
+    draft: "Which plan or renewal is affected, and what looks wrong?",
   },
   technical: {
     id: "technical",
@@ -32,8 +29,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Technical & reader issue",
     subject: "Technical issue",
     description: "Broken reader pages, missing chapters, progress problems, playback failures, or pages that will not load.",
-    draft:
-      "Tell us which title or chapter broke, what device or browser you used, and what happened when you tried to open or continue reading.",
+    draft: "Which title or chapter broke, and what happened when you opened it?",
   },
   adult: {
     id: "adult",
@@ -41,8 +37,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Mature content access",
     subject: "Mature content access",
     description: "18+ access, age check failures, hidden mature titles, region mismatch, or Hide 18+ history questions.",
-    draft:
-      "Tell us whether the problem is age check, region settings, hidden titles, or 18+ history, and whether you are signed in on the affected account.",
+    draft: "Is this about age check, region, hidden titles, or 18+ history?",
   },
   content: {
     id: "content",
@@ -50,8 +45,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Content report",
     subject: "Content report",
     description: "Cover issues, translation quality, metadata mistakes, title reports, or creator-credit problems.",
-    draft:
-      "Tell us which title or creator page needs review, what looks wrong, and any page URL that helps us find it faster.",
+    draft: "Which title or creator page needs review, and what looks wrong?",
   },
 };
 

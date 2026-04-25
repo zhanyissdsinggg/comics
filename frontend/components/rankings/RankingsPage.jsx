@@ -23,28 +23,28 @@ import { getSearchParam } from "../../lib/pageSearchParams";
 const VIEWS = [
   {
     id: "featured",
-    label: "Featured",
-    description: "Top picks.",
+    label: "Popular",
+    description: "",
   },
   {
     id: "start-here",
-    label: "First Picks",
-    description: "Easy starts.",
+    label: "Start Here",
+    description: "",
   },
   {
     id: "completed",
     label: "Completed",
-    description: "Full runs.",
+    description: "",
   },
   {
     id: "comics",
     label: "Comics",
-    description: "Comics only.",
+    description: "",
   },
   {
     id: "novels",
     label: "Novels",
-    description: "Novels only.",
+    description: "",
   },
 ];
 
@@ -178,7 +178,7 @@ function RankingsLoadingState() {
             {Array.from({ length: 2 }).map((_, index) => (
               <div
                 key={index}
-                className="border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_16px_34px_rgba(15,23,42,0.07)]"
               >
                 <div className="h-44 rounded-[20px] bg-slate-200" />
                 <div className="mt-4 h-6 w-40 rounded-full bg-slate-200" />
@@ -197,7 +197,7 @@ function RankingsLoadingState() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="h-20 border-[3px] border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+              className="h-20 rounded-[22px] border border-black/10 bg-white shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
             />
           ))}
         </div>
@@ -240,7 +240,7 @@ function RankingsSectionHeader({
       </div>
       <div className="flex flex-wrap items-center gap-2.5">
         {meta ? (
-          <span className="border-[3px] border-black bg-white px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <span className="rounded-full border border-black/10 bg-[#f6f7f9] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-black/72 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
             {meta}
           </span>
         ) : null}
@@ -324,7 +324,7 @@ export default function RankingsPage({
     {
       label: "Titles",
       value: loading ? "..." : curatedSeries.length.toLocaleString(),
-      hint: loading ? "Refreshing this edit." : "Curated stories in this view.",
+      hint: loading ? "Updating." : "In this view.",
     },
   ];
 
@@ -362,14 +362,14 @@ export default function RankingsPage({
   );
 
   const primaryButtonClass =
-    "border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none";
+    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
   const secondaryButtonClass =
-    "border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none";
+    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-black">
+    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:gap-8 md:px-8 md:py-10">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
             eyebrow="Editor's shelf"
@@ -383,24 +383,24 @@ export default function RankingsPage({
           />
 
           <SurfacePanel
-            tone="default"
-            accent="amber"
-            appearance="dark"
-            className="flex h-full flex-col justify-between space-y-5 border-[3px] border-black bg-black p-4 text-white shadow-[7px_7px_0_0_rgba(255,229,0,1)] sm:p-5 sm:shadow-[10px_10px_0_0_rgba(255,229,0,1)]"
+            tone="muted"
+            accent="blue"
+            appearance="light"
+            className="flex h-full flex-col justify-between space-y-5 border border-black/10 bg-white p-4 text-black shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-5"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#ffe500]">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                 Ranking desk
               </p>
               <div>
-                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
+                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
                   {activeView.label}
                 </h2>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="border-[3px] border-black bg-[#ffe500] px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]">
+              <div className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-4 py-3 text-black shadow-[0_16px_34px_rgba(15,23,42,0.07)]">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                   Shelf
                 </p>
@@ -408,7 +408,7 @@ export default function RankingsPage({
                   {activeView.label}
                 </p>
               </div>
-              <div className="border-[3px] border-black bg-[#00e5ff] px-4 py-3 text-black shadow-[4px_4px_0_0_rgba(255,255,255,0.18)]">
+              <div className="rounded-[24px] border border-black/10 bg-white px-4 py-3 text-black shadow-[0_16px_34px_rgba(15,23,42,0.07)]">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                   Titles
                 </p>
@@ -428,14 +428,14 @@ export default function RankingsPage({
                   onClick={() => router.push("/comics")}
                   className={primaryButtonClass}
                 >
-                  Browse Comics
+                  Comics
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/creators")}
                   className={secondaryButtonClass}
                 >
-                  Open creators
+                  Creators
                 </button>
               </div>
             </div>
@@ -453,7 +453,7 @@ export default function RankingsPage({
           tone="muted"
           accent="blue"
           appearance="light"
-          className="space-y-4 border-[3px] border-black bg-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+          className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
         >
           <RankingsSectionHeader
             eyebrow="Views"
@@ -467,10 +467,10 @@ export default function RankingsPage({
                 type="button"
                 onClick={() => router.replace(`/rankings?view=${item.id}`)}
                 className={[
-                  "border-[3px] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] transition-all",
+                  "rounded-full border px-4 py-2.5 text-sm font-semibold tracking-[0.02em] transition-all",
                   activeView.id === item.id
-                    ? "border-black bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                    : "border-black bg-white text-black/62 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:text-black hover:shadow-none",
+                    ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
+                    : "border-black/12 bg-white text-black/62 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03] hover:text-black",
                 ].join(" ")}
               >
                 {item.label}
@@ -490,7 +490,7 @@ export default function RankingsPage({
             >
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                  View
+                  Shelf
                 </p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   No titles yet.
@@ -502,14 +502,14 @@ export default function RankingsPage({
                   onClick={() => router.push("/comics")}
                   className={primaryButtonClass}
                 >
-                  Browse Comics
+                  Comics
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push("/novels")}
                   className={secondaryButtonClass}
                 >
-                  Browse Novels
+                  Novels
                 </button>
               </div>
             </SurfacePanel>
@@ -532,7 +532,7 @@ export default function RankingsPage({
                 onClick={() => router.push("/creators")}
                 className={secondaryButtonClass}
               >
-                Open creators
+                Creators
               </button>
             </SurfacePanel>
           </div>
@@ -545,10 +545,10 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full border-[3px] border-black bg-[#ff007a] p-4 text-left text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:p-5 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                  className="group w-full rounded-[30px] border border-black/10 bg-white p-3.5 text-left text-black shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02] sm:p-5"
                   aria-label={`Open ${leadEntry.title}`}
                 >
-                    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
+                    <div className="grid gap-3.5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
                     <Cover
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
@@ -560,28 +560,22 @@ export default function RankingsPage({
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
                         Lead pick
                       </p>
-                      <h2 className="mt-3 text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
+                      <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-black sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/80">
-                        {leadEntry.description || "Start here."}
-                      </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
                         {getSeriesMeta(leadEntry).map((item) => (
                           <span
                             key={`${leadEntry.id}-lead-meta-${item}`}
-                            className="border-[3px] border-black bg-[#00e5ff] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black"
+                            className="rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1.5 font-semibold tracking-[0.04em] text-black"
                           >
                             {item}
                           </span>
                         ))}
                       </div>
-                      <p className="mt-5 text-xs font-black uppercase tracking-[0.24em] text-white/70">
-                        Open story
-                      </p>
                     </div>
                   </div>
                 </Link>
@@ -600,13 +594,13 @@ export default function RankingsPage({
                           "FEATURED_SUPPORTING",
                         )
                       }
-                      className="group border-[3px] border-black bg-white p-3.5 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff6c7] hover:shadow-none sm:p-4 sm:shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+                        className="group rounded-[28px] border border-black/10 bg-white p-3 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02] sm:p-4"
                       aria-label={`Open ${series.title}`}
                     >
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
                         {activeView.label}
                       </p>
-                      <h3 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                      <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-black sm:text-2xl">
                         {series.title}
                       </h3>
                       <Cover
@@ -625,14 +619,14 @@ export default function RankingsPage({
                         {getSeriesMeta(series).map((item) => (
                           <span
                             key={`${series.id}-support-meta-${item}`}
-                            className="border-[3px] border-black bg-white px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black/62"
+                            className="rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1.5 font-semibold tracking-[0.04em] text-black/70"
                           >
                             {item}
                           </span>
                         ))}
                       </div>
                       <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-black/55">
-                        Open story
+                        Series
                       </p>
                     </Link>
                   ))}
@@ -640,12 +634,8 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                  <section className="space-y-4 border-[3px] border-black bg-white p-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)] sm:space-y-5 sm:p-6 sm:shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-                  <RankingsSectionHeader
-                    eyebrow="More titles"
-                    title="Keep browsing"
-                    description=""
-                  />
+                  <section className="space-y-4 rounded-[30px] border border-black/10 bg-white p-3.5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5 sm:p-6">
+                  <RankingsSectionHeader eyebrow="More titles" title="More" description="" />
 
                   <div className="space-y-3">
                     {boardEntries.map((series) => (
@@ -659,7 +649,7 @@ export default function RankingsPage({
                             "FEATURED_LIST",
                           )
                         }
-                        className="flex w-full items-center gap-4 border-[3px] border-black bg-white p-3 text-left shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
+                        className="flex w-full items-center gap-4 rounded-[24px] border border-black/10 bg-white p-3 text-left shadow-[0_16px_36px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02]"
                         aria-label={`Open ${series.title}`}
                       >
                         <Cover
@@ -688,8 +678,8 @@ export default function RankingsPage({
                             </p>
                           ) : null}
                         </div>
-                        <span className="hidden border-[3px] border-black bg-[#00e5ff] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-black sm:inline-flex">
-                          Open
+                        <span className="hidden rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-black sm:inline-flex">
+                          Series
                         </span>
                       </Link>
                     ))}
@@ -708,20 +698,20 @@ export default function RankingsPage({
                 maxCreators={6}
                 compact
                 appearance="light"
-                className="shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                className="shadow-[0_22px_48px_rgba(15,23,42,0.08)]"
               />
 
               <SurfacePanel
-                className="space-y-4 border-[3px] border-black bg-white shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+                className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
                 appearance="light"
                 accent="blue"
               >
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                    Browse
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+                    Paths
                   </p>
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                    Browse
+                    Paths
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -730,14 +720,14 @@ export default function RankingsPage({
                     onClick={() => router.push("/comics")}
                     className={primaryButtonClass}
                   >
-                    Browse Comics
+                    Comics
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/novels")}
                     className={secondaryButtonClass}
                   >
-                    Browse Novels
+                    Novels
                   </button>
                 </div>
               </SurfacePanel>

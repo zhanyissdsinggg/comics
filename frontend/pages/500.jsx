@@ -13,8 +13,7 @@ export default function ServerErrorPage() {
             We hit a temporary issue.
           </h1>
           <p className="mt-4 text-base leading-7 text-slate-600">
-            Your account and reading progress are safe. Try again or go back
-            home.
+            Try again or go back home.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link

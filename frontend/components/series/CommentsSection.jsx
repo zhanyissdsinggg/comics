@@ -239,16 +239,16 @@ export default function CommentsSection({
   );
 
   const secondaryButtonClass =
-    "rounded-full border-[3px] border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:-translate-y-0.5 hover:bg-[#eefcff]";
+    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]";
   const primaryButtonClass =
-    "rounded-full border-[3px] border-black bg-[#ff007a] px-4 py-2 text-sm font-black uppercase tracking-[0.06em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]";
+    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90";
   const inputClass =
-    "flex-1 rounded-full border-[3px] border-black bg-white px-4 py-3 text-sm text-black outline-none transition focus:outline-none";
+    "flex-1 rounded-full border border-black/12 bg-white px-4 py-3 text-sm text-black outline-none transition focus:outline-none focus:border-black/18";
 
   return (
     <section
       data-comments-section
-      className="mt-8 rounded-[30px] border-[3px] border-black bg-white p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+      className="mt-8 rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -269,8 +269,8 @@ export default function CommentsSection({
               onClick={onFollowToggle}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 isFollowing
-                  ? "border-[3px] border-black bg-[#ffe500] text-black"
-                  : "border-[3px] border-black bg-white text-black hover:-translate-y-0.5 hover:bg-[#fff7cf]"
+                  ? "border border-black/10 bg-[#f8f9fb] text-black"
+                  : "border border-black/12 bg-white text-black hover:border-black/18 hover:bg-black/[0.03]"
               }`}
             >
               {isFollowing ? "Saved" : "Save"}
@@ -286,7 +286,7 @@ export default function CommentsSection({
           <ShareButton
             url={shareUrl}
             title={seriesTitle || "Check out this series"}
-            description={`Join the conversation around ${seriesTitle || "this series"}.`}
+            description=""
             className={secondaryButtonClass}
           />
         </div>
@@ -299,8 +299,8 @@ export default function CommentsSection({
             onClick={() => setSortKey("latest")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "latest"
-                ? "border-[3px] border-black bg-[#ffe500] text-black"
-                : "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff]"
+                ? "border border-black/10 bg-[#f8f9fb] text-black"
+                : "border border-black/12 bg-white text-black/65 hover:border-black/18 hover:bg-black/[0.03]"
             }`}
           >
             Latest
@@ -310,8 +310,8 @@ export default function CommentsSection({
             onClick={() => setSortKey("top")}
             className={`rounded-full border px-3 py-1 transition ${
               sortKey === "top"
-                ? "border-[3px] border-black bg-[#ffe500] text-black"
-                : "border-[3px] border-black bg-white text-black/65 hover:-translate-y-0.5 hover:bg-[#eefcff]"
+                ? "border border-black/10 bg-[#f8f9fb] text-black"
+                : "border border-black/12 bg-white text-black/65 hover:border-black/18 hover:bg-black/[0.03]"
             }`}
           >
             Top
@@ -321,22 +321,18 @@ export default function CommentsSection({
           <button
             type="button"
             onClick={() => setActiveModal(true)}
-            className="rounded-full border-[3px] border-black bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.06em] text-black transition hover:bg-[#fff1f7]"
+            className="rounded-full border border-black/12 bg-white px-3 py-1 text-xs font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
           >
-            Sign in to comment
+            Sign in
           </button>
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-[26px] border-[3px] border-black bg-[#fffdf7] p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
+      <div className="mt-5 rounded-[26px] border border-black/10 bg-[#f8f9fb] p-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
-              Start the conversation
-            </p>
-            <p className="mt-2 text-sm leading-6 text-black/68">
-              Keep it short. Mention a favorite moment, a recent chapter, or who
-              should read it.
+              Comments
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -345,7 +341,7 @@ export default function CommentsSection({
                 key={prompt.id}
                 type="button"
                 onClick={() => focusComposer(prompt.text)}
-                className="rounded-full border-[3px] border-black bg-white px-3 py-2 text-sm font-bold uppercase tracking-[0.05em] text-black transition hover:bg-[#fff7cf]"
+                className="rounded-full border border-black/12 bg-white px-3 py-2 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
               >
                 {prompt.label}
               </button>
@@ -374,19 +370,19 @@ export default function CommentsSection({
 
       <div className="mt-6 space-y-4">
         {sortedComments.length === 0 ? (
-          <div className="rounded-[24px] border-[3px] border-black bg-[#fff7cf] p-5">
+          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] p-5">
             <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
               No comments yet.
             </p>
             <p className="mt-2 text-sm leading-6 text-black/55">
-              Start the first note.
+              Be the first to post.
             </p>
           </div>
         ) : (
           sortedComments.map((comment) => (
             <div
               key={comment.id}
-              className="rounded-[24px] border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+              className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
             >
               <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.08em] text-black/45">
                 <span>{getCommentAuthor(comment)}</span>
@@ -399,8 +395,8 @@ export default function CommentsSection({
                   onClick={() => handleLike(comment.id)}
                   className={`rounded-full border px-3 py-1 transition ${
                     getCommentLikedByUser(comment)
-                      ? "border-[3px] border-black bg-[#ffe500] text-black"
-                      : "border-[3px] border-black bg-white text-black/65 hover:bg-[#eefcff]"
+                      ? "border border-black/10 bg-[#f8f9fb] text-black"
+                      : "border border-black/12 bg-white text-black/65 hover:border-black/18 hover:bg-black/[0.03]"
                   }`}
                 >
                   Like {getCommentLikeCount(comment)}
@@ -412,14 +408,14 @@ export default function CommentsSection({
                       prev === comment.id ? "" : comment.id,
                     )
                   }
-                  className="rounded-full border-[3px] border-black bg-white px-3 py-1 font-bold uppercase tracking-[0.05em] text-black/65 transition hover:bg-[#fff1f7]"
+                  className="rounded-full border border-black/12 bg-white px-3 py-1 font-semibold tracking-[0.02em] text-black/65 transition hover:border-black/18 hover:bg-black/[0.03]"
                 >
                   Reply{" "}
                   {Array.isArray(comment.replies) ? comment.replies.length : 0}
                 </button>
               </div>
               {Array.isArray(comment.replies) && comment.replies.length > 0 ? (
-                <div className="mt-3 space-y-2 rounded-[18px] border-[3px] border-black bg-[#f3f0ea] p-3 text-xs text-black/68">
+                <div className="mt-3 space-y-2 rounded-[18px] border border-black/10 bg-[#f8f9fb] p-3 text-xs text-black/68">
                   {comment.replies.map((reply) => (
                     <div key={reply.id}>
                       <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.08em] text-black/45">
@@ -444,12 +440,12 @@ export default function CommentsSection({
                       }))
                     }
                     placeholder="Write a reply..."
-                    className="flex-1 rounded-full border-[3px] border-black bg-white px-3 py-2 text-xs text-black outline-none transition focus:outline-none"
+                    className="flex-1 rounded-full border border-black/12 bg-white px-3 py-2 text-xs text-black outline-none transition focus:outline-none focus:border-black/18"
                   />
                   <button
                     type="button"
                     onClick={() => handleReply(comment.id)}
-                    className="rounded-full border-[3px] border-black bg-[#ff007a] px-3 py-2 text-xs font-black uppercase tracking-[0.05em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-[#e1006d] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                    className="rounded-full border border-black bg-black px-3 py-2 text-xs font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
                   >
                     Reply
                   </button>
@@ -465,7 +461,7 @@ export default function CommentsSection({
         onClose={() => setActiveModal(false)}
         allowRegister
         title="Sign in"
-        description="Sign in to join the comments."
+        description=""
         onSubmit={async ({ email, password, mode }) => {
           const response = await signIn(email, password, mode);
           if (response?.status === 202) {

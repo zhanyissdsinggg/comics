@@ -19,13 +19,13 @@ export default function EditorialHero({
   const isLight = resolvedAppearance === "light";
   const statClass = isLight
     ? accent === "rose"
-      ? "border-[3px] border-black bg-[#ffe7ec] dark:border-white/10 dark:bg-white/[0.05]"
+      ? "border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] dark:border-white/10 dark:bg-white/[0.05]"
       : accent === "emerald"
-        ? "border-[3px] border-black bg-[#d9fff0] dark:border-white/10 dark:bg-white/[0.05]"
+        ? "border border-emerald-200/70 bg-[linear-gradient(180deg,#f4fdf7_0%,#ecfdf3_100%)] dark:border-white/10 dark:bg-white/[0.05]"
         : accent === "cyan"
-          ? "border-[3px] border-black bg-[#dffcff] dark:border-white/10 dark:bg-white/[0.05]"
-          : "border-[3px] border-black bg-[#ffe500] dark:border-white/10 dark:bg-white/[0.05]"
-    : "border-[3px] border-white/20 bg-white/[0.04] shadow-none";
+          ? "border border-sky-200/70 bg-[linear-gradient(180deg,#f3fbff_0%,#eaf7ff_100%)] dark:border-white/10 dark:bg-white/[0.05]"
+          : "border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] dark:border-white/10 dark:bg-white/[0.05]"
+    : "border border-white/20 bg-white/[0.04] shadow-none";
 
   return (
     <SurfacePanel
@@ -99,8 +99,7 @@ export default function EditorialHero({
                   key={stat.label}
                   title={stat.hint || ""}
                   className={cn(
-                    "min-w-[10rem] rounded-[22px] border px-4 py-3.5 shadow-[5px_5px_0_0_rgba(0,0,0,1)]",
-                    "rounded-none",
+                    "min-w-[10rem] rounded-[22px] border px-4 py-3.5 shadow-[0_14px_30px_rgba(15,23,42,0.08)]",
                     statClass,
                   )}
                 >

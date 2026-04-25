@@ -241,39 +241,36 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "signin",
         eyebrow: "Account",
-        title: "Sign in to see receipts.",
+        title: "Sign in.",
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
-        accentClass:
-          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
+        accentClass: actionCardPrimaryClass,
       },
       {
         id: "support",
         eyebrow: "Billing",
-        title: "Billing support.",
-        cta: "Billing support",
+        title: "Support.",
+        cta: "Support",
         onClick: () => router.push(buildSupportHref("", "billing")),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
+        accentClass: actionCardSecondaryClass,
       },
     ],
-    [router],
+    [actionCardPrimaryClass, actionCardSecondaryClass, router],
   );
   const emptyOrderActionCards = useMemo(
     () => [
       {
         id: "packs",
         eyebrow: "Point packs",
-        title: "Open point packs.",
+        title: "Point packs.",
         cta: STOREFRONT_TERMS.viewPointPacks,
         onClick: () => router.push("/store"),
-        accentClass:
-          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
+        accentClass: actionCardPrimaryClass,
       },
       {
         id: "membership",
         eyebrow: "Membership",
-        title: "View membership.",
+        title: "Membership.",
         cta: STOREFRONT_TERMS.compareMembership,
         onClick: () =>
           router.push(
@@ -283,20 +280,18 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               returnTo: "/orders",
             }),
           ),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
+        accentClass: actionCardSecondaryClass,
       },
       {
         id: "support",
         eyebrow: "Billing",
-        title: "Billing support.",
-        cta: "Billing support",
+        title: "Support.",
+        cta: "Support",
         onClick: () => router.push(buildSupportHref("", "billing")),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
+        accentClass: actionCardSecondaryClass,
       },
     ],
-    [router],
+    [actionCardPrimaryClass, actionCardSecondaryClass, router],
   );
 
   const billingTaskCards = useMemo(
@@ -306,32 +301,23 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         eyebrow: "Receipts",
         title: viewerSignedIn
           ? latestPaidOrder
-            ? "View receipts and order IDs."
+            ? "Receipts."
             : orders.length > 0
-              ? "Open receipts."
-              : "Receipts land here."
-          : "Sign in for receipts.",
-        description: viewerSignedIn
-          ? latestPaidOrder
-            ? `Latest: ${latestPaidOrder.orderId}.`
-            : "Recent charges appear here."
-          : "Receipts show here.",
-        cta: viewerSignedIn ? "View receipts" : "Sign in",
+              ? "Receipts."
+              : "Receipts."
+          : "Sign in.",
+        description: "",
+        cta: viewerSignedIn ? "Receipts" : "Sign in",
         onClick: viewerSignedIn
           ? () => scrollToSection("purchase-history")
           : signInToOrders,
-        accentClass:
-          "border-[3px] border-black bg-[#fff6c7] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-white hover:shadow-none",
+        accentClass: actionCardPrimaryClass,
       },
       {
         id: "membership-charges",
-        eyebrow: "Membership charges",
-        title: "Membership charges.",
-        description: latestMembershipOrder
-          ? `${formatOrderPackageLabel(latestMembershipOrder.packageId)} was charged on ${formatOrderDate(latestMembershipOrder.createdAt)} for ${formatOrderAmount(latestMembershipOrder.amount, latestMembershipOrder.currency)}.`
-          : viewerSignedIn
-            ? "Membership receipts appear here."
-            : "Membership receipts appear here.",
+        eyebrow: "Membership",
+        title: "Membership.",
+        description: "",
         cta: latestMembershipOrder
           ? "See membership charges"
           : STOREFRONT_TERMS.compareMembership,
@@ -345,23 +331,21 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   returnTo: "/orders",
                 }),
               ),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
+        accentClass: actionCardSecondaryClass,
       },
       {
         id: "purchase-issue",
         eyebrow: "Missing points?",
-        title: latestPaidOrder ? "Report a charge issue." : "Billing support.",
-        description: refundActionsEnabled
-          ? "Refund-eligible purchases can still be requested here."
-          : "Missing receipt, missing points, or wrong charge.",
-        cta: "Billing support",
+        title: latestPaidOrder ? "Report a charge." : "Support.",
+        description: "",
+        cta: "Support",
         onClick: () => router.push(buildSupportHref(latestPaidOrder?.orderId)),
-        accentClass:
-          "border-[3px] border-black bg-white text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#f5f1ea] hover:shadow-none",
+        accentClass: actionCardSecondaryClass,
       },
     ],
     [
+      actionCardPrimaryClass,
+      actionCardSecondaryClass,
       latestMembershipOrder,
       latestPaidOrder,
       orders.length,
@@ -375,9 +359,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
   const secondaryButtonClass = `${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
+  const actionCardPrimaryClass =
+    "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] text-black shadow-[0_18px_36px_rgba(15,23,42,0.08)] hover:border-black/14 hover:bg-white";
+  const actionCardSecondaryClass =
+    "border border-black/10 bg-white text-black shadow-[0_16px_32px_rgba(15,23,42,0.07)] hover:border-black/14 hover:bg-[#fcfcfd]";
+  const subtleChipClass =
+    "rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-black/70";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-black">
+    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -385,19 +375,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             appearance="light"
             accent="blue"
             eyebrow="Orders"
-            title={
-              viewerSignedIn ? "Orders and receipts." : "Sign in for receipts."
-            }
+            title={viewerSignedIn ? "Orders." : "Sign in."}
             description={
               viewerSignedIn
-                ? "Charges and help in one place."
-                : "Billing history appears here."
+                ? ""
+                : ""
             }
           />
 
           <StorefrontDesk
-            eyebrow="Billing desk"
-            title={viewerSignedIn ? "Receipts." : "Sign in first."}
+            eyebrow="Desk"
+            title={viewerSignedIn ? "Receipts." : "Sign in."}
             actions={
               viewerSignedIn ? (
                 <>
@@ -406,7 +394,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                     onClick={() => scrollToSection("purchase-history")}
                     className={primaryButtonClass}
                   >
-                    View receipts
+                    Receipts
                   </button>
                   <button
                     type="button"
@@ -415,7 +403,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                     }
                     className={secondaryButtonClass}
                   >
-                    Billing support
+                    Support
                   </button>
                 </>
               ) : (
@@ -432,7 +420,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                     onClick={() => router.push(buildSupportHref("", "billing"))}
                     className={secondaryButtonClass}
                   >
-                    Billing support
+                    Support
                   </button>
                 </>
               )
@@ -453,8 +441,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent={feedback.type === "error" ? "rose" : "amber"}
             className={
               feedback.type === "error"
-                ? "border-[3px] border-black bg-[#ffe3ec] text-[#8f003f] shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
-                : "border-[3px] border-black bg-[#fff6c7] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                ? "border border-rose-200/80 bg-[linear-gradient(180deg,#fff8fa_0%,#fff2f5_100%)] text-[#8f003f] shadow-[0_16px_34px_rgba(244,63,94,0.08)]"
+                : "border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf8_0%,#fff7eb_100%)] text-black shadow-[0_16px_34px_rgba(245,158,11,0.08)]"
             }
           >
             <p
@@ -467,21 +455,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel
-            className="border-[3px] border-black bg-[#fff6c7] text-black shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+            className="border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf8_0%,#fff7eb_100%)] text-black shadow-[0_18px_34px_rgba(245,158,11,0.08)]"
             appearance="light"
             tone="warning"
             accent="blue"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-black uppercase tracking-[0.03em]">
-                  Need help with a charge?
-                </p>
-                <p className="text-sm font-medium text-black/68">
-                  You can still review purchases here. Include the order ID if
-                  something looks off.
-                </p>
-              </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-black uppercase tracking-[0.03em]">
+                        Charge issue?
+                      </p>
+                    </div>
               <button
                 type="button"
                 onClick={() =>
@@ -489,7 +473,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 }
                 className={secondaryButtonClass}
               >
-                Billing support
+                Support
               </button>
             </div>
           </SurfacePanel>
@@ -504,10 +488,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             >
               <div className="space-y-2">
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                  Billing tasks
+                  Tasks
                 </p>
                 <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                  Orders or support.
+                  Orders.
                 </h2>
               </div>
               <StorefrontPathwaysGrid
@@ -521,7 +505,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {!viewerSignedIn ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <StorefrontSectionHeading title="Sign in for receipts." />
+              <StorefrontSectionHeading title="Receipts." />
+              <StorefrontSectionHeading title="Sign in." />
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
               columnsClassName="md:grid-cols-2"
@@ -548,7 +533,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                  className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
                   aria-hidden="true"
                 >
                   <div className="h-4 w-24 animate-pulse rounded-full bg-slate-200" />
@@ -561,8 +546,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         ) : orders.length === 0 ? (
           <SurfacePanel className="space-y-4" appearance="light" accent="blue">
             <StorefrontSectionHeading
-              title="No purchases yet."
-              description="Receipts appear here after checkout."
+              title="No orders yet."
+              description=""
             />
             <StorefrontPathwaysGrid
               cards={emptyOrderActionCards}
@@ -579,7 +564,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           >
             <div className="flex flex-wrap items-end justify-between gap-4">
               <StorefrontSectionHeading
-                eyebrow="Receipts and charges"
+                eyebrow="History"
                 title="Purchase history"
               />
               <div className="flex flex-wrap items-center gap-2">
@@ -595,7 +580,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 >
                   {workingId === "refresh"
                     ? "Refreshing..."
-                    : "Refresh purchases"}
+                    : "Refresh"}
                 </button>
               </div>
             </div>
@@ -607,7 +592,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 return (
                   <div
                     key={order.orderId}
-                    className="border-[3px] border-black bg-white p-4 shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                    className="rounded-[26px] border border-black/10 bg-white p-4 shadow-[0_18px_38px_rgba(15,23,42,0.07)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-black/14 hover:shadow-[0_22px_42px_rgba(15,23,42,0.1)]"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
@@ -619,21 +604,18 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           Order ID {order.orderId}
                         </p>
                       </div>
-                      <span className="border-[3px] border-black bg-[#fff6c7] px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-black/68">
+                      <span className={subtleChipClass}>
                         {order.status}
                       </span>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-black/58">
-                      <span className="border-[3px] border-black bg-[#00e5ff] px-3 py-1 font-black uppercase tracking-[0.08em] text-black">
+                      <span className="rounded-full border border-sky-200/80 bg-sky-50 px-3 py-1 font-semibold uppercase tracking-[0.12em] text-sky-900">
                         {orderGuide.eyebrow}
                       </span>
-                      <span className="border-[3px] border-black bg-[#f5f1ea] px-3 py-1 font-black uppercase tracking-[0.08em] text-black/68">
+                      <span className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 font-semibold uppercase tracking-[0.12em] text-black/65">
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm font-medium leading-6 text-black/68">
-                      {orderGuide.description}
-                    </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {order.status === "PAID" && refundActionsEnabled ? (
                         <button
@@ -673,10 +655,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                             }
                             setWorkingId("");
                           }}
-                          className={`px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] transition ${
+                          className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition ${
                             workingId === order.orderId
-                              ? "cursor-not-allowed border-[3px] border-black bg-slate-300 text-black/45 shadow-[4px_4px_0_0_rgba(0,0,0,0.45)]"
-                              : "border-[3px] border-black bg-[#ff007a] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
+                              ? "cursor-not-allowed border border-black/10 bg-slate-200 text-black/45 shadow-none"
+                              : primaryButtonClass
                           }`}
                           disabled={workingId === order.orderId}
                         >
@@ -690,15 +672,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           onClick={() =>
                             router.push(buildSupportHref(order.orderId))
                           }
-                          className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ffe500] hover:shadow-none"
+                          className={`${secondaryButtonClass} h-9 px-3 py-1.5 text-xs tracking-[0.08em]`}
                         >
-                          Billing support
+                          Support
                         </button>
                       ) : null}
                       <button
                         type="button"
                         onClick={() => router.push(orderGuide.nextHref)}
-                        className="border-[3px] border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#00e5ff] hover:shadow-none"
+                        className={`${secondaryButtonClass} h-9 px-3 py-1.5 text-xs tracking-[0.08em]`}
                       >
                         {orderGuide.nextCta}
                       </button>

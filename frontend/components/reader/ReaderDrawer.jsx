@@ -57,7 +57,7 @@ export default function ReaderDrawer({
       onClick={onClose}
     >
       <div
-        className="flex h-full w-full max-w-full flex-col border-l-[3px] border-black bg-[#111111] px-4 py-5 shadow-[-10px_0_0_0_rgba(0,0,0,1)] sm:max-w-sm"
+        className="flex h-full w-full max-w-full flex-col border-l border-black/10 bg-[linear-gradient(180deg,rgba(18,20,24,0.98)_0%,rgba(13,15,18,0.99)_100%)] px-4 py-5 shadow-[-20px_0_44px_rgba(0,0,0,0.28)] sm:max-w-sm"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -69,10 +69,10 @@ export default function ReaderDrawer({
               type="button"
               onClick={() => setTab("toc")}
               aria-pressed={tab === "toc"}
-              className={`rounded-full px-3 py-1 ${
+              className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "toc"
-                  ? "border-[3px] border-black bg-[#ffe500] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                  : "border-[3px] border-white/20 bg-white/10 text-neutral-300 hover:bg-white/20"
+                  ? "border border-white/15 bg-white text-black shadow-[0_10px_20px_rgba(255,255,255,0.08)]"
+                  : "border border-white/15 bg-white/8 text-neutral-300 hover:bg-white/14"
               }`}
             >
               Contents
@@ -81,10 +81,10 @@ export default function ReaderDrawer({
               type="button"
               onClick={() => setTab("bookmarks")}
               aria-pressed={tab === "bookmarks"}
-              className={`rounded-full px-3 py-1 ${
+              className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "bookmarks"
-                  ? "border-[3px] border-black bg-[#00e5ff] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
-                  : "border-[3px] border-white/20 bg-white/10 text-neutral-300 hover:bg-white/20"
+                  ? "border border-white/15 bg-white text-black shadow-[0_10px_20px_rgba(255,255,255,0.08)]"
+                  : "border border-white/15 bg-white/8 text-neutral-300 hover:bg-white/14"
               }`}
             >
               Bookmarks
@@ -93,24 +93,24 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="border-[3px] border-white/20 bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-neutral-200 transition hover:bg-white/20"
+            className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/14 hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] active:translate-y-px"
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 border-[3px] border-white/20 bg-white/10 p-3 text-xs text-neutral-300 backdrop-blur-sm">
+          <div className="mt-4 rounded-[22px] border border-white/12 bg-white/8 p-3 text-xs text-neutral-300 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
-              <span>Members get free reads and lower prices.</span>
+              <span>Plans add free reads.</span>
               <button
                 type="button"
                 onClick={() => {
                   trackEvent("click_subscribe_from_toc", { seriesId: currentSeriesId });
                   onSubscribe();
                 }}
-                className="border-[3px] border-black bg-[#ff007a] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#e1006d] hover:shadow-none"
+                className="rounded-full border border-white/18 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_18px_rgba(255,255,255,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/92 hover:shadow-[0_12px_20px_rgba(255,255,255,0.1)] active:translate-y-px"
               >
-                See membership
+                Plans
               </button>
             </div>
           </div>
@@ -123,10 +123,10 @@ export default function ReaderDrawer({
               const isCurrentEpisode = episode.id === currentEpisodeId;
               const unlocked = unlockedIds.includes(episode.id);
               const helperLabel = isCurrentEpisode
-                ? "Now reading"
+                ? "Current"
                 : unlocked
-                  ? "Tap to open"
-                  : "Locked from the reader";
+                  ? "Open"
+                  : "Locked";
               return (
                 <button
                   key={episode.id}
@@ -136,7 +136,7 @@ export default function ReaderDrawer({
                       onSelectEpisode(episode.id);
                     }
                   }}
-                  className="w-full border-[3px] border-white/20 bg-white/10 px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-white/20"
+                  className="w-full rounded-[22px] border border-white/12 bg-white/8 px-3 py-2 text-left text-sm text-neutral-200 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/14 hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -156,17 +156,14 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
-              <div className="border-[3px] border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+              <div className="rounded-[22px] border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
                 <div className="text-sm font-black uppercase tracking-[0.04em] text-neutral-100">No bookmarks yet.</div>
-                <div className="mt-1 text-xs leading-5 text-neutral-400">
-                  Save a spot and it will show up here.
-                </div>
               </div>
             ) : (
               bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="border-[3px] border-white/20 bg-white/10 px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
+                  className="rounded-[22px] border border-white/12 bg-white/8 px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -186,7 +183,7 @@ export default function ReaderDrawer({
                   <button
                     type="button"
                     onClick={() => onGoBookmark(bookmark)}
-                    className="mt-2 w-full border-[3px] border-black bg-[#ffe500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                    className="mt-2 w-full rounded-full border border-white/18 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_18px_rgba(255,255,255,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/92 hover:shadow-[0_12px_20px_rgba(255,255,255,0.1)] active:translate-y-px"
                   >
                     Go
                   </button>

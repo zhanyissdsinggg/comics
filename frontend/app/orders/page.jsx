@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 export const metadata = createPageMetadata({
   title: "Orders",
-  description: "See your billing history, receipts, and membership charges after sign-in.",
+  description: "Receipts and purchases.",
   path: "/orders",
   robots: {
     index: false,
