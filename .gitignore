@@ -47,6 +47,7 @@ artifacts/
 *.tmp
 .tmp_*
 .tmp-*
+tmp-gh-run-*/
 check-*.png
 *-white-ui.png
 .audit-*.json
