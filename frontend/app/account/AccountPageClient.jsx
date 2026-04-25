@@ -702,6 +702,9 @@ export default function AccountPage({ initialSignedIn = false }) {
               <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                 Sign in.
               </h2>
+              <h3 className="mt-3 text-lg font-black tracking-[-0.02em] text-black">
+                This device, for now.
+              </h3>
               <p className="mt-3 text-sm font-semibold leading-6 text-black/72">
                 Sync settings and orders.
               </p>

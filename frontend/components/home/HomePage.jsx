@@ -617,9 +617,7 @@ function HomeContent({ initialSearchParams = {} }) {
   const heroDescription = String(heroSeries?.description || "").trim();
   const primaryHeroCtaLabel = resumeSeries
     ? "Continue"
-    : heroSeries?.id
-      ? "Read"
-      : "Browse";
+    : "Start Reading";
 
   return (
     <div className="min-h-screen overflow-hidden bg-white text-black">
@@ -649,8 +647,14 @@ function HomeContent({ initialSearchParams = {} }) {
                   </div>
 
                   <h1 className="mt-5 max-w-[8.8ch] text-[clamp(2.35rem,10vw,6.4rem)] font-black uppercase leading-[0.86] tracking-[-0.06em] text-black">
-                    {resumeSeries ? "Keep reading" : "Featured now"}
+                    {resumeSeries
+                      ? "Keep reading"
+                      : "Read original comics and novels in one place."}
                   </h1>
+
+                  <h2 className="mt-4 text-base font-semibold tracking-[-0.01em] text-black/72 sm:text-lg">
+                    Start with a story worth opening.
+                  </h2>
 
                   {heroMetaLine ? (
                     <div className="mt-4 max-w-[30rem]">
@@ -687,17 +691,17 @@ function HomeContent({ initialSearchParams = {} }) {
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                     <Link
                       href={primaryHeroHref}
-                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 sm:w-auto sm:px-6 sm:text-base"
+                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:w-auto sm:px-6 sm:text-base"
                     >
                       {primaryHeroCtaLabel}
                       <ArrowRight className="size-4" />
                     </Link>
                     <button
                       type="button"
-                      onClick={() => router.push("/rankings")}
-                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.02em] text-black/72 transition-all hover:border-black/18 hover:bg-black/[0.03] hover:text-black sm:min-h-0 sm:w-auto sm:text-sm"
+                      onClick={() => router.push("/search")}
+                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.02em] text-black/72 transition-all hover:border-black/18 hover:bg-black/[0.03] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:min-h-0 sm:w-auto sm:text-sm"
                     >
-                      Chart
+                      Browse all
                     </button>
                   </div>
 

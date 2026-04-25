@@ -1627,7 +1627,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 From
               </p>
               <p className="mt-2 font-semibold text-white">
-                {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
+                {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
               </p>
             </div>
             <button

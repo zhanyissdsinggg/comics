@@ -18,13 +18,13 @@ const MAX_HISTORY_ITEMS = 5;
 const HOME_DISCOVERY_LANES = [
   {
     id: "featured-series",
-    label: "Featured",
+    label: "Featured Series",
     hint: "",
     href: "/search",
   },
   {
     id: "completed-series",
-    label: "Completed",
+    label: "Completed Series",
     hint: "",
     href: "/search?status=Completed&sort=popular",
   },
@@ -44,7 +44,7 @@ const HOME_DISCOVERY_LANES = [
 
 const SearchBar = memo(function SearchBar({
   onSearch,
-  placeholder = "Search",
+  placeholder = "Search series, creators, or genres",
   variant = "default",
   showShortcut = true,
   initialValue = "",
@@ -59,6 +59,7 @@ const SearchBar = memo(function SearchBar({
   const [searchHistory, setSearchHistory] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef(null);
+  const firstLaneRef = useRef(null);
   const containerRef = useRef(null);
   const shortcutLabel = useSearchShortcutLabel();
   const isHome = variant === "home";
@@ -255,6 +256,18 @@ const SearchBar = memo(function SearchBar({
           }}
           onBlur={() => setIsFocused(false)}
           onKeyDown={(event) => {
+            if (event.key === "Tab" && !event.shiftKey && showSuggestions) {
+              // Make focus order deterministic for keyboard users: Search input -> first discovery lane.
+              // Playwright E2E also asserts this order.
+              const target = firstLaneRef.current;
+              if (target && typeof target.focus === "function") {
+                event.preventDefault();
+                // Defer the focus hop to the next frame so Playwright's `.press("Tab")`
+                // does not treat the active element change as a flaky mid-action detach.
+                window.requestAnimationFrame(() => target.focus());
+                return;
+              }
+            }
             if (event.key === "Enter") {
               handleSearch(value);
             }
@@ -266,7 +279,7 @@ const SearchBar = memo(function SearchBar({
           className="min-w-0 flex-1 bg-transparent text-base text-black placeholder:text-black/38 focus:outline-none md:text-sm"
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
-          aria-label="Search"
+          aria-label="Search series, creators, or genres"
         />
         {value ? (
           <Button
@@ -425,9 +438,10 @@ const SearchBar = memo(function SearchBar({
                 </span>
               </div>
               <div className="space-y-1">
-                {discoveryLanes.map((lane) => (
+                {discoveryLanes.map((lane, index) => (
                   <Button
                     key={lane.id}
+                    ref={index === 0 ? firstLaneRef : null}
                     type="button"
                     variant="ghost"
                     onClick={() => handleLaneClick(lane)}

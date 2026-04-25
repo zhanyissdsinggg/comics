@@ -162,7 +162,7 @@ function PortraitCard({
           ) : null}
             <p
               className={cn(
-                "line-clamp-2 font-black uppercase tracking-[-0.04em] transition-colors",
+                "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
                 isCompact
                   ? "text-[1.08rem] leading-5"
                   : "text-[1.12rem] leading-6",

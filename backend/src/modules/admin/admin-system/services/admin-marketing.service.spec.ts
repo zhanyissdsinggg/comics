@@ -7,125 +7,142 @@ describe('AdminMarketingService', () => {
   let prisma: PrismaService;
 
   beforeEach(async () => {
+    const prismaMock: any = {
+      marketingCampaign: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'campaign-1',
+            name: 'Summer Sale',
+            description: 'Summer promotion',
+            type: 'email',
+            status: 'active',
+            targetSegment: 'vip',
+            budget: 1000,
+            spent: 500,
+            startDate: new Date('2024-06-01'),
+            endDate: new Date('2024-06-30'),
+            createdAt: new Date(),
+            analytics: [{ dateKey: '2024-06-01', revenue: 100, converted: 10 }],
+          },
+        ]),
+        count: jest.fn().mockResolvedValue(1),
+        create: jest.fn().mockResolvedValue({
+          id: 'campaign-1',
+          name: 'Summer Sale',
+          status: 'draft',
+          targetSegment: 'all',
+          budget: 1000,
+          spent: 0,
+        }),
+        update: jest.fn().mockResolvedValue({
+          id: 'campaign-1',
+          name: 'Updated Campaign',
+          budget: 1500,
+        }),
+        delete: jest.fn().mockResolvedValue({ id: 'campaign-1' }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'campaign-1',
+          name: 'Summer Sale',
+          budget: 1000,
+          spent: 500,
+          analytics: [
+            { dateKey: '2024-06-01', revenue: 100, converted: 10 },
+            { dateKey: '2024-06-02', revenue: 150, converted: 15 },
+          ],
+        }),
+      },
+      marketingBudget: {
+        create: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          totalBudget: 1000,
+          emailBudget: 500,
+          pushBudget: 300,
+          bannerBudget: 200,
+          discountBudget: 0,
+        }),
+        findUnique: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          totalBudget: 1000,
+          emailBudget: 500,
+          pushBudget: 300,
+          bannerBudget: 200,
+          discountBudget: 0,
+        }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+        upsert: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          totalBudget: 1500,
+        }),
+      },
+      marketingCampaignTarget: {
+        count: jest.fn().mockResolvedValue(2),
+        createMany: jest.fn().mockResolvedValue({ count: 50 }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 2 }),
+        findMany: jest.fn().mockResolvedValue([
+          {
+            campaignId: 'campaign-1',
+            userId: 'user-1',
+            target: 'user-1',
+            createdAt: new Date(),
+          },
+          {
+            campaignId: 'campaign-1',
+            userId: 'user-2',
+            target: 'user-2',
+            createdAt: new Date(),
+          },
+        ]),
+        update: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          userId: 'user-1',
+          status: 'sent',
+        }),
+      },
+      marketingAnalytics: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            campaignId: 'campaign-1',
+            dateKey: '2024-06-01',
+            sent: 1000,
+            opened: 300,
+            clicked: 100,
+            converted: 10,
+            revenue: 500,
+            openRate: 30,
+            clickRate: 10,
+            conversionRate: 1,
+            cac: 50,
+            roi: 50,
+          },
+        ]),
+        count: jest.fn().mockResolvedValue(1),
+        findUnique: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          dateKey: '2024-06-01',
+          sent: 1000,
+        }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+        update: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          dateKey: '2024-06-01',
+          sent: 1000,
+        }),
+        create: jest.fn().mockResolvedValue({
+          campaignId: 'campaign-1',
+          dateKey: '2024-06-01',
+          sent: 1000,
+        }),
+      },
+    };
+
+    prismaMock.$transaction = jest.fn(async (callback) => callback(prismaMock));
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AdminMarketingService,
         {
           provide: PrismaService,
-          useValue: {
-            marketingCampaign: {
-              findMany: jest.fn().mockResolvedValue([
-                {
-                  id: 'campaign-1',
-                  name: 'Summer Sale',
-                  description: 'Summer promotion',
-                  type: 'email',
-                  status: 'active',
-                  targetSegment: 'vip',
-                  budget: 1000,
-                  spent: 500,
-                  startDate: new Date('2024-06-01'),
-                  endDate: new Date('2024-06-30'),
-                  createdAt: new Date(),
-                  analytics: [{ dateKey: '2024-06-01', revenue: 100, converted: 10 }],
-                },
-              ]),
-              count: jest.fn().mockResolvedValue(1),
-              create: jest.fn().mockResolvedValue({
-                id: 'campaign-1',
-                name: 'Summer Sale',
-                status: 'draft',
-                targetSegment: 'all',
-                budget: 1000,
-                spent: 0,
-              }),
-              update: jest.fn().mockResolvedValue({
-                id: 'campaign-1',
-                name: 'Updated Campaign',
-                budget: 1500,
-              }),
-              delete: jest.fn().mockResolvedValue({ id: 'campaign-1' }),
-              findUnique: jest.fn().mockResolvedValue({
-                id: 'campaign-1',
-                name: 'Summer Sale',
-                budget: 1000,
-                spent: 500,
-                analytics: [
-                  { dateKey: '2024-06-01', revenue: 100, converted: 10 },
-                  { dateKey: '2024-06-02', revenue: 150, converted: 15 },
-                ],
-              }),
-            },
-            marketingBudget: {
-              create: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                totalBudget: 1000,
-                emailBudget: 500,
-                pushBudget: 300,
-                bannerBudget: 200,
-                discountBudget: 0,
-              }),
-              findUnique: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                totalBudget: 1000,
-                emailBudget: 500,
-                pushBudget: 300,
-                bannerBudget: 200,
-                discountBudget: 0,
-              }),
-              upsert: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                totalBudget: 1500,
-              }),
-            },
-            marketingCampaignTarget: {
-              count: jest.fn().mockResolvedValue(2),
-              createMany: jest.fn().mockResolvedValue({ count: 50 }),
-              findMany: jest.fn().mockResolvedValue([
-                { campaignId: 'campaign-1', userId: 'user-1', target: 'user-1', createdAt: new Date() },
-                { campaignId: 'campaign-1', userId: 'user-2', target: 'user-2', createdAt: new Date() },
-              ]),
-              update: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                userId: 'user-1',
-                status: 'sent',
-              }),
-            },
-            marketingAnalytics: {
-              findMany: jest.fn().mockResolvedValue([
-                {
-                  campaignId: 'campaign-1',
-                  dateKey: '2024-06-01',
-                  sent: 1000,
-                  opened: 300,
-                  clicked: 100,
-                  converted: 10,
-                  revenue: 500,
-                  openRate: 30,
-                  clickRate: 10,
-                  conversionRate: 1,
-                  cac: 50,
-                  roi: 50,
-                },
-              ]),
-              count: jest.fn().mockResolvedValue(1),
-              findUnique: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                dateKey: '2024-06-01',
-                sent: 1000,
-              }),
-              update: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                dateKey: '2024-06-01',
-                sent: 1000,
-              }),
-              create: jest.fn().mockResolvedValue({
-                campaignId: 'campaign-1',
-                dateKey: '2024-06-01',
-                sent: 1000,
-              }),
-            },
-          },
+          useValue: prismaMock,
         },
       ],
     }).compile();

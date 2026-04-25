@@ -110,7 +110,7 @@ export default function Rail({
               ) : null}
               <h2
                 className={cn(
-                  "font-display text-2xl font-black uppercase tracking-[-0.05em] md:text-[1.95rem]",
+                  "font-display text-2xl font-black tracking-[-0.05em] md:text-[1.95rem]",
                   "text-black",
                 )}
               >

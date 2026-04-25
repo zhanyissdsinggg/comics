@@ -29,7 +29,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
             From
           </p>
           <p className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-black">
-            {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
+            {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
           </p>
         </div>
         {onReturnToSource ? (

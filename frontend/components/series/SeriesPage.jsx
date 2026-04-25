@@ -993,7 +993,7 @@ export default function SeriesPage({
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff007a]">
-                  {discoveryContext.sourceLabel} / {discoveryContext.laneValue}
+                  {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                 </p>
                 <h2 className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black sm:text-base">
                   {discoveryContext.title}

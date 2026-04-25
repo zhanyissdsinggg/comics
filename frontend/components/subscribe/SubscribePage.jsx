@@ -405,6 +405,36 @@ export default function SubscribePage({
             </div>
           </div>
 
+          {!subscriptionActionsEnabled ? (
+            <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+              <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-black">
+                Membership opens soon.
+              </h3>
+              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                Plans are visible. Billing is not live yet.
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                No monthly charge yet.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildSupportPath({
+                        topic: "billing",
+                        context: "Membership is in preview. Billing is not live yet.",
+                      }),
+                    )
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Billing support
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <div className="grid gap-3 md:grid-cols-2">
             {[
               {
@@ -453,7 +483,7 @@ export default function SubscribePage({
               }
               className={secondaryButtonClass}
             >
-              Support
+              {subscriptionActionsEnabled ? "Support" : "Billing support"}
             </button>
             <button
               type="button"

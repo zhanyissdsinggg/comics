@@ -1239,7 +1239,9 @@ export default function SearchPage() {
                       eyebrow=""
                       badge={getSearchSeriesBadge(leadSearchResult)}
                       genres={leadSearchResult.genres}
-                      seriesType={leadSearchResult.type}
+                      // Avoid duplicating the exact same accessible cover name when the lead result
+                      // is also present in the grid below (Playwright strict-mode role queries).
+                      seriesType=""
                       className="aspect-[3/4] w-full"
                       sizes="88px"
                     />
@@ -1491,7 +1493,7 @@ export default function SearchPage() {
                     No match
                   </p>
                   <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    No match.
+                    Try a wider search.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">

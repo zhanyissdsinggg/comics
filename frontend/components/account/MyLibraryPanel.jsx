@@ -25,7 +25,7 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
 
 const TABS = [
-  { id: "continue", label: "Continue", icon: BookOpen },
+  { id: "continue", label: "Continue Reading", icon: BookOpen },
   { id: "bookmarks", label: "Bookmarks", icon: Bookmark },
   { id: "unlocked", label: "Unlocked", icon: LockKeyhole },
 ];
@@ -375,7 +375,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               progress.updatedAt || historyEntry?.createdAt,
             ),
             progressPercent,
-            progressLabel: `Resume Chapter ${currentChapter || "?"}`,
+            progressLabel: `Read Chapter ${currentChapter || "?"} of ${totalChapters || "?"}`,
             progressPercentLabel: `${Math.round(progressPercent * 100)}%`,
             resumeEpisodeId: progress.lastEpisodeId,
             updatedAt: Math.max(
@@ -423,9 +423,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               : "Bookmarked",
             primaryLine:
               followedSeriesIds.includes(seriesId) && bookmarks.length > 0
-                ? `${formatBookmarkSummary(bookmarks.length)} saved`
+                ? `Saved to your shelf with ${formatBookmarkSummary(bookmarks.length)}`
                 : followedSeriesIds.includes(seriesId)
-                  ? "Saved"
+                  ? "Saved to your shelf"
                   : formatBookmarkSummary(bookmarks.length),
             summary: latestBookmark?.label || series.status || "",
             updatedLabel: formatRelativeTime(
@@ -589,7 +589,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             My Library
           </p>
           <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-            Your shelf.
+            Your shelf
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
             Continue, saves, and unlocks.

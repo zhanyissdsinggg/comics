@@ -635,7 +635,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
       return "";
     }
     if (recommendedItems.some((item) => item.sourceSlot === "library-return")) {
-      return "Picked for your shelf.";
+      return "Staff pick to resume";
     }
     if (recommendedItems.some((item) => Boolean(item.sourceSlot))) {
       return "Fresh from the front page.";
@@ -855,7 +855,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
     : "Sign in to sync.";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
-      ? "Your next chapter."
+      ? "Your next read."
       : hasLibrarySignals
         ? "Shelf, saves, and recent reads."
         : "Start your shelf."
@@ -1088,7 +1088,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             onClick={() => router.push(resumeSpotlightReadHref)}
                             className={primaryButtonClass}
                           >
-                            Resume now
+                            Continue
                           </button>
                         ) : visibleLibraryItems.length > 0 ? (
                           <button
@@ -1195,7 +1195,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         Library
                       </p>
                       <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                        Your shelf.
+                        Keep your shelf together.
                       </h2>
                 </div>
                 <StorefrontPathwaysGrid
@@ -1251,7 +1251,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 <div id="recent-activity">
                   <Rail
                     eyebrow="Recent"
-                    title="Recent"
+                    title="Recent Activity"
                     railName="history"
                     items={historyRail}
                     appearance="light"
@@ -1335,7 +1335,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
               {recommendedItems.length > 0 ? (
                 <Rail
                   eyebrow={viewerSignedIn ? "Next" : "For you"}
-                  title="For you"
+                  title="Recommended"
                   railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}

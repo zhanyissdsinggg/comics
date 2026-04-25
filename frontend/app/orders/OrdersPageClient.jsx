@@ -187,6 +187,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   const refundActionsEnabled =
     billingAvailability?.refundActionsEnabled === true;
   const refundPreviewOnly = billingAvailability?.refundActionsEnabled === false;
+  const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
+  const secondaryButtonClass = `${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
+
+  // NOTE: These class strings are referenced by multiple useMemo blocks below.
+  // They must be declared before use to avoid TDZ runtime errors in production builds.
+  const actionCardPrimaryClass =
+    "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] text-black shadow-[0_18px_36px_rgba(15,23,42,0.08)] hover:border-black/14 hover:bg-white";
+  const actionCardSecondaryClass =
+    "border border-black/10 bg-white text-black shadow-[0_16px_32px_rgba(15,23,42,0.07)] hover:border-black/14 hover:bg-[#fcfcfd]";
+  const subtleChipClass =
+    "rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-black/70";
   const latestPaidOrder = useMemo(
     () => orders.find((order) => order.status === "PAID") || null,
     [orders],
@@ -356,15 +367,6 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       viewerSignedIn,
     ],
   );
-
-  const secondaryButtonClass = `${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
-  const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
-  const actionCardPrimaryClass =
-    "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] text-black shadow-[0_18px_36px_rgba(15,23,42,0.08)] hover:border-black/14 hover:bg-white";
-  const actionCardSecondaryClass =
-    "border border-black/10 bg-white text-black shadow-[0_16px_32px_rgba(15,23,42,0.07)] hover:border-black/14 hover:bg-[#fcfcfd]";
-  const subtleChipClass =
-    "rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-black/70";
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">

@@ -123,7 +123,7 @@ export default function ReaderDrawer({
               const isCurrentEpisode = episode.id === currentEpisodeId;
               const unlocked = unlockedIds.includes(episode.id);
               const helperLabel = isCurrentEpisode
-                ? "Current"
+                ? "Now reading"
                 : unlocked
                   ? "Open"
                   : "Locked";

@@ -48,7 +48,7 @@ const GUIDE_CARDS = [
     eyebrow: "Credits",
     title: "Creators",
     description: "",
-    ctaLabel: "Creators",
+    ctaLabel: "Open creators",
     href: "/creators",
     accent: "bg-black/[0.04]",
   },
@@ -175,6 +175,16 @@ function ShelfComicCard({ item, onClick, actionLabel = "Series" }) {
   const meta = String(item?.metaLabel || "").trim();
   const badge = normalizeTag(item?.badge || item?.statusLabel || item?.type);
   const genres = Array.isArray(item?.genres) ? item.genres.slice(0, 1) : [];
+  const seriesType = String(item?.type || item?.seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+  const coverAlt =
+    title && (seriesType === "comic" || seriesType === "novel")
+      ? `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image for ${title}`
+      : title
+        ? `Cover image for ${title}`
+        : "Series cover image";
 
   return (
     <button
@@ -187,7 +197,7 @@ function ShelfComicCard({ item, onClick, actionLabel = "Series" }) {
         {coverUrl ? (
           <img
             src={coverUrl}
-            alt={title}
+            alt={coverAlt}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             loading="lazy"
             decoding="async"
@@ -319,6 +329,16 @@ function LeaderboardCard({ item, rank, onClick }) {
   const title = String(item?.title || "Story").trim();
   const author = String(item?.author || "").trim();
   const meta = String(item?.metaLabel || "").trim();
+  const seriesType = String(item?.type || item?.seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+  const coverAlt =
+    title && (seriesType === "comic" || seriesType === "novel")
+      ? `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image for ${title}`
+      : title
+        ? `Cover image for ${title}`
+        : "Series cover image";
 
   return (
     <button
@@ -340,7 +360,7 @@ function LeaderboardCard({ item, rank, onClick }) {
         {coverUrl ? (
           <img
             src={coverUrl}
-            alt={title}
+            alt={coverAlt}
             className="h-full w-full object-cover"
             loading="lazy"
             decoding="async"
@@ -454,7 +474,7 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
               Genres
             </p>
             <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-white">
-              Pick a lane
+              Find your lane fast
             </h2>
           </div>
           <Button
@@ -541,9 +561,9 @@ export default function HomeContentSections({
       ) : (
         <>
           <HomeShelfSection
-            eyebrow="Popular"
-            title="Popular"
-            description=""
+            eyebrow="Featured"
+            title="Featured"
+            description="The stories getting the most attention right now."
             ctaLabel="See all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}

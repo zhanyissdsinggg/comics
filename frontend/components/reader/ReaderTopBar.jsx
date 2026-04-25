@@ -111,8 +111,9 @@ export default function ReaderTopBar({
                 ? "border-neutral-800 text-neutral-200"
                 : lightButtonClass
             }`}
+            aria-label="Chapters"
           >
-            List
+            Chapters
           </button>
           <button
             type="button"

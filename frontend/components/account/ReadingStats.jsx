@@ -162,7 +162,10 @@ const ReadingStats = React.memo(() => {
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
             Reading note
           </p>
-          <p className="mt-3 text-sm font-semibold leading-7 text-black/72">
+          <h3 className="mt-3 text-base font-black tracking-[-0.02em] text-black">
+            Keep your next read closer than the settings.
+          </h3>
+          <p className="mt-2 text-sm font-semibold leading-7 text-black/72">
             {tip}
           </p>
         </div>

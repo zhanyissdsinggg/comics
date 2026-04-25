@@ -105,8 +105,8 @@ function getLaneReason({ entryPoint, campaignId, series }) {
     ) {
       return {
         sourceLabel: "Search",
-        laneValue: "Trending",
-        title: `${series?.title || "This title"} came from search.`,
+        laneValue: "Trending pick",
+        title: `${series?.title || "This title"} is trending in search right now.`,
         description: "",
       };
     }
@@ -167,7 +167,7 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("library_")) {
     return {
       sourceLabel: "Library",
-      laneValue: "Saved",
+      laneValue: "Saved in library",
       title: `${series?.title || "This title"} came from your library.`,
       description: "",
     };

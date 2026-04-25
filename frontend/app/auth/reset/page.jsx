@@ -213,7 +213,7 @@ function ResetPageContent() {
               onClick={handleSendResetLink}
               className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
-              {submitting ? "Sending..." : "Send reset link"}
+              {submitting ? "Sending..." : "Email me a reset link"}
             </button>
           </div>
         )}

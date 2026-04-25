@@ -54,6 +54,7 @@ const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: path.resolve(__dirname, ".."),
   poweredByHeader: false,
+  distDir: process.env.NEXT_DIST_DIR || ".next",
 
   eslint: {
     ignoreDuringBuilds: true,

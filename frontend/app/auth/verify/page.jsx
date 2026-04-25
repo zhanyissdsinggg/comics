@@ -176,6 +176,9 @@ function VerifyPageContent() {
               description=""
               className="border-sky-200/70 bg-sky-50"
             />
+            <p className="text-sm font-semibold leading-6 text-black/68">
+              No code field required.
+            </p>
             <button
               type="button"
               disabled={submitting}

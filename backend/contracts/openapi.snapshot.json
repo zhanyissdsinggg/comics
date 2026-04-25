@@ -17,6 +17,10 @@
         "properties": {},
         "type": "object"
       },
+      "CreateAdminMemberDto": {
+        "properties": {},
+        "type": "object"
+      },
       "CreateMarketingCampaignDto": {
         "properties": {},
         "type": "object"
@@ -62,6 +66,10 @@
         "type": "object"
       },
       "TestEmailDto": {
+        "properties": {},
+        "type": "object"
+      },
+      "UpdateAdminMemberDto": {
         "properties": {},
         "type": "object"
       },
@@ -509,7 +517,56 @@
     "/api/admin/comments": {
       "get": {
         "operationId": "AdminCommentsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeTestData",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -572,6 +629,17 @@
           },
           "required": true
         },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/creators/audit": {
+      "get": {
+        "operationId": "AdminCreatorsController_audit",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -677,6 +745,310 @@
       "post": {
         "operationId": "AdminContentGeneratorController_generate",
         "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories": {
+      "get": {
+        "operationId": "AdminInteractiveStoriesController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "seriesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "published",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "AdminInteractiveStoriesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/{id}": {
+      "delete": {
+        "operationId": "AdminInteractiveStoriesController_remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "get": {
+        "operationId": "AdminInteractiveStoriesController_detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AdminInteractiveStoriesController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/{id}/export": {
+      "get": {
+        "operationId": "AdminInteractiveStoriesController_export",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/{id}/nodes": {
+      "post": {
+        "operationId": "AdminInteractiveStoriesController_createNode",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/{id}/publish": {
+      "post": {
+        "operationId": "AdminInteractiveStoriesController_publish",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/{id}/validation": {
+      "get": {
+        "operationId": "AdminInteractiveStoriesController_validate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/choices/{choiceId}": {
+      "delete": {
+        "operationId": "AdminInteractiveStoriesController_removeChoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "choiceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AdminInteractiveStoriesController_updateChoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "choiceId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/import": {
+      "post": {
+        "operationId": "AdminInteractiveStoriesController_importStory",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/nodes/{nodeId}": {
+      "delete": {
+        "operationId": "AdminInteractiveStoriesController_removeNode",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AdminInteractiveStoriesController_updateNode",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/interactive-stories/nodes/{nodeId}/choices": {
+      "post": {
+        "operationId": "AdminInteractiveStoriesController_createChoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": ""
@@ -1021,6 +1393,148 @@
         "parameters": [],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members": {
+      "get": {
+        "operationId": "AdminMembersController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "AdminMembersController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminMemberDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}": {
+      "patch": {
+        "operationId": "AdminMembersController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminMemberDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/2fa": {
+      "delete": {
+        "operationId": "AdminMembersController_clearTwoFactor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/reset-2fa": {
+      "post": {
+        "operationId": "AdminMembersController_resetTwoFactor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/{id}/status": {
+      "patch": {
+        "operationId": "AdminMembersController_updateStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/meta": {
+      "get": {
+        "operationId": "AdminMembersController_meta",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/admin/members/sync-env": {
+      "post": {
+        "operationId": "AdminMembersController_syncEnv",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         }
@@ -1800,6 +2314,26 @@
         }
       }
     },
+    "/api/admin/series/{id}/credits": {
+      "get": {
+        "operationId": "AdminSeriesController_detailCredits",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "AdminSeriesController_updateCredits",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/admin/series/{id}/episodes": {
       "get": {
         "operationId": "AdminEpisodesController_listEpisodes",
@@ -2403,7 +2937,16 @@
     "/api/creators": {
       "get": {
         "operationId": "CreatorsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "adult",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -2418,6 +2961,14 @@
           {
             "in": "path",
             "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adult",
             "required": true,
             "schema": {
               "type": "string"
@@ -2652,6 +3203,86 @@
         "parameters": [],
         "responses": {
           "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/interactive-stories/{storyId}": {
+      "get": {
+        "operationId": "InteractiveStoriesController_getStory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "storyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/interactive-stories/{storyId}/choice": {
+      "post": {
+        "operationId": "InteractiveStoriesController_submitChoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "storyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/interactive-stories/{storyId}/progress": {
+      "get": {
+        "operationId": "InteractiveStoriesController_getProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "storyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/interactive-stories/by-series/{seriesId}": {
+      "get": {
+        "operationId": "InteractiveStoriesController_getBySeries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "seriesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
             "description": ""
           }
         }
@@ -2943,6 +3574,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "adult",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2959,6 +3598,14 @@
           {
             "in": "query",
             "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adult",
             "required": true,
             "schema": {
               "type": "string"
@@ -2987,6 +3634,14 @@
           {
             "in": "query",
             "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adult",
             "required": true,
             "schema": {
               "type": "string"
@@ -3230,6 +3885,34 @@
     "/api/series/{id}": {
       "get": {
         "operationId": "SeriesController_detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "adult",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/series/{id}/commerce": {
+      "get": {
+        "operationId": "SeriesController_detailCommerce",
         "parameters": [
           {
             "in": "path",

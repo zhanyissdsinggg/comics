@@ -33,7 +33,7 @@ function buildSupportBody(message, topicLabel, replyEmail, orderId) {
     notes.push(`Topic: ${topicLabel}`);
   }
   if (replyEmail) {
-    notes.push(`Email: ${replyEmail}`);
+    notes.push(`Reply email: ${replyEmail}`);
   }
   if (orderId) {
     notes.push(`Order: ${orderId}`);
@@ -480,7 +480,7 @@ export default function SupportPage() {
               </div>
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <StorefrontSectionHeading eyebrow="Form" title="Request." />
+                <StorefrontSectionHeading eyebrow="Form" title="Send a request." />
 
                 {feedback.text ? (
                   feedback.type === "error" && feedback.mode === "network" ? (

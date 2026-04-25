@@ -23,7 +23,7 @@ import { getSearchParam } from "../../lib/pageSearchParams";
 const VIEWS = [
   {
     id: "featured",
-    label: "Popular",
+    label: "Featured",
     description: "",
   },
   {
@@ -365,6 +365,8 @@ export default function RankingsPage({
     "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
   const secondaryButtonClass =
     "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
+  const heroTitle =
+    activeView.id === "featured" ? "Featured stories." : `${activeView.label}.`;
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
@@ -373,7 +375,7 @@ export default function RankingsPage({
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
             eyebrow="Editor's shelf"
-            title={`${activeView.label}.`}
+            title={heroTitle}
             description={activeView.description}
             secondary=""
             stats={heroStats}
