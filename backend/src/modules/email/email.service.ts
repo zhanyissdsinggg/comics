@@ -2,12 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { getAppConfig, getPrimaryFrontendOrigin } from "../../common/config/app-config";
 import { logger } from "../../common/logger/winston.init";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import {
-  addEmailJob,
-  getEmailJob,
-  listFailedEmailJobs,
-  updateEmailJob,
-} from "../../common/storage/mock-store";
 import { decryptString } from "../../common/utils/crypto";
 import { parseStoredJson } from "../../common/utils/stored-json";
 import {
@@ -25,6 +19,18 @@ const RETRY_INTERVAL_MS = 60_000;
 const MAX_RETRIES = 5;
 
 type SendResult = { ok: boolean; status?: number; error?: string };
+type EmailJobRow = {
+  id: string;
+  status: string;
+  provider: string;
+  to: string;
+  subject: string;
+  payload: string | null;
+  priority: string;
+  retries: number;
+  lastAttemptAt: Date | null;
+  error: string | null;
+};
 
 type EmailMessagePayload = {
   from: string;
@@ -241,6 +247,65 @@ export class EmailService {
     await this.attemptSend(alertPayload, provider, config);
   }
 
+  private async createJob(input: {
+    provider: string;
+    to: string;
+    subject: string;
+    payload: EmailMessagePayload;
+    priority: EmailPriority;
+  }): Promise<EmailJobRow> {
+    return this.prisma.emailJob.create({
+      data: {
+        status: "QUEUED",
+        provider: input.provider,
+        to: input.to,
+        subject: input.subject,
+        payload: JSON.stringify(input.payload),
+        priority: String(input.priority || "normal"),
+        retries: 0,
+        lastAttemptAt: new Date(),
+        error: "",
+      },
+    }) as unknown as EmailJobRow;
+  }
+
+  private async updateJob(jobId: string, patch: Partial<EmailJobRow>): Promise<void> {
+    try {
+      await this.prisma.emailJob.update({
+        where: { id: jobId },
+        data: {
+          status: patch.status,
+          provider: patch.provider,
+          to: patch.to,
+          subject: patch.subject,
+          payload: patch.payload,
+          priority: patch.priority,
+          retries: patch.retries,
+          lastAttemptAt: patch.lastAttemptAt ?? undefined,
+          error: patch.error ?? undefined,
+        },
+      });
+    } catch (error) {
+      // Do not fail the user-facing auth flows if the internal job table is misconfigured.
+      logger.warn("Email job update failed", { jobId, error });
+    }
+  }
+
+  private parseJobPayload(raw: unknown): EmailMessagePayload | null {
+    if (!raw) {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(String(raw));
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      return parsed as EmailMessagePayload;
+    } catch {
+      return null;
+    }
+  }
+
   async sendEmail(
     to: string,
     subject: string,
@@ -255,26 +320,17 @@ export class EmailService {
     const payload: EmailMessagePayload = { from, to, subject, html, text };
     const priority = options.priority || "normal";
 
-    const job = addEmailJob({
-      provider,
-      to,
-      subject,
-      status: "PENDING",
-      retries: 0,
-      lastAttemptAt: new Date().toISOString(),
-      payload,
-      priority,
-    });
+    const job = await this.createJob({ provider, to, subject, payload, priority });
 
     let result = await this.attemptSendWithPriority(payload, provider, config, priority);
     if (!result.ok) {
       const retry = await this.attemptSendWithPriority(payload, provider, config, priority);
       result = retry.ok ? retry : result;
-      updateEmailJob(job.id, {
-        retries: job.retries + 1,
+      await this.updateJob(job.id, {
+        retries: (job.retries || 0) + 1,
         status: retry.ok ? "SENT" : "FAILED",
         error: retry.ok ? "" : retry.error || "SEND_FAILED",
-        lastAttemptAt: new Date().toISOString(),
+        lastAttemptAt: new Date(),
       });
       if (!retry.ok) {
         await this.notifyAdminFailure(config, payload, retry.error || "SEND_FAILED");
@@ -282,29 +338,29 @@ export class EmailService {
       return { ok: retry.ok };
     }
 
-    updateEmailJob(job.id, {
+    await this.updateJob(job.id, {
       status: "SENT",
       error: "",
-      lastAttemptAt: new Date().toISOString(),
+      lastAttemptAt: new Date(),
     });
     return { ok: true };
   }
 
   async retryJobById(jobId: string): Promise<{ ok: boolean; error?: string }> {
-    const job = getEmailJob(jobId);
-    if (!job || !job.payload) {
+    const job = await this.prisma.emailJob.findUnique({ where: { id: jobId } });
+    const payload = this.parseJobPayload(job?.payload);
+    if (!job || !payload) {
       return { ok: false, error: "JOB_NOT_FOUND" };
     }
 
     const config = await this.loadConfig();
-    const payload = job.payload as EmailMessagePayload;
     const provider = job.provider || "console";
     const result = await this.attemptSend(payload, provider, config);
-    updateEmailJob(jobId, {
+    await this.updateJob(jobId, {
       status: result.ok ? "SENT" : "FAILED",
       error: result.ok ? "" : result.error || "SEND_FAILED",
       retries: (job.retries || 0) + 1,
-      lastAttemptAt: new Date().toISOString(),
+      lastAttemptAt: new Date(),
     });
     if (!result.ok) {
       await this.notifyAdminFailure(config, payload, result.error || "SEND_FAILED");
@@ -314,24 +370,28 @@ export class EmailService {
 
   async retryFailedJobs(): Promise<void> {
     const config = await this.loadConfig();
-    const failed = listFailedEmailJobs(20);
+    const failed = await this.prisma.emailJob.findMany({
+      where: {
+        status: "FAILED",
+        retries: { lt: MAX_RETRIES },
+      },
+      orderBy: { lastAttemptAt: "desc" },
+      take: 20,
+    });
+
     for (const job of failed) {
-      const full = getEmailJob(job.id);
-      if (!full?.payload) {
-        continue;
-      }
-      if ((full.retries || 0) >= MAX_RETRIES) {
+      const payload = this.parseJobPayload(job.payload);
+      if (!payload) {
         continue;
       }
 
-      const payload = full.payload as EmailMessagePayload;
-      const provider = full.provider || "console";
+      const provider = job.provider || "console";
       const result = await this.attemptSend(payload, provider, config);
-      updateEmailJob(job.id, {
+      await this.updateJob(job.id, {
         status: result.ok ? "SENT" : "FAILED",
         error: result.ok ? "" : result.error || "SEND_FAILED",
-        retries: (full.retries || 0) + 1,
-        lastAttemptAt: new Date().toISOString(),
+        retries: (job.retries || 0) + 1,
+        lastAttemptAt: new Date(),
       });
       if (!result.ok) {
         await this.notifyAdminFailure(config, payload, result.error || "SEND_FAILED");

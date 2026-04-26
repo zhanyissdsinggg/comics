@@ -1,6 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
-import { listEmailJobs, listFailedEmailJobs } from "../../../../common/storage/mock-store";
 import { EmailService } from "../../../email/email.service";
 import { PrismaService } from "../../../../common/prisma/prisma.service";
 import { RequireAdminPermissions } from "../../decorators/admin-permissions.decorator";
@@ -19,12 +18,45 @@ export class AdminEmailJobsController {
 
   @Get()
   async list() {
-    return { jobs: listEmailJobs(100) };
+    const jobs = await this.prisma.emailJob.findMany({
+      orderBy: { lastAttemptAt: "desc" },
+      take: 100,
+    });
+    return {
+      jobs: jobs.map((job) => ({
+        id: job.id,
+        status: job.status,
+        provider: job.provider,
+        to: job.to,
+        subject: job.subject,
+        priority: job.priority,
+        retries: job.retries,
+        lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
+        error: job.error || "",
+      })),
+    };
   }
 
   @Get("failed")
   async failed() {
-    return { jobs: listFailedEmailJobs(100) };
+    const jobs = await this.prisma.emailJob.findMany({
+      where: { status: "FAILED" },
+      orderBy: { lastAttemptAt: "desc" },
+      take: 100,
+    });
+    return {
+      jobs: jobs.map((job) => ({
+        id: job.id,
+        status: job.status,
+        provider: job.provider,
+        to: job.to,
+        subject: job.subject,
+        priority: job.priority,
+        retries: job.retries,
+        lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
+        error: job.error || "",
+      })),
+    };
   }
 
   @Post("retry")

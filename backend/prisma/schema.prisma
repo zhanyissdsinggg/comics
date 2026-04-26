@@ -769,6 +769,27 @@ model EmailConfig {
   @@map("email_configs")
 }
 
+model EmailJob {
+  id            String   @id @default(cuid())
+  status        String   @default("QUEUED")
+  provider      String   @default("console")
+  to            String
+  subject       String
+  payload       String?
+  priority      String   @default("normal")
+  retries       Int      @default(0)
+  lastAttemptAt DateTime?
+  error         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, lastAttemptAt])
+  @@index([to])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@map("email_jobs")
+}
+
 model MarketingCampaign {
   id            String                    @id @default(cuid())
   name          String
