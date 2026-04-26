@@ -222,11 +222,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-series"));
         if (!clicked) {
-          await page
-            .locator('a[href="/admin/series"]')
-            .filter({ hasText: "去作品管理" })
-            .first()
-            .click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/series"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/series`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -243,11 +240,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-creators"));
         if (!clicked) {
-          await page
-            .locator('a[href="/admin/creators"]')
-            .filter({ hasText: "去创作者页" })
-            .first()
-            .click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/creators"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/creators`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -264,11 +258,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-merchandising"));
         if (!clicked) {
-          await page
-            .locator('a[href="/admin/merchandising"]')
-            .filter({ hasText: "去首页编排" })
-            .first()
-            .click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/merchandising"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/merchandising`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -285,7 +276,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-support-view-all"));
         if (!clicked) {
-          await page.locator('a[href="/admin/support"]').filter({ hasText: "查看全部" }).first().click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/support"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/support`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -302,7 +294,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-orders-view-all"));
         if (!clicked) {
-          await page.locator('a[href="/admin/orders"]').filter({ hasText: "查看全部" }).first().click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/orders"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/orders`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -319,7 +312,8 @@ function buildChecks(baseUrl) {
       run: async (page) => {
         const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-comments-view-all"));
         if (!clicked) {
-          await page.locator('a[href="/admin/comments"]').filter({ hasText: "查看全部" }).first().click();
+          // Avoid text-based matching to prevent mojibake on different locales.
+          await page.locator('a[href="/admin/comments"]').first().click();
         }
         await page.waitForURL(`${baseUrl}/admin/comments`, { timeout: DEFAULT_TIMEOUT_MS });
 
@@ -1045,10 +1039,10 @@ function stabilizeChecks(checks) {
       return {
         ...check,
         run: async (page) => {
-          await clickButtonByText(page, "璇昏€呭垎缇?");
+          await clickButtonByText(page, "读者分群");
 
           const firstRowBefore = await readFirstTableRowText(page);
-          await page.locator("button").filter({ hasText: "涓嬩竴椤?" }).last().click();
+          await page.locator("button").filter({ hasText: "下一页" }).last().click();
           await page.waitForFunction(
             (expectedRow) => {
               const row = document.querySelector("tbody tr");
@@ -1075,13 +1069,13 @@ function stabilizeChecks(checks) {
       return {
         ...check,
         run: async (page) => {
-          await clickButtonByText(page, "璇昏€呭垎缇?");
+          await clickButtonByText(page, "读者分群");
           const selectedUser = (await readFirstTableRowText(page))
             .split("\n")
             .map((part) => part.trim())
             .find(Boolean);
 
-          await page.locator("button").filter({ hasText: "鎵撳紑鐢ㄦ埛" }).first().click();
+          await page.locator("button").filter({ hasText: "打开用户" }).first().click();
           await page.waitForFunction(
             (email) => !document.querySelector("tbody tr") && document.body.innerText.includes(email),
             selectedUser,
