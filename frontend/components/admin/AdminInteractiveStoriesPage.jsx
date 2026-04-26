@@ -899,6 +899,111 @@ export default function AdminInteractiveStoriesPage() {
     setFeedback({ type: "success", message: "导出完成" });
   }
 
+  async function copyStoryJson() {
+    if (!selectedStoryId) return;
+    const resp = await adminGet(`/api/admin/interactive-stories/${selectedStoryId}/export`);
+    if (!resp.ok) {
+      setFeedback({ type: "error", message: msg(resp, "获取导出 JSON 失败") });
+      return;
+    }
+    const payload = resp.data?.payload || {};
+    const ok = await copyToClipboard(JSON.stringify(payload, null, 2));
+    setFeedback({ type: ok ? "success" : "error", message: ok ? "导出 JSON 已复制" : "复制失败，请改用下载导出" });
+  }
+
+  function fillImportTemplate() {
+    const template = {
+      story: {
+        slug: "midnight-archive",
+        title: "午夜来信",
+        description: "用于测试的互动小说骨架示例（可改成你的真实作品）。",
+        seriesId: "",
+        baseContext: "角色设定、世界观、叙事口吻都可以写在这里。",
+        initialNodeId: "intro-01",
+        initialState: { trust: 0, risk: 0, clues: 0 },
+        aiEnabled: true,
+      },
+      nodes: [
+        {
+          nodeKey: "intro-01",
+          title: "开场",
+          basePrompt: "写一段 120-180 字的剧情开场，留一个悬念。",
+          fallbackText: "AI 失败时显示这段兜底文本。",
+          requiredFlags: [],
+          blockedFlags: [],
+          stateEffects: {},
+          sortOrder: 0,
+          isEnding: false,
+          aiEnabled: true,
+          choices: [
+            {
+              choiceKey: "look_closer",
+              label: "仔细查看",
+              description: "更谨慎一点。",
+              targetNodeKey: "scene-02",
+              requiredFlags: [],
+              blockedFlags: [],
+              stateEffects: { clues: 1 },
+              sortOrder: 0,
+            },
+            {
+              choiceKey: "walk_away",
+              label: "先离开",
+              description: "先保命。",
+              targetNodeKey: "scene-02",
+              requiredFlags: [],
+              blockedFlags: [],
+              stateEffects: { risk: -1 },
+              sortOrder: 1,
+            },
+          ],
+        },
+        {
+          nodeKey: "scene-02",
+          title: "第二幕",
+          basePrompt: "延续上一个选择的后果，给出新的分支。",
+          fallbackText: "继续推进剧情。",
+          requiredFlags: [],
+          blockedFlags: [],
+          stateEffects: {},
+          sortOrder: 1,
+          isEnding: false,
+          aiEnabled: true,
+          choices: [
+            {
+              choiceKey: "ask_editor",
+              label: "去找编辑",
+              description: "",
+              targetNodeKey: "ending-01",
+              requiredFlags: [],
+              blockedFlags: [],
+              stateEffects: { trust: 1 },
+              sortOrder: 0,
+            },
+          ],
+        },
+        {
+          nodeKey: "ending-01",
+          title: "结局",
+          basePrompt: "收束剧情，给一个结尾。",
+          fallbackText: "故事到此结束。",
+          requiredFlags: [],
+          blockedFlags: [],
+          stateEffects: {},
+          sortOrder: 2,
+          isEnding: true,
+          aiEnabled: false,
+          choices: [],
+        },
+      ],
+    };
+
+    setImportMode("create");
+    setImportText(JSON.stringify(template, null, 2));
+    setActiveTab("json");
+    setFeedback({ type: "success", message: "已生成导入模板，可直接修改后导入" });
+  }
+
   async function importStory() {
     if (!importText.trim()) {
       setFeedback({ type: "error", message: "请先粘贴导入 JSON" });
@@ -945,11 +1050,21 @@ export default function AdminInteractiveStoriesPage() {
             <RefreshCw className="size-4" />
             刷新
           </Button>
+          <Button variant="outline" onClick={fillImportTemplate}>
+            <FileJson className="size-4" />
+            模板
+          </Button>
           {selectedStoryId ? (
-            <Button variant="outline" onClick={exportStory}>
-              <Download className="size-4" />
-              导出
-            </Button>
+            <>
+              <Button variant="outline" onClick={copyStoryJson}>
+                <Copy className="size-4" />
+                复制 JSON
+              </Button>
+              <Button variant="outline" onClick={exportStory}>
+                <Download className="size-4" />
+                导出
+              </Button>
+            </>
           ) : null}
         </div>
       )}
