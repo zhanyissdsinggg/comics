@@ -18,45 +18,60 @@ export class AdminEmailJobsController {
 
   @Get()
   async list() {
-    const jobs = await this.prisma.emailJob.findMany({
-      orderBy: { lastAttemptAt: "desc" },
-      take: 100,
-    });
-    return {
-      jobs: jobs.map((job) => ({
-        id: job.id,
-        status: job.status,
-        provider: job.provider,
-        to: job.to,
-        subject: job.subject,
-        priority: job.priority,
-        retries: job.retries,
-        lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
-        error: job.error || "",
-      })),
-    };
+    try {
+      const jobs = await this.prisma.emailJob.findMany({
+        orderBy: { lastAttemptAt: "desc" },
+        take: 100,
+      });
+      return {
+        jobs: jobs.map((job) => ({
+          id: job.id,
+          status: job.status,
+          provider: job.provider,
+          to: job.to,
+          subject: job.subject,
+          priority: job.priority,
+          retries: job.retries,
+          lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
+          error: job.error || "",
+        })),
+      };
+    } catch (error) {
+      // Deployment-safe: if migrations lag, show an empty list instead of breaking the admin UI.
+      return {
+        jobs: [],
+        warning: "EMAIL_JOBS_UNAVAILABLE",
+      };
+    }
   }
 
   @Get("failed")
   async failed() {
-    const jobs = await this.prisma.emailJob.findMany({
-      where: { status: "FAILED" },
-      orderBy: { lastAttemptAt: "desc" },
-      take: 100,
-    });
-    return {
-      jobs: jobs.map((job) => ({
-        id: job.id,
-        status: job.status,
-        provider: job.provider,
-        to: job.to,
-        subject: job.subject,
-        priority: job.priority,
-        retries: job.retries,
-        lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
-        error: job.error || "",
-      })),
-    };
+    try {
+      const jobs = await this.prisma.emailJob.findMany({
+        where: { status: "FAILED" },
+        orderBy: { lastAttemptAt: "desc" },
+        take: 100,
+      });
+      return {
+        jobs: jobs.map((job) => ({
+          id: job.id,
+          status: job.status,
+          provider: job.provider,
+          to: job.to,
+          subject: job.subject,
+          priority: job.priority,
+          retries: job.retries,
+          lastAttemptAt: job.lastAttemptAt ? job.lastAttemptAt.toISOString() : null,
+          error: job.error || "",
+        })),
+      };
+    } catch (error) {
+      return {
+        jobs: [],
+        warning: "EMAIL_JOBS_UNAVAILABLE",
+      };
+    }
   }
 
   @Post("retry")

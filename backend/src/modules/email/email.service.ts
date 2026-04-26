@@ -254,19 +254,36 @@ export class EmailService {
     payload: EmailMessagePayload;
     priority: EmailPriority;
   }): Promise<EmailJobRow> {
-    return this.prisma.emailJob.create({
-      data: {
+    try {
+      return this.prisma.emailJob.create({
+        data: {
+          status: "QUEUED",
+          provider: input.provider,
+          to: input.to,
+          subject: input.subject,
+          payload: JSON.stringify(input.payload),
+          priority: String(input.priority || "normal"),
+          retries: 0,
+          lastAttemptAt: new Date(),
+          error: "",
+        },
+      }) as unknown as EmailJobRow;
+    } catch (error) {
+      // Migration may lag on a fresh deploy. Never break auth flows due to missing job table.
+      logger.warn("Email job create failed; continuing without job persistence", { error });
+      return {
+        id: "",
         status: "QUEUED",
         provider: input.provider,
         to: input.to,
         subject: input.subject,
-        payload: JSON.stringify(input.payload),
+        payload: null,
         priority: String(input.priority || "normal"),
         retries: 0,
         lastAttemptAt: new Date(),
-        error: "",
-      },
-    }) as unknown as EmailJobRow;
+        error: "JOB_STORAGE_UNAVAILABLE",
+      };
+    }
   }
 
   private async updateJob(jobId: string, patch: Partial<EmailJobRow>): Promise<void> {
@@ -321,33 +338,45 @@ export class EmailService {
     const priority = options.priority || "normal";
 
     const job = await this.createJob({ provider, to, subject, payload, priority });
+    const jobId = String(job?.id || "").trim();
 
     let result = await this.attemptSendWithPriority(payload, provider, config, priority);
     if (!result.ok) {
       const retry = await this.attemptSendWithPriority(payload, provider, config, priority);
       result = retry.ok ? retry : result;
-      await this.updateJob(job.id, {
-        retries: (job.retries || 0) + 1,
-        status: retry.ok ? "SENT" : "FAILED",
-        error: retry.ok ? "" : retry.error || "SEND_FAILED",
-        lastAttemptAt: new Date(),
-      });
+      if (jobId) {
+        await this.updateJob(jobId, {
+          retries: (job.retries || 0) + 1,
+          status: retry.ok ? "SENT" : "FAILED",
+          error: retry.ok ? "" : retry.error || "SEND_FAILED",
+          lastAttemptAt: new Date(),
+        });
+      }
       if (!retry.ok) {
         await this.notifyAdminFailure(config, payload, retry.error || "SEND_FAILED");
       }
       return { ok: retry.ok };
     }
 
-    await this.updateJob(job.id, {
-      status: "SENT",
-      error: "",
-      lastAttemptAt: new Date(),
-    });
+    if (jobId) {
+      await this.updateJob(jobId, {
+        status: "SENT",
+        error: "",
+        lastAttemptAt: new Date(),
+      });
+    }
     return { ok: true };
   }
 
   async retryJobById(jobId: string): Promise<{ ok: boolean; error?: string }> {
-    const job = await this.prisma.emailJob.findUnique({ where: { id: jobId } });
+    let job: any = null;
+    try {
+      job = await this.prisma.emailJob.findUnique({ where: { id: jobId } });
+    } catch (error) {
+      logger.warn("Email job lookup failed", { jobId, error });
+      return { ok: false, error: "JOB_STORAGE_UNAVAILABLE" };
+    }
+
     const payload = this.parseJobPayload(job?.payload);
     if (!job || !payload) {
       return { ok: false, error: "JOB_NOT_FOUND" };
@@ -370,14 +399,20 @@ export class EmailService {
 
   async retryFailedJobs(): Promise<void> {
     const config = await this.loadConfig();
-    const failed = await this.prisma.emailJob.findMany({
-      where: {
-        status: "FAILED",
-        retries: { lt: MAX_RETRIES },
-      },
-      orderBy: { lastAttemptAt: "desc" },
-      take: 20,
-    });
+    let failed: any[] = [];
+    try {
+      failed = await this.prisma.emailJob.findMany({
+        where: {
+          status: "FAILED",
+          retries: { lt: MAX_RETRIES },
+        },
+        orderBy: { lastAttemptAt: "desc" },
+        take: 20,
+      });
+    } catch (error) {
+      logger.warn("Email job retry scan failed; job storage unavailable", { error });
+      return;
+    }
 
     for (const job of failed) {
       const payload = this.parseJobPayload(job.payload);
