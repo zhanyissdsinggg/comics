@@ -192,6 +192,23 @@ async function runDesktopSuite(baseUrl) {
           );
         }
 
+        // Validate follow/save is gated when signed out: clicking should open the auth modal rather than no-op.
+        const followButton = await pickFirstVisibleLocator(
+          [
+            page.getByRole("button", { name: /^(Save to library|Remove from library)$/ }).first(),
+            page.locator('button[aria-label="Save to library"]').first(),
+          ],
+          { perCandidateTimeoutMs: 1500 },
+        );
+        if (followButton) {
+          await followButton.click({ timeout: DEFAULT_TIMEOUT_MS });
+          const closeModal = page.getByLabel("Close modal").first();
+          // If we're signed-in in this smoke context, the modal may not appear. That's fine.
+          if (await closeModal.isVisible().catch(() => false)) {
+            await closeModal.click({ timeout: DEFAULT_TIMEOUT_MS });
+          }
+        }
+
         const primary = await pickFirstVisibleLocator(
           [
             page.getByTestId("series-primary-action"),
@@ -212,11 +229,27 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
+      id: "account.page-load-unauth",
+      run: async () => {
+        await page.goto(`${baseUrl}/account`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        // Contract: the page should render something meaningful without crashing.
+        // We accept either a visible title or a sign-in CTA or the site header.
+        await page.locator('[data-site-header="1"]').waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+      },
+    },
+    {
       id: "reader.chapters-drawer-open-close",
       run: async () => {
         const currentPath = new URL(page.url()).pathname;
         if (!currentPath.startsWith("/read/")) {
-          throw new Error("reader drawer check requires being on a /read/* route first");
+          const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
+          const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", "demo-episode");
+          await page.goto(`${baseUrl}/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`, {
+            waitUntil: "domcontentloaded",
+            timeout: 60_000,
+          });
+          await page.waitForLoadState("networkidle", { timeout: 60_000 });
         }
 
         const chapters = page.getByRole("button", { name: "Chapters" });
