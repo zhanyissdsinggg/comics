@@ -377,14 +377,11 @@ async function runSeriesEpisodeCreditsRoundtrip(backendBaseUrl, cookieJar, suffi
 }
 
 async function run() {
-  if (process.env.OPS_ADMIN_WRITE_ALLOWED !== "1") {
-    throw new Error("refusing to run without OPS_ADMIN_WRITE_ALLOWED=1");
-  }
-
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   if (!backendBaseUrl) {
     throw new Error("BACKEND_URL is required");
   }
+  ensureOpsWriteAllowed(backendBaseUrl);
 
   const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
   const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
@@ -418,3 +415,4 @@ run().catch((error) => {
   );
   process.exit(1);
 });
+import { ensureOpsWriteAllowed } from "./_write-guard.mjs";

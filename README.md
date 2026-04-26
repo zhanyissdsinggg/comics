@@ -58,6 +58,8 @@ Builds the frontend first, then the backend.
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 OPS_ADMIN_KEY=<production-admin-key> \
 OPS_ADMIN_WRITE_ALLOWED=1 \
+OPS_ADMIN_WRITE_REMOTE_ALLOWED=1 \
+OPS_ADMIN_WRITE_PROD_ALLOWED=1 \
 npm run ops:admin-write-smoke
 ```
 
@@ -68,6 +70,8 @@ Runs the reversible admin QA-user write smoke:
 - blocks the QA account, verifies the state change, then restores the original state
 - creates one QA-only notification, verifies it appears in the admin list, then deletes it
 - refuses to run unless `OPS_ADMIN_WRITE_ALLOWED=1` is set
+- refuses to run against non-local targets unless `OPS_ADMIN_WRITE_REMOTE_ALLOWED=1` is set
+- refuses to run against production hosts unless `OPS_ADMIN_WRITE_PROD_ALLOWED=1` is set
 
 Optional after the support reply migration/runtime is deployed:
 
@@ -75,6 +79,8 @@ Optional after the support reply migration/runtime is deployed:
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 OPS_ADMIN_KEY=<production-admin-key> \
 OPS_ADMIN_WRITE_ALLOWED=1 \
+OPS_ADMIN_WRITE_REMOTE_ALLOWED=1 \
+OPS_ADMIN_WRITE_PROD_ALLOWED=1 \
 OPS_ADMIN_WRITE_SUPPORT=1 \
 npm run ops:admin-write-smoke
 ```

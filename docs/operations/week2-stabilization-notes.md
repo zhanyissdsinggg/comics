@@ -42,6 +42,8 @@ $env:OPS_ALLOWED_FRONTEND_SLOW_SAMPLES='1'
 2. After fix, promote support write verification to blocking mode:
 ```powershell
 $env:OPS_ADMIN_WRITE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_REMOTE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_PROD_ALLOWED='1'
 $env:OPS_ADMIN_WRITE_SUPPORT='1'
 $env:OPS_ADMIN_WRITE_SUPPORT_REQUIRED='1'
 npm run ops:admin-write-smoke

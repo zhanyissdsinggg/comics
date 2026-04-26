@@ -11,6 +11,8 @@ Set these before running any SOP profile:
 - `OPS_ADMIN_EMAIL`
 - `OPS_ADMIN_PASSWORD`
 - `OPS_ADMIN_WRITE_ALLOWED=1` (required for write probes)
+- `OPS_ADMIN_WRITE_REMOTE_ALLOWED=1` (required when running write probes against non-local targets)
+- `OPS_ADMIN_WRITE_PROD_ALLOWED=1` (required when the target host is production)
 
 Required for strict full deploy gate profile:
 

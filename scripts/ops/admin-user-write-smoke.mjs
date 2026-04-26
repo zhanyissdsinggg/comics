@@ -199,9 +199,11 @@ function logStep(step, result) {
   console.log(parts.join(" "));
 }
 
-function ensureWriteAllowed() {
-  if (process.env.OPS_ADMIN_WRITE_ALLOWED !== "1") {
-    fail("refusing to run without OPS_ADMIN_WRITE_ALLOWED=1");
+function ensureWriteAllowed(backendBaseUrl) {
+  try {
+    ensureOpsWriteAllowed(backendBaseUrl);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -703,8 +705,6 @@ async function runOptionalSupportWriteSmoke(backendBaseUrl, cookieJar, candidate
 }
 
 async function run() {
-  ensureWriteAllowed();
-
   const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
   const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
@@ -713,6 +713,8 @@ async function run() {
   if (!backendBaseUrl) {
     throw new Error("BACKEND_URL is required");
   }
+
+  ensureWriteAllowed(backendBaseUrl);
 
   if (!(adminEmail && adminPassword) && !adminKey) {
     throw new Error(
@@ -793,3 +795,4 @@ run().catch((error) => {
   console.error("[ops-admin-write] admin QA user write smoke crashed", error);
   process.exit(1);
 });
+import { ensureOpsWriteAllowed } from "./_write-guard.mjs";

@@ -91,6 +91,82 @@ function runAudit(target) {
 
 const violations = [];
 
+function listGitFiles() {
+  const result = spawnSync("git ls-files", {
+    cwd: root,
+    encoding: "utf8",
+    shell: true,
+  });
+
+  if (result.status !== 0) {
+    return [];
+  }
+
+  return String(result.stdout || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function isProbablyBinary(buffer) {
+  // If it contains a NUL byte, treat as binary.
+  for (let i = 0; i < buffer.length; i += 1) {
+    if (buffer[i] === 0) return true;
+  }
+  return false;
+}
+
+function scanForSecrets() {
+  const files = listGitFiles();
+  const findings = [];
+
+  const patterns = [
+    { id: "github_pat", re: /\bgithub_pat_[A-Za-z0-9_]{10,}\b/g },
+    { id: "github_ghp", re: /\bghp_[A-Za-z0-9]{30,}\b/g },
+    { id: "openai_key", re: /\bsk-[A-Za-z0-9]{20,}\b/g },
+    { id: "aws_access_key", re: /\bAKIA[0-9A-Z]{16}\b/g },
+    { id: "slack_token", re: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g },
+    { id: "private_key_block", re: /-----BEGIN (?:RSA |EC |OPENSSH |)?PRIVATE KEY-----/g },
+  ];
+
+  for (const relative of files) {
+    // Avoid scanning large generated artifacts.
+    if (relative.includes("node_modules/") || relative.includes("dist/") || relative.includes(".next/")) {
+      continue;
+    }
+
+    const fullPath = path.join(root, relative);
+    let stat = null;
+    try {
+      stat = fs.statSync(fullPath);
+    } catch {
+      continue;
+    }
+
+    if (!stat.isFile()) continue;
+    if (stat.size > 2_000_000) continue;
+
+    let buffer = null;
+    try {
+      buffer = fs.readFileSync(fullPath);
+    } catch {
+      continue;
+    }
+
+    if (isProbablyBinary(buffer)) continue;
+
+    const text = buffer.toString("utf8");
+    for (const pattern of patterns) {
+      if (pattern.re.test(text)) {
+        findings.push(`[secrets] ${pattern.id} detected in ${relative}`);
+      }
+      pattern.re.lastIndex = 0;
+    }
+  }
+
+  return findings;
+}
+
 for (const target of targets) {
   const auditJson = runAudit(target);
   const entries = parseEntries(auditJson);
@@ -124,6 +200,13 @@ if (violations.length > 0) {
   for (const violation of violations) {
     console.error(`- ${violation}`);
   }
+  process.exit(1);
+}
+
+const secretFindings = scanForSecrets();
+if (secretFindings.length > 0) {
+  console.error("[security] secret scan violations detected:");
+  secretFindings.forEach((item) => console.error(`- ${item}`));
   process.exit(1);
 }
 

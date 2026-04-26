@@ -97,12 +97,16 @@ Use this only when you explicitly want one reversible production write check aga
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 OPS_ADMIN_KEY=<production-admin-key> \
 OPS_ADMIN_WRITE_ALLOWED=1 \
+OPS_ADMIN_WRITE_REMOTE_ALLOWED=1 \
+OPS_ADMIN_WRITE_PROD_ALLOWED=1 \
 npm run ops:admin-write-smoke
 ```
 
 Guard rails:
 
 - requires `OPS_ADMIN_WRITE_ALLOWED=1`
+- requires `OPS_ADMIN_WRITE_REMOTE_ALLOWED=1` for non-local targets
+- requires `OPS_ADMIN_WRITE_PROD_ALLOWED=1` for production hosts
 - only targets users under `@example.com`
 - only accepts QA-style emails containing one of: `gush.qa.`, `qa_`, `smoke_`, `deploy-verify-`
 - toggles the chosen user's blocked state once, verifies it, then restores the original state

@@ -115,6 +115,8 @@ $env:BACKEND_URL='https://www.gushcomics.com'
 $env:OPS_ADMIN_EMAIL='<admin_email>'
 $env:OPS_ADMIN_PASSWORD='<admin_password>'
 $env:OPS_ADMIN_WRITE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_REMOTE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_PROD_ALLOWED='1'
 $env:OPS_ADMIN_WRITE_SUPPORT='1'
 # Optional: make support verification blocking
 $env:OPS_ADMIN_WRITE_SUPPORT_REQUIRED='1'

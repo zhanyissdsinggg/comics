@@ -47,6 +47,8 @@ Expected: no FAIL entries in the generated report.
 2. Reversible write smoke
 ```powershell
 $env:OPS_ADMIN_WRITE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_REMOTE_ALLOWED='1'
+$env:OPS_ADMIN_WRITE_PROD_ALLOWED='1'
 npm run ops:admin-write-smoke
 ```
 Expected: QA user mutation and notification roundtrip both pass and auto-restore.
