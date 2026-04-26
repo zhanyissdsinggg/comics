@@ -7,6 +7,7 @@ import {
   ArrowRight,
   BookCopy,
   CheckCircle2,
+  Copy,
   Download,
   FileJson,
   GitBranch,
@@ -191,6 +192,38 @@ function formatValidationIssue(issue) {
 
   const message = String(issue?.message || issue?.text || "").trim();
   return { code, nodeKey, choiceKey, severity, text: message || "未知校验问题" };
+}
+
+async function copyToClipboard(text) {
+  const value = String(text || "");
+  if (!value) {
+    return false;
+  }
+
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    // fall through
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
 }
 
 function mapStoryToForm(next) {
@@ -888,6 +921,7 @@ export default function AdminInteractiveStoriesPage() {
       return;
     }
     setFeedback({ type: "success", message: "导入成功，故事结构已刷新" });
+    setValidation(resp.data?.validation || null);
     await loadStories();
     setSelectedStoryId(resp.data?.story?.id || "");
   }
@@ -1499,19 +1533,35 @@ function InteractiveStoryNodesTab({
                         </div>
                           <div className="mt-4 space-y-4">
                             <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/80 p-4">
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-950">{selectedNode.title || "未命名节点"}</p>
-                                  <p className="mt-1 text-xs text-slate-500">{selectedNode.nodeKey || "未设置节点 Key"}</p>
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-950">{selectedNode.title || "未命名节点"}</p>
+                                    <p className="mt-1 text-xs text-slate-500">{selectedNode.nodeKey || "未设置节点 Key"}</p>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    <AdminBadge>{selectedNodeChoiceCount} 个选项</AdminBadge>
+                                    <AdminBadge>{selectedNodeTargets.length} 个目标节点</AdminBadge>
+                                    <AdminBadge tone={selectedNode.aiEnabled ? "accent" : "default"}>
+                                      {selectedNode.aiEnabled ? "AI 开启" : "AI 关闭"}
+                                    </AdminBadge>
+                                    {selectedNode.nodeKey ? (
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          const ok = await copyToClipboard(selectedNode.nodeKey);
+                                          setFeedback({
+                                            type: ok ? "success" : "error",
+                                            message: ok ? "已复制节点 Key" : "复制失败，请手动选中复制",
+                                          });
+                                        }}
+                                        className="inline-flex items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/70 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
+                                      >
+                                        <Copy className="size-3" />
+                                        复制 Key
+                                      </button>
+                                    ) : null}
+                                  </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                  <AdminBadge>{selectedNodeChoiceCount} 个选项</AdminBadge>
-                                  <AdminBadge>{selectedNodeTargets.length} 个目标节点</AdminBadge>
-                                  <AdminBadge tone={selectedNode.aiEnabled ? "accent" : "default"}>
-                                    {selectedNode.aiEnabled ? "AI 开启" : "AI 关闭"}
-                                  </AdminBadge>
-                                </div>
-                              </div>
                               {selectedNodeTargets.length > 0 ? (
                                 <div className="mt-3 flex flex-wrap gap-2">
                                   {selectedNodeTargets.map((node) => (
@@ -1866,6 +1916,22 @@ function InteractiveStoryNodesTab({
                                     <div className="flex flex-wrap gap-2">
                                       <AdminBadge>{targetNode ? `跳到 ${targetNode.title}` : "留在当前节点"}</AdminBadge>
                                       {choiceDirtyById[choice.id] ? <AdminBadge tone="warning">未保存</AdminBadge> : null}
+                                      {form.choiceKey ? (
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            const ok = await copyToClipboard(form.choiceKey);
+                                            setFeedback({
+                                              type: ok ? "success" : "error",
+                                              message: ok ? "已复制选项 Key" : "复制失败，请手动选中复制",
+                                            });
+                                          }}
+                                          className="inline-flex items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/70 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
+                                        >
+                                          <Copy className="size-3" />
+                                          复制 Key
+                                        </button>
+                                      ) : null}
                                     </div>
                                   </div>
                                   <div className="grid gap-4">
