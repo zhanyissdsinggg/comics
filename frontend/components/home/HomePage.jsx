@@ -691,6 +691,7 @@ function HomeContent({ initialSearchParams = {} }) {
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                     <Link
                       href={primaryHeroHref}
+                      data-testid="home-hero-primary-cta"
                       className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:w-auto sm:px-6 sm:text-base"
                     >
                       {primaryHeroCtaLabel}

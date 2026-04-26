@@ -190,6 +190,7 @@ function ShelfComicCard({ item, onClick, actionLabel = "Series" }) {
     <button
       type="button"
       onClick={onClick}
+      data-testid={item?.id ? `home-shelf-series-${item.id}` : "home-shelf-series"}
       className="group text-left"
       aria-label={actionLabel ? `${actionLabel} ${title}` : `Open ${title}`}
     >

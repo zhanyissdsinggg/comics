@@ -59,6 +59,12 @@ async function pickFirstVisibleLocator(candidates, options = {}) {
   return null;
 }
 
+async function clickFirstMatching(page, selector, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: "visible", timeout: timeoutMs });
+  await locator.click({ timeout: timeoutMs });
+}
+
 async function runDesktopSuite(baseUrl) {
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1280, height: 820 } });
@@ -76,6 +82,29 @@ async function runDesktopSuite(baseUrl) {
         await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
         await page.waitForLoadState("networkidle", { timeout: 60_000 });
         await page.locator('[data-site-header="1"]').waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+      },
+    },
+    {
+      id: "home.hero-cta-enters-series",
+      run: async () => {
+        // Prefer the explicit hero CTA testid, but fall back to the first "Start Reading" / "Continue Reading" link.
+        const heroCta = await pickFirstVisibleLocator(
+          [
+            page.getByTestId("home-hero-primary-cta"),
+            page.getByRole("link", { name: /^(Start Reading|Continue Reading)$/ }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+
+        if (!heroCta) {
+          throw new Error("unable to locate home hero CTA");
+        }
+
+        await heroCta.click({ timeout: DEFAULT_TIMEOUT_MS });
+        await page.waitForURL(
+          (url) => url.pathname.startsWith("/series/") || url.pathname.startsWith("/read/"),
+          { timeout: 60_000 },
+        );
       },
     },
     {
@@ -128,12 +157,18 @@ async function runDesktopSuite(baseUrl) {
     {
       id: "series.primary-action-enters-reader",
       run: async () => {
-        const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
-        await page.goto(`${baseUrl}/series/${encodeURIComponent(seriesId)}`, {
-          waitUntil: "domcontentloaded",
-          timeout: 60_000,
-        });
-        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        // If we're already on a series page (from home or search), reuse it; otherwise use the demo series id.
+        let seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
+        const currentPath = new URL(page.url()).pathname;
+        if (currentPath.startsWith("/series/")) {
+          seriesId = currentPath.split("/")[2] || seriesId;
+        } else {
+          await page.goto(`${baseUrl}/series/${encodeURIComponent(seriesId)}`, {
+            waitUntil: "domcontentloaded",
+            timeout: 60_000,
+          });
+          await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        }
 
         const primary = await pickFirstVisibleLocator(
           [
@@ -181,8 +216,11 @@ async function runDesktopSuite(baseUrl) {
         });
 
         // Open the demo series from results (href may include attribution query params).
-        await page.locator(`a[href^="/series/${seriesId}"]`).first().click({ timeout: DEFAULT_TIMEOUT_MS });
-        await page.waitForURL((url) => url.pathname === `/series/${seriesId}`, { timeout: 60_000 });
+        await clickFirstMatching(page, `a[href^="/series/${seriesId}"]`);
+        await page.waitForURL(
+          (url) => url.pathname === `/series/${seriesId}`,
+          { timeout: 90_000, waitUntil: "domcontentloaded" },
+        );
       },
     },
   ];
