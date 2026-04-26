@@ -278,6 +278,33 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
+      id: "notifications.mark-read-safe",
+      run: async () => {
+        await page.goto(`${baseUrl}/notifications`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+
+        const button = await pickFirstVisibleLocator(
+          [
+            page.getByRole("button", { name: /^Mark read$/ }).first(),
+            page.getByRole("button", { name: /^Saving\.\.\.$/ }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!button) {
+          throw new Error("unable to locate notifications mark-read button");
+        }
+
+        // This check is explicitly "safe": the button may be disabled when there are no unread items.
+        const disabled = await button.isDisabled().catch(() => false);
+        if (!disabled) {
+          await button.click({ timeout: DEFAULT_TIMEOUT_MS });
+        }
+
+        // Contract: clicking must not navigate away or crash the page shell.
+        await page.locator('[data-site-header="1"]').waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+      },
+    },
+    {
       id: "reader.chapters-drawer-open-close",
       run: async () => {
         const currentPath = new URL(page.url()).pathname;
@@ -382,6 +409,46 @@ async function runDesktopSuite(baseUrl) {
           timeout: 60_000,
           waitUntil: "domcontentloaded",
         });
+      },
+    },
+    {
+      id: "rankings.open-first-series-and-read",
+      run: async () => {
+        await page.goto(`${baseUrl}/rankings`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+
+        const seriesLink = await pickFirstVisibleLocator(
+          [
+            page.locator('a[href^="/series/"]').first(),
+            page.getByRole("link", { name: /Open/i }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!seriesLink) {
+          throw new Error("unable to locate a series link on rankings");
+        }
+
+        await seriesLink.click({ timeout: DEFAULT_TIMEOUT_MS });
+        await page.waitForURL(
+          (url) => url.pathname.startsWith("/series/"),
+          { timeout: 60_000, waitUntil: "domcontentloaded" },
+        );
+
+        // Reuse the existing primary-action flow by clicking the series CTA on the series page.
+        const primary = await pickFirstVisibleLocator(
+          [
+            page.getByTestId("series-primary-action"),
+            page.getByRole("button", { name: /^(Read|Start Reading|Continue Reading)$/ }).first(),
+            page.locator("button").filter({ hasText: /^Read$/ }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!primary) {
+          throw new Error("unable to locate series primary action after navigating from rankings");
+        }
+        await primary.click({ timeout: DEFAULT_TIMEOUT_MS });
+
+        await page.waitForURL((url) => url.pathname.startsWith("/read/"), { timeout: 60_000 });
       },
     },
   ];
