@@ -37,6 +37,8 @@ async function run() {
     isWindows ? ["/d", "/s", "/c", `npm run ${scriptName}`] : ["run", scriptName];
 
   if (strict) {
+    // Strict mode is the "release gate" path. Content audit prevents legacy copy/currency leaks
+    // and is meant to be blocking by default.
     env.OPS_STRICT_CONTENT_AUDIT = "1";
     const hasAdminCredentials = Boolean(
       (env.OPS_ADMIN_EMAIL && env.OPS_ADMIN_PASSWORD) || env.OPS_ADMIN_KEY || env.ADMIN_KEY,
