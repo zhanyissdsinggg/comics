@@ -29,6 +29,15 @@ const LEGACY_TERMS = [
   "Story team",
   "The team behind",
 ];
+const DEFAULT_FORBIDDEN_TERMS = [
+  // US region: never leak CNY/RMB pricing hints in storefront surfaces.
+  "CNY",
+  "RMB",
+  "人民币",
+  "￥",
+  "¥",
+];
+const AUDIT_FORBIDDEN_TERMS = readCsv("OPS_AUDIT_FORBIDDEN_TERMS", DEFAULT_FORBIDDEN_TERMS);
 
 function readNumber(name, fallback) {
   const raw = process.env[name];
@@ -178,23 +187,29 @@ function buildFrontendAuditSpecs(seriesCatalog) {
     {
       route: "/",
       required: homeRequired,
-      forbidden: LEGACY_TERMS,
+      forbidden: [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS],
     },
     {
       route: "/rankings",
       required: rankingsRequired,
-      forbidden: [...LEGACY_TERMS, "Rank #", "All time", "Weekly", "Monthly"],
+      forbidden: [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS, "Rank #", "All time", "Weekly", "Monthly"],
     },
     hasRealCreators
       ? {
           route: "/creators",
           required: creatorsRequiredWithRealData,
-          forbidden: ["Story team", "The team behind", CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL],
+          forbidden: [
+            ...AUDIT_FORBIDDEN_TERMS,
+            "Story team",
+            "The team behind",
+            CREATOR_FALLBACK_LABEL,
+            CREATOR_FALLBACK_DETAIL,
+          ],
         }
       : {
           route: "/creators",
           required: creatorsRequiredFallback,
-          forbidden: ["Story team", "The team behind", "Featured Creators"],
+          forbidden: [...AUDIT_FORBIDDEN_TERMS, "Story team", "The team behind", "Featured Creators"],
         },
   ];
 
@@ -204,7 +219,7 @@ function buildFrontendAuditSpecs(seriesCatalog) {
     route: `/series/${demoSeriesId}`,
     required: ["Demo Series"],
     requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
-    forbidden: LEGACY_TERMS,
+    forbidden: [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS],
   });
 
   for (const seriesId of ["series-008", "series-010", "series-005"]) {
@@ -221,8 +236,8 @@ function buildFrontendAuditSpecs(seriesCatalog) {
       ].filter(Boolean),
       requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
       forbidden: hasPublicCreatorCredit(series)
-        ? [...LEGACY_TERMS, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]
-        : LEGACY_TERMS,
+        ? [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]
+        : [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS],
     });
   }
 
