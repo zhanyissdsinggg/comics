@@ -164,6 +164,35 @@ function getValidationTone(validation) {
   return "success";
 }
 
+function formatValidationIssue(issue) {
+  const code = String(issue?.code || "").trim();
+  const nodeKey = String(issue?.nodeKey || "").trim();
+  const choiceKey = String(issue?.choiceKey || "").trim();
+
+  const templates = {
+    STORY_ID_MISSING: () => "故事 ID 缺失",
+    NODES_EMPTY: () => "至少需要 1 个剧情节点",
+    NODE_KEY_MISSING: () => "节点 Key 必填",
+    NODE_KEY_DUPLICATED: () => (nodeKey ? `节点 Key 重复：${nodeKey}` : "节点 Key 重复"),
+    INITIAL_NODE_NOT_FOUND: () => "起始节点 initialNodeId 未在节点列表中找到",
+    NODE_NO_CHOICES: () => (nodeKey ? `非结局节点缺少选项：${nodeKey}` : "非结局节点缺少选项"),
+    CHOICE_KEY_MISSING: () => (nodeKey ? `选项 Key 缺失（节点：${nodeKey}）` : "选项 Key 缺失"),
+    CHOICE_TARGET_MISSING: () =>
+      nodeKey ? `选项未配置目标节点：${nodeKey}${choiceKey ? `.${choiceKey}` : ""}` : "选项未配置目标节点",
+    CHOICE_TARGET_NOT_FOUND: () =>
+      nodeKey ? `选项目标节点不存在：${nodeKey}${choiceKey ? `.${choiceKey}` : ""}` : "选项目标节点不存在",
+    UNREACHABLE_ROOTS: () => "存在未被任何分支指向的节点（可能是孤岛节点）",
+  };
+
+  const severity = String(issue?.severity || "").trim() || "warning";
+  if (code && templates[code]) {
+    return { code, nodeKey, choiceKey, severity, text: templates[code]() };
+  }
+
+  const message = String(issue?.message || issue?.text || "").trim();
+  return { code, nodeKey, choiceKey, severity, text: message || "未知校验问题" };
+}
+
 function mapStoryToForm(next) {
   return {
     slug: next?.slug || "",
@@ -240,15 +269,22 @@ function StoryLibraryCard({ item, isActive, onSelect }) {
   );
 }
 
-function ValidationList({ validation }) {
+function ValidationList({ validation, onJumpNodeKey }) {
   if (!validation) {
     return <p className="text-sm leading-6 text-slate-500">保存后可运行图谱校验，系统会在这里列出阻止发布的问题。</p>;
   }
 
-  const issues = [
-    ...(Array.isArray(validation?.issues?.errors) ? validation.issues.errors.map((item) => ({ type: "error", text: item })) : []),
-    ...(Array.isArray(validation?.issues?.warnings) ? validation.issues.warnings.map((item) => ({ type: "warning", text: item })) : []),
-  ];
+  const rawIssues = validation?.issues;
+  const issues = Array.isArray(rawIssues)
+    ? rawIssues.map((issue) => formatValidationIssue(issue))
+    : [
+        ...(Array.isArray(rawIssues?.errors)
+          ? rawIssues.errors.map((item) => ({ severity: "error", message: item }))
+          : []),
+        ...(Array.isArray(rawIssues?.warnings)
+          ? rawIssues.warnings.map((item) => ({ severity: "warning", message: item }))
+          : []),
+      ].map((issue) => formatValidationIssue(issue));
 
   if (issues.length === 0) {
     return <p className="text-sm leading-6 text-emerald-700">当前没有阻止发布的问题，图谱结构已通过校验。</p>;
@@ -258,15 +294,47 @@ function ValidationList({ validation }) {
     <div className="space-y-3">
       {issues.map((issue, index) => (
         <div
-          key={`${issue.type}-${index}`}
+          key={`${issue.code || issue.text || "issue"}-${index}`}
           className={cn(
             "rounded-[18px] border px-3 py-3 text-sm leading-6",
-            issue.type === "error" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700",
+            issue.severity === "error"
+              ? "border-rose-200 bg-rose-50 text-rose-700"
+              : "border-amber-200 bg-amber-50 text-amber-700",
           )}
         >
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-            <span>{issue.text}</span>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-2">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  {issue.nodeKey ? (
+                    <span className="rounded-full border border-black/10 bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-black/70">
+                      {issue.nodeKey}
+                    </span>
+                  ) : null}
+                  {issue.choiceKey ? (
+                    <span className="rounded-full border border-black/10 bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-black/70">
+                      {issue.choiceKey}
+                    </span>
+                  ) : null}
+                  {issue.code ? (
+                    <span className="rounded-full border border-black/10 bg-white/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/50">
+                      {issue.code}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="mt-1 break-words">{issue.text}</div>
+              </div>
+            </div>
+            {issue.nodeKey && typeof onJumpNodeKey === "function" ? (
+              <button
+                type="button"
+                onClick={() => onJumpNodeKey(issue.nodeKey)}
+                className="shrink-0 rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[11px] font-semibold text-black/70 transition hover:bg-white"
+              >
+                定位
+              </button>
+            ) : null}
           </div>
         </div>
       ))}
@@ -377,6 +445,24 @@ export default function AdminInteractiveStoriesPage() {
     [choiceDirtyById, nodeDirtyById, nodes],
   );
   const validationTone = getValidationTone(validation);
+
+  const jumpToNodeKey = useCallback(
+    (nodeKey) => {
+      const normalizedKey = String(nodeKey || "").trim();
+      if (!normalizedKey) {
+        return;
+      }
+
+      const target = nodes.find((item) => String(item?.nodeKey || "").trim() === normalizedKey);
+      setActiveTab("nodes");
+      if (!target) {
+        setFeedback({ type: "error", message: `未找到节点 Key：${normalizedKey}` });
+        return;
+      }
+      setSelectedNodeId(target.id);
+    },
+    [nodes],
+  );
 
   const loadStories = useCallback(async () => {
     setLoading(true);
@@ -1159,7 +1245,7 @@ export default function AdminInteractiveStoriesPage() {
                 description="发布前先看这里，别让断链节点、缺失起点、空分支这种问题混进线上。"
                 accent="blue"
               >
-                <ValidationList validation={validation} />
+                <ValidationList validation={validation} onJumpNodeKey={jumpToNodeKey} />
               </AdminPageSection>
 
               <AdminPageSection
