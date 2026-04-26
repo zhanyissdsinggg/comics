@@ -31,6 +31,11 @@ import { canAccessAdminRoute } from "../../lib/adminAccess";
 
 const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 
+function isAdminTestToolsEnabled() {
+  // Keep test tools hidden in production unless explicitly enabled.
+  return process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_ADMIN_TOOLS_ENABLED === "1";
+}
+
 const SEARCH_ITEMS = [
   {
     id: "dashboard",
@@ -74,13 +79,17 @@ const SEARCH_ITEMS = [
     icon: Sparkles,
     keywords: ["recommendation", "slot", "placement", "featured", "推荐位", "推荐", "排位", "卡槽"],
   },
-  {
-    id: "content-generator",
-    label: "内容生成器（测试工具）",
-    href: "/admin/content-generator",
-    icon: Sparkles,
-    keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试工具", "生成", "种子"],
-  },
+  ...(isAdminTestToolsEnabled()
+    ? [
+        {
+          id: "content-generator",
+          label: "内容生成器（测试工具）",
+          href: "/admin/content-generator",
+          icon: Sparkles,
+          keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试工具", "生成", "种子"],
+        },
+      ]
+    : []),
   {
     id: "creators",
     label: "创作者",
