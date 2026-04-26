@@ -280,6 +280,7 @@ const SearchBar = memo(function SearchBar({
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
           aria-label="Search series, creators, or genres"
+          data-testid="storefront-search-input"
         />
         {value ? (
           <Button
@@ -294,6 +295,7 @@ const SearchBar = memo(function SearchBar({
                 : "text-black/40 hover:bg-black/[0.04] hover:text-black",
             )}
             aria-label="Clear search"
+            data-testid="storefront-search-clear"
           >
             <X className="size-3.5" />
           </Button>

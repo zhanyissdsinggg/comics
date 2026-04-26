@@ -156,6 +156,7 @@ export default function SeriesHeader({
         }}
         type="button"
         onClick={primaryAction}
+        data-testid="series-primary-action"
         className={`flex ${primaryActionClassName}`}
       >
         <BookOpen size={18} />
@@ -214,6 +215,7 @@ export default function SeriesHeader({
                   <Link
                     href={creatorHref}
                     className="font-black uppercase tracking-[0.04em] text-black transition-colors hover:text-black/68"
+                    data-testid="series-creator-link"
                   >
                     Creator
                   </Link>
