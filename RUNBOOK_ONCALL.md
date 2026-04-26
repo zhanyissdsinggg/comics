@@ -43,6 +43,7 @@ $env:BACKEND_URL='https://www.gushcomics.com'
 $env:FRONTEND_URL='https://www.gushcomics.com'
 npm run ops:post-deploy
 npm run ops:reader-live
+npm run ops:admin-ui-live
 npm run ops:oncall-watchdog
 ```
 

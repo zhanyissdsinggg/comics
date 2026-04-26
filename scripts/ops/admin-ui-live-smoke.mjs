@@ -1274,9 +1274,30 @@ async function run() {
   const artifactsDir = path.dirname(outputJson);
 
   if (!(adminEmail && adminPassword) && !adminKey) {
-    throw new Error(
-      "admin credentials required: set OPS_ADMIN_EMAIL + OPS_ADMIN_PASSWORD, or OPS_ADMIN_KEY/ADMIN_KEY",
-    );
+    const message =
+      "admin UI smoke skipped: provide OPS_ADMIN_EMAIL+OPS_ADMIN_PASSWORD or OPS_ADMIN_KEY/ADMIN_KEY (set OPS_ADMIN_UI_REQUIRED=1 to hard fail)";
+    if (adminUiRequired) {
+      throw new Error(message);
+    }
+
+    ensureDirectory(outputJson);
+    ensureDirectory(outputTxt);
+
+    const summary = {
+      generatedAt: new Date().toISOString(),
+      frontendUrl,
+      status: "skipped",
+      passed: 0,
+      failed: 0,
+      warnings: [message],
+      results: [],
+    };
+    fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+    fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");
+    console.warn(`[ops-admin-ui] warning: ${message}`);
+    console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputJson).replace(/\\/g, "/")}`);
+    console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputTxt).replace(/\\/g, "/")}`);
+    return;
   }
 
   ensureDirectory(outputJson);

@@ -65,6 +65,7 @@ async function run() {
   await runStep("security-baseline", npmCommand, npmArgs("ops:security-baseline"), env);
   await runStep("watchdog", npmCommand, npmArgs("ops:oncall-watchdog"), env);
   await runStep("admin-session", npmCommand, npmArgs("ops:admin-smoke"), env);
+  await runStep("admin-ui-live", npmCommand, npmArgs("ops:admin-ui-live"), env);
 
   console.log("[deploy-gate] all steps passed");
 }
