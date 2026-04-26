@@ -73,7 +73,7 @@ export default function ContentGeneratorPage() {
   return (
     <AdminShell
       title="内容生成器"
-      subtitle="用于测试。"
+      subtitle="用于批量生成测试内容。"
     >
       <div className="space-y-6">
         <GeneratorSummaryCards

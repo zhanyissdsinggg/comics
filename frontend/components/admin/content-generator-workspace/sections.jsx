@@ -47,7 +47,7 @@ export function GeneratorFormSection({
 
   return (
     <AdminPageSection
-      title="演示内容生成器"
+      title="内容生成器（测试工具）"
       description="只生成测试目录数据。"
       eyebrow="测试工具"
       action={<AdminBadge tone="accent">仅测试工具</AdminBadge>}

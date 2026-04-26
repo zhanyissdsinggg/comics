@@ -145,7 +145,7 @@ export default function AdminMembersPage() {
     onSuccess: (data) => {
       setFeedback({
         type: 'success',
-        message: `已同步环境密钥槽位，本次新增 ${Number(data?.created || 0)} 个成员占位。`,
+        message: `已同步环境密钥槽位，本次新增 ${Number(data?.created || 0)} 个槽位成员。`,
       });
       refetch();
       metaQuery.refetch();

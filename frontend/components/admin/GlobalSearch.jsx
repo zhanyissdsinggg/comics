@@ -76,10 +76,10 @@ const SEARCH_ITEMS = [
   },
   {
     id: "content-generator",
-    label: "内容生成器",
+    label: "内容生成器（测试工具）",
     href: "/admin/content-generator",
     icon: Sparkles,
-    keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试内容", "生成", "种子"],
+    keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试工具", "生成", "种子"],
   },
   {
     id: "creators",
