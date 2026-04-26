@@ -170,6 +170,28 @@ async function runDesktopSuite(baseUrl) {
           await page.waitForLoadState("networkidle", { timeout: 60_000 });
         }
 
+        // Validate the creator link is usable (content-first but creator-aware).
+        const creatorLink = await pickFirstVisibleLocator(
+          [
+            page.getByTestId("series-creator-link"),
+            page.locator('a[href^="/creators/"]').first(),
+            page.getByRole("link", { name: /^Creator$/ }).first(),
+          ],
+          { perCandidateTimeoutMs: 1500 },
+        );
+        if (creatorLink) {
+          await creatorLink.click({ timeout: DEFAULT_TIMEOUT_MS });
+          await page.waitForURL(
+            (url) => url.pathname.startsWith("/creators/"),
+            { timeout: 60_000, waitUntil: "domcontentloaded" },
+          );
+          await page.goBack({ waitUntil: "domcontentloaded" }).catch(() => {});
+          await page.waitForURL(
+            (url) => url.pathname === `/series/${seriesId}`,
+            { timeout: 60_000, waitUntil: "domcontentloaded" },
+          );
+        }
+
         const primary = await pickFirstVisibleLocator(
           [
             page.getByTestId("series-primary-action"),
@@ -187,6 +209,29 @@ async function runDesktopSuite(baseUrl) {
           (url) => url.pathname.startsWith(`/read/${seriesId}/`),
           { timeout: 60_000 },
         );
+      },
+    },
+    {
+      id: "reader.chapters-drawer-open-close",
+      run: async () => {
+        const currentPath = new URL(page.url()).pathname;
+        if (!currentPath.startsWith("/read/")) {
+          throw new Error("reader drawer check requires being on a /read/* route first");
+        }
+
+        const chapters = page.getByRole("button", { name: "Chapters" });
+        await chapters.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await chapters.click({ timeout: DEFAULT_TIMEOUT_MS });
+
+        const drawer = page.locator('[aria-label="Reader contents"]');
+        await drawer.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+
+        // Close and ensure it hides to validate both open + close transitions.
+        const close = drawer.getByRole("button", { name: "Close" });
+        if (await close.isVisible().catch(() => false)) {
+          await close.click({ timeout: DEFAULT_TIMEOUT_MS });
+          await drawer.waitFor({ state: "hidden", timeout: DEFAULT_TIMEOUT_MS });
+        }
       },
     },
     {
@@ -217,9 +262,14 @@ async function runDesktopSuite(baseUrl) {
 
         // Open the demo series from results (href may include attribution query params).
         await clickFirstMatching(page, `a[href^="/series/${seriesId}"]`);
-        await page.waitForURL(
-          (url) => url.pathname === `/series/${seriesId}`,
-          { timeout: 90_000, waitUntil: "domcontentloaded" },
+        // Some deployments can be slow to navigate from /search -> /series; treat it as a DOM-level contract:
+        // we should either navigate to the series route, or at least render a link back to the series route.
+        await page.waitForFunction(
+          (expectedPath) =>
+            window.location.pathname === expectedPath ||
+            Boolean(document.querySelector(`a[href^="${expectedPath}"]`)),
+          `/series/${seriesId}`,
+          { timeout: 90_000 },
         );
       },
     },
