@@ -53,6 +53,7 @@
     "ops:sop:daily": "node scripts/ops/sop-runner.mjs daily",
     "ops:sop:deploy": "node scripts/ops/sop-runner.mjs deploy",
     "ops:sop:weekly": "node scripts/ops/sop-runner.mjs weekly",
-    "ops:workflow:watch": "node scripts/ops/watch-workflow-run.mjs"
+    "ops:workflow:watch": "node scripts/ops/watch-workflow-run.mjs",
+    "ops:public-ui-live": "node scripts/ops/public-ui-live-smoke.mjs"
   }
 }
