@@ -239,6 +239,22 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
+      id: "library.page-load-unauth",
+      run: async () => {
+        await page.goto(`${baseUrl}/library`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        await page.locator('[data-site-header="1"]').waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+      },
+    },
+    {
+      id: "notifications.page-load-unauth",
+      run: async () => {
+        await page.goto(`${baseUrl}/notifications`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        await page.locator('[data-site-header="1"]').waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+      },
+    },
+    {
       id: "reader.chapters-drawer-open-close",
       run: async () => {
         const currentPath = new URL(page.url()).pathname;
