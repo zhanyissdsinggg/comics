@@ -39,7 +39,7 @@ const secretFields = [
   {
     key: "smsWebhookUrl",
     label: "短信回调地址",
-    placeholder: "https://notify.yoursite.com/sms/webhook",
+    placeholder: "https://notify.example.com/sms/webhook",
   },
 ];
 
@@ -246,22 +246,22 @@ export default function AdminEmailSettingsPage() {
           </AdminFormField>
 
           <AdminFormField label="默认发件地址" helperText="读者会看到这个发件地址。">
-            <input
-              value={draft.from}
-              onChange={(event) => handleChange("from", event.target.value)}
-              className={adminInputClassName}
-              placeholder="notice@yoursite.com"
-              data-testid="admin-email-from-input"
-            />
+              <input
+                value={draft.from}
+                onChange={(event) => handleChange("from", event.target.value)}
+                className={adminInputClassName}
+                placeholder="notice@example.com"
+                data-testid="admin-email-from-input"
+              />
           </AdminFormField>
 
           <AdminFormField label="运营通知邮箱" helperText="投递异常和系统提醒会发到这里。">
-            <input
-              value={draft.adminNotifyEmail}
-              onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
-              className={adminInputClassName}
-              placeholder="ops@yoursite.com"
-            />
+              <input
+                value={draft.adminNotifyEmail}
+                onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
+                className={adminInputClassName}
+                placeholder="ops@example.com"
+              />
           </AdminFormField>
         </div>
       </AdminPageSection>
@@ -269,12 +269,12 @@ export default function AdminEmailSettingsPage() {
       <AdminPageSection title="密钥与回调" description="把密钥和回调集中放在一起。">
         <div className="space-y-4">
           <AdminFormField label="默认回调地址" helperText="启用回调通道时会使用这里的地址。">
-            <input
-              value={draft.webhookUrl}
-              onChange={(event) => handleChange("webhookUrl", event.target.value)}
-              className={adminInputClassName}
-              placeholder="https://notify.yoursite.com/email/webhook"
-            />
+              <input
+                value={draft.webhookUrl}
+                onChange={(event) => handleChange("webhookUrl", event.target.value)}
+                className={adminInputClassName}
+                placeholder="https://notify.example.com/email/webhook"
+              />
           </AdminFormField>
 
           <div className="grid gap-4 xl:grid-cols-3">
@@ -314,13 +314,13 @@ export default function AdminEmailSettingsPage() {
             label="测试收件人"
             helperText={hasUnsavedChanges ? "发送前会先保存当前草稿。" : "会直接使用当前已保存的配置。"}
           >
-            <input
-              value={draft.testRecipient}
-              onChange={(event) => handleChange("testRecipient", event.target.value)}
-              className={adminInputClassName}
-              placeholder="qa@yoursite.com"
-              data-testid="admin-email-test-recipient"
-            />
+              <input
+                value={draft.testRecipient}
+                onChange={(event) => handleChange("testRecipient", event.target.value)}
+                className={adminInputClassName}
+                placeholder="qa@example.com"
+                data-testid="admin-email-test-recipient"
+              />
           </AdminFormField>
         </div>
       </AdminPageSection>

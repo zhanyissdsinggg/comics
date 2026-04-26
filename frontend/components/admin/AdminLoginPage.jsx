@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="username"
               className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-950 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
-              placeholder="name@example.com"
+              placeholder="输入邮箱地址（例如 admin@example.com）"
               required
               disabled={isLoading}
             />
@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
               className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-950 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
-              placeholder="输入后台密码"
+              placeholder="输入密码"
               required
               disabled={isLoading}
             />
