@@ -662,6 +662,49 @@ function buildChecks(baseUrl) {
       },
     },
     {
+      id: "billing.page-load",
+      route: "/admin/billing",
+      description: "充值与会员页能加载；演示支付模式不会展示误导性的套餐列表",
+      run: async (page) => {
+        await page.locator("body").waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await page.locator("text=充值与会员").first().waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+
+        const bodyText = await page.locator("body").innerText();
+        if (bodyText.includes("当前为演示支付模式")) {
+          return {
+            finalUrl: page.url(),
+            note: "支付未接入时应隐藏演示套餐，避免运营误判。",
+          };
+        }
+
+        // Provider mode: should render the packages workspace table shell without crashing.
+        await page.locator("text=充值套餐").first().waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        return {
+          finalUrl: page.url(),
+          note: "正式支付模式下应展示套餐列表与会员方案概览。",
+        };
+      },
+    },
+    {
+      id: "revenue.page-load",
+      route: "/admin/revenue",
+      description: "营收页能加载且不会回退到伪造数据",
+      run: async (page) => {
+        await page.locator("body").waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+        await page.locator("text=营收").first().waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
+
+        const bodyText = await page.locator("body").innerText();
+        if (bodyText.includes("derived_rules") || bodyText.includes("fallback") || bodyText.includes("legacy")) {
+          throw new Error("revenue page leaked legacy/fallback implementation details");
+        }
+
+        return {
+          finalUrl: page.url(),
+          note: "营收页应只展示真实接口数据或明确空态，不应伪造统计。",
+        };
+      },
+    },
+    {
       id: "recommendations.rankings-tab",
       route: "/admin/recommendations",
       description: "recommendations rankings tab loads without leaving the page",
@@ -931,6 +974,14 @@ function validateCheckResult(id, finalUrl) {
     return pathname === "/admin/orders";
   }
 
+  if (id === "billing.page-load") {
+    return pathname === "/admin/billing";
+  }
+
+  if (id === "revenue.page-load") {
+    return pathname === "/admin/revenue";
+  }
+
   if (id === "recommendations.rankings-tab") {
     return pathname === "/admin/recommendations";
   }
@@ -976,8 +1027,8 @@ function stabilizeChecks(checks) {
       return {
         ...check,
         run: async (page) => {
-          await clickButtonByText(page, "姒滃崟瑙勫垯");
-          await page.locator("body").filter({ hasText: "鏂板缓姒滃崟瑙勫垯" }).waitFor({
+          await clickButtonByText(page, "榜单规则");
+          await page.locator("body").filter({ hasText: "新建榜单规则" }).waitFor({
             state: "visible",
             timeout: DEFAULT_TIMEOUT_MS,
           });

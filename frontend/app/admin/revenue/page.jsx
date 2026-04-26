@@ -32,12 +32,7 @@ export default function AdminRevenuePage() {
     queryKey: ['admin', 'revenue', 'stats', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      return loadRevenueResource(
-        `/api/admin/revenue/stats?${params}`,
-        dateRange,
-        (fallback) => ({ stats: fallback.stats }),
-        { stats: null },
-      );
+      return loadRevenueResource(`/api/admin/revenue/stats?${params}`, { stats: null });
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -46,12 +41,7 @@ export default function AdminRevenuePage() {
     queryKey: ['admin', 'revenue', 'trend', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams({ ...dateRange, groupBy: 'day' });
-      return loadRevenueResource(
-        `/api/admin/revenue/trend?${params}`,
-        dateRange,
-        (fallback) => ({ trend: fallback.trend }),
-        { trend: [] },
-      );
+      return loadRevenueResource(`/api/admin/revenue/trend?${params}`, { trend: [] });
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -60,12 +50,7 @@ export default function AdminRevenuePage() {
     queryKey: ['admin', 'revenue', 'channels', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      return loadRevenueResource(
-        `/api/admin/revenue/channels?${params}`,
-        dateRange,
-        (fallback) => ({ channels: fallback.channels }),
-        { channels: [] },
-      );
+      return loadRevenueResource(`/api/admin/revenue/channels?${params}`, { channels: [] });
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -74,16 +59,11 @@ export default function AdminRevenuePage() {
     queryKey: ['admin', 'revenue', 'promotions', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      return loadRevenueResource(
-        `/api/admin/revenue/promotions?${params}`,
-        dateRange,
-        (fallback) => ({
-          promotions: fallback.promotions,
-          attributionModel: fallback.attributionModel,
-          roiAvailable: fallback.roiAvailable,
-        }),
-        { promotions: [], attributionModel: null, roiAvailable: true },
-      );
+      return loadRevenueResource(`/api/admin/revenue/promotions?${params}`, {
+        promotions: [],
+        attributionModel: null,
+        roiAvailable: true,
+      });
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -91,12 +71,7 @@ export default function AdminRevenuePage() {
   const { data: userValueData, isLoading: userValueLoading } = useQuery({
     queryKey: ['admin', 'revenue', 'user-value-distribution', dateRange],
     queryFn: async () =>
-      loadRevenueResource(
-        '/api/admin/revenue/user-value-distribution',
-        dateRange,
-        (fallback) => ({ distribution: fallback.distribution }),
-        { distribution: null },
-      ),
+      loadRevenueResource('/api/admin/revenue/user-value-distribution', { distribution: null }),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -104,12 +79,9 @@ export default function AdminRevenuePage() {
     queryKey: ['admin', 'revenue', 'order-status-distribution', dateRange],
     queryFn: async () => {
       const params = new URLSearchParams(dateRange);
-      return loadRevenueResource(
-        `/api/admin/revenue/order-status-distribution?${params}`,
-        dateRange,
-        (fallback) => ({ distribution: fallback.orderStatus }),
-        { distribution: null },
-      );
+      return loadRevenueResource(`/api/admin/revenue/order-status-distribution?${params}`, {
+        distribution: null,
+      });
     },
     staleTime: 5 * 60 * 1000,
   });

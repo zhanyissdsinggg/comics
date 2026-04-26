@@ -23,6 +23,7 @@ import {
 import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
 import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
 import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
+import { AdminPageSection } from '@/components/admin/common/AdminWorkspacePrimitives';
 import { apiGet } from '@/lib/apiClient';
 import { useAdminList } from '@/lib/hooks/useAdminList';
 import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
@@ -115,13 +116,22 @@ export default function AdminBillingPage() {
     [packageSummary, planSummary],
   );
 
+  const isDemoBilling = String(billingAvailability?.billingMode || '').toLowerCase() === 'demo';
+  const demoBillingFeedback = isDemoBilling
+    ? {
+        type: 'warning',
+        message:
+          '当前为演示支付模式（未接入真实支付提供商）。为避免误判，后台已隐藏演示套餐列表；接入支付后将展示真实可售套餐与会员方案。',
+      }
+    : { type: '', message: '' };
+
   return (
     <AdminShell title="充值与会员" subtitle="查看套餐、会员方案和可售状态。">
       <div className="space-y-6">
         <BillingSummaryCards cards={metricCards} />
 
         <AdminFeedbackBanner
-          feedback={feedback}
+          feedback={demoBillingFeedback.type ? demoBillingFeedback : feedback}
           onDismiss={() => setFeedback({ type: '', message: '' })}
         />
 
@@ -130,37 +140,52 @@ export default function AdminBillingPage() {
           membershipSnapshotItems={membershipSnapshotItems}
         />
 
-        <BillingPackagesSection
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-          sortOrder={sortOrder}
-          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-          onOpenSortModal={() => setIsSortModalOpen(true)}
-          selectedIds={selectedIds}
-          clearSelection={clearSelection}
-          onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
-          deletePending={bulkDeleteMutation.isPending}
-          isError={isError}
-          errorMessage={error?.message || '充值套餐加载失败。'}
-          onRetry={refetch}
-          isLoading={isLoading}
-          hasItems={packages.length > 0}
-          pagination={pagination}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          packages={packages}
-          selectedIdsSet={selectedIdsSet}
-          onSelectAll={(checked) => {
-            if (checked) {
-              selectAll(packages);
-              return;
-            }
-            clearSelection();
-          }}
-          onToggleSelect={toggleSelect}
-        />
+        {isDemoBilling ? (
+          <AdminPageSection
+            title="充值套餐"
+            eyebrow="套餐管理"
+            description="支付未接入时，不展示演示套餐，避免把示例数据当成真实可售配置。"
+          >
+            <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+              <p className="font-semibold text-slate-950">当前为演示支付模式</p>
+              <p className="mt-2">
+                接入真实支付提供商并切换到“正式支付模式”后，这里会显示可售套餐、价格、点数与启用状态。
+              </p>
+            </div>
+          </AdminPageSection>
+        ) : (
+          <BillingPackagesSection
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            sortOrder={sortOrder}
+            onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            onOpenSortModal={() => setIsSortModalOpen(true)}
+            selectedIds={selectedIds}
+            clearSelection={clearSelection}
+            onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
+            deletePending={bulkDeleteMutation.isPending}
+            isError={isError}
+            errorMessage={error?.message || '充值套餐加载失败。'}
+            onRetry={refetch}
+            isLoading={isLoading}
+            hasItems={packages.length > 0}
+            pagination={pagination}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            packages={packages}
+            selectedIdsSet={selectedIdsSet}
+            onSelectAll={(checked) => {
+              if (checked) {
+                selectAll(packages);
+                return;
+              }
+              clearSelection();
+            }}
+            onToggleSelect={toggleSelect}
+          />
+        )}
 
         <AdminSortModal
           isOpen={isSortModalOpen}

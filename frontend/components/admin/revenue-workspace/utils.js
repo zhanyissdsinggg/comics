@@ -3,9 +3,7 @@
 import { adminFetchJson } from "@/lib/adminApiClient";
 import { normalizeUSDisplayCurrency } from "@/lib/localization";
 
-export const LEGACY_REVENUE_CACHE_TTL_MS = 60_000;
 export const EMPTY_MESSAGE = "当前时间范围内还没有收入数据。";
-const legacyRevenueCache = new Map();
 
 export const REVENUE_TABS = [
   { value: "overview", label: "总览" },
@@ -142,169 +140,27 @@ export function formatLabel(value, fallback = "未命名渠道") {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-export async function loadRevenueResource(path, dateRange, fallbackSelector, defaultValue) {
+function markUnavailable(defaultValue) {
+  if (defaultValue && typeof defaultValue === "object" && !Array.isArray(defaultValue)) {
+    return { ...defaultValue, __unavailable: true };
+  }
+
+  return { value: defaultValue, __unavailable: true };
+}
+
+export async function loadRevenueResource(path, defaultValue) {
   const result = await fetchAdminJson(path);
   if (result.ok) {
     return result.data;
   }
 
   if (result.status === 404) {
-    const fallback = await getLegacyRevenueFallback(dateRange);
-    return fallbackSelector(fallback);
+    // Revenue endpoints should exist in stable deployments. If they don't, do not fabricate
+    // "best effort" revenue numbers from unrelated endpoints; surface an explicit empty state.
+    return markUnavailable(defaultValue);
   }
 
   return defaultValue;
-}
-
-export async function getLegacyRevenueFallback(dateRange) {
-  const cacheKey = `${dateRange.startDate || ""}:${dateRange.endDate || ""}`;
-  const now = Date.now();
-  const cached = legacyRevenueCache.get(cacheKey);
-
-  if (cached && now - cached.ts < LEGACY_REVENUE_CACHE_TTL_MS) {
-    return cached.value;
-  }
-
-  const dateParams = new URLSearchParams({
-    from: dateRange.startDate || "",
-    to: dateRange.endDate || "",
-  });
-
-  const [dashboardRes, dailyStatsRes, promotionsRes, ordersRes] = await Promise.all([
-    fetchAdminJson(`/api/admin/stats/dashboard?${dateParams}`),
-    fetchAdminJson(`/api/admin/stats?${dateParams}`),
-    fetchAdminJson("/api/admin/promotions?page=1&pageSize=100"),
-    fetchAdminJson("/api/admin/orders?page=1&pageSize=100"),
-  ]);
-
-  const dashboard = dashboardRes?.data || {};
-  const dailyStats = extractList(dailyStatsRes?.data, ["stats"]);
-  const promotions = extractList(promotionsRes?.data, ["promotions", "data"]);
-  const orders = extractList(ordersRes?.data, ["orders", "data"]);
-
-  let paidRevenue = 0;
-  let refundedRevenue = 0;
-  let paidCount = 0;
-  const orderStatus = {
-    pending: 0,
-    paid: 0,
-    failed: 0,
-    refunded: 0,
-  };
-
-  const channelMap = new Map();
-  const userSpendMap = new Map();
-  const trendMap = new Map();
-
-  for (const order of orders) {
-    const amount = toNumber(order?.amount);
-    const status = normalizeOrderStatus(order?.status);
-
-    if (status === "PENDING") orderStatus.pending += 1;
-    else if (isPaidOrder(status)) orderStatus.paid += 1;
-    else if (isRefundedOrder(status)) orderStatus.refunded += 1;
-    else orderStatus.failed += 1;
-
-    if (isPaidOrder(status)) {
-      paidRevenue += amount;
-      paidCount += 1;
-
-      const channel = String(order?.channel || order?.provider || "unknown");
-      const currentChannel = channelMap.get(channel) || { channel, orders: 0, revenue: 0 };
-      currentChannel.orders += 1;
-      currentChannel.revenue += amount;
-      channelMap.set(channel, currentChannel);
-
-      const userId = String(order?.userId || order?.readerId || "");
-      if (userId) {
-        userSpendMap.set(userId, (userSpendMap.get(userId) || 0) + amount);
-      }
-
-      const dateKey = dateKeyFromIso(order?.paidAt || order?.updatedAt || order?.createdAt);
-      if (dateKey) {
-        const trend = trendMap.get(dateKey) || { date: dateKey, revenue: 0, orders: 0 };
-        trend.revenue += amount;
-        trend.orders += 1;
-        trendMap.set(dateKey, trend);
-      }
-    }
-
-    if (isRefundedOrder(status)) {
-      refundedRevenue += amount;
-    }
-  }
-
-  const avgOrderValue = paidCount > 0 ? paidRevenue / paidCount : 0;
-  const netRevenue = paidRevenue - refundedRevenue;
-
-  const spendBuckets = {
-    highValue: 0,
-    mediumValue: 0,
-    lowValue: 0,
-    noValue: 0,
-  };
-
-  for (const [, spend] of userSpendMap.entries()) {
-    if (spend >= 100) spendBuckets.highValue += 1;
-    else if (spend >= 30) spendBuckets.mediumValue += 1;
-    else if (spend > 0) spendBuckets.lowValue += 1;
-  }
-
-  const estimatedReaders = Math.max(
-    toNumber(dashboard?.users),
-    toNumber(dashboard?.activeUsers),
-    userSpendMap.size,
-  );
-  spendBuckets.noValue = Math.max(estimatedReaders - userSpendMap.size, 0);
-
-  const stats = {
-    totalRevenue: paidRevenue,
-    totalOrders: paidCount,
-    avgOrderValue,
-    totalRefunded: refundedRevenue,
-    netRevenue,
-  };
-
-  const trend = [...trendMap.values()].sort((left, right) => left.date.localeCompare(right.date));
-
-  const channels = [...channelMap.values()]
-    .map((item) => ({
-      ...item,
-      avgOrderValue: item.orders > 0 ? item.revenue / item.orders : 0,
-    }))
-    .sort((left, right) => right.revenue - left.revenue);
-
-  const promotionsFallback = promotions.map((promotion) => {
-    const promotionOrders = orders.filter(
-      (order) => String(order?.promotionId || order?.promotion || "") === String(promotion?.id || ""),
-    );
-    const promotionRevenue = promotionOrders
-      .filter((order) => isPaidOrder(order?.status))
-      .reduce((sum, order) => sum + toNumber(order?.amount), 0);
-
-    return {
-      promotionId: promotion.id,
-      title: promotion.title || promotion.name || "未命名活动",
-      orders: promotionOrders.length,
-      revenue: promotionRevenue,
-      roi: null,
-      active: Boolean(promotion.isActive ?? promotion.active),
-    };
-  });
-
-  const value = {
-    stats,
-    trend,
-    channels,
-    promotions: promotionsFallback,
-    attributionModel: "derived_rules",
-    roiAvailable: false,
-    distribution: spendBuckets,
-    orderStatus,
-  };
-
-  legacyRevenueCache.set(cacheKey, { ts: now, value });
-  return value;
 }
 
 export function viewMeta(tab) {
