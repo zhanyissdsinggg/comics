@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { createRequire } from "node:module";
+import crypto from "node:crypto";
 
 const ROOT = process.cwd();
 const requireFromFrontend = createRequire(path.resolve(ROOT, "frontend/package.json"));
@@ -13,6 +14,9 @@ const DEFAULT_OUTPUT_TXT = "frontend/.tmp-admin-audit/live-interactions/latest.t
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_LOGIN_RETRIES = 3;
 const DEFAULT_LOGIN_RETRY_DELAY_MS = 1_000;
+
+const DEFAULT_DEMO_SERIES_ID = "demo-series";
+const DEFAULT_DEMO_CREATOR_NAME = "Gush Demo Studio";
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
@@ -177,6 +181,16 @@ async function readFirstTableRowText(page) {
   return row.innerText();
 }
 
+async function clickIfVisible(locator, timeoutMs = 1_500) {
+  try {
+    await locator.waitFor({ state: "visible", timeout: timeoutMs });
+    await locator.click();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function summarizeError(error) {
   if (error instanceof Error) {
     return error.message;
@@ -185,18 +199,35 @@ function summarizeError(error) {
   return String(error || "Unknown error");
 }
 
+function normalizeCreatorName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function buildCreatorIdFromName(name) {
+  const normalizedName = normalizeCreatorName(name).toLowerCase();
+  const hash = crypto.createHash("sha256").update(normalizedName).digest("hex").slice(0, 24);
+  return `creator_${hash}`;
+}
+
 function buildChecks(baseUrl) {
+  const demoSeriesId = String(process.env.OPS_DEMO_SERIES_ID || DEFAULT_DEMO_SERIES_ID).trim();
+  const demoCreatorName = String(process.env.OPS_DEMO_CREATOR_NAME || DEFAULT_DEMO_CREATOR_NAME).trim();
+  const demoCreatorId = buildCreatorIdFromName(demoCreatorName);
+
   return [
     {
       id: "dashboard.quick-series",
       route: "/admin",
       description: "仪表盘快捷入口能进入作品管理",
       run: async (page) => {
-        await page
-          .locator('a[href="/admin/series"]')
-          .filter({ hasText: "去作品管理" })
-          .first()
-          .click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-series"));
+        if (!clicked) {
+          await page
+            .locator('a[href="/admin/series"]')
+            .filter({ hasText: "去作品管理" })
+            .first()
+            .click();
+        }
         await page.waitForURL(`${baseUrl}/admin/series`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -210,11 +241,14 @@ function buildChecks(baseUrl) {
       route: "/admin",
       description: "仪表盘快捷入口能进入创作者页",
       run: async (page) => {
-        await page
-          .locator('a[href="/admin/creators"]')
-          .filter({ hasText: "去创作者页" })
-          .first()
-          .click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-creators"));
+        if (!clicked) {
+          await page
+            .locator('a[href="/admin/creators"]')
+            .filter({ hasText: "去创作者页" })
+            .first()
+            .click();
+        }
         await page.waitForURL(`${baseUrl}/admin/creators`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -228,11 +262,14 @@ function buildChecks(baseUrl) {
       route: "/admin",
       description: "仪表盘快捷入口能进入内容编排",
       run: async (page) => {
-        await page
-          .locator('a[href="/admin/merchandising"]')
-          .filter({ hasText: "去内容编排" })
-          .first()
-          .click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-quick-merchandising"));
+        if (!clicked) {
+          await page
+            .locator('a[href="/admin/merchandising"]')
+            .filter({ hasText: "去首页编排" })
+            .first()
+            .click();
+        }
         await page.waitForURL(`${baseUrl}/admin/merchandising`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -246,7 +283,10 @@ function buildChecks(baseUrl) {
       route: "/admin",
       description: "仪表盘客服队列的查看全部能进入客服页",
       run: async (page) => {
-        await page.locator('a[href="/admin/support"]').filter({ hasText: "查看全部" }).first().click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-support-view-all"));
+        if (!clicked) {
+          await page.locator('a[href="/admin/support"]').filter({ hasText: "查看全部" }).first().click();
+        }
         await page.waitForURL(`${baseUrl}/admin/support`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -260,7 +300,10 @@ function buildChecks(baseUrl) {
       route: "/admin",
       description: "仪表盘最近订单的查看全部能进入订单页",
       run: async (page) => {
-        await page.locator('a[href="/admin/orders"]').filter({ hasText: "查看全部" }).first().click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-orders-view-all"));
+        if (!clicked) {
+          await page.locator('a[href="/admin/orders"]').filter({ hasText: "查看全部" }).first().click();
+        }
         await page.waitForURL(`${baseUrl}/admin/orders`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -274,7 +317,10 @@ function buildChecks(baseUrl) {
       route: "/admin",
       description: "仪表盘最新评论的查看全部能进入评论页",
       run: async (page) => {
-        await page.locator('a[href="/admin/comments"]').filter({ hasText: "查看全部" }).first().click();
+        const clicked = await clickIfVisible(page.getByTestId("admin-dashboard-comments-view-all"));
+        if (!clicked) {
+          await page.locator('a[href="/admin/comments"]').filter({ hasText: "查看全部" }).first().click();
+        }
         await page.waitForURL(`${baseUrl}/admin/comments`, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -288,9 +334,15 @@ function buildChecks(baseUrl) {
       route: "/admin/series",
       description: "作品卡片的详情按钮能进入后台详情页",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        let card = page.getByTestId(`admin-series-card-${demoSeriesId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-        await card.getByRole("button", { name: "详情", exact: true }).click();
+        const clicked = await clickIfVisible(card.getByTestId(`admin-series-card-${demoSeriesId}-detail`));
+        if (!clicked) {
+          await card.getByRole("button", { name: "详情", exact: true }).click();
+        }
         await page.waitForURL(/\/admin\/series\/[^/]+$/, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -304,9 +356,15 @@ function buildChecks(baseUrl) {
       route: "/admin/series",
       description: "作品卡片的章节按钮能进入章节管理页",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        let card = page.getByTestId(`admin-series-card-${demoSeriesId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-        await card.getByRole("button", { name: "章节", exact: true }).click();
+        const clicked = await clickIfVisible(card.getByTestId(`admin-series-card-${demoSeriesId}-episodes`));
+        if (!clicked) {
+          await card.getByRole("button", { name: "章节", exact: true }).click();
+        }
         await page.waitForURL(/\/admin\/series\/[^/]+\/episodes$/, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -320,10 +378,16 @@ function buildChecks(baseUrl) {
       route: "/admin/series",
       description: "已发布作品的前台页按钮能打开真实前台作品页",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        let card = page.getByTestId(`admin-series-card-${demoSeriesId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Crimson Tide" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
         const popup = await waitForPopup(page, () =>
-          card.getByRole("button", { name: "前台页", exact: true }).click(),
+          clickIfVisible(card.getByTestId(`admin-series-card-${demoSeriesId}-storefront`)).then((clicked) => {
+            if (clicked) return;
+            return card.getByRole("button", { name: "前台页", exact: true }).click();
+          }),
         );
 
         try {
@@ -341,9 +405,15 @@ function buildChecks(baseUrl) {
       route: "/admin/creators",
       description: "创作者卡片的编辑代表作品能跳到作品详情署名区",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        let card = page.getByTestId(`admin-creator-card-${demoCreatorId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-        await card.getByRole("button", { name: "编辑代表作品", exact: true }).click();
+        const clicked = await clickIfVisible(card.getByTestId(`admin-creator-card-${demoCreatorId}-edit-spotlight`));
+        if (!clicked) {
+          await card.getByRole("button", { name: "编辑代表作品", exact: true }).click();
+        }
         await page.waitForURL(/\/admin\/series\/[^/]+#creator$/, { timeout: DEFAULT_TIMEOUT_MS });
 
         return {
@@ -357,10 +427,16 @@ function buildChecks(baseUrl) {
       route: "/admin/creators",
       description: "创作者卡片的前台创作者页按钮能打开真实前台页",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        let card = page.getByTestId(`admin-creator-card-${demoCreatorId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
         const popup = await waitForPopup(page, () =>
-          card.getByRole("button", { name: "打开前台创作者页", exact: true }).click(),
+          clickIfVisible(card.getByTestId(`admin-creator-card-${demoCreatorId}-storefront-profile`)).then((clicked) => {
+            if (clicked) return;
+            return card.getByRole("button", { name: "打开前台创作者页", exact: true }).click();
+          }),
         );
 
         try {
@@ -378,10 +454,16 @@ function buildChecks(baseUrl) {
       route: "/admin/creators",
       description: "创作者卡片的前台代表作品按钮能打开真实作品页",
       run: async (page) => {
-        const card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        let card = page.getByTestId(`admin-creator-card-${demoCreatorId}`);
+        if (!(await card.isVisible().catch(() => false))) {
+          card = page.locator("article").filter({ hasText: "Mira Dane" }).first();
+        }
         await card.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
         const popup = await waitForPopup(page, () =>
-          card.getByRole("button", { name: "查看前台代表作品", exact: true }).click(),
+          clickIfVisible(card.getByTestId(`admin-creator-card-${demoCreatorId}-storefront-series`)).then((clicked) => {
+            if (clicked) return;
+            return card.getByRole("button", { name: "查看前台代表作品", exact: true }).click();
+          }),
         );
 
         try {

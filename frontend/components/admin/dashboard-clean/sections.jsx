@@ -118,6 +118,7 @@ export function QuickActionsSection() {
             <Link
               key={item.href}
               href={item.href}
+              data-testid={`admin-dashboard-quick-${item.icon}`}
               className="group flex min-h-[110px] items-start gap-4 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] transition hover:border-[color:var(--gush-border-strong)] hover:-translate-y-[1px] hover:shadow-[0_14px_28px_rgba(15,23,42,0.05)]"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-slate-950">
@@ -144,7 +145,11 @@ export function SupportQueueSection({ support }) {
         description="优先处理刚更新的对话，避免读者等待过久。"
         eyebrow="支持中心"
         action={
-          <Link href="/admin/support" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
+          <Link
+            href="/admin/support"
+            data-testid="admin-dashboard-support-view-all"
+            className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
+          >
             查看全部
           </Link>
         }
@@ -177,7 +182,11 @@ export function OrdersQueueSection({ orders }) {
         description="这里只放最新订单，方便快速确认异常和退款类问题。"
         eyebrow="交易跟进"
         action={
-          <Link href="/admin/orders" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
+          <Link
+            href="/admin/orders"
+            data-testid="admin-dashboard-orders-view-all"
+            className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
+          >
             查看全部
           </Link>
         }
@@ -210,7 +219,11 @@ export function CommentsQueueSection({ comments }) {
         description="先看最新反馈，判断是否需要隐藏或继续跟进。"
         eyebrow="读者反馈"
         action={
-          <Link href="/admin/comments" className="text-sm font-semibold text-slate-600 transition hover:text-slate-950">
+          <Link
+            href="/admin/comments"
+            data-testid="admin-dashboard-comments-view-all"
+            className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
+          >
             查看全部
           </Link>
         }

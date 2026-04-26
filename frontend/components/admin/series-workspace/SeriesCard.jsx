@@ -101,6 +101,7 @@ export default function SeriesCard(props) {
           ? "border-[color:var(--gush-border-strong)] shadow-[0_18px_40px_rgba(15,23,42,0.07)]"
           : "border-[color:var(--gush-border)]"
       }`}
+      data-testid={`admin-series-card-${series.id}`}
     >
       <div
         className={`grid gap-4 ${
@@ -311,6 +312,7 @@ export default function SeriesCard(props) {
                 onClick={onCancelEdit}
                 disabled={isSaving}
                 className="min-w-[104px] justify-center"
+                data-testid={`admin-series-card-${series.id}-edit-cancel`}
               >
                 取消
               </Button>
@@ -320,6 +322,7 @@ export default function SeriesCard(props) {
                 onClick={onSaveEdit}
                 disabled={isSaving}
                 className="min-w-[104px] justify-center"
+                data-testid={`admin-series-card-${series.id}-edit-save`}
               >
                 {isSaving ? "保存中..." : "保存"}
               </Button>
@@ -329,7 +332,13 @@ export default function SeriesCard(props) {
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">主操作</p>
                 <div className={primaryActionGroupClassName}>
-                <Button type="button" size="sm" onClick={() => onOpenDetails(series.id)} title="查看详情">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => onOpenDetails(series.id)}
+                  title="查看详情"
+                  data-testid={`admin-series-card-${series.id}-detail`}
+                >
                   <Edit className="size-4" />
                   详情
                 </Button>
@@ -339,6 +348,7 @@ export default function SeriesCard(props) {
                   size="sm"
                   onClick={() => onOpenEpisodes(series.id)}
                   title="管理章节"
+                  data-testid={`admin-series-card-${series.id}-episodes`}
                 >
                   <BookOpen className="size-4" />
                   章节
@@ -349,6 +359,7 @@ export default function SeriesCard(props) {
                   size="sm"
                   onClick={() => onTogglePublish(series)}
                   title={series.isPublished ? "转为草稿" : "立刻发布"}
+                  data-testid={`admin-series-card-${series.id}-publish-toggle`}
                 >
                   {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   {series.isPublished ? "转草稿" : "发布"}
@@ -365,6 +376,7 @@ export default function SeriesCard(props) {
                   size="sm"
                   onClick={() => onStartEdit(series)}
                   title="快速编辑"
+                  data-testid={`admin-series-card-${series.id}-quick-edit`}
                 >
                   <Edit className="size-4" />
                   快速编辑
@@ -376,6 +388,7 @@ export default function SeriesCard(props) {
                   onClick={() => onOpenFrontend(series.id)}
                   disabled={!series.isPublished}
                   title={series.isPublished ? "查看前台作品页" : "草稿状态下不能直接打开前台页"}
+                  data-testid={`admin-series-card-${series.id}-storefront`}
                 >
                   <ExternalLink className="size-4" />
                   前台页
@@ -386,6 +399,7 @@ export default function SeriesCard(props) {
                   size="sm"
                   onClick={() => onDuplicate(series)}
                   title="复制作品"
+                  data-testid={`admin-series-card-${series.id}-duplicate`}
                 >
                   <Copy className="size-4" />
                   复制
@@ -402,6 +416,7 @@ export default function SeriesCard(props) {
                   size="sm"
                   onClick={() => onDelete(series)}
                   title="删除作品"
+                  data-testid={`admin-series-card-${series.id}-delete`}
                 >
                   <Trash2 className="size-4" />
                   删除

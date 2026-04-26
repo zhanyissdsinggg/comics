@@ -247,6 +247,7 @@ export function CreatorDirectorySection({
             return (
               <article
                 key={creator.slug}
+                data-testid={`admin-creator-card-${creator.id}`}
                 className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -325,6 +326,7 @@ export function CreatorDirectorySection({
                   <ActionButton
                     onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
                     className={primaryActionClassName}
+                    data-testid={`admin-creator-card-${creator.id}-edit-spotlight`}
                   >
                     <Edit3 className="h-4 w-4" />
                     编辑代表作品
@@ -339,12 +341,18 @@ export function CreatorDirectorySection({
                       ? "已复制"
                       : "复制规范名称"}
                   </ActionButton>
-                  <ActionButton onClick={() => handleOpenCreator(creator.path)}>
+                  <ActionButton
+                    onClick={() => handleOpenCreator(creator.path)}
+                    data-testid={`admin-creator-card-${creator.id}-storefront-profile`}
+                  >
                     <Eye className="h-4 w-4" />
                     打开前台创作者页
                   </ActionButton>
                   {creator.spotlightSeries?.id ? (
-                    <ActionButton onClick={() => handleOpenStorefrontSeries(creator.spotlightSeries.id)}>
+                    <ActionButton
+                      onClick={() => handleOpenStorefrontSeries(creator.spotlightSeries.id)}
+                      data-testid={`admin-creator-card-${creator.id}-storefront-series`}
+                    >
                       <ArrowUpRight className="h-4 w-4" />
                       查看前台代表作品
                     </ActionButton>
