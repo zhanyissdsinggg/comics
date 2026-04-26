@@ -255,6 +255,29 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
+      id: "notifications.library-button-navigates",
+      run: async () => {
+        await page.goto(`${baseUrl}/notifications`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+
+        const libraryButton = await pickFirstVisibleLocator(
+          [
+            page.getByTestId("notifications-go-library").first(),
+            page.getByRole("button", { name: "Library" }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!libraryButton) {
+          throw new Error("unable to locate notifications library button");
+        }
+        await libraryButton.click({ timeout: DEFAULT_TIMEOUT_MS });
+        await page.waitForURL((url) => url.pathname === "/library", {
+          timeout: 60_000,
+          waitUntil: "domcontentloaded",
+        });
+      },
+    },
+    {
       id: "reader.chapters-drawer-open-close",
       run: async () => {
         const currentPath = new URL(page.url()).pathname;
@@ -320,6 +343,45 @@ async function runDesktopSuite(baseUrl) {
           `/series/${seriesId}`,
           { timeout: 90_000 },
         );
+      },
+    },
+    {
+      id: "library.entry-cta-navigates",
+      run: async () => {
+        await page.goto(`${baseUrl}/library`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+
+        const entryCta = await pickFirstVisibleLocator(
+          [
+            page.getByRole("button", { name: "Search" }).first(),
+            page.getByRole("link", { name: "Search" }).first(),
+            page.locator('a[href="/search"]').first(),
+            page.locator('a[href^="/search"]').first(),
+            page.locator('a[href*="/search"]').first(),
+            page.getByRole("button", { name: "Start here" }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+
+        if (!entryCta) {
+          throw new Error("unable to locate library entry CTA");
+        }
+
+        const entryLabel = String(await entryCta.innerText().catch(() => "")).trim();
+        await entryCta.click({ timeout: DEFAULT_TIMEOUT_MS });
+
+        if (/start here/i.test(entryLabel)) {
+          await page.waitForURL((url) => url.pathname === "/rankings", {
+            timeout: 60_000,
+            waitUntil: "domcontentloaded",
+          });
+          return;
+        }
+
+        await page.waitForURL((url) => url.pathname === "/search", {
+          timeout: 60_000,
+          waitUntil: "domcontentloaded",
+        });
       },
     },
   ];

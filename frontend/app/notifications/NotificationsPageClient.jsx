@@ -225,6 +225,7 @@ export default function NotificationsPage() {
                   type="button"
                   onClick={() => router.push("/library")}
                   className={storefrontPrimaryButtonClass}
+                  data-testid="notifications-go-library"
                 >
                   Library
                 </button>
@@ -252,6 +253,7 @@ export default function NotificationsPage() {
                 type="button"
                 onClick={() => router.push("/library")}
                 className={storefrontPrimaryButtonClass}
+                data-testid="notifications-go-library"
               >
                 Library
               </button>
