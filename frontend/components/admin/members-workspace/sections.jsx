@@ -349,7 +349,7 @@ export function MemberEditorModalContent({
             className={adminInputClassName}
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            placeholder="editor@yoursite.com"
+            placeholder="editor@example.com"
           />
         </AdminFormField>
 
