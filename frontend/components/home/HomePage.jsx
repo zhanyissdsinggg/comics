@@ -5,6 +5,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -218,12 +219,12 @@ function HeroRailPreviewCard({ item, tone = "light", onClick }) {
           )}
         >
         {coverUrl ? (
-          <img
+          <Image
             src={coverUrl}
             alt={buildHeroCoverAltText(item)}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
-            decoding="async"
+            fill
+            sizes="82px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
           <div
@@ -749,17 +750,19 @@ function HomeContent({ initialSearchParams = {} }) {
                   ) : null}
 
                   <div className="relative w-full max-w-[300px] overflow-hidden rounded-[32px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.12)] sm:max-w-[340px] lg:max-w-[390px]">
-                    {heroSeries?.coverUrl ? (
-                      <img
-                        src={heroSeries.coverUrl}
-                        alt={buildHeroCoverAltText(heroSeries)}
-                        className="aspect-[3/4] w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div className="aspect-[3/4] w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
-                    )}
+                    <div className="relative aspect-[3/4] w-full">
+                      {heroSeries?.coverUrl ? (
+                        <Image
+                          src={heroSeries.coverUrl}
+                          alt={buildHeroCoverAltText(heroSeries)}
+                          fill
+                          sizes="(max-width: 640px) 300px, (max-width: 1024px) 340px, 390px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
+                      )}
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/86 via-black/18 to-transparent" />
                     <div className="absolute left-3 top-3 rounded-full border border-black/10 bg-white/92 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/72 sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
                       {resumeSeries ? "Resume" : heroEyebrow}

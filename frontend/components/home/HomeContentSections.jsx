@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   ArrowRight,
   BookOpen,
@@ -196,12 +197,12 @@ function ShelfComicCard({ item, onClick, actionLabel = "Series" }) {
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-[26px] border border-black/10 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]">
         {coverUrl ? (
-          <img
+          <Image
             src={coverUrl}
             alt={coverAlt}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            loading="lazy"
-            decoding="async"
+            fill
+            sizes="(max-width: 640px) 44vw, (max-width: 1024px) 22vw, 240px"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
         ) : (
           <div className="h-full w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
@@ -359,12 +360,12 @@ function LeaderboardCard({ item, rank, onClick }) {
       </div>
       <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-black/10 bg-[#f6f7f9] shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
         {coverUrl ? (
-          <img
+          <Image
             src={coverUrl}
             alt={coverAlt}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
+            fill
+            sizes="64px"
+            className="object-cover"
           />
         ) : (
           <div className="h-full w-full bg-[linear-gradient(135deg,#f8fafc,#eef2ff,#ffffff)]" />
