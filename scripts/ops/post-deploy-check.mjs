@@ -415,9 +415,10 @@ async function run() {
       const result = await probeWithRetry(url);
 
       if (!result.ok) {
+        const requestId = readHeader(result.headers, "x-request-id");
         const failureMessage = `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
           result.error || "n/a"
-        }`;
+        }, requestId=${requestId || "n/a"}`;
         if (!required && result.status === 404) {
           warnings.push(`${routeKey} unavailable (404) but optional in current mode`);
           continue;
@@ -454,9 +455,10 @@ async function run() {
         });
 
         if (!result.ok) {
+          const requestId = readHeader(result.headers, "x-request-id");
           const failureMessage = `${routeKey} failed: status=${result.status}, durationMs=${result.durationMs}, error=${
             result.error || "n/a"
-          }`;
+          }, requestId=${requestId || "n/a"}`;
           failureCountByRoute.set(routeKey, (failureCountByRoute.get(routeKey) || 0) + 1);
           failureExampleByRoute.set(routeKey, failureMessage);
         } else {
@@ -615,10 +617,11 @@ async function run() {
         });
 
         if (!result.ok) {
+          const requestId = readHeader(result.headers, "x-request-id");
           failures.push(
             `frontend content audit failed for ${spec.route}: status=${result.status}, error=${
               result.error || "n/a"
-            }`,
+            }, requestId=${requestId || "n/a"}`,
           );
           continue;
         }
