@@ -37,6 +37,9 @@ function ToastItem({ toast, onClose }) {
   const { type, message } = toast;
   const resolvedMessage = normalizeToastMessage(message);
   const resolvedLabel = getToastLabel(type, message);
+  const isAdminUi =
+    typeof window !== "undefined" &&
+    String(window.location?.pathname || "").startsWith("/admin");
 
   const styles = {
     success: {
@@ -90,7 +93,7 @@ function ToastItem({ toast, onClose }) {
         type="button"
         onClick={onClose}
         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black/60 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
-        aria-label="Close"
+        aria-label={isAdminUi ? "关闭" : "Close"}
       >
         <X size={16} />
       </button>
