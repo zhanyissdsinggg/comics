@@ -15,6 +15,8 @@
     "frontend:guard": "node scripts/frontend-static-guard.mjs",
     "security:check": "node scripts/security-audit.mjs",
     "cleanup:comments": "node scripts/cleanup-mojibake-comments.mjs",
+    "cleanup:local": "node scripts/cleanup-local-artifacts.mjs",
+    "cleanup:local:force": "node scripts/cleanup-local-artifacts.mjs --force",
     "hygiene:check": "node scripts/check-comment-encoding.mjs",
     "ops:oncall-watchdog": "node scripts/ops/oncall-watchdog.mjs",
     "ops:chaos-drill": "node scripts/ops/chaos-drill.mjs",
