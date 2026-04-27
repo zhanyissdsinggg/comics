@@ -39,11 +39,11 @@ const CommerceSuccessBanner = dynamic(
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
   loading: () => (
-    <div className="sticky top-0 z-40 border-b border-black/8 bg-white/92 backdrop-blur-lg">
+    <div className="sticky top-0 z-40 border-b-4 border-[#FFE500] bg-black/90 backdrop-blur-xl">
       <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 rounded-full border border-black/10 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]" />
-        <div className="hidden h-10 flex-1 rounded-full border border-black/10 bg-white md:block" />
-        <div className="h-10 w-24 rounded-full border border-black/10 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.06)]" />
+        <div className="h-10 w-28 animate-pulse rounded-full border-2 border-white/20 bg-white/10" />
+        <div className="hidden h-10 flex-1 animate-pulse rounded-full border-2 border-white/20 bg-white/10 md:block" />
+        <div className="h-10 w-24 animate-pulse rounded-full border-2 border-white/20 bg-white/10" />
       </div>
     </div>
   ),
@@ -56,12 +56,12 @@ const HomeContentSections = dynamic(() => import("./HomeContentSections"), {
   ssr: false,
   loading: () => (
     <div className="space-y-8 md:space-y-10">
-      <div className="h-56 rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(0,0,0,0.05)]" />
+      <div className="h-56 rounded-[28px] border-[3px] border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={`home-section-skeleton-${index}`}
-            className="h-72 rounded-[26px] border border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(0,0,0,0.05)]"
+            className="h-72 rounded-[26px] border-[3px] border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
           />
         ))}
       </div>
@@ -212,10 +212,10 @@ function HeroRailPreviewCard({ item, tone = "light", onClick }) {
     >
         <div
           className={cn(
-            "relative aspect-[3/4] w-[82px] shrink-0 overflow-hidden rounded-[20px] border border-black/10",
+            "relative aspect-[3/4] w-[82px] shrink-0 overflow-hidden border-[3px] border-black bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
             isLight
-            ? "bg-white shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
-            : "bg-black shadow-[0_14px_30px_rgba(255,255,255,0.12)]",
+            ? ""
+            : "border-white/20 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
           )}
         >
         {coverUrl ? (
