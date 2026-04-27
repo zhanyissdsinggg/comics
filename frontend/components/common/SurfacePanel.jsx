@@ -16,7 +16,7 @@ const toneClasses = {
     muted:
       "border border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
     highlight:
-      "border border-black/8 bg-[linear-gradient(180deg,#111214_0%,#1b1d22_100%)] text-white backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
+      "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f4f6f9_100%)] text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
     warning:
       "border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
