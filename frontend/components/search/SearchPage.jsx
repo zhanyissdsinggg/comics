@@ -222,15 +222,15 @@ function SearchSectionHeader({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-[42rem]">
         {eyebrow ? (
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
+        <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-black/68">
+          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-white/80">
             {description}
           </p>
         ) : null}
@@ -238,7 +238,7 @@ function SearchSectionHeader({
 
       <div className="flex flex-wrap items-center gap-2.5">
         {meta ? (
-          <span className="rounded-full border border-black/10 bg-white px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+          <span className="rounded-full border-2 border-black bg-[#FFE500] px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             {meta}
           </span>
         ) : null}
@@ -764,15 +764,15 @@ export default function SearchPage() {
       ? "Next picks."
       : "Next picks.";
   const lightCardAccentClass =
-    "border border-black/10 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:bg-[#fcfcfd] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]";
+    "border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const lightFeatureAccentClass =
-    "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] shadow-[0_18px_40px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,#fffdf7_0%,#fff3de_100%)] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]";
+    "border-2 border-black bg-[#FFE500] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
+    "rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const accentButtonClass =
-    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
+    "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const filterSelectClass =
-    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all focus:ring-4 focus:ring-black/10";
+    "rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform focus:ring-0 hover:translate-x-0.5 hover:translate-y-0.5";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -1132,34 +1132,34 @@ export default function SearchPage() {
     },
   ];
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="space-y-0">
-        <section className="grid border-b border-black/8 bg-[#f6f7f9] xl:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="grid border-b-2 border-white/15 bg-black xl:grid-cols-[minmax(0,1fr)_380px]">
           <SurfacePanel
             className="space-y-6 border-0 bg-transparent px-5 py-10 shadow-none sm:px-8 sm:py-14 lg:px-12 xl:px-16"
             tone="highlight"
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
           >
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2.5">
-                <p className="rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-black/70 shadow-[0_10px_22px_rgba(15,23,42,0.06)]">
+                <p className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   Search
                 </p>
               </div>
-              <h1 className="mt-5 max-w-4xl text-[2.75rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-black sm:text-[3.5rem] xl:text-[4.4rem]">
+              <h1 className="mt-5 max-w-4xl text-[2.75rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-white sm:text-[3.5rem] xl:text-[4.4rem]">
                 {heroTitle}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-black/70 sm:text-[0.98rem]">
+              <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/80 sm:text-[0.98rem]">
                 {heroDescription}
               </p>
               {heroSecondary ? (
-                <p className="mt-2 text-sm font-medium text-black/55">{heroSecondary}</p>
+                <p className="mt-2 text-sm font-semibold text-white/65">{heroSecondary}</p>
               ) : null}
             </div>
 
-            <div className="rounded-[28px] border border-black/10 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] sm:p-5">
+            <div className="rounded-[28px] border-2 border-white/20 bg-black/80 p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, genres, or creators"
@@ -1173,7 +1173,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-2 text-sm font-semibold tracking-[0.02em] text-black/72 transition-all hover:border-black/16 hover:bg-black/[0.03] hover:text-black"
+                      className="rounded-full border-2 border-black bg-white px-3 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                     >
                       {item}
                     </button>
@@ -1191,7 +1191,7 @@ export default function SearchPage() {
                         key={item.id}
                         type="button"
                         onClick={() => updateParam("q", item.value)}
-                        className="rounded-full border border-black/10 bg-[#f8fafc] px-3 py-2 text-sm font-semibold tracking-[0.02em] text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition-all hover:border-black/16 hover:bg-black/[0.03] hover:text-black active:translate-y-px"
+                        className="rounded-full border-2 border-black bg-white px-3 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                       >
                         {item.label}
                       </button>
@@ -1202,16 +1202,16 @@ export default function SearchPage() {
           </SurfacePanel>
 
           <SurfacePanel
-            className="h-full space-y-5 border border-black/10 bg-white p-5 text-black shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-6 xl:p-8"
+            className="h-full space-y-5 p-5 sm:p-6 xl:p-8"
             tone="muted"
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
           >
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
                 Search
               </p>
-              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
+              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                 {query ? "Best match" : "Pick"}
               </h2>
             </div>
@@ -1228,10 +1228,10 @@ export default function SearchPage() {
                       : "search_masthead_featured",
                   )
                 }
-                className="group w-full rounded-[28px] border border-black/10 bg-white p-4 text-left text-black shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition-all hover:border-black/15 hover:bg-black/[0.02]"
+                className="group w-full rounded-[28px] border-2 border-black bg-white p-4 text-left text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 <div className="grid gap-4 grid-cols-[88px_minmax(0,1fr)]">
-                  <div className="overflow-hidden rounded-[24px] border border-black/10 bg-[#f6f7f9]">
+                  <div className="overflow-hidden rounded-[24px] border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                     <Cover
                       tone={leadSearchResult.coverTone}
                       coverUrl={leadSearchResult.coverUrl}
@@ -1263,8 +1263,8 @@ export default function SearchPage() {
                 </div>
               </button>
             ) : (
-              <div className="rounded-[28px] border border-black/10 bg-[#f8f9fb] p-4 text-black shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/45">
+              <div className="rounded-[28px] border-2 border-black bg-white p-4 text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/65">
                   Search
                 </p>
                 <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-black">
@@ -1277,9 +1277,9 @@ export default function SearchPage() {
               {heroStatCards.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-black shadow-[0_14px_32px_rgba(15,23,42,0.06)]"
+                  className="rounded-[24px] border-2 border-black bg-white px-4 py-3 text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/45">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65">
                     {item.label}
                   </p>
                   <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
@@ -1310,7 +1310,7 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm font-semibold text-black shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+          <div className="rounded-[24px] border-2 border-[#FFE500] bg-black/85 px-4 py-3 text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             Showing saved results. Reconnect to refresh.
           </div>
         ) : null}
@@ -1321,7 +1321,7 @@ export default function SearchPage() {
             title={query ? "Best match." : "Popular."}
             description=""
             events={searchEventCards}
-            appearance="light"
+            appearance="dark"
           />
         ) : null}
 
@@ -1335,9 +1335,9 @@ export default function SearchPage() {
 
         {shouldShowReco ? (
           <SurfacePanel
-            className="space-y-8 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-            appearance="light"
-            accent="amber"
+            className="space-y-8"
+            appearance="dark"
+            accent="cyan"
           >
             <SearchSectionHeader
               eyebrow="Next"
@@ -1348,10 +1348,10 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setHotWindow("day")}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.03em] transition-all ${
+                    className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.03em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
                       hotWindow === "day"
-                        ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
-                        : "border-black/12 bg-white text-black/70 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]"
+                        ? "bg-[#FFE500] text-black"
+                        : "bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5"
                     }`}
                   >
                     Today
@@ -1359,10 +1359,10 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setHotWindow("week")}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold tracking-[0.03em] transition-all ${
+                    className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.03em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
                       hotWindow === "week"
-                        ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
-                        : "border-black/12 bg-white text-black/70 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]"
+                        ? "bg-[#FFE500] text-black"
+                        : "bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5"
                     }`}
                   >
                     Week
@@ -1374,7 +1374,7 @@ export default function SearchPage() {
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
                 <section key={rail.id} className="space-y-4">
-                  <h3 className="text-lg font-black uppercase tracking-[0.03em] text-black">
+                  <h3 className="text-lg font-black uppercase tracking-[0.03em] text-white">
                     {rail.title}
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1402,9 +1402,9 @@ export default function SearchPage() {
         {showResultSections ? (
           <>
             <SurfacePanel
-              className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-              appearance="light"
-              accent="blue"
+              className="space-y-5"
+              appearance="dark"
+              accent="cyan"
             >
               <SearchSectionHeader
                 eyebrow="Results"
@@ -1416,12 +1416,12 @@ export default function SearchPage() {
                     <button
                       type="button"
                       onClick={() => setShowAdvancedFilters(true)}
-                      className="inline-flex items-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_12px_28px_rgba(15,23,42,0.10)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
+                      className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-white px-4 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                     >
                       <SlidersHorizontal size={16} />
                       <span>Filters</span>
                       {activeFilterCount > 0 ? (
-                        <span className="rounded-full border border-black bg-black px-2 py-0.5 text-[11px] font-black text-white">
+                        <span className="rounded-full border-2 border-black bg-[#FFE500] px-2 py-0.5 text-[11px] font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                           {activeFilterCount}
                         </span>
                       ) : null}
@@ -1484,15 +1484,15 @@ export default function SearchPage() {
               </NetworkFallback>
             ) : results.length === 0 ? (
               <SurfacePanel
-                className="space-y-4 border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-                appearance="light"
-                accent="blue"
+                className="space-y-4"
+                appearance="dark"
+                accent="cyan"
               >
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                     No match
                   </p>
-                  <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
+                  <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
                     Try a wider search.
                   </h2>
                 </div>
@@ -1624,11 +1624,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden rounded-[30px] border border-black/10 bg-white p-5 text-left shadow-[0_20px_46px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#fcfcfd] hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]"
+                      className="group block overflow-hidden rounded-[30px] border-2 border-black bg-white p-5 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
                       aria-label={`Open ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <div className="overflow-hidden rounded-[22px] border border-black/10 bg-[#f8fafc] shadow-[0_14px_30px_rgba(15,23,42,0.06)]">
+                        <div className="overflow-hidden rounded-[22px] border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1658,7 +1658,7 @@ export default function SearchPage() {
                             <span className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                               Read
                             </span>
-                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black/72 transition-all duration-300 group-hover:translate-x-0.5">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 group-hover:translate-x-0.5">
                               <ArrowRight className="size-4" />
                             </span>
                           </div>
@@ -1669,7 +1669,7 @@ export default function SearchPage() {
                 </div>
 
                 {total > PAGE_SIZE ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black/65 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border-2 border-black bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                     <span>
                       Page {page} of {totalPages}
                     </span>
@@ -1679,7 +1679,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page - 1))}
                         disabled={page <= 1}
                         aria-label="Previous page"
-                        className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-sm font-semibold tracking-[0.02em] text-black transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                       >
                         Previous
                       </button>
@@ -1688,7 +1688,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page + 1))}
                         disabled={page >= totalPages}
                         aria-label="Next page"
-                        className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-sm font-semibold tracking-[0.02em] text-black transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                       >
                         Next page
                       </button>

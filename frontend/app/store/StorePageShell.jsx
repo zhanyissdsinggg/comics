@@ -6,25 +6,25 @@ import Skeleton from "../../components/common/Skeleton";
 const StorePage = dynamic(() => import("../../components/store/StorePage"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+        <section className="rounded-[28px] border-2 border-[#FFE500] bg-black/90 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
             Store
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-black">
+          <h1 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white">
             Top up.
           </h1>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <a
               href="/subscribe"
-              className="rounded-full border border-black/10 bg-white px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
+              className="rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
             >
               Membership
             </a>
             <a
               href="/orders"
-              className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
+              className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
             >
               Orders
             </a>
@@ -32,10 +32,10 @@ const StorePage = dynamic(() => import("../../components/store/StorePage"), {
         </section>
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
-            <Skeleton className="h-56 rounded-[28px]" />
-            <Skeleton className="h-56 rounded-[28px]" />
+            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
           </div>
-          <Skeleton className="h-[42rem] rounded-[28px]" />
+          <Skeleton className="h-[42rem] rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
         </div>
       </main>
     </div>

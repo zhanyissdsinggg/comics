@@ -38,22 +38,22 @@ import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)] sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b border-black/8 pb-4">
+    <section className="mt-6 rounded-[28px] border-2 border-white/20 bg-black/80 p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:mt-8 sm:p-6">
+      <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
         <div className="flex items-center gap-2">
-          <Skeleton className="h-6 w-28 rounded-full" />
-          <Skeleton className="h-4 w-10 rounded-full" />
+          <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
+          <Skeleton className="h-4 w-10 rounded-full bg-white/10" />
         </div>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-9 w-24 rounded-full" />
-          <Skeleton className="h-9 w-24 rounded-full" />
+          <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
+          <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
         </div>
       </div>
       <div className="space-y-2">
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton
             key={`episode-list-skeleton-${index}`}
-            className="h-24 w-full rounded-[24px]"
+            className="h-24 w-full rounded-[24px] bg-white/10"
           />
         ))}
       </div>
@@ -682,9 +682,9 @@ export default function SeriesPage({
     );
   }, [episodes]);
   const primaryButtonClass =
-    "rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all duration-200 hover:bg-black/90";
+    "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-colors hover:border-black/18 hover:bg-black/[0.03]";
+    "rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -799,55 +799,55 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <section className="rounded-[30px] border border-black/10 bg-white p-5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-7">
+          <section className="rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
-              <Skeleton className="aspect-[3/4] w-full rounded-[28px]" />
+              <Skeleton className="aspect-[3/4] w-full rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
-                  <Skeleton className="h-7 w-24 rounded-full" />
-                  <Skeleton className="h-7 w-24 rounded-full" />
+                  <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
+                  <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
                 </div>
-                <Skeleton className="h-12 w-4/5 rounded-[20px]" />
-                <Skeleton className="h-5 w-3/5 rounded-full" />
+                <Skeleton className="h-12 w-4/5 rounded-[20px] bg-white/20" />
+                <Skeleton className="h-5 w-3/5 rounded-full bg-white/10" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded-full" />
-                  <Skeleton className="h-4 w-[92%] rounded-full" />
-                  <Skeleton className="h-4 w-[76%] rounded-full" />
+                  <Skeleton className="h-4 w-full rounded-full bg-white/10" />
+                  <Skeleton className="h-4 w-[92%] rounded-full bg-white/10" />
+                  <Skeleton className="h-4 w-[76%] rounded-full bg-white/10" />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Skeleton className="h-9 w-36 rounded-full" />
-                  <Skeleton className="h-9 w-32 rounded-full" />
+                  <Skeleton className="h-9 w-36 rounded-full bg-white/20" />
+                  <Skeleton className="h-9 w-32 rounded-full bg-white/20" />
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Skeleton
                       key={`series-header-skeleton-${index}`}
-                      className="h-28 rounded-[22px]"
+                      className="h-28 rounded-[22px] bg-white/10"
                     />
                   ))}
                 </div>
               </div>
             </div>
           </section>
-          <section className="mt-6 rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-            <div className="mb-4 flex items-center justify-between border-b-[3px] border-black pb-4">
+          <section className="mt-6 rounded-[28px] border-2 border-white/20 bg-black/80 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-6 w-28 rounded-full" />
-                <Skeleton className="h-4 w-12 rounded-full" />
+                <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
+                <Skeleton className="h-4 w-12 rounded-full bg-white/10" />
               </div>
               <div className="flex items-center gap-3">
-                <Skeleton className="h-9 w-24 rounded-full" />
-                <Skeleton className="h-9 w-24 rounded-full" />
+                <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
+                <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
               </div>
             </div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton
                   key={`episode-${index}`}
-                  className="h-20 w-full rounded-[24px]"
+                  className="h-20 w-full rounded-[24px] bg-white/10"
                 />
               ))}
             </div>
@@ -859,14 +859,14 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
-          <div className="rounded-[28px] border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+          <div className="rounded-[28px] border-2 border-[#FFE500] bg-black/85 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
               Series unavailable
             </p>
-            <h1 className="mt-3 text-3xl font-black uppercase tracking-[0.03em] text-black sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-black uppercase tracking-[0.03em] text-white sm:text-4xl">
               Title unavailable.
             </h1>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -902,7 +902,7 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
@@ -943,7 +943,7 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
 
         <AdultGateBlockingPanel
@@ -975,7 +975,7 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
@@ -989,20 +989,20 @@ export default function SeriesPage({
         ) : null}
 
         {discoveryContext ? (
-          <div className="mb-4 rounded-[22px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] px-4 py-3 shadow-[0_14px_30px_rgba(15,23,42,0.06)] sm:px-5">
+          <div className="mb-4 rounded-[22px] border-2 border-[#FFE500] bg-black/85 px-4 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5">
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ff007a]">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#FF007A]">
                   {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
                 </p>
-                <h2 className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black sm:text-base">
+                <h2 className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-white sm:text-base">
                   {discoveryContext.title}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={handleReturnToDiscovery}
-                className="shrink-0 rounded-full border border-black/12 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.02em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
+                className="shrink-0 rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1.5 text-xs font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 {discoveryContext.returnLabel}
               </button>
@@ -1025,7 +1025,7 @@ export default function SeriesPage({
         />
 
         {interactiveStory ? (
-          <section className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+          <section className="rounded-[24px] border-2 border-black bg-white p-4 text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/50">
