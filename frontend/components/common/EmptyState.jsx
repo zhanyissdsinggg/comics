@@ -61,9 +61,10 @@ export const EmptyState = memo(function EmptyState({
   return (
     <div
       className={cn(
-        "relative overflow-hidden border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] px-4 py-10 text-center shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
-        isLight &&
-          "rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] shadow-[0_20px_46px_rgba(15,23,42,0.08)]",
+        "relative overflow-hidden rounded-[30px] px-4 py-10 text-center",
+        isLight
+          ? "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] shadow-[0_20px_46px_rgba(15,23,42,0.08)]"
+          : "border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(14,18,28,0.9),rgba(8,11,16,0.98))] shadow-[0_22px_80px_rgba(0,0,0,0.2)]",
         className,
       )}
     >
