@@ -1002,6 +1002,79 @@ export default function AdminInteractiveStoriesPage() {
     await loadDetail(selectedStoryId);
   }
 
+  async function createTargetNodeForChoice(choiceId, sourceNode) {
+    if (!selectedStoryId || !choiceId) {
+      return;
+    }
+
+    if (dirtyNodeCount > 0) {
+      setFeedback({ type: "warning", message: "你有未保存的改动。请先保存后再新建目标节点。" });
+      return;
+    }
+
+    if (choiceDirtyById[choiceId]) {
+      setFeedback({ type: "warning", message: "这个选项还没保存。请先保存选项，再新建目标节点。" });
+      return;
+    }
+
+    const base = emptyNode();
+    const nextForm = {
+      ...base,
+      nodeKey: buildUniqueNodeKey("node"),
+      title: "新节点",
+      sortOrder: Number(sourceNode?.sortOrder || 0) + 10,
+    };
+
+    let nodePayload;
+    try {
+      nodePayload = buildNodePayload(nextForm);
+    } catch (error) {
+      setFeedback({ type: "error", message: error.message });
+      return;
+    }
+
+    setBusy(true);
+    const createResp = await adminPost(`/api/admin/interactive-stories/${selectedStoryId}/nodes`, {
+      node: nodePayload,
+      setAsInitial: false,
+    });
+    if (!createResp.ok) {
+      setBusy(false);
+      setFeedback({ type: "error", message: msg(createResp, "创建目标节点失败") });
+      return;
+    }
+
+    const createdNodeId = createResp.data?.node?.id || "";
+    if (!createdNodeId) {
+      setBusy(false);
+      setFeedback({ type: "error", message: "创建目标节点失败：缺少 node.id" });
+      return;
+    }
+
+    const currentChoiceForm = choiceForms[choiceId] || emptyChoice();
+    let choicePayload;
+    try {
+      choicePayload = buildChoicePayload({ ...currentChoiceForm, targetNodeId: createdNodeId });
+    } catch (error) {
+      setBusy(false);
+      setFeedback({ type: "error", message: error.message });
+      return;
+    }
+
+    const patchResp = await adminPatch(`/api/admin/interactive-stories/choices/${choiceId}`, { choice: choicePayload });
+    setBusy(false);
+    if (!patchResp.ok) {
+      setFeedback({ type: "error", message: msg(patchResp, "已创建节点，但绑定选项失败") });
+      await loadDetail(selectedStoryId);
+      return;
+    }
+
+    setFeedback({ type: "success", message: "已创建目标节点并绑定到该选项" });
+    await loadDetail(selectedStoryId);
+    setActiveTab("nodes");
+    setSelectedNodeId(createdNodeId);
+  }
+
   async function addChoice(nodeId) {
     const form = newChoiceByNode[nodeId] || emptyChoice();
     let payload;
@@ -2360,6 +2433,18 @@ function InteractiveStoryNodesTab({
                                             </option>
                                           ))}
                                         </select>
+                                        {!form.targetNodeId ? (
+                                          <div className="mt-2 flex flex-wrap gap-2">
+                                            <button
+                                              type="button"
+                                              onClick={() => void createTargetNodeForChoice(choice.id, selectedNode)}
+                                              className="inline-flex items-center gap-1 rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/70 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"
+                                            >
+                                              <Plus className="size-3" />
+                                              新建目标节点
+                                            </button>
+                                          </div>
+                                        ) : null}
                                       </AdminFormField>
                                       <AdminFormField label="排序">
                                         <input
