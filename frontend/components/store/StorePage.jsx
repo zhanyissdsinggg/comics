@@ -672,7 +672,7 @@ export default function StorePage({
                   }
                   className={secondaryButtonClass}
                 >
-                  Billing support
+                  Support
                 </button>
               </div>
             </div>
@@ -722,7 +722,7 @@ export default function StorePage({
               }
               className={secondaryButtonClass}
             >
-              {purchaseActionsEnabled ? "Support" : "Billing support"}
+              Support
             </button>
             <button
               type="button"

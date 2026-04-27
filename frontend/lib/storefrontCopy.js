@@ -6,7 +6,7 @@ export const STOREFRONT_TERMS = {
   returnWeekly: "Return weekly",
   compareMembership: "Plans",
   viewPointPacks: "Point packs",
-  billingSupport: "Billing support",
+  billingSupport: "Support",
   readerBenefits: "Why join",
 };
 

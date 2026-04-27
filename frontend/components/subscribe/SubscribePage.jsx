@@ -480,7 +480,7 @@ export default function SubscribePage({
               }
               className={secondaryButtonClass}
             >
-              {subscriptionActionsEnabled ? "Support" : "Billing support"}
+              Support
             </button>
             <button
               type="button"
