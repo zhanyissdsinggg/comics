@@ -1385,6 +1385,12 @@ function formatTextReport(summary) {
   return `${lines.join("\n").trim()}\n`;
 }
 
+function writeUtf8TextFileWithBom(filePath, contents) {
+  // Windows Notepad and some CI log collectors may treat UTF-8 without BOM as ANSI/GBK.
+  // Prefix a BOM so operators can read the report without guessing encodings.
+  fs.writeFileSync(filePath, `\uFEFF${contents}`, "utf8");
+}
+
 async function run() {
   const frontendUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
@@ -1484,7 +1490,7 @@ async function run() {
       results,
     };
     fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-    fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");
+    writeUtf8TextFileWithBom(outputTxt, formatTextReport(summary));
     console.warn(`[ops-admin-ui] warning: ${message}`);
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputJson).replace(/\\/g, "/")}`);
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputTxt).replace(/\\/g, "/")}`);
@@ -1524,7 +1530,7 @@ async function run() {
       results: [],
     };
     fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-    fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");
+    writeUtf8TextFileWithBom(outputTxt, formatTextReport(summary));
     console.warn(`[ops-admin-ui] warning: ${loginMessage}`);
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputJson).replace(/\\/g, "/")}`);
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputTxt).replace(/\\/g, "/")}`);
@@ -1560,7 +1566,7 @@ async function run() {
     };
 
     fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-    fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");
+    writeUtf8TextFileWithBom(outputTxt, formatTextReport(summary));
 
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputJson).replace(/\\/g, "/")}`);
     console.log(`[ops-admin-ui] wrote ${path.relative(ROOT, outputTxt).replace(/\\/g, "/")}`);
