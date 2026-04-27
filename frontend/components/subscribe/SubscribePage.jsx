@@ -335,7 +335,7 @@ export default function SubscribePage({
             accent="blue"
             appearance="light"
             eyebrow="Membership"
-            title="Membership."
+            title="Membership"
             description=""
             stats={subscriptionHeroStats}
           />
@@ -353,8 +353,8 @@ export default function SubscribePage({
               <div>
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
                   {subscriptionActionsEnabled
-                    ? "Plans."
-                    : "Info."}
+                    ? "Plans"
+                    : "Preview"}
                 </h2>
               </div>
             </div>
@@ -399,8 +399,8 @@ export default function SubscribePage({
               </p>
                 <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
                   {subscriptionActionsEnabled
-                    ? "Monthly plans."
-                    : "Plan details."}
+                    ? "Monthly plans"
+                    : "Membership preview"}
                 </h2>
             </div>
           </div>
@@ -408,13 +408,10 @@ export default function SubscribePage({
           {!subscriptionActionsEnabled ? (
             <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
               <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-black">
-                Membership opens soon.
+                Coming soon.
               </h3>
               <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Plans are visible. Billing is not live yet.
-              </p>
-              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                No monthly charge yet.
+                Plans are visible. Checkout is disabled.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -423,13 +420,13 @@ export default function SubscribePage({
                     router.push(
                       buildSupportPath({
                         topic: "billing",
-                        context: "Membership is in preview. Billing is not live yet.",
+                        context: "Membership preview. Checkout disabled.",
                       }),
                     )
                   }
                   className={secondaryButtonClass}
                 >
-                  Billing support
+                  Support
                 </button>
               </div>
             </div>
@@ -441,21 +438,21 @@ export default function SubscribePage({
                 title: "Today",
                 body: subscriptionActionsEnabled
                   ? "Billing starts at checkout."
-                  : "Not live yet.",
+                  : "Preview only.",
               },
               {
                 title: "Billing",
                 body: subscriptionActionsEnabled
                   ? "Renews monthly while active."
-                  : "Checkout required.",
+                  : "Checkout disabled.",
               },
               {
                 title: "Receipts",
-                body: "Receipts show in Purchases.",
+                body: "See Orders.",
               },
               {
                 title: "Help",
-                body: "Support.",
+                body: "Contact support.",
               },
             ].map((item) => (
               <div key={item.title} className={quietCardClass}>
