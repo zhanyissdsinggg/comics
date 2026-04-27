@@ -13,7 +13,7 @@ const StorePage = dynamic(() => import("../../components/store/StorePage"), {
             Store
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-black">
-            Pick a plan.
+            Top up.
           </h1>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <a

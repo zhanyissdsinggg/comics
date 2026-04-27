@@ -103,6 +103,7 @@ export function buildPackageSummary(packages) {
       const price = toNumber(pkg.price);
       const density = price > 0 ? totalPoints / price : 0;
       const currentLargestTotal = summary.largest ? getPackageTotalPoints(summary.largest) : 0;
+      const currency = normalizeUSDisplayCurrency(pkg.currency);
 
       summary.totalCount += 1;
 
@@ -124,7 +125,7 @@ export function buildPackageSummary(packages) {
         summary.bestDensity = {
           name: pkg.name || pkg.label || pkg.id,
           value: density,
-          currency: pkg.currency || "USD",
+          currency,
         };
       }
 

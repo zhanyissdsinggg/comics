@@ -20,7 +20,7 @@ import { getSiteFaqItems } from "../../lib/storefrontFaq";
 
 export const metadata = createPageMetadata({
   title: "FAQ",
-  description: "Quick answers.",
+  description: "",
   path: "/faq",
 });
 
@@ -59,7 +59,7 @@ export default function FAQPage() {
     buildFaqStructuredData({
       path: "/faq",
       name: `Help & FAQ | ${siteConfig.siteName}`,
-      description: "Quick answers.",
+      description: "",
       items: FAQ,
     }),
   ].filter(Boolean);

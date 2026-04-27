@@ -19,7 +19,7 @@ import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
   title: "Access",
-  description: "Free reads, points, and plans.",
+  description: "Free reads and unlocks.",
   path: "/how-it-works",
 });
 
@@ -44,7 +44,7 @@ const HOW_IT_WORKS_STEPS = [
 const FAQ_ITEMS = [
   {
     question: "What can I read for free on Gush?",
-    answer: "Some titles start with free chapters or previews.",
+    answer: "Some titles start with free chapters.",
   },
   {
     question: "How do points work?",
@@ -52,8 +52,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "What does membership change?",
-    answer:
-      "Plans can add discounts, free reads, shorter waits, or monthly points.",
+    answer: "Plans can add perks for regular reading.",
   },
   {
     question: "Is membership recurring?",
@@ -78,7 +77,7 @@ export default function HowItWorksPage() {
     buildFaqStructuredData({
       path: "/how-it-works",
       name: `Access | ${siteConfig.siteName}`,
-      description: "Free reads, points, and plans on Gush.",
+      description: "Free reads and unlocks.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
