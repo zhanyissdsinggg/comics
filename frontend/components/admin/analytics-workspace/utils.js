@@ -20,7 +20,7 @@ export function getErrorMessage(error, fallbackMessage) {
 }
 
 export function formatCurrency(value) {
-  const amount = Number(value || 0);
+  const amount = Number(value || 0) / 100;
   return new Intl.NumberFormat("zh-CN", {
     style: "currency",
     currency: "USD",

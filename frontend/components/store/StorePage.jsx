@@ -24,6 +24,7 @@ import { getFriendlyMessage } from "../../lib/errorMessages";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import {
   formatUSDisplayCurrency,
+  formatUSDisplayCurrencyFromCents,
   formatUSNumber,
 } from "../../lib/localization";
 import {
@@ -84,7 +85,7 @@ function formatPriceLabel(amount, currency = "USD") {
     return "";
   }
 
-  return formatUSDisplayCurrency(numericAmount, currency);
+  return formatUSDisplayCurrencyFromCents(numericAmount, currency);
 }
 
 function scrollToSection(id) {

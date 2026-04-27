@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Gift, Sparkles, X, Zap } from "lucide-react";
 import {
   formatUSDisplayCurrency,
+  formatUSDisplayCurrencyFromCents,
   formatUSNumber,
 } from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
@@ -36,7 +37,7 @@ function formatPackagePrice(pkg) {
   if (!Number.isFinite(price) || price <= 0) {
     return "";
   }
-  return formatUSDisplayCurrency(price, pkg?.currency);
+  return formatUSDisplayCurrencyFromCents(price, pkg?.currency);
 }
 
 const WalletTopUpPrompt = memo(function WalletTopUpPrompt({

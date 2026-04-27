@@ -107,7 +107,7 @@ export function toDateInputValue(value) {
 }
 
 export function formatCurrency(value, currency = "USD") {
-  const amount = Number(value || 0);
+  const amount = Number(value || 0) / 100;
   const normalizedCurrency = normalizeUSDisplayCurrency(currency);
 
   try {

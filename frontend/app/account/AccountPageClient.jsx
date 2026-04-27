@@ -16,7 +16,7 @@ import {
 } from "../../lib/region/config";
 import { setCookie } from "../../lib/cookies";
 import { applyPreferencesToStorage } from "../../lib/preferencesClient";
-import { formatUSDisplayCurrency } from "../../lib/localization";
+import { formatUSDisplayCurrencyFromCents } from "../../lib/localization";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { apiGet, apiPost } from "../../lib/apiClient";
@@ -46,7 +46,7 @@ function readStorage(key, fallback) {
 
 function formatOrderAmount(amount, currency) {
   const numericAmount = Number(amount || 0);
-  return formatUSDisplayCurrency(numericAmount, currency);
+  return formatUSDisplayCurrencyFromCents(numericAmount, currency);
 }
 
 function formatOrderDate(value) {

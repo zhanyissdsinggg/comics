@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { OFFERS } from "../../lib/offers/catalog";
 import {
-  formatUSDisplayCurrency,
+  formatUSDisplayCurrencyFromCents,
   formatUSNumber,
 } from "../../lib/localization";
 import { getRegionConfig } from "../../lib/region/config";
@@ -88,7 +88,7 @@ function resolvePackagePriceLabel(pkg, packageId) {
 
   const price = Number(pkg?.price);
   if (Number.isFinite(price) && price > 0) {
-    return formatUSDisplayCurrency(price, pkg?.currency);
+    return formatUSDisplayCurrencyFromCents(price, pkg?.currency);
   }
 
   return "";

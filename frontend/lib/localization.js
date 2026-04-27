@@ -142,6 +142,16 @@ export function formatUSDisplayCurrency(amount, currency = US_CURRENCY, options 
   }).format(amount);
 }
 
+// Backend monetary amounts (orders/topups/marketing spend) are stored as integer cents.
+export function formatUSDisplayCurrencyFromCents(amountCents, currency = US_CURRENCY, options = {}) {
+  if (amountCents === null || amountCents === undefined || Number.isNaN(Number(amountCents))) {
+    return '$0.00';
+  }
+
+  const dollars = Number(amountCents) / 100;
+  return formatUSDisplayCurrency(dollars, currency, options);
+}
+
 export function formatUSNumber(number, options = {}) {
   if (number === null || number === undefined || Number.isNaN(Number(number))) {
     return '0';
