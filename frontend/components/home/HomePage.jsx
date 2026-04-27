@@ -650,12 +650,10 @@ function HomeContent({ initialSearchParams = {} }) {
                   <h1 className="mt-5 max-w-[8.8ch] text-[clamp(2.35rem,10vw,6.4rem)] font-black uppercase leading-[0.86] tracking-[-0.06em] text-black">
                     {resumeSeries
                       ? "Keep reading"
-                      : "Read original comics and novels in one place."}
+                      : "Original comics and novels."}
                   </h1>
 
-                  <h2 className="mt-4 text-base font-semibold tracking-[-0.01em] text-black/72 sm:text-lg">
-                    Start with a story worth opening.
-                  </h2>
+                  <h2 className="mt-4 text-base font-semibold tracking-[-0.01em] text-black/72 sm:text-lg">Start here.</h2>
 
                   {heroMetaLine ? (
                     <div className="mt-4 max-w-[30rem]">
@@ -703,7 +701,7 @@ function HomeContent({ initialSearchParams = {} }) {
                       onClick={() => router.push("/search")}
                       className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.02em] text-black/72 transition-all hover:border-black/18 hover:bg-black/[0.03] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:min-h-0 sm:w-auto sm:text-sm"
                     >
-                      Browse all
+                      Browse
                     </button>
                   </div>
 

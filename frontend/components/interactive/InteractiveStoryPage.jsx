@@ -55,17 +55,17 @@ export default function InteractiveStoryPage({ seriesId }) {
 
     if (response.status === 401) {
       setAuthRequired(true);
-      setError("Sign in to save and continue your interactive run.");
+      setError("Sign in to continue.");
       return;
     }
 
-    setError("Failed to load your interactive progress.");
+    setError("Couldn't load your progress.");
   }, []);
 
   const bootstrap = useCallback(async () => {
     const normalizedSeriesId = normalizeText(seriesId);
     if (!normalizedSeriesId) {
-      setError("Invalid series id.");
+      setError("Invalid story.");
       setLoading(false);
       return;
     }
@@ -82,7 +82,7 @@ export default function InteractiveStoryPage({ seriesId }) {
     if (!storyResponse.ok || !storyResponse.data?.story) {
       setStory(null);
       setProgress(null);
-      setError("Interactive mode is not configured for this story yet.");
+      setError("Interactive mode isn't available yet.");
       setLoading(false);
       return;
     }
@@ -124,18 +124,18 @@ export default function InteractiveStoryPage({ seriesId }) {
 
       if (response.status === 401) {
         setAuthRequired(true);
-        setError("Please sign in before making interactive choices.");
+        setError("Sign in to choose.");
         openAuthModal();
         return;
       }
 
       if (response.status === 400) {
-        setDegradedNotice("That option is unavailable now. We reloaded your latest node.");
+        setDegradedNotice("That choice isn't available. Reloaded your latest node.");
         await loadProgress(story.id);
         return;
       }
 
-      setError("We could not continue the story right now. Please retry.");
+      setError("Couldn't continue right now. Try again.");
     },
     [loadProgress, story?.id],
   );
@@ -151,7 +151,7 @@ export default function InteractiveStoryPage({ seriesId }) {
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-            <p className="text-sm font-medium text-black/58">Loading...</p>
+            <p className="text-sm font-medium text-black/58">Loading</p>
           </section>
         </div>
       </main>
@@ -179,7 +179,7 @@ export default function InteractiveStoryPage({ seriesId }) {
               href={`/series/${encodeURIComponent(seriesId)}`}
               className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
             >
-              Back to series
+              Back
             </Link>
           </div>
         </section>
@@ -219,7 +219,7 @@ export default function InteractiveStoryPage({ seriesId }) {
             </section>
 
             <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-              <h2 className="text-base font-semibold tracking-[0.01em] text-black">Choose your next move</h2>
+              <h2 className="text-base font-semibold tracking-[0.01em] text-black">Choices</h2>
               <div className="mt-4 grid gap-3">
                 {(node.choices || []).map((choice) => {
                   const disabled = Boolean(submittingChoiceId) || authRequired;
@@ -232,13 +232,13 @@ export default function InteractiveStoryPage({ seriesId }) {
                       onClick={() => handleChoose(choice.id)}
                       className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] px-4 py-3 text-left text-sm font-medium text-black shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-white hover:shadow-[0_16px_34px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {busy ? "Generating next segment..." : normalizeText(choice.label)}
+                      {busy ? "Generating..." : normalizeText(choice.label)}
                     </button>
                   );
                 })}
                 {node.choices?.length === 0 ? (
                   <p className="text-sm font-medium text-black/58">
-                    End of current branch. More chapters can be configured in story nodes.
+                    No choices yet.
                   </p>
                 ) : null}
               </div>
@@ -247,7 +247,7 @@ export default function InteractiveStoryPage({ seriesId }) {
             {storyStateRows.length > 0 ? (
               <section className="rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fa_100%)] p-4 shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
                 <h3 className="text-xs font-black uppercase tracking-[0.16em] text-black/55">
-                  Story State
+                  State
                 </h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {storyStateRows.map((item) => (

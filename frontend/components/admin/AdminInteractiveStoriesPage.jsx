@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  ArrowUpRight,
   ArrowRight,
   BookCopy,
   CheckCircle2,
@@ -479,6 +480,36 @@ export default function AdminInteractiveStoriesPage() {
   );
   const validationTone = getValidationTone(validation);
 
+  const publicSeriesHref = useMemo(() => {
+    const normalized = String(story.seriesId || "").trim();
+    return normalized ? `/series/${encodeURIComponent(normalized)}` : "";
+  }, [story.seriesId]);
+
+  const publicInteractiveHref = useMemo(() => {
+    const normalized = String(story.seriesId || "").trim();
+    return normalized ? `/series/${encodeURIComponent(normalized)}/interactive` : "";
+  }, [story.seriesId]);
+
+  const openPublicHref = useCallback((href) => {
+    const normalized = String(href || "").trim();
+    if (!normalized) return;
+    if (typeof window === "undefined") return;
+    window.open(normalized, "_blank", "noopener,noreferrer");
+  }, []);
+
+  const copyPublicHref = useCallback(async (href, successMessage) => {
+    const normalized = String(href || "").trim();
+    if (!normalized) return;
+    const absolute = normalized.startsWith("http")
+      ? normalized
+      : `${window.location.origin}${normalized}`;
+    const ok = await copyToClipboard(absolute);
+    setFeedback({
+      type: ok ? "success" : "error",
+      message: ok ? successMessage : "复制失败，请手动选中复制",
+    });
+  }, []);
+
   const jumpToNodeKey = useCallback(
     (nodeKey) => {
       const normalizedKey = String(nodeKey || "").trim();
@@ -632,6 +663,171 @@ export default function AdminInteractiveStoriesPage() {
       stateEffects: parseJsonText(form.stateEffectsText, "选项状态变更"),
     };
   }
+
+  function buildUniqueNodeKey(baseKey) {
+    const normalized = String(baseKey || "").trim() || "node";
+    const existingKeys = new Set(
+      nodes.map((node) => String(node?.nodeKey || "").trim()).filter(Boolean),
+    );
+    if (!existingKeys.has(normalized)) {
+      return normalized;
+    }
+    for (let index = 2; index <= 999; index += 1) {
+      const candidate = `${normalized}-${index}`;
+      if (!existingKeys.has(candidate)) {
+        return candidate;
+      }
+    }
+    return `${normalized}-${Date.now()}`;
+  }
+
+  async function duplicateNode(nodeId) {
+    if (!selectedStoryId || !nodeId) return;
+    const node = nodes.find((item) => item.id === nodeId);
+    const form = nodeForms[nodeId] || (node ? mapNodeToForm(node) : emptyNode());
+
+    let payload;
+    try {
+      payload = buildNodePayload(form);
+    } catch (error) {
+      setFeedback({ type: "error", message: error.message });
+      return;
+    }
+
+    const nextPayload = {
+      ...payload,
+      nodeKey: buildUniqueNodeKey(`${payload.nodeKey || "node"}-copy`),
+      title: payload.title ? `${payload.title}（副本）` : "节点副本",
+      sortOrder: normalizeInteger(payload.sortOrder) + 1,
+    };
+
+    setBusy(true);
+    const resp = await adminPost(`/api/admin/interactive-stories/${selectedStoryId}/nodes`, {
+      node: nextPayload,
+      setAsInitial: false,
+    });
+    setBusy(false);
+
+    if (!resp.ok) {
+      setFeedback({ type: "error", message: msg(resp, "复制节点失败") });
+      return;
+    }
+
+    setFeedback({ type: "success", message: "节点副本已创建" });
+    await loadDetail(selectedStoryId);
+    setSelectedNodeId(resp.data?.node?.id || "");
+  }
+
+  async function resequenceNodesNow() {
+    if (!selectedStoryId) return;
+    if (dirtyNodeCount > 0) {
+      setFeedback({ type: "error", message: "请先保存所有未保存的节点/选项后再重排排序。" });
+      return;
+    }
+
+    const ordered = [...nodes].sort((a, b) => {
+      const left = Number(a?.sortOrder || 0);
+      const right = Number(b?.sortOrder || 0);
+      if (left !== right) return left - right;
+      return String(a?.nodeKey || "").localeCompare(String(b?.nodeKey || ""));
+    });
+    if (ordered.length === 0) {
+      setFeedback({ type: "error", message: "当前故事还没有节点，无法重排。" });
+      return;
+    }
+
+    setBusy(true);
+    try {
+      for (let index = 0; index < ordered.length; index += 1) {
+        const node = ordered[index];
+        const nextSortOrder = (index + 1) * 10;
+        if (Number(node.sortOrder || 0) === nextSortOrder) continue;
+        const payload = buildNodePayload(mapNodeToForm(node));
+        const resp = await adminPatch(`/api/admin/interactive-stories/nodes/${node.id}`, {
+          node: { ...payload, sortOrder: nextSortOrder },
+        });
+        if (!resp.ok) {
+          throw new Error(msg(resp, `节点 ${node.nodeKey || node.id} 重排失败`));
+        }
+      }
+      setFeedback({ type: "success", message: "节点排序已重排" });
+      await loadDetail(selectedStoryId);
+    } catch (error) {
+      setFeedback({ type: "error", message: `重排失败：${msg(error, "未知错误")}` });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resequenceChoicesNow(nodeId) {
+    if (!selectedStoryId || !nodeId) return;
+    if (dirtyNodeCount > 0) {
+      setFeedback({ type: "error", message: "请先保存所有未保存的节点/选项后再重排排序。" });
+      return;
+    }
+    const node = nodes.find((item) => item.id === nodeId);
+    const choices = Array.isArray(node?.choices) ? [...node.choices] : [];
+    if (!node || choices.length === 0) {
+      setFeedback({ type: "error", message: "当前节点没有选项，无法重排。" });
+      return;
+    }
+
+    choices.sort((a, b) => {
+      const left = Number(a?.sortOrder || 0);
+      const right = Number(b?.sortOrder || 0);
+      if (left !== right) return left - right;
+      return String(a?.choiceKey || "").localeCompare(String(b?.choiceKey || ""));
+    });
+
+    setBusy(true);
+    try {
+      for (let index = 0; index < choices.length; index += 1) {
+        const choice = choices[index];
+        const nextSortOrder = (index + 1) * 10;
+        if (Number(choice.sortOrder || 0) === nextSortOrder) continue;
+        const payload = buildChoicePayload(mapChoiceToForm(choice));
+        const resp = await adminPatch(`/api/admin/interactive-stories/choices/${choice.id}`, {
+          choice: { ...payload, sortOrder: nextSortOrder },
+        });
+        if (!resp.ok) {
+          throw new Error(msg(resp, `选项 ${choice.choiceKey || choice.id} 重排失败`));
+        }
+      }
+      setFeedback({ type: "success", message: "选项排序已重排" });
+      await loadDetail(selectedStoryId);
+    } catch (error) {
+      setFeedback({ type: "error", message: `重排失败：${msg(error, "未知错误")}` });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const openResequenceNodesConfirm = useCallback(() => {
+    if (!selectedStoryId) return;
+    setConfirmDialog({
+      isOpen: true,
+      title: "重排节点排序",
+      message: "将按当前已保存的节点 sortOrder 重新编号为 10/20/30...。建议先保存所有未保存改动。",
+      confirmText: "开始重排",
+      variant: "warning",
+      onConfirm: () => resequenceNodesNow(),
+    });
+  }, [resequenceNodesNow, selectedStoryId]);
+
+  const openResequenceChoicesConfirm = useCallback(
+    (nodeId) => {
+      if (!selectedStoryId || !nodeId) return;
+      setConfirmDialog({
+        isOpen: true,
+        title: "重排选项排序",
+        message: "将按当前已保存的选项 sortOrder 重新编号为 10/20/30...。建议先保存所有未保存改动。",
+        confirmText: "开始重排",
+        variant: "warning",
+        onConfirm: () => resequenceChoicesNow(nodeId),
+      });
+    },
+    [resequenceChoicesNow, selectedStoryId],
+  );
 
   async function saveStory() {
     if (!selectedStoryId) return;
@@ -1266,6 +1462,38 @@ export default function AdminInteractiveStoriesPage() {
                         <Save className="size-4" />
                         {selectedStoryId ? "保存故事设定" : "创建故事"}
                       </Button>
+                      {publicInteractiveHref ? (
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => openPublicHref(publicInteractiveHref)}
+                          disabled={!publicInteractiveHref}
+                        >
+                          <ArrowUpRight className="size-4" />
+                          打开前台互动阅读
+                        </Button>
+                      ) : null}
+                      {publicSeriesHref ? (
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => openPublicHref(publicSeriesHref)}
+                          disabled={!publicSeriesHref}
+                        >
+                          <ArrowUpRight className="size-4" />
+                          打开前台作品页
+                        </Button>
+                      ) : null}
+                      {publicInteractiveHref ? (
+                        <Button
+                          className="w-full"
+                          variant="secondary"
+                          onClick={() => copyPublicHref(publicInteractiveHref, "互动阅读链接已复制")}
+                        >
+                          <Copy className="size-4" />
+                          复制互动阅读链接
+                        </Button>
+                      ) : null}
                       {selectedStoryId ? (
                         <Button className="w-full" variant="outline" onClick={() => loadValidation(selectedStoryId)}>
                           <ShieldCheck className="size-4" />
@@ -1377,6 +1605,9 @@ export default function AdminInteractiveStoriesPage() {
                   saveNode={saveNode}
                   setStartNode={setStartNode}
                   removeNode={openRemoveNodeConfirm}
+                  duplicateNode={duplicateNode}
+                  openResequenceNodesConfirm={openResequenceNodesConfirm}
+                  openResequenceChoicesConfirm={openResequenceChoicesConfirm}
                   choiceForms={choiceForms}
                   setChoiceForms={setChoiceForms}
                   newChoiceByNode={newChoiceByNode}
@@ -1463,6 +1694,9 @@ function InteractiveStoryNodesTab({
   saveNode,
   setStartNode,
   removeNode,
+  duplicateNode,
+  openResequenceNodesConfirm,
+  openResequenceChoicesConfirm,
   choiceForms,
   setChoiceForms,
   newChoiceByNode,
@@ -1549,6 +1783,29 @@ function InteractiveStoryNodesTab({
                           >
                             清空筛选
                           </Button>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={openResequenceNodesConfirm}
+                            disabled={!selectedStoryId || nodes.length === 0 || dirtyNodeCount > 0}
+                          >
+                            重排节点排序
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => openResequenceChoicesConfirm(selectedNode?.id)}
+                            disabled={!selectedNode || (selectedNode.choices?.length || 0) === 0 || dirtyNodeCount > 0}
+                          >
+                            重排当前节点选项
+                          </Button>
+                          {dirtyNodeCount > 0 ? (
+                            <span className="self-center text-xs text-amber-600">
+                              发现未保存改动，先保存再重排
+                            </span>
+                          ) : null}
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
                           {NODE_FILTERS.map((filter) => {
@@ -1990,6 +2247,10 @@ function InteractiveStoryNodesTab({
                               <Button size="sm" variant="outline" onClick={() => setStartNode(selectedNode.id)}>
                                 设为起始节点
                               </Button>
+                              <Button size="sm" variant="outline" onClick={() => duplicateNode(selectedNode.id)}>
+                                <Copy className="size-4" />
+                                复制节点
+                              </Button>
                               <Button size="sm" variant="destructive" onClick={() => removeNode(selectedNode.id)}>
                                 <Trash2 className="size-4" />
                                 删除节点
@@ -2007,7 +2268,19 @@ function InteractiveStoryNodesTab({
                               每个选项都能写说明、条件、状态变更和跳转目标，别再只有一个按钮文案了。
                             </p>
                           </div>
-                          {selectedNode ? <AdminBadge>{selectedNode.choices?.length || 0} 个选项</AdminBadge> : null}
+                          {selectedNode ? (
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              <AdminBadge>{selectedNode.choices?.length || 0} 个选项</AdminBadge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openResequenceChoicesConfirm(selectedNode.id)}
+                                disabled={(selectedNode.choices?.length || 0) === 0 || dirtyNodeCount > 0}
+                              >
+                                重排选项
+                              </Button>
+                            </div>
+                          ) : null}
                         </div>
 
                         {!selectedNode ? (
