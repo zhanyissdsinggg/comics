@@ -199,7 +199,7 @@ function summarizeSpotlightDescription(text, fallback) {
 
 function CreatorPageSkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -458,13 +458,13 @@ export default function CreatorPage({
   }, [spotlightSeries]);
 
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black/12 bg-white px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const creatorCardClass =
-    "overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)]";
+    "overflow-hidden rounded-[30px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const neutralChipClass =
-    "rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/70 shadow-[0_8px_18px_rgba(15,23,42,0.05)]";
+    "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const softActionClass = secondaryButtonClass;
   const strongActionClass = primaryButtonClass;
 
@@ -571,7 +571,7 @@ export default function CreatorPage({
     {
       label: "Profile",
       value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
-      tone: "bg-[#f6f7f9]",
+      tone: "bg-white",
     },
     {
       label: "Titles",
@@ -581,7 +581,7 @@ export default function CreatorPage({
     {
       label: "Top genre",
       value: topGenres[0] || "Mixed",
-      tone: "bg-[#f6f7f9]",
+      tone: "bg-white",
     },
   ];
   const emptyCreatorPathways = useMemo(
@@ -631,7 +631,7 @@ export default function CreatorPage({
 
   if (error) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
@@ -655,7 +655,7 @@ export default function CreatorPage({
 
   if (!creatorItems.length) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -736,7 +736,7 @@ export default function CreatorPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -772,7 +772,7 @@ export default function CreatorPage({
               {creatorDeskStats.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-white/12 bg-white/90 px-4 py-3 text-black shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
+                  className="rounded-[24px] border-2 border-black bg-white px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
                     {item.label}

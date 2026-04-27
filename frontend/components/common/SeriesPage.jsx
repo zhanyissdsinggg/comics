@@ -500,9 +500,9 @@ export default function SeriesPage({
     }));
   }, [config.fallbackGenres, genreQuickPicks]);
   const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px";
+    "rounded-full border-2 border-black bg-[#00E5FF] px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px";
+    "rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const showEntrySpotlight =
     Boolean(entrySpotlight) &&
     !isComicPage &&
@@ -510,7 +510,7 @@ export default function SeriesPage({
   const showCatalogCount = !isComicPage;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-7 md:gap-8 md:px-8 md:py-10">
@@ -518,17 +518,17 @@ export default function SeriesPage({
           <SurfacePanel
             className="space-y-4 px-4 py-4 sm:space-y-5 sm:px-6 sm:py-6"
             tone="highlight"
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
           >
             <div className="max-w-3xl">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                 {config.eyebrow}
               </p>
-              <h1 className="mt-3 text-[2.2rem] font-semibold leading-[0.92] tracking-[-0.06em] text-black sm:mt-4 sm:text-[3.35rem] xl:text-[4.2rem]">
+              <h1 className="mt-3 text-[2.2rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-white sm:mt-4 sm:text-[3.35rem] xl:text-[4.2rem]">
                 {config.heroTitle}
               </h1>
-              <p className="mt-4 max-w-2xl text-sm font-medium leading-7 text-black/68 sm:text-[0.98rem]">
+              <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-white/80 sm:text-[0.98rem]">
                 {config.description}
               </p>
             </div>
@@ -539,7 +539,7 @@ export default function SeriesPage({
                   key={`hero-genre-${item.genre}`}
                   type="button"
                   onClick={() => updateParams({ genre: item.genre })}
-                  className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/72 shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
+                  className="inline-flex items-center rounded-full border-2 border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
                 >
                   {item.genre}
                 </button>
@@ -550,7 +550,7 @@ export default function SeriesPage({
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className="rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px"
+                className="rounded-full border-2 border-black bg-[#00E5FF] px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 Search
               </button>
@@ -558,7 +558,7 @@ export default function SeriesPage({
           </SurfacePanel>
 
           {showEntrySpotlight ? (
-            <section className="rounded-[30px] border border-black/10 bg-white p-4 shadow-[0_20px_46px_rgba(15,23,42,0.08)] sm:p-6">
+            <section className="rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
               <div className="grid grid-cols-[108px_minmax(0,1fr)] gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                 <Cover
                   tone={entrySpotlight.coverTone}
@@ -570,17 +570,17 @@ export default function SeriesPage({
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-black/10 bg-[#f6f7f9] shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                 />
 
                 <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-[0.26em] text-black/55">
+                  <p className="text-[11px] font-black uppercase tracking-[0.26em] text-white/70">
                     Spotlight
                   </p>
-                  <h2 className="mt-2.5 text-[1.5rem] font-black uppercase leading-tight tracking-[-0.04em] text-black sm:mt-3 sm:text-[1.8rem]">
+                  <h2 className="mt-2.5 text-[1.5rem] font-black uppercase leading-tight tracking-[-0.04em] text-white sm:mt-3 sm:text-[1.8rem]">
                     {entrySpotlight.title}
                   </h2>
-                  <p className="mt-3 text-sm font-medium leading-6 text-black/68">
+                  <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
                     {getSeriesSubtitle(entrySpotlight)}
                   </p>
 
@@ -593,7 +593,7 @@ export default function SeriesPage({
                       .map((genre) => (
                         <span
                           key={`spotlight-${entrySpotlight.id}-${genre}`}
-                          className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/72"
+                          className="rounded-full border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                         >
                           {genre}
                         </span>
@@ -603,7 +603,7 @@ export default function SeriesPage({
                   <button
                     type="button"
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
-                    className="mt-5 rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px"
+                    className="mt-5 rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
                   >
                     Series
                   </button>
@@ -619,17 +619,17 @@ export default function SeriesPage({
               <SurfacePanel
                 key={index}
                 className="space-y-5"
-                appearance="light"
-                accent="blue"
+                appearance="dark"
+                accent="cyan"
               >
                 <div className="space-y-3">
-                  <div className="h-3 w-24 rounded-full bg-slate-200" />
-                  <div className="h-8 w-56 rounded-full bg-slate-200" />
-                  <div className="h-4 w-full max-w-xl rounded-full bg-slate-100" />
+                  <div className="h-3 w-24 rounded-full bg-white/20" />
+                  <div className="h-8 w-56 rounded-full bg-white/20" />
+                  <div className="h-4 w-full max-w-xl rounded-full bg-white/10" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {Array.from({ length: 4 }).map((__, cardIndex) => (
-                    <SkeletonCard key={cardIndex} appearance="light" />
+                    <SkeletonCard key={cardIndex} appearance="dark" />
                   ))}
                 </div>
               </SurfacePanel>
@@ -642,14 +642,14 @@ export default function SeriesPage({
                 <SurfacePanel
                   key={card.title}
                   className="space-y-4"
-                  appearance="light"
-                  accent="blue"
+                  appearance="dark"
+                  accent="cyan"
                 >
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                       {card.eyebrow}
                     </p>
-                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                       {card.title}
                     </h2>
                   </div>
@@ -666,14 +666,14 @@ export default function SeriesPage({
 
             <SurfacePanel
               className="space-y-4"
-              appearance="light"
-              accent="blue"
+              appearance="dark"
+              accent="cyan"
             >
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                   Genres
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   Genres
                 </h2>
               </div>
@@ -688,7 +688,7 @@ export default function SeriesPage({
                         `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
                       )
                     }
-                    className="rounded-full border border-black/10 bg-white px-3 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
+                    className="rounded-full border-2 border-black bg-white px-3 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
                   >
                     {item.genre}
                   </button>
@@ -698,18 +698,18 @@ export default function SeriesPage({
           </section>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+        <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                 Catalog
               </p>
-              <h2 className="mt-2 font-display text-[1.95rem] font-black uppercase tracking-[-0.05em] text-black">
+              <h2 className="mt-2 font-display text-[1.95rem] font-black uppercase tracking-[-0.05em] text-white">
                 {config.title}
               </h2>
             </div>
             {showCatalogCount ? (
-              <p className="text-sm font-medium uppercase tracking-[0.12em] text-black/55">
+              <p className="text-sm font-black uppercase tracking-[0.12em] text-white/70">
                 {formatTitleCount(filteredAndSortedSeries.length)}
               </p>
             ) : null}
@@ -724,7 +724,7 @@ export default function SeriesPage({
             status={status}
             onStatusChange={(value) => updateParams({ status: value })}
             onReset={handleResetFilters}
-            appearance="light"
+            appearance="dark"
             density={isComicPage ? "quiet" : "default"}
           />
         </SurfacePanel>
@@ -732,16 +732,16 @@ export default function SeriesPage({
         {loading ? (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 15 }).map((_, index) => (
-              <SkeletonCard key={index} appearance="light" />
+              <SkeletonCard key={index} appearance="dark" />
             ))}
           </div>
         ) : filteredAndSortedSeries.length === 0 ? (
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <EmptyState
               icon={config.emptyIcon}
               title={emptyStateCopy.title}
               description={emptyStateCopy.description}
-              appearance="light"
+              appearance="dark"
               action={{
                 label: "Reset filters",
                 onClick: handleResetFilters,
@@ -773,7 +773,6 @@ export default function SeriesPage({
                 key={item.id}
                 item={item}
                 tone={item.coverTone}
-                appearance="light"
                 density="compact"
                 showActionLabel={false}
                 coverFallbackVariant={isComicPage ? "minimal-card" : "default"}

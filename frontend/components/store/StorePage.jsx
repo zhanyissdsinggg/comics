@@ -523,7 +523,7 @@ export default function StorePage({
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">

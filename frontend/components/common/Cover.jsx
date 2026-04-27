@@ -112,7 +112,7 @@ function CoverFallback({
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
-            <span className="inline-flex whitespace-nowrap rounded-full border border-black/10 bg-[#f6f7f9] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-black">
+            <span className="inline-flex whitespace-nowrap rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               {minimalChipLabel}
             </span>
           ) : null}
@@ -120,18 +120,18 @@ function CoverFallback({
       ) : (
         <div className="absolute left-3 right-4 top-3 flex flex-wrap items-start gap-2">
           {artDirection.badgeLabel ? (
-            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-black/10 bg-[#f6f7f9] py-1 pl-2.5 pr-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-black">
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border-2 border-black bg-[#FFE500] py-1 pl-2.5 pr-3 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               {artDirection.badgeLabel}
             </span>
           ) : null}
           <div className="order-2 flex w-full flex-wrap gap-2">
             {shouldShowTypeLabel ? (
-              <span className="rounded-full border border-sky-200/70 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-700">
+              <span className="rounded-full border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 {artDirection.typeLabel}
               </span>
             ) : null}
             {artDirection.primaryGenre ? (
-              <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-black">
+              <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 {artDirection.primaryGenre}
               </span>
             ) : null}

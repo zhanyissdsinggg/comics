@@ -85,7 +85,7 @@ export default function MatureContentPage() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       <StructuredDataScript id="mature-content-jsonld" data={structuredData} />
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">

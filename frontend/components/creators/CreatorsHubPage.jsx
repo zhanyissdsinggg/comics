@@ -243,39 +243,39 @@ function buildCreatorWorksSummary(creator) {
 
 function CreatorDirectorySkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel appearance="light" accent="blue" className="space-y-6">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-100" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-white/20" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/20" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/10" />
             </div>
           </SurfacePanel>
           <SurfacePanel
             tone="muted"
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             className="space-y-3"
           >
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-hero-stat-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-black/10 bg-white"
+                className="h-24 animate-pulse rounded-[24px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
               />
             ))}
           </SurfacePanel>
         </div>
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-4">
-          <div className="h-3 w-28 animate-pulse rounded-full bg-slate-200" />
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+          <div className="h-3 w-28 animate-pulse rounded-full bg-white/20" />
           <div className="grid gap-3 sm:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-filter-skeleton-${index}`}
-                className="h-11 animate-pulse rounded-full border border-black/10 bg-white"
+                className="h-11 animate-pulse rounded-full border-2 border-white/20 bg-white/10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
               />
             ))}
           </div>
@@ -285,7 +285,7 @@ function CreatorDirectorySkeleton() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`creators-card-skeleton-${index}`}
-              className="h-[360px] animate-pulse rounded-[28px] border border-black/10 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+              className="h-[360px] animate-pulse rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             />
           ))}
         </div>
@@ -294,7 +294,7 @@ function CreatorDirectorySkeleton() {
           {Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard
               key={`creator-grid-skeleton-${index}`}
-              appearance="light"
+              appearance="dark"
             />
           ))}
         </div>
@@ -568,19 +568,19 @@ export default function CreatorsHubPage({
   );
 
   const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
+    "rounded-full border-2 border-black bg-[#00E5FF] px-5 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
+    "rounded-full border-2 border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const filterButtonClass = (isActive) =>
-    `rounded-full border px-3.5 py-2 text-sm font-semibold tracking-[0.02em] transition-all ${
+    `rounded-full border-2 border-black px-3.5 py-2 text-sm font-black uppercase tracking-[0.02em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
       isActive
-        ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
-        : "border-black/12 bg-white text-black/72 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03] hover:text-black"
+        ? "bg-[#FFE500] text-black"
+        : "bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5"
     }`;
   const creatorCardClass =
-    "block w-full rounded-[30px] border border-black/10 bg-white p-4 text-left shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-black/15 hover:bg-black/[0.02]";
+    "block w-full rounded-[30px] border-2 border-black bg-white p-4 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const neutralChipClass =
-    "rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1 text-xs font-semibold tracking-[0.04em] text-black/72";
+    "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const jumpToGenreBrowse = (genre) => {
     setQuery("");
     setCreditFilter("all");
@@ -789,13 +789,13 @@ export default function CreatorsHubPage({
       : "Titles";
 
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
-              accent="blue"
-              appearance="light"
+              accent="cyan"
+              appearance="dark"
               eyebrow="Creator credits"
               title={
                 error
@@ -819,12 +819,12 @@ export default function CreatorsHubPage({
 
             <SurfacePanel
               tone="muted"
-              accent="blue"
-              appearance="light"
+              accent="cyan"
+              appearance="dark"
               className="flex h-full flex-col justify-between space-y-6"
             >
               <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black dark:text-white">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {fallbackDeskTitle}
                 </h2>
               </div>
@@ -953,14 +953,14 @@ export default function CreatorsHubPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:gap-8 md:px-8 md:py-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
             eyebrow="Creators"
             title="Creators"
             description=""
@@ -969,12 +969,12 @@ export default function CreatorsHubPage({
 
           <SurfacePanel
             tone="muted"
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
             className="flex h-full flex-col justify-between space-y-5"
           >
             <div>
-              <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
+              <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                 Creators
               </h2>
             </div>
@@ -1005,7 +1005,7 @@ export default function CreatorsHubPage({
           />
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 sm:space-y-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">

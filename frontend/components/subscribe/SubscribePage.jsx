@@ -327,7 +327,7 @@ export default function SubscribePage({
   const compareShellClass =
     "overflow-hidden rounded-[30px] border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)]";
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">

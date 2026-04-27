@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import SurfacePanel from "./SurfacePanel";
 
 export const storefrontPrimaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black bg-black px-5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:bg-black/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-black/10 active:translate-y-px h-11";
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-black bg-[#00E5FF] px-5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] h-11";
 
 export const storefrontSecondaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black/12 bg-white px-5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out outline-none select-none hover:border-black/18 hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black focus-visible:ring-[3px] focus-visible:ring-black/10 active:translate-y-px h-11";
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-black bg-white px-5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] h-11";
 
 export const storefrontInfoCardClass =
-  "rounded-[22px] border border-black/10 bg-white px-5 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]";
+  "rounded-[22px] border-2 border-black bg-white px-5 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
 
 export function StorefrontSectionHeading({
   eyebrow,
@@ -19,16 +19,16 @@ export function StorefrontSectionHeading({
   return (
     <div className={cn("space-y-3", className)}>
       {eyebrow ? (
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
           {eyebrow}
         </p>
       ) : null}
       <div>
-        <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
+        <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 text-sm font-medium leading-7 text-black/68">
+          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
             {description}
           </p>
         ) : null}
@@ -48,8 +48,8 @@ export function StorefrontDesk({
   return (
     <SurfacePanel
       tone="muted"
-      accent="blue"
-      appearance="light"
+      accent="cyan"
+      appearance="dark"
       className={cn("flex h-full flex-col justify-between space-y-6", className)}
     >
       <StorefrontSectionHeading
@@ -71,9 +71,9 @@ export function StorefrontInfoCard({
   children = null,
 }) {
   return (
-    <div className={cn(storefrontInfoCardClass, className)}>
+    <div className={cn(storefrontInfoCardClass, "text-black", className)}>
       {eyebrow ? (
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/65">
           {eyebrow}
         </p>
       ) : null}
@@ -81,7 +81,7 @@ export function StorefrontInfoCard({
         {title}
       </h3>
       {description ? (
-        <p className="mt-3 text-sm font-medium leading-7 text-black/68">
+        <p className="mt-3 text-sm font-semibold leading-7 text-black/75">
           {description}
         </p>
       ) : null}

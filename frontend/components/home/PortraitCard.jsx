@@ -96,15 +96,14 @@ function PortraitCard({
   const cardContent = (
     <div
       className={cn(
-        "overflow-hidden transition-all duration-300 group-hover:-translate-y-1",
-        "rounded-[28px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.08)] group-hover:border-black/14 group-hover:bg-[#fcfcfd] group-hover:shadow-[0_24px_50px_rgba(15,23,42,0.12)]",
+        "overflow-hidden rounded-[28px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:translate-y-0.5",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "relative aspect-[3/4] overflow-hidden",
-            "bg-[#f6f7f9]",
+            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
           )}
         >
           <Cover
@@ -152,9 +151,9 @@ function PortraitCard({
           {metaLine ? (
             <p
               className={cn(
-                "line-clamp-1 font-semibold uppercase tracking-[0.2em] transition-colors",
+                "line-clamp-1 font-black uppercase tracking-[0.2em]",
                 isCompact ? "text-[10px]" : "text-[11px]",
-                "text-black/45 group-hover:text-black/60",
+                "text-black/65",
               )}
             >
               {metaLine}
@@ -179,11 +178,11 @@ function PortraitCard({
               <span
                 key={`${item?.id || item?.title || "series"}-${genre}`}
                 className={cn(
-                  "inline-flex items-center whitespace-nowrap rounded-full border font-medium",
+                  "inline-flex items-center whitespace-nowrap rounded-full border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
                   isCompact
                     ? "px-2.5 py-1 text-[10px]"
                     : "px-3 py-1 text-[11px]",
-                  "border-black/10 bg-[#f6f7f9] text-black/60",
+                  "bg-[#FFE500] text-black",
                 )}
               >
                 {genre}
@@ -237,8 +236,8 @@ function PortraitCard({
           ) : null}
           <span
             className={cn(
-              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1",
-              "border border-black/10 bg-[#f6f7f9] text-black/70 shadow-[0_10px_20px_rgba(15,23,42,0.06)] group-hover:bg-white",
+              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+              "transition-transform duration-150 group-hover:translate-x-0.5",
             )}
           >
             <ArrowRight className="size-4" />
