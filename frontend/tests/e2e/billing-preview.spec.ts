@@ -93,17 +93,12 @@ test.describe("Billing prelaunch states", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Point packs open soon." }).first(),
+      page.getByRole("heading", { name: "Coming soon." }).first(),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByText("Prices are visible. Checkout is not live yet."),
-    ).toBeVisible({
-      timeout: BILLING_UI_TIMEOUT_MS,
-    });
-    await expect(
-      page.getByText("Receipts show up in Purchases after launch."),
+      page.getByText("Preview only. Checkout is disabled."),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });
@@ -137,7 +132,7 @@ test.describe("Billing prelaunch states", () => {
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByText("Plans are visible. Checkout is disabled."),
+      page.getByText("Preview only. Checkout is disabled."),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });

@@ -19,7 +19,7 @@ import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
   title: "18+ Access",
-  description: "18+ access and controls.",
+  description: "18+ access controls.",
   path: "/mature-content",
 });
 
@@ -27,26 +27,26 @@ const FAQ_ITEMS = [
   {
     question: "What counts as mature content on Gush?",
     answer:
-      "Mature content means titles that stay hidden until 18+ access is turned on and the required age check is complete.",
+      "Mature titles stay hidden until 18+ access is enabled.",
   },
   {
     question: "Who needs to complete an age check?",
     answer:
-      "Readers who want the 18+ catalog may need to sign in and confirm age for the current region.",
+      "Sign in and confirm age when prompted.",
   },
   {
     question: "What does Hide 18+ history do?",
     answer:
-      "It hides mature titles from visible reading history on the account or device where it is turned on.",
+      "It hides mature titles from visible reading history.",
   },
   {
     question: "Can region settings change what I see?",
     answer:
-      "Yes. Mature-content rules and age thresholds can depend on your region setting.",
+      "Yes. Rules can vary by region.",
   },
   {
     question: "What if age check fails or 18+ titles still look hidden?",
-    answer: "Check the gate, region, and support.",
+    answer: "Try the gate again or contact support.",
   },
 ];
 
@@ -79,7 +79,7 @@ export default function MatureContentPage() {
       path: "/mature-content",
       name: `Mature Content | ${siteConfig.siteName}`,
       description:
-        "See how 18+ access, region checks, and 18+ history controls work on Gush.",
+        "How 18+ access works.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
@@ -180,8 +180,6 @@ export default function MatureContentPage() {
             <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
               <li>Sign in.</li>
               <li>Confirm age.</li>
-              <li>Check region.</li>
-              <li>Check 18+ history.</li>
               <li>Support.</li>
             </ul>
           </SurfacePanel>

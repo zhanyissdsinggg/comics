@@ -411,7 +411,7 @@ export default function SubscribePage({
                 Coming soon.
               </h3>
               <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Plans are visible. Checkout is disabled.
+                Preview only. Checkout is disabled.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button

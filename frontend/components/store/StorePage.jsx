@@ -651,13 +651,10 @@ export default function StorePage({
           {!purchaseActionsEnabled ? (
             <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
               <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-black">
-                Point packs open soon.
+                Coming soon.
               </h3>
               <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Prices are visible. Checkout is not live yet.
-              </p>
-              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Receipts show up in Purchases after launch.
+                Preview only. Checkout is disabled.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -684,13 +681,13 @@ export default function StorePage({
                 label: "Today",
                 detail: purchaseActionsEnabled
                   ? "Buy what you need."
-                  : "Not live yet.",
+                  : "Preview.",
               },
               {
                 label: "Receipts",
                 detail: purchaseActionsEnabled
                   ? "Receipts in Orders."
-                  : "Receipts after launch.",
+                  : "After launch.",
               },
               {
                 label: "Help",
