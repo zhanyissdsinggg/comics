@@ -68,13 +68,13 @@ const SearchBar = memo(function SearchBar({
   const discoveryHeading = "Open";
   const shellClass = isFocused
     ? isDark
-      ? "border-[#FFE500] bg-white/10 text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
-      : "border-black/18 bg-white text-black shadow-[0_0_0_4px_rgba(15,23,42,0.08)]"
+      ? "border-2 border-[#FFE500] bg-white/10 text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
+      : "border-2 border-black bg-white text-black shadow-[0_0_0_4px_rgba(15,23,42,0.08)]"
     : isDark
-      ? "border-white/20 bg-white/10 text-white hover:border-[#FFE500]"
+      ? "border-2 border-white/20 bg-white/10 text-white hover:border-[#FFE500]"
       : isHome
-        ? "border-black/12 bg-white text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.02]"
-        : "border-black/12 bg-white/96 text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-white";
+        ? "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#00E5FF]"
+        : "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white";
   const searchIconClass = isFocused
     ? isDark
       ? "text-white"
@@ -226,7 +226,7 @@ const SearchBar = memo(function SearchBar({
     <div ref={containerRef} className="relative w-full">
         <div
           className={cn(
-          "relative flex items-center gap-2 rounded-full border px-4 py-2.5 transition-all duration-200 touch-manipulation",
+          "relative flex items-center gap-2 rounded-full px-4 py-2.5 transition-all duration-150 touch-manipulation",
           shellClass,
         )}
         style={{ WebkitTapHighlightColor: "transparent" }}
@@ -276,7 +276,10 @@ const SearchBar = memo(function SearchBar({
               inputRef.current?.blur();
             }
           }}
-          className="min-w-0 flex-1 bg-transparent text-base text-black placeholder:text-black/38 focus:outline-none md:text-sm"
+          className={cn(
+            "min-w-0 flex-1 bg-transparent text-base placeholder:text-black/38 focus:outline-none md:text-sm",
+            isDark ? "text-white placeholder:text-white/50" : "text-black",
+          )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
           aria-label="Search series, creators, or genres"
@@ -305,8 +308,10 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
               isHome
-                ? "border border-black/10 bg-[#f8fafc] text-black/55"
-                : "border border-black/10 bg-[#f8fafc] text-black/55",
+                ? "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                : isDark
+                  ? "border-2 border-white/20 bg-white/10 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
             )}
           >
             {shortcutLabel}
@@ -318,10 +323,10 @@ const SearchBar = memo(function SearchBar({
         <div
           id={listboxId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.14)] backdrop-blur-md",
-            isHome
-              ? ""
-              : "",
+            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-md",
+            isDark
+              ? "border-white/20 bg-black"
+              : "border-black bg-white",
           )}
         >
           <div className="p-2">

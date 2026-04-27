@@ -104,41 +104,41 @@ export default function HeaderMenuModal({
         className="absolute inset-x-0 top-0 px-4 pb-4 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mx-auto max-w-[30rem] overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.16)]">
-          <div className="border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="inline-flex rounded-full border border-black/10 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
-                Menu
-              </p>
-              <h2 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-black">
-                Menu
-              </h2>
+        <div className="mx-auto max-w-[30rem] overflow-hidden rounded-[30px] border-2 border-[#FFE500] bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="border-b-2 border-[#FFE500] bg-black p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  Menu
+                </p>
+                <h2 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white">
+                  Menu
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                aria-label="Close menu"
+              >
+                <ChevronRight className="size-5 rotate-45" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/16 hover:bg-black/[0.03] hover:text-black"
-              aria-label="Close menu"
-            >
-              <ChevronRight className="size-5 rotate-45" />
-            </button>
-          </div>
           </div>
 
-          <div className="m-4 rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] p-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]">
+          <div className="m-4 rounded-[24px] border-2 border-white/20 bg-white/5 p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                       Account
                     </p>
-                    <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-black">
+                    <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-white">
                       Signed in
                     </p>
                   </div>
-                  <span className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/72">
+                  <span className="rounded-full border-2 border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     {walletTotal.toLocaleString()} pts
                   </span>
                 </div>
@@ -161,20 +161,20 @@ export default function HeaderMenuModal({
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:border-black/16 hover:bg-black/[0.02]",
+                      "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border-2 border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                       <>
                         <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white">
                             <Icon className="size-4" />
                           </span>
                           {item.label}
                         </span>
                         {item.badge ? (
-                          <span className="rounded-full border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-2 py-0.5 text-[10px] font-semibold text-rose-700">
+                          <span className="rounded-full border-2 border-black bg-[#FF007A] px-2 py-0.5 text-[10px] font-semibold text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                             {item.badge}
                           </span>
                         ) : (
-                          <ChevronRight className="size-4 text-black/45" />
+                          <ChevronRight className="size-4 text-white/60" />
                         )}
                       </>,
                     );
@@ -183,10 +183,10 @@ export default function HeaderMenuModal({
               </>
             ) : (
               <>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                   Account
                 </p>
-                <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-black">
+                <p className="mt-2 text-lg font-black uppercase tracking-[0.03em] text-white">
                   Sign in
                 </p>
                 <div className="mt-4 flex gap-2">
@@ -196,13 +196,13 @@ export default function HeaderMenuModal({
                       onClose();
                       onOpenLogin?.();
                     }}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black bg-black px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                   >
                     Sign In
                   </button>
                   {renderMenuLink(
                     { label: "Help", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-black/12 bg-white px-4 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/16 hover:bg-black/[0.03]",
+                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                     "Help",
                   )}
                 </div>
@@ -211,7 +211,7 @@ export default function HeaderMenuModal({
           </div>
 
           <div className="m-4 mt-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
               Sections
             </p>
             <div className="mt-3 grid gap-2">
@@ -221,21 +221,21 @@ export default function HeaderMenuModal({
                 return renderMenuLink(
                   item,
                   cn(
-                    "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border px-4 py-3 text-sm font-semibold tracking-[0.02em] transition",
+                    "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border-2 px-4 py-3 text-sm font-semibold tracking-[0.02em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                     isActive
-                      ? "border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]"
-                      : "border-black/10 bg-white text-black/75 shadow-[0_10px_24px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.02]",
+                      ? "border-black bg-[#FF007A] text-white"
+                      : "border-white/20 bg-white/10 text-white hover:bg-white/14",
                   ),
                   <>
                     <span className="flex items-center gap-3">
                       {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-[#f8fafc] text-black">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white">
                           <Icon className="size-4" />
                         </span>
                       ) : null}
                       {item.label}
                     </span>
-                    <ChevronRight className="size-4 text-black/45" />
+                    <ChevronRight className="size-4 text-white/60" />
                   </>,
                 );
               })}

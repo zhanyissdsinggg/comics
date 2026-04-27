@@ -37,17 +37,17 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] placeholder:text-black/35 transition-[border-color,box-shadow,background-color] duration-200 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)] focus:outline-none";
+    "w-full rounded-[20px] border-2 border-black bg-white px-4 py-3 text-sm font-medium text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] placeholder:text-black/40 transition-all duration-150 focus:border-[#FFE500] focus:outline-none";
   const secondaryPillClass =
-    "rounded-full border border-black/12 bg-white text-black/70 shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/18 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px";
+    "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px";
+    "rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
   const activePillClass =
-    "rounded-full border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)]";
+    "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const dividerClass =
     "h-px flex-1 bg-black/10";
   const primaryButtonClass =
-    "rounded-full border border-black bg-black px-6 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px";
+    "rounded-full border-2 border-black bg-[#00E5FF] px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
 
   useEffect(() => {
     if (open) {
