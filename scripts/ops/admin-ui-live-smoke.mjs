@@ -1410,14 +1410,78 @@ async function run() {
     ensureDirectory(outputJson);
     ensureDirectory(outputTxt);
 
+    // Run a minimal non-authenticated smoke so we still catch proxy regressions
+    // like /api/admin/auth/login returning 502 or the login page not rendering.
+    const results = [];
+    const warnings = [message];
+
+    try {
+      const apiRes = await fetch(`${frontendUrl}/api/admin/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({}),
+      });
+      const body = await apiRes.text();
+      results.push({
+        id: "login.api-reachable",
+        route: "/api/admin/auth/login",
+        description: "Login API reachable (expects 400 without credentials, not 502).",
+        ok: apiRes.status >= 400 && apiRes.status < 500,
+        finalUrl: `${frontendUrl}/api/admin/auth/login`,
+        note: `status=${apiRes.status}`,
+        error: apiRes.status >= 500 ? body.slice(0, 240) : null,
+      });
+    } catch (error) {
+      results.push({
+        id: "login.api-reachable",
+        route: "/api/admin/auth/login",
+        description: "Login API reachable (expects 400 without credentials, not 502).",
+        ok: false,
+        finalUrl: `${frontendUrl}/api/admin/auth/login`,
+        error: summarizeError(error),
+      });
+    }
+
+    try {
+      const browser = await chromium.launch({ headless: true });
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      const target = `${frontendUrl}/admin/login`;
+      await page.goto(target, { waitUntil: "domcontentloaded", timeout: DEFAULT_TIMEOUT_MS });
+      await page.waitForLoadState("networkidle").catch(() => {});
+      const hasEmail = (await page.locator('input[type="email"]').count()) > 0;
+      const hasPassword = (await page.locator('input[type="password"]').count()) > 0;
+      results.push({
+        id: "login.page-load",
+        route: "/admin/login",
+        description: "Admin login page renders email/password inputs.",
+        ok: hasEmail && hasPassword,
+        finalUrl: page.url(),
+        note: `hasEmail=${hasEmail} hasPassword=${hasPassword}`,
+      });
+      await browser.close();
+    } catch (error) {
+      results.push({
+        id: "login.page-load",
+        route: "/admin/login",
+        description: "Admin login page renders email/password inputs.",
+        ok: false,
+        finalUrl: `${frontendUrl}/admin/login`,
+        error: summarizeError(error),
+      });
+    }
+
+    const passed = results.filter((r) => r.ok).length;
+    const failed = results.length - passed;
+
     const summary = {
       generatedAt: new Date().toISOString(),
       frontendUrl,
-      status: "skipped",
-      passed: 0,
-      failed: 0,
-      warnings: [message],
-      results: [],
+      status: failed === 0 ? "pass" : "fail",
+      passed,
+      failed,
+      warnings,
+      results,
     };
     fs.writeFileSync(outputJson, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
     fs.writeFileSync(outputTxt, formatTextReport(summary), "utf8");

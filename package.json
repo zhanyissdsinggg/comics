@@ -39,6 +39,7 @@
     "ops:deploy-gate:strict:full": "node scripts/ops/deploy-gate-strict-full.mjs",
     "ops:release:ready-live": "node scripts/ops/release-ready-live.mjs",
     "ops:release:ready-live:full": "node scripts/ops/release-ready-live-full.mjs",
+    "ops:release:ready-live:full:required": "node scripts/ops/release-ready-live-full-required.mjs",
     "ops:release:summary": "node scripts/ops/release-summary.mjs",
     "ops:release:brief": "node scripts/ops/release-brief.mjs",
     "ops:release:dashboard": "node scripts/ops/release-dashboard.mjs",
