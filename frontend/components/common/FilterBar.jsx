@@ -98,13 +98,13 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "rounded-[24px] border border-black/10 bg-white px-3 py-2.5 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
-      : "rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] px-4 py-3.5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
-    : "rounded-[24px] border border-white/10 bg-black/20 px-4 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.14)]";
-  const labelClass = isLight ? "text-black/55" : "text-neutral-400";
+      ? "rounded-[22px] border-2 border-black bg-white px-3 py-2.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      : "rounded-[26px] border-2 border-black bg-white px-4 py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+    : "rounded-[24px] border-2 border-white/20 bg-black/30 px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+  const labelClass = isLight ? "text-black/60" : "text-white/70";
   const subtleButtonClass = isLight
-    ? "rounded-full border border-black/10 bg-white text-black/60 shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
-    : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
+    ? "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+    : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white/10";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
     isQuiet ? "text-[10px] tracking-[0.18em]" : "text-[11px] tracking-[0.24em]",
@@ -133,8 +133,8 @@ export default function FilterBar({
                   className={cn(
                     "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
-                      ? "rounded-full border-black/10 bg-[#f6f7f9] text-black/55"
-                      : "border-white/10 bg-white/[0.04] text-neutral-300",
+                      ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                      : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
                   )}
                 >
                   {activeFilterCount} active
@@ -146,8 +146,8 @@ export default function FilterBar({
               className={cn(
                 "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
-                  ? "rounded-full border-black/10 bg-[#f6f7f9] text-black/45"
-                  : "border-white/10 bg-white/[0.04] text-neutral-300",
+                  ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
               )}
             >
               {activeFilterCount} active
@@ -166,8 +166,8 @@ export default function FilterBar({
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "rounded-full border-black/10 bg-white text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
-                  : "border-white/10 bg-black/20 text-neutral-200 hover:border-white/20 hover:bg-white/[0.08]"
+                  ? "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white/10"
               }`}
             >
               <RotateCcw size={14} />
@@ -231,7 +231,7 @@ export default function FilterBar({
           <div
             className={cn(
               `${isQuiet ? "pt-2.5" : "space-y-3 pt-3"} border-t`,
-              isLight ? "border-black/8" : "border-white/10",
+              isLight ? "border-black/20" : "border-white/20",
             )}
           >
             {isQuiet ? (
@@ -279,8 +279,8 @@ export default function FilterBar({
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
                       isLight
-                        ? "rounded-[24px] border-black/10 bg-white"
-                        : "border-white/10 bg-black/90",
+                        ? "rounded-[22px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                        : "border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
                     )}
                   >
                     <div className="flex flex-wrap gap-2">

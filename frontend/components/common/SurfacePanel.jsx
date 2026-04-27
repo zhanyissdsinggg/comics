@@ -4,19 +4,22 @@ import { cn } from "@/lib/utils";
 
 const toneClasses = {
   dark: {
-    default: "border border-white/10 bg-[#111214] text-white",
-    muted: "border border-white/10 bg-[#17181b] text-white",
-    highlight: "border border-white/10 bg-[#111214] text-white",
+    default:
+      "border-2 border-white/20 bg-black/90 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+    muted:
+      "border-2 border-white/20 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+    highlight:
+      "border-2 border-[#FFE500] bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
     warning: "border border-amber-200/10 bg-[#1d1811] text-white",
     danger: "border border-rose-200/10 bg-[#1e1316] text-white",
   },
   light: {
     default:
-      "border border-black/8 bg-white text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[rgba(17,17,19,0.82)] dark:text-white",
+      "border-2 border-black bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
     muted:
-      "border border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[rgba(20,20,23,0.76)] dark:text-white",
+      "border-2 border-black bg-[#f3f3f5] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
     highlight:
-      "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f4f6f9_100%)] text-slate-900 backdrop-blur-none dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(20,20,23,0.9),rgba(10,10,12,0.84))] dark:text-white",
+      "border-2 border-black bg-[#FFE500] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
     warning:
       "border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
@@ -75,7 +78,7 @@ export default function SurfacePanel({
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[30px] border p-5 shadow-[0_20px_46px_rgba(15,23,42,0.08)] sm:p-6",
+        "relative overflow-hidden rounded-[28px] p-5 sm:p-6",
         toneClasses[resolvedAppearance]?.[tone] ||
           toneClasses[resolvedAppearance].default,
         isLight ? "" : "backdrop-blur-[24px]",
@@ -100,8 +103,8 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0.12)_18%,transparent_100%)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]"
-            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_34%)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.55),transparent_52%)]"
+            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]",
         )}
       />
       <div className="relative">{children}</div>

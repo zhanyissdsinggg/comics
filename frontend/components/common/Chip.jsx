@@ -20,13 +20,13 @@ export default function Chip({
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em]",
+          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
           active
             ? isLight
-              ? "border-black/12 bg-[#f6f7f9] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
+              ? "border-black bg-[#FFE500] text-black"
               : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
             : isLight
-              ? "border-black/10 bg-white text-black/68"
+              ? "border-black bg-white text-black"
               : "border-white/10 bg-white/[0.04] text-neutral-300",
           className,
         )}
@@ -41,14 +41,14 @@ export default function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200",
+        "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
         active
           ? isLight
-            ? "border-black/12 bg-[#f6f7f9] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
-            : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100 shadow-[0_18px_40px_rgba(16,185,129,0.12)]"
+            ? "border-black bg-[#FFE500] text-black"
+            : "border-[#FFE500] bg-black text-white"
           : isLight
-            ? "border-black/10 bg-white text-black/68 shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
-            : "border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+            ? "border-black bg-white text-black hover:bg-[#00E5FF]"
+            : "border-white/20 bg-white/[0.06] text-white hover:bg-white/10",
         className,
       )}
     >
