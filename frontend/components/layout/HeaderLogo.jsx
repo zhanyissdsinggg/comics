@@ -66,10 +66,10 @@ export default function HeaderLogo({ variant = "default" }) {
       )}
 
       <span className="hidden min-w-0 flex-col sm:flex">
-        <span className="text-[1.02rem] font-black uppercase leading-none tracking-[-0.04em] text-black">
+        <span className="text-[1.02rem] font-black uppercase leading-none tracking-[-0.04em] text-white">
           {siteConfig.siteName}
         </span>
-        <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-black/55">
+        <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">
           {BRAND_SUBNOTE}
         </span>
       </span>

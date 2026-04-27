@@ -12,7 +12,6 @@ import { trackEvent } from "../../lib/trackEvent";
 import HeaderLogo from "./HeaderLogo";
 import HeaderNav from "./HeaderNav";
 import HeaderSearch from "./HeaderSearch";
-import { cn } from "@/lib/utils";
 
 const HeaderActions = dynamic(() => import("./HeaderActionsRuntime"), {
   ssr: false,
@@ -165,12 +164,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
       <header
         data-site-header="1"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-        className={cn(
-          "sticky top-0 z-40 border-b border-black/8 bg-[rgba(255,255,255,0.76)] backdrop-blur-xl transition-[background-color,box-shadow,border-color] duration-200",
-          scrolled
-            ? "bg-[rgba(255,255,255,0.92)] shadow-[0_16px_40px_rgba(15,23,42,0.08)]"
-            : "shadow-none",
-        )}
+        className="sticky top-0 z-40 border-b-4 border-[#FFE500] bg-black/90 backdrop-blur-xl"
       >
         <div className="relative mx-auto max-w-[1320px] px-3 sm:px-6 lg:px-8">
           <div className="flex min-h-[56px] items-center justify-between gap-2 py-2 sm:min-h-[68px] sm:gap-4 sm:py-3">

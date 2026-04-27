@@ -102,7 +102,7 @@ export default function MobileBottomNav() {
       data-mobile-bottom-nav="1"
       className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom,0px))] md:hidden"
     >
-      <div className="mx-auto grid max-w-[720px] grid-cols-4 gap-1 rounded-[28px] border border-black/10 bg-[rgba(255,255,255,0.92)] px-1.5 py-1.5 shadow-[0_20px_46px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+      <div className="mx-auto grid max-w-[720px] grid-cols-4 gap-1 border-2 border-[#FFE500] bg-black px-1.5 py-1.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-xl">
         {TAB_ITEMS.map((item) => {
           const isActive = item.isActive(pathname);
           const Icon = item.icon;
@@ -129,14 +129,14 @@ export default function MobileBottomNav() {
               className={cn(
                 "relative flex min-h-[56px] flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-all duration-150",
                 isActive
-                  ? "rounded-[24px] border border-black/10 bg-black/[0.04] text-black"
-                  : "rounded-[24px] text-black/55 hover:bg-black/[0.03] hover:text-black/80",
+                  ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "text-white/70 hover:bg-white/10 hover:text-white",
               )}
             >
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-[var(--gush-accent)] opacity-100" : "bg-transparent",
+                  isActive ? "bg-black opacity-100" : "bg-transparent",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />
