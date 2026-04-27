@@ -1410,7 +1410,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       type: "ERROR",
                       title: "Couldn't top up",
                       description:
-                        "We couldn't top up the starter pack and restore today's streak.",
+                        "Couldn't restore today's streak.",
                     });
                   },
                   variant: "primary",

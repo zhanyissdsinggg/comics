@@ -26,7 +26,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
 
   const handleCreate = useCallback(() => {
     if (!newCollectionName.trim()) {
-      setMessage("Please enter a collection name");
+      setMessage("Enter a collection name.");
       return;
     }
 
@@ -56,7 +56,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
 
   const handleSaveEdit = useCallback(() => {
     if (!editingName.trim()) {
-      setMessage("Please enter a collection name");
+      setMessage("Enter a collection name.");
       return;
     }
 

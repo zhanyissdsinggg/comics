@@ -251,7 +251,7 @@ export default function SubscribePage({
     setFeedback(
       getFriendlyMessage(
         response.error,
-        response.message || "We couldn't update membership right now.",
+        response.message || "Couldn't update membership.",
       ),
     );
   };
@@ -275,7 +275,7 @@ export default function SubscribePage({
       setFeedback(
         getFriendlyMessage(
           response.error,
-          response.message || "We couldn't update membership right now.",
+          response.message || "Couldn't update membership.",
         ),
       );
     }

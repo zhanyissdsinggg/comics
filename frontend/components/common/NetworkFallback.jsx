@@ -26,7 +26,7 @@ function MascotPlaceholder() {
 }
 
 export default function NetworkFallback({
-  title = "We couldn't load this right now.",
+  title = "Couldn't load.",
   description = "",
   retryLabel = "Retry",
   onRetry,
@@ -63,7 +63,7 @@ export default function NetworkFallback({
           {showIllustration ? illustration || <MascotPlaceholder /> : null}
 
           <p className="mt-5 rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-black/55">
-            Connection issue
+            Network
           </p>
 
           <h2

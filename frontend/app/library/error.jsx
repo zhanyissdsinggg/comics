@@ -19,7 +19,7 @@ export default function LibraryError({ error, reset }) {
             Library error
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-black/68">
-            We couldn't load your library.
+            Couldn't load your library.
           </p>
           <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-black/55">
             {error?.message || "Retry when you're ready."}

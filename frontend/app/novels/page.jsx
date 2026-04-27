@@ -17,7 +17,7 @@ export default async function Page({ searchParams }) {
   return (
     <ErrorBoundary
       title="Failed to load novels page"
-      message="We couldn't load the novels page."
+      message="Couldn't load novels."
     >
       <NovelsPage
         initialSearchParams={initialSearchParams}

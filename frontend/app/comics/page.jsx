@@ -17,7 +17,7 @@ export default async function Page({ searchParams }) {
   return (
     <ErrorBoundary
       title="Failed to load comics page"
-      message="We couldn't load the comics page."
+      message="Couldn't load comics."
     >
       <ComicsPage
         initialSearchParams={initialSearchParams}

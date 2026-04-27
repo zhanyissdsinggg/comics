@@ -103,7 +103,7 @@ export default function AppProviders({ children }) {
     <ErrorBoundary
       name="AppRoot"
       title="Application Error"
-      message="Something went wrong with the application. Please reload the page."
+      message="Something went wrong. Reload the page."
     >
       <ThemeProvider>
         <ToastProvider>

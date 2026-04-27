@@ -20,7 +20,7 @@ export default function AdultError({ error, reset }) {
             Adult Hub error
           </h1>
           <p className="relative mx-auto mt-3 max-w-2xl text-sm leading-7 text-black/68">
-            We couldn't load the 18+ catalog.
+            Couldn't load the 18+ catalog.
           </p>
           <p className="relative mx-auto mt-2 max-w-2xl text-sm leading-7 text-black/54">
             {error?.message || "Retry when you're ready."}

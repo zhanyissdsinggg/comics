@@ -201,8 +201,8 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
 
 export const ErrorState = memo(function ErrorState({
   onRetry,
-  title = "We couldn't load this yet.",
-  description = "Connection looks shaky. Your data is safe.",
+  title = "Couldn't load.",
+  description = "Try again in a moment.",
   retryLabel = "Retry",
   className = "",
 }) {

@@ -324,7 +324,7 @@ export default function SupportPage() {
     if (!trimmedSubject || !trimmedMessage) {
       setFeedback({
         type: "error",
-        text: "Please add both a subject and a message.",
+        text: "Add a subject and a message.",
         mode: "inline",
       });
       return;

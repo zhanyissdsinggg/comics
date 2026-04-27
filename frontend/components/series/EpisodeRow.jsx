@@ -560,7 +560,7 @@ function EpisodeRow({
           setModalState({
             type: "ERROR",
             title: "Couldn't add points",
-            description: "We couldn't finish that purchase just now.",
+            description: "Couldn't finish that purchase.",
           });
           setBusyAction("");
         }}

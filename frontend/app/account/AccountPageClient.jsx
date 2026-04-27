@@ -297,7 +297,7 @@ export default function AccountPage({ initialSignedIn = false }) {
     setSecurityStatus("");
     const email = user?.email || "";
     if (!email) {
-      setSecurityStatus("Email not found. Please sign in again.");
+      setSecurityStatus("Email not found. Sign in again.");
       return;
     }
 

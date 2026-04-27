@@ -2084,7 +2084,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
             setModalState({
               type: "ERROR",
               title: "Couldn't add points",
-              description: "We couldn't finish that purchase just now.",
+              description: "Couldn't finish that purchase.",
             });
           }}
           onOpenStore={() => {
@@ -2278,7 +2278,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         type: "ERROR",
                         title: "Couldn't add points",
                         description:
-                          "We couldn't finish that purchase just now.",
+                          "Couldn't finish that purchase.",
                       });
                     },
                     variant: "primary",
