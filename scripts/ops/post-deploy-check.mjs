@@ -1,5 +1,6 @@
 import process from "node:process";
 
+const DEFAULT_LIVE_URL = "https://www.gushcomics.com";
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_PROBE_RETRY_ATTEMPTS = 2;
 const DEFAULT_PROBE_RETRY_INTERVAL_MS = 500;
@@ -189,6 +190,19 @@ function buildFrontendAuditSpecs(seriesCatalog) {
       required: homeRequired,
       forbidden: [...LEGACY_TERMS, ...AUDIT_FORBIDDEN_TERMS],
     },
+    // Storefront purchase surfaces must never show CNY/RMB in US deployments.
+    // We intentionally do NOT apply LEGACY_TERMS here because purchase pages
+    // legitimately contain commerce language.
+    {
+      route: "/store",
+      requiredAny: [["Point options", "Pick a plan", "Buy now", "Store"]],
+      forbidden: [...AUDIT_FORBIDDEN_TERMS],
+    },
+    {
+      route: "/subscribe",
+      requiredAny: [["Plans", "Choose plan", "Monthly"]],
+      forbidden: [...AUDIT_FORBIDDEN_TERMS],
+    },
     {
       route: "/rankings",
       required: rankingsRequired,
@@ -322,8 +336,8 @@ async function probeWithRetry(url, options = {}) {
 }
 
 async function run() {
-  const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL);
-  const frontendBaseUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
+  const backendBaseUrl = normalizeBaseUrl(process.env.BACKEND_URL) || DEFAULT_LIVE_URL;
+  const frontendBaseUrl = normalizeBaseUrl(process.env.FRONTEND_URL) || DEFAULT_LIVE_URL;
   const expectedBackendCommit = String(process.env.EXPECT_BACKEND_COMMIT || "").trim();
   const expectedFrontendCommit = String(process.env.EXPECT_FRONTEND_COMMIT || "").trim();
   const expectedFrontendRepo = String(process.env.EXPECT_FRONTEND_REPO || "").trim();
@@ -332,10 +346,6 @@ async function run() {
   const observabilityRequired = process.env.OBS_REQUIRED === "1";
   const requireAdvancedHealth = process.env.OPS_REQUIRE_ADVANCED_HEALTH === "1";
   const strictContentAudit = process.env.OPS_STRICT_CONTENT_AUDIT === "1";
-
-  if (!backendBaseUrl) {
-    throw new Error("BACKEND_URL is required");
-  }
 
   const rounds = readNumber("OPS_ROUNDS", DEFAULT_ROUNDS);
   const intervalMs = readNumber("OPS_INTERVAL_MS", DEFAULT_INTERVAL_MS);
