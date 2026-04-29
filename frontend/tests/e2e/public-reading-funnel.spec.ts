@@ -91,6 +91,40 @@ const CATALOG = [
     ],
   },
   {
+    id: "series-011",
+    title: "Solar Wind",
+    type: "novel",
+    status: "Ongoing",
+    adult: false,
+    description: "A courier crew races a solar storm to keep one city online.",
+    shortDescription: "A courier crew races a solar storm to keep one city online.",
+    synopsis: "A courier crew races a solar storm to keep one city online.",
+    coverUrl: createPosterPlaceholder("Solar Wind"),
+    bannerUrl: createBannerPlaceholder("Solar Wind"),
+    genres: ["Sci-Fi", "Drama"],
+    episodeCount: 3,
+    latestEpisodeId: "series-011e3",
+    updatedAt: "2026-04-22T12:00:00.000Z",
+    creator: {
+      label: "Mira Dane",
+      type: "person",
+      slug: "mira-dane-d1b324",
+      creatorId: "creator_mira_dane",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_mira_dane",
+        slug: "mira-dane-d1b324",
+        name: "Mira Dane",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
     id: "series-009",
     title: "Rocket Choir",
     type: "comic",
@@ -117,6 +151,40 @@ const CATALOG = [
         creatorId: "creator_northline_studio",
         slug: "northline-studio-c913e2",
         name: "Northline Studio",
+        type: "studio",
+        role: "studio",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-010",
+    title: "Crimson Tide",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "A harbor crew outruns a city-wide blackout and the people behind it.",
+    shortDescription: "A harbor crew outruns a city-wide blackout and the people behind it.",
+    synopsis: "A harbor crew outruns a city-wide blackout and the people behind it.",
+    coverUrl: createPosterPlaceholder("Crimson Tide"),
+    bannerUrl: createBannerPlaceholder("Crimson Tide"),
+    genres: ["Thriller", "Action"],
+    episodeCount: 3,
+    latestEpisodeId: "series-010e3",
+    updatedAt: "2026-04-18T12:00:00.000Z",
+    creator: {
+      label: "Rook Hollow Studio",
+      type: "studio",
+      slug: "rook-hollow-studio-31fd27",
+      creatorId: "creator_rook_hollow_studio",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_rook_hollow_studio",
+        slug: "rook-hollow-studio-31fd27",
+        name: "Rook Hollow Studio",
         type: "studio",
         role: "studio",
         isPrimary: true,
@@ -193,16 +261,81 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       releasedAt: "2026-03-30T00:00:00.000Z",
     },
   ],
+  "series-010": [
+    {
+      id: "series-010e1",
+      seriesId: "series-010",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-06T00:00:00.000Z",
+    },
+    {
+      id: "series-010e2",
+      seriesId: "series-010",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-13T00:00:00.000Z",
+    },
+    {
+      id: "series-010e3",
+      seriesId: "series-010",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-20T00:00:00.000Z",
+    },
+  ],
+  "series-011": [
+    {
+      id: "series-011e1",
+      seriesId: "series-011",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-05T00:00:00.000Z",
+    },
+    {
+      id: "series-011e2",
+      seriesId: "series-011",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-12T00:00:00.000Z",
+    },
+    {
+      id: "series-011e3",
+      seriesId: "series-011",
+      number: 3,
+      title: "Episode 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-19T00:00:00.000Z",
+    },
+  ],
 };
 
 const CANONICAL_ROUTE_SPECS = [
-  { path: "/", title: /Trending Comics, Novels, and Interactive Stories \| Gush/i, heading: /The Last Kingdom/i },
+  { path: "/", title: /Trending Comics, Novels, and Interactive Stories \| Gush/i, heading: /Solar Wind/i },
   { path: "/comics", title: /Comics/i, heading: /^Comics$/i },
   { path: "/novels", title: /Novels/i, heading: /^Novels$/i },
   { path: "/creators", title: /Creators/i, heading: /^Creators$/i },
   { path: "/search", title: /Search Comics & Novels/i, heading: /^Titles$/i },
   { path: "/rankings", title: /Trending Stories/i, heading: /Trending/i },
   { path: "/series/series-001", title: /The Last Kingdom|Story/i, heading: /The Last Kingdom/i },
+  { path: "/series/series-011", title: /Solar Wind|Story/i, heading: /Solar Wind/i },
   { path: "/support", title: /Support/i, heading: /Support/i },
   { path: "/account", title: /Account/i, heading: /Account/i },
   { path: "/library", title: /Library/i, heading: /Your library/i },
@@ -589,13 +722,13 @@ test.describe("Public reading funnel", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "The Last Kingdom" })).toBeVisible({
+    await expect(page.getByRole("heading", { level: 1, name: "Solar Wind" })).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.getByTestId("home-hero-primary-cta")).toHaveText("Read Chapter 1 Free");
+    await expect(page.getByTestId("home-hero-primary-cta")).toHaveText("Read Episode 1 Free");
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveAttribute(
       "href",
-      /\/read\/series-001\/series-001e1$/,
+      /\/read\/series-011\/series-011e1$/,
     );
     await expectNoBannedCopy(page, "/");
     await expectNoRuntimeIssues("/", runtimeIssues);
@@ -660,11 +793,10 @@ test.describe("Public reading funnel", () => {
 
     response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
-    await page.getByRole("button", { name: /Open menu/i }).click();
-    await expect(menu).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const footer = page.getByRole("contentinfo");
     await Promise.all([
       page.waitForURL(/\/support(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      menu.getByRole("link", { name: "Support" }).click(),
+      footer.getByRole("link", { name: "Support" }).click(),
     ]);
     await expect(page.getByRole("heading", { name: "Support" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
@@ -770,6 +902,87 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("/series/series-001 chapter list", runtimeIssues);
   });
 
+  test("novels use episode terminology everywhere", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/series/series-011", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Solar Wind" })).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).toContainText("Episodes");
+    await expect(page.locator("#episode-series-011e1")).toContainText("Episode 1");
+    await expect(page.locator("#episode-series-011e2")).toContainText("Episode 2");
+    await expect(page.locator("#episode-series-011e3")).toContainText("Episode 3");
+    await expect(page.locator("body")).not.toContainText(/Chapter 1|Chapter 2|Chapter 3/i);
+    await expectNoRuntimeIssues("/series/series-011 terminology", runtimeIssues);
+  });
+
+  test("series pages keep header, main, and footer in canonical order", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    for (const routePath of [
+      "/series/series-001",
+      "/series/series-005",
+      "/series/series-009",
+      "/series/series-010",
+      "/series/series-011",
+    ]) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      await expect(page.locator("header").first()).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+      await expect(page.locator("main").first()).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+      await expect(page.locator("footer").first()).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+
+      const counts = await page.evaluate(() => ({
+        headerCount: document.querySelectorAll("body > header").length,
+        footerCount: document.querySelectorAll("body > footer").length,
+        mainCount: document.querySelectorAll("body > main").length,
+        entryListInsideMain:
+          Boolean(document.querySelector("main [id^='episode-']")) ||
+          /episodes|chapters/i.test(
+            document.querySelector("main")?.textContent || "",
+          ),
+      }));
+
+      expect(counts.headerCount, `${routePath} should render one top-level header`).toBe(1);
+      expect(counts.mainCount, `${routePath} should render one top-level main`).toBe(1);
+      expect(counts.footerCount, `${routePath} should render one top-level footer`).toBe(1);
+      expect(counts.entryListInsideMain, `${routePath} should keep entry list inside main`).toBeTruthy();
+
+      const order = await page.evaluate(() => {
+        const bodyChildren = Array.from(document.body.children);
+        return {
+          headerIndex: bodyChildren.findIndex((node) => node.tagName === "HEADER"),
+          mainIndex: bodyChildren.findIndex((node) => node.tagName === "MAIN"),
+          footerIndex: bodyChildren.findIndex((node) => node.tagName === "FOOTER"),
+        };
+      });
+
+      expect(order.headerIndex).toBeGreaterThanOrEqual(0);
+      expect(order.mainIndex).toBeGreaterThan(order.headerIndex);
+      expect(order.footerIndex).toBeGreaterThan(order.mainIndex);
+    }
+
+    await expectNoRuntimeIssues("series-layout-order", runtimeIssues);
+  });
+
   test("creator link opens creator detail without demo or QA copy", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
@@ -807,6 +1020,27 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText(/Point packs/i);
     await expect(page.locator("body")).not.toContainText(/Compare plans/i);
     await expectNoRuntimeIssues("prelaunch-commerce-hidden", runtimeIssues);
+  });
+
+  test("library signed-out state renders the message only once", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/library", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Your library" }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+
+    const signedOutCopyCount = await page.evaluate(() => {
+      const text = document.body.innerText || "";
+      const matches = text.match(/Sign in to save progress and favorites\./g);
+      return matches ? matches.length : 0;
+    });
+
+    expect(signedOutCopyCount).toBe(1);
+    await expectNoRuntimeIssues("/library signed-out", runtimeIssues);
   });
 
   test("support form renders and validates reply email for signed-out users", async ({
@@ -861,6 +1095,43 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("canonical-public-routes", runtimeIssues);
+  });
+
+  test("hidden production routes stay blocked and prelaunch pages stay clean", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    let response = await page.goto("/series/demo-series", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status()).toBe(404);
+
+    response = await page.goto("/creators/gush-demo-studio-c6420d", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status()).toBe(404);
+
+    response = await page.goto("/creators", {
+      waitUntil: "domcontentloaded",
+    });
+    expect([200, 404]).toContain(response?.status() ?? 0);
+    if ((response?.status() ?? 0) === 200) {
+      await expectNoBannedCopy(page, "/creators");
+    }
+
+    response = await page.goto("/store", {
+      waitUntil: "domcontentloaded",
+    });
+    expect([200, 404]).toContain(response?.status() ?? 0);
+    if ((response?.status() ?? 0) === 200) {
+      await expect(page.locator("body")).toContainText(/Points are coming soon/i);
+      await expect(page.locator("body")).not.toContainText(/\$4\.99|\$7\.99|\$12\.99/i);
+      await expectNoBannedCopy(page, "/store");
+    }
+
+    await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);
   });
 
   test("public catalog routes stay free of demo and fixture copy", async ({ page }) => {

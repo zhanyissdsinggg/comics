@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
@@ -145,10 +146,13 @@ export default function CreatorShelfLinks({
 
         <div className="flex flex-wrap gap-2.5">
           {creators.map((creator) => (
-            <button
+            <Link
               key={creator.slug}
-              type="button"
-              onClick={() => handleClick(creator)}
+              href={creator.href || "/creators"}
+              onClick={(event) => {
+                event.preventDefault();
+                handleClick(creator);
+              }}
               className={`group rounded-full px-3.5 py-2 text-left transition ${
                 isLight
                   ? "border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111] active:translate-y-px"
@@ -170,10 +174,10 @@ export default function CreatorShelfLinks({
                   aria-hidden="true"
                   className={`text-sm transition group-hover:translate-x-0.5 ${isLight ? "text-white/45 group-hover:text-[#FFE500]" : "text-neutral-500 group-hover:text-neutral-300"}`}
                 >
-                  &gt;
+                  &rarr;
                 </span>
               </span>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

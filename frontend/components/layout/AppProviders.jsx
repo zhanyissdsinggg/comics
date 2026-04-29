@@ -16,6 +16,8 @@ import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
+import PublicHeader from "./PublicHeader";
+import PublicFooter from "./PublicFooter";
 
 const GlobalErrorToast = dynamic(() => import("../common/GlobalErrorToast"), {
   ssr: false,
@@ -26,8 +28,6 @@ const BackendMetaBadge = dynamic(() => import("../common/BackendMetaBadge"), {
 const PerfMonitorBadge = dynamic(() => import("../common/PerfMonitorBadge"), {
   ssr: false,
 });
-const PublicHeader = dynamic(() => import("./PublicHeader"));
-const PublicFooter = dynamic(() => import("./PublicFooter"));
 const ToastContainer = dynamic(() => import("../common/ToastContainer"), {
   ssr: false,
 });

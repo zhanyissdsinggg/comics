@@ -364,8 +364,7 @@ export default function RankingsPage({
     "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
     "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
-  const heroTitle =
-    activeView.id === "featured" ? "Trending." : `${activeView.label}.`;
+  const heroTitle = activeView.label;
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -420,23 +419,21 @@ export default function RankingsPage({
 
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                Next
+                Browse
               </p>
               <div className="flex flex-col gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => router.push("/comics")}
-                  className="rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
+                <Link
+                  href="/comics"
+                  className="rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-center text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                 >
                   Comics
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/creators")}
-                  className="rounded-full border-2 border-black bg-[#FF007A] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
+                </Link>
+                <Link
+                  href="/novels"
+                  className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-center text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
                 >
-                  Creators
-                </button>
+                  Novels
+                </Link>
               </div>
             </div>
           </SurfacePanel>
@@ -521,19 +518,20 @@ export default function RankingsPage({
             >
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
-                  Creators
+                  Keep reading
                 </p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                  Creators
+                  Find your next pick
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={() => router.push("/creators")}
-                className={secondaryButtonClass}
-              >
-                Creators
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/search" className={secondaryButtonClass}>
+                  Search
+                </Link>
+                <Link href="/novels" className={secondaryButtonClass}>
+                  Novels
+                </Link>
+              </div>
             </SurfacePanel>
           </div>
         ) : (
@@ -626,7 +624,7 @@ export default function RankingsPage({
                         ))}
                       </div>
                       <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
-                        Read More
+                        Open series
                       </p>
                     </Link>
                   ))}
@@ -679,7 +677,7 @@ export default function RankingsPage({
                           ) : null}
                         </div>
                         <span className="hidden rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:inline-flex">
-                          Read More
+                          Open series
                         </span>
                       </Link>
                     ))}
@@ -708,27 +706,25 @@ export default function RankingsPage({
               >
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                    More
+                    Browse
                   </p>
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    More
+                    Browse
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/comics")}
+                  <Link
+                    href="/comics"
                     className="rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                   >
                     Comics
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/novels")}
+                  </Link>
+                  <Link
+                    href="/novels"
                     className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
                   >
                     Novels
-                  </button>
+                  </Link>
                 </div>
               </SurfacePanel>
             </div>

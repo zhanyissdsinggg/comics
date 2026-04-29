@@ -20,6 +20,7 @@ import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 
 const DEFAULT_PACKAGE_IDS = ["starter", "medium", "value"];
 const US_REGION = getRegionConfig("us");
@@ -178,7 +179,8 @@ function getPrimaryButtonLabel({ isSignedIn, insufficient, busyAction }) {
 
 export default function UnlockChapterModal({
   open,
-  chapterNumber,
+  installmentNumber,
+  seriesType,
   pricePts = 0,
   walletBalance = 0,
   shortfallPts = 0,
@@ -209,7 +211,9 @@ export default function UnlockChapterModal({
     packages,
     preferredPackageId,
   );
-  const chapterSuffix = chapterNumber ? ` ${chapterNumber}` : "";
+  const installmentLabel = getInstallmentLabel(seriesType);
+  const installmentSuffix = installmentNumber ? ` ${installmentNumber}` : "";
+  const installmentLabelLower = installmentLabel.toLowerCase();
   const primaryButtonLabel = getPrimaryButtonLabel({
     isSignedIn,
     insufficient,
@@ -291,7 +295,7 @@ export default function UnlockChapterModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Unlock chapter${chapterSuffix}`}
+        aria-label={`Unlock ${installmentLabelLower}${installmentSuffix}`}
         className="relative w-full max-w-[32rem] overflow-hidden rounded-[32px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
         onClick={(event) => event.stopPropagation()}
       >
@@ -333,7 +337,8 @@ export default function UnlockChapterModal({
           {view === "confirm" ? (
             <div className="mt-6">
               <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-white">
-                Unlock Chapter{chapterSuffix} for{" "}
+                Unlock {installmentLabel}
+                {installmentSuffix} for{" "}
                 <span className="text-[#00E5FF]">{formatUSNumber(resolvedPrice)}</span>{" "}
                 Points
               </h2>
@@ -361,7 +366,7 @@ export default function UnlockChapterModal({
                 </div>
                 <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                    Chapter price
+                    {installmentLabel} price
                   </p>
                   <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
                     <span className="text-[#FFE500]">
@@ -419,7 +424,8 @@ export default function UnlockChapterModal({
                     Get points
                   </h2>
                   <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
-                    Add a pack to unlock Chapter{chapterSuffix}.
+                    Add a pack to unlock {installmentLabel}
+                    {installmentSuffix}.
                   </p>
                 </div>
                 <button

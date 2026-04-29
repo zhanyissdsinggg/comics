@@ -11,7 +11,7 @@ const frontendRoot = path.resolve(__dirname, "..");
 const buildIdPath = path.join(frontendRoot, ".next", "BUILD_ID");
 
 const ROUTE_SPECS = [
-  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "The Last Kingdom" },
+  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "Solar Wind" },
   { path: "/comics", expectedTitle: "Comics", expectedHeading: "Comics" },
   { path: "/novels", expectedTitle: "Novels", expectedHeading: "Novels" },
   { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
@@ -351,8 +351,8 @@ function createMockBackendServer() {
     if (pathname === "/api/recommendations/homepage") {
       jsonResponse(response, 200, {
         slots: [
-          { id: "slot-home-breakout", slot: "home-breakout", seriesIds: ["series-001"] },
-          { id: "slot-home-free-start", slot: "home-free-start", seriesIds: ["series-001"] },
+          { id: "slot-home-breakout", slot: "home-breakout", seriesIds: ["series-011"] },
+          { id: "slot-home-free-start", slot: "home-free-start", seriesIds: ["series-011"] },
           { id: "slot-home-binge-ready", slot: "home-binge-ready", seriesIds: ["series-009"] },
         ],
       });
@@ -721,7 +721,7 @@ async function run() {
         const directHref = extractHomePrimaryCtaHref(direct.html);
         const variantHref = extractHomePrimaryCtaHref(variant.html);
         if (!directHref) {
-          throw new Error('/ is missing the "Read Chapter 1 Free" anchor href');
+          throw new Error('/ is missing the home hero reading anchor href');
         }
         if (directHref !== variantHref) {
           throw new Error(

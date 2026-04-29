@@ -1092,85 +1092,54 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   </div>
                 </SurfacePanel>
               )
-            ) : (
+            ) : signedOutRecommendedStarts.length > 0 ? (
               <SurfacePanel
-                className="space-y-5"
+                className="space-y-4"
                 appearance="dark"
                 accent="blue"
                 tone="muted"
               >
-                <div className="space-y-2">
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                    Library
+                <div className="space-y-1">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                    Free starts
                   </p>
-                  <h1 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    Your library
-                  </h1>
-                  <p className="text-sm font-semibold leading-6 text-white/70">
-                    Sign in to save progress and favorites.
-                  </p>
+                  <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
+                    Try these first
+                  </h2>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={openAuthPrompt}
-                    className={primaryButtonClass}
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/comics")}
-                    className={secondaryButtonClass}
-                  >
-                    Browse free chapters
-                  </button>
-                </div>
-                {signedOutRecommendedStarts.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                        Free starts
+                <div className="grid gap-3 md:grid-cols-3">
+                  {signedOutRecommendedStarts.map((item) => (
+                    <button
+                      key={`signed-out-library-${item.id}`}
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          buildLibrarySeriesHref(
+                            item.seriesId,
+                            item.entryPoint || "LIBRARY_SIGNED_OUT_RECO",
+                            item.campaignId || "library_signed_out_reco",
+                          ),
+                        )
+                      }
+                      className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                    >
+                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+                        {item.eyebrow || "Free start"}
                       </p>
-                      <h3 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
-                        Try these first
+                      <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
+                        {item.title}
                       </h3>
-                    </div>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      {signedOutRecommendedStarts.map((item) => (
-                        <button
-                          key={`signed-out-library-${item.id}`}
-                          type="button"
-                          onClick={() =>
-                            router.push(
-                              buildLibrarySeriesHref(
-                                item.seriesId,
-                                item.entryPoint || "LIBRARY_SIGNED_OUT_RECO",
-                                item.campaignId || "library_signed_out_reco",
-                              ),
-                            )
-                          }
-                          className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
-                        >
-                          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
-                            {item.eyebrow || "Free start"}
-                          </p>
-                          <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
-                            {item.title}
-                          </h3>
-                          <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                            {item.subtitle || "Open the series page and start with chapter 1."}
-                          </p>
-                          <span className="mt-4 inline-flex rounded-full border-2 border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
-                            Start reading
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
+                      <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                        {item.subtitle || "Open the series page and start reading."}
+                      </p>
+                      <span className="mt-4 inline-flex rounded-full border-2 border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
+                        Start reading
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </SurfacePanel>
-            )}
+            ) : null}
 
             <div className="grid gap-6">
               {continueRailItems.length > 0 ? (

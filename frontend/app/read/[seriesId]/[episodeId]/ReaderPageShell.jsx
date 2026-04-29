@@ -11,7 +11,7 @@ const ReaderPage = dynamic(() => import("../../../../components/reader/ReaderPag
 function ReaderShellFallback({ fallbackData }) {
   const seriesTitle = String(fallbackData?.seriesTitle || "Reader").trim();
   const episodeTitle = String(
-    fallbackData?.episodeTitle || "Loading story",
+    fallbackData?.episodeTitle || "Loading entry",
   ).trim();
 
   return (

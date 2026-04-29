@@ -8,6 +8,7 @@ import { resolveSeriesCreatorName } from "../../../../lib/creatorIdentity";
 import { createPageMetadata } from "../../../../lib/seo";
 import {
   formatInstallmentLabel,
+  getInstallmentLabel,
   isDefaultInstallmentTitle,
 } from "../../../../lib/seriesFormatLabels";
 import { siteConfig } from "../../../../lib/siteConfig";
@@ -24,8 +25,8 @@ export async function generateMetadata({ params }) {
 
   if (!series || !episode) {
     return createPageMetadata({
-      title: "Read chapter",
-      description: `Read chapters on ${siteConfig.siteName}.`,
+      title: "Read story",
+      description: `Read stories on ${siteConfig.siteName}.`,
       path: `/read/${seriesId}/${episodeId}`,
       robots: {
         index: false,
@@ -35,7 +36,16 @@ export async function generateMetadata({ params }) {
   }
 
   const seriesTitle = String(series?.title || "").trim() || "Series";
-  const episodeTitle = String(episode?.title || "").trim() || `Chapter ${episodeId}`;
+  const fallbackEpisodeTitle = formatInstallmentLabel(
+    series?.type || episode,
+    episode?.number || episodeId,
+  );
+  const rawEpisodeTitle = String(episode?.title || "").trim();
+  const episodeTitle =
+    rawEpisodeTitle &&
+    !isDefaultInstallmentTitle(rawEpisodeTitle, series?.type || episode)
+      ? rawEpisodeTitle
+      : fallbackEpisodeTitle;
   const creatorName = resolveSeriesCreatorName(series);
   const description = [
     `Read ${episodeTitle} from ${seriesTitle} on ${siteConfig.siteName}.`,
@@ -98,7 +108,9 @@ export default async function Page({ params }) {
     seriesId,
     episodeId,
     seriesTitle: String(series?.title || "").trim() || "Reader",
-    episodeTitle: episodeTitle || "Loading story",
+    episodeTitle:
+      episodeTitle ||
+      `Loading ${getInstallmentLabel(series?.type || episode).toLowerCase()}`,
     backToSeriesHref: seriesId ? `/series/${seriesId}` : "/",
     previousEpisode:
       previousEpisode && previousEpisode?.id

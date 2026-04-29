@@ -284,7 +284,8 @@ function EpisodeRow({
     setModalState({
       type: "UNLOCK",
       view,
-      chapterNumber: episode?.number,
+      installmentNumber: episode?.number,
+      seriesType,
       pricePts: effectivePrice,
       shortfallPts: Math.max(0, Number(nextShortfall || 0)),
       targetEpisodeId: episode?.id,
@@ -491,7 +492,8 @@ function EpisodeRow({
 
       <UnlockChapterModal
         open={modalState?.type === "UNLOCK"}
-        chapterNumber={modalState?.chapterNumber}
+        installmentNumber={modalState?.installmentNumber}
+        seriesType={modalState?.seriesType || seriesType}
         pricePts={modalState?.pricePts}
         walletBalance={walletBalance}
         shortfallPts={modalState?.shortfallPts}
