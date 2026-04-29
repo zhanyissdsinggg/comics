@@ -7,6 +7,7 @@ import {
   resolveSeriesCreatorName,
   seriesMatchesCreatorSlug,
 } from "./creatorIdentity";
+import { buildHomeHeroItems, getHomeEditorialSnapshot } from "./homeMerchandising";
 
 export const SEO_REVALIDATE_SECONDS = 300;
 
@@ -183,10 +184,52 @@ export const loadHomepageSeoPayload = cache(async () => {
     fetchSeoApiJson("/api/recommendations/homepage?adult=0", "home-recommendations"),
   ]);
 
+  const seriesList = Array.isArray(seriesPayload?.series) ? seriesPayload.series : [];
+  const homepageSlots = Array.isArray(recommendationsPayload?.slots)
+    ? recommendationsPayload.slots
+    : [];
+  const editorialSnapshot = getHomeEditorialSnapshot(seriesList, { homepageSlots });
+  const hasExplicitHomeHeroSlot = homepageSlots.some(
+    (slot) =>
+      String(slot?.slot || slot?.name || slot?.id || "")
+        .trim()
+        .toLowerCase() === "home-hero",
+  );
+  const canonicalHeroSeriesId =
+    (hasExplicitHomeHeroSlot
+      ? buildHomeHeroItems(seriesList, { homepageSlots })[0]?.seriesId
+      : null) ||
+    editorialSnapshot.breakoutPick?.id ||
+    editorialSnapshot.freeStartPick?.id ||
+    buildHomeHeroItems(seriesList, { homepageSlots })[0]?.seriesId ||
+    null;
+  let canonicalHeroFirstEpisodeId = null;
+
+  if (canonicalHeroSeriesId) {
+    const detailPayload = await fetchSeoApiJson(
+      `/api/series/${encodeURIComponent(canonicalHeroSeriesId)}?adult=0`,
+      "home-canonical-hero",
+    );
+    const firstEpisode = Array.isArray(detailPayload?.episodes)
+      ? [...detailPayload.episodes].sort(
+          (left, right) => Number(left?.number || 0) - Number(right?.number || 0),
+        )[0] || null
+      : null;
+    canonicalHeroFirstEpisodeId = firstEpisode?.id || null;
+  }
+
   return {
-    seriesList: Array.isArray(seriesPayload?.series) ? seriesPayload.series : [],
+    seriesList,
     hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
-    homepageSlots: Array.isArray(recommendationsPayload?.slots) ? recommendationsPayload.slots : [],
+    homepageSlots,
+    canonicalHome: canonicalHeroSeriesId
+      ? {
+          featuredSeriesId: canonicalHeroSeriesId,
+          featuredReadHref: canonicalHeroFirstEpisodeId
+            ? `/read/${canonicalHeroSeriesId}/${canonicalHeroFirstEpisodeId}`
+            : `/series/${canonicalHeroSeriesId}`,
+        }
+      : null,
     ready: true,
   };
 });

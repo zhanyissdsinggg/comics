@@ -11,6 +11,7 @@ import {
   getEpisodeAvailabilitySummary,
 } from "../../lib/episodeAccessState";
 import { getEpisodeCommerceAccess } from "../../lib/seriesCommerce";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 
 function sortEpisodes(episodes, sortOrder) {
   const sorted = [...episodes];
@@ -46,6 +47,8 @@ export default function EpisodeList({
   );
   const walletTotal = (wallet?.paidPts || 0) + (wallet?.bonusPts || 0);
   const totalEpisodes = Array.isArray(episodes) ? episodes.length : 0;
+  const installmentPlural = getInstallmentLabel(series, { plural: true });
+  const installmentPluralLower = installmentPlural.toLowerCase();
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const episodeStateMap = useMemo(() => {
@@ -70,10 +73,11 @@ export default function EpisodeList({
   const availabilitySummary = useMemo(
     () =>
       getEpisodeAvailabilitySummary({
+        series,
         episodes,
         episodeStateMap,
       }),
-    [episodeStateMap, episodes],
+    [episodeStateMap, episodes, series],
   );
   const availabilityCounts = availabilitySummary.counts;
   const availabilityChips = useMemo(
@@ -157,14 +161,14 @@ export default function EpisodeList({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-              <span>Chapters</span>
+              <span>{installmentPlural}</span>
               <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                 {totalEpisodes.toLocaleString()}
               </span>
             </div>
             <div className="space-y-2">
               <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.04em] text-white sm:text-[2.15rem]">
-                Chapters
+                {installmentPlural}
               </h2>
             </div>
 
@@ -192,7 +196,7 @@ export default function EpisodeList({
                     value={filter}
                     onChange={(event) => setFilter(event.target.value)}
                     className={filterControlClass}
-                    aria-label="Filter chapters"
+                    aria-label={`Filter ${installmentPluralLower}`}
                   >
                     {filterOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -206,7 +210,7 @@ export default function EpisodeList({
                     value={sortOrder}
                     onChange={(event) => setSortOrder(event.target.value)}
                     className={filterControlClass}
-                    aria-label="Sort chapters"
+                    aria-label={`Sort ${installmentPluralLower}`}
                   >
                     <option value="oldest">Oldest first</option>
                     <option value="newest">Newest first</option>
@@ -222,10 +226,12 @@ export default function EpisodeList({
         {sortedEpisodes.length === 0 ? (
           <div className="rounded-[24px] border-2 border-white/15 bg-black/70 p-6 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <p className="text-base font-black uppercase tracking-[0.03em] text-white">
-              No chapters yet.
+              No {installmentPluralLower} yet.
             </p>
             <p className="mt-2 text-sm font-semibold text-white/70">
-              {filter === "all" ? "No chapters are live yet." : "Try another filter."}
+              {filter === "all"
+                ? `No ${installmentPluralLower} are live yet.`
+                : "Try another filter."}
             </p>
           </div>
         ) : (

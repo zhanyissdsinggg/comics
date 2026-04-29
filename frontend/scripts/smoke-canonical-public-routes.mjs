@@ -18,8 +18,9 @@ const ROUTE_SPECS = [
   { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Titles" },
   { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending" },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
+  { path: "/series/series-011", expectedTitle: "Solar Wind", expectedHeading: "Solar Wind" },
   { path: "/store", expectedTitle: "Store", expectedHeading: "Points" },
-  { path: "/subscribe", expectedTitle: "Plans", expectedHeading: "Plans" },
+  { path: "/subscribe", expectedTitle: "Membership is coming soon", expectedHeading: "Membership is coming soon" },
   { path: "/support", expectedTitle: "Support", expectedHeading: "Support" },
   { path: "/account", expectedTitle: "Account", expectedHeading: "Account" },
   { path: "/library", expectedTitle: "Library", expectedHeading: "Your library" },
@@ -144,6 +145,40 @@ const CATALOG = [
       },
     ],
   },
+  {
+    id: "series-011",
+    title: "Solar Wind",
+    type: "novel",
+    status: "Ongoing",
+    adult: false,
+    description: "Two rival cadets fake a truce to survive a broken station orbit.",
+    shortDescription: "Two rival cadets fake a truce to survive a broken station orbit.",
+    synopsis: "Two rival cadets fake a truce to survive a broken station orbit.",
+    coverUrl: "/mock-covers/series-011.jpg",
+    bannerUrl: "/mock-covers/series-011.jpg",
+    genres: ["Sci-Fi", "Drama"],
+    episodeCount: 3,
+    latestEpisodeId: "series-011e3",
+    updatedAt: "2026-04-23T12:00:00.000Z",
+    creator: {
+      label: "Nova Hart",
+      type: "person",
+      slug: "nova-hart-b37e12",
+      creatorId: "creator_nova_hart",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_nova_hart",
+        slug: "nova-hart-b37e12",
+        name: "Nova Hart",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
 ];
 
 const SERIES_EPISODES = {
@@ -158,6 +193,11 @@ const SERIES_EPISODES = {
   ],
   "series-009": [
     { id: "series-009e1", seriesId: "series-009", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-03-30T00:00:00.000Z" },
+  ],
+  "series-011": [
+    { id: "series-011e1", seriesId: "series-011", number: 1, title: "Episode 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-03T00:00:00.000Z" },
+    { id: "series-011e2", seriesId: "series-011", number: 2, title: "Episode 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-10T00:00:00.000Z" },
+    { id: "series-011e3", seriesId: "series-011", number: 3, title: "Episode 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-17T00:00:00.000Z" },
   ],
 };
 
@@ -263,6 +303,7 @@ function stripTags(value) {
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, "\"")
     .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -297,6 +338,90 @@ function resolveHeading(html, expectedHeading) {
   }
 
   return "";
+}
+
+function extractHomePrimaryCtaHref(html) {
+  const match = html.match(
+    /<a[^>]*data-testid=["']home-hero-primary-cta["'][^>]*href=["']([^"']+)["']/i,
+  );
+  return String(match?.[1] || "").trim();
+}
+
+function assertSeriesReaderLinks(html, seriesId) {
+  const normalizedSeriesId = String(seriesId || "").trim();
+  const primaryCtaMatch = html.match(
+    /<a[^>]*data-testid=["']series-primary-action["'][^>]*href=["']([^"']+)["']/i,
+  );
+
+  if (!primaryCtaMatch?.[1]) {
+    throw new Error(`/series/${normalizedSeriesId} is missing a primary reader anchor`);
+  }
+
+  const expectedEpisodeHrefs = [
+    `/read/${normalizedSeriesId}/${normalizedSeriesId}e1`,
+    `/read/${normalizedSeriesId}/${normalizedSeriesId}e2`,
+    `/read/${normalizedSeriesId}/${normalizedSeriesId}e3`,
+  ];
+
+  for (const href of expectedEpisodeHrefs) {
+    if (!html.includes(`href="${href}"`) && !html.includes(`href='${href}'`)) {
+      throw new Error(`/series/${normalizedSeriesId} is missing reader link "${href}"`);
+    }
+  }
+}
+
+function assertHeaderAndFooterSingle(html, pathname) {
+  const headerMatches =
+    html.match(/<header\b[^>]*data-site-header=["']1["'][^>]*>/gi) || [];
+  const footerMatches =
+    html.match(/<footer\b[^>]*data-site-footer=["']1["'][^>]*>/gi) || [];
+
+  if (headerMatches.length !== 1) {
+    throw new Error(`${pathname} should render exactly one site header, found ${headerMatches.length}`);
+  }
+
+  if (footerMatches.length !== 1) {
+    throw new Error(`${pathname} should render exactly one site footer, found ${footerMatches.length}`);
+  }
+}
+
+function assertSubscribePrelaunch(html) {
+  const bannedPricingCopy = [
+    "$4.99",
+    "$7.99",
+    "$12.99",
+    "30% off",
+    "Best savings",
+    "Compare plans",
+  ];
+
+  for (const phrase of bannedPricingCopy) {
+    if (html.toLowerCase().includes(phrase.toLowerCase())) {
+      throw new Error(`/subscribe should stay in prelaunch preview mode, found pricing copy "${phrase}"`);
+    }
+  }
+}
+
+function assertSeriesTerminology(html, seriesId, format) {
+  const normalizedFormat = String(format || "").toLowerCase();
+  if (normalizedFormat === "comic") {
+    if (!html.includes("Chapter")) {
+      throw new Error(`/series/${seriesId} should use "Chapter" terminology for comics`);
+    }
+    if (html.includes("Latest Episode") || html.includes(">Episode<")) {
+      throw new Error(`/series/${seriesId} should not leak episode terminology for a comic`);
+    }
+    return;
+  }
+
+  if (normalizedFormat === "novel") {
+    if (!html.includes("Episode")) {
+      throw new Error(`/series/${seriesId} should use "Episode" terminology for novels`);
+    }
+    if (html.includes("Latest Chapter") || html.includes(">Chapter<")) {
+      throw new Error(`/series/${seriesId} should not leak chapter terminology for a novel`);
+    }
+  }
 }
 
 function buildVariantPath(pathname) {
@@ -360,6 +485,7 @@ async function run() {
       env: {
         ...process.env,
         NODE_ENV: "production",
+        NEXT_DIST_DIR: ".next",
         API_BASE_URL: backendBaseUrl,
         NEXT_PUBLIC_API_BASE_URL: backendBaseUrl,
       },
@@ -401,6 +527,9 @@ async function run() {
       direct.heading = resolveHeading(direct.html, spec.expectedHeading);
       variant.heading = resolveHeading(variant.html, spec.expectedHeading);
 
+      assertHeaderAndFooterSingle(direct.html, spec.path);
+      assertHeaderAndFooterSingle(variant.html, `${spec.path} (variant)`);
+
       if (!direct.title) {
         throw new Error(`${spec.path} is missing a page title`);
       }
@@ -426,6 +555,44 @@ async function run() {
         !direct.heading.toLowerCase().includes(spec.expectedHeading.toLowerCase())
       ) {
         throw new Error(`${spec.path} heading mismatch: "${direct.heading}"`);
+      }
+
+      if (spec.path === "/") {
+        const secondPass = await fetchRoute(baseUrl, spec.path);
+        secondPass.heading = resolveHeading(secondPass.html, spec.expectedHeading);
+        const directHref = extractHomePrimaryCtaHref(direct.html);
+        const variantHref = extractHomePrimaryCtaHref(variant.html);
+        if (!directHref) {
+          throw new Error('/ is missing the "Read Chapter 1 Free" anchor href');
+        }
+        if (directHref !== variantHref) {
+          throw new Error(
+            `/ changed hero CTA href between direct and attributed visits: "${directHref}" vs "${variantHref}"`,
+          );
+        }
+        if (!/^\/read\/[^/]+\/[^/]+$/.test(directHref)) {
+          throw new Error(`/ hero CTA must point to a readable chapter, got "${directHref}"`);
+        }
+        if (direct.title !== secondPass.title || direct.heading !== secondPass.heading) {
+          throw new Error(
+            `/ homepage hero is unstable across consecutive requests: "${direct.title}/${direct.heading}" vs "${secondPass.title}/${secondPass.heading}"`,
+          );
+        }
+      }
+
+      if (spec.path === "/series/series-001") {
+        assertSeriesReaderLinks(direct.html, "series-001");
+        assertSeriesTerminology(direct.html, "series-001", "comic");
+      }
+
+      if (spec.path === "/series/series-011") {
+        assertSeriesReaderLinks(direct.html, "series-011");
+        assertSeriesTerminology(direct.html, "series-011", "novel");
+      }
+
+      if (spec.path === "/subscribe") {
+        assertSubscribePrelaunch(direct.html);
+        assertSubscribePrelaunch(variant.html);
       }
 
       for (const phrase of BANNED_COPY) {

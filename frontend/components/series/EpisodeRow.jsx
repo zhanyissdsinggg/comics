@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ActionModal from "./ActionModal";
@@ -17,6 +18,11 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
+import { buildReaderPath } from "../../lib/readerRoutes";
+import {
+  formatInstallmentLabel,
+  isDefaultInstallmentTitle,
+} from "../../lib/seriesFormatLabels";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -168,8 +174,8 @@ function EpisodeRow({
   );
   const effectivePrice = accessState.effectivePrice;
   const hasCustomEpisodeTitle =
-    Boolean(episode?.title) && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title);
-  const episodeNumberLabel = `Chapter ${episode?.number}`;
+    Boolean(episode?.title) && !isDefaultInstallmentTitle(episode.title, episode);
+  const episodeNumberLabel = formatInstallmentLabel(episode, episode?.number);
   const episodeHeading = hasCustomEpisodeTitle
     ? episode.title
     : episodeNumberLabel;
@@ -367,8 +373,20 @@ function EpisodeRow({
       : accessState.actionKind === "subscribe"
         ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
         : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
+  const readHref = buildReaderPath(seriesId, episode?.id);
+  const isDirectReadLink =
+    accessState.actionKind === "read" || accessState.actionKind === "preview";
 
-  const actionNode = (
+  const actionNode = isDirectReadLink ? (
+    <Link
+      href={readHref}
+      onClick={() => onRead(seriesId, episode?.id)}
+      className={`inline-flex items-center justify-center ${actionClassName}`}
+      style={{ willChange: "transform" }}
+    >
+      {accessState.actionLabel}
+    </Link>
+  ) : (
     <button
       type="button"
       onClick={handlePrimaryAction}

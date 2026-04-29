@@ -1,11 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import SiteHeader from "../../components/layout/SiteHeader";
-import SiteFooter from "../../components/layout/SiteFooter";
 import { createPageMetadata } from "../../lib/seo";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeGenreList } from "../../lib/coverPresentation";
+import {
+  filterBlockedPublicCreators,
+  filterBlockedPublicGenres,
+  filterBlockedPublicSeries,
+} from "../../lib/publicCatalogVisibility";
 
 const FORMAT_OPTIONS = [
   { label: "All", value: "" },
@@ -438,14 +441,16 @@ export default async function Page({ searchParams }) {
   const normalizedQuery = normalizeSearchValue(q);
 
   const catalogPayload = await loadSeriesCatalogSeoPayload();
-  const catalog = Array.isArray(catalogPayload?.series) ? catalogPayload.series : [];
-  const creators = buildCreatorDirectory(catalog);
+  const catalog = filterBlockedPublicSeries(
+    Array.isArray(catalogPayload?.series) ? catalogPayload.series : [],
+  );
+  const creators = filterBlockedPublicCreators(buildCreatorDirectory(catalog));
 
-  const allGenres = Array.from(
-    new Set(
-      catalog.flatMap((series) => normalizeGenreList(series?.genres)).filter(Boolean),
-    ),
-  )
+  const allGenres = Array.from(new Set(filterBlockedPublicGenres(
+    catalog
+      .flatMap((series) => normalizeGenreList(series?.genres))
+      .filter(Boolean),
+  )))
     .sort((left, right) => left.localeCompare(right))
     .slice(0, 18);
 
@@ -505,8 +510,6 @@ export default async function Page({ searchParams }) {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <SiteHeader variant="home" />
-
       <main className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
         <div className="space-y-6 rounded-[28px] border border-white/10 bg-[#0b0b0b] p-4 sm:p-6">
           <header className="space-y-3">
@@ -629,7 +632,6 @@ export default async function Page({ searchParams }) {
         </div>
       </main>
 
-      <SiteFooter tone="light" variant="compact" pathname="/search" showTagline={false} />
     </div>
   );
 }

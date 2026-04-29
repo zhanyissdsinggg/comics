@@ -3,6 +3,7 @@
 import useCountdown from "../../hooks/useCountdown";
 import { OFFERS } from "../../lib/offers/catalog";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import ShareButton from "../common/ShareButton";
 import {
   storefrontPrimaryButtonClass,
@@ -13,9 +14,12 @@ function formatPointsLabel(value) {
   return `${Number(value || 0)} points`;
 }
 
-function formatPackLabel(value) {
+function formatPackLabel(value, seriesType) {
   const count = Number(value || 0);
-  return `${count || 1} more chapter${count === 1 ? "" : "s"}`;
+  const installmentLabel = getInstallmentLabel(seriesType, {
+    plural: count !== 1,
+  }).toLowerCase();
+  return `${count || 1} more ${installmentLabel}`;
 }
 
 function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
@@ -89,6 +93,7 @@ export default function EndOfEpisodeOverlay({
   primaryActionRef,
   highlightPrimaryAction = false,
   onReturnToSource,
+  seriesType,
 }) {
   const readyAtMs = nextEpisode?.ttfReadyAt
     ? Date.parse(nextEpisode.ttfReadyAt)
@@ -114,16 +119,18 @@ export default function EndOfEpisodeOverlay({
   const packPrice = packPricing?.finalPrice || packOffer?.pricePts || 0;
   const showPackPrimary =
     packHintVariant === "C" || (recommendedOffer?.episodes || 0) > 1;
+  const installmentLabel = getInstallmentLabel(seriesType);
+  const installmentLabelLower = installmentLabel.toLowerCase();
   const primaryLabel = showPackPrimary
-    ? `Unlock ${formatPackLabel(packOffer?.episodes || 3)}`
+    ? `Unlock ${formatPackLabel(packOffer?.episodes || 3, seriesType)}`
     : singlePrice === 0
       ? "Read Free"
       : `Unlock Next - ${formatPointsLabel(singlePrice)}`;
   const secondaryLabel = showPackPrimary
     ? singlePrice === 0
-      ? "Just this chapter"
-      : `Just this chapter (${formatPointsLabel(singlePrice)})`
-    : `${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`;
+      ? `Just this ${installmentLabelLower}`
+      : `Just this ${installmentLabelLower} (${formatPointsLabel(singlePrice)})`
+    : `${formatPackLabel(packOffer?.episodes || 3, seriesType)} (${formatPointsLabel(packPrice)})`;
   const packSavingsText = packOffer?.savingsPct
     ? `Save ${packOffer.savingsPct}% with the pack.`
     : "";
@@ -134,7 +141,7 @@ export default function EndOfEpisodeOverlay({
   const packNote =
     packPricing?.appliedCoupon?.label ||
     (packPricing?.discountPct ? `${packPricing.discountPct}% off` : "");
-  const subscriptionNote = "Free reads plus lower chapter prices.";
+  const subscriptionNote = `Free reads plus lower ${installmentLabelLower} prices.`;
   const upsellBadge = showSubscribe ? "Best" : "";
   const nextEpisodeStatusLabel = nextUnlocked
     ? "Ready now"
@@ -177,7 +184,7 @@ export default function EndOfEpisodeOverlay({
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.26em] text-white/55">
-              Next chapter
+              Next {installmentLabel.toLowerCase()}
             </p>
             <p className="text-lg font-black uppercase tracking-[-0.03em] text-white">
               {nextEpisode.title}
@@ -190,7 +197,7 @@ export default function EndOfEpisodeOverlay({
           </div>
           <ShareButton
             url={typeof window !== "undefined" ? window.location.href : ""}
-            title={`${seriesTitle || "Series"} - ${episodeTitle || "Chapter"}`}
+            title={`${seriesTitle || "Series"} - ${episodeTitle || installmentLabel}`}
             description=""
             className=""
           />

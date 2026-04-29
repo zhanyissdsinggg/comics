@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import SiteHeader from "../layout/SiteHeader";
 import SurfacePanel from "../common/SurfacePanel";
 import EmptyState from "../common/EmptyState";
 import Cover from "../common/Cover";
@@ -212,7 +211,6 @@ function CreatorCard({ creator }) {
 function CreatorsHubSkeleton() {
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -355,7 +353,6 @@ export default function CreatorsHubPage({
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">

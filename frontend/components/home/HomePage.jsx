@@ -3,26 +3,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
-import { useBrandingStore } from "../../store/useBrandingStore";
+import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import { getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
+import { buildHomeHeroItems, getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
+import {
+  formatInstallmentCount,
+  getStartReadingLabel,
+} from "../../lib/seriesFormatLabels";
 import { cn } from "@/lib/utils";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
-  ssr: false,
-});
-const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
-  ssr: false,
-});
-const SiteFooter = dynamic(() => import("../layout/SiteFooter"), {
   ssr: false,
 });
 
@@ -41,6 +39,52 @@ function dedupeSeries(seriesList) {
     seen.add(seriesId);
     return true;
   });
+}
+
+const HOMEPAGE_BANNED_TOKENS = [
+  "demo series",
+  "gush demo studio",
+  "smoke test",
+  "reader qa",
+  "demo action",
+  "demo genre",
+  "platform smoke tests",
+  "demo-series",
+];
+
+function collectHomepageSeriesText(series) {
+  const creatorNames = Array.isArray(series?.creatorCredits)
+    ? series.creatorCredits.map((item) => item?.name)
+    : [];
+  return [
+    series?.id,
+    series?.slug,
+    series?.title,
+    series?.description,
+    series?.shortDescription,
+    series?.summary,
+    series?.synopsis,
+    series?.author,
+    series?.creator?.label,
+    ...creatorNames,
+    ...(Array.isArray(series?.genres) ? series.genres : []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function isHomepageProductionSeries(series) {
+  if (!series || typeof series !== "object") {
+    return false;
+  }
+
+  const haystack = collectHomepageSeriesText(series);
+  return !HOMEPAGE_BANNED_TOKENS.some((token) => haystack.includes(token));
+}
+
+function sanitizeHomepageSeriesList(seriesList) {
+  return dedupeSeries(seriesList).filter(isHomepageProductionSeries);
 }
 
 function buildHeroSummary(series) {
@@ -75,7 +119,7 @@ function buildSeriesMeta(series) {
   return [
     creatorName,
     typeLabel ? `${typeLabel.charAt(0).toUpperCase()}${typeLabel.slice(1)}` : "",
-    episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"}` : "",
+    episodeCount > 0 ? formatInstallmentCount(series, episodeCount) : "",
     statusLabel,
   ]
     .filter(Boolean)
@@ -127,7 +171,7 @@ function buildCoverAltText(series) {
 }
 
 function buildSectionItems(seriesList, section, excludedIds = new Set(), limit = 6) {
-  const filtered = dedupeSeries(seriesList).filter((series) => {
+  const filtered = sanitizeHomepageSeriesList(seriesList).filter((series) => {
     const seriesId = String(series?.id || "").trim();
     return seriesId && !excludedIds.has(seriesId);
   });
@@ -144,6 +188,115 @@ function buildSectionItems(seriesList, section, excludedIds = new Set(), limit =
   }
 
   return ranked.slice(0, limit);
+}
+
+function inferFirstEpisodeId(series) {
+  const direct =
+    String(series?.firstReadableEpisodeId || "").trim() ||
+    String(series?.firstEpisodeId || "").trim();
+  if (direct) {
+    return direct;
+  }
+
+  const latestEpisodeId = String(series?.latestEpisodeId || "").trim();
+  const match = latestEpisodeId.match(/^(.*?)(\d+)$/);
+  if (!match) {
+    return "";
+  }
+
+  const [, prefix, digits] = match;
+  return `${prefix}${String(1).padStart(digits.length, "0")}`;
+}
+
+function buildReaderHref(seriesId, episodeId) {
+  const normalizedSeriesId = String(seriesId || "").trim();
+  const normalizedEpisodeId = String(episodeId || "").trim();
+
+  if (normalizedSeriesId && normalizedEpisodeId) {
+    return `/read/${normalizedSeriesId}/${normalizedEpisodeId}`;
+  }
+
+  if (normalizedSeriesId) {
+    return `/series/${normalizedSeriesId}`;
+  }
+
+  return "/comics";
+}
+
+function hasHomepageSlot(homepageSlots, slotName) {
+  const normalizedSlotName = String(slotName || "").trim().toLowerCase();
+  return (Array.isArray(homepageSlots) ? homepageSlots : []).some(
+    (slot) =>
+      String(slot?.slot || slot?.name || slot?.id || "")
+        .trim()
+        .toLowerCase() === normalizedSlotName,
+  );
+}
+
+function createCanonicalHomeView(seriesList, homepageSlots, preferredFeaturedSeriesId = "") {
+  const safeSeriesList = sanitizeHomepageSeriesList(seriesList);
+  const editorialSnapshot = getHomeEditorialSnapshot(safeSeriesList, { homepageSlots });
+  const canonicalHeroSeriesId = String(preferredFeaturedSeriesId || "").trim();
+  const hasExplicitHomeHeroSlot = hasHomepageSlot(homepageSlots, "home-hero");
+  const heroCandidates = buildHomeHeroItems(safeSeriesList, { homepageSlots })
+    .map((item) =>
+      safeSeriesList.find((series) => String(series?.id || "").trim() === String(item?.seriesId || "").trim()),
+    )
+    .filter(Boolean);
+
+  const featuredSeries =
+    safeSeriesList.find((series) => String(series?.id || "").trim() === canonicalHeroSeriesId) ||
+    (hasExplicitHomeHeroSlot ? heroCandidates[0] : null) ||
+    editorialSnapshot.breakoutPick ||
+    editorialSnapshot.freeStartPick ||
+    heroCandidates[0] ||
+    editorialSnapshot.safeCatalog?.[0] ||
+    safeSeriesList[0] ||
+    null;
+
+  const trendingSeed = [
+    ...heroCandidates,
+    editorialSnapshot.breakoutPick,
+    ...(Array.isArray(editorialSnapshot.safeCatalog) ? editorialSnapshot.safeCatalog : []),
+    ...safeSeriesList,
+  ];
+  const trendingExcludedIds = new Set([String(featuredSeries?.id || "").trim()].filter(Boolean));
+  const trendingItems = buildSectionItems(trendingSeed, "trending", trendingExcludedIds, 6);
+
+  const newUpdatesExcludedIds = new Set(
+    [featuredSeries?.id, ...trendingItems.map((item) => item.id)]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean),
+  );
+  const newUpdateItems = buildSectionItems(
+    safeSeriesList,
+    "updates",
+    newUpdatesExcludedIds,
+    6,
+  );
+
+  const completedExcludedIds = new Set(
+    [
+      featuredSeries?.id,
+      ...trendingItems.map((item) => item.id),
+      ...newUpdateItems.map((item) => item.id),
+    ]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean),
+  );
+  const completedItems = buildSectionItems(
+    safeSeriesList,
+    "completed",
+    completedExcludedIds,
+    4,
+  );
+
+  return {
+    featuredSeries,
+    trendingItems,
+    newUpdateItems,
+    completedItems,
+  };
 }
 
 function HomeSection({
@@ -258,7 +411,7 @@ function HomeSection({
   );
 }
 
-function HomeHero({ featuredSeries, onOpenFeatured }) {
+function HomeHero({ featuredSeries, featuredReadHref }) {
   if (!featuredSeries) {
     return (
       <section className="border-b border-white/10 bg-[#0b0b0b]">
@@ -313,15 +466,14 @@ function HomeHero({ featuredSeries, onOpenFeatured }) {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={() => onOpenFeatured(featuredSeries.id)}
+            <Link
+              href={featuredReadHref}
               data-testid="home-hero-primary-cta"
               className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.01]"
             >
-              Read Chapter 1 Free
+              {getStartReadingLabel(featuredSeries, 1)} Free
               <ArrowRight className="size-4" />
-            </button>
+            </Link>
             <Link
               href="/comics"
               className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/14 bg-white/[0.03] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.06] hover:text-white"
@@ -353,11 +505,33 @@ function HomeHero({ featuredSeries, onOpenFeatured }) {
   );
 }
 
-function HomeContent({ initialSearchParams = {} }) {
+function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
   const router = useRouter();
-  const { branding } = useBrandingStore();
   const { loading, seriesList, homepageSlots } = useHomeData();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const initialFeaturedSeriesId = String(
+    initialHomeData?.canonicalHome?.featuredSeriesId || "",
+  ).trim();
+  const initialFeaturedReadHref = String(
+    initialHomeData?.canonicalHome?.featuredReadHref || "",
+  ).trim();
+  const [canonicalHomeView, setCanonicalHomeView] = useState(() =>
+    createCanonicalHomeView(seriesList, homepageSlots, initialFeaturedSeriesId),
+  );
+  const [featuredReadHref, setFeaturedReadHref] = useState(() => {
+    if (initialFeaturedReadHref) {
+      return initialFeaturedReadHref;
+    }
+    const fallbackFeaturedSeries = createCanonicalHomeView(
+      seriesList,
+      homepageSlots,
+      initialFeaturedSeriesId,
+    ).featuredSeries;
+    return buildReaderHref(
+      fallbackFeaturedSeries?.id,
+      inferFirstEpisodeId(fallbackFeaturedSeries),
+    );
+  });
 
   useEffect(() => {
     const reason = getSearchParam(initialSearchParams, "reason");
@@ -382,58 +556,61 @@ function HomeContent({ initialSearchParams = {} }) {
     trackEvent("view_home", {});
   }, []);
 
-  const editorialSnapshot = useMemo(
-    () => getHomeEditorialSnapshot(seriesList, { homepageSlots }),
-    [homepageSlots, seriesList],
-  );
+  useEffect(() => {
+    if (canonicalHomeView.featuredSeries || !seriesList.length) {
+      return;
+    }
 
-  const featuredSeries = useMemo(
-    () =>
-      editorialSnapshot.breakoutPick ||
-      editorialSnapshot.freeStartPick ||
-      editorialSnapshot.safeCatalog?.[0] ||
-      seriesList[0] ||
-      null,
-    [editorialSnapshot, seriesList],
-  );
-
-  const trendingItems = useMemo(() => {
-    const excludedIds = new Set([String(featuredSeries?.id || "").trim()].filter(Boolean));
-    return buildSectionItems(
-      [
-        editorialSnapshot.breakoutPick,
-        ...(Array.isArray(editorialSnapshot.safeCatalog)
-          ? editorialSnapshot.safeCatalog
-          : []),
-        ...seriesList,
-      ],
-      "trending",
-      excludedIds,
-      6,
+    setCanonicalHomeView(
+      createCanonicalHomeView(seriesList, homepageSlots, initialFeaturedSeriesId),
     );
-  }, [editorialSnapshot, featuredSeries?.id, seriesList]);
+  }, [
+    canonicalHomeView.featuredSeries,
+    homepageSlots,
+    initialFeaturedSeriesId,
+    seriesList,
+  ]);
 
-  const newUpdateItems = useMemo(() => {
-    const excludedIds = new Set(
-      [featuredSeries?.id, ...trendingItems.map((item) => item.id)]
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
-    );
-    return buildSectionItems(seriesList, "updates", excludedIds, 6);
-  }, [featuredSeries?.id, seriesList, trendingItems]);
+  useEffect(() => {
+    const featuredSeriesId = String(canonicalHomeView.featuredSeries?.id || "").trim();
+    if (!featuredSeriesId) {
+      return;
+    }
 
-  const completedItems = useMemo(() => {
-    const excludedIds = new Set(
-      [
-        featuredSeries?.id,
-        ...trendingItems.map((item) => item.id),
-        ...newUpdateItems.map((item) => item.id),
-      ]
-        .map((value) => String(value || "").trim())
-        .filter(Boolean),
+    const inferredHref = buildReaderHref(
+      featuredSeriesId,
+      inferFirstEpisodeId(canonicalHomeView.featuredSeries),
     );
-    return buildSectionItems(seriesList, "completed", excludedIds, 4);
-  }, [featuredSeries?.id, newUpdateItems, seriesList, trendingItems]);
+    if (!featuredReadHref) {
+      setFeaturedReadHref(inferredHref);
+    }
+
+    if (featuredReadHref.startsWith(`/read/${featuredSeriesId}/`)) {
+      return;
+    }
+
+    let cancelled = false;
+    apiGet(`/api/series/${featuredSeriesId}?adult=0`, { cacheMs: 60000 })
+      .then((response) => {
+        if (cancelled || !response?.ok) {
+          return;
+        }
+        const episodes = Array.isArray(response.data?.episodes) ? response.data.episodes : [];
+        const firstEpisodeId =
+          [...episodes].sort(
+            (left, right) => Number(left?.number || 0) - Number(right?.number || 0),
+          )[0]?.id || "";
+        if (!firstEpisodeId) {
+          return;
+        }
+        setFeaturedReadHref(buildReaderHref(featuredSeriesId, firstEpisodeId));
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canonicalHomeView.featuredSeries, featuredReadHref]);
 
   const openSeries = (seriesId, entryPoint = "HOME_CARD") => {
     if (!seriesId) {
@@ -452,10 +629,10 @@ function HomeContent({ initialSearchParams = {} }) {
     );
   };
 
+  const { featuredSeries, trendingItems, newUpdateItems, completedItems } = canonicalHomeView;
+
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <SiteHeader variant="home" />
-
       <main>
         {loading ? (
           <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
@@ -474,7 +651,7 @@ function HomeContent({ initialSearchParams = {} }) {
         ) : (
           <HomeHero
             featuredSeries={featuredSeries}
-            onOpenFeatured={(seriesId) => openSeries(seriesId, "HOME_FEATURED")}
+            featuredReadHref={featuredReadHref}
           />
         )}
 
@@ -490,7 +667,7 @@ function HomeContent({ initialSearchParams = {} }) {
           />
           <HomeSection
             title="New updates"
-            description="Fresh chapters and recent drops."
+            description="Fresh updates and recent drops."
             ctaLabel="Browse all"
             ctaHref="/search?sort=updated"
             items={newUpdateItems}
@@ -520,13 +697,6 @@ function HomeContent({ initialSearchParams = {} }) {
           showFeatures={false}
         />
       </main>
-
-      <SiteFooter
-        tone={branding?.homeBannerUrl ? "home" : "light"}
-        variant="compact"
-        pathname="/"
-        showTagline={false}
-      />
     </div>
   );
 }
@@ -537,7 +707,10 @@ export default function HomePage({
 }) {
   return (
     <HomeDataProvider initialData={initialHomeData}>
-      <HomeContent initialSearchParams={initialSearchParams} />
+      <HomeContent
+        initialSearchParams={initialSearchParams}
+        initialHomeData={initialHomeData}
+      />
     </HomeDataProvider>
   );
 }

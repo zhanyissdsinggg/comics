@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
-import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import {
@@ -136,6 +135,10 @@ export default function SubscribePage({
   }, [planCatalog]);
 
   useEffect(() => {
+    if (!siteConfig.monetization.membershipEnabled) {
+      return undefined;
+    }
+
     let mounted = true;
     apiGet("/api/billing/plans").then((response) => {
       if (!mounted) {
@@ -337,9 +340,55 @@ export default function SubscribePage({
     "rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const compareShellClass =
     "overflow-hidden rounded-[30px] border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+
+  if (!siteConfig.monetization.membershipEnabled) {
+    return (
+      <div className="min-h-screen overflow-hidden bg-black text-white">
+        <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+          <SurfacePanel className="space-y-5" appearance="dark" accent="blue">
+            <div className="space-y-3">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                Membership
+              </p>
+              <h1 className="font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-white sm:text-[2.8rem]">
+                Membership is coming soon
+              </h1>
+              <p className="max-w-2xl text-sm font-semibold leading-7 text-white/72">
+                Plans are not available yet. You can read free chapters now.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => router.push("/comics")}
+                className={primaryButtonClass}
+              >
+                Browse Comics
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    buildSupportPath({
+                      topic: "billing",
+                      context: "Membership is coming soon.",
+                    }),
+                  )
+                }
+                className={secondaryButtonClass}
+              >
+                Contact Support
+              </button>
+            </div>
+          </SurfacePanel>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
 import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
+import { formatInstallmentLabel, getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -45,7 +46,9 @@ function formatEpisodeLabel(episode) {
 
   const rawValue = episode.number || episode.id;
   const match = String(rawValue).match(/(\d+)/);
-  return match ? `Ch ${match[1]}` : `Ch ${rawValue}`;
+  return match
+    ? formatInstallmentLabel(episode, match[1])
+    : formatInstallmentLabel(episode, rawValue);
 }
 
 function getLatestEpisode(episodes) {
@@ -103,6 +106,7 @@ export default function SeriesTrustPanel({
   const views = toNumber(series?.views);
   const ratingCount = toNumber(series?.ratingCount);
   const status = String(series?.status || "").toLowerCase();
+  const latestInstallmentLabel = getInstallmentLabel(series).toLowerCase();
 
   const trustCards = [
     {
@@ -129,7 +133,7 @@ export default function SeriesTrustPanel({
               : "Still early.",
     },
     {
-      label: "Latest chapter",
+      label: `Latest ${latestInstallmentLabel}`,
       value: latestEpisode
         ? formatEpisodeLabel(latestEpisode)
         : status === "completed"

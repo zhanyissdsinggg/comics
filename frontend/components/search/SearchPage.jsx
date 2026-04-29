@@ -9,7 +9,6 @@ import Cover from "../common/Cover";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
-import SiteHeader from "../layout/SiteHeader";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -27,10 +26,19 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import {
+  formatInstallmentCount,
+  getInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
+import {
   readSearchHistory,
   saveSearchHistoryItem,
   subscribeSearchHistory,
 } from "../../lib/searchHistory";
+import {
+  filterBlockedPublicKeywordItems,
+  filterBlockedPublicSeries,
+  filterBlockedPublicTextList,
+} from "../../lib/publicCatalogVisibility";
 
 const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
 const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
@@ -155,9 +163,17 @@ function normalizeKeywordList(items) {
     return [];
   }
 
-  return items
+  return filterBlockedPublicKeywordItems(items)
     .map((item, index) => normalizeKeywordItem(item, index))
     .filter(Boolean);
+}
+
+function sanitizeSeriesList(items) {
+  return filterBlockedPublicSeries(items);
+}
+
+function sanitizeSuggestionList(items) {
+  return filterBlockedPublicTextList(items);
 }
 
 function formatSearchSeriesMeta(series) {
@@ -182,7 +198,7 @@ function summarizeSearchDescription(series) {
 
   if (Number(series?.episodeCount || 0) > 0) {
     const episodeCount = Number(series.episodeCount || 0);
-    return `${episodeCount} chapter${episodeCount === 1 ? "" : "s"}.`;
+    return `${formatInstallmentCount(series, episodeCount)}.`;
   }
 
   return "";
@@ -348,7 +364,7 @@ export default function SearchPage() {
       }
 
       setError("");
-      setResults(response.data?.results || []);
+      setResults(sanitizeSeriesList(response.data?.results || []));
       setTotal(response.data?.total || 0);
       return true;
     };
@@ -498,7 +514,7 @@ export default function SearchPage() {
 
       setCatalogResponse(response);
       if (response.ok) {
-        setCatalog(response.data?.series || []);
+        setCatalog(sanitizeSeriesList(response.data?.series || []));
         return true;
       }
 
@@ -602,7 +618,7 @@ export default function SearchPage() {
           return;
         }
         if (response.ok) {
-          setSuggestions(response.data?.suggestions || []);
+          setSuggestions(sanitizeSuggestionList(response.data?.suggestions || []));
         } else if (response.error === "ADULT_GATED") {
           forceDisableAdultMode();
           setSuggestions([]);
@@ -787,7 +803,7 @@ export default function SearchPage() {
               title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${startHereEpisodeCount} chapter${startHereEpisodeCount === 1 ? "" : "s"} live.`
+                ? `${formatInstallmentCount(freeStartPick, startHereEpisodeCount)} live.`
                 : "",
             ctaLabel: "Start Reading",
             onClick: () =>
@@ -1014,9 +1030,9 @@ export default function SearchPage() {
               title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${startHereEpisodeCount} chapter${startHereEpisodeCount === 1 ? "" : "s"} listed.`
+                ? `${formatInstallmentCount(freeStartPick, startHereEpisodeCount)} listed.`
                 : "",
-            signalLabel: "Chapters",
+            signalLabel: getInstallmentLabel(freeStartPick, { plural: true }),
             signalValue:
               startHereEpisodeCount > 0
                 ? String(startHereEpisodeCount)
@@ -1052,7 +1068,7 @@ export default function SearchPage() {
             signalLabel: "Status",
             signalValue: "Finished",
             signalHint: completedPick?.episodeCount
-              ? `${completedPick.episodeCount} chapters ready`
+              ? `${formatInstallmentCount(completedPick, completedPick.episodeCount)} ready`
               : "",
             ctaLabel: "Start Reading",
             onClick: () =>
@@ -1133,7 +1149,6 @@ export default function SearchPage() {
   ];
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="space-y-0">
         <section className="grid border-b-2 border-white/15 bg-black xl:grid-cols-[minmax(0,1fr)_380px]">
           <SurfacePanel
@@ -1162,7 +1177,7 @@ export default function SearchPage() {
             <div className="rounded-[28px] border-2 border-white/20 bg-black/80 p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-5">
               <SearchBar
                 variant="home"
-                placeholder="Search titles, genres, or creators"
+                placeholder="Search titles, creators, or genres"
                 showShortcut={false}
                 initialValue={query}
               />

@@ -41,13 +41,13 @@ const ReadingStats = React.memo(() => {
     const badges = [];
 
     if (stats.totalEpisodesRead >= 10) {
-      badges.push("10 chapters");
+      badges.push("10 reads");
     }
     if (stats.totalEpisodesRead >= 50) {
-      badges.push("50 chapters");
+      badges.push("50 reads");
     }
     if (stats.totalEpisodesRead >= 100) {
-      badges.push("100 chapters");
+      badges.push("100 reads");
     }
     if (stats.followedCount >= 5) {
       badges.push("Following 5+");
@@ -76,13 +76,16 @@ const ReadingStats = React.memo(() => {
     {
       label: "Time read",
       value: `${stats.readingHours}h${stats.readingMinutes > 0 ? ` ${stats.readingMinutes}m` : ""}`,
-      hint: "Based on recent chapters.",
+      hint: "Based on recent reading.",
       highlighted: true,
     },
     {
-      label: "Chapters",
+      label: "Reads",
       value: `${stats.totalEpisodesRead}`,
-      hint: `${stats.totalEpisodesRead === 1 ? "Chapter" : "Chapters"} finished.`,
+      hint:
+        stats.totalEpisodesRead === 1
+          ? "1 read finished."
+          : `${stats.totalEpisodesRead} reads finished.`,
     },
     {
       label: "Active series",

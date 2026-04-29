@@ -1,4 +1,9 @@
 import { calculatePrice } from "./pricing";
+import {
+  getContinueReadingNote,
+  getInstallmentLabel,
+  getStartReadingLabel,
+} from "./seriesFormatLabels";
 
 export const EPISODE_PRIMARY_STATE_ORDER = [
   "free",
@@ -59,7 +64,9 @@ function toEpisodeStateList(episodeStateMap) {
   return [];
 }
 
-function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
+function buildEpisodeAvailabilityExplainer(series, counts, hasCountdown) {
+  const installmentPlural = getInstallmentLabel(series, { plural: true }).toLowerCase();
+
   if (counts.free > 0 && counts.preview > 0) {
     return "Unlock later.";
   }
@@ -79,15 +86,15 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   }
 
   if (counts.points > 0 && counts.membership > 0) {
-    return "Some episodes open now, others use points.";
+    return `Some ${installmentPlural} open now, others use points.`;
   }
 
   if (counts.membership > 0) {
-    return counts.points > 0 ? "Some episodes are already open." : "";
+    return counts.points > 0 ? `Some ${installmentPlural} are already open.` : "";
   }
 
   if (hasCountdown) {
-    return "Some episodes open later.";
+    return `Some ${installmentPlural} open later.`;
   }
 
   if (counts.points > 0) {
@@ -97,9 +104,12 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   return "";
 }
 
-function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
+function getEpisodeEntryLabel(series, firstState, counts, hasCountdown) {
+  const installmentLabel = getInstallmentLabel(series);
+  const installmentPlural = getInstallmentLabel(series, { plural: true });
+
   if (!firstState) {
-    return "Episodes";
+    return installmentPlural;
   }
 
   if (firstState.kind === "unlocked") {
@@ -108,8 +118,8 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
 
   if (firstState.primaryState === "free") {
     return counts.preview === 0 && counts.points === 0 && counts.membership === 0 && counts.locked === 0
-      ? "All episodes open"
-      : "Episode 1 open";
+      ? `All ${installmentPlural.toLowerCase()} open`
+      : `${installmentLabel} 1 open`;
   }
 
   if (firstState.primaryState === "preview") {
@@ -419,6 +429,7 @@ export function getEpisodeAvailabilityCounts(episodeStateMap) {
 }
 
 export function getEpisodeAvailabilitySummary({
+  series = null,
   episodes = [],
   episodeStateMap,
 }) {
@@ -436,7 +447,7 @@ export function getEpisodeAvailabilitySummary({
   const firstState = firstEpisode
     ? episodeStateMap?.get?.(firstEpisode.id) || null
     : null;
-  const explainer = buildEpisodeAvailabilityExplainer(counts, hasCountdown);
+  const explainer = buildEpisodeAvailabilityExplainer(series, counts, hasCountdown);
 
   return {
     counts,
@@ -447,7 +458,7 @@ export function getEpisodeAvailabilitySummary({
     startsFree: counts.free > 0 || counts.preview > 0,
     heroBadgeLabel: counts.preview > 0 ? "Preview" : "",
     badgeLabel: getEpisodeAvailabilityBadge(counts, hasCountdown),
-    entryLabel: getEpisodeEntryLabel(firstState, counts, hasCountdown),
+    entryLabel: getEpisodeEntryLabel(series, firstState, counts, hasCountdown),
     entryHint: explainer,
     firstState,
   };
@@ -476,7 +487,7 @@ export function getSeriesPrimaryReadAction({
       label: "Continue Reading",
       episodeId: progressEpisode.id,
       actionKind: "read",
-      note: `Resume Chapter ${progressEpisode.number}.`,
+      note: getContinueReadingNote(series, progressEpisode.number),
     };
   }
 
@@ -498,7 +509,7 @@ export function getSeriesPrimaryReadAction({
   if (state.kind === "unlocked") {
     return {
       type: "start",
-      label: "Read Chapter 1",
+      label: getStartReadingLabel(series, 1),
       episodeId: firstEpisode.id,
       actionKind: "read",
       note: "",
@@ -508,7 +519,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "free" || state.primaryState === "preview") {
     return {
       type: state.primaryState,
-      label: "Read Chapter 1",
+      label: getStartReadingLabel(series, 1),
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",

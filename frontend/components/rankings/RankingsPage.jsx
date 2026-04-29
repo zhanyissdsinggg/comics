@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
@@ -370,7 +369,6 @@ export default function RankingsPage({
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero

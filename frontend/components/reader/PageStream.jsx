@@ -3,6 +3,7 @@
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import { trackEvent } from "../../lib/trackEvent";
 
 function pushPerfMetric(name, value) {
@@ -65,9 +66,18 @@ function readPlaceholdPageMeta(url) {
   }
 }
 
-function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
+function ReaderEditorialFallback({
+  page,
+  meta,
+  index,
+  isHorizontal = false,
+  seriesType,
+}) {
   const title = meta?.title || "Story";
-  const episodeLabel = meta?.episodeNumber ? `Chapter ${meta.episodeNumber}` : "Chapter";
+  const installmentLabel = getInstallmentLabel(seriesType);
+  const episodeLabel = meta?.episodeNumber
+    ? `${installmentLabel} ${meta.episodeNumber}`
+    : installmentLabel;
   const pageLabel = meta?.pageNumber ? `Page ${meta.pageNumber}` : `Panel ${index + 1}`;
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
   const accentMap = ["#60a5fa", "#34d399", "#f59e0b", "#f472b6"];
@@ -143,6 +153,7 @@ export default function PageStream({
   onRetryPage,
   imageQuality,
   imageSizes,
+  seriesType,
 }) {
   const [errorPages, setErrorPages] = useState({});
   const [loadingPages, setLoadingPages] = useState({});
@@ -395,6 +406,7 @@ export default function PageStream({
                   meta={placeholderMeta}
                   index={index}
                   isHorizontal={isHorizontal}
+                  seriesType={seriesType}
                 />
                 ) : errorPages[index] ? (
                 <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">

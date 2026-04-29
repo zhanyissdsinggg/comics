@@ -10,9 +10,18 @@ import { siteConfig } from "../../lib/siteConfig";
 const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Trending", href: "/rankings" },
   { label: "Support", href: "/support" },
-];
+]
+  .concat(
+    siteConfig.navigation.showRankingsInNav
+      ? [{ label: "Trending", href: "/rankings" }]
+      : [],
+  )
+  .concat(
+    siteConfig.navigation.showCreatorsInNav
+      ? [{ label: "Creators", href: "/creators" }]
+      : [],
+  );
 
 const fullFooterSections = [
   {
@@ -20,25 +29,37 @@ const fullFooterSections = [
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
-      { label: "Trending", href: "/rankings" },
       { label: "Support", href: "/support" },
-    ],
+    ]
+      .concat(
+        siteConfig.navigation.showRankingsInNav
+          ? [{ label: "Trending", href: "/rankings" }]
+          : [],
+      )
+      .concat(
+        siteConfig.navigation.showCreatorsInNav
+          ? [{ label: "Creators", href: "/creators" }]
+          : [],
+      ),
   },
   {
     title: "Account",
     links: []
       .concat(
-        siteConfig.monetization.pointPacksEnabled
+        siteConfig.navigation.enableMonetizationNav &&
+          siteConfig.monetization.pointPacksEnabled
           ? [{ label: "Store", href: "/store" }]
           : [],
       )
       .concat(
-        siteConfig.monetization.membershipEnabled
+        siteConfig.navigation.enableMonetizationNav &&
+          siteConfig.monetization.membershipEnabled
           ? [{ label: "Plans", href: "/subscribe" }]
           : [],
       )
       .concat(
-        siteConfig.monetization.checkoutEnabled
+        siteConfig.navigation.enableMonetizationNav &&
+          siteConfig.monetization.checkoutEnabled
           ? [{ label: "Orders", href: "/orders" }]
           : [],
       )
@@ -67,7 +88,17 @@ const homePrimaryFooterLinks = [
   { label: "Support", href: "/support" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
-];
+]
+  .concat(
+    siteConfig.navigation.showRankingsInNav
+      ? [{ label: "Trending", href: "/rankings" }]
+      : [],
+  )
+  .concat(
+    siteConfig.navigation.showCreatorsInNav
+      ? [{ label: "Creators", href: "/creators" }]
+      : [],
+  );
 
 const homeCompactMetaFooterLinks = [];
 
@@ -123,6 +154,10 @@ function MastercardIcon() {
 }
 
 function PaymentIconRow() {
+  if (!siteConfig.navigation.enableMonetizationNav) {
+    return null;
+  }
+
   const iconTone = "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
 
   return (
@@ -231,6 +266,7 @@ export default function SiteFooter({
   if (isCompact) {
     return (
       <footer
+        data-site-footer="1"
         className={`${isHome ? "mt-0" : "mt-16"} border-t-[4px] border-[#ffe500] bg-black text-white`}
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
@@ -280,6 +316,7 @@ export default function SiteFooter({
 
   return (
     <footer
+      data-site-footer="1"
       className="mt-16 border-t-[4px] border-[#ffe500] bg-black text-white"
     >
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
@@ -356,10 +393,6 @@ export default function SiteFooter({
                   link,
                   "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
                 ),
-              )}
-              {renderInternalLink(
-                { label: "Mature content settings", href: "/mature-content" },
-                "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
               )}
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

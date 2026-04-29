@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
+import { formatInstallmentCount } from "../../../lib/seriesFormatLabels";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
 import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
 
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }) {
     `Read ${series.title} on ${siteConfig.siteName}.`,
     authorLabel ? `By ${authorLabel}.` : "",
     genreLabel ? `${genreLabel}.` : "",
-    episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"} live.` : "",
+    episodeCount > 0 ? `${formatInstallmentCount(series, episodeCount)} live.` : "",
     `Status: ${statusLabel}.`,
   ]
     .filter(Boolean)

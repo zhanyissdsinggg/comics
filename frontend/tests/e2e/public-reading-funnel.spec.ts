@@ -593,6 +593,10 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveText("Read Chapter 1 Free");
+    await expect(page.getByTestId("home-hero-primary-cta")).toHaveAttribute(
+      "href",
+      /\/read\/series-001\/series-001e1$/,
+    );
     await expectNoBannedCopy(page, "/");
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
@@ -719,6 +723,10 @@ test.describe("Public reading funnel", () => {
 
     const primaryCta = page.getByTestId("series-primary-action");
     await expect(primaryCta).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(primaryCta).toHaveAttribute(
+      "href",
+      /\/read\/series-001\/series-001e1$/,
+    );
 
     await Promise.all([
       page.waitForURL("**/read/series-001/series-001e1", {
@@ -742,8 +750,12 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const chapterAction = page.locator("#episode-series-001e2 button").first();
+    const chapterAction = page.locator("#episode-series-001e2 a").first();
     await expect(chapterAction).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(chapterAction).toHaveAttribute(
+      "href",
+      /\/read\/series-001\/series-001e2$/,
+    );
 
     await Promise.all([
       page.waitForURL("**/read/series-001/series-001e2", {

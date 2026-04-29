@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiGet, apiPost } from "../../lib/apiClient";
-import SiteHeader from "../layout/SiteHeader";
 import { useAuthStore } from "../../store/useAuthStore";
 import SurfacePanel from "../common/SurfacePanel";
 import {
@@ -153,7 +152,6 @@ export default function InteractiveStoryPage({ seriesId }) {
   if (loading) {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <SurfacePanel tone="muted" accent="cyan" appearance="dark">
             <p className="text-sm font-semibold text-white/75">Loading</p>
@@ -165,7 +163,6 @@ export default function InteractiveStoryPage({ seriesId }) {
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel tone="muted" accent="cyan" appearance="dark">
           <div className="flex flex-wrap items-center justify-between gap-3">

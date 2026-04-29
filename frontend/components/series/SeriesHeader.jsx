@@ -5,6 +5,10 @@ import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
+import {
+  formatInstallmentLabel,
+  getInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
 
 function capitalize(value) {
   if (!value) {
@@ -91,6 +95,7 @@ export default function SeriesHeader({
   episodeCount = 0,
   latestEpisode = null,
   onPrimaryAction = null,
+  primaryActionHref = "",
   primaryActionLabelOverride = "",
   onFollowToggle,
   isFollowing,
@@ -106,11 +111,13 @@ export default function SeriesHeader({
     .slice(0, 2)
     .map((genre) => ({ label: genre, tone: "genre" }));
   const primaryAction = onPrimaryAction || null;
+  const normalizedPrimaryActionHref = String(primaryActionHref || "").trim();
   const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
   const latestEpisodeValue = latestEpisodeNumber
-    ? `Chapter ${latestEpisodeNumber}`
+    ? formatInstallmentLabel(series, latestEpisodeNumber)
     : "Coming soon";
+  const installmentPluralLabel = getInstallmentLabel(series, { plural: true });
   const creatorPresentation = getCreatorPresentation(series);
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
   const latestUpdateLabel = getLatestLabel(latestEpisode, series.updatedAt);
@@ -129,10 +136,13 @@ export default function SeriesHeader({
       value: isCompleted
         ? "Finished"
         : capitalize(series.status || "updating"),
-      detail: isCompleted ? "Full run" : "New chapters",
+      detail:
+        isCompleted
+          ? "Full run"
+          : `New ${installmentPluralLabel.toLowerCase()}`,
     },
     {
-      label: "Chapters",
+      label: installmentPluralLabel,
       value: episodeCount > 0 ? `${episodeCount}` : "Soon",
       detail: episodeCount > 0 ? "Ready to read" : "Coming soon",
     },
@@ -148,7 +158,23 @@ export default function SeriesHeader({
       ? "bg-[#00E5FF] text-black"
       : "bg-[#00E5FF] text-black",
   ].join(" ");
-  const primaryActions = primaryAction ? (
+  const primaryActions = normalizedPrimaryActionHref ? (
+    <div className="grid gap-3">
+      <Link
+        ref={(node) => {
+          assignRef(desktopPrimaryActionRef, node);
+          assignRef(mobilePrimaryActionRef, node);
+        }}
+        href={normalizedPrimaryActionHref}
+        onClick={primaryAction || undefined}
+        data-testid="series-primary-action"
+        className={`flex ${primaryActionClassName}`}
+      >
+        <BookOpen size={18} />
+        <span>{primaryActionLabel}</span>
+      </Link>
+    </div>
+  ) : primaryAction ? (
     <div className="grid gap-3">
       <button
         ref={(node) => {

@@ -1,4 +1,4 @@
-import { absoluteUrl } from "../lib/siteConfig";
+import { absoluteUrl, siteConfig } from "../lib/siteConfig";
 import { resolveSeriesCreatorIdentity } from "../lib/creatorIdentity";
 
 const STATIC_SITEMAP_PATHS = [
@@ -16,7 +16,9 @@ const STATIC_SITEMAP_PATHS = [
   "/mature-content",
   "/privacy-policy",
   "/terms-of-service",
-];
+].filter((path) =>
+  path === "/subscribe" ? siteConfig.monetization.membershipEnabled : true,
+);
 
 const ROUTE_PRIORITIES = {
   "/": 1.0,

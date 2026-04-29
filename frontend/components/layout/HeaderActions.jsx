@@ -28,6 +28,7 @@ export default function HeaderActions({
   isAdultMode,
   legalAge,
   variant = "default",
+  showAdultToggle = true,
 }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
@@ -78,40 +79,42 @@ export default function HeaderActions({
         </button>
       ) : null}
 
-      <button
-        type="button"
-        onClick={onAdultToggleClick}
-        className={cn(
-          "inline-flex h-11 min-w-[4.75rem] items-center justify-center gap-2 border-2 px-3 text-xs font-semibold uppercase tracking-[0.08em] transition-all sm:min-w-[5.75rem] sm:px-3.5",
-          isAdultMode
-            ? "border-[#FF007A] bg-[#FF007A] text-white"
-            : "border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]",
-        )}
-        aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
-        aria-pressed={isAdultMode}
-        title={`Switch between standard mode and ${legalAge}+ mode. Current: ${isAdultMode ? `${legalAge}+ on` : "standard"}`}
-        data-testid="adult-toggle-button"
-      >
-        <span className="flex items-center gap-1.5 whitespace-nowrap">
+      {showAdultToggle ? (
+        <button
+          type="button"
+          onClick={onAdultToggleClick}
+          className={cn(
+            "inline-flex h-11 min-w-[4.75rem] items-center justify-center gap-2 border-2 px-3 text-xs font-semibold uppercase tracking-[0.08em] transition-all sm:min-w-[5.75rem] sm:px-3.5",
+            isAdultMode
+              ? "border-[#FF007A] bg-[#FF007A] text-white"
+              : "border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]",
+          )}
+          aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
+          aria-pressed={isAdultMode}
+          title={`Switch between standard mode and ${legalAge}+ mode. Current: ${isAdultMode ? `${legalAge}+ on` : "standard"}`}
+          data-testid="adult-toggle-button"
+        >
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
+            <span
+              className={cn(
+                "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(15,23,42,0.06)]",
+                isAdultMode
+                  ? "bg-white opacity-90 shadow-[0_0_0_4px_rgba(255,0,122,0.22)]"
+                  : "bg-[#FFE500] shadow-[0_0_0_4px_rgba(255,229,0,0.16)]",
+              )}
+            />
+            <span className="text-white">{legalAge}+</span>
+          </span>
           <span
             className={cn(
-              "inline-flex h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(15,23,42,0.06)]",
-              isAdultMode
-                ? "bg-white opacity-90 shadow-[0_0_0_4px_rgba(255,0,122,0.22)]"
-                : "bg-[#FFE500] shadow-[0_0_0_4px_rgba(255,229,0,0.16)]",
+              "text-[10px] font-medium uppercase tracking-[0.16em] text-white",
+              isAdultMode ? "opacity-85" : "opacity-55",
             )}
-          />
-          <span className="text-white">{legalAge}+</span>
-        </span>
-        <span
-          className={cn(
-            "text-[10px] font-medium uppercase tracking-[0.16em] text-white",
-            isAdultMode ? "opacity-85" : "opacity-55",
-          )}
-        >
-          {isAdultMode ? "On" : "Off"}
-        </span>
-      </button>
+          >
+            {isAdultMode ? "On" : "Off"}
+          </span>
+        </button>
+      ) : null}
 
       <button
         type="button"

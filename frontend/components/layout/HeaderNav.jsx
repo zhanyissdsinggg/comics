@@ -7,23 +7,28 @@ import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
+import { siteConfig } from "../../lib/siteConfig";
 
-const DEFAULT_NAV_ITEMS = [
-  { id: "home", label: "Home", href: "/" },
-  { id: "featured", label: "Trending", href: "/rankings" },
+const PUBLIC_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
-];
-
-const HOME_NAV_ITEMS = [
-  { id: "comics", label: "Comics", href: "/comics" },
-  { id: "novels", label: "Novels", href: "/novels" },
-];
+  { id: "search", label: "Search", href: "/search" },
+]
+  .concat(
+    siteConfig.navigation.showRankingsInNav
+      ? [{ id: "rankings", label: "Trending", href: "/rankings" }]
+      : [],
+  )
+  .concat(
+    siteConfig.navigation.showCreatorsInNav
+      ? [{ id: "creators", label: "Creators", href: "/creators" }]
+      : [],
+  );
 
 export default function HeaderNav({ variant = "default" }) {
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
-  const navItems = variant === "home" ? HOME_NAV_ITEMS : DEFAULT_NAV_ITEMS;
+  const navItems = PUBLIC_NAV_ITEMS;
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">

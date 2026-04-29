@@ -20,28 +20,33 @@ import {
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
 
-const MENU_LINKS = [{ label: "Library", href: "/library", icon: Library }]
+const PUBLIC_MENU_LINKS = [
+  { label: "Comics", href: "/comics" },
+  { label: "Novels", href: "/novels" },
+  { label: "Search", href: "/search" },
+]
   .concat(
-    siteConfig.monetization.pointPacksEnabled
+    siteConfig.navigation.showRankingsInNav
+      ? [{ label: "Trending", href: "/rankings" }]
+      : [],
+  )
+  .concat(
+    siteConfig.navigation.showCreatorsInNav
+      ? [{ label: "Creators", href: "/creators" }]
+      : [],
+  )
+  .concat(
+    siteConfig.navigation.enableMonetizationNav &&
+      siteConfig.monetization.pointPacksEnabled
       ? [{ label: "Store", href: "/store", icon: ShoppingBag }]
       : [],
   )
   .concat(
-    siteConfig.monetization.membershipEnabled
+    siteConfig.navigation.enableMonetizationNav &&
+      siteConfig.monetization.membershipEnabled
       ? [{ label: "Plans", href: "/subscribe", icon: Crown }]
       : [],
-  )
-  .concat([
-    { label: "Comics", href: "/comics" },
-    { label: "Novels", href: "/novels" },
-    { label: "Support", href: "/support" },
-  ]);
-
-const HOME_MENU_LINKS = [
-  { label: "Comics", href: "/comics" },
-  { label: "Novels", href: "/novels" },
-  { label: "Support", href: "/support" },
-];
+  );
 
 function isActivePath(pathname, href) {
   if (href === "/") {
@@ -62,8 +67,7 @@ export default function HeaderMenuModal({
   const { unreadCount } = useNotificationsStore();
   const { paidPts, bonusPts } = useWalletStore();
   const walletTotal = Number(paidPts || 0) + Number(bonusPts || 0);
-  const isHome = variant === "home";
-  const menuLinks = variant === "home" ? HOME_MENU_LINKS : MENU_LINKS;
+  const menuLinks = PUBLIC_MENU_LINKS;
   const renderMenuLink = (item, className, content) => {
     const useDocumentNavigation = shouldUseDocumentNavigation(
       pathname,
@@ -98,8 +102,10 @@ export default function HeaderMenuModal({
     );
   };
   const accountLinks = [
+    { label: "Library", href: "/library", icon: Library },
     { label: "Account", href: "/account", icon: User },
-    ...(siteConfig.monetization.checkoutEnabled
+    ...(siteConfig.navigation.enableMonetizationNav &&
+    siteConfig.monetization.checkoutEnabled
       ? [{ label: "Purchases", href: "/orders", icon: ShoppingBag }]
       : []),
     {
@@ -212,11 +218,6 @@ export default function HeaderMenuModal({
                   >
                     Sign In
                   </button>
-                  {renderMenuLink(
-                    { label: "Support", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:border-white/35 hover:bg-[#111111] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
-                    "Support",
-                  )}
                 </div>
               </>
             )}

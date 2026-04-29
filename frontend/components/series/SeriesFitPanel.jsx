@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import SurfacePanel from "../common/SurfacePanel";
 import { getReadingCadenceLabel } from "../../lib/storefrontCopy";
 import {
+  formatInstallmentCount,
+  getInstallmentLabel,
+  getStartReadingLabel,
+} from "../../lib/seriesFormatLabels";
+import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
@@ -46,7 +51,7 @@ function getEpisodeCount(series, episodes) {
   return directCount > 0 ? directCount : 0;
 }
 
-function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
+function getPrimaryAction({ series, continueHref, startHref, freeEpisodeCount }) {
   if (continueHref) {
     return {
       label: "Keep Reading",
@@ -57,17 +62,17 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
 
   if (startHref && freeEpisodeCount > 0) {
     return {
-      label: "Start Reading",
+      label: getStartReadingLabel(series, 1),
       href: startHref,
-      hint: `${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"} to start.`,
+      hint: `${formatInstallmentCount(series, freeEpisodeCount)} free to start.`,
     };
   }
 
   if (startHref) {
     return {
-      label: "Start Reading",
+      label: getStartReadingLabel(series, 1),
       href: startHref,
-      hint: "Start at Chapter 1.",
+      hint: `Start at ${getInstallmentLabel(series)} 1.`,
     };
   }
 
@@ -97,7 +102,7 @@ function getStarterLane(series, leadGenre) {
   if (freeEpisodeCount > 0) {
     return {
       label: "Easy start",
-      body: `${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"} to start.`,
+      body: `${formatInstallmentCount(series, freeEpisodeCount)} free to start.`,
     };
   }
 
@@ -155,6 +160,7 @@ export default function SeriesFitPanel({
       readerProof,
       starterLane,
       primaryAction: getPrimaryAction({
+        series,
         continueHref,
         startHref,
         freeEpisodeCount,
@@ -163,7 +169,7 @@ export default function SeriesFitPanel({
         status === "completed"
           ? `${leadGenre ? `${leadGenre} fans` : "Readers"} who want the full run.`
           : `${leadGenre ? `${leadGenre} fans` : "Readers"} who want something still updating.`,
-      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"}` : "updating"}`,
+      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? formatInstallmentCount(series, episodeCount) : "updating"}`,
       socialProof:
         readerProof > 0
           ? `${formatCompactCount(readerProof)} readers. Updated ${formatDateLabel(series?.updatedAt)}.`

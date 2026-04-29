@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
-import SiteHeader from "../layout/SiteHeader";
 import NetworkFallback from "../common/NetworkFallback";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
@@ -34,6 +33,7 @@ import {
 } from "../../lib/commerceSuccess";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
+import { buildReaderPath } from "../../lib/readerRoutes";
 
 function EpisodeListSkeleton() {
   return (
@@ -579,9 +579,8 @@ export default function SeriesPage({
   const handleRead = useCallback(
     (seriesIdValue, episodeId) => {
       trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
-      router.push(`/read/${seriesIdValue}/${episodeId}`);
     },
-    [router],
+    [],
   );
 
   const handleUnlock = useCallback(
@@ -684,6 +683,26 @@ export default function SeriesPage({
       walletStore?.subscriptionUsage,
     ],
   );
+  const primaryReadHref = useMemo(() => {
+    if (!primaryReadAction?.episodeId) {
+      return "";
+    }
+
+    if (
+      primaryReadAction.actionKind !== "read" &&
+      primaryReadAction.actionKind !== "preview"
+    ) {
+      return "";
+    }
+
+    return buildReaderPath(seriesId, primaryReadAction.episodeId);
+  }, [primaryReadAction, seriesId]);
+  const handleSeriesPrimaryLinkClick = useCallback(() => {
+    if (!primaryReadAction?.episodeId) {
+      return;
+    }
+    handleRead(seriesId, primaryReadAction.episodeId);
+  }, [handleRead, primaryReadAction?.episodeId, seriesId]);
   const handleSeriesPrimaryAction = useCallback(async () => {
     if (!primaryReadAction) {
       return;
@@ -776,7 +795,6 @@ export default function SeriesPage({
   if (loading) {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <section className="rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
@@ -836,7 +854,6 @@ export default function SeriesPage({
   if (error === "NOT_FOUND") {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
           <div className="rounded-[28px] border-2 border-[#FFE500] bg-black/85 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
@@ -879,7 +896,6 @@ export default function SeriesPage({
 
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
             compact
@@ -920,8 +936,6 @@ export default function SeriesPage({
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
-
         <AdultGateBlockingPanel
           status={gateStatus}
           onOpenModal={openGateModal}
@@ -952,7 +966,6 @@ export default function SeriesPage({
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
           <div className="pt-6">
@@ -968,7 +981,14 @@ export default function SeriesPage({
           series={series}
           episodeCount={episodes.length}
           latestEpisode={latestEpisode}
-          onPrimaryAction={primaryReadAction ? handleSeriesPrimaryAction : null}
+          onPrimaryAction={
+            primaryReadHref
+              ? handleSeriesPrimaryLinkClick
+              : primaryReadAction
+                ? handleSeriesPrimaryAction
+                : null
+          }
+          primaryActionHref={primaryReadHref}
           primaryActionLabelOverride={primaryReadAction?.label || ""}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
@@ -1028,6 +1048,7 @@ export default function SeriesPage({
               }
               status={series.status}
               genres={series.genres}
+              seriesType={series.type}
               isFollowing={isFollowing}
               onFollowToggle={handleFollowToggle}
               sharePath={`/series/${seriesId}`}

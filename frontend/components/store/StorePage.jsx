@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
 import EditorialHero from "../common/EditorialHero";
 import NetworkFallback from "../common/NetworkFallback";
 import SurfacePanel from "../common/SurfacePanel";
@@ -539,7 +538,6 @@ export default function StorePage({
 
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero

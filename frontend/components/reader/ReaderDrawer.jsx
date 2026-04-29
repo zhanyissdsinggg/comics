@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Pill from "../common/Pill";
 import { trackEvent } from "../../lib/trackEvent";
+import {
+  formatInstallmentLabel,
+  getInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
 
 function formatPercent(value) {
   if (typeof value !== "number") {
@@ -23,8 +27,10 @@ export default function ReaderDrawer({
   onGoBookmark,
   onRemoveBookmark,
   onSubscribe,
+  seriesType,
 }) {
   const [tab, setTab] = useState("toc");
+  const installmentPlural = getInstallmentLabel(seriesType, { plural: true });
 
   useEffect(() => {
     if (open) {
@@ -75,7 +81,7 @@ export default function ReaderDrawer({
                   : "border-2 border-white/15 bg-black text-neutral-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#111111]"
               }`}
             >
-              Chapters
+              {installmentPlural}
             </button>
             <button
               type="button"
@@ -141,7 +147,7 @@ export default function ReaderDrawer({
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold">
-                        Ch {episode.number} {episode.title}
+                        {formatInstallmentLabel(seriesType, episode.number)} {episode.title}
                       </div>
                       <div className="text-xs text-neutral-400">
                         {helperLabel}
@@ -169,7 +175,7 @@ export default function ReaderDrawer({
                     <div>
                       <div className="font-semibold">{bookmark.label}</div>
                       <div className="text-xs text-neutral-400">
-                        Ch {bookmark.episodeId} - {formatPercent(bookmark.percent)}
+                        {formatInstallmentLabel(seriesType, bookmark.episodeId)} - {formatPercent(bookmark.percent)}
                       </div>
                     </div>
                     <button

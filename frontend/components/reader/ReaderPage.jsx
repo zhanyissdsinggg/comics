@@ -38,6 +38,11 @@ import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import {
+  formatInstallmentLabel,
+  formatInstallmentCount,
+  getInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -240,6 +245,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const walletBalance = paidPts + bonusPts;
   const bookmarks = bookmarksBySeries[seriesId] || [];
   const isComic = episodeData?.type === "comic";
+  const readerSeriesType =
+    seriesData?.series?.type || episodeData?.type || "comic";
+  const readerInstallmentLabel = getInstallmentLabel(readerSeriesType);
+  const readerInstallmentLabelLower = readerInstallmentLabel.toLowerCase();
+  const readerInstallmentPluralLower = getInstallmentLabel(readerSeriesType, {
+    plural: true,
+  }).toLowerCase();
   const layoutModeForView = isComic ? layoutMode : "vertical";
   const upcomingEpisodes = useMemo(
     () =>
@@ -1407,7 +1419,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setModalState({
         type: "SUCCESS",
         title: "Pack unlocked",
-        description: `${targets.length} chapters are ready.`,
+        description: `${formatInstallmentCount(
+          readerSeriesType,
+          targets.length,
+        )} are ready.`,
       });
     router.push(buildEpisodeHref(targets[0].id));
   };
@@ -1556,7 +1571,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         <div className="mx-auto max-w-3xl px-4 py-10">
             <NetworkFallback
               compact
-              title="This chapter didn't load."
+              title={`This ${readerInstallmentLabelLower} didn't load.`}
               description="Try again."
               onRetry={() => fetchEpisode({ bustSeries: true })}
           >
@@ -1593,7 +1608,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
     >
       <ReaderTopBar
         title={seriesData?.series?.title || "Series"}
-        episodeLabel={episodeData?.title || episodeId}
+        episodeLabel={
+          episodeData?.title ||
+          formatInstallmentLabel(
+            readerSeriesType,
+            episodeData?.episodeNumber || episodeData?.number || episodeId,
+          )
+        }
         onBack={() => router.push(buildSeriesHref())}
         onOpenToc={() => setDrawerOpen(true)}
         onAddBookmark={handleAddBookmark}
@@ -1611,6 +1632,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         onPrev={handleGoPrevChapter}
         onNext={handleGoNextChapter}
         nextLocked={nextEpisode ? !nextUnlocked : false}
+        seriesType={readerSeriesType}
       />
       {commerceNotice && !showPaywall ? (
         <div className="mx-auto max-w-5xl px-4 pt-4">
@@ -1654,6 +1676,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           prefetchCount={prefetchCount}
           layoutMode={layoutModeForView}
           isNightMode={nightMode}
+          seriesType={readerSeriesType}
           onActiveIndexChange={setActivePageIndex}
           onPreviewEndRef={previewEndRef}
           onEndRef={endRef}
@@ -1676,6 +1699,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
         nextLocked={Boolean(nextEpisode) && !nextUnlocked}
         onPrev={handleGoPrevChapter}
         onNext={handleGoNextChapter}
+        seriesType={readerSeriesType}
       />
 
       {showPaywall ? (
@@ -1738,7 +1762,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               </div>
                 <div className={lightInfoCardClass}>
                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/75">
-                    This chapter
+                    This {readerInstallmentLabelLower}
                   </p>
                 <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
                   {currentPricing.finalPrice === 0
@@ -1902,6 +1926,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           packPricing={packPricing}
           seriesTitle={seriesData?.series?.title}
           episodeTitle={episodeData?.episode?.title}
+          seriesType={readerSeriesType}
           onNext={() => router.push(buildEpisodeHref(nextEpisode?.id))}
           onUnlock={handleUnlockNext}
           onSubscribe={() => {
@@ -1982,6 +2007,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
               ),
             )
           }
+          seriesType={readerSeriesType}
         />
       ) : null}
 
@@ -2143,11 +2169,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
             offerDecision?.recommendedUnlockOffer?.episodes > 1
                 ? [
                     {
-                    label: "Single chapter",
+                    label: `Single ${readerInstallmentLabelLower}`,
                       value: `${episodeData?.pricePts || 0} points`,
                     },
                     {
-                    label: `${offerDecision.recommendedUnlockOffer.episodes}-chapter pack`,
+                    label: `${offerDecision.recommendedUnlockOffer.episodes}-${readerInstallmentLabelLower} pack`,
                       value: `${offerDecision.recommendedUnlockOffer.pricePts} points`,
                     },
                   {
@@ -2163,10 +2189,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
           tips={
               modalState?.type === "SHORTFALL"
                 ? [
-                  "Unlocked chapters stay in your library.",
-                  "Packs usually cost less per chapter.",
+                  `Unlocked ${readerInstallmentPluralLower} stay in your library.`,
+                  `Packs usually cost less per ${readerInstallmentLabelLower}.`,
                   "Plans can unlock free reads.",
-                  "Plans can lower chapter prices.",
+                  `Plans can lower ${readerInstallmentLabelLower} prices.`,
                 ]
               : []
           }
@@ -2263,7 +2289,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                         });
                         setModalState({
                           type: "SUCCESS",
-                          title: "Chapter unlocked",
+                          title: `${readerInstallmentLabel} unlocked`,
                           description: "",
                         });
                         return;

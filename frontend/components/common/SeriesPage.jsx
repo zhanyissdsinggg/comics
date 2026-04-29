@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
-import SiteFooter from "../layout/SiteFooter";
 import PortraitCard from "../home/PortraitCard";
 import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
@@ -14,6 +12,7 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
+import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
 
 const PAGE_CONFIG = {
   comic: {
@@ -87,7 +86,7 @@ function getSeriesSubtitle(series) {
     return creatorName;
   }
   if (getEpisodeCount(series) > 0) {
-    return `${getEpisodeCount(series)} chapter${getEpisodeCount(series) === 1 ? "" : "s"}`;
+    return formatInstallmentCount(series, getEpisodeCount(series));
   }
   return normalizeStatus(series?.status) === "completed" ? "Finished" : "Ongoing";
 }
@@ -303,8 +302,6 @@ export default function SeriesPage({
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
-      <SiteHeader variant="home" />
-
       <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
         <section className="rounded-[28px] border border-white/10 bg-[#0b0b0b] p-5 sm:p-6">
           <div className="space-y-4">
@@ -434,12 +431,6 @@ export default function SeriesPage({
         )}
       </div>
 
-      <SiteFooter
-        tone="light"
-        variant="compact"
-        pathname={config.pathname}
-        showTagline={false}
-      />
     </main>
   );
 }

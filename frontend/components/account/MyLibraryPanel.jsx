@@ -23,6 +23,10 @@ import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
+import {
+  formatInstallmentCount,
+  formatInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
 
 const TABS = [
   { id: "continue", label: "Continue Reading", icon: BookOpen },
@@ -87,12 +91,12 @@ function formatRelativeTime(value) {
   }).format(new Date(timestamp));
 }
 
-function formatProgressLabel(currentChapter, totalChapters) {
-  if (currentChapter > 0 && totalChapters > 0) {
-    return `Chapter ${currentChapter} of ${totalChapters}`;
+function formatProgressLabel(series, currentInstallment, totalInstallments) {
+  if (currentInstallment > 0 && totalInstallments > 0) {
+    return `${formatInstallmentLabel(series, currentInstallment)} of ${totalInstallments}`;
   }
-  if (currentChapter > 0) {
-    return `Chapter ${currentChapter}`;
+  if (currentInstallment > 0) {
+    return formatInstallmentLabel(series, currentInstallment);
   }
   return "Start reading";
 }
@@ -102,12 +106,12 @@ function formatBookmarkSummary(count) {
   return `${total} saved ${total === 1 ? "spot" : "spots"}`;
 }
 
-function formatUnlockedSummary(count, latestChapter) {
+function formatUnlockedSummary(series, count, latestChapter) {
   const total = Number(count || 0);
   if (latestChapter > 0) {
-    return `${total} chapters unlocked up to Chapter ${latestChapter}`;
+    return `${formatInstallmentCount(series, total)} unlocked up to ${formatInstallmentLabel(series, latestChapter)}`;
   }
-  return `${total} chapters unlocked`;
+  return `${formatInstallmentCount(series, total)} unlocked`;
 }
 
 function sortByUpdatedAt(items) {
@@ -369,13 +373,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: progressPercent >= 0.98 ? "Read" : "In Progress",
-            primaryLine: formatProgressLabel(currentChapter, totalChapters),
+            primaryLine: formatProgressLabel(series, currentChapter, totalChapters),
             summary: series.type ? `${series.type} series` : "",
             updatedLabel: formatRelativeTime(
               progress.updatedAt || historyEntry?.createdAt,
             ),
             progressPercent,
-            progressLabel: `Chapter ${currentChapter || "?"} of ${totalChapters || "?"}`,
+            progressLabel: `${formatInstallmentLabel(series, currentChapter || "?")} of ${totalChapters || "?"}`,
             progressPercentLabel: `${Math.round(progressPercent * 100)}%`,
             resumeEpisodeId: progress.lastEpisodeId,
             updatedAt: Math.max(
@@ -485,11 +489,15 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             badge: "Unlocked",
             
               primaryLine: formatUnlockedSummary(
+                series,
                 entry.unlockedEpisodeIds.length,
                 latestUnlockedChapter,
               ),
               summary: progress?.lastEpisodeId
-                ? `Resume Ch ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
+                ? `Resume ${formatInstallmentLabel(
+                    series,
+                    parseEpisodeNumber(progress.lastEpisodeId) || "?",
+                  )}`
                 : series.type
                   ? `${series.type} series`
                   : "",

@@ -74,12 +74,27 @@ export const siteConfig = {
       "ENABLE_POINT_PACKS",
     ),
   },
+  navigation: {
+    showCreatorsInNav: parseEnvFlag(
+      "NEXT_PUBLIC_SHOW_CREATORS_IN_NAV",
+      "SHOW_CREATORS_IN_NAV",
+    ),
+    showRankingsInNav: parseEnvFlag(
+      "NEXT_PUBLIC_SHOW_RANKINGS_IN_NAV",
+      "SHOW_RANKINGS_IN_NAV",
+    ),
+    enableMonetizationNav: parseEnvFlag(
+      "NEXT_PUBLIC_ENABLE_MONETIZATION_NAV",
+      "ENABLE_MONETIZATION_NAV",
+    ),
+  },
 };
 
 siteConfig.monetization.publicCommerceNavEnabled =
-  siteConfig.monetization.checkoutEnabled ||
-  siteConfig.monetization.membershipEnabled ||
-  siteConfig.monetization.pointPacksEnabled;
+  siteConfig.navigation.enableMonetizationNav &&
+  (siteConfig.monetization.checkoutEnabled ||
+    siteConfig.monetization.membershipEnabled ||
+    siteConfig.monetization.pointPacksEnabled);
 
 export function absoluteUrl(path = "/") {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

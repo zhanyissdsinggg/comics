@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
 import SurfacePanel from "../common/SurfacePanel";
 import {
   storefrontPrimaryButtonClass,
@@ -95,7 +94,6 @@ export default function AdultGatePage() {
 
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 pt-4 xl:grid-cols-1 xl:items-start">
           <SurfacePanel appearance="dark" tone="muted" accent="cyan" className="p-6 sm:p-7">

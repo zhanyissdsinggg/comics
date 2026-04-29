@@ -7,6 +7,7 @@ import SurfacePanel from "../common/SurfacePanel";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeCreatorName } from "../../lib/creators";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
+import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import { trackEvent } from "../../lib/trackEvent";
 
 function normalizeSearchValue(value) {
@@ -57,7 +58,9 @@ export default function SearchCreatorMatchesPanel({
   searchPath = "/search",
 }) {
   const matchedCreators = useMemo(() => {
-    const creatorDirectory = buildCreatorDirectory(catalog);
+    const creatorDirectory = buildCreatorDirectory(
+      filterBlockedPublicSeries(catalog),
+    );
     const normalizedQuery = normalizeSearchValue(query);
 
     if (!normalizedQuery || creatorDirectory.length === 0) {

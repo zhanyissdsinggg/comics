@@ -26,7 +26,8 @@ const BackendMetaBadge = dynamic(() => import("../common/BackendMetaBadge"), {
 const PerfMonitorBadge = dynamic(() => import("../common/PerfMonitorBadge"), {
   ssr: false,
 });
-const SiteFooter = dynamic(() => import("./SiteFooter"));
+const PublicHeader = dynamic(() => import("./PublicHeader"));
+const PublicFooter = dynamic(() => import("./PublicFooter"));
 const ToastContainer = dynamic(() => import("../common/ToastContainer"), {
   ssr: false,
 });
@@ -42,20 +43,6 @@ const OfflineNotice = dynamic(() => import("../common/OfflineNotice"), {
 const TrackingInjector = dynamic(() => import("../tracking/TrackingInjector"), {
   ssr: false,
 });
-
-const FULL_FOOTER_PATHS = [];
-
-function matchesPath(pathname, prefix) {
-  if (!pathname || !prefix) {
-    return false;
-  }
-
-  if (prefix === "/") {
-    return pathname === "/";
-  }
-
-  return pathname === prefix || pathname.startsWith(`${prefix}/`);
-}
 
 function BrandingHeadSync() {
   const { branding } = useBrandingStore();
@@ -93,11 +80,7 @@ export default function AppProviders({ children }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
-  const isHomeRoute = pathname === "/";
-  const shouldShowFooter = !isAdminRoute && !isReaderRoute && !isHomeRoute;
-  const useFullFooter = FULL_FOOTER_PATHS.some((prefix) => matchesPath(pathname, prefix));
-  const footerTone = shouldShowFooter ? "light" : "default";
-  const footerVariant = useFullFooter ? "full" : "compact";
+  const shouldShowPublicChrome = !isAdminRoute && !isReaderRoute;
 
   return (
     <ErrorBoundary
@@ -124,8 +107,9 @@ export default function AppProviders({ children }) {
                       <NotificationsProvider>
                         <BehaviorProvider>
                           <HistoryProvider>
+                            {shouldShowPublicChrome ? <PublicHeader /> : null}
                             {children}
-                            {shouldShowFooter ? <SiteFooter tone={footerTone} variant={footerVariant} pathname={pathname || ""} /> : null}
+                            {shouldShowPublicChrome ? <PublicFooter /> : null}
                             <PWAInstallPrompt />
                           </HistoryProvider>
                         </BehaviorProvider>

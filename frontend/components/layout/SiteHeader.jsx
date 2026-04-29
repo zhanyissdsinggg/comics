@@ -26,7 +26,11 @@ const MobileBottomNav = dynamic(() => import("./MobileBottomNav"), {
   ssr: false,
 });
 
-export default function SiteHeader({ onSearch, variant = "default" }) {
+export default function SiteHeader({
+  onSearch,
+  variant = "default",
+  showAdultToggle = true,
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
@@ -188,6 +192,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
               isAdultMode={isAdultMode}
               legalAge={legalAge}
               variant={variant}
+              showAdultToggle={showAdultToggle}
             />
           </div>
         </div>

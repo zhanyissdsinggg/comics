@@ -29,6 +29,7 @@ export default function ReaderTopBar({
   progress,
   hasPrev = true,
   hasNext = true,
+  seriesType = "comic",
 }) {
   const shareUrl =
     typeof window !== "undefined" && seriesId && episodeId
@@ -56,6 +57,8 @@ export default function ReaderTopBar({
     "border-2 border-white/10 bg-black text-white/35 shadow-none";
   const lightLockedButtonClass =
     "border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
+  const installmentPlural = seriesType === "novel" ? "Episodes" : "Chapters";
+  const installmentSingle = seriesType === "novel" ? "episode" : "chapter";
 
   const canOpenToc = typeof onOpenToc === "function";
   const canBookmark = typeof onAddBookmark === "function";
@@ -119,9 +122,9 @@ export default function ReaderTopBar({
                   ? "border-neutral-800 text-neutral-200"
                   : lightButtonClass
               }`}
-              aria-label="Chapters"
+              aria-label={installmentPlural}
             >
-              Chapters
+              {installmentPlural}
             </button>
           ) : null}
           {canBookmark ? (
@@ -226,7 +229,7 @@ export default function ReaderTopBar({
             <button
               type="button"
               onClick={onPrev}
-              aria-label="Previous chapter"
+              aria-label={`Previous ${installmentSingle}`}
               disabled={!hasPrev}
               className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
                 hasPrev
@@ -247,10 +250,10 @@ export default function ReaderTopBar({
               onClick={onNext}
               aria-label={
                 !hasNext
-                  ? "End of chapter"
+                  ? `End of ${installmentSingle}`
                   : nextLocked
-                    ? "Locked next chapter"
-                    : "Next chapter"
+                    ? `Locked next ${installmentSingle}`
+                    : `Next ${installmentSingle}`
               }
               disabled={!hasNext}
               className={`shrink-0 rounded-full px-3 py-1 text-xs ${

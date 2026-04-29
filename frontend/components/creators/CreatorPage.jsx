@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import SiteHeader from "../layout/SiteHeader";
 import SurfacePanel from "../common/SurfacePanel";
 import Cover from "../common/Cover";
 import EmptyState from "../common/EmptyState";
@@ -136,7 +135,6 @@ function buildGridItems(items) {
 function CreatorPageSkeleton() {
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -310,7 +308,6 @@ export default function CreatorPage({
   if (error) {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <SurfacePanel appearance="dark" accent="cyan">
             <EmptyState
@@ -330,7 +327,6 @@ export default function CreatorPage({
   if (!creatorItems.length) {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
-        <SiteHeader variant="home" />
         <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
           <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
@@ -358,7 +354,6 @@ export default function CreatorPage({
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <SiteHeader variant="home" />
 
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">

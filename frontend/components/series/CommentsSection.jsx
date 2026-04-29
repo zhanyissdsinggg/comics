@@ -5,6 +5,7 @@ import ShareButton from "../common/ShareButton";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { useAuthStore } from "../../store/useAuthStore";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -51,13 +52,20 @@ function getCommentLikedByUser(entry) {
   return false;
 }
 
-function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
+function buildPromptSuggestions({
+  seriesTitle,
+  author,
+  status,
+  genres,
+  seriesType,
+}) {
   const safeTitle = seriesTitle || "this series";
   const leadGenre =
     Array.isArray(genres) && genres.length > 0
       ? genres[0]
       : "character-driven stories";
   const isCompleted = String(status || "").toLowerCase() === "completed";
+  const latestInstallmentLabel = getInstallmentLabel(seriesType).toLowerCase();
 
   return [
     {
@@ -67,10 +75,10 @@ function buildPromptSuggestions({ seriesTitle, author, status, genres }) {
     },
       {
         id: "moment",
-        label: isCompleted ? "Ending payoff" : "Latest chapter",
+        label: isCompleted ? "Ending payoff" : `Latest ${latestInstallmentLabel}`,
         text: isCompleted
           ? `The ending of ${safeTitle} worked for me because `
-          : `The latest chapter of ${safeTitle} stood out to me because `,
+          : `The latest ${latestInstallmentLabel} of ${safeTitle} stood out to me because `,
       },
     {
       id: "craft",
@@ -93,6 +101,7 @@ export default function CommentsSection({
   author = "",
   status = "",
   genres = [],
+  seriesType = "",
   isFollowing = false,
   onFollowToggle = null,
   sharePath = "",
@@ -207,8 +216,15 @@ export default function CommentsSection({
   }, [comments, sortKey]);
 
   const promptSuggestions = useMemo(
-    () => buildPromptSuggestions({ seriesTitle, author, status, genres }),
-    [author, genres, seriesTitle, status],
+    () =>
+      buildPromptSuggestions({
+        seriesTitle,
+        author,
+        status,
+        genres,
+        seriesType,
+      }),
+    [author, genres, seriesTitle, seriesType, status],
   );
 
   const shareUrl = useMemo(() => {
