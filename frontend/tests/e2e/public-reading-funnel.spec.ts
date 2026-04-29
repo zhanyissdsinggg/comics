@@ -233,7 +233,7 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       id: "series-005e1",
       seriesId: "series-005",
       number: 1,
-      title: "Chapter 1",
+      title: "Episode 1",
       pricePts: 0,
       previewFreePages: 3,
       ttfEligible: false,
@@ -243,7 +243,7 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       id: "series-005e2",
       seriesId: "series-005",
       number: 2,
-      title: "Chapter 2",
+      title: "Episode 2",
       pricePts: 0,
       previewFreePages: 3,
       ttfEligible: false,
@@ -351,6 +351,8 @@ const BANNED_COPY_ROUTE_PATHS = [
   "/search",
   "/rankings",
   "/series/series-001",
+  "/series/series-011",
+  "/store",
 ] as const;
 
 function buildSeriesPayload(seriesId: string) {
@@ -365,16 +367,24 @@ function buildSeriesPayload(seriesId: string) {
 }
 
 function buildEpisodePayload(seriesId: string, episodeId: string) {
+  const series = CATALOG.find((item) => item.id === seriesId);
+  if (!series) {
+    return null;
+  }
   const episode =
     (SERIES_EPISODES[seriesId] || []).find((item) => item.id === episodeId) ||
-    (SERIES_EPISODES[seriesId] || [])[0];
+    null;
+
+  if (!episode) {
+    return null;
+  }
 
   return {
     episode: {
       id: episode?.id || `${seriesId}e1`,
       seriesId,
       title: String(episode?.title || "Chapter 1"),
-      type: CATALOG.find((item) => item.id === seriesId)?.type || "comic",
+      type: series.type || "comic",
       pricePts: 0,
       previewFreePages: 3,
       pages: [
@@ -552,7 +562,12 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
     if (pathname === "/api/episode") {
       const seriesId = searchParams.get("seriesId") || "series-001";
       const episodeId = searchParams.get("episodeId") || `${seriesId}e1`;
-      await fulfillJson(route, buildEpisodePayload(seriesId, episodeId));
+      const payload = buildEpisodePayload(seriesId, episodeId);
+      if (!payload) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      await fulfillJson(route, payload);
       return;
     }
 
@@ -946,7 +961,9 @@ test.describe("Public reading funnel", () => {
       expect(rawResponse.ok(), `${routePath} raw HTML should load`).toBeTruthy();
       const rawHtml = await rawResponse.text();
       const expectedListMarker =
-        routePath === "/series/series-011" ? "Episodes" : "Chapters";
+        routePath === "/series/series-011" || routePath === "/series/series-005"
+          ? "Episodes"
+          : "Chapters";
       const footerIndex = rawHtml.indexOf('data-site-footer="1"');
       const mainIndex = rawHtml.indexOf("<main");
       const mainCloseIndex = rawHtml.indexOf("</main>");
@@ -1125,6 +1142,11 @@ test.describe("Public reading funnel", () => {
     await mockPublicApi(page);
 
     let response = await page.goto("/series/demo-series", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status()).toBe(404);
+
+    response = await page.goto("/read/demo-series/demo-seriese1", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.status()).toBe(404);

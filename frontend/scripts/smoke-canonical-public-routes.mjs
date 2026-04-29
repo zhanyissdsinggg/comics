@@ -31,7 +31,11 @@ const ROUTE_SPECS = [
   { path: "/orders", expectedTitle: "Orders", expectedHeading: "Sign in to view purchases" },
 ];
 
-const EXPECTED_404_ROUTES = ["/series/demo-series", "/creators/gush-demo-studio-c6420d"];
+const EXPECTED_404_ROUTES = [
+  "/series/demo-series",
+  "/read/demo-series/demo-seriese1",
+  "/creators/gush-demo-studio-c6420d",
+];
 
 const BANNED_COPY = [
   "Demo Series",

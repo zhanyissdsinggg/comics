@@ -4,7 +4,9 @@ import { EntitlementProvider } from "../../../../store/useEntitlementStore";
 import { ReaderSettingsProvider } from "../../../../store/useReaderSettingsStore";
 import { RewardsProvider } from "../../../../store/useRewardsStore";
 import { WalletProvider } from "../../../../store/useWalletStore";
+import { notFound } from "next/navigation";
 import { resolveSeriesCreatorName } from "../../../../lib/creatorIdentity";
+import { isBlockedPublicSeriesRecord } from "../../../../lib/publicCatalogVisibility";
 import { createPageMetadata } from "../../../../lib/seo";
 import {
   formatInstallmentLabel,
@@ -71,10 +73,16 @@ export default async function Page({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const seriesId = String(resolvedParams?.seriesId || "").trim();
   const episodeId = String(resolvedParams?.episodeId || "").trim();
+  if (isBlockedPublicSeriesRecord({ id: seriesId })) {
+    notFound();
+  }
   const { series, episode, episodes } = await loadReaderSeoPayload(
     seriesId,
     episodeId,
   );
+  if (!series || !episode) {
+    notFound();
+  }
   const currentIndex = episodes.findIndex(
     (item) => String(item?.id || "").trim() === episodeId,
   );
