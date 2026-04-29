@@ -83,6 +83,10 @@ export function isBlockedPublicCreatorRecord(value) {
   );
 }
 
+export function isBlockedPublicCreatorSlug(value) {
+  return containsBlockedPublicToken(value) || containsBlockedPublicText(value);
+}
+
 export function filterBlockedPublicSeries(items) {
   return (Array.isArray(items) ? items : []).filter(
     (item) => !isBlockedPublicSeriesRecord(item),

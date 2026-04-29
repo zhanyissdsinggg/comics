@@ -9,7 +9,6 @@ import Skeleton from "../common/Skeleton";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -815,33 +814,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
     visibleLibraryItems,
     visibleLibraryItems.length,
   ]);
-  const signedOutActionCards = useMemo(() => {
-    const commonAccentClass =
-      "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
-    const primaryAccentClass =
-      "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] outline outline-2 outline-offset-2 outline-[#00E5FF] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
-
-    return [
-      {
-        id: "signin",
-        eyebrow: "Library",
-        title: "Sign in",
-        description: "",
-        cta: "Sign in",
-        onClick: () => openAuthPrompt(),
-        accentClass: primaryAccentClass,
-      },
-      {
-        id: "browse-free",
-        eyebrow: "Free",
-        title: "Browse free chapters",
-        description: "",
-        cta: "Browse free chapters",
-        onClick: () => router.push("/comics"),
-        accentClass: commonAccentClass,
-      },
-    ];
-  }, [openAuthPrompt, router]);
   const signedOutRecommendedStarts = useMemo(
     () => recommendedItems.slice(0, 3),
     [recommendedItems],
@@ -1131,18 +1103,29 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                     Library
                   </p>
-                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                  <h1 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                     Your library
-                  </h2>
+                  </h1>
                   <p className="text-sm font-semibold leading-6 text-white/70">
                     Sign in to save progress and favorites.
                   </p>
                 </div>
-                <StorefrontPathwaysGrid
-                  cards={signedOutActionCards}
-                  columnsClassName="md:grid-cols-2"
-                  appearance="dark"
-                />
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={openAuthPrompt}
+                    className={primaryButtonClass}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/comics")}
+                    className={secondaryButtonClass}
+                  >
+                    Browse free chapters
+                  </button>
+                </div>
                 {signedOutRecommendedStarts.length > 0 ? (
                   <div className="space-y-3">
                     <div className="space-y-1">

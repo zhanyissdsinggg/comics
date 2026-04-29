@@ -62,6 +62,7 @@ function getSignalClass(tone) {
 function EpisodeRow({
   episode,
   seriesId,
+  seriesType,
   unlocked,
   ttfStatus,
   pricePts,
@@ -174,8 +175,18 @@ function EpisodeRow({
   );
   const effectivePrice = accessState.effectivePrice;
   const hasCustomEpisodeTitle =
-    Boolean(episode?.title) && !isDefaultInstallmentTitle(episode.title, episode);
-  const episodeNumberLabel = formatInstallmentLabel(episode, episode?.number);
+    Boolean(episode?.title) &&
+    !isDefaultInstallmentTitle(episode.title, {
+      ...episode,
+      type: seriesType || episode?.type,
+    });
+  const episodeNumberLabel = formatInstallmentLabel(
+    {
+      ...episode,
+      type: seriesType || episode?.type,
+    },
+    episode?.number,
+  );
   const episodeHeading = hasCustomEpisodeTitle
     ? episode.title
     : episodeNumberLabel;

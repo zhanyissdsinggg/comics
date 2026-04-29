@@ -8,7 +8,10 @@ import {
   seriesMatchesCreatorSlug,
 } from "./creatorIdentity";
 import { buildHomeHeroItems, getHomeEditorialSnapshot } from "./homeMerchandising";
-import { filterBlockedPublicSeries } from "./publicCatalogVisibility";
+import {
+  filterBlockedPublicSeries,
+  isBlockedPublicCreatorSlug,
+} from "./publicCatalogVisibility";
 
 export const SEO_REVALIDATE_SECONDS = 300;
 
@@ -315,6 +318,14 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
     };
   }
 
+  if (isBlockedPublicCreatorSlug(creatorSlug)) {
+    return {
+      creatorName: fallbackName,
+      items: [],
+      blocked: true,
+    };
+  }
+
   try {
     const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
@@ -341,11 +352,13 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
     return {
       creatorName: resolveSeriesCreatorName(creatorItems[0]) || fallbackName,
       items: creatorItems,
+      blocked: false,
     };
   } catch {
     return {
       creatorName: fallbackName,
       items: [],
+      blocked: false,
     };
   }
 });

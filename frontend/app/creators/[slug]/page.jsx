@@ -7,13 +7,26 @@ import {
 } from "../../../lib/creators";
 import { siteConfig } from "../../../lib/siteConfig";
 import { buildCreatorStructuredData } from "../../../lib/structuredData";
+import { isBlockedPublicCreatorSlug } from "../../../lib/publicCatalogVisibility";
 import { loadCreatorSeoPayload } from "../../../lib/storefrontSeo";
+import { notFound } from "next/navigation";
 
 export const revalidate = 300;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const creatorSlug = resolvedParams?.slug;
+  if (isBlockedPublicCreatorSlug(creatorSlug)) {
+    return createPageMetadata({
+      title: "Creators",
+      description: "Writers, artists, and studios behind the stories on Gush.",
+      path: "/creators",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    });
+  }
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
   const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
   const creatorName =
@@ -32,7 +45,13 @@ export async function generateMetadata({ params }) {
 export default async function CreatorRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const creatorSlug = resolvedParams.slug;
+  if (isBlockedPublicCreatorSlug(creatorSlug)) {
+    notFound();
+  }
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
+  if (creatorPayload?.blocked) {
+    notFound();
+  }
   const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
 
   const structuredData = buildCreatorStructuredData({

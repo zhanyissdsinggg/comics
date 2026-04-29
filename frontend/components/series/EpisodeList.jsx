@@ -254,6 +254,7 @@ export default function EpisodeList({
                   key={key}
                   episode={episode}
                   seriesId={series?.id}
+                  seriesType={series?.type}
                   unlocked={unlocked}
                   ttfStatus={ttfStatus}
                   pricePts={pricePts}

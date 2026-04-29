@@ -18,8 +18,12 @@ const ROUTE_SPECS = [
   { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Titles" },
   { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending" },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
+  { path: "/series/series-004", expectedTitle: "Cherry Blossom High", expectedHeading: "Cherry Blossom High" },
+  { path: "/series/series-005", expectedTitle: "Dragon's Oath", expectedHeading: "Dragon's Oath" },
+  { path: "/series/series-009", expectedTitle: "Starfall Academy", expectedHeading: "Starfall Academy" },
+  { path: "/series/series-010", expectedTitle: "Crimson Tide", expectedHeading: "Crimson Tide" },
   { path: "/series/series-011", expectedTitle: "Solar Wind", expectedHeading: "Solar Wind" },
-  { path: "/store", expectedTitle: "Store", expectedHeading: "Points" },
+  { path: "/store", expectedTitle: "Points are coming soon", expectedHeading: "Points are coming soon" },
   { path: "/subscribe", expectedTitle: "Membership is coming soon", expectedHeading: "Membership is coming soon" },
   { path: "/support", expectedTitle: "Support", expectedHeading: "Support" },
   { path: "/account", expectedTitle: "Account", expectedHeading: "Account" },
@@ -27,7 +31,7 @@ const ROUTE_SPECS = [
   { path: "/orders", expectedTitle: "Orders", expectedHeading: "Sign in to view purchases" },
 ];
 
-const EXPECTED_404_ROUTES = ["/series/demo-series"];
+const EXPECTED_404_ROUTES = ["/series/demo-series", "/creators/gush-demo-studio-c6420d"];
 
 const BANNED_COPY = [
   "Demo Series",
@@ -78,10 +82,44 @@ const CATALOG = [
     ],
   },
   {
+    id: "series-004",
+    title: "Cherry Blossom High",
+    type: "comic",
+    status: "Completed",
+    adult: false,
+    description: "A sweet high school romance blooms during one last spring festival.",
+    shortDescription: "A sweet high school romance blooms during one last spring festival.",
+    synopsis: "A sweet high school romance blooms during one last spring festival.",
+    coverUrl: "/mock-covers/series-004.jpg",
+    bannerUrl: "/mock-covers/series-004.jpg",
+    genres: ["Romance", "Comedy"],
+    episodeCount: 3,
+    latestEpisodeId: "series-004e3",
+    updatedAt: "2026-04-11T12:00:00.000Z",
+    creator: {
+      label: "Hana Seo",
+      type: "person",
+      slug: "hana-seo-b0a4d1",
+      creatorId: "creator_hana_seo",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_hana_seo",
+        slug: "hana-seo-b0a4d1",
+        name: "Hana Seo",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
     id: "series-005",
     title: "Dragon's Oath",
-    type: "novel",
-    status: "Completed",
+    type: "comic",
+    status: "Ongoing",
     adult: false,
     description: "A street mage takes one bad deal and starts a war with dragons.",
     shortDescription: "A street mage takes one bad deal and starts a war with dragons.",
@@ -113,31 +151,65 @@ const CATALOG = [
   },
   {
     id: "series-009",
-    title: "Rocket Choir",
+    title: "Starfall Academy",
     type: "comic",
-    status: "Completed",
+    status: "Ongoing",
     adult: false,
-    description: "A washed-up band gets drafted to sing on a doomed space run.",
-    shortDescription: "A washed-up band gets drafted to sing on a doomed space run.",
-    synopsis: "A washed-up band gets drafted to sing on a doomed space run.",
+    description: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
+    shortDescription: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
+    synopsis: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
     coverUrl: "/mock-covers/series-009.jpg",
     bannerUrl: "/mock-covers/series-009.jpg",
-    genres: ["Sci-Fi", "Comedy"],
-    episodeCount: 4,
-    latestEpisodeId: "series-009e4",
-    updatedAt: "2026-04-08T12:00:00.000Z",
+    genres: ["Fantasy", "School Life"],
+    episodeCount: 3,
+    latestEpisodeId: "series-009e3",
+    updatedAt: "2026-04-18T12:00:00.000Z",
     creator: {
-      label: "Northline Studio",
-      type: "studio",
-      slug: "northline-studio-c913e2",
-      creatorId: "creator_northline_studio",
+      label: "Naomi Vale",
+      type: "person",
+      slug: "naomi-vale-f7a3c1",
+      creatorId: "creator_naomi_vale",
       isFallback: false,
     },
     creatorCredits: [
       {
-        creatorId: "creator_northline_studio",
-        slug: "northline-studio-c913e2",
-        name: "Northline Studio",
+        creatorId: "creator_naomi_vale",
+        slug: "naomi-vale-f7a3c1",
+        name: "Naomi Vale",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-010",
+    title: "Crimson Tide",
+    type: "comic",
+    status: "Completed",
+    adult: false,
+    description: "A hunter tracks a blood-red curse through a ruined harbor city.",
+    shortDescription: "A hunter tracks a blood-red curse through a ruined harbor city.",
+    synopsis: "A hunter tracks a blood-red curse through a ruined harbor city.",
+    coverUrl: "/mock-covers/series-010.jpg",
+    bannerUrl: "/mock-covers/series-010.jpg",
+    genres: ["Horror", "Action"],
+    episodeCount: 3,
+    latestEpisodeId: "series-010e3",
+    updatedAt: "2026-04-09T12:00:00.000Z",
+    creator: {
+      label: "Rook Hollow Studio",
+      type: "studio",
+      slug: "rook-hollow-studio-71ad24",
+      creatorId: "creator_rook_hollow_studio",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_rook_hollow_studio",
+        slug: "rook-hollow-studio-71ad24",
+        name: "Rook Hollow Studio",
         type: "studio",
         role: "studio",
         isPrimary: true,
@@ -187,12 +259,25 @@ const SERIES_EPISODES = {
     { id: "series-001e2", seriesId: "series-001", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-08T00:00:00.000Z" },
     { id: "series-001e3", seriesId: "series-001", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-15T00:00:00.000Z" },
   ],
+  "series-004": [
+    { id: "series-004e1", seriesId: "series-004", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-01T00:00:00.000Z" },
+    { id: "series-004e2", seriesId: "series-004", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-08T00:00:00.000Z" },
+    { id: "series-004e3", seriesId: "series-004", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-15T00:00:00.000Z" },
+  ],
   "series-005": [
     { id: "series-005e1", seriesId: "series-005", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-02T00:00:00.000Z" },
     { id: "series-005e2", seriesId: "series-005", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-09T00:00:00.000Z" },
+    { id: "series-005e3", seriesId: "series-005", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-16T00:00:00.000Z" },
   ],
   "series-009": [
-    { id: "series-009e1", seriesId: "series-009", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-03-30T00:00:00.000Z" },
+    { id: "series-009e1", seriesId: "series-009", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-04T00:00:00.000Z" },
+    { id: "series-009e2", seriesId: "series-009", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-11T00:00:00.000Z" },
+    { id: "series-009e3", seriesId: "series-009", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-18T00:00:00.000Z" },
+  ],
+  "series-010": [
+    { id: "series-010e1", seriesId: "series-010", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-03-28T00:00:00.000Z" },
+    { id: "series-010e2", seriesId: "series-010", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-04T00:00:00.000Z" },
+    { id: "series-010e3", seriesId: "series-010", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-11T00:00:00.000Z" },
   ],
   "series-011": [
     { id: "series-011e1", seriesId: "series-011", number: 1, title: "Episode 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-03T00:00:00.000Z" },
@@ -416,6 +501,41 @@ function assertSubscribePrelaunch(html) {
   }
 }
 
+function assertStorePrelaunch(html) {
+  const requiredCopy = [
+    "Points are coming soon",
+    "Point packs are not available yet. You can read free chapters now.",
+    "Browse Comics",
+    "Contact Support",
+  ];
+  const bannedCopy = ["Plans", "Orders", "VISA", "MC", "18+"];
+
+  for (const phrase of requiredCopy) {
+    if (!html.includes(phrase)) {
+      throw new Error(`/store prelaunch page is missing "${phrase}"`);
+    }
+  }
+
+  for (const phrase of bannedCopy) {
+    if (html.includes(phrase)) {
+      throw new Error(`/store prelaunch page should not expose "${phrase}"`);
+    }
+  }
+
+  if (!/name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
+    throw new Error(`/store prelaunch page should publish a noindex robots tag`);
+  }
+}
+
+function assertSeriesPrelaunchChrome(html, seriesId) {
+  const forbidden = ["Point packs", "Membership", "VISA", "MC"];
+  for (const phrase of forbidden) {
+    if (html.includes(phrase)) {
+      throw new Error(`/series/${seriesId} should not expose prelaunch commercial chrome "${phrase}"`);
+    }
+  }
+}
+
 function assertSeriesTerminology(html, seriesId, format) {
   const normalizedFormat = String(format || "").toLowerCase();
   if (normalizedFormat === "comic") {
@@ -622,16 +742,50 @@ async function run() {
       if (spec.path === "/series/series-001") {
         assertSeriesReaderLinks(direct.html, "series-001");
         assertSeriesTerminology(direct.html, "series-001", "comic");
+        assertSeriesPrelaunchChrome(direct.html, "series-001");
+      }
+
+      if (spec.path === "/series/series-004") {
+        assertSeriesReaderLinks(direct.html, "series-004");
+        assertSeriesTerminology(direct.html, "series-004", "comic");
+        assertSeriesPrelaunchChrome(direct.html, "series-004");
+      }
+
+      if (spec.path === "/series/series-005") {
+        assertSeriesReaderLinks(direct.html, "series-005");
+        assertSeriesTerminology(direct.html, "series-005", "comic");
+        assertSeriesPrelaunchChrome(direct.html, "series-005");
+      }
+
+      if (spec.path === "/series/series-009") {
+        assertSeriesReaderLinks(direct.html, "series-009");
+        assertSeriesTerminology(direct.html, "series-009", "comic");
+        assertSeriesPrelaunchChrome(direct.html, "series-009");
+        if (!direct.html.includes("Chapter 3")) {
+          throw new Error('/series/series-009 should show "Chapter 3" as the latest entry');
+        }
+      }
+
+      if (spec.path === "/series/series-010") {
+        assertSeriesReaderLinks(direct.html, "series-010");
+        assertSeriesTerminology(direct.html, "series-010", "comic");
+        assertSeriesPrelaunchChrome(direct.html, "series-010");
       }
 
       if (spec.path === "/series/series-011") {
         assertSeriesReaderLinks(direct.html, "series-011");
         assertSeriesTerminology(direct.html, "series-011", "novel");
+        assertSeriesPrelaunchChrome(direct.html, "series-011");
       }
 
       if (spec.path === "/subscribe") {
         assertSubscribePrelaunch(direct.html);
         assertSubscribePrelaunch(variant.html);
+      }
+
+      if (spec.path === "/store") {
+        assertStorePrelaunch(direct.html);
+        assertStorePrelaunch(variant.html);
       }
 
       for (const phrase of BANNED_COPY) {

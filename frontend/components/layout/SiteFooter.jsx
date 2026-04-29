@@ -154,7 +154,7 @@ function MastercardIcon() {
 }
 
 function PaymentIconRow() {
-  if (!siteConfig.navigation.enableMonetizationNav) {
+  if (!siteConfig.monetization.publicCommerceNavEnabled) {
     return null;
   }
 
