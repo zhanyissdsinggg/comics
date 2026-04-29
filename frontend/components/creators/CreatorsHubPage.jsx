@@ -7,6 +7,7 @@ import EmptyState from "../common/EmptyState";
 import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
+import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 
 function formatCreditTypeLabel(creditType) {
@@ -286,7 +287,11 @@ export default function CreatorsHubPage({
           return;
         }
 
-        setCatalog(Array.isArray(response.data?.series) ? response.data.series : []);
+        setCatalog(
+          filterBlockedPublicSeries(
+            Array.isArray(response.data?.series) ? response.data.series : [],
+          ),
+        );
         setError("");
         setLoading(false);
       },
@@ -302,7 +307,10 @@ export default function CreatorsHubPage({
     retryLoad();
   }, [hasInitialCatalog, retryLoad]);
 
-  const creators = useMemo(() => buildCreatorDirectory(catalog), [catalog]);
+  const creators = useMemo(
+    () => buildCreatorDirectory(filterBlockedPublicSeries(catalog)),
+    [catalog],
+  );
   const genreOptions = useMemo(() => buildGenreOptions(creators), [creators]);
   const featuredCreators = useMemo(() => creators.slice(0, 3), [creators]);
   const filteredCreators = useMemo(() => {

@@ -3,6 +3,7 @@ import {
   getCreatorDisplayName,
 } from "./creators";
 import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
+import { filterBlockedPublicSeries } from "./publicCatalogVisibility";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -27,7 +28,7 @@ function getCatalogPriority(series) {
 }
 
 function normalizeSeriesList(items) {
-  return (Array.isArray(items) ? items : []).filter(
+  return filterBlockedPublicSeries(Array.isArray(items) ? items : []).filter(
     (item) => item?.id && resolveSeriesCreatorIdentity(item).hasPublicCredit,
   );
 }

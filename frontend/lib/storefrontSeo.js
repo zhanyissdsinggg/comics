@@ -8,6 +8,7 @@ import {
   seriesMatchesCreatorSlug,
 } from "./creatorIdentity";
 import { buildHomeHeroItems, getHomeEditorialSnapshot } from "./homeMerchandising";
+import { filterBlockedPublicSeries } from "./publicCatalogVisibility";
 
 export const SEO_REVALIDATE_SECONDS = 300;
 
@@ -84,6 +85,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
     return {
       series: null,
       episode: null,
+      episodes: [],
     };
   }
 
@@ -98,6 +100,9 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
   return {
     series: seriesRoutePayload?.payload?.series || null,
     episode: episodePayload?.episode || null,
+    episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
+      ? seriesRoutePayload.payload.episodes
+      : [],
   };
 });
 
@@ -111,6 +116,15 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
   }
 
   try {
+    const normalizedSeriesId = String(seriesId || "").trim().toLowerCase();
+    if (normalizedSeriesId === "demo-series" || normalizedSeriesId === "fixture-series") {
+      return {
+        payload: null,
+        state: "not-found",
+        gateReason: null,
+      };
+    }
+
     const response = await fetch(
       `${getSeoApiBaseUrl()}/api/series/${encodeURIComponent(seriesId)}`,
       {
@@ -148,8 +162,20 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
 
     const payload = await response.json();
     if (payload?.series) {
+      const safeSeries = filterBlockedPublicSeries([payload.series])[0] || null;
+      if (!safeSeries) {
+        return {
+          payload: null,
+          state: "not-found",
+          gateReason: null,
+        };
+      }
+
       return {
-        payload,
+        payload: {
+          ...payload,
+          series: safeSeries,
+        },
         state: "ready",
         gateReason: null,
       };
@@ -172,7 +198,9 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
 export const loadSeriesCatalogSeoPayload = cache(async () => {
   const payload = await fetchSeoApiJson("/api/series?adult=0", "series-catalog");
   return {
-    series: Array.isArray(payload?.series) ? payload.series : [],
+    series: filterBlockedPublicSeries(
+      Array.isArray(payload?.series) ? payload.series : [],
+    ),
     ready: Boolean(payload),
   };
 });
@@ -184,7 +212,9 @@ export const loadHomepageSeoPayload = cache(async () => {
     fetchSeoApiJson("/api/recommendations/homepage?adult=0", "home-recommendations"),
   ]);
 
-  const seriesList = Array.isArray(seriesPayload?.series) ? seriesPayload.series : [];
+  const seriesList = filterBlockedPublicSeries(
+    Array.isArray(seriesPayload?.series) ? seriesPayload.series : [],
+  );
   const homepageSlots = Array.isArray(recommendationsPayload?.slots)
     ? recommendationsPayload.slots
     : [];
@@ -301,7 +331,9 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
     }
 
     const payload = await response.json();
-    const seriesList = Array.isArray(payload?.series) ? payload.series : [];
+    const seriesList = filterBlockedPublicSeries(
+      Array.isArray(payload?.series) ? payload.series : [],
+    );
     const creatorItems = sortCreatorSeries(
       seriesList.filter((item) => seriesMatchesCreatorSlug(item, creatorSlug)),
     );
@@ -334,7 +366,9 @@ export const loadCreatorsDirectorySeoPayload = cache(async () => {
     }
 
     const payload = await response.json();
-    const seriesList = Array.isArray(payload?.series) ? payload.series : [];
+    const seriesList = filterBlockedPublicSeries(
+      Array.isArray(payload?.series) ? payload.series : [],
+    );
 
     return {
       creators: buildCreatorDirectory(seriesList),

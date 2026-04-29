@@ -9,11 +9,11 @@ import { ArrowRight } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
-import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { buildHomeHeroItems, getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
+import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
   formatInstallmentCount,
   getStartReadingLabel,
@@ -41,50 +41,8 @@ function dedupeSeries(seriesList) {
   });
 }
 
-const HOMEPAGE_BANNED_TOKENS = [
-  "demo series",
-  "gush demo studio",
-  "smoke test",
-  "reader qa",
-  "demo action",
-  "demo genre",
-  "platform smoke tests",
-  "demo-series",
-];
-
-function collectHomepageSeriesText(series) {
-  const creatorNames = Array.isArray(series?.creatorCredits)
-    ? series.creatorCredits.map((item) => item?.name)
-    : [];
-  return [
-    series?.id,
-    series?.slug,
-    series?.title,
-    series?.description,
-    series?.shortDescription,
-    series?.summary,
-    series?.synopsis,
-    series?.author,
-    series?.creator?.label,
-    ...creatorNames,
-    ...(Array.isArray(series?.genres) ? series.genres : []),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
-
-function isHomepageProductionSeries(series) {
-  if (!series || typeof series !== "object") {
-    return false;
-  }
-
-  const haystack = collectHomepageSeriesText(series);
-  return !HOMEPAGE_BANNED_TOKENS.some((token) => haystack.includes(token));
-}
-
 function sanitizeHomepageSeriesList(seriesList) {
-  return dedupeSeries(seriesList).filter(isHomepageProductionSeries);
+  return dedupeSeries(filterBlockedPublicSeries(seriesList));
 }
 
 function buildHeroSummary(series) {
@@ -305,7 +263,6 @@ function HomeSection({
   ctaLabel,
   ctaHref,
   items,
-  onSeriesOpen,
   section = "trending",
 }) {
   if (!Array.isArray(items) || items.length === 0) {
@@ -350,10 +307,9 @@ function HomeSection({
           const label = buildSeriesCardLabel(series, section);
 
           return (
-            <button
+            <Link
               key={series.id}
-              type="button"
-              onClick={() => onSeriesOpen(series.id, `HOME_${section.toUpperCase()}`)}
+              href={`/series/${encodeURIComponent(series.id)}`}
               className="group overflow-hidden rounded-[22px] border border-white/10 bg-[#111111] text-left transition-all duration-200 hover:border-white/18 hover:bg-[#171717]"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-[#0b0b0b]">
@@ -403,7 +359,7 @@ function HomeSection({
                   <p className="line-clamp-1 text-xs text-white/45">{meta}</p>
                 ) : null}
               </div>
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -612,23 +568,6 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
     };
   }, [canonicalHomeView.featuredSeries, featuredReadHref]);
 
-  const openSeries = (seriesId, entryPoint = "HOME_CARD") => {
-    if (!seriesId) {
-      return;
-    }
-
-    const targetPath = `/series/${seriesId}`;
-    router.push(
-      buildPathWithAttribution(targetPath, {
-        entryPoint,
-        campaignId: `${String(entryPoint || "home").toLowerCase()}_${seriesId}`,
-        sourcePath: "/",
-        sourceSeriesId: seriesId,
-        returnTo: targetPath,
-      }),
-    );
-  };
-
   const { featuredSeries, trendingItems, newUpdateItems, completedItems } = canonicalHomeView;
 
   return (
@@ -662,7 +601,6 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             ctaLabel="See all"
             ctaHref="/rankings"
             items={trendingItems}
-            onSeriesOpen={openSeries}
             section="trending"
           />
           <HomeSection
@@ -671,7 +609,6 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             ctaLabel="Browse all"
             ctaHref="/search?sort=updated"
             items={newUpdateItems}
-            onSeriesOpen={openSeries}
             section="updates"
           />
           <HomeSection
@@ -680,7 +617,6 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             ctaLabel="More finished series"
             ctaHref="/search?status=Completed&sort=popular"
             items={completedItems}
-            onSeriesOpen={openSeries}
             section="completed"
           />
         </div>

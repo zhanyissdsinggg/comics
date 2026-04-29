@@ -244,6 +244,20 @@ function createMockBackendServer() {
       return;
     }
 
+    if (pathname === "/api/episode") {
+      const seriesId = url.searchParams.get("seriesId") || "";
+      const episodeId = url.searchParams.get("episodeId") || "";
+      const seriesPayload = buildSeriesPayload(seriesId);
+      const episode =
+        (seriesPayload?.episodes || []).find((item) => item.id === episodeId) || null;
+      if (!seriesPayload || !episode) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
+      jsonResponse(response, 200, { episode });
+      return;
+    }
+
     if (pathname === "/api/search/hot") {
       jsonResponse(response, 200, { keywords: ["dragon", "mira", "fantasy"] });
       return;
@@ -424,6 +438,30 @@ function assertSeriesTerminology(html, seriesId, format) {
   }
 }
 
+function assertHomepageSeriesCardLinks(html) {
+  const homepageSeriesLinks =
+    html.match(/<a[^>]*href=["']\/series\/[^"']+["'][^>]*>/gi) || [];
+  if (homepageSeriesLinks.length < 3) {
+    throw new Error(`/ should render multiple homepage title card anchors, found ${homepageSeriesLinks.length}`);
+  }
+
+  if (/<a[^>]*href=["']\/_next\/image[^"']*["'][^>]*>/i.test(html)) {
+    throw new Error(`/ should not link homepage cards to /_next/image assets`);
+  }
+}
+
+function assertReaderFallback(html, seriesId, episodeId, episodeLabel) {
+  if (!html.includes("Back to series")) {
+    throw new Error(`/read/${seriesId}/${episodeId} is missing the SSR back-to-series link`);
+  }
+  if (!html.includes(episodeLabel)) {
+    throw new Error(`/read/${seriesId}/${episodeId} should render "${episodeLabel}" in the SSR fallback`);
+  }
+  if (!html.includes(`/series/${seriesId}`)) {
+    throw new Error(`/read/${seriesId}/${episodeId} should include a back link to /series/${seriesId}`);
+  }
+}
+
 function buildVariantPath(pathname) {
   const separator = pathname.includes("?") ? "&" : "?";
   return `${pathname}${separator}campaignId=canonical-test&entry=nav&returnTo=%2Frankings&sourcePath=%2Frankings`;
@@ -578,6 +616,7 @@ async function run() {
             `/ homepage hero is unstable across consecutive requests: "${direct.title}/${direct.heading}" vs "${secondPass.title}/${secondPass.heading}"`,
           );
         }
+        assertHomepageSeriesCardLinks(direct.html);
       }
 
       if (spec.path === "/series/series-001") {
@@ -623,6 +662,20 @@ async function run() {
       }
       console.log(`[canonical-smoke] PASS ${routePath} -> 404`);
     }
+
+    const readerResponse = await fetchRoute(baseUrl, "/read/series-011/series-011e1");
+    assertReaderFallback(
+      readerResponse.html,
+      "series-011",
+      "series-011e1",
+      "Episode 1",
+    );
+    for (const phrase of BANNED_COPY) {
+      if (readerResponse.text.toLowerCase().includes(phrase.toLowerCase())) {
+        throw new Error(`/read/series-011/series-011e1 still exposes banned copy: "${phrase}"`);
+      }
+    }
+    console.log("[canonical-smoke] PASS /read/series-011/series-011e1 -> SSR fallback");
 
     console.log("[canonical-smoke] all public routes passed");
   } finally {

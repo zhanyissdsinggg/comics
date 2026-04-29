@@ -8,6 +8,7 @@ import EmptyState from "../common/EmptyState";
 import PortraitCard from "../home/PortraitCard";
 import { apiGet } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
   buildPathWithAttribution,
   loadPersistedPaymentAttribution,
@@ -229,7 +230,11 @@ export default function CreatorPage({
           return;
         }
 
-        setCatalog(Array.isArray(response.data?.series) ? response.data.series : []);
+        setCatalog(
+          filterBlockedPublicSeries(
+            Array.isArray(response.data?.series) ? response.data.series : [],
+          ),
+        );
         setError("");
         setLoading(false);
       },
@@ -246,7 +251,7 @@ export default function CreatorPage({
   }, [fetchCreatorCatalog, hasInitialCatalog]);
 
   const creatorItems = useMemo(
-    () => buildCreatorItems(catalog, creatorSlug),
+    () => buildCreatorItems(filterBlockedPublicSeries(catalog), creatorSlug),
     [catalog, creatorSlug],
   );
   const routeCreatorName = useMemo(

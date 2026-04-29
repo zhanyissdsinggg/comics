@@ -10,6 +10,7 @@ import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
 import { formatInstallmentCount } from "../../../lib/seriesFormatLabels";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
+import { isBlockedPublicSeriesRecord } from "../../../lib/publicCatalogVisibility";
 import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
 
 export const revalidate = 300;
@@ -55,6 +56,9 @@ export async function generateMetadata({ params }) {
 
 export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
+  if (isBlockedPublicSeriesRecord({ id: resolvedParams.id })) {
+    notFound();
+  }
   const routePayload = await loadSeriesRoutePayload(resolvedParams.id);
   if (routePayload?.state === "not-found") {
     notFound();

@@ -6,6 +6,10 @@ import { RewardsProvider } from "../../../../store/useRewardsStore";
 import { WalletProvider } from "../../../../store/useWalletStore";
 import { resolveSeriesCreatorName } from "../../../../lib/creatorIdentity";
 import { createPageMetadata } from "../../../../lib/seo";
+import {
+  formatInstallmentLabel,
+  isDefaultInstallmentTitle,
+} from "../../../../lib/seriesFormatLabels";
 import { siteConfig } from "../../../../lib/siteConfig";
 import { loadReaderSeoPayload } from "../../../../lib/storefrontSeo";
 import ReaderPageShell from "./ReaderPageShell";
@@ -53,7 +57,65 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default function Page({ params }) {
+export default async function Page({ params }) {
+  const resolvedParams = await Promise.resolve(params);
+  const seriesId = String(resolvedParams?.seriesId || "").trim();
+  const episodeId = String(resolvedParams?.episodeId || "").trim();
+  const { series, episode, episodes } = await loadReaderSeoPayload(
+    seriesId,
+    episodeId,
+  );
+  const currentIndex = episodes.findIndex(
+    (item) => String(item?.id || "").trim() === episodeId,
+  );
+  const previousEpisode = currentIndex > 0 ? episodes[currentIndex - 1] : null;
+  const nextEpisode =
+    currentIndex >= 0 && currentIndex < episodes.length - 1
+      ? episodes[currentIndex + 1]
+      : null;
+
+  const defaultEpisodeLabel = formatInstallmentLabel(
+    series?.type || episode?.type,
+    episode?.number,
+  );
+  const episodeTitle =
+    episode && !isDefaultInstallmentTitle(episode?.title, series?.type || episode)
+      ? String(episode.title || "").trim()
+      : defaultEpisodeLabel;
+
+  const buildEpisodeTitle = (item) => {
+    if (!item) {
+      return "";
+    }
+
+    return isDefaultInstallmentTitle(item?.title, series?.type || item)
+      ? formatInstallmentLabel(series?.type || item, item?.number)
+      : String(item?.title || "").trim() ||
+          formatInstallmentLabel(series?.type || item, item?.number);
+  };
+
+  const fallbackData = {
+    seriesId,
+    episodeId,
+    seriesTitle: String(series?.title || "").trim() || "Reader",
+    episodeTitle: episodeTitle || "Loading story",
+    backToSeriesHref: seriesId ? `/series/${seriesId}` : "/",
+    previousEpisode:
+      previousEpisode && previousEpisode?.id
+        ? {
+            href: `/read/${seriesId}/${previousEpisode.id}`,
+            label: buildEpisodeTitle(previousEpisode),
+          }
+        : null,
+    nextEpisode:
+      nextEpisode && nextEpisode?.id
+        ? {
+            href: `/read/${seriesId}/${nextEpisode.id}`,
+            label: buildEpisodeTitle(nextEpisode),
+          }
+        : null,
+  };
+
   return (
     <WalletProvider>
       <RewardsProvider>
@@ -61,7 +123,11 @@ export default function Page({ params }) {
           <CouponProvider>
             <ReaderSettingsProvider>
               <BookmarkProvider>
-                <ReaderPageShell seriesId={params.seriesId} episodeId={params.episodeId} />
+                <ReaderPageShell
+                  seriesId={seriesId}
+                  episodeId={episodeId}
+                  fallbackData={fallbackData}
+                />
               </BookmarkProvider>
             </ReaderSettingsProvider>
           </CouponProvider>
