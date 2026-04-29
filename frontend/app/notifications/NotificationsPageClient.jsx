@@ -183,7 +183,7 @@ export default function NotificationsPage() {
         hint: "",
       },
       {
-        label: "Episodes",
+        label: "Chapters",
         value: loading ? "--" : episodes.toLocaleString(),
         hint: "",
       },
@@ -212,7 +212,7 @@ export default function NotificationsPage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
+            appearance="dark"
             accent="blue"
             eyebrow="Notifications"
             title="Inbox."
@@ -270,18 +270,18 @@ export default function NotificationsPage() {
         </section>
 
         {loading ? (
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
             <div className="space-y-2">
               <div
-                className="h-4 w-28 animate-pulse rounded-full bg-slate-200"
+                className="h-4 w-28 animate-pulse rounded-full bg-white/20"
                 aria-hidden="true"
               />
               <div
-                className="h-9 w-64 animate-pulse rounded-2xl bg-slate-200"
+                className="h-9 w-64 animate-pulse rounded-2xl bg-white/20"
                 aria-hidden="true"
               />
               <div
-                className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-slate-200"
+                className="h-4 w-full max-w-2xl animate-pulse rounded-full bg-white/15"
                 aria-hidden="true"
               />
             </div>
@@ -289,16 +289,16 @@ export default function NotificationsPage() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
+                  className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                   aria-hidden="true"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1 space-y-3">
-                      <div className="h-5 w-1/2 animate-pulse rounded-2xl bg-slate-200" />
-                      <div className="h-4 w-full animate-pulse rounded-full bg-slate-100" />
-                      <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-100" />
+                      <div className="h-5 w-1/2 animate-pulse rounded-2xl bg-white/20" />
+                      <div className="h-4 w-full animate-pulse rounded-full bg-white/15" />
+                      <div className="h-4 w-2/3 animate-pulse rounded-full bg-white/15" />
                     </div>
-                    <div className="h-9 w-24 animate-pulse bg-slate-200" />
+                    <div className="h-9 w-24 animate-pulse rounded-full bg-white/20" />
                   </div>
                 </div>
               ))}
@@ -306,8 +306,8 @@ export default function NotificationsPage() {
           </SurfacePanel>
         ) : error ? (
           <SurfacePanel
-            className="border border-[#f0b7c8] bg-[#fff3f6] text-red-600 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
-            appearance="light"
+            className="border-2 border-[#FF007A] bg-black text-[#FF007A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
             tone="danger"
             accent="rose"
           >
@@ -327,10 +327,10 @@ export default function NotificationsPage() {
             </div>
           </SurfacePanel>
         ) : (
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <StorefrontSectionHeading eyebrow="Inbox" title="Latest" />
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                 {notifications.length} updates
               </p>
             </div>
@@ -339,7 +339,7 @@ export default function NotificationsPage() {
               onMarkRead={handleMarkRead}
               onNavigate={handleNavigate}
               workingId={workingId}
-              appearance="light"
+              appearance="dark"
             />
           </SurfacePanel>
         )}

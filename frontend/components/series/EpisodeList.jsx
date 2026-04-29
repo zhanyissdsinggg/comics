@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import EpisodeRow from "./EpisodeRow";
+import SurfacePanel from "../common/SurfacePanel";
 import { useProgressStore } from "../../store/useProgressStore";
 import {
   EPISODE_PRIMARY_STATE_META,
@@ -34,9 +35,9 @@ export default function EpisodeList({
 }) {
   const { getProgress } = useProgressStore();
   const neutralChipClass =
-    "rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-black/60";
+    "rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const filterControlClass =
-    "min-h-[48px] rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black outline-none transition hover:border-black/18 hover:bg-black/[0.03] focus:outline-none";
+    "min-h-[48px] rounded-full border-2 border-black bg-[#080808] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 focus:outline-none";
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filter, setFilter] = useState("all");
   const unlockedEpisodeIds = useMemo(
@@ -145,30 +146,26 @@ export default function EpisodeList({
   }, [filter, filterOptions]);
 
   return (
-    <section
-      className="mt-5 overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:mt-8"
+    <SurfacePanel
+      appearance="dark"
+      tone="muted"
+      accent="cyan"
+      className="mt-5 overflow-hidden p-0 sm:mt-8"
       data-wallet-total={walletTotal}
     >
-      <div className="border-b border-black/10 px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
+      <div className="border-b-2 border-white/10 px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
-              <span>Episodes</span>
-                <span className="rounded-full border border-black/10 bg-[#f8f9fb] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+              <span>Chapters</span>
+              <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                 {totalEpisodes.toLocaleString()}
               </span>
             </div>
             <div className="space-y-2">
-              <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.04em] text-black sm:text-[2.15rem]">
-                Episode list
+              <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.04em] text-white sm:text-[2.15rem]">
+                Chapters
               </h2>
-              {availabilitySummary.entryHint ||
-              availabilitySummary.entryLabel ? (
-                <p className="max-w-2xl text-sm font-semibold leading-6 text-black/68 sm:leading-7">
-                  {availabilitySummary.entryHint ||
-                    availabilitySummary.entryLabel}
-                </p>
-              ) : null}
             </div>
 
             {availabilityChips.length > 0 ? (
@@ -195,6 +192,7 @@ export default function EpisodeList({
                     value={filter}
                     onChange={(event) => setFilter(event.target.value)}
                     className={filterControlClass}
+                    aria-label="Filter chapters"
                   >
                     {filterOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -208,6 +206,7 @@ export default function EpisodeList({
                     value={sortOrder}
                     onChange={(event) => setSortOrder(event.target.value)}
                     className={filterControlClass}
+                    aria-label="Sort chapters"
                   >
                     <option value="oldest">Oldest first</option>
                     <option value="newest">Newest first</option>
@@ -221,14 +220,12 @@ export default function EpisodeList({
 
       <div className="px-4 py-4 sm:px-6 sm:py-6">
         {sortedEpisodes.length === 0 ? (
-          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] p-6 text-sm text-black/68 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-            <p className="text-base font-black uppercase tracking-[0.03em] text-black">
-              No episodes yet.
+          <div className="rounded-[24px] border-2 border-white/15 bg-black/70 p-6 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <p className="text-base font-black uppercase tracking-[0.03em] text-white">
+              No chapters yet.
             </p>
-            <p className="mt-2 text-sm font-semibold text-black/55">
-              {filter === "all"
-                ? "Episodes will appear here once available."
-                : "Pick another filter."}
+            <p className="mt-2 text-sm font-semibold text-white/70">
+              {filter === "all" ? "No chapters are live yet." : "Try another filter."}
             </p>
           </div>
         ) : (
@@ -267,6 +264,6 @@ export default function EpisodeList({
           </ul>
         )}
       </div>
-    </section>
+    </SurfacePanel>
   );
 }

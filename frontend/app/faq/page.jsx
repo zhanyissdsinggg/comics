@@ -40,13 +40,13 @@ const QUICK_LINKS = [
     title: "Access",
     description: "",
     href: "/how-it-works",
-    label: "Access",
+    label: "How It Works",
   },
   {
     title: "Mature content",
     description: "",
     href: "/mature-content",
-    label: "18+ access",
+    label: "18+ Access",
   },
 ];
 
@@ -71,10 +71,10 @@ export default function FAQPage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             eyebrow="FAQ"
-            title="FAQ."
+            title="Answers."
             description=""
             actions={
               <>
@@ -85,7 +85,7 @@ export default function FAQPage() {
                   href={`mailto:${siteConfig.supportEmail}`}
                   className={storefrontSecondaryButtonClass}
                 >
-                  Email support
+                  Email us
                 </a>
               </>
             }
@@ -103,7 +103,7 @@ export default function FAQPage() {
 
           <StorefrontDesk
             eyebrow="More"
-            title="FAQ."
+            title="More."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -113,7 +113,7 @@ export default function FAQPage() {
                   href="/how-it-works"
                   className={storefrontSecondaryButtonClass}
                 >
-                  Access
+                  How It Works
                 </Link>
               </>
             }
@@ -121,16 +121,15 @@ export default function FAQPage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-          <SurfacePanel className="space-y-4" appearance="light" accent="blue">
-            <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
+          <SurfacePanel className="space-y-4" appearance="dark" accent="cyan">
+            <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
             <div className="space-y-3">
               {FAQ.map((item) => (
                 <StorefrontInfoCard
                   key={item.q}
                   title={item.q}
                   description={item.a}
-                >
-                </StorefrontInfoCard>
+                />
               ))}
             </div>
           </SurfacePanel>
@@ -140,8 +139,8 @@ export default function FAQPage() {
               <SurfacePanel
                 key={item.title}
                 className="h-full"
-                appearance="light"
-                accent="blue"
+                appearance="dark"
+                accent="cyan"
               >
                 <StorefrontSectionHeading
                   eyebrow="More"

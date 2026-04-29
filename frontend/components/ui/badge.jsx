@@ -9,11 +9,11 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-[color:var(--gush-border)] bg-white text-slate-700",
+        default: "border-white/20 bg-black text-white",
         secondary:
           "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
         destructive: "border-red-200 bg-red-50 text-red-600",
-        outline: "border-black/10 bg-transparent text-slate-700",
+        outline: "border-white/20 bg-transparent text-white/80",
         ghost: "border-transparent bg-transparent text-slate-600",
         link: "rounded-none border-transparent bg-transparent px-0 text-[var(--gush-accent,#3157d6)] hover:underline",
       },

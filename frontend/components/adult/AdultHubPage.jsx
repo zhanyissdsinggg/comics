@@ -21,6 +21,10 @@ import {
   LOGIN_GATE_DESCRIPTION,
   LOGIN_GATE_TITLE,
 } from "../../lib/adultGateCopy";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -214,7 +218,7 @@ export default function AdultHubPage() {
         .map((series) =>
           mapAdultItem(
             series,
-            series.genres?.slice(0, 2).join(" | ") || "Adult pick",
+            series.genres?.slice(0, 2).join(" | ") || "18+ title",
           ),
         ),
     [seriesList],
@@ -236,7 +240,7 @@ export default function AdultHubPage() {
       seriesList
         .filter((series) => series.ttf?.enabled)
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, "Timed access available")),
+        .map((series) => mapAdultItem(series, "Free reads")),
     [seriesList],
   );
 
@@ -247,16 +251,16 @@ export default function AdultHubPage() {
         value: loading ? "--" : seriesList.length.toLocaleString(),
       },
       {
-        label: "Completed",
+        label: "Finished",
         value: loading ? "--" : completedItems.length.toLocaleString(),
       },
-      {
-        label: "Timed opens",
+        {
+        label: "Free reads",
         value: loading ? "--" : freeUnlockItems.length.toLocaleString(),
       },
       {
         label: "Mode",
-        value: isAdultMode ? "18+ enabled" : "Gate locked",
+        value: isAdultMode ? "18+ on" : "Locked",
       },
     ],
     [
@@ -268,38 +272,34 @@ export default function AdultHubPage() {
     ],
   );
   const adultModeLabel = isAdultMode ? "18+ on." : "18+ off.";
-  const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px";
-  const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="18+ catalog"
-            title="18+ shelf."
-            description="Private by default."
-            secondary={isAdultMode ? "Access on." : "Sign in and confirm."}
+            title="18+"
+            description=""
+            secondary={isAdultMode ? "Access on." : "Sign in to enter."}
             stats={adultStats}
             accent="blue"
-            appearance="light"
+            appearance="dark"
           />
 
           <SurfacePanel
             tone="muted"
             accent="blue"
-            appearance="light"
+            appearance="dark"
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                 Access
               </p>
               <div>
-                <h2 className="text-[1.7rem] font-semibold tracking-[-0.05em] text-black">
+                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-white">
                   {adultModeLabel}
                 </h2>
               </div>
@@ -313,23 +313,23 @@ export default function AdultHubPage() {
                     onClick={() =>
                       router.push("/rankings?type=popular&window=week")
                     }
-                    className={primaryButtonClass}
+                    className={storefrontPrimaryButtonClass}
                   >
                     Rankings
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className={secondaryButtonClass}
+                    className={storefrontSecondaryButtonClass}
                   >
-                    Timed opens
+                    Free reads
                   </button>
                 </>
               ) : (
                 <button
                   type="button"
                   onClick={handleGate}
-                  className={primaryButtonClass}
+                  className={storefrontPrimaryButtonClass}
                 >
                   Enable 18+ mode
                 </button>
@@ -339,8 +339,8 @@ export default function AdultHubPage() {
         </section>
 
         {showStale ? (
-          <div className="rounded-[24px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
-            Showing saved 18+ titles.
+          <div className="rounded-[24px] border-2 border-white/20 bg-[#0a0a0a] px-4 py-3 text-sm font-semibold text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            Showing saved results.
           </div>
         ) : null}
 
@@ -356,29 +356,29 @@ export default function AdultHubPage() {
             <Skeleton className="h-56 w-full rounded-[28px]" />
           </div>
         ) : seriesList.length === 0 ? (
-          <SurfacePanel appearance="light" accent="blue">
+          <SurfacePanel appearance="dark" accent="blue">
             <EmptyState
               icon="search"
-              title="No 18+ titles yet."
+              title="No 18+ titles."
               description=""
               action={{
                 label: "Rankings",
                 onClick: () =>
                   router.push("/rankings?type=popular&window=week"),
               }}
-              appearance="light"
+              appearance="dark"
             />
           </SurfacePanel>
         ) : (
           <div className="space-y-6">
-            <SurfacePanel appearance="light" accent="blue">
-              <Rail
-                title="18+ picks"
-                items={spotlightItems}
-                reason="Current picks."
-                href="/rankings?type=popular&window=week"
-                ctaLabel="Open rankings"
-                appearance="light"
+            <SurfacePanel appearance="dark" accent="blue">
+                <Rail
+                  title="18+ Picks"
+                  items={spotlightItems}
+                  reason=""
+                  href="/rankings?type=popular&window=week"
+                  ctaLabel="Rankings"
+                appearance="dark"
                 onItemClick={(item) =>
                   router.push(`/series/${item.seriesId || item.id}`)
                 }
@@ -386,14 +386,14 @@ export default function AdultHubPage() {
             </SurfacePanel>
 
             {completedItems.length > 0 ? (
-              <SurfacePanel appearance="light" accent="blue">
+              <SurfacePanel appearance="dark" accent="blue">
                 <Rail
-                  title="Completed"
+                  title="Finished"
                   items={completedItems}
-                  reason="Finished stories."
+                  reason=""
                   href="/rankings?type=completed&window=all"
-                  ctaLabel="Completed"
-                  appearance="light"
+                  ctaLabel="Finished"
+                  appearance="dark"
                   onItemClick={(item) =>
                     router.push(`/series/${item.seriesId || item.id}`)
                   }
@@ -402,14 +402,14 @@ export default function AdultHubPage() {
             ) : null}
 
             {freeUnlockItems.length > 0 ? (
-              <SurfacePanel appearance="light" accent="blue">
+              <SurfacePanel appearance="dark" accent="blue">
                 <Rail
-                  title="Timed opens"
+                  title="Free Later"
                   items={freeUnlockItems}
-                  reason="Opens on a timer."
+                  reason=""
                   href="/rankings?type=ttf&window=all"
-                  ctaLabel="Timed opens"
-                  appearance="light"
+                  ctaLabel="Top Picks"
+                  appearance="dark"
                   onItemClick={(item) =>
                     router.push(`/series/${item.seriesId || item.id}`)
                   }

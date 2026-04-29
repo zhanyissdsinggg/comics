@@ -89,10 +89,10 @@ function formatRelativeTime(value) {
 
 function formatProgressLabel(currentChapter, totalChapters) {
   if (currentChapter > 0 && totalChapters > 0) {
-    return `Read Ep ${currentChapter} of ${totalChapters}`;
+    return `Chapter ${currentChapter} of ${totalChapters}`;
   }
   if (currentChapter > 0) {
-    return `Read Ep ${currentChapter}`;
+    return `Chapter ${currentChapter}`;
   }
   return "Start reading";
 }
@@ -105,7 +105,7 @@ function formatBookmarkSummary(count) {
 function formatUnlockedSummary(count, latestChapter) {
   const total = Number(count || 0);
   if (latestChapter > 0) {
-    return `${total} chapters unlocked - up to Chapter ${latestChapter}`;
+    return `${total} chapters unlocked up to Chapter ${latestChapter}`;
   }
   return `${total} chapters unlocked`;
 }
@@ -122,7 +122,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-black/10 bg-white shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
+      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border-2 border-black bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <Image
           src={coverUrl}
           alt={`Cover image for ${title}`}
@@ -137,14 +137,14 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-black/10 px-3 py-3 shadow-[0_12px_24px_rgba(15,23,42,0.08)]"
+      className="flex h-[92px] w-[72px] items-end rounded-[18px] border-2 border-black px-3 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
       style={{
         background:
           coverTone ||
-          "linear-gradient(160deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.96) 100%)",
+          "linear-gradient(160deg, rgba(16,16,16,1) 0%, rgba(10,10,10,1) 100%)",
       }}
     >
-      <span className="line-clamp-2 text-[11px] font-black uppercase tracking-[0.16em] text-black/75">
+      <span className="line-clamp-2 text-[11px] font-black uppercase tracking-[0.16em] text-white/80">
         {title}
       </span>
     </div>
@@ -157,13 +157,13 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
       ? "Resume"
       : item.resumeEpisodeId
         ? "Resume"
-        : "Series";
+        : "Read More";
   const metaLine = [item.summary, item.updatedLabel]
     .filter(Boolean)
     .join(" / ");
 
   return (
-    <article className="rounded-[28px] border border-black/10 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(15,23,42,0.1)]">
+    <article className="rounded-[26px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -175,20 +175,20 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="truncate text-base font-black uppercase tracking-[-0.03em] text-black">
+                <h3 className="truncate text-base font-black uppercase tracking-[-0.03em] text-white">
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="rounded-full border border-black/10 bg-[#f6f7f9] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black">
+                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     {item.badge}
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-sm font-semibold text-black/72">
+              <p className="mt-1 text-sm font-semibold text-white/80">
                 {item.primaryLine}
               </p>
               {metaLine ? (
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
                   {metaLine}
                 </p>
               ) : null}
@@ -210,13 +210,13 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
 
           {mode === "continue" ? (
             <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+              <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
                 <span>{item.progressLabel}</span>
                 <span>{item.progressPercentLabel}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full border border-black/10 bg-[#f3f4f6]">
+              <div className="h-2 overflow-hidden rounded-full border-2 border-black bg-black/40">
                 <div
-                  className="h-full rounded-full bg-black"
+                  className="h-full rounded-full bg-[#00E5FF]"
                   style={{
                     width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
                   }}
@@ -230,7 +230,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               {item.genreLine.map((genre) => (
                 <span
                   key={`${item.seriesId}-${genre}`}
-                  className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black/70"
+                  className="rounded-full border-2 border-black bg-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 >
                   {genre}
                 </span>
@@ -249,7 +249,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[28px] border border-black/10 bg-[#f6f7f9]"
+          className="h-[124px] animate-pulse rounded-[26px] border-2 border-black bg-[#111111]"
         />
       ))}
     </div>
@@ -375,7 +375,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               progress.updatedAt || historyEntry?.createdAt,
             ),
             progressPercent,
-            progressLabel: `Read Chapter ${currentChapter || "?"} of ${totalChapters || "?"}`,
+            progressLabel: `Chapter ${currentChapter || "?"} of ${totalChapters || "?"}`,
             progressPercentLabel: `${Math.round(progressPercent * 100)}%`,
             resumeEpisodeId: progress.lastEpisodeId,
             updatedAt: Math.max(
@@ -419,13 +419,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: followedSeriesIds.includes(seriesId)
-              ? "Saved"
+              ? "In Library"
               : "Bookmarked",
             primaryLine:
               followedSeriesIds.includes(seriesId) && bookmarks.length > 0
-                ? `Saved to your shelf with ${formatBookmarkSummary(bookmarks.length)}`
+                ? `In your library with ${formatBookmarkSummary(bookmarks.length)}`
                 : followedSeriesIds.includes(seriesId)
-                  ? "Saved to your shelf"
+                  ? "In your library"
                   : formatBookmarkSummary(bookmarks.length),
             summary: latestBookmark?.label || series.status || "",
             updatedLabel: formatRelativeTime(
@@ -482,16 +482,17 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             title: series.title,
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
-            badge: entry.unlockedEpisodeIds.length > 1 ? "Unlocked" : "Open",
-            primaryLine: formatUnlockedSummary(
-              entry.unlockedEpisodeIds.length,
-              latestUnlockedChapter,
-            ),
-            summary: progress?.lastEpisodeId
-              ? `Resume Ep ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
-              : series.type
-                ? `${series.type} series`
-                : "",
+            badge: "Unlocked",
+            
+              primaryLine: formatUnlockedSummary(
+                entry.unlockedEpisodeIds.length,
+                latestUnlockedChapter,
+              ),
+              summary: progress?.lastEpisodeId
+                ? `Resume Ch ${parseEpisodeNumber(progress.lastEpisodeId) || "?"}`
+                : series.type
+                  ? `${series.type} series`
+                  : "",
             updatedLabel: formatRelativeTime(
               progress?.updatedAt || historyEntry?.createdAt,
             ),
@@ -516,17 +517,17 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       continue: {
         items: continueItems,
         emptyTitle: "Nothing in progress",
-        emptyDescription: "Start a series.",
+        emptyDescription: "",
       },
       bookmarks: {
         items: bookmarkItems,
         emptyTitle: "No saved series",
-        emptyDescription: "Save a few titles.",
+        emptyDescription: "",
       },
       unlocked: {
         items: unlockedItems,
-        emptyTitle: "No unlocked series",
-        emptyDescription: "Unlocked titles appear here.",
+        emptyTitle: "No unlocked titles",
+        emptyDescription: "",
       },
     }),
     [bookmarkItems, continueItems, unlockedItems],
@@ -582,18 +583,15 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   const buttonBaseClass = storefrontSecondaryButtonClass;
 
   return (
-    <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+    <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-            My Library
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+            Library
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-            Your shelf
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+            Your library
           </h2>
-          <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-            Continue, saves, and unlocks.
-          </p>
         </div>
 
         {viewerSignedIn ? (
@@ -602,20 +600,17 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             onClick={() => router.push("/library")}
             className={buttonBaseClass}
           >
-            Full library
+            Library
           </button>
         ) : null}
       </div>
 
       {!viewerSignedIn ? (
-        <div className="rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+        <div className="rounded-[28px] border-2 border-white/15 bg-black p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.06em] text-black">
-                Sign in for your shelf
-              </p>
-              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Keep progress, saves, and unlocks together.
+              <p className="text-sm font-black uppercase tracking-[0.06em] text-white">
+                Sign in to save your library
               </p>
             </div>
             <button
@@ -631,7 +626,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         <>
           <div
             role="tablist"
-            aria-label="My Library sections"
+            aria-label="Library sections"
             className="flex flex-wrap gap-2"
           >
             {TABS.map((tab) => {
@@ -648,13 +643,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                     isActive
-                      ? "border border-black bg-black text-white shadow-[0_12px_24px_rgba(15,23,42,0.16)]"
-                      : "border border-black/10 bg-white text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
+                      ? "border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      : "border-2 border-white/20 bg-black text-white/75 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] active:translate-y-px"
                   }`}
                 >
                   <Icon className="size-4" />
                   <span>{tab.label}</span>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-white/20 bg-white text-black" : "border-black/10 bg-[#f6f7f9] text-black/72"}`}>
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-black bg-[#FFE500] text-black" : "border-white/20 bg-[#0a0a0a] text-white/70"}`}>
                     {signedInCount[tab.id]}
                   </span>
                 </button>
@@ -682,14 +677,14 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[28px] border border-dashed border-black/14 bg-[#f6f7f9] px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-black/10 bg-white text-black shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
+              <div className="rounded-[28px] border-2 border-dashed border-white/15 bg-black px-5 py-8 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   <BookMarked className="size-5" />
                 </div>
-                <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-black">
+                <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-white">
                   {tabData[activeTab]?.emptyTitle}
                 </p>
-                <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-black/72">
+                <p className="mx-auto mt-2 max-w-lg text-sm font-semibold leading-6 text-white/70">
                   {tabData[activeTab]?.emptyDescription}
                 </p>
               </div>

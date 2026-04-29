@@ -121,7 +121,7 @@ function getSeriesSignalScore(series) {
 
 function getCreatorStoryBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed";
+    return "Finished";
   }
 
   const updatedAtMs = Date.parse(series?.updatedAt || 0);
@@ -134,7 +134,7 @@ function getCreatorStoryBadge(series) {
 
   const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "First picks";
+    return "Top Pick";
   }
 
   return "";
@@ -200,7 +200,7 @@ function buildCreatorShelfMeta(creator) {
     meta.push(formatDateLabel(creator.latestUpdatedAt));
   }
 
-  return meta.length > 0 ? meta : ["Featured"];
+  return meta.length > 0 ? meta : ["Trending"];
 }
 
 function formatSeriesTypeLabel(value) {
@@ -251,7 +251,7 @@ function CreatorDirectorySkeleton() {
             <div className="space-y-3">
               <div className="h-4 w-28 animate-pulse rounded-full bg-white/20" />
               <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/20" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/10" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-[#111111]" />
             </div>
           </SurfacePanel>
           <SurfacePanel
@@ -263,7 +263,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-hero-stat-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                className="h-24 animate-pulse rounded-[24px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
               />
             ))}
           </SurfacePanel>
@@ -275,7 +275,7 @@ function CreatorDirectorySkeleton() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creators-filter-skeleton-${index}`}
-                className="h-11 animate-pulse rounded-full border-2 border-white/20 bg-white/10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                className="h-11 animate-pulse rounded-full border-2 border-white/20 bg-[#111111] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
               />
             ))}
           </div>
@@ -285,7 +285,7 @@ function CreatorDirectorySkeleton() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`creators-card-skeleton-${index}`}
-              className="h-[360px] animate-pulse rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+              className="h-[360px] animate-pulse rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             />
           ))}
         </div>
@@ -570,15 +570,15 @@ export default function CreatorsHubPage({
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-5 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border-2 border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-full border-2 border-white/20 bg-black px-5 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
   const filterButtonClass = (isActive) =>
     `rounded-full border-2 border-black px-3.5 py-2 text-sm font-black uppercase tracking-[0.02em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
       isActive
         ? "bg-[#FFE500] text-black"
-        : "bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5"
+        : "border-white/20 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
     }`;
   const creatorCardClass =
-    "block w-full rounded-[30px] border-2 border-black bg-white p-4 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "block w-full rounded-[30px] border-2 border-white/20 bg-black p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
   const neutralChipClass =
     "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const jumpToGenreBrowse = (genre) => {
@@ -803,12 +803,12 @@ export default function CreatorsHubPage({
                   : "Creators are coming soon."
               }
               description={fallbackDescription}
-              stats={[
-                {
-                  label: "Story picks",
-                  value: fallbackEntryTitles.length.toLocaleString(),
-                  hint: "",
-                },
+                stats={[
+                  {
+                  label: "Top picks",
+                    value: fallbackEntryTitles.length.toLocaleString(),
+                    hint: "",
+                  },
                 {
                   label: "Genre lanes",
                   value: fallbackGenrePicks.length.toLocaleString(),
@@ -864,12 +864,12 @@ export default function CreatorsHubPage({
             />
           ) : null}
 
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                First picks
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                Picks
               </p>
-              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
+              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
                 Picks
               </h2>
             </div>
@@ -884,7 +884,7 @@ export default function CreatorsHubPage({
                       handleFallbackTitleLinkClick(event, series)
                     }
                     className={`group overflow-hidden ${creatorCardClass}`}
-                    aria-label={`Open ${series.title}`}
+                    aria-label={`Read More ${series.title}`}
                   >
                     <div className="relative aspect-[3/4] overflow-hidden bg-[color:var(--gush-page-bg-muted)]">
                       <Cover
@@ -899,10 +899,10 @@ export default function CreatorsHubPage({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
                     </div>
                     <div className="space-y-2.5 px-4 py-4">
-                      <p className="line-clamp-2 text-[15px] font-black uppercase leading-5 tracking-[-0.02em] text-black transition-colors group-hover:text-black">
+                      <p className="line-clamp-2 text-[15px] font-black uppercase leading-5 tracking-[-0.02em] text-white transition-colors group-hover:text-[#FFE500]">
                         {series.title}
                       </p>
-                      <p className="line-clamp-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55 transition-colors group-hover:text-black/72">
+                      <p className="line-clamp-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/60 transition-colors group-hover:text-white/80">
                         {series.subtitle}
                       </p>
                     </div>
@@ -913,19 +913,19 @@ export default function CreatorsHubPage({
           </SurfacePanel>
 
           <section className="grid gap-4 xl:grid-cols-[1.04fr_0.96fr]">
-            <SurfacePanel
-              appearance="light"
-              accent="blue"
-              className="space-y-5"
-            >
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                  Browse
-                </p>
-                <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
-                  Genres
-                </h2>
-              </div>
+              <SurfacePanel
+               appearance="dark"
+               accent="cyan"
+               className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+             >
+               <div>
+                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                   Explore
+                 </p>
+                 <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
+                   Genres
+                 </h2>
+               </div>
 
               {fallbackGenrePicks.length > 0 ? (
                 <div className="flex flex-wrap gap-2.5">
@@ -992,7 +992,7 @@ export default function CreatorsHubPage({
                 onClick={() => router.push("/rankings")}
                 className={secondaryButtonClass}
               >
-                Featured
+                Trending
               </button>
             </div>
           </SurfacePanel>
@@ -1008,10 +1008,10 @@ export default function CreatorsHubPage({
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 sm:space-y-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
                 Search
               </p>
-              <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
+              <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
                 Creators
               </h2>
             </div>
@@ -1034,15 +1034,15 @@ export default function CreatorsHubPage({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search creators"
-              className="rounded-full border border-black/10 bg-white px-4 py-3.5 text-sm font-semibold text-black shadow-[0_12px_28px_rgba(15,23,42,0.08)] outline-none transition-all placeholder:text-black/40 focus:border-black/15 focus:ring-4 focus:ring-black/5"
+              placeholder="Find creators"
+              className="rounded-full border-2 border-white/20 bg-black px-4 py-3.5 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] outline-none transition-transform duration-150 placeholder:text-white/35 focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15"
             />
 
             <div className="flex flex-wrap gap-2.5">
               {[
                 { id: "all", label: "All" },
                 { id: "creator", label: "Creators" },
-                { id: "team", label: "Studios & Teams" },
+                { id: "team", label: "Studios + Teams" },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -1062,7 +1062,7 @@ export default function CreatorsHubPage({
               onClick={() => setActiveGenre("All")}
               className={filterButtonClass(activeGenre === "All")}
             >
-              All genres
+              All
             </button>
             {genreOptions.map((genre) => (
               <button
@@ -1077,13 +1077,13 @@ export default function CreatorsHubPage({
           </div>
         </SurfacePanel>
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5">
-          <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Popular
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
+                Trending
               </p>
-              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                Popular
+              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
+                Trending
               </h2>
           </div>
 
@@ -1106,10 +1106,10 @@ export default function CreatorsHubPage({
                     )
                   }
                   className={creatorCardClass}
-                  aria-label={`Open ${creator.name}`}
+                  aria-label={`View ${creator.name}`}
                 >
                   <div className="grid gap-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-4">
-                    <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <div className="overflow-hidden rounded-[24px] border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
                       <Cover
                         tone={leadSeries?.coverTone}
                         coverUrl={leadSeries?.coverUrl}
@@ -1124,12 +1124,12 @@ export default function CreatorsHubPage({
                     <div className="min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                             {formatCreditTypeLabel(
                               resolveDisplayCreditType(creator),
                             )}
                           </p>
-                          <h3 className="mt-2 text-lg font-black uppercase tracking-[0.01em] text-black">
+                          <h3 className="mt-2 text-lg font-black uppercase tracking-[0.01em] text-white">
                             {creator.name}
                           </h3>
                         </div>
@@ -1138,7 +1138,7 @@ export default function CreatorsHubPage({
                         </span>
                       </div>
 
-                      <p className="mt-3 text-sm font-medium leading-6 text-black/68">
+                      <p className="mt-3 text-sm font-medium leading-6 text-white/70">
                         {buildCreatorWorksSummary(creator)}
                       </p>
 
@@ -1162,13 +1162,13 @@ export default function CreatorsHubPage({
         </SurfacePanel>
 
         {guidedDiscoveryEntries.length > 0 ? (
-          <SurfacePanel appearance="light" accent="blue" className="space-y-4 border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
-                Start
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
+                Picks
               </p>
-              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                Start here
+              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
+                Top Picks
               </h2>
             </div>
 
@@ -1182,7 +1182,7 @@ export default function CreatorsHubPage({
                 }) => (
                   <div
                     key={id}
-                    className="rounded-[28px] border border-black/10 bg-white p-3.5 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-black/14 hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)] sm:p-4"
+                    className="rounded-[28px] border-2 border-white/15 bg-black p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 sm:p-4"
                   >
                     <Link
                       href={
@@ -1206,8 +1206,8 @@ export default function CreatorsHubPage({
                         }
                         handleFallbackTitleLinkClick(event, series);
                       }}
-                      className="group block overflow-hidden rounded-[24px] border border-black/10"
-                      aria-label={`Open ${series.title}`}
+                      className="group block overflow-hidden rounded-[24px] border-2 border-white/15 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      aria-label={`View ${series.title}`}
                     >
                       <Cover
                         tone={series?.coverTone}
@@ -1224,14 +1224,14 @@ export default function CreatorsHubPage({
                     <div className="mt-4 space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                             {creator
                               ? formatCreditTypeLabel(
                                   resolveDisplayCreditType(creator),
                                 )
-                              : "Story pick"}
+                              : "Top Pick"}
                           </p>
-                          <h3 className="mt-2 text-xl font-black uppercase tracking-[0.01em] text-black">
+                          <h3 className="mt-2 text-xl font-black uppercase tracking-[0.01em] text-white">
                             <Link
                               href={
                                 creator
@@ -1261,20 +1261,20 @@ export default function CreatorsHubPage({
                           </h3>
                         </div>
                         <span className={neutralChipClass}>
-                          {creator?.name || series?.type || "Series"}
+                          {creator?.name || series?.type || "Story"}
                         </span>
                       </div>
 
-                      <p className="text-sm font-medium leading-6 text-black/68">
+                      <p className="text-sm font-medium leading-6 text-white/70">
                         {summarizeLeadCopy(
                           series?.description,
-                          creator ? `By ${creator.name}` : "Featured",
+                          creator ? `By ${creator.name}` : "Top pick",
                         )}
                       </p>
 
-                      <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
+                      <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">
                         <span className={neutralChipClass}>
-                          {series?.type || "Series"}
+                          {series?.type || "Story"}
                         </span>
                         <span className={neutralChipClass}>
                           {series?.status || "Ongoing"}
@@ -1306,7 +1306,7 @@ export default function CreatorsHubPage({
                           }}
                           className={primaryButtonClass}
                         >
-                          {hasOpeningChapter ? "Read" : "Series"}
+                          {hasOpeningChapter ? "Start Reading" : "Read More"}
                         </Link>
                       </div>
                     </div>
@@ -1317,12 +1317,12 @@ export default function CreatorsHubPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5">
           <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
                 Genres
               </p>
-              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
+              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
                 Genres
               </h2>
           </div>
@@ -1341,7 +1341,7 @@ export default function CreatorsHubPage({
               ))}
             </div>
           ) : (
-            <p className="text-sm font-semibold text-black/58">
+            <p className="text-sm font-semibold text-white/55">
               No genres
             </p>
           )}
@@ -1349,20 +1349,20 @@ export default function CreatorsHubPage({
 
           <SurfacePanel
           id="creator-list"
-          appearance="light"
-          accent="blue"
-          className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5"
+          appearance="dark"
+          accent="cyan"
+          className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
                 Directory
               </p>
-              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                All creators
+              <h2 className="text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
+                Creators
               </h2>
             </div>
-            <p className="text-sm font-bold uppercase tracking-[0.06em] text-black/55">
+            <p className="text-sm font-bold uppercase tracking-[0.06em] text-white/60">
               {filteredCreators.length.toLocaleString()} match
               {filteredCreators.length === 1 ? "" : "es"}
             </p>
@@ -1370,15 +1370,15 @@ export default function CreatorsHubPage({
         </SurfacePanel>
 
         {filteredCreators.length === 0 ? (
-          <SurfacePanel appearance="light" accent="blue">
+          <SurfacePanel appearance="dark" accent="cyan" className="border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <EmptyState
-              appearance="light"
+              appearance="dark"
               icon="search"
-              eyebrow="No match"
-              title="No match"
+              eyebrow="No results"
+              title="No results"
               description=""
               action={{
-                label: "Show all",
+                label: "Clear filters",
                 onClick: () => {
                   setQuery("");
                   setActiveGenre("All");
@@ -1388,7 +1388,7 @@ export default function CreatorsHubPage({
             />
           </SurfacePanel>
         ) : (
-          <SurfacePanel appearance="light" accent="blue" className="space-y-4 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:space-y-5">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 xl:gap-4">
               {filteredCreators.map((creator) => {
                 const leadSeries = getCreatorLeadSeries(creator);
@@ -1402,7 +1402,7 @@ export default function CreatorsHubPage({
                     href={buildCreatorHref(creator)}
                     onClick={(event) => handleCreatorLinkClick(event, creator)}
                     className={`group ${creatorCardClass}`}
-                    aria-label={`Open ${creator.name}`}
+                    aria-label={`View ${creator.name}`}
                   >
                     <div className="grid gap-4 sm:grid-cols-[132px_minmax(0,1fr)]">
                       <Cover
@@ -1417,12 +1417,12 @@ export default function CreatorsHubPage({
                       <div className="min-w-0">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/55">
+                            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/60">
                               {formatCreditTypeLabel(
                                 resolveDisplayCreditType(creator),
                               )}
                             </p>
-                            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.01em] text-black">
+                            <h3 className="mt-2 text-xl font-black uppercase tracking-[0.01em] text-white">
                               {creator.name}
                             </h3>
                           </div>
@@ -1431,7 +1431,7 @@ export default function CreatorsHubPage({
                           </span>
                         </div>
 
-                        <p className="mt-3 text-sm font-medium leading-6 text-black/68">
+                        <p className="mt-3 text-sm font-medium leading-6 text-white/70">
                           {buildCreatorWorksSummary(creator)}
                         </p>
 
@@ -1446,7 +1446,7 @@ export default function CreatorsHubPage({
                           ))}
                         </div>
 
-                        <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold text-black/55">
+                        <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold text-white/60">
                           {buildCreatorShelfMeta(creator).map((item) => (
                             <span key={`${creator.slug}-list-meta-${item}`}>
                               {item}

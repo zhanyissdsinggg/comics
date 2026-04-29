@@ -13,16 +13,12 @@ import {
 } from "@/components/ui/card";
 
 function EventCard({ event, priority = "secondary", appearance = "default" }) {
-  const isLight = appearance === "light" || appearance === "default";
-
   return (
     <Card
       className={cn(
-        "h-full rounded-[28px] py-0 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]",
+        "h-full rounded-[28px] py-0 transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
         event.accentClass ||
-          (isLight
-            ? "border-black/10 bg-white hover:bg-[#fcfcfd]"
-            : "border-white/10 bg-white/[0.03]"),
+          "border-2 border-black bg-[#080808] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-[#101010]",
       )}
     >
       <CardContent className="flex h-full flex-col p-5">
@@ -32,9 +28,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               variant="outline"
               className={cn(
                 "rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
-                isLight
-                  ? "border-black/10 bg-[#f8fafc]"
-                  : "border-white/10 bg-black/20",
+                "border-2 border-black bg-[#FFE500] text-black",
               )}
             >
               {event.eyebrow}
@@ -42,7 +36,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
             <CardTitle
               className={cn(
                 "mt-4 font-display font-black uppercase tracking-[-0.05em]",
-                isLight ? "text-black" : "text-white",
+                "text-white",
                 priority === "lead"
                   ? "text-2xl leading-tight sm:text-[2rem]"
                   : "text-xl leading-tight",
@@ -54,7 +48,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               <CardDescription
                 className={cn(
                   "mt-3 max-w-3xl text-sm leading-6",
-                  isLight ? "text-black/68" : "text-neutral-200/90",
+                  "text-neutral-200/90",
                 )}
               >
                 {event.description}
@@ -66,15 +60,13 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
             <div
               className={cn(
                 "min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)]",
-                isLight
-                  ? "border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fff8eb_100%)] shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
-                  : "border-white/10 bg-black/25",
+                "border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
               )}
             >
               <p
                 className={cn(
                   "text-[10px] font-semibold uppercase tracking-[0.22em]",
-                  isLight ? "text-black/55" : "text-neutral-400",
+                  "text-black/70",
                 )}
               >
                 {event.signalLabel || "Signal"}
@@ -82,7 +74,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
               <p
                 className={cn(
                   "mt-1.5 font-display text-xl font-semibold tracking-tight",
-                  isLight ? "text-black" : "text-white",
+                  "text-black",
                 )}
               >
                 {event.signalValue}
@@ -97,9 +89,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           onClick={event.onClick}
           className={cn(
             "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
-            isLight
-              ? "text-black/70 hover:text-black"
-              : "text-white hover:text-[var(--gush-accent)]",
+            "text-white/80 hover:text-[#FFE500]",
           )}
         >
           {event.ctaLabel}
@@ -123,41 +113,29 @@ export default function StorefrontEventHub({
   }
 
   const [leadEvent, ...secondaryEvents] = events;
-  const isLight = appearance === "light" || appearance === "default";
-
   return (
     <section className={className}>
       <Card
         className={cn(
           "relative overflow-hidden rounded-[32px] py-0",
-          isLight
-            ? "border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.1)]"
-            : "border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.92),rgba(10,14,22,0.98))] shadow-[0_26px_90px_rgba(0,0,0,0.28)]",
+          "border-2 border-black bg-[#050505] text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]",
         )}
       >
         <div
           className={cn(
             "absolute inset-0",
-            isLight
-              ? "bg-[linear-gradient(180deg,rgba(247,247,249,0.72),transparent_44%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(56,189,248,0.12),transparent_22%)]",
+            "bg-[radial-gradient(circle_at_top_left,rgba(255,229,0,0.18),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(0,229,255,0.12),transparent_22%)]",
           )}
         />
         <CardHeader className="relative p-5 pb-0 sm:p-6 sm:pb-0">
           <div className="max-w-3xl">
-            <p
-              className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-black/55" : "text-[var(--gush-accent)]/85"}`}
-            >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent)]/85">
               {eyebrow}
             </p>
-            <h2
-              className={`mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] sm:text-3xl ${isLight ? "text-black" : "text-white"}`}
-            >
+            <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
               {title}
             </h2>
-            <p
-              className={`mt-2 text-sm leading-6 ${isLight ? "text-black/68" : "text-neutral-300"}`}
-            >
+            <p className="mt-2 text-sm leading-6 text-neutral-300">
               {description}
             </p>
           </div>

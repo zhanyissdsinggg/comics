@@ -21,7 +21,7 @@ import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 const PAGE_CONFIG = {
   comic: {
     eyebrow: "Comics",
-    heroTitle: "Original comics.",
+    heroTitle: "Comics",
     title: "Comics",
     description: "",
     secondary: "",
@@ -31,17 +31,17 @@ const PAGE_CONFIG = {
     pathname: "/comics",
     emptyBrowseCards: [
       {
-        eyebrow: "Featured Series",
-        title: "Featured",
+        eyebrow: "Trending",
+        title: "Trending",
         body: "",
-        ctaLabel: "Featured",
+        ctaLabel: "Trending",
         href: "/rankings?view=featured",
       },
       {
-        eyebrow: "Completed Series",
-        title: "Completed",
+        eyebrow: "Finished",
+        title: "Finished",
         body: "",
-        ctaLabel: "Completed",
+        ctaLabel: "Finished",
         href: "/rankings?view=completed",
       },
     ],
@@ -49,7 +49,7 @@ const PAGE_CONFIG = {
   },
   novel: {
     eyebrow: "Novels",
-    heroTitle: "Original novels.",
+    heroTitle: "Novels",
     title: "Novels",
     description: "",
     secondary: "",
@@ -59,17 +59,17 @@ const PAGE_CONFIG = {
     pathname: "/novels",
     emptyBrowseCards: [
       {
-        eyebrow: "Featured Series",
-        title: "Featured",
+        eyebrow: "Trending",
+        title: "Trending",
         body: "",
-        ctaLabel: "Featured",
+        ctaLabel: "Trending",
         href: "/rankings?view=featured",
       },
       {
-        eyebrow: "Completed Series",
-        title: "Completed",
+        eyebrow: "Finished",
+        title: "Finished",
         body: "",
-        ctaLabel: "Completed",
+        ctaLabel: "Finished",
         href: "/rankings?view=completed",
       },
     ],
@@ -144,13 +144,13 @@ function formatTitleCount(value) {
 
 function getSeriesBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed";
+    return "Finished";
   }
   if (isRecentlyUpdated(series, 14)) {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "First picks";
+    return "Top Pick";
   }
   return "";
 }
@@ -161,10 +161,10 @@ function getSeriesSubtitle(series) {
     return series.genres.slice(0, 2).join(" / ");
   }
   if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed";
+    return "Finished";
   }
   if (getEpisodeCount(series) > 0) {
-    return `${getEpisodeCount(series).toLocaleString()} episode${getEpisodeCount(series) === 1 ? "" : "s"}`;
+    return `${getEpisodeCount(series).toLocaleString()} chapter${getEpisodeCount(series) === 1 ? "" : "s"}`;
   }
   return creatorName || "Updated";
 }
@@ -366,19 +366,19 @@ export default function SeriesPage({
     return [
       {
         id: "start-free",
-        eyebrow: "First Picks",
-        title: "First Picks",
+        eyebrow: "Top Picks",
+        title: "Top Picks",
         description: "",
-        ctaLabel: "First Picks",
+        ctaLabel: "Top Picks",
         href: "/rankings?view=start-here",
         items: startHere,
       },
       {
         id: "featured",
-        eyebrow: "Featured Series",
-        title: "Featured Series",
+        eyebrow: "Trending",
+        title: "Trending",
         description: "",
-        ctaLabel: "Featured",
+        ctaLabel: "Trending",
         href: "/rankings?view=featured",
         items: featured,
       },
@@ -393,10 +393,10 @@ export default function SeriesPage({
       },
       {
         id: "completed",
-        eyebrow: "Completed Series",
-        title: "Completed Series",
+        eyebrow: "Finished",
+        title: "Finished",
         description: "",
-        ctaLabel: "Completed",
+        ctaLabel: "Finished",
         href: "/rankings?view=completed",
         items: completed,
       },
@@ -406,7 +406,7 @@ export default function SeriesPage({
   const emptyStateCopy = useMemo(() => {
     if (!loading && series.length === 0) {
       return {
-        title: "No titles yet.",
+        title: "No titles yet",
         description: "",
       };
     }
@@ -502,7 +502,7 @@ export default function SeriesPage({
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-5 py-2.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
   const showEntrySpotlight =
     Boolean(entrySpotlight) &&
     !isComicPage &&
@@ -539,7 +539,7 @@ export default function SeriesPage({
                   key={`hero-genre-${item.genre}`}
                   type="button"
                   onClick={() => updateParams({ genre: item.genre })}
-                  className="inline-flex items-center rounded-full border-2 border-black bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
+                  className="inline-flex items-center rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111]"
                 >
                   {item.genre}
                 </button>
@@ -565,12 +565,12 @@ export default function SeriesPage({
                   coverUrl={entrySpotlight.coverUrl}
                   label={entrySpotlight.title}
                   eyebrow={
-                    type === "comic" ? "Featured" : "Novel"
+                  type === "comic" ? "Trending" : "Novel"
                   }
                   badge={getSeriesBadge(entrySpotlight)}
                   genres={entrySpotlight.genres}
                   seriesType={entrySpotlight.type}
-                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                  className="aspect-[3/4] w-full overflow-hidden rounded-[24px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                 />
 
                 <div className="min-w-0">
@@ -593,7 +593,7 @@ export default function SeriesPage({
                       .map((genre) => (
                         <span
                           key={`spotlight-${entrySpotlight.id}-${genre}`}
-                          className="rounded-full border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                          className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                         >
                           {genre}
                         </span>
@@ -605,7 +605,7 @@ export default function SeriesPage({
                     onClick={() => handleSeriesClick(entrySpotlight.id)}
                     className="mt-5 rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
                   >
-                    Series
+                    Read More
                   </button>
                 </div>
               </div>
@@ -625,7 +625,7 @@ export default function SeriesPage({
                 <div className="space-y-3">
                   <div className="h-3 w-24 rounded-full bg-white/20" />
                   <div className="h-8 w-56 rounded-full bg-white/20" />
-                  <div className="h-4 w-full max-w-xl rounded-full bg-white/10" />
+                  <div className="h-4 w-full max-w-xl rounded-full bg-[#111111]" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {Array.from({ length: 4 }).map((__, cardIndex) => (
@@ -680,18 +680,18 @@ export default function SeriesPage({
 
               <div className="flex flex-wrap gap-2">
                 {fallbackGenrePicks.map((item) => (
-                  <button
-                    key={item.genre}
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
-                      )
-                    }
-                    className="rounded-full border-2 border-black bg-white px-3 py-2 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
-                  >
-                    {item.genre}
-                  </button>
+                    <button
+                      key={item.genre}
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/search?q=${encodeURIComponent(item.genre)}&sort=latest`,
+                        )
+                      }
+                    className="rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#FFE500] hover:bg-[#111111]"
+                    >
+                      {item.genre}
+                    </button>
                 ))}
               </div>
             </SurfacePanel>
@@ -702,7 +702,7 @@ export default function SeriesPage({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                Catalog
+                Browse
               </p>
               <h2 className="mt-2 font-display text-[1.95rem] font-black uppercase tracking-[-0.05em] text-white">
                 {config.title}
@@ -753,7 +753,7 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?view=featured")}
                 className={secondaryButtonClass}
               >
-                Featured
+                Trending
               </button>
               <button
                 type="button"

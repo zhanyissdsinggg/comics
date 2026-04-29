@@ -38,6 +38,10 @@ import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { buildSupportPath } from "../../lib/supportRouting";
 import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 const PromoBanner = dynamic(() => import("./PromoBanner"));
 
@@ -51,31 +55,31 @@ function openAuthPrompt() {
 
 function getReturnLabel(returnTo, sourceEntry) {
   if (/^\/(read|series)\//.test(returnTo) || sourceEntry.includes("READER")) {
-    return "Back to reading";
+    return "Back";
   }
   if (returnTo.startsWith("/library")) {
-    return "Back to library";
+    return "Library";
   }
   if (returnTo.startsWith("/account")) {
-    return "Back to account";
+    return "Account";
   }
   if (returnTo.startsWith("/search")) {
-    return "Back to search";
+    return "Search";
   }
   if (returnTo.startsWith("/rankings")) {
-    return "Back to rankings";
+    return "Rankings";
   }
   if (returnTo.startsWith("/subscribe")) {
-    return "Back to membership";
+    return "Plans";
   }
-  return "Back to browse";
+  return "Browse";
 }
 
 const PACKAGE_FIT_GUIDE = {
   starter: "A few chapters.",
-  medium: "One or two series a week.",
-  value: "Regular weekly reading.",
-  mega: "Heavy reading across the shelf.",
+  medium: "Weekly reading.",
+  value: "Read more, spend less.",
+  mega: "Big reading weeks.",
 };
 
 function formatPriceLabel(amount, currency = "USD") {
@@ -334,8 +338,8 @@ export default function StorePage({
   const purchaseActionsEnabled = purchaseMode.isRealCommerceLive;
   const purchasePrelaunch = purchaseMode.isPrelaunch;
   const purchaseAvailabilityLabel = purchaseActionsEnabled
-    ? "Buy now"
-    : "Prelaunch";
+    ? "Live"
+    : "Preview";
   const packageComparisonRows = useMemo(
     () =>
       orderedPackages.map((pkg) => {
@@ -483,22 +487,22 @@ export default function StorePage({
           ? {
               label: "Availability",
               value: purchaseAvailabilityLabel,
-              hint: "Checkout open.",
+              hint: "Checkout is live.",
             }
           : null,
         {
           label: "Model",
           value: "One-time packs",
-          hint: isSubscriber ? "Separate from membership." : "One-time.",
+          hint: isSubscriber ? "Separate from plans." : "One-time.",
         },
         {
-          label: "Membership",
+          label: "Plans",
           value: membershipStartingPrice
             ? `${membershipStartingPrice}/mo`
             : "Monthly option",
           hint: subscriptionStats
-            ? `Up to ${subscriptionStats.maxDiscount}% off unlocks.`
-            : "Recurring monthly option.",
+            ? `Up to ${subscriptionStats.maxDiscount}% off chapters.`
+            : "Monthly option.",
         },
       ].filter(Boolean),
     [
@@ -511,15 +515,15 @@ export default function StorePage({
   );
 
   const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black/12 bg-white px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]";
+    `${storefrontSecondaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90";
+    `${storefrontPrimaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
   const fieldClass =
-    "flex-1 rounded-full border border-black/10 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.06em] text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition focus:border-black/14 focus:bg-[#fcfcfd]";
+    "flex-1 rounded-full border-2 border-white/20 bg-[#080808] px-4 py-3 text-xs font-black uppercase tracking-[0.08em] text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]";
   const quietCardClass =
-    "rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]";
+    "rounded-[24px] border-2 border-black bg-[#0b0b0b] px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const compareShellClass =
-    "overflow-hidden rounded-[30px] border border-black/10 bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.08)]";
+    "overflow-hidden rounded-[30px] border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const packCountLabel = `${orderedPackages.length} ${orderedPackages.length === 1 ? "pack" : "packs"}`;
 
   return (
@@ -530,32 +534,32 @@ export default function StorePage({
           <EditorialHero
             eyebrow="Point packs"
             title={
-              purchaseActionsEnabled ? "Buy points." : "Point packs preview."
+              purchaseActionsEnabled ? "Points." : "Points preview."
             }
             description={
               purchaseActionsEnabled
-                ? "Buy and unlock."
-                : "View packs."
+                ? "Pick a pack."
+                : "See the packs."
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
             accent="blue"
-            appearance="light"
+            appearance="dark"
           />
 
           <SurfacePanel
             tone="muted"
             accent="blue"
-            appearance="light"
+            appearance="dark"
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Checkout
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+                Store
               </p>
               <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
-                  {purchaseActionsEnabled ? "Pick a pack." : "Packs"}
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
+                  {purchaseActionsEnabled ? "Point packs" : "Packs"}
                 </h2>
               </div>
             </div>
@@ -570,7 +574,7 @@ export default function StorePage({
                 }
                 className={primaryButtonClass}
               >
-                {purchaseActionsEnabled ? "Point packs" : launchAccessLabel}
+                {purchaseActionsEnabled ? "See packs" : launchAccessLabel}
               </button>
               {subscriptionStats ? (
                 <button
@@ -610,7 +614,7 @@ export default function StorePage({
               compact
               className="px-0 py-0"
               cardClassName="max-w-none rounded-[28px] px-5 py-5 sm:px-6 sm:py-6"
-              title="Point-pack checkout hit a snag."
+              title="Checkout hit a snag."
               description={errorMessage}
               onRetry={retryFailedPurchase}
             >
@@ -630,32 +634,32 @@ export default function StorePage({
               </button>
             </NetworkFallback>
           ) : (
-            <SurfacePanel tone="danger" appearance="light" accent="rose">
-              <p className="text-sm text-red-600">{errorMessage}</p>
+            <SurfacePanel tone="danger" appearance="dark" accent="pink">
+              <p className="text-sm font-semibold text-white">{errorMessage}</p>
             </SurfacePanel>
           )
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+        <SurfacePanel className="space-y-5" appearance="dark" accent="blue" tone="muted">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Overview
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+                Store
               </p>
-              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                {purchaseActionsEnabled ? "Checkout." : "Details."}
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                {purchaseActionsEnabled ? "Store" : "Preview"}
               </h2>
             </div>
           </div>
 
           {!purchaseActionsEnabled ? (
-            <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-              <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-black">
-                Coming soon.
-              </h3>
-              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                Preview only. Checkout is disabled.
-              </p>
+            <div className={quietCardClass}>
+                <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
+                  Preview only
+                </h3>
+                <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
+                Packs are listed. Checkout is off for now.
+                </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -678,28 +682,28 @@ export default function StorePage({
           <div className="grid gap-3 md:grid-cols-3">
             {[
               {
-                label: "Today",
+                label: "Now",
                 detail: purchaseActionsEnabled
                   ? "Buy what you need."
-                  : "Preview.",
+                  : "Preview only.",
               },
               {
-                label: "Receipts",
+                label: "Orders",
                 detail: purchaseActionsEnabled
-                  ? "Receipts in Orders."
+                  ? "Past charges are in Orders."
                   : "After launch.",
               },
               {
                 label: "Help",
-                detail: "Support.",
+                detail: "Billing help.",
               },
             ].map((item) => (
               <div key={item.label} className={quietCardClass}>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-3">
-                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
                     {item.label}
                   </p>
-                  <p className="text-sm font-semibold leading-6 text-black/72">
+                  <p className="text-sm font-semibold leading-6 text-white/75">
                     {item.detail}
                   </p>
                 </div>
@@ -751,7 +755,7 @@ export default function StorePage({
               >
                 <div>
                   <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                    One account.
+                    Sign in
                   </h2>
                 </div>
                 <button
@@ -767,7 +771,7 @@ export default function StorePage({
                   onClick={() => router.push("/rankings?type=ttf&window=all")}
                   className={secondaryButtonClass}
                 >
-                    Start here
+                    Trending
                   </button>
                   <button
                     type="button"
@@ -782,28 +786,29 @@ export default function StorePage({
 
             <SurfacePanel
               className="space-y-4"
-              appearance="light"
+              appearance="dark"
               accent="blue"
+              tone="muted"
             >
                 <div>
-                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                    Reading options.
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                    Reading
                   </h2>
                 </div>
               <div className="grid gap-3">
                 <div className={quietCardClass}>
-                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
                     Point packs
                   </p>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
                     Buy once.
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-                  <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
-                    Membership
+                <div className={quietCardClass}>
+                  <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
+                    Plans
                   </p>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
                     {subscriptionStats
                       ? `From ${membershipStartingPrice || "current price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
                       : "Monthly plans."}
@@ -846,19 +851,20 @@ export default function StorePage({
               <SurfacePanel
                 id="wallet-codes"
                 className="space-y-4"
-                appearance="light"
+                appearance="dark"
                 accent="blue"
+                tone="muted"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                       Codes
                     </p>
-                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                      Redeem a code
+                    <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                      Redeem code
                     </h2>
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                  <span className="text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
                     {coupons.length} available
                   </span>
                 </div>
@@ -878,14 +884,14 @@ export default function StorePage({
                   </button>
                 </div>
                 {couponMessage ? (
-                  <p className="text-xs font-semibold text-black/68">{couponMessage}</p>
+                  <p className="text-xs font-semibold text-white/80">{couponMessage}</p>
                 ) : null}
                 {coupons.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-black/55">
+                  <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
                     {coupons.map((coupon) => (
                       <span
                         key={coupon.id}
-                        className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 font-semibold uppercase tracking-[0.1em] text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.05)]"
+                        className="rounded-full border-2 border-black bg-[#0b0b0b] px-3 py-1 font-black uppercase tracking-[0.1em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                       >
                         {coupon.label || coupon.code}
                       </span>
@@ -897,12 +903,13 @@ export default function StorePage({
               <SurfacePanel
                 id="wallet-codes"
                 className="space-y-4"
-                appearance="light"
+                appearance="dark"
                 accent="blue"
+                tone="muted"
               >
                 <div>
-                  <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                    Promo codes
+                  <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                    Codes
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -935,39 +942,42 @@ export default function StorePage({
           <SurfacePanel
             id="point-packs"
             className="space-y-5"
-            appearance="light"
+            appearance="dark"
             accent="blue"
+            tone="muted"
           >
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   {purchaseActionsEnabled ? "Choose a pack" : "Packs"}
                 </h2>
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">{packCountLabel}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
+                {packCountLabel}
+              </p>
             </div>
 
             {packageComparisonRows.length > 0 ? (
               <details className={compareShellClass}>
-                <summary className="cursor-pointer list-none px-4 py-4 text-sm font-black uppercase tracking-[0.06em] text-black">
-                  Compare packs
+                <summary className="cursor-pointer list-none px-4 py-4 text-sm font-black uppercase tracking-[0.06em] text-white">
+                  Pack info
                 </summary>
-                <div className="border-t border-[color:var(--gush-border)] px-4 py-4">
+                <div className="border-t-2 border-black px-4 py-4">
                   <div className="space-y-3 md:hidden">
                     {packageComparisonRows.map((pkg) => (
                       <div
                         key={pkg.id}
-                        className="rounded-[20px] border border-black/10 bg-white px-4 py-4 shadow-[0_14px_30px_rgba(15,23,42,0.06)]"
+                        className="rounded-[20px] border-2 border-black bg-[#0b0b0b] px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                          <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
                             {pkg.name}
                           </p>
-                          <span className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                          <span className="text-sm font-black uppercase tracking-[0.04em] text-white">
                             {pkg.priceLabel}
                           </span>
                         </div>
-                        <div className="mt-3 grid gap-2 text-sm font-semibold text-black/72">
+                        <div className="mt-3 grid gap-2 text-sm font-semibold text-white/75">
                           <p>{formatUSNumber(pkg.totalPts)} total points</p>
                           <p>{pkg.bonusLabel}</p>
                           <p>{pkg.bestFor}</p>
@@ -978,32 +988,40 @@ export default function StorePage({
                   <div className="hidden overflow-x-auto md:block">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-black/10 text-left text-black/55">
-                          <th className="px-4 py-3 font-semibold">Pack</th>
-                          <th className="px-4 py-3 font-semibold">Price</th>
-                          <th className="px-4 py-3 font-semibold">
+                        <tr className="border-b-2 border-black text-left text-white/70">
+                          <th className="px-4 py-3 font-black uppercase tracking-[0.08em]">
+                            Pack
+                          </th>
+                          <th className="px-4 py-3 font-black uppercase tracking-[0.08em]">
+                            Price
+                          </th>
+                          <th className="px-4 py-3 font-black uppercase tracking-[0.08em]">
                             Total points
                           </th>
-                          <th className="px-4 py-3 font-semibold">Bonus</th>
-                          <th className="px-4 py-3 font-semibold">Fit</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-[0.08em]">
+                            Bonus
+                          </th>
+                          <th className="px-4 py-3 font-black uppercase tracking-[0.08em]">
+                            Fit
+                          </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-black/10 bg-white">
+                      <tbody className="divide-y-2 divide-black bg-[#0b0b0b]">
                         {packageComparisonRows.map((pkg) => (
                           <tr key={pkg.id}>
-                            <td className="px-4 py-3 font-black uppercase tracking-[0.04em] text-black">
+                            <td className="px-4 py-3 font-black uppercase tracking-[0.04em] text-white">
                               {pkg.name}
                             </td>
-                            <td className="px-4 py-3 font-semibold text-black/72">
+                            <td className="px-4 py-3 font-semibold text-white/75">
                               {pkg.priceLabel}
                             </td>
-                            <td className="px-4 py-3 font-semibold text-black/72">
+                            <td className="px-4 py-3 font-semibold text-white/75">
                               {formatUSNumber(pkg.totalPts)} pts
                             </td>
-                            <td className="px-4 py-3 font-semibold text-black/72">
+                            <td className="px-4 py-3 font-semibold text-white/75">
                               {pkg.bonusLabel}
                             </td>
-                            <td className="px-4 py-3 font-semibold text-black/72">
+                            <td className="px-4 py-3 font-semibold text-white/75">
                               {pkg.bestFor}
                             </td>
                           </tr>

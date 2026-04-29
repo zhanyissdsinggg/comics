@@ -6,7 +6,7 @@ import StorePageShell from "./StorePageShell";
 
 export const metadata = createPageMetadata({
   title: "Store",
-  description: "Review point packs, free reading options, coupon entry, and membership savings before checkout.",
+  description: "Get points, use codes, and check current plan savings.",
   path: "/store",
 });
 

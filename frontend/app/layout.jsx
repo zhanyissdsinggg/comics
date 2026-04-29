@@ -11,7 +11,7 @@ const CookieConsent = dynamic(
 );
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-const defaultTitle = `${siteConfig.siteName} | Read comics and novels`;
+const defaultTitle = `${siteConfig.siteName} | Comics, novels, and interactive stories`;
 
 export const metadata = {
   title: {

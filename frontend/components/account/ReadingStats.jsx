@@ -41,13 +41,13 @@ const ReadingStats = React.memo(() => {
     const badges = [];
 
     if (stats.totalEpisodesRead >= 10) {
-      badges.push("10 episodes");
+      badges.push("10 chapters");
     }
     if (stats.totalEpisodesRead >= 50) {
-      badges.push("50 episodes");
+      badges.push("50 chapters");
     }
     if (stats.totalEpisodesRead >= 100) {
-      badges.push("100 episodes");
+      badges.push("100 chapters");
     }
     if (stats.followedCount >= 5) {
       badges.push("Following 5+");
@@ -61,28 +61,28 @@ const ReadingStats = React.memo(() => {
 
   const tip = useMemo(() => {
     if (stats.totalEpisodesRead === 0) {
-      return "Start a series and your reading history will build here.";
+      return "Start reading and this fills in.";
     }
     if (stats.seriesInProgress > 5) {
-      return "You have a lot in progress. Finishing one or two will clear your shelf.";
+      return "You have a lot open right now. Finish one and clear some space.";
     }
     if (stats.followedCount > stats.seriesInProgress * 2) {
-      return "You are following more series than you are reading. Check the latest updates.";
+      return "Your library is stacked. Check new updates.";
     }
-    return "Your reading pace looks healthy. Keep the next chapter close.";
+    return "You're on a good run. Keep going.";
   }, [stats.followedCount, stats.seriesInProgress, stats.totalEpisodesRead]);
 
   const statCards = [
     {
       label: "Time read",
       value: `${stats.readingHours}h${stats.readingMinutes > 0 ? ` ${stats.readingMinutes}m` : ""}`,
-      hint: "Estimated from recent episode history.",
+      hint: "Based on recent chapters.",
       highlighted: true,
     },
     {
-      label: "Episodes",
+      label: "Chapters",
       value: `${stats.totalEpisodesRead}`,
-      hint: `${stats.totalEpisodesRead === 1 ? "Episode" : "Episodes"} completed so far.`,
+      hint: `${stats.totalEpisodesRead === 1 ? "Chapter" : "Chapters"} finished.`,
     },
     {
       label: "Active series",
@@ -92,23 +92,23 @@ const ReadingStats = React.memo(() => {
     {
       label: "Following",
       value: `${stats.followedCount}`,
-      hint: "Series waiting for updates on your shelf.",
+      hint: "Saved for later.",
     },
   ];
 
   return (
-    <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+    <SurfacePanel appearance="dark" accent="cyan" tone="muted" className="space-y-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-            Reading stats
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Reading
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-            Reading rhythm.
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+            Reading
           </h2>
         </div>
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
-          History, progress, and follows.
+        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/65">
+          Progress
         </p>
       </div>
 
@@ -116,19 +116,20 @@ const ReadingStats = React.memo(() => {
         {statCards.map((card, index) => (
           <div
             key={card.label}
-            className={`rounded-[24px] border px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)] ${
+            className={[
+              "rounded-[22px] border-2 border-black bg-[#0b0b0b] px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
               card.highlighted || index === 0
-                ? "border-black/10 bg-[#f6f7f9]"
-                : "border-black/10 bg-white"
-            }`}
+                ? "outline outline-2 outline-offset-2 outline-[#00E5FF]"
+                : "",
+            ].join(" ")}
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
               {card.label}
             </p>
-            <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black">
+            <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white">
               {card.value}
             </p>
-            <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+            <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
               {card.hint}
             </p>
           </div>
@@ -136,8 +137,8 @@ const ReadingStats = React.memo(() => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[24px] border border-black/10 bg-[#f6f7f9] p-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
+        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
             Milestones
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -145,27 +146,27 @@ const ReadingStats = React.memo(() => {
               achievements.map((achievement) => (
                 <span
                   key={achievement}
-                  className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-black shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
+                  className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
                   {achievement}
                 </span>
               ))
             ) : (
-              <p className="text-sm font-semibold text-black/58">
-                Start reading to unlock milestones.
+              <p className="text-sm font-semibold text-white/70">
+                Start reading to unlock these.
               </p>
             )}
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
-            Reading note
+        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+            Right now
           </p>
-          <h3 className="mt-3 text-base font-black tracking-[-0.02em] text-black">
-            Keep your next read closer than the settings.
+          <h3 className="mt-3 text-base font-black tracking-[-0.02em] text-white">
+            Note
           </h3>
-          <p className="mt-2 text-sm font-semibold leading-7 text-black/72">
+          <p className="mt-2 text-sm font-semibold leading-7 text-white/75">
             {tip}
           </p>
         </div>

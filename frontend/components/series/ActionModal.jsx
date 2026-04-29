@@ -1,11 +1,16 @@
 "use client";
 
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
+
 function getActionClass(variant) {
   if (variant === "secondary") {
-    return "rounded-full border border-black/12 bg-white text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px";
+    return storefrontSecondaryButtonClass;
   }
 
-  return "rounded-full border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] hover:bg-black/90 hover:shadow-[0_10px_24px_rgba(15,23,42,0.14)] active:translate-y-px";
+  return storefrontPrimaryButtonClass;
 }
 
 export default function ActionModal({
@@ -18,9 +23,9 @@ export default function ActionModal({
   offerBadge,
   offerSavingsText,
   compareItems,
-  compareTitle = "Your options",
+  compareTitle = "Options",
   tips,
-  tipsTitle = "Worth knowing",
+  tipsTitle = "Quick notes",
   actions,
   onClose,
 }) {
@@ -47,61 +52,63 @@ export default function ActionModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-[34rem] overflow-hidden rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_28px_60px_rgba(15,23,42,0.18)]"
+        className="w-full max-w-[34rem] overflow-hidden rounded-[30px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+        <div className="flex items-start justify-between gap-4 border-b-2 border-white/10 bg-black/80 p-5">
           <div>
-            <p className="inline-flex rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-black/55">
+            <p className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               {type === "SHORTFALL"
                 ? "Keep reading"
                 : type === "SUCCESS"
                   ? "Ready"
                   : "Quick note"}
             </p>
-            <h3 className="mt-3 text-3xl font-semibold leading-none tracking-[-0.06em] text-black">
+            <h3 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white">
               {title}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-black/72 shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
+            className={`${storefrontSecondaryButtonClass} px-3 py-1.5 text-xs`}
           >
             Close
           </button>
         </div>
 
         <div className="p-5">
-          <p className="text-sm leading-7 text-black/68">{description}</p>
+          <p className="text-sm font-semibold leading-7 text-white/80">
+            {description}
+          </p>
 
           {type === "SHORTFALL" ? (
-            <div className="mt-4 rounded-[24px] border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] px-4 py-3 text-sm text-black/75 shadow-[0_14px_30px_rgba(245,158,11,0.08)]">
+            <div className="mt-4 rounded-[24px] border-2 border-black bg-[#FFE500] px-4 py-3 text-sm font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               Need{" "}
-              <span className="font-semibold text-black">{shortfallPts}</span>{" "}
-              more points to unlock this episode.
-            </div>
-          ) : null}
+                <span className="font-black text-black">{shortfallPts}</span>{" "}
+                more points for this chapter.
+              </div>
+            ) : null}
 
           {offer ? (
-            <div className="mt-4 rounded-[24px] border border-black/10 bg-white p-4 text-sm text-black/68 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
+            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black p-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold tracking-[0.01em] text-black">
+                <span className="font-black uppercase tracking-[0.01em] text-white">
                   {offer.title || offer.name}
                 </span>
                 {offerBadge ? (
-                  <span className="rounded-full border border-sky-200/70 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700">
+                  <span className="rounded-full border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     {offerBadge}
                   </span>
                 ) : null}
               </div>
               {offer.pricePts ? (
-                <p className="mt-2 text-xs text-black/55">
+                <p className="mt-2 text-xs font-semibold text-white/70">
                   {offer.pricePts} points
                 </p>
               ) : null}
               {offerSavingsText ? (
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/72">
+                <p className="mt-2 text-xs font-black uppercase tracking-[0.08em] text-white/75">
                   {offerSavingsText}
                 </p>
               ) : null}
@@ -109,8 +116,8 @@ export default function ActionModal({
           ) : null}
 
           {Array.isArray(compareItems) && compareItems.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border border-black/10 bg-white p-4 text-sm text-black/68 shadow-[0_16px_34px_rgba(15,23,42,0.08)]">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-black/45">
+            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black p-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
                 {compareTitle}
               </p>
               {compareItems.map((item) => (
@@ -119,20 +126,22 @@ export default function ActionModal({
                   className="flex items-center justify-between gap-3 py-1"
                 >
                   <span>{item.label}</span>
-                  <span className="text-right font-semibold text-black/55">{item.value}</span>
+                  <span className="text-right font-semibold text-white/70">
+                    {item.value}
+                  </span>
                 </div>
               ))}
             </div>
           ) : null}
 
           {Array.isArray(tips) && tips.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-4 py-4 text-sm text-black/68">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-black/45">
+            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
                 {tipsTitle}
               </p>
               {tips.map((tip) => (
                 <div key={tip} className="flex gap-2">
-                  <span className="font-semibold text-rose-500">
+                  <span className="font-black text-[#FF007A]">
                     -
                   </span>
                   <span>{tip}</span>
@@ -147,7 +156,7 @@ export default function ActionModal({
                 key={action.label}
                 type="button"
                 onClick={action.onClick}
-                className={`px-4 py-2.5 text-sm font-semibold tracking-[0.02em] transition ${getActionClass(action.variant)}`}
+                className={`px-4 py-2.5 text-sm ${getActionClass(action.variant)}`}
               >
                 {action.label}
               </button>

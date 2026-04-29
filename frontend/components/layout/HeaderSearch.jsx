@@ -17,7 +17,7 @@ export default function HeaderSearch({ onSearch, variant = "default" }) {
         <Link
           href="/search"
           aria-label="Open search"
-          className="inline-flex h-11 w-full items-center gap-2 border-2 border-white/20 bg-white/10 px-3.5 text-white transition-colors focus-within:border-[#FFE500]"
+          className="inline-flex h-11 w-full items-center gap-2 rounded-full border-2 border-white/20 bg-black px-3.5 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-colors hover:border-[#FFE500] hover:bg-[#111111] focus-within:border-[#FFE500]"
           title={placeholder}
         >
           <Search className="size-4" />

@@ -16,6 +16,10 @@ import {
 } from "../../lib/localization";
 import { getRegionConfig } from "../../lib/region/config";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 const DEFAULT_PACKAGE_IDS = ["starter", "medium", "value"];
 const US_REGION = getRegionConfig("us");
@@ -164,12 +168,12 @@ function getPrimaryButtonLabel({ isSignedIn, insufficient, busyAction }) {
     return "Unlocking...";
   }
   if (!isSignedIn) {
-    return "Sign in to unlock";
+    return "Sign in";
   }
   if (insufficient) {
-    return "Get More Points";
+    return "Get points";
   }
-  return "Unlock Now";
+  return "Unlock";
 }
 
 export default function UnlockChapterModal({
@@ -287,14 +291,14 @@ export default function UnlockChapterModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Unlock Chapter${chapterSuffix}`}
-        className="relative w-full max-w-[32rem] overflow-hidden rounded-[32px] border border-black/10 bg-white text-black shadow-[0_32px_80px_rgba(15,23,42,0.18)]"
+        aria-label={`Unlock chapter${chapterSuffix}`}
+        className="relative w-full max-w-[32rem] overflow-hidden rounded-[32px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="relative border-b border-black/10 bg-[#f8f9fb] p-5 sm:p-6">
+        <div className="relative border-b-2 border-white/10 bg-black/80 p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-black/10 bg-white text-black shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 {view === "packs" ? (
                   <Wallet size={20} />
                 ) : (
@@ -302,12 +306,12 @@ export default function UnlockChapterModal({
                 )}
               </div>
               <div>
-                <p className="inline-flex rounded-full border border-black bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-white">
-                  {view === "packs" ? "More points" : "Secure unlock"}
+                <p className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  {view === "packs" ? "More points" : "Unlock"}
                 </p>
-                <p className="mt-3 text-sm font-bold text-black/62">
+                <p className="mt-3 text-sm font-semibold text-white/80">
                   {view === "packs"
-                    ? "Pick a pack and keep reading."
+                    ? "Pick a pack."
                     : "Unlock stays on this account after checkout."}
                 </p>
               </div>
@@ -316,7 +320,7 @@ export default function UnlockChapterModal({
             <button
               type="button"
               onClick={onClose}
-            className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-black/12 bg-white text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03]"
+              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
               aria-label="Close unlock modal"
             >
               <X size={18} />
@@ -328,55 +332,60 @@ export default function UnlockChapterModal({
         <div className="relative p-5 sm:p-6">
           {view === "confirm" ? (
             <div className="mt-6">
-              <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-black">
+              <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-white">
                 Unlock Chapter{chapterSuffix} for{" "}
-                {formatUSNumber(resolvedPrice)} Points
+                <span className="text-[#00E5FF]">{formatUSNumber(resolvedPrice)}</span>{" "}
+                Points
               </h2>
-              <p className="mt-3 text-sm leading-7 text-black/68">
+              <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
                 {!isSignedIn
-                  ? "Sign in to unlock this chapter."
+                  ? "Sign in to unlock"
                   : insufficient
-                    ? `${formatUSNumber(computedShortfall)} more points needed.`
+                    ? `Need ${formatUSNumber(computedShortfall)} more points.`
                     : "Unlocks right away."}
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                     Your balance
                   </p>
-                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
                     {isSignedIn ? formatUSNumber(resolvedWalletBalance) : "--"}
                   </p>
-                  <p className="mt-1 text-xs text-black/55">
+                  <p className="mt-1 text-xs font-semibold text-white/70">
                     {isSignedIn
-                      ? "Available points."
+                      ? "Points ready to use."
                       : "Sign in for balance."}
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                     Chapter price
                   </p>
-                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
-                    {formatUSNumber(resolvedPrice)}
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
+                    <span className="text-[#FFE500]">
+                      {formatUSNumber(resolvedPrice)}
+                    </span>
                   </p>
-                  <p className="mt-1 text-xs text-black/55">
+                  <p className="mt-1 text-xs font-semibold text-white/70">
                     {insufficient
-                      ? `${formatUSNumber(computedShortfall)} more points needed.`
-                      : "Charged after you confirm."}
+                      ? `Need ${formatUSNumber(computedShortfall)} more points.`
+                      : "Used when you confirm."}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[24px] border border-black/10 bg-[#f6f7fb] px-4 py-4 text-sm text-black/78">
+              <div className="mt-5 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white text-black">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-black uppercase tracking-[0.05em] text-black">Secure unlock</p>
-                    <p className="mt-1 text-xs leading-6 text-black/60">
+                    <p className="font-black uppercase tracking-[0.05em] text-white">
+                      Quick note
+                    </p>
+                    <p className="mt-1 text-xs font-semibold leading-6 text-white/70">
                       Point options stay in USD and on this account.
                     </p>
                   </div>
@@ -388,7 +397,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${storefrontSecondaryButtonClass}`}
                 >
                   Not now
                 </button>
@@ -396,7 +405,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={handlePrimaryAction}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
                 >
                   {primaryButtonLabel}
                 </button>
@@ -406,10 +415,10 @@ export default function UnlockChapterModal({
             <div className="mt-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-black">
-                    Get More Points
+                  <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-white">
+                    Get points
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-black/68">
+                  <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
                     Add a pack to unlock Chapter{chapterSuffix}.
                   </p>
                 </div>
@@ -417,19 +426,19 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={() => onViewChange?.("confirm")}
                   disabled={Boolean(busyAction)}
-                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-black/12 bg-white px-3.5 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`inline-flex min-h-[40px] items-center gap-2 px-3.5 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${storefrontSecondaryButtonClass}`}
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-sm text-black/76">
+              <div className="mt-5 rounded-[22px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex items-center justify-between gap-3">
                   <span>
                     Need {formatUSNumber(computedShortfall)} more points
                   </span>
-                  <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black/68">
+                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     Secure checkout
                   </span>
                 </div>
@@ -447,30 +456,30 @@ export default function UnlockChapterModal({
                   return (
                     <div
                       key={pkg.id}
-                      className={`rounded-[24px] border px-4 py-4 transition ${
+                      className={`rounded-[24px] border-2 px-4 py-4 transition shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] ${
                         isHighlighted
-                          ? "border-black/12 bg-[#f8f9fb] shadow-[0_16px_36px_rgba(15,23,42,0.08)]"
-                          : "border-black/10 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.08)]"
+                          ? "border-[#00E5FF] bg-[#101010]"
+                          : "border-white/20 bg-black"
                       }`}
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-lg font-black uppercase tracking-[0.03em] text-black">
+                            <span className="text-lg font-black uppercase tracking-[0.03em] text-white">
                               {pkg.name}
                             </span>
                             {pkg.tag ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-black/10 bg-[#f8f9fb] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black">
+                              <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                                 <Sparkles size={10} />
                                 {pkg.tag}
                               </span>
                             ) : null}
                           </div>
-                          <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-black">
+                          <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
                             {pkg.priceLabel} for {formatUSNumber(pkg.totalPts)}{" "}
                             Points
                           </p>
-                          <p className="mt-1 text-xs text-black/55">
+                          <p className="mt-1 text-xs font-semibold text-white/70">
                             {bonusLabel}
                           </p>
                         </div>
@@ -479,7 +488,7 @@ export default function UnlockChapterModal({
                           type="button"
                           onClick={() => onBuyPack?.(pkg.id)}
                           disabled={Boolean(busyAction)}
-                          className="min-h-[42px] rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-60"
+                          className={`min-h-[42px] px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
                         >
                           {busyAction === currentPackAction
                             ? "Buying..."
@@ -491,16 +500,16 @@ export default function UnlockChapterModal({
                 })}
               </div>
 
-              <div className="mt-5 rounded-[24px] border border-black/10 bg-[#f6f7fb] px-4 py-4 text-sm text-black/72">
+              <div className="mt-5 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white text-black">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-black uppercase tracking-[0.05em] text-black">
-                      Safe to check out
+                    <p className="font-black uppercase tracking-[0.05em] text-white">
+                      Checkout
                     </p>
-                    <p className="mt-1 text-xs leading-6 text-black/58">
+                    <p className="mt-1 text-xs font-semibold leading-6 text-white/70">
                       {packagesUsingFallback
                         ? "Showing current pack defaults."
                         : "USD pricing. Points land on this account after purchase."}
@@ -514,7 +523,7 @@ export default function UnlockChapterModal({
                   type="button"
                   onClick={onClose}
                   disabled={Boolean(busyAction)}
-                  className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${storefrontSecondaryButtonClass}`}
                 >
                   Close
                 </button>
@@ -523,13 +532,13 @@ export default function UnlockChapterModal({
                     type="button"
                     onClick={onOpenStore}
                     disabled={Boolean(busyAction)}
-                    className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${storefrontSecondaryButtonClass}`}
                   >
                     Store
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full border border-black/10 bg-[#f6f7fb] px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black">
-                  {isLoadingPackages ? "Refreshing prices..." : "Point options"}
+                <span className="inline-flex items-center justify-center rounded-full border-2 border-white/20 bg-black px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  {isLoadingPackages ? "Refreshing..." : "Point options"}
                 </span>
               </div>
             </div>

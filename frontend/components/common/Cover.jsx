@@ -131,7 +131,7 @@ function CoverFallback({
               </span>
             ) : null}
             {artDirection.primaryGenre ? (
-              <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <span className="rounded-full border-2 border-black bg-[#FF007A] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 {artDirection.primaryGenre}
               </span>
             ) : null}
@@ -144,7 +144,7 @@ function CoverFallback({
           style={{ borderColor: artDirection.border }}
         />
         <div
-          className="absolute mt-6 h-20 w-20 rounded-full border bg-white/10 blur-[0.5px]"
+          className="absolute mt-6 h-20 w-20 rounded-full border bg-[#111111] blur-[0.5px]"
           style={{ borderColor: artDirection.border }}
         />
       </div>

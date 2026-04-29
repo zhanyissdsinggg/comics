@@ -27,17 +27,17 @@ const FAQ_ITEMS = [
   {
     question: "What counts as mature content on Gush?",
     answer:
-      "Mature titles stay hidden until 18+ access is enabled.",
+      "Mature titles stay hidden until 18+ is on.",
   },
-  {
-    question: "Who needs to complete an age check?",
-    answer:
-      "Sign in and confirm age when prompted.",
+    {
+      question: "Who needs to complete an age check?",
+      answer:
+        "Sign in and confirm once.",
   },
   {
     question: "What does Hide 18+ history do?",
     answer:
-      "It hides mature titles from visible reading history.",
+      "It hides 18+ titles from visible history.",
   },
   {
     question: "Can region settings change what I see?",
@@ -53,19 +53,19 @@ const FAQ_ITEMS = [
 const CONTROL_CARDS = [
   {
     title: "18+ toggle",
-    body: "",
+    body: "Keep mature titles hidden until you turn them on.",
   },
   {
     title: "Age check",
-    body: "",
+    body: "Confirm once after you sign in.",
   },
   {
     title: "Hide history",
-    body: "",
+    body: "Keep 18+ reads out of visible history.",
   },
   {
     title: "Support",
-    body: "",
+    body: "Use support if the gate gets stuck.",
   },
 ];
 
@@ -91,10 +91,10 @@ export default function MatureContentPage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             eyebrow="18+"
-            title="18+ access."
+            title="18+ access"
             description=""
             stats={[
               {
@@ -131,7 +131,7 @@ export default function MatureContentPage() {
 
           <StorefrontDesk
             eyebrow="Controls"
-            title="18+."
+            title="18+ settings."
             description=""
             actions={
               <>
@@ -139,7 +139,7 @@ export default function MatureContentPage() {
                   href="/adult-gate"
                   className={storefrontPrimaryButtonClass}
                 >
-                  18+ gate
+                  Open 18+
                 </Link>
                 <Link
                   href="/account"
@@ -156,56 +156,59 @@ export default function MatureContentPage() {
           {CONTROL_CARDS.map((card) => (
             <SurfacePanel
               key={card.title}
-              appearance="light"
+              appearance="dark"
               accent="blue"
-              className="border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
+              className="border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
               <StorefrontSectionHeading
                 title={card.title}
               />
+              <p className="mt-3 text-sm font-semibold leading-6 text-white/75">
+                {card.body}
+              </p>
             </SurfacePanel>
           ))}
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel
-            className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
-            appearance="light"
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
             accent="blue"
           >
-            <StorefrontSectionHeading
-              eyebrow="Check"
-              title="Before you enter."
-            />
-            <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
-              <li>Sign in.</li>
-              <li>Confirm age.</li>
-              <li>Support.</li>
-            </ul>
+              <StorefrontSectionHeading
+                eyebrow="Check"
+                title="Before you enter"
+              />
+              <ul className="space-y-3 text-sm font-medium leading-7 text-white/70">
+                <li>Sign in</li>
+                <li>Confirm your age</li>
+                <li>Use support if you get stuck</li>
+              </ul>
           </SurfacePanel>
 
           <SurfacePanel
-            className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
-            appearance="light"
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
             accent="blue"
           >
-            <StorefrontSectionHeading eyebrow="More" title="Pages." />
+            <StorefrontSectionHeading eyebrow="More" title="More" />
             <div className="space-y-3">
               {[
                 {
                   href: "/account",
                   title: "Account settings",
-                  body: "",
+                  body: "Manage your preferences.",
                 },
                 {
                   href: "/faq",
                   title: "FAQ",
-                  body: "",
+                  body: "Answers.",
                 },
                 {
                   href: "/support",
                   title: "Support",
-                  body: "",
+                  body: "Talk to support.",
                 },
               ].map((item) => (
                 <Link
@@ -216,7 +219,7 @@ export default function MatureContentPage() {
                   <StorefrontInfoCard
                     title={item.title}
                     description={item.body}
-                    className="border border-black/10 bg-black/[0.03] hover:bg-black/[0.05]"
+                    className="border-2 border-white/15 bg-[#0a0a0a] hover:bg-[#111111]"
                   />
                 </Link>
               ))}
@@ -225,11 +228,11 @@ export default function MatureContentPage() {
         </section>
 
         <SurfacePanel
-          className="space-y-5 border border-black/10 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.07)]"
-          appearance="light"
+          className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+          appearance="dark"
           accent="blue"
         >
-          <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
+          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <StorefrontInfoCard

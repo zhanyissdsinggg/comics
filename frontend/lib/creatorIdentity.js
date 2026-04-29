@@ -117,7 +117,7 @@ function createCreatorIdentity(source) {
       : buildCreatorHref(normalizedName),
     creditType,
     eyebrow: normalizedName,
-    detail: "Open creator",
+    detail: "Creator",
   };
 }
 

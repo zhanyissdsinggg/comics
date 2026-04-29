@@ -494,7 +494,7 @@ async function runMobileSuite(baseUrl) {
   ];
 
   for (const spec of tabSpecs) {
-    const tab = nav.getByText(spec.label, { exact: true });
+    const tab = nav.getByRole("link", { name: spec.label, exact: true });
     if (await tab.isVisible().catch(() => false)) {
       await tab.click({ timeout: DEFAULT_TIMEOUT_MS });
       await expectRoute(page, baseUrl, spec.expect);

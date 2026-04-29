@@ -36,8 +36,8 @@ const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
             </a>
           </div>
         </section>
-        <Skeleton className="h-14 w-full rounded-[22px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
-        <Skeleton className="h-72 w-full rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+        <Skeleton className="h-14 w-full rounded-[22px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+        <Skeleton className="h-72 w-full rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
       </main>
     </div>
   ),

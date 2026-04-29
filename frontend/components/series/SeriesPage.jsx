@@ -42,7 +42,7 @@ function EpisodeListSkeleton() {
       <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
-          <Skeleton className="h-4 w-10 rounded-full bg-white/10" />
+          <Skeleton className="h-4 w-10 rounded-full bg-[#111111]" />
         </div>
         <div className="flex items-center gap-3">
           <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
@@ -53,7 +53,7 @@ function EpisodeListSkeleton() {
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton
             key={`episode-list-skeleton-${index}`}
-            className="h-24 w-full rounded-[24px] bg-white/10"
+            className="h-24 w-full rounded-[24px] bg-[#111111]"
           />
         ))}
       </div>
@@ -684,7 +684,7 @@ export default function SeriesPage({
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -804,18 +804,18 @@ export default function SeriesPage({
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <section className="rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-7">
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
-              <Skeleton className="aspect-[3/4] w-full rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+              <Skeleton className="aspect-[3/4] w-full rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
                   <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
                 </div>
                 <Skeleton className="h-12 w-4/5 rounded-[20px] bg-white/20" />
-                <Skeleton className="h-5 w-3/5 rounded-full bg-white/10" />
+                <Skeleton className="h-5 w-3/5 rounded-full bg-[#111111]" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded-full bg-white/10" />
-                  <Skeleton className="h-4 w-[92%] rounded-full bg-white/10" />
-                  <Skeleton className="h-4 w-[76%] rounded-full bg-white/10" />
+                  <Skeleton className="h-4 w-full rounded-full bg-[#111111]" />
+                  <Skeleton className="h-4 w-[92%] rounded-full bg-[#111111]" />
+                  <Skeleton className="h-4 w-[76%] rounded-full bg-[#111111]" />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Skeleton className="h-9 w-36 rounded-full bg-white/20" />
@@ -825,7 +825,7 @@ export default function SeriesPage({
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Skeleton
                       key={`series-header-skeleton-${index}`}
-                      className="h-28 rounded-[22px] bg-white/10"
+                      className="h-28 rounded-[22px] bg-[#111111]"
                     />
                   ))}
                 </div>
@@ -836,7 +836,7 @@ export default function SeriesPage({
             <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
-                <Skeleton className="h-4 w-12 rounded-full bg-white/10" />
+                <Skeleton className="h-4 w-12 rounded-full bg-[#111111]" />
               </div>
               <div className="flex items-center gap-3">
                 <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
@@ -847,7 +847,7 @@ export default function SeriesPage({
               {Array.from({ length: 5 }).map((_, index) => (
                 <Skeleton
                   key={`episode-${index}`}
-                  className="h-20 w-full rounded-[24px] bg-white/10"
+                  className="h-20 w-full rounded-[24px] bg-[#111111]"
                 />
               ))}
             </div>
@@ -875,7 +875,7 @@ export default function SeriesPage({
                 onClick={() => router.push("/rankings?view=featured")}
                 className={primaryButtonClass}
               >
-                Featured
+                Trending
               </button>
               <button
                 type="button"
@@ -924,7 +924,7 @@ export default function SeriesPage({
               onClick={() => router.push("/rankings?view=featured")}
               className={secondaryButtonClass}
             >
-              Featured
+              Trending
             </button>
             <button
               type="button"
@@ -1025,22 +1025,22 @@ export default function SeriesPage({
         />
 
         {interactiveStory ? (
-          <section className="rounded-[24px] border-2 border-black bg-white p-4 text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <section className="rounded-[24px] border-2 border-white/20 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/50">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">
                   Interactive
                 </p>
-                <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-black">
-                  Interactive is live.
+                <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-white">
+                  Interactive story
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
-                className="rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
+                className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
               >
-                Open
+                Start Story
               </button>
             </div>
           </section>

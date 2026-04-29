@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import LoginGateModal from "../layout/LoginGateModal";
@@ -89,24 +93,19 @@ export default function AdultGatePage() {
     });
   }, [reason, returnTo]);
 
-  const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)] transition-all hover:bg-black/90";
-  const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.01em] text-black shadow-[0_14px_32px_rgba(15,23,42,0.10)] transition-all hover:border-black/20 hover:bg-black/[0.03]";
-
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <div className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 pt-4 xl:grid-cols-1 xl:items-start">
-          <section className="rounded-[36px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)] sm:p-7">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/45">
+          <SurfacePanel appearance="dark" tone="muted" accent="cyan" className="p-6 sm:p-7">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/70">
               18+
             </p>
-            <h1 className="mt-5 text-[2.1rem] font-black uppercase tracking-[-0.05em] text-black sm:text-[2.6rem]">
+            <h1 className="mt-5 text-[2.1rem] font-black uppercase tracking-[-0.05em] text-white sm:text-[2.6rem]">
               {titleMap[reason]}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-black/68">
+            <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/80">
               {descriptionMap[reason]}
             </p>
 
@@ -114,25 +113,25 @@ export default function AdultGatePage() {
               <button
                 type="button"
                 onClick={handleOpen}
-                className={primaryButtonClass}
+                className={storefrontPrimaryButtonClass}
               >
-                {ADULT_GATE_ACTION_LABELS[reason] || "Continue"}
+                {ADULT_GATE_ACTION_LABELS[reason] || "Keep Going"}
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Back
               </button>
             </div>
 
             {isSignedIn && reason === "NEED_LOGIN" ? (
-              <p className="mt-4 text-xs font-medium text-black/58">
-                Signed in. Continue to confirm.
+              <p className="mt-4 text-xs font-semibold text-white/70">
+                You're signed in. Confirm and keep going.
               </p>
             ) : null}
-          </section>
+          </SurfacePanel>
         </section>
       </main>
 

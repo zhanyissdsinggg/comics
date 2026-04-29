@@ -13,14 +13,14 @@ const StorePage = dynamic(() => import("../../components/store/StorePage"), {
             Store
           </p>
           <h1 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white">
-            Top up.
+            Points.
           </h1>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <a
               href="/subscribe"
               className="rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1.5 font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
             >
-              Membership
+              Plans
             </a>
             <a
               href="/orders"
@@ -32,10 +32,10 @@ const StorePage = dynamic(() => import("../../components/store/StorePage"), {
         </section>
         <div className="grid gap-6 xl:grid-cols-[0.84fr_1.16fr]">
           <div className="space-y-6">
-            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
-            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+            <Skeleton className="h-56 rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
           </div>
-          <Skeleton className="h-[42rem] rounded-[28px] border-2 border-white/20 bg-white/10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+          <Skeleton className="h-[42rem] rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
         </div>
       </main>
     </div>

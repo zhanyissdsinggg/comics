@@ -208,16 +208,16 @@ export default function SocialAuthButton({
 
     return (
       <div className="w-full space-y-2">
-        <div className="flex min-h-[48px] w-full items-center justify-center overflow-hidden rounded-[20px] border border-black/10 bg-white px-2 py-1 shadow-[0_14px_30px_rgba(15,23,42,0.08)]">
+        <div className="flex min-h-[48px] w-full items-center justify-center overflow-hidden rounded-[20px] border-2 border-white/20 bg-black px-2 py-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <div ref={googleButtonRef} className="w-full max-w-[320px]" />
         </div>
         {GOOGLE_CLIENT_ID && !googleReady ? (
-          <p className="text-center text-xs uppercase tracking-[0.18em] text-black/45">
-            Loading Google Sign-In...
+          <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-white/60">
+            Loading...
           </p>
         ) : null}
         {loading || isLoading ? (
-          <p className="text-center text-xs uppercase tracking-[0.18em] text-black/45">
+          <p className="text-center text-xs font-black uppercase tracking-[0.18em] text-white/60">
             Signing in...
           </p>
         ) : null}
@@ -231,7 +231,7 @@ export default function SocialAuthButton({
         type="button"
         onClick={handleAppleLogin}
         disabled={loading || isLoading}
-        className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-[20px] border border-black/10 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-black shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:shadow-[0_16px_34px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
+        className="group relative flex min-h-[48px] w-full items-center justify-center gap-2 rounded-[20px] border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Sign in with Apple"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

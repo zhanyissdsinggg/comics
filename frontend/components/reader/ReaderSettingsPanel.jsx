@@ -12,7 +12,7 @@ function clamp(value, min, max, fallback) {
 
 function ToggleRow({ label, description, enabled, onToggle }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-sm">
+    <div className="flex items-center justify-between gap-4 rounded-[22px] border-2 border-white/15 bg-black px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
       <div className="min-w-0">
         <div className="text-sm font-semibold text-white">{label}</div>
         {description ? (
@@ -22,13 +22,13 @@ function ToggleRow({ label, description, enabled, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
-          enabled ? "bg-emerald-500" : "bg-neutral-700"
+        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-black transition-colors ${
+          enabled ? "bg-[#00E5FF]" : "bg-[#111111]"
         }`}
         aria-pressed={enabled}
       >
         <span
-          className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${
+          className={`inline-block h-5 w-5 rounded-full border border-black bg-[#FFE500] transition-transform ${
             enabled ? "translate-x-6" : "translate-x-1"
           }`}
         />
@@ -43,12 +43,12 @@ function ModeButton({ active, disabled, onClick, children }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+      className={`rounded-[20px] border-2 px-4 py-3 text-sm font-black uppercase tracking-[0.06em] transition ${
         active
-          ? "border-white/20 bg-white text-slate-950 shadow-[0_10px_24px_rgba(255,255,255,0.08)]"
+          ? "border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
           : disabled
-            ? "border-white/6 bg-white/[0.03] text-neutral-600"
-            : "border-white/10 bg-white/5 text-neutral-200 hover:border-white/20 hover:bg-white/10"
+            ? "border-white/10 bg-black text-white/30"
+            : "border-white/20 bg-black text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
       }`}
     >
       {children}
@@ -87,17 +87,17 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
       onClick={onClose}
     >
       <section
-        className="flex max-h-[min(92vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[rgba(12,12,14,0.94)] shadow-[0_28px_72px_rgba(0,0,0,0.36)] backdrop-blur-xl"
+        className="flex max-h-[min(92vh,42rem)] w-full max-w-lg flex-col overflow-hidden rounded-[30px] border-2 border-white/20 bg-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] backdrop-blur-xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <div className="flex items-center justify-between border-b-2 border-white/10 px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">Display</h2>
+            <h2 className="text-lg font-semibold text-white">Reader</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-neutral-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+            className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] hover:text-white"
           >
             Close
           </button>
@@ -105,16 +105,16 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
 
         <div className="space-y-6 overflow-y-auto px-5 py-5">
           <ToggleRow
-            label="Night Mode"
+            label="Night mode"
             description=""
             enabled={nightMode}
             onToggle={onToggleNight}
           />
 
           {showLayoutControls ? (
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
+            <div className="space-y-3 rounded-[22px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div>
-                <div className="text-sm font-semibold text-white">Layout</div>
+                <div className="text-sm font-semibold text-white">Page view</div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <ModeButton
@@ -126,7 +126,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                     }
                   }}
                 >
-                  Scroll
+                  Vertical
                 </ModeButton>
                 <ModeButton
                   active={layoutMode === "horizontal"}
@@ -143,7 +143,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
             </div>
           ) : null}
 
-          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
+          <div className="space-y-3 rounded-[22px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-white">Brightness</div>
@@ -159,7 +159,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
               onChange={(event) => onBrightnessChange?.(Number(event.target.value))}
               className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
               style={{
-                background: `linear-gradient(to right, rgb(16 185 129) 0%, rgb(16 185 129) ${
+                background: `linear-gradient(to right, rgb(0 229 255) 0%, rgb(0 229 255) ${
                   ((safeBrightness - 50) / 100) * 100
                 }%, rgb(38 38 38) ${((safeBrightness - 50) / 100) * 100}%, rgb(38 38 38) 100%)`,
               }}
@@ -167,17 +167,17 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           </div>
 
           <ToggleRow
-            label="Auto Scroll"
+            label="Auto-scroll"
             description=""
             enabled={autoScroll}
             onToggle={onToggleAutoScroll}
           />
 
           {autoScroll ? (
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
+            <div className="space-y-3 rounded-[22px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-semibold text-white">Auto speed</div>
+                  <div className="text-sm font-semibold text-white">Speed</div>
                 </div>
                 <span className="text-sm font-semibold text-white/90">{safeAutoScrollSpeed}x</span>
               </div>
@@ -190,7 +190,7 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 onChange={(event) => onAutoScrollSpeedChange?.(Number(event.target.value))}
                 className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
                 style={{
-                  background: `linear-gradient(to right, rgb(16 185 129) 0%, rgb(16 185 129) ${
+                  background: `linear-gradient(to right, rgb(255 0 122) 0%, rgb(255 0 122) ${
                     ((safeAutoScrollSpeed - 1) / 4) * 100
                   }%, rgb(38 38 38) ${((safeAutoScrollSpeed - 1) / 4) * 100}%, rgb(38 38 38) 100%)`,
                 }}
@@ -199,14 +199,14 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           ) : null}
 
           <ToggleRow
-            label="Fullscreen"
+            label="Full screen"
             description=""
             enabled={fullscreen}
             onToggle={onToggleFullscreen}
           />
         </div>
 
-        <div className="flex gap-3 border-t border-white/10 px-5 py-4">
+        <div className="flex gap-3 border-t-2 border-white/10 px-5 py-4">
           <button
             type="button"
             onClick={() => {
@@ -226,14 +226,14 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 onAutoScrollSpeedChange?.(1);
               }
             }}
-            className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/10"
+            className="flex-1 rounded-full border-2 border-white/20 bg-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
           >
             Reset
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_12px_24px_rgba(255,255,255,0.08)] transition hover:bg-white/95"
+            className="flex-1 rounded-full border-2 border-black bg-[#FFE500] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#fff173]"
           >
             Done
           </button>

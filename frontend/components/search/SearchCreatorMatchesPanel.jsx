@@ -97,41 +97,35 @@ export default function SearchCreatorMatchesPanel({
           return null;
         }
 
-        let matchLabel = "Creator match";
-        let matchDescription =
-          "Matched creator and related titles.";
+        let matchLabel = "Creator";
+        let matchDescription = "Creator and title match.";
         let matchScore = 0;
 
         if (exactNameMatch) {
-          matchLabel = "Exact creator";
-          matchDescription =
-            "You searched for the creator directly, so their page is the clearest next stop.";
+          matchLabel = "Exact match";
+          matchDescription = "Direct creator match.";
           matchScore += 1200;
         } else if (prefixNameMatch) {
-          matchLabel = "Creator name";
-          matchDescription =
-            "This search starts with the creator name, so their page should open the shelf up cleanly.";
+          matchLabel = "Creator";
+          matchDescription = "Name match.";
           matchScore += 900;
         } else if (includesNameMatch) {
-          matchLabel = "Creator name";
-          matchDescription =
-            "This search still matches the creator name closely enough that their page is worth opening.";
+          matchLabel = "Creator";
+          matchDescription = "Close name match.";
           matchScore += 700;
         }
 
         if (spotlightTitleMatch) {
           if (!hasPrimaryMatch) {
-            matchLabel = "Featured";
-            matchDescription =
-              "The strongest title match comes from this creator, so their page keeps related work close.";
+            matchLabel = "Top Pick";
+            matchDescription = "Best title match.";
           }
           matchScore += 220;
         }
 
         if (!hasPrimaryMatch && genreMatches.length > 0) {
-          matchLabel = "Genre bridge";
-          matchDescription =
-            "This search overlaps the creator's main genres, so their page is a natural next stop.";
+          matchLabel = "Genre";
+          matchDescription = "Genre match.";
         }
 
         matchScore += genreMatches.length * 80;
@@ -218,16 +212,16 @@ export default function SearchCreatorMatchesPanel({
 
   const leadCreatorMatch = matchedCreators[0] || null;
   const creatorPanelTitle =
-    resultsLength === 0 ? "No title match." : "Creator matches.";
+    resultsLength === 0 ? "Try a creator." : "Creator matches.";
 
   return (
-    <SurfacePanel className="space-y-4" appearance="light" accent="blue">
+    <SurfacePanel className="space-y-4" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/55">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">
             Creators
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
             {creatorPanelTitle}
           </h2>
         </div>
@@ -235,7 +229,7 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+            className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
           >
             Creator
           </Link>
@@ -248,36 +242,36 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[30px] border border-black/10 bg-white p-4 shadow-[0_20px_44px_rgba(15,23,42,0.08)]"
+            className="rounded-[30px] border-2 border-white/20 bg-black p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
               coverUrl={creator.spotlightSeries?.coverUrl}
-              className="h-48 rounded-[22px] border border-black/10"
+              className="h-48 rounded-[22px] border-2 border-white/20"
             />
             <div className="mt-4 space-y-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-black/55">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
                   {creator.matchLabel}
                 </p>
-                <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   {highlight(creator.name, query)}
                 </h3>
               </div>
 
               {creator.spotlightSeries?.title ? (
-                <p className="text-sm leading-6 text-black/68">
-                  <span className="font-medium text-black">
+                <p className="text-sm leading-6 text-white/68">
+                  <span className="font-medium text-white">
                     {highlight(creator.spotlightSeries.title, query)}
                   </span>
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-black/68">
+                <p className="text-sm leading-6 text-white/68">
                   Creator
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-black/55">
+              <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-white/55">
                 <span>
                   {creator.titleCount} title
                   {creator.titleCount === 1 ? "" : "s"}
@@ -294,7 +288,7 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border border-black/10 bg-white px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:bg-[#f6f7f9]"
+                  className="rounded-full border-2 border-white/20 bg-black px-3.5 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
                 >
                   Creator
                 </Link>

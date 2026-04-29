@@ -23,17 +23,17 @@ import { getSearchParam } from "../../lib/pageSearchParams";
 const VIEWS = [
   {
     id: "featured",
-    label: "Featured",
+    label: "Trending",
     description: "",
   },
   {
     id: "start-here",
-    label: "Start Here",
+    label: "Top Picks",
     description: "",
   },
   {
     id: "completed",
-    label: "Completed",
+    label: "Finished",
     description: "",
   },
   {
@@ -89,13 +89,13 @@ function getFeaturedScore(series) {
 
 function getSeriesBadge(series) {
   if (normalizeStatus(series?.status) === "completed") {
-    return "Completed";
+    return "Finished";
   }
   if (isRecentlyUpdated(series, 14)) {
-    return "Updated";
+    return "Updated Today";
   }
   if (hasReaderFriendlyStart(series)) {
-    return "First picks";
+    return "Top Pick";
   }
   return "";
 }
@@ -172,7 +172,7 @@ function RankingsLoadingState() {
           <div className="space-y-3">
             <div className="h-3 w-28 rounded-full bg-white/20" />
             <div className="h-10 w-72 rounded-full bg-white/20" />
-            <div className="h-4 w-full max-w-2xl rounded-full bg-white/10" />
+            <div className="h-4 w-full max-w-2xl rounded-full bg-[#111111]" />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
@@ -182,7 +182,7 @@ function RankingsLoadingState() {
               >
                 <div className="h-44 rounded-[20px] bg-white/20" />
                 <div className="mt-4 h-6 w-40 rounded-full bg-white/20" />
-                <div className="mt-3 h-4 w-full rounded-full bg-white/10" />
+                <div className="mt-3 h-4 w-full rounded-full bg-[#111111]" />
               </div>
             ))}
           </div>
@@ -192,7 +192,7 @@ function RankingsLoadingState() {
       <SurfacePanel className="space-y-4" appearance="dark" accent="cyan">
         <div className="h-3 w-24 rounded-full bg-white/20" />
         <div className="h-8 w-48 rounded-full bg-white/20" />
-        <div className="h-4 w-full rounded-full bg-white/10" />
+        <div className="h-4 w-full rounded-full bg-[#111111]" />
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
@@ -317,7 +317,7 @@ export default function RankingsPage({
   const boardEntries = curatedSeries.slice(3, 12);
   const heroStats = [
     {
-      label: "Shelf",
+      label: "List",
       value: activeView.label,
       hint: activeView.description,
     },
@@ -364,9 +364,9 @@ export default function RankingsPage({
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
   const heroTitle =
-    activeView.id === "featured" ? "Featured stories." : `${activeView.label}.`;
+    activeView.id === "featured" ? "Trending." : `${activeView.label}.`;
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -374,7 +374,7 @@ export default function RankingsPage({
       <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
           <EditorialHero
-            eyebrow="Editor's shelf"
+            eyebrow="This Week"
             title={heroTitle}
             description={activeView.description}
             secondary=""
@@ -392,7 +392,7 @@ export default function RankingsPage({
           >
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                Ranking desk
+                Explore
               </p>
               <div>
                 <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
@@ -404,14 +404,14 @@ export default function RankingsPage({
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <div className="rounded-[24px] border-2 border-black bg-[#FFE500] px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65">
-                  Shelf
+                  List
                 </p>
                 <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
                   {activeView.label}
                 </p>
               </div>
-              <div className="rounded-[24px] border-2 border-black bg-white px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65">
+              <div className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/60">
                   Titles
                 </p>
                 <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
@@ -459,7 +459,7 @@ export default function RankingsPage({
         >
           <RankingsSectionHeader
             eyebrow="Views"
-            title="Switch shelves"
+            title="Lists"
             description=""
           />
           <div className="flex flex-wrap gap-2.5">
@@ -472,7 +472,7 @@ export default function RankingsPage({
                   "rounded-full border-2 border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.02em] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform",
                   activeView.id === item.id
                     ? "bg-[#FFE500] text-black"
-                    : "bg-white text-black hover:translate-x-0.5 hover:translate-y-0.5",
+                     : "border-white/20 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30",
                 ].join(" ")}
               >
                 {item.label}
@@ -492,10 +492,10 @@ export default function RankingsPage({
             >
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                  Shelf
+                  List
                 </p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                  No titles yet.
+                  Nothing here yet.
                 </h2>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -518,14 +518,14 @@ export default function RankingsPage({
 
             <SurfacePanel
               className="space-y-4"
-              appearance="light"
-              accent="blue"
+              appearance="dark"
+              accent="cyan"
             >
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
                   Creators
                 </p>
-                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-black">
+                <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   Creators
                 </h2>
               </div>
@@ -547,8 +547,8 @@ export default function RankingsPage({
                   onClick={(event) =>
                     handleSeriesLinkClick(event, leadEntry.id, "FEATURED_LEAD")
                   }
-                  className="group w-full rounded-[30px] border-2 border-black bg-white p-3.5 text-left text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 sm:p-5"
-                  aria-label={`Open ${leadEntry.title}`}
+                  className="group w-full rounded-[30px] border-2 border-white/15 bg-black p-3.5 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 sm:p-5"
+                  aria-label={`View ${leadEntry.title}`}
                 >
                     <div className="grid gap-3.5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
                     <Cover
@@ -562,10 +562,10 @@ export default function RankingsPage({
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
-                        Lead pick
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
+                        Featured
                       </p>
-                      <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-black sm:mt-3 sm:text-4xl">
+                      <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-white sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
@@ -596,13 +596,13 @@ export default function RankingsPage({
                           "FEATURED_SUPPORTING",
                       )
                       }
-                        className="group rounded-[28px] border-2 border-black bg-white p-3 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 sm:p-4"
-                      aria-label={`Open ${series.title}`}
+                        className="group rounded-[28px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 sm:p-4"
+                      aria-label={`View ${series.title}`}
                     >
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/55">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
                         {activeView.label}
                       </p>
-                      <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-black sm:text-2xl">
+                      <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-white sm:text-2xl">
                         {series.title}
                       </h3>
                       <Cover
@@ -627,8 +627,8 @@ export default function RankingsPage({
                           </span>
                         ))}
                       </div>
-                      <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-black/55">
-                        Series
+                      <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
+                        Read More
                       </p>
                     </Link>
                   ))}
@@ -637,7 +637,7 @@ export default function RankingsPage({
 
               {boardEntries.length > 0 ? (
                   <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
-                  <RankingsSectionHeader eyebrow="More titles" title="More" description="" />
+                  <RankingsSectionHeader eyebrow="More to Read" title="More to Read" description="" />
 
                   <div className="space-y-3">
                     {boardEntries.map((series) => (
@@ -651,8 +651,8 @@ export default function RankingsPage({
                             "FEATURED_LIST",
                           )
                         }
-                        className="flex w-full items-center gap-4 rounded-[24px] border-2 border-black bg-white p-3 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
-                        aria-label={`Open ${series.title}`}
+                        className="flex w-full items-center gap-4 rounded-[24px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25"
+                        aria-label={`View ${series.title}`}
                       >
                         <Cover
                           tone={series.coverTone}
@@ -667,21 +667,21 @@ export default function RankingsPage({
                           className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-base font-black uppercase tracking-[-0.02em] text-black">
+                          <p className="truncate text-base font-black uppercase tracking-[-0.02em] text-white">
                             {series.title}
                           </p>
-                          <p className="mt-1 text-xs font-medium text-black/58">
+                          <p className="mt-1 text-xs font-medium text-white/58">
                             {getSeriesMeta(series).join(" / ")}
                           </p>
                           {Array.isArray(series.genres) &&
                           series.genres.length > 0 ? (
-                            <p className="mt-1 truncate text-xs font-medium text-black/46">
+                              <p className="mt-1 truncate text-xs font-medium text-white/46">
                               {series.genres.slice(0, 2).join(" / ")}
                             </p>
                           ) : null}
                         </div>
                         <span className="hidden rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:inline-flex">
-                          Series
+                          Read More
                         </span>
                       </Link>
                     ))}
@@ -710,10 +710,10 @@ export default function RankingsPage({
               >
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                    Paths
+                    More
                   </p>
                   <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    Paths
+                    More
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -727,7 +727,7 @@ export default function RankingsPage({
                   <button
                     type="button"
                     onClick={() => router.push("/novels")}
-                    className="rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
+                    className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
                   >
                     Novels
                   </button>

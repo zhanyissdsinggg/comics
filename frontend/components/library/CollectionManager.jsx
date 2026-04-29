@@ -2,6 +2,10 @@
 
 import React, { useCallback, useState } from "react";
 import { useFollowStore } from "../../store/useFollowStore";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 const CollectionManager = React.memo(({ seriesId, onClose }) => {
   const {
@@ -92,29 +96,33 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-white">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-950">Collections</h3>
+        <h3 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
+          Collections
+        </h3>
         {onClose ? (
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
             aria-label="Close"
           >
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">Close</span>
           </button>
         ) : null}
       </div>
 
       {message ? (
-        <div className="rounded-xl border border-[color:var(--gush-border)] bg-white p-3 text-sm text-slate-700">
+        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-3 text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           {message}
         </div>
       ) : null}
 
-      <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
-        <h4 className="text-sm font-semibold text-slate-700">New Collection</h4>
+      <div className="rounded-[24px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <h4 className="text-sm font-black uppercase tracking-[0.08em] text-white/80">
+          New Collection
+        </h4>
         <div className="mt-3 flex gap-2">
           <input
             type="text"
@@ -122,12 +130,12 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
             onChange={(event) => setNewCollectionName(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && handleCreate()}
             placeholder="Collection name"
-            className="flex-1 rounded-lg border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-700 focus:border-[color:var(--gush-border-strong)] focus:outline-none focus:ring-2 focus:ring-slate-200/80"
+            className="flex-1 rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]"
           />
           <button
             type="button"
             onClick={handleCreate}
-            className="rounded-lg bg-[color:var(--gush-ink-strong)] px-4 py-2 text-sm font-medium text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82"
+            className={`${storefrontPrimaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
           >
             Create
           </button>
@@ -135,7 +143,9 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-sm font-semibold text-slate-700">My Collections</h4>
+        <h4 className="text-sm font-black uppercase tracking-[0.08em] text-white/80">
+          My Collections
+        </h4>
         {collections.map((collection) => {
           const isDefault = [
             "default",
@@ -149,14 +159,14 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
           return (
             <div
               key={collection.id}
-              className="flex items-center gap-3 rounded-[20px] border border-[color:var(--gush-border)] bg-white p-3 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition-colors hover:border-[color:var(--gush-border-strong)]"
+              className="flex items-center gap-3 rounded-[20px] border-2 border-black bg-[#0b0b0b] p-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
             >
               {seriesId ? (
                 <input
                   type="checkbox"
                   checked={isInCollection}
                   onChange={() => handleToggleCollection(collection.id)}
-                  className="h-4 w-4 rounded border-black/10 bg-white text-slate-950 focus:ring-slate-200/80"
+                  className="h-4 w-4 rounded border-2 border-white/20 bg-black text-[#FFE500]"
                 />
               ) : null}
 
@@ -169,15 +179,15 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     onKeyDown={(event) =>
                       event.key === "Enter" && handleSaveEdit()
                     }
-                    className="w-full rounded-lg border border-[color:var(--gush-border)] bg-white px-2 py-1 text-sm text-slate-700 focus:border-[color:var(--gush-border-strong)] focus:outline-none focus:ring-2 focus:ring-slate-200/80"
+                    className="w-full rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]"
                     autoFocus
                   />
                 ) : (
                   <div>
-                    <div className="text-sm font-medium text-slate-900">
+                    <div className="text-sm font-black uppercase tracking-[-0.01em] text-white">
                       {collection.name}
                     </div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs font-semibold text-white/70">
                       {collection.seriesIds.length} series
                     </div>
                   </div>
@@ -190,14 +200,14 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     <button
                       type="button"
                       onClick={handleSaveEdit}
-                      className="rounded-lg bg-[color:var(--gush-ink-strong)] px-3 py-1 text-xs font-medium text-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] transition-colors hover:bg-black/82"
+                      className={`${storefrontPrimaryButtonClass} h-9 px-3 text-[11px] tracking-[0.08em]`}
                     >
                       Save
                     </button>
                     <button
                       type="button"
                       onClick={handleCancelEdit}
-                      className="rounded-lg border border-[color:var(--gush-border)] px-3 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-[color:var(--gush-page-bg-muted)]"
+                      className={`${storefrontSecondaryButtonClass} h-9 px-3 text-[11px] tracking-[0.08em]`}
                     >
                       Cancel
                     </button>
@@ -207,7 +217,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     <button
                       type="button"
                       onClick={() => handleStartEdit(collection)}
-                      className="rounded-lg border border-[color:var(--gush-border)] px-3 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-[color:var(--gush-page-bg-muted)]"
+                      className={`${storefrontSecondaryButtonClass} h-9 px-3 text-[11px] tracking-[0.08em]`}
                     >
                       Edit
                     </button>
@@ -215,7 +225,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                       <button
                         type="button"
                         onClick={() => handleDelete(collection.id)}
-                        className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50"
+                        className="h-9 rounded-full border-2 border-black bg-[#FF007A] px-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
                       >
                         Delete
                       </button>
@@ -228,7 +238,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
         })}
       </div>
 
-      <div className="rounded-xl border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] p-3 text-xs text-slate-500">
+      <div className="rounded-[22px] border-2 border-black bg-black p-3 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         Default collections like Favorites, Reading, Completed, and Wishlist can
         be renamed but not deleted.
       </div>

@@ -22,10 +22,10 @@ export const EPISODE_PRIMARY_STATE_META = {
     filterLabel: "Preview",
   },
   points: {
-    stateLabel: "Unlock with points",
+    stateLabel: "Points",
     stateTone: "points",
-    summaryLabel: "unlock with points",
-    filterLabel: "Unlock with points",
+    summaryLabel: "points",
+    filterLabel: "Points",
   },
   membership: {
     stateLabel: "Available",
@@ -79,7 +79,7 @@ function buildEpisodeAvailabilityExplainer(counts, hasCountdown) {
   }
 
   if (counts.points > 0 && counts.membership > 0) {
-    return "Some episodes unlock right away, and others use points.";
+    return "Some episodes open now, others use points.";
   }
 
   if (counts.membership > 0) {
@@ -123,7 +123,7 @@ function getEpisodeEntryLabel(firstState, counts, hasCountdown) {
   if (firstState.primaryState === "points") {
     return hasCountdown && counts.free === 0 && counts.preview === 0
       ? "Unlock now or wait"
-      : "Unlock with points";
+      : "Use points";
   }
 
   if (hasCountdown) {
@@ -147,7 +147,7 @@ function getEpisodeAvailabilityBadge(counts, hasCountdown) {
   }
 
   if (counts.points > 0) {
-    return "Point unlocks";
+    return "Points";
   }
 
   if (hasCountdown) {
@@ -307,7 +307,7 @@ export function getEpisodeAccessState({
   if (effectivePrice > 0) {
     return buildEpisodeAccessState("points", {
       kind: "points",
-      actionLabel: "Unlock with Points",
+      actionLabel: "Use Points",
       actionKind: "unlock",
       claimRequired: false,
       pricing,
@@ -341,7 +341,7 @@ export function getEpisodeAccessState({
   if (hasTtf && !isTtfReady) {
     return buildEpisodeAccessState("locked", {
       kind: "locked",
-      actionLabel: "Unlock Access",
+      actionLabel: "See Plans",
       actionKind: "subscribe",
       claimRequired: false,
       pricing,
@@ -369,7 +369,7 @@ export function getEpisodeAccessState({
     countdownMs,
     shortLabel: "Locked",
     helperText: "",
-    rowHelperText: "Unlock required.",
+    rowHelperText: "Locked right now.",
     supportLabel: "",
     supportTone: "muted",
   });
@@ -476,7 +476,7 @@ export function getSeriesPrimaryReadAction({
       label: "Continue Reading",
       episodeId: progressEpisode.id,
       actionKind: "read",
-      note: `Resume Episode ${progressEpisode.number}.`,
+      note: `Resume Chapter ${progressEpisode.number}.`,
     };
   }
 

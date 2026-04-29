@@ -18,11 +18,11 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   const toneMap = {
     neutral:
-      "rounded-[22px] border border-sky-200/70 bg-sky-50 text-black/70 shadow-[0_12px_24px_rgba(125,211,252,0.16)]",
+      "rounded-[22px] border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
     success:
-      "rounded-[22px] border border-emerald-200/70 bg-emerald-50 text-black/70 shadow-[0_12px_24px_rgba(16,185,129,0.12)]",
+      "rounded-[22px] border-2 border-black bg-[#00C767] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
     error:
-      "rounded-[22px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-black/70 shadow-[0_12px_24px_rgba(244,63,94,0.1)]",
+      "rounded-[22px] border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
   };
 
   return (
@@ -30,7 +30,7 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
       className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
     >
       {title ? (
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-black">
+        <p className="text-sm font-black uppercase tracking-[0.14em]">
           {title}
         </p>
       ) : null}
@@ -48,7 +48,7 @@ function VerifyPageContent() {
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
   const inputClassName =
-    "w-full rounded-[20px] border border-black/10 bg-white px-4 py-3 text-sm font-medium text-black outline-none shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-black/32 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)]";
+    "w-full rounded-[20px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]";
 
   useEffect(() => {
     const queryToken = String(searchParams.get("token") || "").trim();
@@ -156,15 +156,15 @@ function VerifyPageContent() {
     >
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-black/55">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
             Account confirmation
           </p>
-          <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
+          <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
             {hasToken
               ? "Verifying your email link"
               : "Send another email?"}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-black/68">
+          <p className="mt-3 text-sm leading-6 text-white/68">
             {hasToken ? "Checking your account." : "Enter your email."}
           </p>
         </div>
@@ -174,9 +174,9 @@ function VerifyPageContent() {
             <StorefrontInfoCard
               title="Link loaded"
               description=""
-              className="border-sky-200/70 bg-sky-50"
+              className="border-[#00E5FF]/50 bg-[#00E5FF]/12"
             />
-            <p className="text-sm font-semibold leading-6 text-black/68">
+            <p className="text-sm font-semibold leading-6 text-white/68">
               No code field required.
             </p>
             <button
@@ -226,19 +226,19 @@ function VerifyPageContent() {
           message={status?.message}
         />
 
-        <StorefrontInfoCard title="More" className="border-black/10 bg-[#f6f7f9]">
-          <p className="mt-3 text-sm leading-6 text-black/70">
+        <StorefrontInfoCard title="More">
+          <p className="mt-3 text-sm leading-6 text-white/70">
             Go to{" "}
             <Link
               href="/account"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
+              className="font-semibold text-[#00E5FF] underline decoration-[#00E5FF]/35 underline-offset-4 hover:text-[#7DF4FF]"
             >
               Account
             </Link>
             .{" "}
             <Link
               href="/support"
-              className="font-semibold text-black underline decoration-black/25 underline-offset-4 hover:text-black/68"
+              className="font-semibold text-[#FFE500] underline decoration-[#FFE500]/35 underline-offset-4 hover:text-[#FFF27A]"
             >
               Support
             </Link>
@@ -254,7 +254,7 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black" />
+        <div className="min-h-screen overflow-hidden bg-black text-white" />
       }
     >
       <VerifyPageContent />

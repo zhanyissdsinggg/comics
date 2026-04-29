@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import SurfacePanel from "../common/SurfacePanel";
 import { trackEvent } from "../../lib/trackEvent";
 import { buildDiscoveryContext } from "../../lib/discoveryContext";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 export default function SeriesArrivalPanel({
   series,
@@ -25,50 +29,50 @@ export default function SeriesArrivalPanel({
   return (
     <SurfacePanel
       className={`mt-8 space-y-5 ${className}`.trim()}
-      appearance="light"
-      accent="blue"
+      appearance="dark"
+      accent="cyan"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
-            From
+          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
+            Found in
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-black sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-white sm:text-3xl">
             {context.title}
           </h2>
         </div>
-        <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Back
+        <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Back to
           </p>
-          <p className="mt-3 text-sm font-black uppercase tracking-[0.03em] text-black">
+          <p className="mt-3 text-sm font-black uppercase tracking-[0.03em] text-white">
             {context.returnTitle}
           </p>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-[22px] border border-black/10 bg-white px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            From
+        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Source
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-black">
+          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
             {context.sourceLabel}
           </p>
         </div>
-        <div className="rounded-[22px] border border-black/10 bg-[#f6f7fb] px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Lane
+        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Row
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-black">
+          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
             {context.laneValue}
           </p>
         </div>
-        <div className="rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Next
+        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Back to
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-black">
+          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
             {context.returnTitle}
           </p>
         </div>
@@ -86,7 +90,7 @@ export default function SeriesArrivalPanel({
             });
             router.push(context.sourcePath);
           }}
-          className="rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+          className={storefrontPrimaryButtonClass}
         >
           {context.returnLabel}
         </button>
@@ -101,7 +105,7 @@ export default function SeriesArrivalPanel({
               });
               router.push(creatorHref);
             }}
-            className="rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
+            className={storefrontSecondaryButtonClass}
           >
             Creator
           </button>
@@ -109,9 +113,9 @@ export default function SeriesArrivalPanel({
         <button
           type="button"
           onClick={() => router.push("/rankings?view=featured")}
-            className="rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
+          className={storefrontSecondaryButtonClass}
         >
-          Popular
+          Trending
         </button>
       </div>
     </SurfacePanel>

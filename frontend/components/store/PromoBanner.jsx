@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import useCountdown from "../../hooks/useCountdown";
 import Pill from "../common/Pill";
+import SurfacePanel from "../common/SurfacePanel";
 
 function getPromoCopy(promotion, offer) {
   if (promotion?.type === "FIRST_PURCHASE") {
@@ -10,7 +11,7 @@ function getPromoCopy(promotion, offer) {
       tag: "First top up",
       title: promotion.title || "Starter Double Bonus",
       description:
-        promotion.description || "Double bonus points for your first purchase.",
+        promotion.description || "Extra points on your first top up.",
     };
   }
   if (promotion?.type === "RETURNING") {
@@ -19,7 +20,7 @@ function getPromoCopy(promotion, offer) {
       title: promotion.title || "Returning Reward",
       description:
         promotion.description ||
-        "Claim your welcome back bonus and keep reading.",
+        "Extra points when you come back.",
     };
   }
   if (promotion?.type === "HOLIDAY") {
@@ -27,13 +28,13 @@ function getPromoCopy(promotion, offer) {
       tag: "Limited",
       title: promotion.title || "Holiday Deal",
       description:
-        promotion.description || "Limited-time discount for your next unlock.",
+        promotion.description || "Limited-time discount on your next chapter.",
     };
   }
   return {
     tag: "Promo",
     title: offer?.title || "Starter Double Bonus",
-    description: "Limited-time bonus points available.",
+    description: "Extra points for a limited time.",
   };
 }
 
@@ -52,7 +53,7 @@ export default function PromoBanner({ offer, promotion }) {
   const badge = promotion?.coupon?.label || offer?.tag || copy.tag;
 
   return (
-    <section className="rounded-[30px] border border-black/10 bg-white p-6 text-black shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+    <SurfacePanel tone="muted" accent="pink" appearance="dark" className="p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2">
@@ -61,25 +62,25 @@ export default function PromoBanner({ offer, promotion }) {
             </Pill>
             <Pill appearance="light">{badge}</Pill>
           </div>
-          <h2 className="mt-4 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black">
+          <h2 className="mt-4 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white">
             {copy.title}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-black/68">
+          <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/80">
             {copy.description}
           </p>
         </div>
-        <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-5 py-4 text-left text-black shadow-[0_18px_44px_rgba(15,23,42,0.08)] lg:min-w-[220px]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] px-5 py-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] lg:min-w-[220px]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/65">
             Ends in
           </p>
-          <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.04em] text-black">
+          <p className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.04em] text-white">
             {formatted || "--:--:--"}
           </p>
-          <p className="mt-2 text-sm font-semibold text-black/68">
-            Best if you already know you are topping up today.
+          <p className="mt-2 text-sm font-semibold text-white/75">
+            Good if you already know you're topping up today.
           </p>
         </div>
       </div>
-    </section>
+    </SurfacePanel>
   );
 }

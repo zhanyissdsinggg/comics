@@ -39,39 +39,39 @@ function getStatusAnswer(seriesTitle, statusLabel) {
 
 function getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages) {
   if (freeEpisodeCount > 0 && maxPreviewPages > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} and previews up to ${maxPreviewPages} pages on eligible chapters.`;
+    return `${seriesTitle} currently has ${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"} and previews up to ${maxPreviewPages} pages on select chapters.`;
   }
 
   if (freeEpisodeCount > 0) {
-    return `${seriesTitle} currently offers ${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"}.`;
+    return `${seriesTitle} currently has ${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"}.`;
   }
 
   if (maxPreviewPages > 0) {
-    return `${seriesTitle} currently offers previews up to ${maxPreviewPages} pages on eligible chapters.`;
+    return `${seriesTitle} currently has previews up to ${maxPreviewPages} pages on select chapters.`;
   }
 
-  return `${seriesTitle} does not currently offer a free start. Check the episode list and current unlock options before you buy.`;
+  return `${seriesTitle} does not have a free start right now. Check the chapter list before you buy.`;
 }
 
 export function getSiteFaqItems() {
   return [
     {
       id: "unlock-episodes",
-      question: "How do I unlock episodes?",
+      question: "How do I unlock chapters?",
       answer:
-        "Use points to unlock an episode. Some series also offer free access.",
+        "Use points to unlock a chapter. Some series also start free.",
     },
     {
       id: "cancel-membership",
-      question: "How do I cancel my membership?",
+      question: "How do I cancel my plan?",
       answer:
-        "Open Account, find your membership, and cancel it there.",
+        "Go to Account, find your plan, and cancel it there.",
     },
     {
       id: "view-orders",
       question: "Where do I see what I bought?",
       answer:
-        "Open Purchases to see recent packs, memberships, and any order ID you might need.",
+        "Go to Orders to see recent purchases and any order ID you need.",
     },
     {
       id: "adult-access",
@@ -121,16 +121,16 @@ export function getSeriesFaqItems({ series, episodes }) {
     },
     {
       id: "series-episodes",
-      question: `How much content is already available for ${seriesTitle}?`,
+      question: `How much is out for ${seriesTitle}?`,
       answer:
         episodeCount > 0
-          ? `${seriesTitle} currently shows ${episodeCount} episode${episodeCount === 1 ? "" : "s"}${leadGenre ? `, with ${leadGenre} as the lead genre` : ""}.`
-          : `${seriesTitle} is live on the site, and the episode list shows what is currently available.`,
+          ? `${seriesTitle} currently has ${episodeCount} chapter${episodeCount === 1 ? "" : "s"}${leadGenre ? `, with ${leadGenre} up front` : ""}.`
+          : `${seriesTitle} is live now, and the chapter list shows what is available.`,
     },
     {
       id: "series-support",
-      question: `Where do I go if I hit a billing or access issue with ${seriesTitle}?`,
-      answer: `Check Purchases for the order details, then use Contact or email ${siteConfig.supportEmail}.`,
+      question: `What if I hit a billing or access issue with ${seriesTitle}?`,
+      answer: `Check Orders for the details, then use Contact or email ${siteConfig.supportEmail}.`,
     },
   ];
 }

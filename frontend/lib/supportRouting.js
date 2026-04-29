@@ -5,7 +5,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Billing & receipts",
     subject: "Billing issue",
     description: "Wrong charge, missing points, duplicate payment, receipts, renewals, or taxes that look off.",
-    draft: "What happened? Include the charge, receipt, or order details.",
+    draft: "What happened? Add the charge, receipt, or order details.",
   },
   login: {
     id: "login",
@@ -13,15 +13,15 @@ const SUPPORT_TOPIC_MAP = {
     title: "Login & account access",
     subject: "Login help",
     description: "Email verification, password reset, sign-in trouble, account recovery, or sync issues.",
-    draft: "What part of sign-in or account access is failing?",
+    draft: "What part of sign-in is not working?",
   },
   subscription: {
     id: "subscription",
-    label: "Subscription",
-    title: "Membership & subscription",
-    subject: "Membership help",
-    description: "Membership charges, plan changes, renewals, perks, or access that looks wrong.",
-    draft: "Which plan or renewal is affected, and what looks wrong?",
+    label: "Plan",
+    title: "Plan & billing",
+    subject: "Plan help",
+    description: "Plan charges, renewals, changes, or access that looks off.",
+    draft: "Which plan or renewal is affected?",
   },
   technical: {
     id: "technical",
@@ -29,7 +29,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Technical & reader issue",
     subject: "Technical issue",
     description: "Broken reader pages, missing chapters, progress problems, playback failures, or pages that will not load.",
-    draft: "Which title or chapter broke, and what happened when you opened it?",
+    draft: "Which title or chapter broke?",
   },
   adult: {
     id: "adult",
@@ -45,7 +45,7 @@ const SUPPORT_TOPIC_MAP = {
     title: "Content report",
     subject: "Content report",
     description: "Cover issues, translation quality, metadata mistakes, title reports, or creator-credit problems.",
-    draft: "Which title or creator page needs review, and what looks wrong?",
+    draft: "Which title or creator page needs review?",
   },
 };
 

@@ -61,7 +61,7 @@ export default function ReaderDrawer({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Reader contents"
+        aria-label="Reader chapters"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
@@ -71,11 +71,11 @@ export default function ReaderDrawer({
               aria-pressed={tab === "toc"}
               className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "toc"
-                  ? "border border-white/15 bg-white text-black shadow-[0_10px_20px_rgba(255,255,255,0.08)]"
-                  : "border border-white/15 bg-white/8 text-neutral-300 hover:bg-white/14"
+                  ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-white/15 bg-black text-neutral-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#111111]"
               }`}
             >
-              Contents
+              Chapters
             </button>
             <button
               type="button"
@@ -83,8 +83,8 @@ export default function ReaderDrawer({
               aria-pressed={tab === "bookmarks"}
               className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "bookmarks"
-                  ? "border border-white/15 bg-white text-black shadow-[0_10px_20px_rgba(255,255,255,0.08)]"
-                  : "border border-white/15 bg-white/8 text-neutral-300 hover:bg-white/14"
+                  ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-white/15 bg-black text-neutral-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#111111]"
               }`}
             >
               Bookmarks
@@ -93,22 +93,22 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/14 hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)] active:translate-y-px"
+            className="rounded-full border-2 border-white/15 bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[#111111] active:translate-y-px"
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 rounded-[22px] border border-white/12 bg-white/8 p-3 text-xs text-neutral-300 backdrop-blur-sm">
+          <div className="mt-4 rounded-[22px] border-2 border-white/12 bg-black p-3 text-xs text-neutral-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center justify-between gap-3">
-              <span>Plans add free reads.</span>
+              <span>Plans can unlock free reads.</span>
               <button
                 type="button"
                 onClick={() => {
                   trackEvent("click_subscribe_from_toc", { seriesId: currentSeriesId });
                   onSubscribe();
                 }}
-                className="rounded-full border border-white/18 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_18px_rgba(255,255,255,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/92 hover:shadow-[0_12px_20px_rgba(255,255,255,0.1)] active:translate-y-px"
+                className="rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] active:translate-y-px"
               >
                 Plans
               </button>
@@ -123,9 +123,9 @@ export default function ReaderDrawer({
               const isCurrentEpisode = episode.id === currentEpisodeId;
               const unlocked = unlockedIds.includes(episode.id);
               const helperLabel = isCurrentEpisode
-                ? "Now reading"
+                ? "Current"
                 : unlocked
-                  ? "Open"
+                  ? "Ready"
                   : "Locked";
               return (
                 <button
@@ -136,18 +136,18 @@ export default function ReaderDrawer({
                       onSelectEpisode(episode.id);
                     }
                   }}
-                  className="w-full rounded-[22px] border border-white/12 bg-white/8 px-3 py-2 text-left text-sm text-neutral-200 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/14 hover:shadow-[0_10px_20px_rgba(0,0,0,0.2)]"
+                  className="w-full rounded-[22px] border-2 border-white/12 bg-black px-3 py-2 text-left text-sm text-neutral-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[#111111]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold">
-                        Ep {episode.number} {episode.title}
+                        Ch {episode.number} {episode.title}
                       </div>
                       <div className="text-xs text-neutral-400">
                         {helperLabel}
                       </div>
                     </div>
-                    {isCurrentEpisode ? <Pill>Reading</Pill> : unlocked ? <Pill>Unlocked</Pill> : <Pill>Locked</Pill>}
+                    {isCurrentEpisode ? <Pill>Reading</Pill> : unlocked ? <Pill>Ready</Pill> : <Pill>Locked</Pill>}
                   </div>
                 </button>
               );
@@ -156,20 +156,20 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
             {bookmarks.length === 0 ? (
-              <div className="rounded-[22px] border border-white/12 bg-white/8 p-4 backdrop-blur-sm">
+              <div className="rounded-[22px] border-2 border-white/12 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                 <div className="text-sm font-black uppercase tracking-[0.04em] text-neutral-100">No bookmarks yet.</div>
               </div>
             ) : (
               bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="rounded-[22px] border border-white/12 bg-white/8 px-3 py-2 text-sm text-neutral-200 backdrop-blur-sm"
+                  className="rounded-[22px] border-2 border-white/12 bg-black px-3 py-2 text-sm text-neutral-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold">{bookmark.label}</div>
                       <div className="text-xs text-neutral-400">
-                        Ep {bookmark.episodeId} - {formatPercent(bookmark.percent)}
+                        Ch {bookmark.episodeId} - {formatPercent(bookmark.percent)}
                       </div>
                     </div>
                     <button
@@ -183,9 +183,9 @@ export default function ReaderDrawer({
                   <button
                     type="button"
                     onClick={() => onGoBookmark(bookmark)}
-                    className="mt-2 w-full rounded-full border border-white/18 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-black shadow-[0_10px_18px_rgba(255,255,255,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/92 hover:shadow-[0_12px_20px_rgba(255,255,255,0.1)] active:translate-y-px"
+                    className="mt-2 w-full rounded-full border-2 border-white/20 bg-black px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] active:translate-y-px"
                   >
-                    Go
+                    Go there
                   </button>
                 </div>
               ))

@@ -9,7 +9,7 @@ import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 
 function getSeriesBadge(item) {
   if (String(item?.status || "").toLowerCase() === "completed") {
-    return "Completed";
+    return "Finished";
   }
 
   const updatedAtMs = Date.parse(item?.updatedAt || 0);
@@ -22,7 +22,7 @@ function getSeriesBadge(item) {
 
   const episodeCount = Math.max(0, Number(item?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "First picks";
+    return "Top Pick";
   }
 
   return "";
@@ -35,18 +35,18 @@ export default function SimilarSeriesSection({ seriesId }) {
     error,
   } = useSimilarRecommendations(seriesId, 6);
   const cardClass =
-    "group overflow-hidden rounded-[28px] border border-black/10 bg-white text-left shadow-[0_24px_60px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-black/15 hover:bg-black/[0.02]";
+    "group overflow-hidden rounded-[28px] border-[3px] border-white/20 bg-black text-left shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
   const chipClass =
-    "rounded-full border border-black/10 bg-[#f8f9fb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/60";
+    "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
 
   if (loading) {
     return (
-      <SurfacePanel className="mt-8 space-y-4" appearance="light" accent="blue">
+      <SurfacePanel className="mt-8 space-y-4" appearance="dark" accent="cyan">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
             More stories
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white">
             More to try.
           </h2>
         </div>
@@ -67,13 +67,13 @@ export default function SimilarSeriesSection({ seriesId }) {
   }
 
   return (
-    <SurfacePanel className="mt-8 space-y-5" appearance="light" accent="blue">
+    <SurfacePanel className="mt-8 space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
             More stories
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black">
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white">
             More to try.
           </h2>
         </div>
@@ -92,7 +92,7 @@ export default function SimilarSeriesSection({ seriesId }) {
                 cardClass,
                 isLeadCard ? "md:col-span-2 xl:col-span-4" : "xl:col-span-2",
               ].join(" ")}
-              aria-label={`Open ${item.title}`}
+              aria-label={`View ${item.title}`}
             >
               <Cover
                 tone={item.coverTone}
@@ -104,13 +104,13 @@ export default function SimilarSeriesSection({ seriesId }) {
                   isLeadCard ? "aspect-[1.2/1] w-full" : "aspect-[3/4] w-full"
                 }
               />
-              <div className="space-y-2 border-t border-black/10 p-4">
+              <div className="space-y-2 border-t-[3px] border-white/15 p-4">
                 <h3
-                  className={`line-clamp-2 font-black uppercase tracking-[0.03em] text-black ${isLeadCard ? "text-base" : "text-sm"}`}
+                  className={`line-clamp-2 font-black uppercase tracking-[0.03em] text-white ${isLeadCard ? "text-base" : "text-sm"}`}
                 >
                   {item.title}
                 </h3>
-                <p className="line-clamp-1 text-xs font-medium uppercase tracking-[0.12em] text-black/45">
+                <p className="line-clamp-1 text-xs font-medium uppercase tracking-[0.12em] text-white/45">
                   {creatorName || item.subtitle || "Series"}
                 </p>
                 {Array.isArray(item.genres) && item.genres.length > 0 ? (
@@ -123,8 +123,8 @@ export default function SimilarSeriesSection({ seriesId }) {
                   </div>
                 ) : null}
                 {isLeadCard ? (
-                  <p className="pt-1 text-xs font-black uppercase tracking-[0.22em] text-black/45">
-                    Read
+                  <p className="pt-1 text-xs font-black uppercase tracking-[0.22em] text-white/45">
+                    Read now
                   </p>
                 ) : null}
               </div>

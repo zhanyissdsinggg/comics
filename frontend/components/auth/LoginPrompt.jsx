@@ -77,21 +77,21 @@ const LoginPrompt = memo(function LoginPrompt({
     >
       <div
         onClick={handleContentClick}
-        className={`relative w-full overflow-hidden rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_28px_60px_rgba(15,23,42,0.18)] transition-all duration-300 sm:max-w-md ${
+        className={`relative w-full overflow-hidden rounded-[30px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 sm:max-w-md ${
           isAnimating
             ? "translate-y-0 opacity-100 scale-100"
             : "translate-y-full sm:translate-y-0 opacity-0 sm:scale-95"
         }`}
       >
-        <div className="border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-6 py-5">
+        <div className="border-b-2 border-white/10 bg-black/80 px-6 py-5">
         <div className="flex justify-center pb-2 sm:hidden">
-          <div className="h-1.5 w-12 rounded-full bg-black/12" />
+          <div className="h-1.5 w-12 rounded-full bg-white/15" />
         </div>
 
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/10 bg-white p-2 text-black/60 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
+          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black/70 p-2 text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:text-white active:translate-y-px"
           aria-label="Close sign-in prompt"
         >
           <X size={20} />
@@ -99,11 +99,11 @@ const LoginPrompt = memo(function LoginPrompt({
 
           <div className="relative text-center">
             {eyebrow ? (
-              <p className="mb-3 inline-flex rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-black/55">
+              <p className="mb-3 inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                 {eyebrow}
               </p>
             ) : null}
-            <h2 className="text-3xl font-semibold leading-none tracking-[-0.06em] text-black sm:text-4xl">
+            <h2 className="text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-4xl">
               {title}
             </h2>
           </div>
@@ -112,7 +112,9 @@ const LoginPrompt = memo(function LoginPrompt({
         <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             {message ? (
-              <p className="text-sm leading-7 text-black/68">{message}</p>
+              <p className="text-sm font-semibold leading-7 text-white/80">
+                {message}
+              </p>
             ) : null}
           </div>
 
@@ -123,12 +125,12 @@ const LoginPrompt = memo(function LoginPrompt({
                 return (
                   <div
                     key={index}
-                    className="flex items-center gap-3 rounded-[22px] border border-black/10 bg-[#f6f7f9] p-3.5 shadow-[0_12px_24px_rgba(15,23,42,0.08)]"
+                    className="flex items-center gap-3 rounded-[22px] border-2 border-white/15 bg-[#0a0a0a] p-3.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-black/10 bg-white text-black">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                       <Icon size={20} />
                     </div>
-                    <p className="text-sm font-medium text-black/68">
+                    <p className="text-sm font-semibold text-white/80">
                       {feature.text}
                     </p>
                   </div>

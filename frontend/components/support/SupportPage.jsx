@@ -92,7 +92,7 @@ export default function SupportPage() {
       label: "Billing",
       topic: "billing",
       subject: "Billing issue",
-      context: "Charge, refund, receipt, or point-pack issue.",
+      context: "Charge, refund, receipt, or points issue.",
     },
     {
       id: "login",
@@ -103,24 +103,24 @@ export default function SupportPage() {
     },
     {
       id: "subscription",
-      label: "Subscription",
+      label: "Plan",
       topic: "subscription",
-      subject: "Membership help",
-      context: "Membership charge, renewal, or access.",
+      subject: "Plan help",
+      context: "Plan charge, renewal, or access issue.",
     },
     {
       id: "content",
       label: "Content issue",
       topic: "content",
       subject: "Content report",
-      context: "Title, chapter, cover, or metadata issue.",
+      context: "Title, chapter, cover, or metadata problem.",
     },
     {
       id: "technical",
       label: "Technical issue",
       topic: "technical",
       subject: "Technical issue",
-      context: "Broken page, reader, or purchase screen.",
+      context: "Broken page, reader, or checkout.",
     },
   ];
 
@@ -277,13 +277,13 @@ export default function SupportPage() {
 
       setFeedback({
         type: "error",
-        text: response.error || "Could not send your request.",
+        text: response.error || "Couldn't send that.",
         mode: "network",
       });
     } catch {
       setFeedback({
         type: "error",
-        text: "Could not send your request.",
+        text: "Couldn't send that.",
         mode: "network",
       });
     } finally {
@@ -306,7 +306,7 @@ export default function SupportPage() {
     if (!trimmedEmail) {
       setFeedback({
         type: "error",
-        text: "Add the best reply email so we know where to answer.",
+        text: "Add an email.",
         mode: "inline",
       });
       return;
@@ -315,7 +315,7 @@ export default function SupportPage() {
     if (!isValidEmail(trimmedEmail)) {
       setFeedback({
         type: "error",
-        text: "Enter a valid reply email address.",
+        text: "Enter a valid email.",
         mode: "inline",
       });
       return;
@@ -324,7 +324,7 @@ export default function SupportPage() {
     if (!trimmedSubject || !trimmedMessage) {
       setFeedback({
         type: "error",
-        text: "Add a subject and a message.",
+        text: "Add a subject and message.",
         mode: "inline",
       });
       return;
@@ -354,9 +354,9 @@ export default function SupportPage() {
   };
 
   const fieldLabelClass =
-    "text-[11px] font-black uppercase tracking-[0.28em] text-black/55";
+    "text-[11px] font-black uppercase tracking-[0.28em] text-white/60";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-black/10 bg-white px-4 py-3.5 text-sm font-semibold text-black outline-none shadow-[0_12px_28px_rgba(15,23,42,0.06)] transition-all placeholder:text-black/40 focus:border-black/14 focus:ring-4 focus:ring-black/5";
+    "mt-2 w-full rounded-[22px] border-2 border-white/15 bg-black px-4 py-3.5 text-sm font-semibold text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 placeholder:text-white/35 focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15";
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const supportHeroStats = [
     {
@@ -379,14 +379,14 @@ export default function SupportPage() {
             title="Support."
             description=""
             stats={supportHeroStats}
-            appearance="light"
+            appearance="dark"
             accent="blue"
           />
 
           <StorefrontDesk
             eyebrow="Topics"
-            title="Topics."
-            className="border-black/10 bg-white/92"
+            title="Pick a topic."
+            className="border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
           >
             <div className="grid gap-2.5 sm:grid-cols-2">
               {quickIssueCards.map((item) => {
@@ -411,10 +411,10 @@ export default function SupportPage() {
                       setSuccessState(null);
                     }}
                     className={[
-                      "rounded-[24px] border border-black/10 px-4 py-3 text-left transition-all",
+                      "rounded-[24px] border-2 px-4 py-3 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5",
                       isActive
-                        ? "bg-[#f6f7f9] text-black shadow-[0_18px_40px_rgba(15,23,42,0.12)] ring-1 ring-black/8"
-                        : "bg-white text-black shadow-[0_12px_28px_rgba(15,23,42,0.08)] hover:border-black/15 hover:bg-black/[0.03]",
+                        ? "border-white/20 bg-[#FFE500] text-black"
+                        : "border-white/15 bg-black text-white hover:border-white/25",
                     ].join(" ")}
                   >
                     <p className="text-sm font-semibold">{item.label}</p>
@@ -434,21 +434,21 @@ export default function SupportPage() {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel
-            className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-            appearance="light"
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
             accent="blue"
           >
             {successState ? (
               <div className="space-y-4">
-                <div className="rounded-[28px] border border-black/10 bg-[#f6f7f9] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
-                    Request received
+                <div className="rounded-[28px] border-2 border-white/15 bg-black p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
+                    Support
                   </p>
-                  <h2 className="mt-3 text-[2.4rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-black">
-                    Request sent.
+                  <h2 className="mt-3 text-[2.4rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
+                    Sent
                   </h2>
-                  <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-black/68">
-                    <span className="font-black text-black">
+                  <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-white/70">
+                    <span className="font-black text-white">
                       {successState.replyEmail}
                     </span>
                   </p>
@@ -480,7 +480,7 @@ export default function SupportPage() {
               </div>
             ) : (
               <form className="space-y-5" onSubmit={handleSubmit}>
-                <StorefrontSectionHeading eyebrow="Form" title="Send a request." />
+            <StorefrontSectionHeading eyebrow="Support" title="Send" />
 
                 {feedback.text ? (
                   feedback.type === "error" && feedback.mode === "network" ? (
@@ -488,18 +488,18 @@ export default function SupportPage() {
                       compact
                       showIllustration={false}
                       className="px-0 py-0"
-                      cardClassName="max-w-none rounded-[24px] border border-black/10 px-4 py-4 shadow-[0_16px_36px_rgba(15,23,42,0.08)] sm:px-5 sm:py-5"
-                      title="Support hit a network snag."
+                      cardClassName="max-w-none rounded-[24px] border-2 border-white/15 px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5 sm:py-5"
+                      title="Network error."
                       description={feedback.text}
                       onRetry={retrySupportRequest}
                     />
                   ) : (
                     <div
                       className={[
-                        "rounded-[22px] border px-4 py-3 text-sm shadow-[0_14px_32px_rgba(15,23,42,0.08)]",
+                        "rounded-[22px] border-2 px-4 py-3 text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
                         feedback.type === "success"
-                          ? "border-black/10 bg-[#f6f7f9] font-semibold text-black"
-                          : "border-[#f0b7c8] bg-[#fff3f6] font-semibold text-[#8f003f]",
+                          ? "border-white/15 bg-black font-semibold text-white"
+                          : "border-[#FF007A] bg-black font-semibold text-[#FF007A]",
                       ].join(" ")}
                     >
                       {feedback.text}
@@ -524,7 +524,7 @@ export default function SupportPage() {
                       }}
                       className={fieldClass}
                     >
-                      <option value="">Pick a topic</option>
+                      <option value="">Choose a topic</option>
                       {SUPPORT_TOPICS.map((preset) => (
                         <option key={preset.id} value={preset.id}>
                           {preset.title}
@@ -594,7 +594,7 @@ export default function SupportPage() {
                     rows={7}
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
-                    placeholder="What happened? Add any page, title, episode, or order ID."
+                    placeholder="What happened? Add the page, title, chapter, or order ID."
                     className={fieldClass}
                   />
                 </div>
@@ -605,7 +605,7 @@ export default function SupportPage() {
                     disabled={submitting}
                     className={primaryButtonClass}
                   >
-                    {submitting ? "Sending..." : "Send Request"}
+                    {submitting ? "Sending..." : "Send"}
                   </button>
                   {!signedInReader ? (
                     <button
@@ -626,19 +626,19 @@ export default function SupportPage() {
           </SurfacePanel>
 
           <SurfacePanel
-            className="space-y-5 border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-            appearance="light"
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
             accent="blue"
           >
-            <StorefrontSectionHeading eyebrow="Contact" title="Contact." />
+            <StorefrontSectionHeading eyebrow="Contact" title="Contact" />
 
             <StorefrontInfoCard
               title="Email"
               eyebrow="Desk"
-              className="border border-black/10 bg-[#f6f7f9]"
+              className="border-2 border-white/15 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
-              <p className="mt-3 text-sm font-medium leading-6 text-black/68">
-                <span className="font-black text-black">
+              <p className="mt-3 text-sm font-medium leading-6 text-white/70">
+                <span className="font-black text-white">
                   {siteConfig.supportEmail}
                 </span>
               </p>

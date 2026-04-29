@@ -37,15 +37,15 @@ export default function LoginGateModal({
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
   const inputClass =
-    "w-full rounded-[20px] border-2 border-black bg-white px-4 py-3 text-sm font-medium text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] placeholder:text-black/40 transition-all duration-150 focus:border-[#FFE500] focus:outline-none";
+    "w-full rounded-[20px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-medium text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] placeholder:text-white/35 transition-all duration-150 focus:border-[#FFE500] focus:outline-none";
   const secondaryPillClass =
-    "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
+    "rounded-full border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
   const secondaryButtonClass =
-    "rounded-full border-2 border-black bg-white px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
+    "rounded-full border-2 border-white/20 bg-black px-6 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
   const activePillClass =
     "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const dividerClass =
-    "h-px flex-1 bg-black/10";
+    "h-px flex-1 bg-[#111111]";
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
 
@@ -177,7 +177,7 @@ export default function LoginGateModal({
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
         {description ? (
-          <p className="rounded-[22px] border border-sky-200/70 bg-sky-50 px-4 py-3 text-sm font-medium leading-6 text-black/72 shadow-[0_12px_24px_rgba(125,211,252,0.16)]">
+          <p className="rounded-[22px] border-2 border-[#00E5FF] bg-black px-4 py-3 text-sm font-medium leading-6 text-white/78 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             {description}
           </p>
         ) : null}
@@ -236,7 +236,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-[20px] border border-black/10 bg-white px-3 py-3 text-sm font-medium text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow,background-color] duration-200 focus:border-black/18 focus:bg-[#fcfcfd] focus:shadow-[0_12px_28px_rgba(15,23,42,0.1)] focus:outline-none"
+                    className="rounded-[20px] border-2 border-white/20 bg-black px-3 py-3 text-sm font-medium text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[border-color,box-shadow,background-color] duration-200 focus:border-[#FFE500] focus:bg-black focus:outline-none"
                   >
                     {(
                       config?.countryCodes || [
@@ -276,7 +276,7 @@ export default function LoginGateModal({
 
           {step !== "otp" && googleAuthEnabled ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.08em] text-black/40">
+              <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.08em] text-white/40">
                 <div className={dividerClass} />
                 <span>or</span>
                 <div className={dividerClass} />
@@ -291,24 +291,24 @@ export default function LoginGateModal({
         </div>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-[20px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-4 py-2 text-xs font-semibold text-black shadow-[0_12px_24px_rgba(244,63,94,0.1)]">
+          <p className="mt-4 rounded-[20px] border-2 border-[#FF007A] bg-black px-4 py-2 text-xs font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             {errorMessage}
           </p>
         ) : null}
 
         {socialError ? (
-          <p className="mt-4 rounded-[20px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-4 py-2 text-xs font-semibold text-black shadow-[0_12px_24px_rgba(244,63,94,0.1)]">
+          <p className="mt-4 rounded-[20px] border-2 border-[#FF007A] bg-black px-4 py-2 text-xs font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             {socialError}
           </p>
         ) : null}
 
         {step === "otp" ? (
-          <div className="mt-3 text-xs font-medium text-black/55">
+          <div className="mt-3 text-xs font-medium text-white/60">
             {otpStatus}
             <button
               type="button"
               onClick={handleResendOtp}
-              className="ml-2 font-semibold uppercase tracking-[0.08em] text-black transition-colors duration-200 hover:text-black/68"
+              className="ml-2 font-semibold uppercase tracking-[0.08em] text-[#FFE500] transition-colors duration-200 hover:text-[#fff173]"
             >
               Resend
             </button>
@@ -346,19 +346,19 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-              className="font-black uppercase tracking-[0.06em] text-black/55 transition-colors duration-300 hover:text-black"
+              className="font-black uppercase tracking-[0.06em] text-white/55 transition-colors duration-300 hover:text-white"
           >
             Forgot password?
           </button>
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-[20px] border border-sky-200/70 bg-sky-50 px-4 py-2 text-xs font-semibold text-black/72 shadow-[0_12px_24px_rgba(125,211,252,0.16)]">
+          <div className="mt-3 rounded-[20px] border-2 border-[#00E5FF] bg-black px-4 py-2 text-xs font-semibold text-white/78 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             {resetStatus}
           </div>
         ) : null}
 
-        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-black/40">
+        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
           Need email verification? Use the link in your inbox.
         </p>
 

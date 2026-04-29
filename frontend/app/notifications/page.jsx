@@ -3,7 +3,7 @@ import NotificationsPageClient from "./NotificationsPageClient";
 
 export const metadata = createPageMetadata({
   title: "Notifications",
-  description: "Review episode alerts, promotions, and voucher messages from one clean inbox.",
+  description: "Review chapter alerts, promotions, and voucher messages from one clean inbox.",
   path: "/notifications",
   robots: {
     index: false,

@@ -24,7 +24,7 @@ export default function FilterBar({
   const [showAllGenres, setShowAllGenres] = useState(false);
   const [showGenrePicker, setShowGenrePicker] = useState(false);
   const genreMenuRef = useRef(null);
-  const isLight = appearance === "light" || appearance === "default";
+  const isLight = appearance === "light";
   const isQuiet = density === "quiet";
 
   const sortOptions = [
@@ -35,7 +35,7 @@ export default function FilterBar({
   const statusOptions = [
     { id: "all", label: "All" },
     { id: "ongoing", label: "Ongoing" },
-    { id: "completed", label: "Completed" },
+    { id: "completed", label: "Finished" },
   ];
 
   const displayedGenres = showAllGenres
@@ -98,13 +98,13 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "rounded-[22px] border-2 border-black bg-white px-3 py-2.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-      : "rounded-[26px] border-2 border-black bg-white px-4 py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      ? "rounded-[22px] border-2 border-black bg-[#080808] px-3 py-2.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      : "rounded-[26px] border-2 border-black bg-[#080808] px-4 py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
     : "rounded-[24px] border-2 border-white/20 bg-black/30 px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
-  const labelClass = isLight ? "text-black/60" : "text-white/70";
+  const labelClass = isLight ? "text-white/70" : "text-white/70";
   const subtleButtonClass = isLight
-    ? "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
-    : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white/10";
+    ? "rounded-full border-2 border-black bg-[#080808] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+    : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111]";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
     isQuiet ? "text-[10px] tracking-[0.18em]" : "text-[11px] tracking-[0.24em]",
@@ -134,7 +134,7 @@ export default function FilterBar({
                     "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
                       ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                      : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                      : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
                   )}
                 >
                   {activeFilterCount} active
@@ -147,7 +147,7 @@ export default function FilterBar({
                 "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
                   ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
               )}
             >
               {activeFilterCount} active
@@ -166,8 +166,8 @@ export default function FilterBar({
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
-                  : "border-2 border-white/20 bg-white/[0.06] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white/10"
+                  ? "rounded-full border-2 border-black bg-[#080808] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]"
               }`}
             >
               <RotateCcw size={14} />
@@ -248,10 +248,10 @@ export default function FilterBar({
                     className={cn(
                       "inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-semibold transition-colors",
                       subtleButtonClass,
-                      (showGenrePicker || selectedGenre !== "all") &&
+                        (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-black/12 bg-[#f6f7f9] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
-                          : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"),
+                          ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                          : "border-2 border-[#FFE500] bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"),
                     )}
                   >
                     <span>Genres</span>
@@ -278,9 +278,9 @@ export default function FilterBar({
                   <div
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
-                      isLight
-                        ? "rounded-[22px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                        : "border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+                        isLight
+                          ? "rounded-[22px] border-2 border-black bg-[#080808] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                          : "rounded-[22px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
                     )}
                   >
                     <div className="flex flex-wrap gap-2">

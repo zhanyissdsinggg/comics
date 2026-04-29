@@ -18,28 +18,27 @@ export function getStorefrontCampaign(series) {
     return {
       id: "free-start",
       eyebrow: STOREFRONT_TERMS.freeStart,
-      title: "Easy to try before you spend.",
+      title: "Easy to try first.",
       description:
         freeEpisodeCount > 0
-          ? `${freeEpisodeCount} free episode${
+          ? `${freeEpisodeCount} free chapter${
               freeEpisodeCount === 1 ? "" : "s"
-            } give new readers a simple way to try the story before unlocking more.`
-          : "This title has the kind of low-friction start that works well for first-time readers.",
+            } let you try the story before you spend points.`
+          : "This title is easy to sample first.",
       heroNote: isHot
-        ? "Hot title with an easy free start."
-        : "Free-sample pick for first-time readers.",
-      reasonLabel: "Why it works",
+        ? "Hot title with a free start."
+        : "Good first pick.",
+      reasonLabel: "Why read",
       reason: isHot
-        ? "Free access plus visible buzz makes it easier to start reading right away."
-        : "A free sample works best when a reader is still deciding what to try.",
+        ? "Free chapters plus buzz make it easy to jump in."
+        : "A free sample helps when you're still picking your next read.",
       nextMoveLabel: "Try next",
       nextMove:
-        "Keep similar free-start titles and free unlock picks nearby so one sample can turn into a longer read.",
+        "Keep nearby free-start titles ready for when you want another quick pick.",
       discoveryCta: "See free unlock picks",
       discoveryHref: "/rankings?type=ttf&window=all",
-      valueLabel: "Keep reading",
-      value:
-        "When the free chapters run out, membership should already be easy to compare.",
+      valueLabel: "Then what",
+      value: "If you keep going, compare plans or grab points.",
       valueCta: STOREFRONT_TERMS.compareMembership,
       valueKind: "subscribe",
     };
@@ -51,21 +50,20 @@ export function getStorefrontCampaign(series) {
       eyebrow: STOREFRONT_TERMS.bingeReady,
       title: "Ready for a full binge.",
       description:
-        "Completed series are easiest to commit to when you want the whole story without waiting for updates.",
+        "Completed series are best when you want the full story without waiting.",
       heroNote: isHot
         ? "Popular completed series built for a binge."
         : "Finished run ready to read straight through.",
-      reasonLabel: "Why it works",
+      reasonLabel: "Why read",
       reason:
-        "A finished story feels safer to invest in because the payoff is already there.",
+        "The ending is already there, so you can read straight through.",
       nextMoveLabel: "Try next",
       nextMove:
-        "Compare this title with other completed series if you want a full binge instead of a one-chapter sample.",
+        "Browse other finished series if you want another full read.",
       discoveryCta: "Browse completed series",
       discoveryHref: "/search?status=Completed&sort=popular",
-      valueLabel: "Unlock value",
-      value:
-        "Point packs make the most sense when you know you want to keep reading for a while.",
+      valueLabel: "Best pick",
+      value: "Point packs work best when you know you want more chapters.",
       valueCta: STOREFRONT_TERMS.viewPointPacks,
       valueKind: "store",
     };
@@ -78,22 +76,21 @@ export function getStorefrontCampaign(series) {
       ? "Catch this one early."
       : "Easy to follow week after week.",
     description: isNew
-      ? "Fresh launches feel best when you can jump in early and follow the release curve as it grows."
-      : "Ongoing series work best when they feel worth coming back to every week.",
+      ? "Jump in early and follow new updates as they land."
+      : "Ongoing series work best when they're worth checking back on every week.",
     heroNote: isNew
       ? "Fresh ongoing pick with early buzz."
       : "Ongoing series built for return visits.",
-    reasonLabel: "Why it works",
+    reasonLabel: "Why read",
     reason:
-      "A return-worthy title needs follow, library, and membership value close to the first read so the habit can stick.",
+      "A good weekly read gives you a reason to come back for the next chapter.",
     nextMoveLabel: "Try next",
     nextMove:
-      "Use charts and latest releases to keep following this kind of series instead of dropping off between updates.",
-    discoveryCta: "See weekly chart",
+      "Use charts and new releases to keep up between updates.",
+    discoveryCta: "See this week's chart",
     discoveryHref: "/rankings?type=popular&window=week",
-    valueLabel: "Best value",
-    value:
-      "Membership usually makes the most sense if you plan to keep coming back for new chapters.",
+    valueLabel: "Best fit",
+    value: "Plans usually make more sense if you read new chapters every week.",
     valueCta: STOREFRONT_TERMS.compareMembership,
     valueKind: "subscribe",
   };

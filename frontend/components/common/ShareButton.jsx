@@ -63,7 +63,7 @@ const ShareButton = React.memo(function ShareButton({
   const shareableUrl = useMemo(() => sanitizeShareUrl(url), [url]);
   const buttonClassName = className
     ? `inline-flex items-center gap-2 ${className}`
-    : "inline-flex items-center gap-2 rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/18 hover:bg-black/[0.03]";
+    : "inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
 
   const platforms = useMemo(
     () => [
@@ -80,7 +80,7 @@ const ShareButton = React.memo(function ShareButton({
         id: "twitter",
         name: "X",
         icon: "X",
-        badgeClass: "border-black bg-white text-black",
+        badgeClass: "border-black bg-[#FFE500] text-black",
         getUrl: (shareUrl, shareTitle) =>
           `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`,
       },
@@ -178,23 +178,23 @@ const ShareButton = React.memo(function ShareButton({
           onClick={handleClose}
         >
           <div
-            className="relative w-full max-w-md overflow-hidden rounded-[32px] border border-black/10 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.18)]"
+            className="relative w-full max-w-md overflow-hidden rounded-[32px] border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-5 py-4">
+            <div className="relative border-b border-white/10 bg-black px-5 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="inline-flex rounded-full border border-black/10 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+                <p className="inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                   Share
                 </p>
-                <h3 className="mt-3 text-3xl font-black leading-none tracking-[-0.06em] text-black">
+                <h3 className="mt-3 text-3xl font-black leading-none tracking-[-0.06em] text-white">
                   Send this title
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full border border-black/10 bg-white p-2 text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:border-black/16 hover:bg-black/[0.03]"
+                className="rounded-full border-2 border-white/20 bg-black p-2 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-[#111111]"
                 aria-label="Close"
               >
                 <X size={16} />
@@ -208,7 +208,7 @@ const ShareButton = React.memo(function ShareButton({
                   key={platform.id}
                   type="button"
                   onClick={() => handleShare(platform)}
-                  className="flex flex-col items-center gap-2 rounded-[22px] border border-black/10 bg-white p-4 text-black shadow-[0_12px_28px_rgba(15,23,42,0.06)] transition hover:border-black/16 hover:bg-black/[0.02]"
+                  className="flex flex-col items-center gap-2 rounded-[22px] border-2 border-white/15 bg-black p-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 hover:bg-[#111111]"
                 >
                   <span
                     className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold ${platform.badgeClass}`}
@@ -220,8 +220,8 @@ const ShareButton = React.memo(function ShareButton({
               ))}
             </div>
 
-            <div className="relative m-5 mt-0 rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-black/55">
+            <div className="relative m-5 mt-0 rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-white/60">
                 <Link2 size={14} />
                 <span>Copy link</span>
               </div>
@@ -230,15 +230,15 @@ const ShareButton = React.memo(function ShareButton({
                   type="text"
                   value={shareableUrl}
                   readOnly
-                  className="flex-1 rounded-[18px] border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none shadow-[0_8px_20px_rgba(15,23,42,0.04)]"
+                  className="flex-1 rounded-[18px] border-2 border-white/20 bg-black px-3 py-2 text-sm text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
                   className={`rounded-full border px-4 py-2 text-sm font-semibold tracking-[0.02em] transition-colors ${
                     copied
-                      ? "border-emerald-200/80 bg-[linear-gradient(180deg,#f4fff8_0%,#ecfdf3_100%)] text-emerald-700"
-                      : "border-black bg-black text-white hover:bg-black/90"
+                      ? "border-black bg-[#00E5FF] text-black"
+                      : "border-2 border-black bg-[#00E5FF] text-black hover:translate-x-0.5 hover:translate-y-0.5"
                   }`}
                 >
                   {copied ? "Copied" : "Copy"}

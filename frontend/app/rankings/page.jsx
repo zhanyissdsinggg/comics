@@ -3,8 +3,8 @@ import { createPageMetadata } from "../../lib/seo";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
-  title: "Featured Series",
-  description: "Editor's picks and reader-friendly starting points on Gush.",
+  title: "Trending Stories",
+  description: "Trending titles, top picks, and finished series on Gush.",
   path: "/rankings",
 });
 

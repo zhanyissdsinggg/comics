@@ -8,9 +8,9 @@ import {
 import { loadHomepageSeoPayload } from "../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
-  title: "Read Comics and Novels Online | Gush",
+  title: "Trending Comics, Novels, and Interactive Stories | Gush",
   description:
-    "Original comics and serialized novels, curated for calm, focused reading in one place.",
+    "Trending comics, novels, and interactive stories. Pick something good and start reading.",
   path: "/",
 });
 
@@ -21,7 +21,7 @@ export default async function Page({ searchParams }) {
     buildOrganizationStructuredData(),
     buildWebsiteStructuredData({
       description:
-        "Original comics and serialized novels, curated for calm, focused reading in one place.",
+        "Trending comics, novels, and interactive stories. Pick something good and start reading.",
     }),
   ];
 

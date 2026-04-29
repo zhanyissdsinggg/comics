@@ -17,6 +17,10 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -34,19 +38,19 @@ function openAuthModal() {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border border-sky-200/70 bg-sky-50 text-slate-700";
+    return "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   }
   if (tone === "preview") {
-    return "border border-black/12 bg-white text-slate-700";
+    return "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   }
   if (tone === "points") {
-    return "border border-amber-200/70 bg-amber-50 text-slate-700";
+    return "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   }
   if (tone === "locked") {
-    return "border border-black/10 bg-[#f3f4f6] text-black/50";
+    return "border-2 border-white/20 bg-black text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   }
 
-  return "border border-black/10 bg-[#f3f4f6] text-black/50";
+  return "border-2 border-white/20 bg-black text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
 }
 
 function EpisodeRow({
@@ -165,7 +169,7 @@ function EpisodeRow({
   const effectivePrice = accessState.effectivePrice;
   const hasCustomEpisodeTitle =
     Boolean(episode?.title) && !/^(Episode|Ep\.?)\s*\d+$/i.test(episode.title);
-  const episodeNumberLabel = `Episode ${episode?.number}`;
+  const episodeNumberLabel = `Chapter ${episode?.number}`;
   const episodeHeading = hasCustomEpisodeTitle
     ? episode.title
     : episodeNumberLabel;
@@ -228,7 +232,7 @@ function EpisodeRow({
       trackEvent("ttf_claim_success", { seriesId, episodeId: episode?.id });
       setModalState({
         type: "SUCCESS",
-        title: "Episode unlocked",
+        title: "Unlocked",
         description: "",
       });
       setBusyAction("");
@@ -250,8 +254,8 @@ function EpisodeRow({
       title: "Free read unavailable",
       description:
         response.status === 409
-          ? "That free read is not ready yet."
-          : response.error || "Couldn't open that free read.",
+          ? "That free read isn't ready yet."
+          : response.error || "Couldn't open it.",
     });
     setBusyAction("");
   };
@@ -292,7 +296,7 @@ function EpisodeRow({
       recordUnlock(seriesId, episode?.id);
       setModalState({
         type: "SUCCESS",
-        title: "Episode unlocked",
+        title: "Unlocked",
         description: "",
       });
       setBusyAction("");
@@ -312,7 +316,7 @@ function EpisodeRow({
       setModalState({
         type: "ERROR",
         title: "Sign in required",
-        description: "Sign in to unlock it.",
+        description: "Sign in to open it.",
       });
     } else if (response.status === 402) {
       openUnlockModal(
@@ -323,7 +327,7 @@ function EpisodeRow({
       setModalState({
         type: "ERROR",
         title: "Couldn't unlock",
-        description: response.error || "Retry in a moment.",
+        description: response.error || "Try again in a sec.",
       });
     }
     setBusyAction("");
@@ -359,10 +363,10 @@ function EpisodeRow({
     accessState.actionKind === "claim" ||
     accessState.actionKind === "read" ||
     accessState.actionKind === "preview"
-      ? "min-h-[46px] w-full rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_12px_24px_rgba(15,23,42,0.14)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
+      ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontPrimaryButtonClass}`
       : accessState.actionKind === "subscribe"
-        ? "min-h-[46px] w-full rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-sky-50/70 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]"
-        : "min-h-[46px] w-full rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px]";
+        ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
+        : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
 
   const actionNode = (
     <button
@@ -381,47 +385,47 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_22px_48px_rgba(15,23,42,0.1)]"
+      className="group overflow-hidden rounded-[28px] border-2 border-white/15 bg-[#0a0a0a] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF]"
     >
       <div className="flex flex-col items-center gap-3 text-center">
         <div className="min-w-0 w-full">
           {hasCustomEpisodeTitle ? (
             <>
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+                <span className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                   {episodeNumberLabel}
                 </span>
                 {showStateBadge ? (
                   <span
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${getSignalClass(accessState.stateTone)}`}
                   >
                     {accessState.stateLabel}
                   </span>
                 ) : null}
                 {isLastReadEpisode ? (
-                  <span className="rounded-full border border-black/12 bg-[#f6f7f9] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/68">
+                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     Last read
                   </span>
                 ) : null}
               </div>
-              <strong className="mt-2 block text-[1.02rem] font-semibold tracking-[-0.02em] text-black">
+              <strong className="mt-2 block text-[1.02rem] font-black uppercase tracking-[-0.02em] text-white">
                 {episodeHeading}
               </strong>
             </>
           ) : (
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <strong className="text-[1.02rem] font-semibold tracking-[-0.02em] text-black">
+              <strong className="text-[1.02rem] font-black uppercase tracking-[-0.02em] text-white">
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
                 <span
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getSignalClass(accessState.stateTone)}`}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${getSignalClass(accessState.stateTone)}`}
                 >
                   {accessState.stateLabel}
                 </span>
               ) : null}
               {isLastReadEpisode ? (
-                <span className="rounded-full border border-black/12 bg-[#f6f7f9] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-black/68">
+                <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                   Last read
                 </span>
               ) : null}
@@ -429,15 +433,15 @@ function EpisodeRow({
           )}
 
           {helperLabel && helperLabel !== rowHelperText ? (
-            <p className="mt-3 text-sm font-semibold leading-6 text-black/68">
+            <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
               {helperLabel}
             </p>
           ) : null}
 
           {isLastReadEpisode ? (
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[color:var(--gush-page-bg-muted)]">
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#111111]">
               <div
-                className="h-full rounded-full bg-[var(--gush-accent,#3157d6)]"
+                className="h-full rounded-full bg-[#00E5FF]"
                 style={{
                   width: `${Math.round((progress.percent || 0) * 100)}%`,
                 }}
@@ -448,7 +452,7 @@ function EpisodeRow({
 
         <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
           {sideLabel ? (
-            <p className="rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-black/55">
+            <p className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               {sideLabel}
             </p>
           ) : null}
@@ -520,7 +524,7 @@ function EpisodeRow({
               });
               setModalState({
                 type: "SUCCESS",
-                title: "Episode unlocked",
+                title: "Unlocked",
                 description: "",
               });
               setBusyAction("");
@@ -560,7 +564,7 @@ function EpisodeRow({
           setModalState({
             type: "ERROR",
             title: "Couldn't add points",
-            description: "Couldn't finish that purchase.",
+            description: "Couldn't finish checkout.",
           });
           setBusyAction("");
         }}

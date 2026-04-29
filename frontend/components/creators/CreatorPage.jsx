@@ -76,7 +76,7 @@ function getCatalogPriority(series) {
 
 function getCreatorShelfBadge(series) {
   if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Completed";
+    return "Finished";
   }
 
   const updatedAtMs = Date.parse(series?.updatedAt || 0);
@@ -89,7 +89,7 @@ function getCreatorShelfBadge(series) {
 
   const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
   if (episodeCount > 0 && episodeCount <= 12) {
-    return "First picks";
+    return "Top Pick";
   }
 
   return "";
@@ -203,40 +203,40 @@ function CreatorPageSkeleton() {
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel appearance="light" accent="blue" className="space-y-6">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-6">
             <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-slate-200" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-100" />
+              <div className="h-4 w-28 animate-pulse rounded-full bg-white/20" />
+              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/20" />
+              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-[#111111]" />
             </div>
           </SurfacePanel>
           <SurfacePanel
             tone="muted"
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             className="space-y-3"
           >
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border border-black/10 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
+                className="h-24 animate-pulse rounded-[24px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
               />
             ))}
           </SurfacePanel>
         </div>
 
-        <SurfacePanel appearance="light" accent="blue">
+        <SurfacePanel appearance="dark" accent="cyan">
           <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border border-black/10 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]" />
+            <div className="aspect-[3/4] animate-pulse rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
             <div className="space-y-4">
-              <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
-              <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-slate-200" />
-              <div className="h-24 w-full animate-pulse rounded-[24px] bg-slate-200" />
+              <div className="h-4 w-32 animate-pulse rounded-full bg-white/20" />
+              <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/20" />
+              <div className="h-24 w-full animate-pulse rounded-[24px] bg-[#111111]" />
               <div className="grid gap-3 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border border-black/10 bg-white shadow-[0_12px_28px_rgba(15,23,42,0.05)]"
+                    className="h-28 animate-pulse rounded-[24px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                   />
                 ))}
               </div>
@@ -419,7 +419,7 @@ export default function CreatorPage({
 
     return [
       {
-        label: "Stories",
+        label: "Titles",
         value: formatTitleCountLabel(creatorItems.length),
       },
       {
@@ -429,7 +429,7 @@ export default function CreatorPage({
       },
       {
         label: "Latest",
-        value: latestUpdatedAt ? formatDateLabel(latestUpdatedAt) : "Catalog",
+        value: latestUpdatedAt ? formatDateLabel(latestUpdatedAt) : "Live now",
       },
       {
         label: "Genre",
@@ -448,21 +448,21 @@ export default function CreatorPage({
 
     return [
       isCompleted
-        ? "Completed"
+        ? "Finished"
         : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
       Array.isArray(spotlightSeries?.genres) &&
       spotlightSeries.genres.length > 0
         ? spotlightSeries.genres.slice(0, 2).join(" / ")
-        : "Featured",
+        : "Trending",
     ].filter(Boolean);
   }, [spotlightSeries]);
 
   const primaryButtonClass =
     "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
   const creatorCardClass =
-    "overflow-hidden rounded-[30px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+    "overflow-hidden rounded-[30px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const neutralChipClass =
     "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
   const softActionClass = secondaryButtonClass;
@@ -522,7 +522,7 @@ export default function CreatorPage({
         subtitle:
           Array.isArray(item?.genres) && item.genres.length > 0
             ? item.genres.slice(0, 2).join(" | ")
-            : String(item?.status || "Series"),
+            : String(item?.status || "Story"),
       })),
     [creatorItems],
   );
@@ -534,7 +534,7 @@ export default function CreatorPage({
               id: "lead-title",
               eyebrow: "Spotlight",
               title: `${spotlightSeries.title}.`,
-              cta: "Series",
+              cta: "Read More",
               onClick: () => handleOpenTitle(spotlightSeries),
               accentClass: strongActionClass,
             }
@@ -544,16 +544,16 @@ export default function CreatorPage({
           eyebrow: "Genres",
           title: topGenres[0]
             ? `Explore ${topGenres[0]}.`
-            : "Explore similar reads.",
-          cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Explore Reads",
+            : "Genres.",
+          cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Genres",
           onClick: handleBrowseGenre,
           accentClass: softActionClass,
         },
         {
           id: "return",
           eyebrow: "Back",
-          title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
-          cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
+          title: originSeries ? `${originSeries.title}.` : "Back.",
+          cta: originSeries ? "Read More" : "Back",
           onClick: handleReturn,
           accentClass: softActionClass,
         },
@@ -568,21 +568,21 @@ export default function CreatorPage({
     ],
   );
   const creatorDeskStats = [
-    {
-      label: "Profile",
-      value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
-      tone: "bg-white",
-    },
-    {
-      label: "Titles",
-      value: String(creatorItems.length || 0),
-      tone: "bg-white",
-    },
-    {
-      label: "Top genre",
-      value: topGenres[0] || "Mixed",
-      tone: "bg-white",
-    },
+      {
+        label: "Profile",
+        value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
+        tone: "bg-black",
+      },
+      {
+        label: "Titles",
+        value: String(creatorItems.length || 0),
+        tone: "bg-black",
+      },
+      {
+        label: "Top genre",
+        value: topGenres[0] || "Mixed",
+        tone: "bg-black",
+      },
   ];
   const emptyCreatorPathways = useMemo(
     () => [
@@ -599,9 +599,9 @@ export default function CreatorPage({
       },
       {
         id: "featured-series",
-        eyebrow: "Featured Series",
-        title: "Featured",
-        cta: "Featured",
+        eyebrow: "Trending",
+        title: "Trending",
+        cta: "Trending",
         onClick: () => router.push("/rankings?view=featured"),
         accentClass: softActionClass,
       },
@@ -616,8 +616,8 @@ export default function CreatorPage({
       {
         id: "return",
         eyebrow: "Back",
-        title: originSeries ? `Back to ${originSeries.title}.` : "Go back.",
-        cta: originSeries ? `Back to ${originSeries.title}` : "Go back",
+        title: originSeries ? `${originSeries.title}.` : "Back.",
+        cta: originSeries ? "Read More" : "Back",
         onClick: handleReturn,
         accentClass: softActionClass,
       },
@@ -636,7 +636,7 @@ export default function CreatorPage({
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
             compact
-            title="This creator page is unavailable right now."
+            title="This creator page isn't loading right now."
             description=""
             onRetry={retryCreatorPage}
           >
@@ -661,9 +661,9 @@ export default function CreatorPage({
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
               accent="blue"
-              appearance="light"
+              appearance="dark"
               eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
-              title={`${creatorName} is not live here yet.`}
+              title={`${creatorName} isn't live here yet.`}
               description=""
               stats={[
                 {
@@ -673,7 +673,7 @@ export default function CreatorPage({
                   value: creatorName,
                 },
                 {
-                  label: "Catalog",
+                  label: "Mode",
                   value: isAdultMode ? "18+" : "Standard",
                 },
               ]}
@@ -682,16 +682,16 @@ export default function CreatorPage({
             <SurfacePanel
               tone="muted"
               accent="blue"
-              appearance="light"
+              appearance="dark"
               className="flex h-full flex-col justify-between space-y-6"
             >
               <div className="space-y-3">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                  Next
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                  Search
                 </p>
                 <div>
-                  <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
-                    Next
+                  <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
+                    Search
                   </h2>
                 </div>
               </div>
@@ -709,25 +709,25 @@ export default function CreatorPage({
                   onClick={handleReturn}
                   className={secondaryButtonClass}
                 >
-                  Go back
+                  Back
                 </button>
               </div>
             </SurfacePanel>
           </section>
 
-          <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+          <SurfacePanel appearance="dark" accent="blue" className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <div className="space-y-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Next
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                Picks
               </p>
-              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-black sm:text-3xl">
+              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
                 Picks
               </h2>
             </div>
             <StorefrontPathwaysGrid
               cards={emptyCreatorPathways}
               columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-              appearance="light"
+              appearance="dark"
             />
           </SurfacePanel>
         </div>
@@ -743,7 +743,7 @@ export default function CreatorPage({
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             accent="blue"
-            appearance="light"
+            appearance="dark"
             eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
             title={heroCopy.title}
             description={heroCopy.description}
@@ -754,12 +754,12 @@ export default function CreatorPage({
           <SurfacePanel
             tone="highlight"
             accent="amber"
-            appearance="light"
+            appearance="dark"
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                Creator desk
+                Creator
               </p>
               <div>
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
@@ -772,9 +772,9 @@ export default function CreatorPage({
               {creatorDeskStats.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border-2 border-black bg-white px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 >
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/55">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/60">
                     {item.label}
                   </p>
                   <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
@@ -791,7 +791,7 @@ export default function CreatorPage({
                   onClick={() => handleOpenTitle(spotlightSeries)}
                   className={primaryButtonClass}
                 >
-                  Series
+                  Read More
                 </button>
               ) : (
                 <button
@@ -799,7 +799,7 @@ export default function CreatorPage({
                   onClick={() => router.push("/rankings?view=featured")}
                   className={primaryButtonClass}
                 >
-                  Featured
+                  Trending
                 </button>
               )}
               <button
@@ -814,7 +814,7 @@ export default function CreatorPage({
                 onClick={handleReturn}
                 className={secondaryButtonClass}
               >
-                {originSeries ? `Back to ${originSeries.title}` : "Go back"}
+                {originSeries ? "Read More" : "Back"}
               </button>
             </div>
           </SurfacePanel>
@@ -828,7 +828,7 @@ export default function CreatorPage({
         ) : null}
 
         {spotlightSeries ? (
-          <SurfacePanel appearance="light" accent="cyan" className="space-y-6">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-6 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
             <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
               <div className={creatorCardClass}>
                 <div className="aspect-[3/4] w-full overflow-hidden">
@@ -844,16 +844,16 @@ export default function CreatorPage({
               </div>
 
               <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                   Spotlight
                 </p>
-                <h2 className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-black sm:text-4xl">
+                <h2 className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
                   {spotlightSeries.title}
                 </h2>
-                <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-black/72 sm:text-base">
+                <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-white/70 sm:text-base">
                   {summarizeSpotlightDescription(
                     spotlightSeries.description,
-                    `${spotlightSeries.title} is a strong place to start.`,
+                    `Start with ${spotlightSeries.title}.`,
                   )}
                 </p>
 
@@ -873,7 +873,7 @@ export default function CreatorPage({
                   ) : null}
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
+                <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/60">
                   {spotlightMeta.map((item, index) => (
                     <span
                       key={`${spotlightSeries.id}-meta-${index}`}
@@ -890,7 +890,7 @@ export default function CreatorPage({
                     onClick={() => handleOpenTitle(spotlightSeries)}
                     className={primaryButtonClass}
                   >
-                    Series
+                    Read More
                   </button>
                   <button
                     type="button"
@@ -905,18 +905,18 @@ export default function CreatorPage({
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="light" accent="blue" className="space-y-5">
+        <SurfacePanel appearance="dark" accent="blue" className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
-                Works
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                Series
               </p>
-              <h2 className="mt-2 font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-black sm:text-[2.8rem]">
-                By {creatorName}
+              <h2 className="mt-2 font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-white sm:text-[2.8rem]">
+                {creatorName}
               </h2>
             </div>
-            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-black/55">
-              {formatTitleCountLabel(gridItems.length)} for {creatorName}
+            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/60">
+              {formatTitleCountLabel(gridItems.length)}
             </p>
           </div>
 
@@ -927,7 +927,7 @@ export default function CreatorPage({
                 item={item}
                 tone={item.coverTone}
                 onClick={() => handleOpenTitle(item)}
-                appearance="light"
+                appearance="dark"
               />
             ))}
           </div>

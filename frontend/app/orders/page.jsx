@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 export const metadata = createPageMetadata({
   title: "Orders",
-  description: "Receipts and purchases.",
+  description: "Orders and purchases.",
   path: "/orders",
   robots: {
     index: false,

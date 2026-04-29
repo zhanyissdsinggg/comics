@@ -18,8 +18,8 @@ import {
 import { siteConfig } from "../../lib/siteConfig";
 
 export const metadata = createPageMetadata({
-  title: "Access",
-  description: "Free reads and unlocks.",
+  title: "How Reading Works",
+  description: "Free chapters, points, and plans.",
   path: "/how-it-works",
 });
 
@@ -27,17 +27,17 @@ const HOW_IT_WORKS_STEPS = [
   {
     eyebrow: "1. Start",
     title: "Start free.",
-    body: "",
+    body: "Start with free chapters.",
   },
   {
     eyebrow: "2. Unlock",
     title: "Unlock.",
-    body: "",
+    body: "Use points to keep going.",
   },
   {
     eyebrow: "3. Keep reading",
-    title: "Keep reading.",
-    body: "",
+    title: "Read on.",
+    body: "Your progress saves.",
   },
 ];
 
@@ -48,23 +48,23 @@ const FAQ_ITEMS = [
   },
   {
     question: "How do points work?",
-    answer: "Points unlock locked episodes.",
+    answer: "Points unlock locked chapters.",
   },
   {
-    question: "What does membership change?",
-    answer: "Plans can add perks for regular reading.",
+    question: "What do plans change?",
+    answer: "Plans can add extra reading perks.",
   },
   {
-    question: "Is membership recurring?",
-    answer: "Yes. Plans renew monthly unless the plan says otherwise.",
+    question: "Do plans renew?",
+    answer: "Yes. Plans renew monthly unless the offer says otherwise.",
   },
   {
-    question: "How do I cancel membership?",
-    answer: "Open Account to manage or end your plan.",
+    question: "How do I cancel a plan?",
+    answer: "Go to Account to manage or end your plan.",
   },
   {
     question: "Where do I find receipts and order IDs?",
-    answer: "Open Orders.",
+    answer: "Go to Orders.",
   },
 ];
 
@@ -72,12 +72,12 @@ export default function HowItWorksPage() {
   const structuredData = [
     buildBreadcrumbStructuredData([
       { name: "Home", path: "/" },
-      { name: "Access", path: "/how-it-works" },
+      { name: "How Reading Works", path: "/how-it-works" },
     ]),
     buildFaqStructuredData({
       path: "/how-it-works",
-      name: `Access | ${siteConfig.siteName}`,
-      description: "Free reads and unlocks.",
+      name: `How Reading Works | ${siteConfig.siteName}`,
+      description: "Free chapters, points, and plans.",
       items: FAQ_ITEMS,
     }),
   ].filter(Boolean);
@@ -89,10 +89,10 @@ export default function HowItWorksPage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
-            eyebrow="Access"
-            title="Access."
+            appearance="dark"
+            accent="cyan"
+            eyebrow="Reading"
+            title="How reading works."
             description=""
             stats={[
               {
@@ -104,7 +104,7 @@ export default function HowItWorksPage() {
                 value: "Points",
               },
               {
-                label: "Membership",
+                label: "Plans",
                 value: "Monthly",
               },
             ]}
@@ -124,8 +124,8 @@ export default function HowItWorksPage() {
           />
 
           <StorefrontDesk
-            eyebrow="Overview"
-            title="Access."
+            eyebrow="More"
+            title="Billing."
             actions={
               <>
                 <Link href="/orders" className={storefrontPrimaryButtonClass}>
@@ -144,24 +144,32 @@ export default function HowItWorksPage() {
 
         <section className="grid gap-4 lg:grid-cols-3">
           {HOW_IT_WORKS_STEPS.map((step) => (
-            <SurfacePanel key={step.title} appearance="light" accent="blue">
+            <SurfacePanel key={step.title} appearance="dark" accent="cyan">
               <StorefrontSectionHeading
                 eyebrow={step.eyebrow}
                 title={step.title}
               />
+              <p className="mt-3 text-sm font-semibold leading-6 text-white/75">
+                {step.body}
+              </p>
             </SurfacePanel>
           ))}
         </section>
 
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-            <StorefrontSectionHeading eyebrow="Access" title="Access." />
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
+            <StorefrontSectionHeading eyebrow="Reading" title="Basics." />
+            <ul className="space-y-3 text-sm font-medium leading-7 text-white/70">
+              <li>Some series start free.</li>
+              <li>Locked chapters use points.</li>
+              <li>Your place saves automatically.</li>
+            </ul>
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading eyebrow="Billing" title="Billing." />
-            <ul className="space-y-3 text-sm font-medium leading-7 text-black/68">
-              <li>Orders shows packs, plans, and order IDs.</li>
+            <ul className="space-y-3 text-sm font-medium leading-7 text-white/70">
+              <li>Orders shows receipts.</li>
               <li>Account shows your plan.</li>
               <li>Support handles billing issues.</li>
             </ul>
@@ -179,16 +187,15 @@ export default function HowItWorksPage() {
           </SurfacePanel>
         </section>
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
-          <StorefrontSectionHeading eyebrow="FAQ" title="FAQ." />
+        <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
+          <StorefrontSectionHeading eyebrow="FAQ" title="Answers." />
           <div className="grid gap-3 lg:grid-cols-2">
             {FAQ_ITEMS.map((item) => (
               <StorefrontInfoCard
                 key={item.question}
                 title={item.question}
                 description={item.answer}
-              >
-              </StorefrontInfoCard>
+              />
             ))}
           </div>
         </SurfacePanel>

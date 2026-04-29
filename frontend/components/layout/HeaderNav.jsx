@@ -10,14 +10,14 @@ import {
 
 const DEFAULT_NAV_ITEMS = [
   { id: "home", label: "Home", href: "/" },
-  { id: "featured", label: "Featured", href: "/rankings" },
+  { id: "featured", label: "Trending", href: "/rankings" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
   { id: "creators", label: "Creators", href: "/creators" },
 ];
 
 const HOME_NAV_ITEMS = [
-  { id: "featured", label: "Featured", href: "/rankings" },
+  { id: "featured", label: "Trending", href: "/rankings" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
   { id: "creators", label: "Creators", href: "/creators" },

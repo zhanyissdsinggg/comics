@@ -6,7 +6,7 @@ import { WalletProvider } from "../../store/useWalletStore";
 
 export const metadata = createPageMetadata({
   title: "Account",
-  description: "Manage your account, membership, purchases, and reading preferences.",
+  description: "Manage your account, plans, orders, and reading settings.",
   path: "/account",
   robots: {
     index: false,

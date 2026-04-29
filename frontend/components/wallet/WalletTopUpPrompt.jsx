@@ -9,6 +9,11 @@ import {
 } from "../../lib/localization";
 import { fetchTopupCatalogSnapshot } from "../../lib/topupCatalog";
 import NetworkFallback from "../common/NetworkFallback";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function getPackageId(pkg) {
   return String(pkg?.packageId || pkg?.id || "").trim();
@@ -162,9 +167,9 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   }
 
   const shellClass =
-    "relative w-full overflow-hidden rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] shadow-[0_28px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:max-w-xl";
+    "relative w-full overflow-hidden rounded-[26px] border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] sm:max-w-xl";
   const quietCardClass =
-    "rounded-[24px] border border-black/10 bg-white shadow-[0_16px_36px_rgba(15,23,42,0.08)] hover:-translate-y-0.5 hover:border-black/14 hover:bg-[#fcfcfd] hover:shadow-[0_22px_42px_rgba(15,23,42,0.12)]";
+    "rounded-[22px] border-2 border-black bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
 
   return (
     <div
@@ -184,30 +189,30 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-[0.98]"
         }`}
       >
-        <div className="border-b border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fa_100%)] px-6 py-5 sm:px-7 sm:py-6">
+        <div className="border-b-2 border-black bg-black px-6 py-5 sm:px-7 sm:py-6">
           <div className="relative flex justify-center pb-2 sm:hidden">
-            <div className="h-1.5 w-11 rounded-full bg-black/12" />
+            <div className="h-1.5 w-11 rounded-full bg-white/15" />
           </div>
 
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/10 bg-white p-2 text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:bg-[#f6f7f9] hover:shadow-[0_14px_28px_rgba(15,23,42,0.12)] active:scale-95"
+            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-black bg-[#FFE500] p-2 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95"
             aria-label="Close top-up dialog"
           >
             <X size={18} />
           </button>
 
           <div className="text-center">
-            <p className="mb-3 inline-flex rounded-full border border-black/10 bg-[#f6f7f9] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-black/62">
+            <p className="mb-3 inline-flex rounded-full border-2 border-black bg-[#0b0b0b] px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               Wallet
             </p>
-            <h2 className="text-4xl font-black uppercase leading-none tracking-[-0.06em] text-black">
+            <h2 className="text-4xl font-black uppercase leading-none tracking-[-0.06em] text-white">
               Add points
             </h2>
-            <p className="mt-3 text-sm font-medium text-black/62">
+            <p className="mt-3 text-sm font-semibold text-white/75">
               Balance:{" "}
-              <span className="font-semibold text-black">
+              <span className="font-black text-white">
                 {formatUSNumber(currentPoints)} points
               </span>
             </p>
@@ -220,7 +225,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
               {[0, 1, 2].map((index) => (
                 <div
                   key={index}
-                  className="h-24 animate-pulse rounded-[24px] border border-black/10 bg-[#f6f7f9]"
+                  className="h-24 animate-pulse rounded-[22px] border-2 border-black bg-[#111111]"
                 />
               ))}
             </div>
@@ -246,12 +251,12 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                     }
                     className={`relative w-full p-4 text-left transition-all duration-300 active:scale-[0.99] ${
                       isHighlighted
-                        ? "rounded-[24px] border border-black/14 bg-[linear-gradient(180deg,#ffffff_0%,#f6f8fb_100%)] shadow-[0_22px_44px_rgba(15,23,42,0.12)]"
+                        ? "rounded-[22px] border-2 border-black bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] outline outline-2 outline-offset-2 outline-[#00E5FF]"
                         : quietCardClass
                     }`}
                   >
                     {isHighlighted ? (
-                      <div className="absolute -top-2 right-4 rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-black/72 shadow-[0_10px_20px_rgba(15,23,42,0.08)]">
+                      <div className="absolute -top-2 right-4 rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                         Best value
                       </div>
                     ) : null}
@@ -261,35 +266,35 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-[18px] ${
                             isHighlighted
-                              ? "border border-black/10 bg-[#f6f7f9] text-black"
-                              : "border border-black/10 bg-[#f8fafc] text-black/55"
+                              ? "border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                              : "border-2 border-black bg-[#0b0b0b] text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                           }`}
                         >
                           <Zap size={22} />
                         </div>
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-lg font-black uppercase tracking-[0.03em] text-black">
+                            <span className="text-lg font-black uppercase tracking-[0.03em] text-white">
                               {getPackageTitle(pkg)}
                             </span>
                             {bonusPts > 0 ? (
-                              <span className="flex items-center gap-1 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-900">
+                              <span className="flex items-center gap-1 rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                 <Gift size={12} />+{formatUSNumber(bonusPts)}
                               </span>
                             ) : null}
                           </div>
-                          <p className="text-xs text-black/55">
+                          <p className="text-xs font-semibold text-white/70">
                             {packageSummary}
                           </p>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <div className="text-xl font-black uppercase tracking-[0.03em] text-black">
+                        <div className="text-xl font-black uppercase tracking-[0.03em] text-white">
                           {formatPackagePrice(pkg)}
                         </div>
-                        <div className="text-xs font-medium uppercase tracking-[0.08em] text-black/45">
-                          {purchaseActionsEnabled ? "Continue" : "Open store"}
+                        <div className="text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
+                          {purchaseActionsEnabled ? "Get Points" : "View Store"}
                         </div>
                       </div>
                     </div>
@@ -306,43 +311,43 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                 title="Point packs are unavailable right now."
                 description={
                   loadFailed
-                    ? "Retry or open the store."
-                    : "Open the store to see the full pack list."
+                    ? "Retry or view the store."
+                    : "View the store to see the full pack list."
                 }
                 onRetry={retryPackages}
               >
                 <button
                   type="button"
                   onClick={() => handleSelectPackage({ id: "auto" })}
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+                  className={`${storefrontPrimaryButtonClass} h-11 px-4 text-[11px] tracking-[0.08em]`}
                 >
-                  Open store
+                  View Store
                 </button>
               </NetworkFallback>
             </div>
           )}
 
-          <div className="rounded-[24px] border border-sky-100 bg-[linear-gradient(180deg,#f8fbff_0%,#f3f8fd_100%)] p-4 shadow-[0_14px_30px_rgba(59,130,246,0.08)]">
+          <SurfacePanel tone="muted" accent="blue" appearance="dark" className="p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-sky-100 bg-white text-sky-700">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <Sparkles size={16} />
               </div>
               <div>
-                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.08em] text-black">
+                <p className="mb-1 text-sm font-black uppercase tracking-[0.08em] text-white">
                   {purchaseActionsEnabled
                     ? "Finish in store"
-                    : "Open the store"}
+                    : "View the store"}
                 </p>
-                <p className="text-xs leading-6 text-black/62">
+                <p className="text-xs font-semibold leading-6 text-white/75">
                   {purchaseActionsEnabled
                     ? "This selection opens the same offer in the store."
                     : "See the full pack list in the store."}
                 </p>
               </div>
             </div>
-          </div>
+          </SurfacePanel>
 
-          <p className="mt-4 text-center text-xs font-medium uppercase tracking-[0.1em] text-black/42">
+          <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.1em] text-white/55">
             Store pricing stays in sync.
           </p>
         </div>

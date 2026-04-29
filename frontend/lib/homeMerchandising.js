@@ -58,7 +58,7 @@ function getCatalogSignalLabel(series) {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "First picks";
+    return "Top picks";
   }
   return "";
 }

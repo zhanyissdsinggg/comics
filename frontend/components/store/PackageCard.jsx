@@ -2,12 +2,16 @@
 
 import Pill from "../common/Pill";
 import { formatUSNumber } from "../../lib/localization";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function BenefitRow({ children }) {
   return (
     <div className="flex items-center gap-1.5">
       <span
-        className="h-1.5 w-1.5 rounded-full bg-[var(--gush-accent,#3157d6)]"
+        className="h-1.5 w-1.5 rounded-full bg-[#00E5FF]"
         aria-hidden="true"
       />
       <span>{children}</span>
@@ -21,7 +25,7 @@ export default function PackageCard({
   onSelect,
   disabled = false,
   hideAction = false,
-  ctaLabel = "Get this pack",
+  ctaLabel = "Get pack",
   statusLabel = "",
   statusNote = "",
 }) {
@@ -38,15 +42,14 @@ export default function PackageCard({
 
   return (
     <div
-        className={`group rounded-[30px] border border-black/10 p-5 transition-all duration-300 hover:border-black/15 hover:bg-black/[0.02] ${
-          highlighted
-            ? "bg-[#f8f9fb] shadow-[0_24px_60px_rgba(15,23,42,0.10)]"
-            : "bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]"
-        }`}
+      className={[
+        "group rounded-[26px] border-2 border-black bg-[#0b0b0b] p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
+        highlighted ? "outline outline-2 outline-offset-2 outline-[#00E5FF]" : "",
+      ].join(" ")}
       style={{ willChange: "transform" }}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-black">
+        <h2 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
           {pkg.name}
         </h2>
         {highlighted ? (
@@ -56,20 +59,20 @@ export default function PackageCard({
         ) : null}
       </div>
 
-      <p className="mt-2 text-sm font-semibold text-black/70">
-        {formatUSNumber(pkg.paidPts)} paid + {formatUSNumber(pkg.bonusPts)}{" "}
-        bonus
+      <p className="mt-2 text-sm font-semibold text-white/80">
+        {formatUSNumber(pkg.paidPts)} base + {formatUSNumber(pkg.bonusPts)}{" "}
+        extra
       </p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
         Total {formatUSNumber(totalPts)} points
-        {bonusPct ? ` - ${bonusPct}% bonus` : ""}
+        {bonusPct ? ` - ${bonusPct}% extra` : ""}
       </p>
 
       {bonusPct > 0 ? (
-        <div className="mt-3 rounded-[18px] border border-black/10 bg-[#f8f9fb] px-3 py-2">
+        <div className="mt-3 rounded-[18px] border-2 border-black bg-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex items-center gap-2">
             <svg
-              className="h-4 w-4 flex-shrink-0 text-[var(--gush-accent,#3157d6)]"
+              className="h-4 w-4 flex-shrink-0 text-[#00E5FF]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -81,15 +84,15 @@ export default function PackageCard({
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <p className="text-xs font-semibold text-black/72">
-              Includes {bonusPct}% extra points
+            <p className="text-xs font-semibold text-white/80">
+              Includes {bonusPct}% more points
             </p>
           </div>
         </div>
       ) : null}
 
       {pkg.priceLabel ? (
-        <p className="mt-3 text-sm font-black uppercase tracking-[0.05em] text-black">
+        <p className="mt-3 text-sm font-black uppercase tracking-[0.05em] text-white">
           {pkg.priceLabel}
         </p>
       ) : null}
@@ -106,23 +109,24 @@ export default function PackageCard({
         </div>
       ) : null}
 
-      <div className="mt-3 space-y-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-black/55">
+      <div className="mt-3 space-y-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
         <BenefitRow>One-time points</BenefitRow>
-        <BenefitRow>Unlock as you go</BenefitRow>
-        <BenefitRow>No recurring billing</BenefitRow>
+        <BenefitRow>Read as you go</BenefitRow>
+        <BenefitRow>No monthly charge</BenefitRow>
         {bonusPct > 0 ? (
-          <BenefitRow>{bonusPct}% bonus included</BenefitRow>
+          <BenefitRow>{bonusPct}% extra included</BenefitRow>
         ) : null}
       </div>
 
       {!hideAction ? (
         <button
           type="button"
-          className={`mt-4 w-full min-h-[48px] px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition-all ${
+          className={[
+            "mt-4 w-full min-h-[48px] px-4 py-3",
             disabled
-              ? "cursor-not-allowed rounded-full border border-black/10 bg-slate-100 text-slate-500 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
-              : "rounded-full border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] hover:bg-black/90"
-          }`}
+              ? `${storefrontSecondaryButtonClass} cursor-not-allowed opacity-50`
+              : storefrontPrimaryButtonClass,
+          ].join(" ")}
           onClick={() => onSelect?.(pkg.id)}
           disabled={disabled}
           style={{ willChange: "transform" }}
@@ -132,7 +136,7 @@ export default function PackageCard({
       ) : null}
       {statusNote ? (
         <p
-          className={`${hideAction ? "mt-4" : "mt-3"} text-xs font-semibold leading-5 text-black/58`}
+          className={`${hideAction ? "mt-4" : "mt-3"} text-xs font-semibold leading-5 text-white/70`}
         >
           {statusNote}
         </p>

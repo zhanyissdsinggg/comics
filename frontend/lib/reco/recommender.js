@@ -43,7 +43,7 @@ function getSeriesBadge(series, override = "") {
     return "Updated";
   }
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "First picks";
+    return "Top picks";
   }
   return "";
 }
@@ -178,7 +178,7 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
         getEpisodeCount(a) - getEpisodeCount(b) ||
         getEditorialScore(b) - getEditorialScore(a),
     )
-    .map((series) => mapSeriesCard(series, "First picks", "First picks"));
+    .map((series) => mapSeriesCard(series, "Top picks", "Top picks"));
 
   const adultRail = isAdultMode
     ? safeCatalog

@@ -20,8 +20,8 @@ export async function generateMetadata({ params }) {
 
   if (!series) {
     return createPageMetadata({
-      title: "Series",
-      description: `Read full series details, episode lists, and release info on ${siteConfig.siteName}.`,
+      title: "Story",
+      description: `Browse chapters, creators, and updates on ${siteConfig.siteName}.`,
       path: `/series/${seriesId || ""}`,
     });
   }
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }) {
     `Read ${series.title} on ${siteConfig.siteName}.`,
     authorLabel ? `By ${authorLabel}.` : "",
     genreLabel ? `${genreLabel}.` : "",
-    episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"} listed.` : "",
+    episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"} live.` : "",
     `Status: ${statusLabel}.`,
   ]
     .filter(Boolean)

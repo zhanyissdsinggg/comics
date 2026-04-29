@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import {
   ADULT_GATE_ACTION_LABELS,
   ADULT_GATE_DESCRIPTIONS,
@@ -21,31 +26,36 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
   const forceDocumentNavigation = shouldUseDocumentNavigation(pathname, "/");
   const trustItems = [
     "Private by default",
-    "Age-gated before access",
-    "18+ can be turned off anytime",
+    "Age check first",
+    "Turn it off anytime",
   ];
 
   return (
     <section className="flex min-h-[50vh] items-center justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.12)] sm:p-7">
+      <SurfacePanel
+        appearance="dark"
+        tone="muted"
+        accent="cyan"
+        className="w-full max-w-2xl p-6 sm:p-7"
+      >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-black/45">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/70">
               18+ access
             </p>
-            <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.04em] text-black">
+            <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.04em] text-white">
               {title}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-black/68">
+            <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-white/80">
               {description}
             </p>
           </div>
-          <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+          <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
               Access
             </p>
-            <p className="mt-2 text-sm leading-6 text-black/72">
-              Sign in and confirm age.
+            <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
+              Sign in to open it.
             </p>
           </div>
         </div>
@@ -54,7 +64,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="rounded-full border border-black/10 bg-[#f6f7fb] px-3 py-1.5 text-xs font-semibold tracking-[0.03em] text-black/68"
+              className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.06em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
             >
               {item}
             </span>
@@ -65,31 +75,31 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           <button
             type="button"
             onClick={onOpenModal}
-            className="rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+            className={`px-5 py-2.5 text-sm ${storefrontPrimaryButtonClass}`}
           >
-            {ADULT_GATE_ACTION_LABELS[status] || "Continue"}
+            {ADULT_GATE_ACTION_LABELS[status] || "Keep Going"}
           </button>
           {forceDocumentNavigation ? (
-            <a
-              href="/"
-              onClick={(event) => {
-                event.preventDefault();
-                navigateWithDocument("/");
-              }}
-              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
-            >
-              Catalog
-            </a>
-          ) : (
+              <a
+                href="/"
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigateWithDocument("/");
+                }}
+                className={`inline-flex items-center justify-center px-5 py-2.5 text-sm ${storefrontSecondaryButtonClass}`}
+              >
+              Home
+              </a>
+            ) : (
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
+              className={`inline-flex items-center justify-center px-5 py-2.5 text-sm ${storefrontSecondaryButtonClass}`}
             >
-              Catalog
+              Home
             </Link>
           )}
         </div>
-      </div>
+      </SurfacePanel>
     </section>
   );
 }

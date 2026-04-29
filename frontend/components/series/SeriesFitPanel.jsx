@@ -4,6 +4,10 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import SurfacePanel from "../common/SurfacePanel";
 import { getReadingCadenceLabel } from "../../lib/storefrontCopy";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -45,7 +49,7 @@ function getEpisodeCount(series, episodes) {
 function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
   if (continueHref) {
     return {
-      label: "Continue reading",
+      label: "Keep Reading",
       href: continueHref,
       hint: "Pick up where you left off.",
     };
@@ -53,17 +57,17 @@ function getPrimaryAction({ continueHref, startHref, freeEpisodeCount }) {
 
   if (startHref && freeEpisodeCount > 0) {
     return {
-      label: "Try the opener",
+      label: "Start Reading",
       href: startHref,
-      hint: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} let you try the series before unlocking more.`,
+      hint: `${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"} to start.`,
     };
   }
 
   if (startHref) {
     return {
-      label: "Read episode 1",
+      label: "Start Reading",
       href: startHref,
-      hint: "Start at Episode 1 and see if the story clicks.",
+      hint: "Start at Chapter 1.",
     };
   }
 
@@ -92,23 +96,21 @@ function getStarterLane(series, leadGenre) {
 
   if (freeEpisodeCount > 0) {
     return {
-      label: "Easy first try",
-      body: `${freeEpisodeCount} free episode${freeEpisodeCount === 1 ? "" : "s"} to start.`,
+      label: "Easy start",
+      body: `${freeEpisodeCount} free chapter${freeEpisodeCount === 1 ? "" : "s"} to start.`,
     };
   }
 
   if (status === "completed") {
     return {
-      label: "Built for a binge",
-      body: "A completed run with no wait between chapters.",
+      label: "Binge-ready",
+      body: "Finished and ready to binge.",
     };
   }
 
   return {
-    label: "Good to come back to",
-    body: leadGenre
-      ? `A ${leadGenre.toLowerCase()} pick worth coming back to.`
-      : "A title worth coming back to.",
+    label: "Good pick",
+    body: leadGenre ? `${leadGenre} pick.` : "Worth saving.",
   };
 }
 
@@ -120,10 +122,8 @@ export default function SeriesFitPanel({
   startHref = "",
 }) {
   const router = useRouter();
-  const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90";
-  const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]";
+  const primaryButtonClass = storefrontPrimaryButtonClass;
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
 
   const fitModel = useMemo(() => {
     const leadGenre =
@@ -161,13 +161,13 @@ export default function SeriesFitPanel({
       }),
       bestFor:
         status === "completed"
-          ? `Readers who want ${leadGenre ? `${leadGenre.toLowerCase()}-driven` : "story-driven"} payoff without release gaps.`
-          : `Readers who want ${leadGenre ? `an ongoing ${leadGenre.toLowerCase()} title` : "an ongoing title"} they can save and come back to.`,
-      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} episode${episodeCount === 1 ? "" : "s"}` : "ongoing run"}`,
+          ? `${leadGenre ? `${leadGenre} fans` : "Readers"} who want the full run.`
+          : `${leadGenre ? `${leadGenre} fans` : "Readers"} who want something still updating.`,
+      commitment: `${getCommitmentLabel(status, episodeCount)} - ${episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"}` : "updating"}`,
       socialProof:
         readerProof > 0
-          ? `${formatCompactCount(readerProof)} visible reader signals and an update trail from ${formatDateLabel(series?.updatedAt)}.`
-          : `Updated as recently as ${formatDateLabel(series?.updatedAt)}.`,
+          ? `${formatCompactCount(readerProof)} readers. Updated ${formatDateLabel(series?.updatedAt)}.`
+          : `Updated ${formatDateLabel(series?.updatedAt)}.`,
       genrePath: leadGenre
         ? `/search?genre=${encodeURIComponent(leadGenre)}&sort=popular`
         : "/search?sort=popular",
@@ -180,7 +180,7 @@ export default function SeriesFitPanel({
 
   const fitCards = [
     {
-      label: "Fit",
+      label: "Vibe",
       value: fitModel.cadence,
       body: fitModel.bestFor,
     },
@@ -190,7 +190,7 @@ export default function SeriesFitPanel({
       body: fitModel.starterLane.body,
     },
     {
-      label: "Reader signals",
+      label: "Readers",
       value:
         fitModel.readerProof > 0
           ? formatCompactCount(fitModel.readerProof)
@@ -200,24 +200,21 @@ export default function SeriesFitPanel({
   ];
 
   return (
-    <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+    <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
-            Fit
+          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
+            Quick take
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
-            Is this your kind of read?
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white sm:text-3xl">
+            Why read this?
           </h2>
         </div>
-        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Start
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Jump in
           </p>
-          <p className="mt-3 text-sm leading-6 text-black/75">
-            <span className="font-black uppercase tracking-[0.04em] text-black">
-              {fitModel.starterLane.label}.
-            </span>{" "}
+          <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
             {fitModel.starterLane.body}
           </p>
         </div>
@@ -227,54 +224,56 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
+            className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
               {card.label}
             </p>
-            <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
+            <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-white">
               {card.value}
             </p>
-            <p className="mt-2 text-sm leading-6 text-black/65">{card.body}</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
+              {card.body}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[26px] border border-black/10 bg-[#f6f7fb] px-4 py-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Read style
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Good fit
           </p>
-          <p className="mt-3 text-sm leading-7 text-black/70">
-            {series?.title || "This title"} works best when the reader wants{" "}
+          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+            {series?.title || "This title"} is a fit if you want{" "}
             {fitModel.status === "completed"
-              ? "continuity and payoff in a longer session"
-              : "a title worth saving and revisiting over time"}
+              ? "a longer read with no waiting"
+              : "something you can save and come back to"}
             {fitModel.leadGenre
-              ? `, especially if ${fitModel.leadGenre.toLowerCase()} is already part of the browsing intent`
+              ? `, especially if you're already into ${fitModel.leadGenre.toLowerCase()}`
               : ""}
             .
           </p>
         </div>
-        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            What to compare next
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Also try
           </p>
-          <p className="mt-3 text-sm leading-7 text-black/70">
+          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
             {fitModel.secondaryGenre
-              ? `If you like ${fitModel.leadGenre}, ${fitModel.secondaryGenre} is the easiest adjacent genre to compare next.`
-              : "If you want more to compare, open the genre page or the creator page before committing."}
+              ? `If you like ${fitModel.leadGenre}, try ${fitModel.secondaryGenre} next.`
+              : "Want more? Check the genre or creator page."}
           </p>
         </div>
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Next
+        <div className="rounded-[26px] border-2 border-white/15 bg-[#0a0a0a] px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Up next
           </p>
           <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="max-w-3xl text-sm leading-7 text-black/70">
+            <p className="max-w-3xl text-sm font-semibold leading-7 text-white/80">
               {fitModel.primaryAction.hint}
             </p>
             <button
@@ -312,7 +311,7 @@ export default function SeriesFitPanel({
           onClick={() => router.push("/rankings?type=popular&window=week")}
           className={secondaryButtonClass}
         >
-          Popular
+          Trending
         </button>
       </div>
     </SurfacePanel>

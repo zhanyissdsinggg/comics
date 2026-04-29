@@ -127,16 +127,16 @@ export default function MobileBottomNav() {
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 px-1.5 py-2 text-center transition-all duration-150",
+                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[18px] px-1.5 py-2 text-center transition-all duration-150",
                 isActive
                   ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "text-white/70 hover:bg-white/10 hover:text-white",
+                  : "border-2 border-transparent text-white/68 hover:border-white/10 hover:bg-[#111111] hover:text-white",
               )}
             >
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-black opacity-100" : "bg-transparent",
+                  isActive ? "bg-black opacity-100" : "bg-transparent opacity-0",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />

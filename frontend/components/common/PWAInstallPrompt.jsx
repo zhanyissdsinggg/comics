@@ -119,28 +119,28 @@ const PWAInstallPrompt = React.memo(() => {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
-      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] shadow-[0_24px_54px_rgba(15,23,42,0.14)]">
+      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden rounded-[30px] border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-black/10 bg-[#f6f7f9] text-black shadow-[0_12px_24px_rgba(15,23,42,0.08)]">
+            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
             <div className="relative">
-              <h3 className="font-display text-sm font-semibold tracking-[0.01em] text-black sm:text-base">
+              <h3 className="font-display text-sm font-semibold tracking-[0.01em] text-white sm:text-base">
                 Install Gush
               </h3>
               {isIOS ? (
-                <p className="mt-1 text-xs leading-6 text-black/68 sm:text-sm">
+                <p className="mt-1 text-xs leading-6 text-white/70 sm:text-sm">
                   On iPhone, open{" "}
-                  <span className="font-semibold text-black">Share</span>,
+                  <span className="font-semibold text-white">Share</span>,
                   then choose{" "}
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-white">
                     Add to Home Screen
                   </span>
                   .
                 </p>
               ) : (
-                <p className="mt-1 text-xs leading-6 text-black/68 sm:text-sm">
+                <p className="mt-1 text-xs leading-6 text-white/70 sm:text-sm">
                   Add Gush for faster launch and cleaner reading.
                 </p>
               )}
@@ -152,7 +152,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-black/90 hover:shadow-[0_12px_26px_rgba(15,23,42,0.14)] active:translate-y-px"
+                className="min-h-[44px] rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 Install
               </button>
@@ -160,14 +160,14 @@ const PWAInstallPrompt = React.memo(() => {
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
+              className="min-h-[44px] rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
             >
               Not now
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/12 bg-white text-black/60 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:text-white"
               aria-label="Close"
             >
               <X size={16} />

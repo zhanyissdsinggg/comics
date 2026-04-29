@@ -10,7 +10,7 @@ export default function Chip({
 }) {
   const isClickable = typeof onClick === "function";
   const content = children ?? label;
-  const isLight = appearance === "light" || appearance === "default";
+  const isLight = appearance === "light";
 
   if (!content) {
     return null;
@@ -26,8 +26,8 @@ export default function Chip({
               ? "border-black bg-[#FFE500] text-black"
               : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
             : isLight
-              ? "border-black bg-white text-black"
-              : "border-white/10 bg-white/[0.04] text-neutral-300",
+              ? "border-black bg-black text-white"
+              : "border-white/20 bg-black text-neutral-200",
           className,
         )}
       >
@@ -47,8 +47,8 @@ export default function Chip({
             ? "border-black bg-[#FFE500] text-black"
             : "border-[#FFE500] bg-black text-white"
           : isLight
-            ? "border-black bg-white text-black hover:bg-[#00E5FF]"
-            : "border-white/20 bg-white/[0.06] text-white hover:bg-white/10",
+            ? "border-black bg-black text-white hover:bg-[#00E5FF] hover:text-black"
+            : "border-white/20 bg-black text-white hover:border-[#00E5FF] hover:bg-[#111111]",
         className,
       )}
     >

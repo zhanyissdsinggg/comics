@@ -4,8 +4,8 @@ import { loadSubscriptionPlansSeoPayload } from "../../lib/storefrontSeo";
 import { WalletProvider } from "../../store/useWalletStore";
 
 export const metadata = createPageMetadata({
-  title: "Membership",
-  description: "Compare monthly membership options, recurring billing, perks, cancellation details, and billing help.",
+  title: "Plans",
+  description: "Compare plans and pricing.",
   path: "/subscribe",
 });
 

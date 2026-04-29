@@ -31,7 +31,7 @@ export const OFFERS = {
     name: "Starter",
     paidPts: 50,
     bonusPts: 5,
-    tag: "Best for trial",
+    tag: "Easy start",
   },
   points_pack_medium: {
     id: "points_pack_medium",

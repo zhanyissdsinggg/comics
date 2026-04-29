@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function ThemeToggle({ variant = "default" }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isLight =
-    variant === "light" || variant === "home" || variant === "default";
+  const isLight = true;
 
   useEffect(() => {
     setMounted(true);
@@ -23,8 +22,8 @@ export default function ThemeToggle({ variant = "default" }) {
         className={cn(
           "h-10 w-10 animate-pulse rounded-full border",
           isLight
-            ? "border-black/10 bg-white"
-            : "border-white/10 bg-white/[0.04]",
+            ? "border-white/20 bg-black"
+            : "border-white/20 bg-black",
         )}
       />
     );
@@ -41,8 +40,8 @@ export default function ThemeToggle({ variant = "default" }) {
       className={cn(
         "relative h-10 w-10 rounded-full border",
         isLight
-          ? "border-black/10 bg-white text-black/60 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black dark:border-white/10 dark:bg-white/10 dark:text-neutral-200 dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-white"
-          : "border-white/10 bg-white/[0.04] text-neutral-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white",
+          ? "border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] hover:text-white dark:border-white/10 dark:bg-black dark:text-neutral-200 dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:border-white/20 dark:hover:bg-[#111111] dark:hover:text-white"
+          : "border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] hover:text-white",
       )}
       aria-label={`Switch to ${isDark ? "day" : "night"} mode`}
       title={`Switch to ${isDark ? "day" : "night"} mode`}

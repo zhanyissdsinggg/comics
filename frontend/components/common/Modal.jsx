@@ -2,6 +2,10 @@
 
 import { memo, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "./StorefrontPagePrimitives";
 
 export const Modal = memo(function Modal({
   isOpen = false,
@@ -113,7 +117,7 @@ export const Modal = memo(function Modal({
       <div
         ref={modalRef}
         onClick={handleContentClick}
-        className={`relative w-full ${sizeClasses[size]} overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.14)] transition-all duration-300 sm:rounded-3xl ${
+        className={`relative w-full ${sizeClasses[size]} overflow-hidden rounded-[26px] border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 sm:rounded-3xl ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
@@ -123,17 +127,16 @@ export const Modal = memo(function Modal({
           borderTopRightRadius: "1.5rem",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),transparent_32%)]" />
         <div className="flex justify-center pb-2 pt-3 sm:hidden">
-          <div className="h-1.5 w-12 rounded-full bg-black/18" />
+          <div className="h-1.5 w-12 rounded-full bg-white/15" />
         </div>
 
         {(title || showCloseButton) && (
-          <div className="relative flex items-center justify-between border-b border-black/8 px-6 py-4">
+          <div className="relative flex items-center justify-between border-b-2 border-black px-6 py-4">
             {title ? (
               <h2
                 id="modal-title"
-                className="font-display text-xl font-black uppercase tracking-[-0.05em] text-black"
+                className="font-display text-xl font-black uppercase tracking-[-0.05em] text-white"
               >
                 {title}
               </h2>
@@ -142,7 +145,7 @@ export const Modal = memo(function Modal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-black/10 bg-white p-2 text-black/55 shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black active:scale-95"
+                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-black bg-[#FFE500] p-2 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95"
                 aria-label="Close dialog"
               >
                 <X size={20} />
@@ -154,7 +157,7 @@ export const Modal = memo(function Modal({
         <div className="relative max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
 
         {footer ? (
-          <div className="relative border-t border-black/8 px-6 py-4">
+          <div className="relative border-t-2 border-black px-6 py-4">
             {footer}
           </div>
         ) : null}
@@ -175,11 +178,11 @@ export const ConfirmModal = memo(function ConfirmModal({
 }) {
   const variantClasses = {
     default:
-      "border border-black bg-black text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] hover:bg-black/90",
+      storefrontPrimaryButtonClass,
     danger:
-      "border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-700 shadow-[0_10px_24px_rgba(244,63,94,0.1)] hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)]",
+      "inline-flex items-center justify-center rounded-full border-2 border-black bg-[#FF007A] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95",
     warning:
-      "border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] text-black shadow-[0_10px_24px_rgba(245,158,11,0.1)] hover:bg-[linear-gradient(180deg,#fff8ef_0%,#fff3de_100%)]",
+      "inline-flex items-center justify-center rounded-full border-2 border-black bg-[#FFE500] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95",
   };
 
   const handleConfirm = () => {
@@ -198,21 +201,21 @@ export const ConfirmModal = memo(function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-black/12 bg-white px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition duration-200 hover:border-black/18 hover:bg-black/[0.03] active:scale-95"
+            className={`flex-1 ${storefrontSecondaryButtonClass}`}
           >
             {cancelText}
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold tracking-[0.02em] transition-all duration-300 active:scale-95 ${variantClasses[variant]}`}
+            className={`flex-1 ${variantClasses[variant]}`}
           >
             {confirmText}
           </button>
         </div>
       }
     >
-      <p className="text-sm leading-7 text-black/68">{message}</p>
+      <p className="text-sm font-semibold leading-7 text-white/75">{message}</p>
     </Modal>
   );
 });

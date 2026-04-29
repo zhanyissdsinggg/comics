@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
 import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -41,7 +45,7 @@ function formatEpisodeLabel(episode) {
 
   const rawValue = episode.number || episode.id;
   const match = String(rawValue).match(/(\d+)/);
-  return match ? `Ep ${match[1]}` : `Ep ${rawValue}`;
+  return match ? `Ch ${match[1]}` : `Ch ${rawValue}`;
 }
 
 function getLatestEpisode(episodes) {
@@ -67,10 +71,8 @@ export default function SeriesTrustPanel({
   creatorHref = "",
 }) {
   const router = useRouter();
-  const primaryButtonClass =
-    "rounded-full border border-black bg-black px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90";
-  const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white px-5 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]";
+  const primaryButtonClass = storefrontPrimaryButtonClass;
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
 
   const latestEpisode = useMemo(() => getLatestEpisode(episodes), [episodes]);
   const shareUrl = useMemo(() => {
@@ -107,12 +109,12 @@ export default function SeriesTrustPanel({
       label: "Creator",
       value: creatorIdentity.displayName,
       hint: creatorHref
-        ? "Creator."
+        ? "See more from this creator."
         : creatorIdentity.detail,
       onClick: creatorHref ? () => router.push(creatorHref) : null,
     },
     {
-      label: "Reader pull",
+      label: "Readers",
       value:
         followers > 0
           ? formatCompactCount(followers)
@@ -121,22 +123,22 @@ export default function SeriesTrustPanel({
         followers > 0
           ? "Following now."
           : views > 0
-            ? "Reader buzz."
+            ? "Readers are here."
             : ratingCount > 0
-              ? "Early ratings."
-              : "Finding readers.",
+              ? "People are finding it."
+              : "Still early.",
     },
     {
       label: "Latest chapter",
       value: latestEpisode
         ? formatEpisodeLabel(latestEpisode)
         : status === "completed"
-          ? "Completed"
+          ? "Finished"
           : "Live",
       hint: latestEpisode
         ? `Updated ${formatDateLabel(series?.updatedAt)}.`
         : status === "completed"
-          ? "Completed."
+          ? "Finished."
           : `Updated ${formatDateLabel(series?.updatedAt)}.`,
     },
   ];
@@ -158,21 +160,21 @@ export default function SeriesTrustPanel({
     : "/search?sort=popular";
 
   return (
-    <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+    <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-black/45">
+          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
             At a glance
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-black sm:text-3xl">
-            Worth a click.
+          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white sm:text-3xl">
+            What to know
           </h2>
         </div>
-        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Quick take
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Right now
           </p>
-          <p className="mt-3 text-sm leading-6 text-black/75">
+          <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
             {trustNarrative}
           </p>
         </div>
@@ -185,33 +187,33 @@ export default function SeriesTrustPanel({
               key={card.label}
               type="button"
               onClick={card.onClick}
-              className="rounded-[24px] border border-black/10 bg-white px-4 py-4 text-left shadow-[0_18px_44px_rgba(15,23,42,0.08)] transition hover:border-black/15 hover:bg-black/[0.02]"
+              className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-left text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111]"
             >
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                 {card.label}
               </p>
-              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
+              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-white">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-black/65">
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
                 {card.hint}
               </p>
-              <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-black/45">
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-white/60">
                 Creator
               </p>
             </button>
           ) : (
             <div
               key={card.label}
-              className="rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
+              className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
                 {card.label}
               </p>
-              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-black">
+              <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-white">
                 {card.value}
               </p>
-              <p className="mt-2 text-sm leading-6 text-black/65">
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
                 {card.hint}
               </p>
             </div>
@@ -220,12 +222,12 @@ export default function SeriesTrustPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.12fr_0.88fr]">
-        <div className="rounded-[26px] border border-black/10 bg-[#f6f7fb] px-4 py-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-            Fit
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            Why read it
           </p>
-          <p className="mt-3 text-sm leading-7 text-black/70">
-            {series?.title || "This title"} works best for readers who want{" "}
+          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+            {series?.title || "This title"} fits if you want{" "}
             {status === "completed"
               ? "a finished run"
               : "something to follow"}
@@ -233,12 +235,12 @@ export default function SeriesTrustPanel({
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>
         </div>
-        <div className="rounded-[26px] border border-black/10 bg-[#f8f9fb] px-4 py-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
+        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
             Share
           </p>
-          <p className="mt-3 text-sm leading-7 text-black/70">
-            Easy to pass along.
+          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+            Send it to a friend.
           </p>
         </div>
       </div>
@@ -256,7 +258,7 @@ export default function SeriesTrustPanel({
           onClick={() => router.push("/rankings?view=featured")}
           className={secondaryButtonClass}
         >
-          Popular
+          Trending
         </button>
         {onFollowToggle ? (
           <button

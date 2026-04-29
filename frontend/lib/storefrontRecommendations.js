@@ -6,7 +6,7 @@ const HOME_RAIL_PRESETS = {
     title: "New from your follows",
     reason: "Fresh updates from the series already living on your shelf.",
     href: "/library",
-    ctaLabel: "Open library",
+    ctaLabel: "Library",
   },
   continue: {
     eyebrow: STOREFRONT_TERMS.readingDesk,
@@ -43,7 +43,7 @@ const HOME_RAIL_PRESETS = {
     reason:
       "Completed runs for readers who do not want to wait between chapters.",
     href: "/search?status=Completed&sort=popular",
-    ctaLabel: "Browse completed",
+    ctaLabel: "Browse finished",
   },
   ttf: {
     eyebrow: STOREFRONT_TERMS.freeStart,
@@ -51,28 +51,28 @@ const HOME_RAIL_PRESETS = {
     reason:
       "Free-start reads that make it easier to test a story before you commit.",
     href: "/rankings?type=ttf&window=all",
-    ctaLabel: "Browse free chapters",
+    ctaLabel: "Browse free starts",
   },
   adult: {
     eyebrow: "18+ picks",
     title: "18+ After Hours",
     reason: "Mature reads surfaced inside the 18+ catalog.",
     href: "/adult",
-    ctaLabel: "Open 18+ page",
+    ctaLabel: "18+",
   },
   history: {
     eyebrow: STOREFRONT_TERMS.readingDesk,
     title: "Recent reading",
     reason: "The last episodes you opened, kept easy to find.",
     href: "/library",
-    ctaLabel: "Open history",
+    ctaLabel: "History",
   },
   starter: {
     eyebrow: STOREFRONT_TERMS.startHere,
-    title: "First Picks",
+    title: "Top Picks",
     reason: "High-confidence first picks for building a new reading list.",
     href: "/rankings?type=popular&window=all",
-    ctaLabel: "View best sellers",
+    ctaLabel: "View chart",
   },
   "ai-recommended": {
     eyebrow: "Tailored picks",

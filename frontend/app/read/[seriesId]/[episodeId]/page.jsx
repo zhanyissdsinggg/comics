@@ -20,8 +20,8 @@ export async function generateMetadata({ params }) {
 
   if (!series || !episode) {
     return createPageMetadata({
-      title: "Read Episode",
-      description: `Continue reading episodes on ${siteConfig.siteName}.`,
+      title: "Read chapter",
+      description: `Read chapters on ${siteConfig.siteName}.`,
       path: `/read/${seriesId}/${episodeId}`,
       robots: {
         index: false,
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }) {
   }
 
   const seriesTitle = String(series?.title || "").trim() || "Series";
-  const episodeTitle = String(episode?.title || "").trim() || `Episode ${episodeId}`;
+  const episodeTitle = String(episode?.title || "").trim() || `Chapter ${episodeId}`;
   const creatorName = resolveSeriesCreatorName(series);
   const description = [
     `Read ${episodeTitle} from ${seriesTitle} on ${siteConfig.siteName}.`,
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }) {
     .join(" ");
 
   return createPageMetadata({
-    title: `${episodeTitle} · ${seriesTitle}`,
+    title: `${episodeTitle} | ${seriesTitle}`,
     description,
     path: `/read/${seriesId}/${episodeId}`,
     image: series?.coverUrl || null,

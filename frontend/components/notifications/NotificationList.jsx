@@ -4,6 +4,7 @@ import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
+import SurfacePanel from "../common/SurfacePanel";
 
 export default function NotificationList({
   notifications,
@@ -26,10 +27,10 @@ export default function NotificationList({
     });
   };
 
-  const getMeta = (item) => {
-    if (item.type === "NEW_EPISODE") {
-      return "New episode";
-    }
+    const getMeta = (item) => {
+      if (item.type === "NEW_EPISODE") {
+        return "New chapter";
+      }
     if (item.type === "TTF_READY") {
       return "Free unlock";
     }
@@ -47,34 +48,34 @@ export default function NotificationList({
       return item.ctaLabel;
     }
     if (item.type === "NEW_EPISODE" || item.type === "TTF_READY") {
-      return "Open episode";
+      return "Start Reading";
     }
     if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
       return "See offer";
     }
-    return "Series";
+    return "Read More";
   };
 
   if (!notifications) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-white p-6 text-black/68 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+      <SurfacePanel tone="muted" accent="cyan" appearance="dark">
+        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
           Inbox
         </p>
-      </section>
+      </SurfacePanel>
     );
   }
 
   if (notifications.length === 0) {
     return (
-      <section className="rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/60">
+      <SurfacePanel tone="muted" accent="cyan" appearance="dark">
+        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
           Inbox
         </p>
-        <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-black">
+        <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-white">
           You're caught up.
         </p>
-      </section>
+      </SurfacePanel>
     );
   }
 
@@ -84,30 +85,30 @@ export default function NotificationList({
         <div
           key={item.id}
           className={[
-            "rounded-[26px] border p-4 shadow-[0_18px_40px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(15,23,42,0.1)]",
+            "rounded-[26px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
             item.read
-              ? "border-black/10 bg-white"
-              : "border-black/10 bg-[#f6f7f9]",
+              ? "text-white/85"
+              : "text-white",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-black uppercase tracking-[0.03em] text-black">
+                <p className="text-sm font-black uppercase tracking-[0.03em] text-white">
                   {item.title}
                 </p>
                 {!item.read ? (
                   <span
-                    className="rounded-full border border-black/10 bg-black px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white"
+                    className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                   >
                     Unread
                   </span>
                 ) : null}
               </div>
-              <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
                 {item.message}
               </p>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-black/55">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">
                 <span>{getMeta(item)}</span>
                 <span>{formatTimestamp(item.createdAt)}</span>
                 {item.expiresAt ? (
@@ -125,7 +126,7 @@ export default function NotificationList({
                 }
               >
                 {item.read
-                  ? "Read"
+                  ? "Done"
                   : workingId === item.id
                     ? "Saving..."
                     : "Mark read"}

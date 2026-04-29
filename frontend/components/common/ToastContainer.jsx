@@ -12,6 +12,7 @@ import {
   getToastLabel,
   normalizeToastMessage,
 } from "../../lib/toastPresentation";
+import { storefrontPrimaryButtonClass } from "./StorefrontPagePrimitives";
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -43,27 +44,31 @@ function ToastItem({ toast, onClose }) {
 
   const styles = {
     success: {
-      panel: "border-black/10 bg-white shadow-[0_20px_40px_rgba(15,23,42,0.14)]",
+      panel:
+        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
       iconWrap:
-        "border-black/10 bg-emerald-50 text-black",
+        "border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
       icon: <CheckCircle2 size={18} />,
     },
     error: {
-      panel: "border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] shadow-[0_20px_40px_rgba(244,63,94,0.12)]",
+      panel:
+        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
       iconWrap:
-        "border-rose-200/70 bg-white text-rose-700",
+        "border-2 border-black bg-[#FF007A] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
       icon: <AlertCircle size={18} />,
     },
     warning: {
-      panel: "border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] shadow-[0_20px_40px_rgba(245,158,11,0.12)]",
+      panel:
+        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
       iconWrap:
-        "border-amber-200/70 bg-white text-black",
+        "border-2 border-black bg-[#FFE500] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
       icon: <TriangleAlert size={18} />,
     },
     info: {
-      panel: "border-black/10 bg-white shadow-[0_20px_40px_rgba(15,23,42,0.14)]",
+      panel:
+        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
       iconWrap:
-        "border-sky-200/70 bg-sky-50 text-black",
+        "border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
       icon: <Info size={18} />,
     },
   };
@@ -74,7 +79,7 @@ function ToastItem({ toast, onClose }) {
     <div
       role="status"
       aria-live={type === "error" ? "assertive" : "polite"}
-      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 rounded-[24px] border px-4 py-3.5 text-black duration-300`}
+      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 rounded-[22px] border px-4 py-3.5 duration-300`}
     >
       <div
         className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl border ${style.iconWrap}`}
@@ -82,17 +87,17 @@ function ToastItem({ toast, onClose }) {
         {style.icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-black/68">
+        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
           {resolvedLabel}
         </p>
-        <p className="mt-1 text-sm font-bold leading-6 text-black">
+        <p className="mt-1 text-sm font-bold leading-6 text-white">
           {resolvedMessage}
         </p>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black/60 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-black/[0.03] hover:text-black hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-px"
         aria-label={isAdminUi ? "关闭" : "Close"}
       >
         <X size={16} />

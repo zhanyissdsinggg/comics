@@ -10,34 +10,27 @@ export default function StorefrontPathwaysGrid({
   cards = [],
   columnsClassName = "md:grid-cols-2 xl:grid-cols-4",
   className = "",
-  appearance = "default",
+  appearance = "dark",
 }) {
   if (!Array.isArray(cards) || cards.length === 0) {
     return null;
   }
-  const isLight = appearance === "light" || appearance === "default";
-
   return (
     <div className={cn("grid gap-4", columnsClassName, className)}>
       {cards.map((card) => (
         <Card
           key={card.id}
           className={cn(
-            "h-full rounded-[30px] py-0 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.12)]",
-            card.accentClass ||
-              (isLight
-                ? "border-black/10 bg-white hover:bg-[#fcfcfd]"
-                : "border-white/10 bg-white/[0.03]"),
+            "h-full rounded-[26px] py-0 transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+            card.accentClass || "border-2 border-black bg-[#0b0b0b] text-white",
           )}
         >
           <CardContent className="flex h-full flex-col p-5 sm:p-6">
             <Badge
               variant="outline"
               className={cn(
-                "w-fit rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-current shadow-none",
-                isLight
-                  ? "border-black/10 bg-[#f8fafc]"
-                  : "border-white/10 bg-black/20",
+                "w-fit rounded-full border-2 border-black px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-current shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+                "bg-[#FFE500] text-black",
               )}
             >
               {card.eyebrow}
@@ -45,7 +38,7 @@ export default function StorefrontPathwaysGrid({
             <h3
               className={cn(
                 "mt-5 font-display text-[1.22rem] font-black uppercase leading-tight tracking-[-0.04em]",
-                isLight ? "text-black" : "text-white",
+                "text-white",
               )}
             >
               {card.title}
@@ -54,7 +47,7 @@ export default function StorefrontPathwaysGrid({
               <p
                 className={cn(
                   "mt-3 max-w-[22rem] text-sm leading-6",
-                  isLight ? "text-black/68" : "text-neutral-200/90",
+                  "text-white/75",
                 )}
               >
                 {card.description}
@@ -66,9 +59,7 @@ export default function StorefrontPathwaysGrid({
               onClick={card.onClick}
               className={cn(
                 "mt-auto h-10 justify-start gap-2 px-0 pt-5 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
-                isLight
-                  ? "text-black/70 hover:text-black"
-                  : "text-white hover:text-[var(--gush-accent)]",
+                "text-white/80 hover:text-white",
               )}
             >
               {card.cta || card.ctaLabel}

@@ -5,7 +5,7 @@ import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Novels",
-  description: "Novels on Gush.",
+  description: "Trending novels, fresh updates, and finished reads on Gush.",
   path: "/novels",
 });
 

@@ -5,6 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import SiteHeader from "../layout/SiteHeader";
 import { useAuthStore } from "../../store/useAuthStore";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -55,7 +60,7 @@ export default function InteractiveStoryPage({ seriesId }) {
 
     if (response.status === 401) {
       setAuthRequired(true);
-      setError("Sign in to continue.");
+      setError("Sign in to keep going.");
       return;
     }
 
@@ -82,7 +87,7 @@ export default function InteractiveStoryPage({ seriesId }) {
     if (!storyResponse.ok || !storyResponse.data?.story) {
       setStory(null);
       setProgress(null);
-      setError("Interactive mode isn't available yet.");
+      setError("Interactive story isn't live yet.");
       setLoading(false);
       return;
     }
@@ -147,79 +152,81 @@ export default function InteractiveStoryPage({ seriesId }) {
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+      <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-            <p className="text-sm font-medium text-black/58">Loading</p>
-          </section>
+          <SurfacePanel tone="muted" accent="cyan" appearance="dark">
+            <p className="text-sm font-semibold text-white/75">Loading</p>
+          </SurfacePanel>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f7f9] text-black">
+    <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="rounded-[30px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
+        <SurfacePanel tone="muted" accent="cyan" appearance="dark">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
                 Interactive
               </p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-black">
+              <h1 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 text-sm font-medium text-black/68">{storyDescription}</p>
+                <p className="mt-2 text-sm font-semibold text-white/80">{storyDescription}</p>
               ) : null}
             </div>
             <Link
               href={`/series/${encodeURIComponent(seriesId)}`}
-              className="inline-flex items-center justify-center rounded-full border border-black/12 bg-white px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/18 hover:bg-black/[0.03] hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)] active:translate-y-px"
+              className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
             >
-              Back
+              Series
             </Link>
           </div>
-        </section>
+        </SurfacePanel>
 
         {error ? (
-          <section className="rounded-[24px] border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] p-4 text-sm font-medium text-rose-700 shadow-[0_16px_34px_rgba(244,63,94,0.1)]">
+          <SurfacePanel tone="muted" accent="pink" appearance="dark" className="text-white">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span>{error}</span>
               {authRequired ? (
                 <button
                   type="button"
                   onClick={openAuthModal}
-                  className="rounded-full border border-rose-200/70 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-rose-700 shadow-[0_10px_20px_rgba(244,63,94,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-rose-50 hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+                  className={`${storefrontPrimaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
                 >
                   Sign in
                 </button>
               ) : null}
             </div>
-          </section>
+          </SurfacePanel>
         ) : null}
 
         {degradedNotice ? (
-          <section className="rounded-[24px] border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] p-4 text-sm font-medium text-black/68 shadow-[0_16px_34px_rgba(245,158,11,0.08)]">
+          <SurfacePanel tone="muted" accent="yellow" appearance="dark">
             {degradedNotice}
-          </section>
+          </SurfacePanel>
         ) : null}
 
         {node ? (
           <>
-            <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-black/55">
+            <SurfacePanel tone="muted" accent="cyan" appearance="dark">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
                 {normalizeText(node.title || "Current Node")}
               </p>
-              <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-black/82">
+              <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-white/85">
                 {normalizeText(node.content)}
               </p>
-            </section>
+            </SurfacePanel>
 
-            <section className="rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_20px_46px_rgba(15,23,42,0.08)]">
-              <h2 className="text-base font-semibold tracking-[0.01em] text-black">Choices</h2>
+            <SurfacePanel tone="muted" accent="yellow" appearance="dark">
+              <h2 className="text-base font-black uppercase tracking-[0.01em] text-white">
+                Choices
+              </h2>
               <div className="mt-4 grid gap-3">
                 {(node.choices || []).map((choice) => {
                   const disabled = Boolean(submittingChoiceId) || authRequired;
@@ -230,36 +237,40 @@ export default function InteractiveStoryPage({ seriesId }) {
                       type="button"
                       disabled={disabled}
                       onClick={() => handleChoose(choice.id)}
-                      className="rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] px-4 py-3 text-left text-sm font-medium text-black shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:border-black/16 hover:bg-white hover:shadow-[0_16px_34px_rgba(15,23,42,0.1)] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
+                      className={[
+                        "w-full rounded-[22px] border-2 border-black bg-[#0b0b0b] px-4 py-3 text-left text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
+                        disabled ? "opacity-60" : "",
+                      ].join(" ")}
                     >
                       {busy ? "Generating..." : normalizeText(choice.label)}
                     </button>
                   );
                 })}
                 {node.choices?.length === 0 ? (
-                  <p className="text-sm font-medium text-black/58">
-                    No choices yet.
-                  </p>
+                  <p className="text-sm font-semibold text-white/70">No choices right now.</p>
                 ) : null}
               </div>
-            </section>
+            </SurfacePanel>
 
             {storyStateRows.length > 0 ? (
-              <section className="rounded-[28px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fa_100%)] p-4 shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
-                <h3 className="text-xs font-black uppercase tracking-[0.16em] text-black/55">
+              <SurfacePanel tone="muted" accent="blue" appearance="dark">
+                <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
                   State
                 </h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {storyStateRows.map((item) => (
                     <div
                       key={item.key}
-                      className="rounded-[20px] border border-black/10 bg-white px-3 py-2 text-sm text-black shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                      className="rounded-[20px] border-2 border-black bg-[#0b0b0b] px-3 py-2 text-sm text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                     >
-                      <span className="font-semibold uppercase tracking-[0.08em] text-black/72">{item.key}</span>: {item.value}
+                      <span className="font-black uppercase tracking-[0.08em] text-white/80">
+                        {item.key}
+                      </span>
+                      : {item.value}
                     </div>
                   ))}
                 </div>
-              </section>
+              </SurfacePanel>
             ) : null}
           </>
         ) : null}

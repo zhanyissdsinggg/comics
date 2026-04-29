@@ -92,16 +92,16 @@ function LegalSection({
   children = null,
 }) {
   return (
-    <SurfacePanel className={className} appearance="light" accent="blue">
-      <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-black">
+    <SurfacePanel className={className} appearance="dark" accent="cyan">
+      <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
         {title}
       </h2>
-      <div className="mt-4 space-y-4 text-sm font-medium leading-7 text-black/68">
+      <div className="mt-4 space-y-4 text-sm font-medium leading-7 text-white/72">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
         {bullets.length > 0 ? (
-          <ul className="list-disc space-y-2 pl-5 text-black/68 marker:text-[#ff007a]">
+          <ul className="list-disc space-y-2 pl-5 text-white/72 marker:text-[#FF007A]">
             {bullets.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -116,18 +116,18 @@ function LegalSection({
 function ContactCard() {
   return (
     <StorefrontInfoCard title="Legal contact">
-      <p className="mt-3 text-sm font-medium text-black/68">
-        <span className="font-black text-black">Email:</span>{" "}
+      <p className="mt-3 text-sm font-medium text-white/68">
+        <span className="font-black uppercase tracking-[0.08em] text-white">Email:</span>{" "}
         <a
           href={`mailto:${siteConfig.legalEmail}`}
-          className="font-black text-[#ff007a] transition hover:text-[#e1006d]"
+          className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
         >
           {siteConfig.legalEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm font-medium text-black/68">
-          <span className="font-black text-black">Address:</span>{" "}
+        <p className="mt-3 text-sm font-medium text-white/68">
+          <span className="font-black uppercase tracking-[0.08em] text-white">Address:</span>{" "}
           {siteConfig.companyAddress}
         </p>
       ) : null}
@@ -142,16 +142,16 @@ export default function TermsOfServicePage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             eyebrow="Terms"
-            title="Terms of service."
+            title="Terms."
             description={
               <>
                 Using {siteConfig.siteName} means you agree to these Terms and our{" "}
                 <Link
                   href="/privacy-policy"
-                  className="font-black text-[#ff007a] transition hover:text-[#e1006d]"
+                  className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
                 >
                   Privacy Policy
                 </Link>
@@ -172,7 +172,7 @@ export default function TermsOfServicePage() {
 
           <StorefrontDesk
             eyebrow="Legal"
-            title="Legal contact."
+            title="Contact."
             actions={
               <>
               <a
@@ -185,7 +185,7 @@ export default function TermsOfServicePage() {
                 href="/privacy-policy"
                 className={storefrontSecondaryButtonClass}
               >
-                View privacy
+                Privacy
               </Link>
               </>
             }

@@ -49,13 +49,13 @@ export default function ReaderTopBar({
   }, [autoScroll]);
 
   const lightButtonClass =
-    "border border-black/10 bg-white text-black/62 shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/16 hover:bg-black/[0.03] hover:text-black";
+    "border-2 border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
   const lightActiveButtonClass =
-    "border border-emerald-200/80 bg-[linear-gradient(180deg,#f4fff8_0%,#ecfdf3_100%)] text-emerald-700 shadow-[0_10px_24px_rgba(16,185,129,0.12)]";
+    "border-2 border-black bg-[#00C767] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const lightMutedButtonClass =
-    "border border-black/8 bg-[#f3f4f6] text-black/35 shadow-none";
+    "border-2 border-white/10 bg-black text-white/35 shadow-none";
   const lightLockedButtonClass =
-    "border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-700 shadow-[0_10px_24px_rgba(244,63,94,0.1)]";
+    "border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
 
   const canOpenToc = typeof onOpenToc === "function";
   const canBookmark = typeof onAddBookmark === "function";
@@ -66,16 +66,16 @@ export default function ReaderTopBar({
 
   return (
     <header
-      className={`sticky top-0 z-40 backdrop-blur-xl shadow-glass ${
+      className={`sticky top-0 z-40 backdrop-blur-xl ${
         isNightMode
           ? "border-b border-white/10 bg-neutral-950/80 text-neutral-100"
-          : "border-b border-black/8 bg-[rgba(255,255,255,0.94)] text-black shadow-[0_16px_40px_rgba(15,23,42,0.08)]"
+          : "border-b-4 border-[#FFE500] bg-black/92 text-white shadow-[0_6px_0px_0px_rgba(0,0,0,1)]"
       }`}
     >
       {typeof progress === "number" ? (
         <div
           className={`h-1 w-full ${
-            isNightMode ? "bg-neutral-900" : "bg-[#f6f7f9]"
+            isNightMode ? "bg-neutral-900" : "bg-black/[0.06]"
           }`}
         >
           <div
@@ -102,7 +102,7 @@ export default function ReaderTopBar({
           <p className="truncate text-sm font-semibold">{title}</p>
           <p
             className={`text-xs ${
-              isNightMode ? "text-neutral-400" : "text-black/50"
+              isNightMode ? "text-neutral-400" : "text-white/50"
             }`}
           >
             {episodeLabel}
@@ -140,8 +140,12 @@ export default function ReaderTopBar({
           <ShareButton
             url={shareUrl}
             title={`${title} - ${episodeLabel}`}
-            description={`Read ${episodeLabel} of ${title} on Gush`}
-            className="!w-auto !shrink-0 !rounded-full !border !border-neutral-800 !px-2 !py-1 !text-xs md:!px-3"
+            description={`${episodeLabel} from ${title} on Gush`}
+            className={`!w-auto !shrink-0 !rounded-full !px-2 !py-1 !text-xs md:!px-3 ${
+              isNightMode
+                ? "!border !border-neutral-800"
+                : "!border-2 !border-white/20 !bg-black !text-white !shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:!translate-x-0.5 hover:!translate-y-0.5 hover:!border-white/35 hover:!bg-[#111111]"
+            }`}
           />
           {onOpenSettings ? (
             <button
@@ -222,7 +226,7 @@ export default function ReaderTopBar({
             <button
               type="button"
               onClick={onPrev}
-              aria-label="Previous episode"
+              aria-label="Previous chapter"
               disabled={!hasPrev}
               className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
                 hasPrev
@@ -245,8 +249,8 @@ export default function ReaderTopBar({
                 !hasNext
                   ? "End of chapter"
                   : nextLocked
-                    ? "Locked upcoming episode"
-                    : "Forward episode"
+                    ? "Locked next chapter"
+                    : "Next chapter"
               }
               disabled={!hasNext}
               className={`shrink-0 rounded-full px-3 py-1 text-xs ${

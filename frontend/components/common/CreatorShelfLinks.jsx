@@ -78,19 +78,19 @@ export default function CreatorShelfLinks({
     () => collectCreators(items, maxCreators),
     [items, maxCreators],
   );
-  const isLight = appearance === "light" || appearance === "default";
+  const isLight = appearance === "light";
 
   if (creators.length === 0) {
     return null;
   }
 
   const baseClassName = compact
-    ? isLight
-      ? "rounded-[24px] border border-black/10 bg-white px-3 py-3 shadow-[0_16px_34px_rgba(15,23,42,0.08)]"
-      : "rounded-[24px] border border-white/10 bg-white/[0.025] px-3 py-3"
-    : isLight
-      ? "rounded-[24px] border border-black/10 bg-white px-4 py-4 shadow-[0_20px_40px_rgba(15,23,42,0.08)] sm:px-5"
-      : "rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-5";
+      ? isLight
+        ? "rounded-[24px] border-2 border-black bg-[#080808] px-3 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        : "rounded-[24px] border-2 border-black bg-[#080808] px-3 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      : isLight
+        ? "rounded-[24px] border-2 border-black bg-[#080808] px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5"
+        : "rounded-[24px] border-2 border-black bg-[#080808] px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5";
 
   const handleClick = (creator) => {
     const targetPath = creator.href || "/creators";
@@ -123,20 +123,20 @@ export default function CreatorShelfLinks({
           }
         >
           <p
-            className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-black/55" : "text-[var(--gush-accent)]/80"}`}
+            className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-[#FFE500]" : "text-[var(--gush-accent)]/80"}`}
           >
             {label}
           </p>
           {title ? (
             <h3
-              className={`font-display text-lg font-black uppercase tracking-[-0.04em] sm:text-xl ${isLight ? "text-black" : "text-white"}`}
+              className={`font-display text-lg font-black uppercase tracking-[-0.04em] sm:text-xl ${isLight ? "text-white" : "text-white"}`}
             >
               {title}
             </h3>
           ) : null}
           {description ? (
             <p
-              className={`max-w-3xl text-sm leading-6 ${isLight ? "text-black/68" : "text-neutral-400"}`}
+              className={`max-w-3xl text-sm leading-6 ${isLight ? "text-white/70" : "text-neutral-400"}`}
             >
               {description}
             </p>
@@ -151,24 +151,24 @@ export default function CreatorShelfLinks({
               onClick={() => handleClick(creator)}
               className={`group rounded-full px-3.5 py-2 text-left transition ${
                 isLight
-                  ? "border border-black/10 bg-[#f6f7f9] shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-black/16 hover:bg-white hover:shadow-[0_10px_20px_rgba(15,23,42,0.08)] active:translate-y-px"
-                  : "border border-white/10 bg-white/[0.05] hover:border-white/20 hover:bg-white/[0.08]"
+                  ? "border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111] active:translate-y-px"
+                  : "border-2 border-white/10 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/20 hover:bg-[#111111]"
               }`}
             >
               <span className="flex items-center gap-2">
                 <span
-                  className={`text-sm font-semibold ${isLight ? "text-black" : "text-white"}`}
+                  className={`text-sm font-semibold ${isLight ? "text-white" : "text-white"}`}
                 >
                   {creator.name}
                 </span>
                 <span
-                  className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-black/45 group-hover:text-black/60" : "text-neutral-500 group-hover:text-neutral-400"}`}
+                  className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-white/45 group-hover:text-white/70" : "text-neutral-500 group-hover:text-neutral-400"}`}
                 >
                   {formatTitleCount(creator.titles)}
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`text-sm transition group-hover:translate-x-0.5 ${isLight ? "text-black/45 group-hover:text-black" : "text-neutral-500 group-hover:text-neutral-300"}`}
+                  className={`text-sm transition group-hover:translate-x-0.5 ${isLight ? "text-white/45 group-hover:text-[#FFE500]" : "text-neutral-500 group-hover:text-neutral-300"}`}
                 >
                   &gt;
                 </span>

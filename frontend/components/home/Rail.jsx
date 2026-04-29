@@ -11,52 +11,52 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   continue: {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   trending: {
-    lightAccent: "text-black/65",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   completed: {
-    lightAccent: "text-black/65",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   new: {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   ttf: {
-    lightAccent: "text-black/65",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   adult: {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   history: {
-    lightAccent: "text-black/65",
-    lightPanel: "border-black/10 bg-[#f8fafc]",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   starter: {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   "ai-recommended": {
-    lightAccent: "text-black/55",
-    lightPanel: "border-black/10 bg-white",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   recommended: {
-    lightAccent: "text-black/65",
-    lightPanel: "border-black/10 bg-[#f4f7fb]",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
   default: {
-    lightAccent: "text-black/60",
-    lightPanel: "border-black/10 bg-[#f8fafc]",
+    darkAccent: "text-white/65",
+    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
   },
 };
 
@@ -69,8 +69,8 @@ export default function Rail({
   railName,
   onItemClick,
   href = "",
-  ctaLabel = "Browse all",
-  appearance = "light",
+  ctaLabel = "See All",
+  appearance = "dark",
   showCreatorShelfLinks = false,
   creatorEntryPoint = "CREATOR_CHIP",
   creatorCampaignId = "",
@@ -88,21 +88,18 @@ export default function Rail({
     <section>
         <Card
         className={cn(
-          "relative overflow-hidden rounded-[32px] border py-0 shadow-[0_22px_48px_rgba(15,23,42,0.08)]",
-          railTheme.lightPanel,
+          "relative overflow-hidden rounded-[26px] border py-0",
+          railTheme.darkPanel,
         )}
       >
-        <div
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),transparent_42%)]"
-        />
         <CardContent className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-1.5">
               {eyebrow || railName ? (
                 <p
                   className={cn(
-                    "text-[11px] font-semibold uppercase tracking-[0.28em]",
-                    railTheme.lightAccent,
+                    "text-[11px] font-black uppercase tracking-[0.28em]",
+                    railTheme.darkAccent,
                   )}
                 >
                   {eyebrow || railName.replace(/-/g, " ")}
@@ -111,7 +108,7 @@ export default function Rail({
               <h2
                 className={cn(
                   "font-display text-2xl font-black tracking-[-0.05em] md:text-[1.95rem]",
-                  "text-black",
+                  "text-white",
                 )}
               >
                 {title}
@@ -120,7 +117,7 @@ export default function Rail({
                 <p
                   className={cn(
                     "max-w-2xl text-sm leading-7",
-                    "text-black/68",
+                    "text-white/75",
                   )}
                 >
                   {reason}
@@ -133,7 +130,7 @@ export default function Rail({
                 type="button"
                 variant="ghost"
                 onClick={() => router.push(href)}
-                className="h-10 justify-start gap-2 rounded-full border border-black/10 bg-white px-4 text-sm font-semibold uppercase tracking-[0.12em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:bg-[#f6f7f9] hover:text-black"
+                className="h-10 justify-start gap-2 rounded-full border-2 border-black bg-[#00E5FF] px-4 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 {ctaLabel}
                 <ArrowRight className="size-4" />
@@ -143,7 +140,7 @@ export default function Rail({
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
             <Card
-              className="mt-5 rounded-[24px] border border-black/10 bg-white py-0 shadow-[0_14px_32px_rgba(15,23,42,0.07)]"
+              className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
               <CardContent className="p-4">
                 <CreatorShelfLinks
@@ -161,11 +158,11 @@ export default function Rail({
 
           {safeItems.length === 0 ? (
             <Card
-              className="mt-5 rounded-[24px] border border-black/10 bg-[#f8fafc] py-0 shadow-[0_14px_32px_rgba(15,23,42,0.07)]"
+              className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
               <CardContent className="p-8 text-center">
-                <p className="text-sm font-semibold text-black/55">
-                  Nothing is live here yet.
+                <p className="text-sm font-semibold text-white/70">
+                  Nothing here yet.
                 </p>
               </CardContent>
             </Card>

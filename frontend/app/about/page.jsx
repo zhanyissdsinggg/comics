@@ -19,7 +19,7 @@ export const metadata = createPageMetadata({
 
 const CONTACT_LINKS = [
   {
-    label: "Email support",
+    label: "Email us",
     href: `mailto:${siteConfig.supportEmail}`,
     external: true,
   },
@@ -40,10 +40,10 @@ export default function AboutPage() {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             eyebrow="About Gush"
-            title="Built for reading."
+            title="About Gush."
             description=""
             actions={
               <>
@@ -77,34 +77,34 @@ export default function AboutPage() {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading
               eyebrow="Principles"
               title="Readers first."
             />
           </SurfacePanel>
 
-          <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading
               eyebrow="Details"
               title="Contact."
             />
-            <div className="space-y-3 text-sm text-black/68">
+            <div className="space-y-3 text-sm text-white/70">
               <p>
-                <span className="font-semibold text-black">Support:</span>{" "}
+                <span className="font-semibold text-white">Support:</span>{" "}
                 {siteConfig.supportEmail}
               </p>
               <p>
-                <span className="font-semibold text-black">Privacy:</span>{" "}
+                <span className="font-semibold text-white">Privacy:</span>{" "}
                 {siteConfig.privacyEmail}
               </p>
               <p>
-                <span className="font-semibold text-black">Legal:</span>{" "}
+                <span className="font-semibold text-white">Legal:</span>{" "}
                 {siteConfig.legalEmail}
               </p>
               {siteConfig.companyAddress ? (
                 <p>
-                  <span className="font-semibold text-black">Address:</span>{" "}
+                  <span className="font-semibold text-white">Address:</span>{" "}
                   {siteConfig.companyAddress}
                 </p>
               ) : null}

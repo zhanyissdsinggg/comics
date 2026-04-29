@@ -18,13 +18,13 @@ const MAX_HISTORY_ITEMS = 5;
 const HOME_DISCOVERY_LANES = [
   {
     id: "featured-series",
-    label: "Featured Series",
+    label: "Trending",
     hint: "",
     href: "/search",
   },
   {
     id: "completed-series",
-    label: "Completed Series",
+    label: "Finished",
     hint: "",
     href: "/search?status=Completed&sort=popular",
   },
@@ -44,7 +44,7 @@ const HOME_DISCOVERY_LANES = [
 
 const SearchBar = memo(function SearchBar({
   onSearch,
-  placeholder = "Search series, creators, or genres",
+  placeholder = "Search titles, creators, or genres",
   variant = "default",
   showShortcut = true,
   initialValue = "",
@@ -65,23 +65,23 @@ const SearchBar = memo(function SearchBar({
   const isHome = variant === "home";
   const isDark = variant === "dark";
   const discoveryLanes = HOME_DISCOVERY_LANES;
-  const discoveryHeading = "Open";
+  const discoveryHeading = "Browse";
   const shellClass = isFocused
     ? isDark
-      ? "border-2 border-[#FFE500] bg-white/10 text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
-      : "border-2 border-black bg-white text-black shadow-[0_0_0_4px_rgba(15,23,42,0.08)]"
+      ? "border-2 border-[#FFE500] bg-black text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
+      : "border-2 border-white/20 bg-black text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
     : isDark
-      ? "border-2 border-white/20 bg-white/10 text-white hover:border-[#FFE500]"
+      ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]"
       : isHome
-        ? "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#00E5FF]"
-        : "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-white";
+        ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111]"
+        : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111]";
   const searchIconClass = isFocused
     ? isDark
-      ? "text-white"
-      : "text-black"
+      ? "text-[#FFE500]"
+      : "text-white"
     : isDark
       ? "text-white/60"
-      : "text-black/48";
+      : "text-white/55";
 
   useEffect(() => {
     setSearchHistory(readSearchHistory({ limit: MAX_HISTORY_ITEMS }));
@@ -241,7 +241,10 @@ const SearchBar = memo(function SearchBar({
         {isSearching ? (
           <Loader2
             size={16}
-            className="animate-spin text-black/55"
+            className={cn(
+              "animate-spin",
+              isDark ? "text-white/60" : "text-white/55",
+            )}
           />
         ) : null}
         <input
@@ -277,12 +280,14 @@ const SearchBar = memo(function SearchBar({
             }
           }}
           className={cn(
-            "min-w-0 flex-1 bg-transparent text-base placeholder:text-black/38 focus:outline-none md:text-sm",
-            isDark ? "text-white placeholder:text-white/50" : "text-black",
+            "min-w-0 flex-1 bg-transparent text-base focus:outline-none md:text-sm",
+            isDark
+              ? "text-white placeholder:text-white/50"
+              : "text-white placeholder:text-white/50",
           )}
           aria-expanded={showSuggestions}
           aria-controls={listboxId}
-          aria-label="Search series, creators, or genres"
+          aria-label="Search titles, creators, or genres"
           data-testid="storefront-search-input"
         />
         {value ? (
@@ -294,8 +299,8 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "rounded-full",
               isHome
-                ? "text-black/40 hover:bg-black/[0.04] hover:text-black"
-                : "text-black/40 hover:bg-black/[0.04] hover:text-black",
+                ? "text-white/45 hover:bg-[#111111] hover:text-white"
+                : "text-white/45 hover:bg-[#111111] hover:text-white",
             )}
             aria-label="Clear search"
             data-testid="storefront-search-clear"
@@ -308,10 +313,10 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
               isHome
-                ? "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                 : isDark
-                  ? "border-2 border-white/20 bg-white/10 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                  ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
             )}
           >
             {shortcutLabel}
@@ -326,7 +331,7 @@ const SearchBar = memo(function SearchBar({
             "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-md",
             isDark
               ? "border-white/20 bg-black"
-              : "border-black bg-white",
+              : "border-white/20 bg-black",
           )}
         >
           <div className="p-2">
@@ -336,14 +341,14 @@ const SearchBar = memo(function SearchBar({
                   <div className="flex items-center gap-2">
                     <Search
                       size={14}
-                      className="text-black/55"
+                      className="text-white/55"
                     />
                     <span
                       className={cn(
                         "text-xs font-semibold",
                         isHome
-                          ? "text-black/55"
-                          : "text-black/55",
+                          ? "text-white/55"
+                          : "text-white/55",
                       )}
                     >
                       Recent
@@ -357,8 +362,8 @@ const SearchBar = memo(function SearchBar({
                     className={cn(
                       "h-7 rounded-full px-2.5 text-[11px]",
                       isHome
-                        ? "text-[color:var(--gush-ink-faint)] hover:bg-red-500/10 hover:text-red-500"
-                        : "text-black/40 hover:bg-red-500/10 hover:text-red-500",
+                        ? "text-white/45 hover:bg-red-500/10 hover:text-red-400"
+                        : "text-white/45 hover:bg-red-500/10 hover:text-red-400",
                     )}
                     aria-label="Clear all history"
                   >
@@ -372,26 +377,26 @@ const SearchBar = memo(function SearchBar({
                     <div
                       key={`${query}-${index}`}
                       className={cn(
-                        "flex items-center gap-2 rounded-[16px] px-2 py-1 hover:bg-[#fff6cf]",
+                        "flex items-center gap-2 rounded-[16px] px-2 py-1 hover:bg-[#111111]",
                       )}
                     >
                       <Button
                         type="button"
                         variant="ghost"
                         onClick={() => handleHistoryClick(query)}
-                        className={cn(
-                          "h-auto flex-1 justify-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm hover:bg-transparent",
-                          isHome
-                            ? "text-[color:var(--gush-ink)] hover:text-[color:var(--gush-ink-strong)]"
-                            : "text-black/68 hover:text-black",
+                          className={cn(
+                            "h-auto flex-1 justify-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm hover:bg-transparent",
+                            isHome
+                            ? "text-white/70 hover:text-white"
+                            : "text-white/70 hover:text-white",
                         )}
                       >
                         <Search
-                          className={cn(
+                            className={cn(
                             "size-3.5",
                             isHome
-                              ? "text-[color:var(--gush-ink-faint)]"
-                              : "text-black/40",
+                              ? "text-white/40"
+                              : "text-white/40",
                           )}
                         />
                         <span className="truncate">{query}</span>
@@ -401,11 +406,11 @@ const SearchBar = memo(function SearchBar({
                         size="icon-xs"
                         variant="ghost"
                         onClick={() => handleDeleteHistory(query)}
-                        className={cn(
+                          className={cn(
                           "rounded-full",
                           isHome
-                            ? "text-[color:var(--gush-ink-faint)] hover:bg-red-500/10 hover:text-red-500"
-                            : "text-black/40 hover:bg-red-500/10 hover:text-red-500",
+                            ? "text-white/40 hover:bg-red-500/10 hover:text-red-400"
+                            : "text-white/40 hover:bg-red-500/10 hover:text-red-400",
                         )}
                         aria-label={`Delete ${query} from recent searches`}
                       >
@@ -418,9 +423,9 @@ const SearchBar = memo(function SearchBar({
             ) : null}
 
             <div
-              className={cn(
+                  className={cn(
                 searchHistory.length > 0
-                  ? "mt-2 border-t border-black/8 pt-2"
+                  ? "mt-2 border-t border-white/10 pt-2"
                   : "",
               )}
             >
@@ -429,16 +434,16 @@ const SearchBar = memo(function SearchBar({
                   size={14}
                   className={cn(
                     isHome
-                      ? "text-[color:var(--gush-ink-faint)]"
-                      : "text-black/40",
+                      ? "text-white/40"
+                      : "text-white/40",
                   )}
                 />
                 <span
                   className={cn(
                     "text-xs font-semibold",
                     isHome
-                      ? "text-black/55"
-                      : "text-black/55",
+                      ? "text-white/55"
+                      : "text-white/55",
                   )}
                 >
                   {discoveryHeading}
@@ -453,27 +458,27 @@ const SearchBar = memo(function SearchBar({
                     variant="ghost"
                     onClick={() => handleLaneClick(lane)}
                     className={cn(
-                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left hover:bg-[#dffcff]",
+                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left hover:bg-[#111111]",
                     )}
                   >
                     <span className="min-w-0">
                       <span
-                        className={cn(
+                          className={cn(
                           "block text-sm font-medium",
                           isHome
-                            ? "text-[color:var(--gush-ink)]"
-                            : "text-black",
+                            ? "text-white"
+                            : "text-white",
                         )}
                       >
                         {lane.label}
                       </span>
                       {lane.hint ? (
                         <span
-                          className={cn(
+                            className={cn(
                             "mt-0.5 block text-xs",
                             isHome
-                              ? "text-[color:var(--gush-ink-faint)]"
-                              : "text-black/55",
+                              ? "text-white/55"
+                              : "text-white/55",
                           )}
                         >
                           {lane.hint}
@@ -484,8 +489,8 @@ const SearchBar = memo(function SearchBar({
                       className={cn(
                         "inline-flex items-center gap-1 text-xs font-semibold",
                         isHome
-                          ? "text-[color:var(--gush-ink-faint)]"
-                          : "text-black/40",
+                          ? "text-white/45"
+                          : "text-white/45",
                       )}
                     >
                       Open

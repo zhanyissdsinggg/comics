@@ -1,15 +1,20 @@
 const palette = {
   dark: {
-    default: "border-white/10 bg-white/[0.05] text-neutral-200",
-    accent: "border-white/20 bg-white/10 text-white",
+    default: "border-white/20 bg-black text-neutral-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+    accent: "border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
     success: "border-emerald-400/25 bg-emerald-400/10 text-emerald-200",
-    subtle: "border-white/10 bg-white/[0.03] text-neutral-400",
+    subtle: "border-white/20 bg-[#0a0a0a] text-neutral-400 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
   },
   light: {
-    default: "border-black/10 bg-white text-black/68 shadow-[0_8px_18px_rgba(15,23,42,0.06)]",
-    accent: "border-black/12 bg-[#f6f7f9] text-black shadow-[0_10px_22px_rgba(15,23,42,0.08)]",
-    success: "border-emerald-200/70 bg-emerald-50 text-black/72 shadow-[0_10px_22px_rgba(16,185,129,0.08)]",
-    subtle: "border-black/10 bg-[#f6f7f9] text-black/55",
+    // Keep "light" readable on dark surfaces, but still match the ZIP hard-edge style.
+    default:
+      "border-2 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+    accent:
+      "border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+    success:
+      "border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+    subtle:
+      "border-2 border-black bg-white text-black/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
   },
 };
 

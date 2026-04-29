@@ -4,6 +4,10 @@ import useCountdown from "../../hooks/useCountdown";
 import { OFFERS } from "../../lib/offers/catalog";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import ShareButton from "../common/ShareButton";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 function formatPointsLabel(value) {
   return `${Number(value || 0)} points`;
@@ -11,7 +15,7 @@ function formatPointsLabel(value) {
 
 function formatPackLabel(value) {
   const count = Number(value || 0);
-  return `${count || 1} more episode${count === 1 ? "" : "s"}`;
+  return `${count || 1} more chapter${count === 1 ? "" : "s"}`;
 }
 
 function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
@@ -22,13 +26,13 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
 
   return (
-    <div className="rounded-[24px] border border-black/10 bg-[#f8f9fb] px-4 py-3 shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+    <div className="rounded-[24px] border-[3px] border-white/20 bg-black px-4 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
             From
           </p>
-          <p className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-black">
+          <p className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-white">
             {discoveryContext.sourceLabel} | {discoveryContext.laneValue}
           </p>
         </div>
@@ -36,7 +40,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
           <button
             type="button"
             onClick={onReturnToSource}
-            className="rounded-full border border-black/12 bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.03em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
+            className={`${storefrontSecondaryButtonClass} px-3 py-1.5 text-[11px]`}
           >
             {discoveryContext.returnLabel}
           </button>
@@ -49,10 +53,10 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
 function MetaPill({ children, accent = false }) {
   return (
     <span
-      className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] ${
+      className={`rounded-full border-2 border-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
           accent
-            ? "border-black/10 bg-[#f6f7fb] text-black"
-            : "border-black/10 bg-white text-black/64"
+            ? "bg-[#FFE500] text-black"
+            : "bg-black text-white/70 border-white/20"
         }`}
     >
       {children}
@@ -113,15 +117,15 @@ export default function EndOfEpisodeOverlay({
   const primaryLabel = showPackPrimary
     ? `Unlock ${formatPackLabel(packOffer?.episodes || 3)}`
     : singlePrice === 0
-      ? "Read free"
-      : `Unlock next for ${formatPointsLabel(singlePrice)}`;
+      ? "Read Free"
+      : `Unlock Next - ${formatPointsLabel(singlePrice)}`;
   const secondaryLabel = showPackPrimary
     ? singlePrice === 0
-      ? "Just the next episode"
-      : `Just the next episode (${formatPointsLabel(singlePrice)})`
+      ? "Just this chapter"
+      : `Just this chapter (${formatPointsLabel(singlePrice)})`
     : `${formatPackLabel(packOffer?.episodes || 3)} (${formatPointsLabel(packPrice)})`;
   const packSavingsText = packOffer?.savingsPct
-    ? `Save ${packOffer.savingsPct}% with the pack`
+    ? `Save ${packOffer.savingsPct}% with the pack.`
     : "";
   const pricingNote = pricing?.appliedDailyFree
     ? "Free now"
@@ -130,8 +134,7 @@ export default function EndOfEpisodeOverlay({
   const packNote =
     packPricing?.appliedCoupon?.label ||
     (packPricing?.discountPct ? `${packPricing.discountPct}% off` : "");
-  const subscriptionNote =
-    "Free reads. Lower prices.";
+  const subscriptionNote = "Free reads plus lower chapter prices.";
   const upsellBadge = showSubscribe ? "Best" : "";
   const nextEpisodeStatusLabel = nextUnlocked
     ? "Ready now"
@@ -163,32 +166,31 @@ export default function EndOfEpisodeOverlay({
     onPackOffer?.(packOffer);
   };
   const primaryButtonClass = highlightPrimaryAction
-    ? "rounded-full border border-black bg-black text-white shadow-[0_0_0_4px_rgba(15,23,42,0.08),0_16px_36px_rgba(15,23,42,0.18)]"
-    : "rounded-full border border-black bg-black text-white shadow-[0_16px_36px_rgba(15,23,42,0.18)] hover:bg-black/90";
-  const secondaryButtonClass =
-    "rounded-full border border-black/12 bg-white text-black transition-all shadow-[0_10px_24px_rgba(15,23,42,0.08)] hover:border-black/18 hover:bg-black/[0.03]";
+    ? `${storefrontPrimaryButtonClass} outline outline-2 outline-offset-2 outline-[#FFE500]`
+    : storefrontPrimaryButtonClass;
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-black/10 bg-white p-5 shadow-[0_28px_70px_rgba(15,23,42,0.16)]">
+      <div className="w-full max-w-2xl rounded-[32px] border-[3px] border-white/20 bg-black p-5 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-black/55">
-              Next episode
+            <p className="text-[11px] font-black uppercase tracking-[0.26em] text-white/55">
+              Next chapter
             </p>
-            <p className="text-lg font-black uppercase tracking-[-0.03em] text-black">
+            <p className="text-lg font-black uppercase tracking-[-0.03em] text-white">
               {nextEpisode.title}
             </p>
             {seriesTitle ? (
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/58">
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/58">
                 {seriesTitle}
               </p>
             ) : null}
           </div>
           <ShareButton
             url={typeof window !== "undefined" ? window.location.href : ""}
-            title={`${seriesTitle || "Series"} - ${episodeTitle || "Episode"}`}
+            title={`${seriesTitle || "Series"} - ${episodeTitle || "Chapter"}`}
             description=""
             className=""
           />
@@ -201,13 +203,13 @@ export default function EndOfEpisodeOverlay({
           />
 
           {nextUnlocked ? (
-            <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+            <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
                     Ready now
                   </p>
-                  <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-black">
+                  <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-white">
                     {nextEpisode.title}
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -221,19 +223,19 @@ export default function EndOfEpisodeOverlay({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    ref={primaryActionRef}
-                    type="button"
-                    onClick={onNext}
-                    className={`px-4 py-2 text-sm font-semibold transition ${primaryButtonClass}`}
-                  >
-                    Next
-                  </button>
+                    <button
+                      ref={primaryActionRef}
+                      type="button"
+                      onClick={onNext}
+                      className={`px-4 py-2 text-sm ${primaryButtonClass}`}
+                    >
+                    Keep Reading
+                    </button>
                   {onViewSeries ? (
                     <button
                       type="button"
                       onClick={onViewSeries}
-                      className={`px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
+                      className={`px-4 py-2 text-sm ${secondaryButtonClass}`}
                     >
                       Series
                     </button>
@@ -242,13 +244,13 @@ export default function EndOfEpisodeOverlay({
               </div>
             </div>
           ) : (
-            <div className="rounded-[26px] border border-black/10 bg-white px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+            <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
                   <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
-                    Continue
+                    Next
                   </p>
-                  <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-black">
+                  <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-white">
                     {nextEpisode.title}
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -263,7 +265,7 @@ export default function EndOfEpisodeOverlay({
                       <button
                         type="button"
                         onClick={onClaim}
-                        className="mt-4 rounded-full border border-black/12 bg-[#f6f7fb] px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03]"
+                        className={`mt-4 px-4 py-2 text-sm ${storefrontSecondaryButtonClass}`}
                       >
                         Claim now
                       </button>
@@ -271,15 +273,15 @@ export default function EndOfEpisodeOverlay({
                       <div
                         className={`mt-4 ${
                           countdownVariant === "B"
-                            ? "flex flex-col gap-2 rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-3 text-xs font-semibold text-black/66 shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
-                            : "flex flex-wrap items-center gap-3 rounded-[22px] border border-black/10 bg-[#f8f9fb] px-4 py-2 text-xs font-semibold text-black/66 shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
+                            ? "flex flex-col gap-2 rounded-[22px] border-[3px] border-white/20 bg-black px-4 py-3 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                            : "flex flex-wrap items-center gap-3 rounded-[22px] border-[3px] border-white/20 bg-black px-4 py-2 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                         }`}
                       >
                         <span>Free in {formatted || "--:--:--"}</span>
                         <button
                           type="button"
                           onClick={() => onNotify?.()}
-                          className={`px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] ${secondaryButtonClass}`}
+                          className={`px-3 py-1 text-[10px] ${secondaryButtonClass}`}
                         >
                           Remind me
                         </button>
@@ -293,12 +295,12 @@ export default function EndOfEpisodeOverlay({
                     ref={primaryActionRef}
                     type="button"
                     onClick={handlePrimary}
-                    className={`w-full px-4 py-2 text-sm font-semibold transition ${primaryButtonClass}`}
+                    className={`w-full px-4 py-2 text-sm ${primaryButtonClass}`}
                   >
                     {primaryLabel}
                   </button>
 
-                  {showPackPrimary && packSavingsText ? (
+                {showPackPrimary && packSavingsText ? (
                     <p className={`text-xs font-black uppercase tracking-[0.08em] ${accentTextClass}`}>
                       {packSavingsText}
                     </p>
@@ -312,7 +314,7 @@ export default function EndOfEpisodeOverlay({
                           onOfferClick?.("subscribe_basic");
                           onSubscribe();
                         }}
-                        className={`w-full px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
+                        className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
                         {STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
@@ -321,19 +323,19 @@ export default function EndOfEpisodeOverlay({
                           </span>
                         ) : null}
                       </button>
-                      <p className="text-xs font-medium leading-5 text-black/58">{subscriptionNote}</p>
+                      <p className="text-xs font-semibold leading-5 text-white/70">{subscriptionNote}</p>
                     </>
                   ) : (
                     <>
                       <button
                         type="button"
                         onClick={handleSecondary}
-                        className={`w-full px-4 py-2 text-sm font-semibold ${secondaryButtonClass}`}
+                        className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
                         {secondaryLabel}
                       </button>
                       {packNote ? (
-                        <p className="text-xs font-medium leading-5 text-black/58">{packNote}</p>
+                        <p className="text-xs font-semibold leading-5 text-white/70">{packNote}</p>
                       ) : null}
                     </>
                   )}

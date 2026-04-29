@@ -5,13 +5,13 @@ export const ADULT_GATE_TITLES = {
 };
 
 export const ADULT_GATE_DESCRIPTIONS = {
-  NEED_LOGIN: "Mature titles stay behind sign-in on this device.",
-  NEED_AGE_CONFIRM: "Confirm your age once to unlock 18+ access.",
-  NEED_ADULT_MODE: "18+ browsing is off right now.",
+  NEED_LOGIN: "Sign in to open 18+ titles.",
+  NEED_AGE_CONFIRM: "Confirm once for 18+.",
+  NEED_ADULT_MODE: "18+ is off right now.",
 };
 
 export const LOGIN_GATE_TITLE = "Sign in to view 18+";
-export const LOGIN_GATE_DESCRIPTION = "Sign in to unlock 18+ titles.";
+export const LOGIN_GATE_DESCRIPTION = "Sign in to open 18+ titles.";
 export const AGE_GATE_TITLE = "Confirm your age";
 
 export const ADULT_GATE_ACTION_LABELS = {

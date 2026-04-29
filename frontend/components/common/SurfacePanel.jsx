@@ -72,7 +72,7 @@ export default function SurfacePanel({
   accent = "blue",
   appearance = "default",
 }) {
-  const resolvedAppearance = appearance === "default" ? "light" : appearance;
+  const resolvedAppearance = appearance === "default" ? "dark" : appearance;
   const isLight = resolvedAppearance === "light";
 
   return (

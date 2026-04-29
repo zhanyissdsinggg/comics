@@ -1,6 +1,10 @@
 "use client";
 
 import { AGE_GATE_TITLE } from "../../lib/adultGateCopy";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
   if (!open) {
@@ -9,22 +13,22 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/40 p-4 backdrop-blur-[6px] sm:items-center"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/82 p-4 backdrop-blur-[6px] sm:items-center"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[30px] border border-black/10 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.14)]"
+        className="w-full max-w-md rounded-[30px] border-2 border-white/20 bg-black/95 p-6 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-black/45">
+        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
           Age check
         </p>
-        <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-black">
+        <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-white">
           {AGE_GATE_TITLE}
         </h3>
-        <p className="mt-3 text-sm leading-7 text-black/68">
+        <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
           You must be at least {legalAge} years old to access mature content.
         </p>
 
@@ -32,14 +36,14 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-black/12 bg-white px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-black transition hover:border-black/18 hover:bg-black/[0.03]"
+            className={`px-4 py-2.5 text-sm ${storefrontSecondaryButtonClass}`}
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="rounded-full border border-black bg-black px-4 py-2.5 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:bg-black/90"
+            className={`px-4 py-2.5 text-sm ${storefrontPrimaryButtonClass}`}
           >
             I confirm
           </button>

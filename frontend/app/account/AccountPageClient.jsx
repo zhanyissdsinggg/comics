@@ -289,7 +289,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         }
       });
     } else {
-      setMessage("Saved to this device.");
+      setMessage("Saved on this device.");
     }
   };
 
@@ -297,7 +297,7 @@ export default function AccountPage({ initialSignedIn = false }) {
     setSecurityStatus("");
     const email = user?.email || "";
     if (!email) {
-      setSecurityStatus("Email not found. Sign in again.");
+      setSecurityStatus("No email found. Sign in again.");
       return;
     }
 
@@ -321,24 +321,24 @@ export default function AccountPage({ initialSignedIn = false }) {
     if (!viewerSignedIn) {
       return [
         {
-          label: "Status",
-          value: "Signed out",
-          hint: "Sign in to sync.",
+            label: "Status",
+            value: "Signed out",
+            hint: "Sign in to keep your place.",
         },
         {
-          label: "Saved now",
-          value: "Local",
-          hint: "Settings and alerts.",
+          label: "This device",
+          value: "This device",
+          hint: "Settings and alerts",
         },
         {
           label: "Point packs",
           value: "One-time",
-          hint: "Flexible unlocks.",
+          hint: "Buy only what you need.",
         },
         {
-          label: "Membership",
+          label: "Plans",
           value: "Monthly",
-          hint: "Monthly access.",
+          hint: "Monthly plan.",
         },
       ];
     }
@@ -347,23 +347,23 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         label: "Status",
         value: "Signed in",
-        hint: !hydrated
-          ? "Loading."
+          hint: !hydrated
+          ? "Loading"
           : user?.emailVerified
-            ? "Synced."
-            : "Verify your email.",
+            ? "Synced"
+            : "Verify your email",
       },
       {
-        label: "Membership",
+        label: "Plans",
         value: subscription?.active ? "Member" : "Free",
         hint: subscription?.renewAt
           ? `Renews ${new Date(subscription.renewAt).toLocaleDateString()}`
           : !hydrated
-            ? "Loading."
-            : "Upgrade anytime.",
+            ? "Loading"
+            : "Upgrade anytime",
       },
       {
-        label: "Saved here",
+        label: "Region",
         value: regionConfig.label,
         hint: `${language.toUpperCase()} | ${regionConfig.legalAge}+ age check`,
       },
@@ -377,8 +377,8 @@ export default function AccountPage({ initialSignedIn = false }) {
               ? orders.length.toLocaleString()
               : "None yet",
         hint: ordersLoading
-          ? "Loading."
-          : "Charges.",
+          ? "Loading"
+          : "Billing",
       },
     ];
   }, [
@@ -395,9 +395,9 @@ export default function AccountPage({ initialSignedIn = false }) {
   ]);
 
   const actionSecondaryButtonClass =
-    "inline-flex min-h-[44px] items-center justify-center rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-50";
   const actionPrimaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50";
 
   const accountActionCards = useMemo(() => {
     if (!viewerSignedIn) {
@@ -405,7 +405,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "signin",
           eyebrow: "Account",
-          title: "Sign in.",
+          title: "Sign in",
           description: "",
           cta: "Sign in",
           onClick: openAuthPrompt,
@@ -414,7 +414,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "recover",
           eyebrow: "Recovery",
-          title: "Reset password.",
+          title: "Reset password",
           description: "",
           cta: "Reset password",
           onClick: () => router.push("/auth/reset"),
@@ -422,8 +422,8 @@ export default function AccountPage({ initialSignedIn = false }) {
         },
         {
           id: "membership",
-          eyebrow: "Membership",
-          title: "Plans.",
+          eyebrow: "Plans",
+          title: "Plans",
           description: "",
           cta: "Plans",
           onClick: () =>
@@ -439,7 +439,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         {
           id: "store",
           eyebrow: "Point packs",
-          title: "Point packs.",
+          title: "Point packs",
           description: "",
           cta: "Point packs",
           onClick: () => router.push("/store"),
@@ -451,8 +451,8 @@ export default function AccountPage({ initialSignedIn = false }) {
     return [
       {
         id: "membership",
-        eyebrow: "Membership",
-        title: "Membership.",
+        eyebrow: "Plans",
+        title: "Plans",
         description: subscription?.active
           ? subscription?.renewAt
             ? `Renews ${new Date(subscription.renewAt).toLocaleDateString(
@@ -462,10 +462,10 @@ export default function AccountPage({ initialSignedIn = false }) {
                   day: "numeric",
                   year: "numeric",
                 },
-              )}.`
-            : "Active."
+              )}`
+            : "Active"
           : "",
-        cta: subscription?.active ? "Membership" : "Plans",
+          cta: subscription?.active ? "Plans" : "See plans",
         onClick: () =>
           router.push(
             buildPathWithAttribution("/subscribe", {
@@ -476,30 +476,30 @@ export default function AccountPage({ initialSignedIn = false }) {
           ),
         accentClass: actionPrimaryButtonClass,
       },
-      {
-        id: "purchases",
-        eyebrow: "Purchases",
-        title: "Orders.",
-        description: "",
-        cta: "Orders",
+        {
+          id: "purchases",
+          eyebrow: "Purchases",
+          title: "Orders",
+          description: "",
+          cta: "Orders",
         onClick: () => router.push("/orders"),
         accentClass: actionSecondaryButtonClass,
       },
-      {
-        id: "library",
-        eyebrow: "Reading",
-        title: "Library.",
-        description: "",
-        cta: "Library",
+        {
+          id: "library",
+          eyebrow: "Reading",
+          title: "Library",
+          description: "",
+          cta: "Library",
         onClick: () => router.push("/library"),
         accentClass: actionSecondaryButtonClass,
       },
-      {
-        id: "support",
-        eyebrow: "Support",
-        title: "Support.",
-        description: "",
-        cta: "Support",
+        {
+          id: "support",
+          eyebrow: "Support",
+          title: "Support",
+          description: "",
+          cta: "Support",
         onClick: () =>
           router.push(
             buildSupportPath({
@@ -522,37 +522,37 @@ export default function AccountPage({ initialSignedIn = false }) {
   ]);
 
   const sectionEyebrowClass =
-    "text-[11px] font-black uppercase tracking-[0.24em] text-black/55";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-white/60";
   const sectionTitleClass =
-    "font-display text-2xl font-black uppercase tracking-[-0.05em] text-black";
-  const mutedCopyClass = "text-sm font-semibold leading-6 text-black/72";
+    "font-display text-2xl font-black uppercase tracking-[-0.05em] text-white";
+  const mutedCopyClass = "text-sm font-semibold leading-6 text-white/70";
   const fieldLabelClass =
-    "text-[11px] font-black uppercase tracking-[0.24em] text-black/55";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-white/60";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black outline-none transition placeholder:text-black/35 shadow-[0_10px_24px_rgba(15,23,42,0.06)] focus:border-black/18 focus:bg-white focus:ring-4 focus:ring-black/5";
+    "mt-2 w-full rounded-[22px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white outline-none transition-transform duration-150 placeholder:text-white/35 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15";
   const secondaryButtonClass =
-    "inline-flex min-h-[44px] items-center justify-center rounded-full border border-black/12 bg-white px-4 py-2 text-xs font-semibold tracking-[0.02em] text-black shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all hover:border-black/18 hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-50";
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border border-black bg-black px-5 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition-all hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50";
   const highlightCardClass =
-    "rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-4 py-4 text-sm font-semibold text-black/72 shadow-[0_18px_40px_rgba(15,23,42,0.08)]";
+    "rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 text-sm font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const softInfoCardClass =
-    "rounded-[24px] border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#f9fafb_100%)] p-4 text-sm font-semibold text-black/60 shadow-[0_16px_36px_rgba(15,23,42,0.06)]";
+    "rounded-[24px] border-2 border-white/15 bg-black p-4 text-sm font-semibold text-white/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const orderCardClass =
-    "rounded-[24px] border border-black/10 bg-white p-4 shadow-[0_18px_42px_rgba(15,23,42,0.08)]";
+    "rounded-[24px] border-2 border-white/15 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
   const checkboxClass =
-    "h-4 w-4 rounded-none border-[2px] border-black bg-white text-black focus:ring-0";
+    "h-4 w-4 rounded-none border-[2px] border-white/30 bg-black text-[#00E5FF] focus:ring-0";
   const checkboxCardClass =
-    "flex items-center gap-3 rounded-[24px] border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black/72 shadow-[0_16px_36px_rgba(15,23,42,0.08)]";
+    "flex items-center gap-3 rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn
-    ? "Account."
-    : "Local.";
+    ? "Account"
+    : "This device";
   const accountDeskCopy = viewerSignedIn
     ? orders.length > 0
-      ? "Orders, plans, support."
-      : "Settings."
-    : "Local settings.";
+      ? "Orders, plans, support"
+      : "Settings"
+    : "Local settings";
 
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
@@ -560,16 +560,16 @@ export default function AccountPage({ initialSignedIn = false }) {
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            appearance="light"
-            accent="blue"
+            appearance="dark"
+            accent="cyan"
             eyebrow="Account"
-            title={viewerSignedIn ? "Account." : "Local."}
+            title={viewerSignedIn ? "Account" : "This device"}
             description={
               viewerSignedIn
-                ? "Reading, orders, and security."
-                : "Local settings."
+                ? "Reading, orders, security"
+                : ""
             }
-            secondary={viewerSignedIn ? "" : "Sign in to sync."}
+            secondary=""
             stats={accountHeroStats}
             actions={
               <>
@@ -603,7 +603,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   }}
                   className={secondaryButtonClass}
                 >
-                  {viewerSignedIn ? "Membership" : "Reset password"}
+                  {viewerSignedIn ? "Plans" : "Reset password"}
                 </button>
               </>
             }
@@ -611,19 +611,19 @@ export default function AccountPage({ initialSignedIn = false }) {
 
           <SurfacePanel
             tone="muted"
-            accent="blue"
-            appearance="light"
+            accent="cyan"
+            appearance="dark"
             className="flex h-full flex-col justify-between space-y-6"
           >
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/55">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                 Desk
               </p>
               <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-black">
+                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {accountDeskTitle}
                 </h2>
-                <p className="mt-3 text-sm font-semibold leading-7 text-black/72">
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/70">
                   {accountDeskCopy}
                 </p>
               </div>
@@ -694,20 +694,21 @@ export default function AccountPage({ initialSignedIn = false }) {
         {!viewerSignedIn ? (
           <SurfacePanel
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-            appearance="light"
+            appearance="dark"
             accent="blue"
+            tone="muted"
           >
             <div>
               <p className={sectionEyebrowClass}>Signed out</p>
-              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-black">
-                Sign in.
+                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                Sign in
               </h2>
-              <h3 className="mt-3 text-lg font-black tracking-[-0.02em] text-black">
-                This device, for now.
-              </h3>
-              <p className="mt-3 text-sm font-semibold leading-6 text-black/72">
-                Sync settings and orders.
-              </p>
+              <h3 className="mt-3 text-lg font-black tracking-[-0.02em] text-white">
+                Local only.
+                </h3>
+                <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
+                 Sign in to sync your account.
+                </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -744,23 +745,23 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         {message ? (
           <SurfacePanel
-            appearance="light"
+            appearance="dark"
             accent={messageIsError ? "rose" : "amber"}
             className={
               messageIsError
-                ? "border border-rose-200/80 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] shadow-[0_18px_40px_rgba(244,63,94,0.08)]"
-                : "border border-amber-200/80 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] shadow-[0_18px_40px_rgba(245,158,11,0.08)]"
+                ? "border-2 border-[#FF007A] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                : "border-2 border-[#FFE500] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             }
           >
             <p
-              className={`text-sm font-semibold ${messageIsError ? "text-red-600" : "text-black/72"}`}
+              className={`text-sm font-semibold ${messageIsError ? "text-[#FF007A]" : "text-white/78"}`}
             >
               {message}
             </p>
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="light" accent="blue">
+        <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
           <div className="space-y-2">
             <p className={sectionEyebrowClass}>Actions</p>
             <h2 className={sectionTitleClass}>Actions.</h2>
@@ -768,7 +769,7 @@ export default function AccountPage({ initialSignedIn = false }) {
           <StorefrontPathwaysGrid
             cards={accountActionCards}
             columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-            appearance="light"
+            appearance="dark"
           />
         </SurfacePanel>
 
@@ -784,12 +785,12 @@ export default function AccountPage({ initialSignedIn = false }) {
             {viewerSignedIn ? null : (
               <SurfacePanel
                 className="space-y-5"
-                appearance="light"
-                accent="blue"
+                appearance="dark"
+                accent="cyan"
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Local reading setup</p>
-                  <h2 className={sectionTitleClass}>Local.</h2>
+                  <h2 className={sectionTitleClass}>This device</h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -815,7 +816,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                       Legal age: {regionConfig.legalAge}+
                     </p>
                   </div>
@@ -861,8 +862,8 @@ export default function AccountPage({ initialSignedIn = false }) {
             {viewerSignedIn ? (
               <SurfacePanel
                 className="space-y-5"
-                appearance="light"
-                accent="blue"
+                appearance="dark"
+                accent="cyan"
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Account basics</p>
@@ -893,7 +894,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <div className="h-3 w-40 animate-pulse rounded-full bg-slate-100" />
                       </div>
                     ) : (
-                      <div className={`${fieldClass} text-black/68`}>
+                      <div className={`${fieldClass} text-white/70`}>
                         {user?.email || user?.id || "Active account"}
                       </div>
                     )}
@@ -905,7 +906,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         Email status:{" "}
-                        <span className="font-black uppercase tracking-[0.06em] text-black">
+                        <span className="font-black uppercase tracking-[0.06em] text-white">
                           {user?.emailVerified ? "Verified" : "Not verified"}
                         </span>
                       </div>
@@ -928,11 +929,11 @@ export default function AccountPage({ initialSignedIn = false }) {
                         }}
                         className={secondaryButtonClass}
                       >
-                        Send another email
+                        Send again
                       </button>
                     </div>
                     {verifyStatus ? (
-                      <div className="mt-2 text-xs font-semibold text-black/68">
+                      <div className="mt-2 text-xs font-semibold text-white/70">
                         {verifyStatus}
                       </div>
                     ) : null}
@@ -1006,7 +1007,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                       Legal age: {regionConfig.legalAge}+
                     </p>
                   </div>
@@ -1078,7 +1079,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   onChange={(event) => setNotifyTtf(event.target.checked)}
                   className={checkboxClass}
                 />
-                Free unlock reminders
+                Free read alerts
               </label>
               <label className={checkboxCardClass}>
                 <input
@@ -1087,7 +1088,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   onChange={(event) => setNotifyPromo(event.target.checked)}
                   className={checkboxClass}
                 />
-                Offers and promos
+                Deals and offers
               </label>
             </SurfacePanel>
           </div>
@@ -1102,8 +1103,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                      Settings only.
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                      This device only.
                     </p>
                   </div>
                   <button
@@ -1111,7 +1112,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     onClick={handleSave}
                     className={primaryButtonClass}
                   >
-                    Save to this device
+                    Save
                   </button>
                 </SurfacePanel>
               </>
@@ -1123,19 +1124,19 @@ export default function AccountPage({ initialSignedIn = false }) {
                   accent="blue"
                 >
                   <div className="space-y-2">
-                    <p className={sectionEyebrowClass}>Membership & billing</p>
+                    <p className={sectionEyebrowClass}>Billing</p>
                     <h2 className={sectionTitleClass}>
-                      Plan, renewal, and cancellation
+                      Billing
                     </h2>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-black/72">
+                  <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-white/70">
                     <div>
-                      <div className={fieldLabelClass}>Current plan</div>
-                      <div className="mt-1 text-sm font-black uppercase tracking-[0.04em] text-black">
+                      <div className={fieldLabelClass}>Plan</div>
+                      <div className="mt-1 text-sm font-black uppercase tracking-[0.04em] text-white">
                         {subscriptionLabel}
                       </div>
                       {subscription?.renewAt ? (
-                        <div className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                        <div className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                           Renews on{" "}
                           {new Date(subscription.renewAt).toLocaleDateString()}
                         </div>
@@ -1155,7 +1156,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                         }
                         className={secondaryButtonClass}
                       >
-                        Membership
+                        Plans
                       </button>
                       <button
                         type="button"
@@ -1164,17 +1165,17 @@ export default function AccountPage({ initialSignedIn = false }) {
                           setWorking("cancel");
                           const response = await cancelSubscription();
                           if (response.ok) {
-                            setMessage("Membership ended.");
+                    setMessage("Plan canceled.");
                           } else {
                             setMessage(
-                              response.error || "Couldn't end membership.",
+                              response.error || "Couldn't end your plan.",
                             );
                           }
                           setWorking("");
                         }}
                         className={secondaryButtonClass}
                       >
-                        Cancel membership
+                        Cancel plan
                       </button>
                     </div>
                   </div>
@@ -1188,7 +1189,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Security</p>
                     <h2 className={sectionTitleClass}>
-                      Sign-in methods and recovery
+                      Sign-in and recovery
                     </h2>
                   </div>
 
@@ -1199,8 +1200,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <span
                           className={
                             providers.password
-                              ? "text-black font-black uppercase tracking-[0.08em]"
-                              : "text-black/55"
+                              ? "text-white font-black uppercase tracking-[0.08em]"
+                              : "text-white/60"
                           }
                         >
                           {providers.password ? "Ready" : "Not set"}
@@ -1217,8 +1218,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                           <span
                             className={
                               providers.google
-                                ? "text-black font-black uppercase tracking-[0.08em]"
-                                : "text-black/55"
+                                ? "text-white font-black uppercase tracking-[0.08em]"
+                                : "text-white/60"
                             }
                           >
                             {providers.google ? "Connected" : "Not connected"}
@@ -1241,7 +1242,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                               "/api/auth/google/unlink",
                             );
                             if (response.ok) {
-                              setProviderStatus("Google sign-in removed.");
+                              setProviderStatus("Google removed.");
                               await loadAuthProviders();
                             } else {
                               setProviderStatus(
@@ -1263,12 +1264,12 @@ export default function AccountPage({ initialSignedIn = false }) {
                             action="link"
                             requestPayload={{ mode: "link" }}
                             onSuccess={async () => {
-                              setProviderStatus("Google sign-in connected.");
+                              setProviderStatus("Google connected.");
                               await loadAuthProviders();
                             }}
                             onError={(nextMessage) => {
                               setProviderStatus(
-                                nextMessage || "Failed to connect Google.",
+                                nextMessage || "Couldn't connect Google.",
                               );
                             }}
                             isLoading={providerBusy}
@@ -1279,7 +1280,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   ) : null}
 
                   {hydrated && isSignedIn && !googleAuthEnabled ? (
-                    <div className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                    <div className="text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                       Google login is not configured.
                     </div>
                   ) : null}
@@ -1290,15 +1291,15 @@ export default function AccountPage({ initialSignedIn = false }) {
                     onClick={handleRequestPasswordReset}
                     className={secondaryButtonClass}
                   >
-                    Send password reset email
+                    Send reset email
                   </button>
                   {securityStatus ? (
-                    <div className="text-xs font-semibold text-black/68">
+                    <div className="text-xs font-semibold text-white/70">
                       {securityStatus}
                     </div>
                   ) : null}
                   {providerStatus ? (
-                    <div className="text-xs font-semibold text-black/68">
+                    <div className="text-xs font-semibold text-white/70">
                       {providerStatus}
                     </div>
                   ) : null}
@@ -1321,7 +1322,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       {Array.from({ length: 2 }).map((_, index) => (
                         <div
                           key={index}
-                          className="rounded-[20px] border border-black/10 bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
+                          className="rounded-[20px] border-2 border-white/15 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                         >
                           <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
                           <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />
@@ -1331,7 +1332,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     </div>
                   ) : orders.length === 0 ? (
                     <div className={softInfoCardClass}>
-                      <p>No orders yet.</p>
+                      <p>No orders yet</p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           type="button"
@@ -1364,14 +1365,14 @@ export default function AccountPage({ initialSignedIn = false }) {
                           className={orderCardClass}
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                            <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
                               {order.packageId}
                             </p>
-                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                               {order.status}
                             </p>
                           </div>
-                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-[0.08em] text-black/55">
+                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
                             <span>
                               {formatOrderAmount(order.amount, order.currency)}
                             </span>
@@ -1388,7 +1389,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       onClick={() => router.push("/orders")}
                       className={secondaryButtonClass}
                     >
-                      All orders
+                      Orders
                     </button>
                     <button
                       type="button"
@@ -1414,8 +1415,8 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div>
                     <p className={sectionEyebrowClass}>Save</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-black/72">
-                      Save here.
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                      Save
                     </p>
                   </div>
                   <button
@@ -1423,7 +1424,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     onClick={handleSave}
                     className={primaryButtonClass}
                   >
-                    Save to account
+                    Save
                   </button>
                 </SurfacePanel>
               </>

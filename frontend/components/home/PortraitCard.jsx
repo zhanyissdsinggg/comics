@@ -28,7 +28,7 @@ function PortraitCard({
   density = "default",
   href = "",
   showActionLabel = true,
-  actionLabel = "Series",
+  actionLabel = "Read More",
   coverFallbackVariant = "default",
   interactionMode = "link",
 }) {
@@ -96,14 +96,14 @@ function PortraitCard({
   const cardContent = (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "overflow-hidden rounded-[28px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
         "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:translate-y-0.5",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
           )}
         >
           <Cover
@@ -153,7 +153,7 @@ function PortraitCard({
               className={cn(
                 "line-clamp-1 font-black uppercase tracking-[0.2em]",
                 isCompact ? "text-[10px]" : "text-[11px]",
-                "text-black/65",
+                "text-white/55",
               )}
             >
               {metaLine}
@@ -165,7 +165,7 @@ function PortraitCard({
                 isCompact
                   ? "text-[1.08rem] leading-5"
                   : "text-[1.12rem] leading-6",
-              "text-black group-hover:text-black",
+                "text-white group-hover:text-white",
             )}
           >
             {item.title}
@@ -196,7 +196,7 @@ function PortraitCard({
             className={cn(
               "line-clamp-1 transition-colors",
               isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
-              "text-black/60 group-hover:text-black/72",
+              "text-white/60 group-hover:text-white/78",
             )}
           >
             {detailText}
@@ -205,7 +205,7 @@ function PortraitCard({
 
         <div
           className={cn(
-            "flex items-center border-t border-black/8 pt-3",
+            "flex items-center border-t border-white/10 pt-3",
             typeof item.progressPercent === "number" && item.progressPercent > 0
               ? "justify-between"
               : showActionLabel
@@ -218,7 +218,7 @@ function PortraitCard({
             <p
               className={cn(
                 "text-[11px] font-medium",
-                "text-black/45",
+                "text-white/45",
               )}
             >
               {Math.round(progressWidth)}% read
@@ -228,7 +228,7 @@ function PortraitCard({
               className={cn(
                 isCompact ? "text-[10px]" : "text-[11px]",
                 "font-medium uppercase tracking-[0.16em]",
-                "text-black/45",
+                "text-white/45",
               )}
             >
               {actionLabel}
@@ -243,7 +243,7 @@ function PortraitCard({
             <ArrowRight className="size-4" />
           </span>
         </div>
-        <div className="sr-only">Series</div>
+        <div className="sr-only">Read more</div>
       </div>
     </div>
   );
@@ -255,7 +255,7 @@ function PortraitCard({
         onClick={handleClick}
         className="group relative block w-full text-left"
         style={{ WebkitTapHighlightColor: "transparent" }}
-        aria-label={item?.title ? `Series ${item.title}` : "Series"}
+        aria-label={item?.title ? `Read more ${item.title}` : "Read more"}
       >
         {cardContent}
       </button>
@@ -268,7 +268,7 @@ function PortraitCard({
       onClick={handleClick}
       className="group relative block w-full text-left"
       style={{ WebkitTapHighlightColor: "transparent" }}
-      aria-label={item?.title ? `Series ${item.title}` : "Series"}
+      aria-label={item?.title ? `Read more ${item.title}` : "Read more"}
     >
       {cardContent}
     </Link>

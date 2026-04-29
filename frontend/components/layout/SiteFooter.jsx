@@ -11,18 +11,18 @@ const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Featured", href: "/rankings" },
+  { label: "Trending", href: "/rankings" },
   { label: "Support", href: "/support" },
 ];
 
 const fullFooterSections = [
   {
-    title: "Browse",
+    title: "Explore",
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
       { label: "Creators", href: "/creators" },
-      { label: "Featured", href: "/rankings" },
+      { label: "Trending", href: "/rankings" },
       { label: "Support", href: "/support" },
     ],
   },
@@ -31,7 +31,7 @@ const fullFooterSections = [
     links: [
       { label: "Store", href: "/store" },
       { label: "Plans", href: "/subscribe" },
-      { label: "Purchases", href: "/orders" },
+      { label: "Orders", href: "/orders" },
       { label: "Account", href: "/account" },
     ],
   },
@@ -70,10 +70,7 @@ const fullMetaFooterLinks = [
   { label: "Terms", href: "/terms-of-service" },
 ];
 
-const contactActions = [
-  { label: "Support", href: `mailto:${siteConfig.supportEmail}` },
-  { label: "About", href: "/about" },
-];
+const contactActions = [{ label: "About", href: "/about" }];
 
 const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl },
@@ -84,7 +81,7 @@ function FooterAgeBadge() {
   return (
     <span
       aria-label="18 plus only"
-      className="inline-flex items-center rounded-full border-2 border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold tracking-[0.22em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+      className="inline-flex items-center rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[11px] font-black tracking-[0.22em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
     >
       18+
     </span>
@@ -131,7 +128,7 @@ function MastercardIcon() {
 }
 
 function PaymentIconRow() {
-  const iconTone = "border-2 border-white/20 bg-white/10 text-white";
+  const iconTone = "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
 
   return (
     <div className="flex flex-wrap items-center gap-2 opacity-60">
@@ -250,11 +247,6 @@ export default function SiteFooter({
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
-              {showTagline && footerTagline ? (
-                <p className="text-sm leading-6 text-white/60">
-                  {footerTagline}
-                </p>
-              ) : null}
             </div>
 
             <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm font-semibold uppercase tracking-[0.08em]">
@@ -308,7 +300,7 @@ export default function SiteFooter({
               <p
                 className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]"
               >
-                Stories
+                Read
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
@@ -316,11 +308,6 @@ export default function SiteFooter({
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
-              {showTagline && footerTagline ? (
-                <p className="text-sm leading-6 text-white/60">
-                  {footerTagline}
-                </p>
-              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

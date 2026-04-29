@@ -56,7 +56,7 @@ export default function AgeGateModal({
         aria-describedby="adult-gate-description"
       >
         <div className="relative border-b-2 border-[#FFE500] bg-black p-6 sm:p-7">
-          <div className="inline-flex size-12 items-center justify-center rounded-2xl border-2 border-white/20 bg-white/10 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <div className="inline-flex size-12 items-center justify-center rounded-2xl border-2 border-black bg-[#FF007A] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
             <ShieldAlert className="size-5" strokeWidth={2} />
           </div>
 
@@ -80,7 +80,7 @@ export default function AgeGateModal({
 
         <div className="p-6 sm:p-7">
 
-          <div className="rounded-[24px] border-2 border-white/20 bg-white/5 px-4 py-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <div className="rounded-[24px] border-2 border-white/20 bg-[#0a0a0a] px-4 py-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
             <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
               Region check
             </p>
@@ -88,7 +88,7 @@ export default function AgeGateModal({
               {regionLabel} requires {currentAge}+ access for this catalog.
             </p>
             <p className="mt-2 text-sm leading-6 text-white/70">
-              Saved on this device after you confirm.
+              Saved on this device.
             </p>
           </div>
 
@@ -97,14 +97,14 @@ export default function AgeGateModal({
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="h-11 rounded-full border-2 border-white/20 bg-white/10 px-5 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+              className="h-11 rounded-full border-2 border-white/20 bg-black px-5 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:border-white/35 hover:bg-[#111111] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
             >
               No, take me back
             </Button>
             <Button
               type="button"
               onClick={() => onConfirm?.(normalizedRule)}
-              className="h-11 rounded-full border-2 border-black bg-[#00E5FF] px-5 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+              className="h-11 rounded-full border-2 border-black bg-[#00E5FF] px-5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
             >
               Yes, I am {currentAge} or older
               <ChevronRight className="size-4" />

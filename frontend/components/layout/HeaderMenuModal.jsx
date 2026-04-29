@@ -26,14 +26,14 @@ const MENU_LINKS = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Help", href: "/support" },
+  { label: "Support", href: "/support" },
 ];
 
 const HOME_MENU_LINKS = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
   { label: "Creators", href: "/creators" },
-  { label: "Help", href: "/support" },
+  { label: "Support", href: "/support" },
 ];
 
 function isActivePath(pathname, href) {
@@ -118,7 +118,7 @@ export default function HeaderMenuModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                 aria-label="Close menu"
               >
                 <ChevronRight className="size-5 rotate-45" />
@@ -126,7 +126,7 @@ export default function HeaderMenuModal({
             </div>
           </div>
 
-          <div className="m-4 rounded-[24px] border-2 border-white/20 bg-white/5 p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          <div className="m-4 rounded-[24px] border-2 border-white/20 bg-black p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
             {hydrated && isSignedIn ? (
               <>
                 <div className="flex items-start justify-between gap-3">
@@ -138,7 +138,7 @@ export default function HeaderMenuModal({
                       Signed in
                     </p>
                   </div>
-                  <span className="rounded-full border-2 border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                     {walletTotal.toLocaleString()} pts
                   </span>
                 </div>
@@ -161,10 +161,10 @@ export default function HeaderMenuModal({
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border-2 border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                      "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:border-[#00E5FF] hover:bg-[#111111] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                       <>
                         <span className="flex items-center gap-3">
-                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white">
+                          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-black text-white">
                             <Icon className="size-4" />
                           </span>
                           {item.label}
@@ -201,9 +201,9 @@ export default function HeaderMenuModal({
                     Sign In
                   </button>
                   {renderMenuLink(
-                    { label: "Help", href: "/support" },
-                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-white/14 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
-                    "Help",
+                    { label: "Support", href: "/support" },
+                    "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:border-white/35 hover:bg-[#111111] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+                    "Support",
                   )}
                 </div>
               </>
@@ -224,12 +224,12 @@ export default function HeaderMenuModal({
                     "flex min-h-12 items-center justify-between gap-3 rounded-[20px] border-2 px-4 py-3 text-sm font-semibold tracking-[0.02em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
                     isActive
                       ? "border-black bg-[#FF007A] text-white"
-                      : "border-white/20 bg-white/10 text-white hover:bg-white/14",
+                      : "border-white/20 bg-black text-white hover:border-[#FFE500] hover:bg-[#111111]",
                   ),
                   <>
                     <span className="flex items-center gap-3">
                       {Icon ? (
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-white">
+                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/20 bg-black text-white">
                           <Icon className="size-4" />
                         </span>
                       ) : null}

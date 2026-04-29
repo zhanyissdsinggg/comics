@@ -29,7 +29,7 @@ function createTargetAction(targetPath) {
     return { label: "Return to series", href: targetPath };
   }
   if (targetPath.startsWith("/library")) {
-    return { label: "Open library", href: targetPath };
+    return { label: "Library", href: targetPath };
   }
   if (targetPath.startsWith("/search")) {
     return { label: "Return to search", href: targetPath };
@@ -38,15 +38,15 @@ function createTargetAction(targetPath) {
     return { label: "Return to rankings", href: targetPath };
   }
   if (targetPath.startsWith("/account")) {
-    return { label: "Open account", href: targetPath };
+    return { label: "Account", href: targetPath };
   }
   if (targetPath.startsWith("/orders")) {
     return { label: "View orders", href: targetPath };
   }
   if (targetPath.startsWith("/support")) {
-    return { label: "Open support", href: targetPath };
+    return { label: "Support", href: targetPath };
   }
-  return { label: "Open home", href: "/" };
+  return { label: "Home", href: "/" };
 }
 
 export function persistCommerceSuccess(payload) {
@@ -113,19 +113,19 @@ export function getCommerceSuccessPresentation(payload) {
     const planId = String(payload.planId || "").trim().toLowerCase();
     const guide = getCommerceJourneyGuide(planId);
     return {
-      eyebrow: "Membership active",
-      title: `${payload.planTitle || guide.title || "Membership"} is now active`,
+      eyebrow: "Plan active",
+      title: `${payload.planTitle || guide.title || "Plan"} is active`,
       description:
-        "Your recurring perks are active now, so the next step should take you back to reading instead of leaving you on a purchase screen.",
+        "Your plan is active. Jump back in.",
       metaItems: [
-        payload.planTitle || "Membership",
-        "Discounts + daily free reads",
-        payload.orderId ? `Receipt ${payload.orderId}` : "Orders keeps the receipt trail",
+        payload.planTitle || "Plan",
+        "Discounts + free reads",
+        payload.orderId ? `Receipt ${payload.orderId}` : "See Orders",
       ],
       primaryAction: { label: guide.nextCta, href: guide.nextHref },
       secondaryAction:
         guide.nextHref === "/orders"
-          ? { label: "Open library", href: "/library" }
+          ? { label: "Library", href: "/library" }
           : { label: "View orders", href: "/orders" },
     };
   }
@@ -139,10 +139,10 @@ export function getCommerceSuccessPresentation(payload) {
     eyebrow: guide.eyebrow || STOREFRONT_TERMS.freeStart,
     title: `${totalPts.toLocaleString()} points added to your wallet`,
     description:
-      "Your wallet is ready, so the site should point you back to something worth reading instead of leaving you on a receipt screen.",
+      "Your points are ready. Jump back in.",
     metaItems: [
-      `${paidPts.toLocaleString()} paid pts`,
-      `${bonusPts.toLocaleString()} bonus pts`,
+      `${paidPts.toLocaleString()} base pts`,
+      `${bonusPts.toLocaleString()} extra pts`,
       payload.orderId ? `Receipt ${payload.orderId}` : "Wallet synced",
     ],
     primaryAction: { label: guide.nextCta, href: guide.nextHref },
