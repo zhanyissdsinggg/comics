@@ -61,7 +61,7 @@ export default function ReaderDrawer({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Reader chapters"
+        aria-label="Reader contents"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">

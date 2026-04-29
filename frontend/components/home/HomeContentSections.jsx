@@ -57,28 +57,36 @@ const GUIDE_CARDS = [
 
 const SECTION_STYLES = {
   featured: {
-    shell: "bg-black",
+    shell: "bg-[#FFE500]",
     panel: "bg-[#0b0b0b]",
-    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
-    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
+    eyebrow: "text-black/70",
+    title: "text-black",
+    description: "text-black/75",
+    cta: "bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]",
   },
   comics: {
-    shell: "bg-black",
+    shell: "bg-white",
     panel: "bg-[#0b0b0b]",
-    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
-    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
+    eyebrow: "text-black/70",
+    title: "text-black",
+    description: "text-black/75",
+    cta: "bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]",
   },
   novels: {
-    shell: "bg-black",
+    shell: "bg-[#FF007A]",
     panel: "bg-[#0b0b0b]",
-    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
-    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
+    eyebrow: "text-white/70",
+    title: "text-white",
+    description: "text-white/75",
+    cta: "bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
   },
   start: {
-    shell: "bg-black",
+    shell: "bg-[#00E5FF]",
     panel: "bg-[#0b0b0b]",
-    shadow: "shadow-[0_18px_44px_rgba(15,23,42,0.08)]",
-    buttonShadow: "shadow-[0_12px_28px_rgba(15,23,42,0.10)]",
+    eyebrow: "text-black/70",
+    title: "text-black",
+    description: "text-black/75",
+    cta: "bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]",
   },
 };
 
@@ -102,15 +110,15 @@ function HomeSectionHeader({
     <div className="mb-6 flex flex-col gap-3 sm:mb-8 md:flex-row md:items-end md:justify-between">
       <div className="max-w-[38rem]">
         {eyebrow ? (
-          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/70 sm:text-sm">
+          <p className={cn("text-[11px] font-black uppercase tracking-[0.18em] sm:text-sm", styles.eyebrow)}>
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:mt-2">
+        <h2 className={cn("mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] sm:mt-2", styles.title)}>
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-6 text-white/75">
+          <p className={cn("mt-3 max-w-[34rem] text-sm font-semibold leading-6", styles.description)}>
             {description}
           </p>
         ) : null}
@@ -121,7 +129,8 @@ function HomeSectionHeader({
           type="button"
           onClick={onCtaClick}
           className={cn(
-            "inline-flex items-center gap-2 rounded-full border-[3px] border-black bg-[#00E5FF] px-5 py-3 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:text-sm",
+            "inline-flex items-center gap-2 border-[3px] border-black px-5 py-3 text-xs font-black uppercase tracking-[0.08em] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none sm:text-sm",
+            styles.cta,
           )}
         >
           {ctaLabel}
@@ -397,14 +406,14 @@ function LeaderboardSection({ items, onItemClick }) {
   }
 
   return (
-    <section className="border-y-[4px] border-black bg-black py-12 sm:py-16">
+    <section className="border-y-[4px] border-black bg-[#00E5FF] py-12 sm:py-16">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[38rem]">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/65">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-black/70">
               This Week
             </p>
-            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-white">
+            <h2 className="mt-2 text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] text-black">
               Trending
             </h2>
           </div>
@@ -464,14 +473,14 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
   ];
 
   return (
-    <section className="border-y-[4px] border-black bg-black py-5 sm:py-6">
+    <section className="border-y-[4px] border-black bg-[#FFE500] py-5 sm:py-6">
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-white/55">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-black/60">
               Genres
             </p>
-            <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-white">
+            <h2 className="mt-1 text-[clamp(1.6rem,4vw,2.5rem)] font-black uppercase tracking-[-0.04em] text-black">
               Genres
             </h2>
           </div>
@@ -617,14 +626,14 @@ export default function HomeContentSections({
         </>
       )}
 
-      <section className="border-y-[4px] border-black bg-black py-12 sm:py-16">
-        <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-[36rem]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/65 sm:text-sm">
+    <section className="border-y-[4px] border-black bg-white py-12 sm:py-16">
+      <div className="mx-auto max-w-[1320px] px-4 md:px-8">
+        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-[36rem]">
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65 sm:text-sm">
                 Explore
               </p>
-              <h2 className="mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:mt-2">
+              <h2 className="mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-black sm:mt-2">
                 More to Read
               </h2>
             </div>

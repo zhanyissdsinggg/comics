@@ -380,12 +380,14 @@ async function runDesktopSuite(baseUrl) {
 
         const entryCta = await pickFirstVisibleLocator(
           [
+            page.getByTestId("library-entry-cta").first(),
             page.getByRole("button", { name: "Search" }).first(),
             page.getByRole("link", { name: "Search" }).first(),
             page.locator('a[href="/search"]').first(),
             page.locator('a[href^="/search"]').first(),
             page.locator('a[href*="/search"]').first(),
             page.getByRole("button", { name: "Start here" }).first(),
+            page.getByRole("button", { name: "Top Picks" }).first(),
           ],
           { perCandidateTimeoutMs: 8000 },
         );
@@ -397,7 +399,7 @@ async function runDesktopSuite(baseUrl) {
         const entryLabel = String(await entryCta.innerText().catch(() => "")).trim();
         await entryCta.click({ timeout: DEFAULT_TIMEOUT_MS });
 
-        if (/start here/i.test(entryLabel)) {
+        if (/start here|top picks/i.test(entryLabel)) {
           await page.waitForURL((url) => url.pathname === "/rankings", {
             timeout: 60_000,
             waitUntil: "domcontentloaded",

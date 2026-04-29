@@ -170,6 +170,44 @@ function buildCleanSeriesMetaLabel(series, creatorName) {
   return buildSeriesMetaLabel(series, creatorName);
 }
 
+function splitHeroTitle(title) {
+  const normalized = String(title || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return { lead: "Trending", accent: "" };
+  }
+
+  const parts = normalized.split(" ");
+  if (parts.length === 1) {
+    return { lead: parts[0], accent: "" };
+  }
+
+  return {
+    lead: parts.slice(0, -1).join(" "),
+    accent: parts.at(-1) || "",
+  };
+}
+
+function buildHeroSummary(series) {
+  const raw =
+    series?.shortDescription ||
+    series?.summary ||
+    series?.synopsis ||
+    series?.description ||
+    "";
+  const normalized = String(raw).replace(/\s+/g, " ").trim();
+
+  if (!normalized) {
+    return "Pick up the latest chapter and keep going.";
+  }
+
+  const firstSentence = normalized.match(/[^.!?]+[.!?]?/u)?.[0]?.trim();
+  const summary = firstSentence || normalized;
+  return summary.length > 140 ? `${summary.slice(0, 137).trimEnd()}...` : summary;
+}
+
 function buildHomeShelfItem(series) {
   if (!series?.id) {
     return null;
@@ -389,6 +427,11 @@ function HomeContent({ initialSearchParams = {} }) {
     () => buildCleanSeriesMetaLabel(heroSeries, heroCreatorName),
     [heroCreatorName, heroSeries],
   );
+  const heroTitleParts = useMemo(
+    () => splitHeroTitle(heroSeries?.title || (resumeSeries ? "Keep Reading" : "Trending")),
+    [heroSeries?.title, resumeSeries],
+  );
+  const heroSummary = useMemo(() => buildHeroSummary(heroSeries), [heroSeries]);
 
   const heroSignals = useMemo(() => {
     if (!heroSeries) {
@@ -606,44 +649,48 @@ function HomeContent({ initialSearchParams = {} }) {
           {loading ? (
             <div className="aspect-[5/6] w-full animate-pulse rounded-[34px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:aspect-[21/11] lg:aspect-[21/8]" />
           ) : (
-            <section className="relative overflow-hidden border-b border-white/10 bg-black">
+            <section className="relative overflow-hidden border-b-4 border-black bg-[#FF007A]">
               <div
-                className="absolute inset-0 opacity-10"
+                className="absolute inset-0 opacity-20"
                 style={{
                   backgroundImage:
-                    "radial-gradient(circle, #ffffff 2px, transparent 2px)",
+                    "radial-gradient(circle, #000000 2px, transparent 2px)",
                   backgroundSize: "24px 24px",
                 }}
               />
-              <div className="absolute -right-8 top-10 hidden h-32 w-32 rounded-full border-2 border-white/10 bg-[#0a0a0a] md:block" />
-              <div className="absolute bottom-14 left-4 hidden h-20 w-20 rotate-12 rounded-[28px] border-2 border-white/10 bg-[#0a0a0a] md:block" />
+              <div className="absolute -right-8 top-10 hidden h-32 w-32 rounded-full border-4 border-black bg-[#FFE500] md:block" />
+              <div className="absolute bottom-14 left-4 hidden h-20 w-20 rotate-12 border-4 border-black bg-[#00E5FF] md:block" />
 
               <div className="relative mx-auto grid min-h-[480px] max-w-7xl gap-7 px-4 py-8 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
                 <div className="flex flex-col justify-center">
-                  <div className="inline-block w-fit rounded-full border-2 border-white/20 bg-[#0a0a0a] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-4 sm:py-2 sm:text-sm">
-                    {resumeSeries ? "Continue Reading" : "Trending"}
+                  <div className="inline-block w-fit -rotate-2 border-2 border-black bg-black px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#FFE500] sm:text-sm">
+                    {resumeSeries ? "CONTINUE READING" : "TRENDING NOW"}
                   </div>
 
-                  <h1 className="mt-5 max-w-[8.8ch] text-[clamp(2.35rem,10vw,6.4rem)] font-black uppercase leading-[0.86] tracking-[-0.06em] text-white">
-                    {resumeSeries
-                      ? "Keep reading"
-                      : "Trending."}
+                  <h1 className="mt-5 max-w-[9.2ch] text-[clamp(3rem,8vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.06em] text-white">
+                    {heroTitleParts.lead}
+                    {heroTitleParts.accent ? (
+                      <>
+                        <br />
+                        <span className="mt-2 inline-block -rotate-1 border-4 border-black bg-[#FFE500] px-3 text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                          {heroTitleParts.accent}
+                        </span>
+                      </>
+                    ) : null}
                   </h1>
 
-                  {heroMetaLine ? (
-                    <div className="mt-4 max-w-[30rem]">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/58">
-                        {heroMetaLine}
-                      </p>
-                    </div>
-                  ) : null}
+                  <div className="mt-4 max-w-[32rem]">
+                    <p className="text-base font-semibold leading-7 text-white/90">
+                      {heroSummary}
+                    </p>
+                  </div>
 
                   {heroGenrePills.length > 0 || heroSignals.length > 0 ? (
                     <div className="mt-5 flex flex-wrap gap-2">
                       {heroGenrePills.map((genre) => (
                         <span
                           key={`hero-genre-${genre}`}
-                          className="rounded-full border-2 border-white/20 bg-[#0a0a0a] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/72 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]"
+                          className="border-2 border-black bg-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]"
                         >
                           {genre}
                         </span>
@@ -652,8 +699,8 @@ function HomeContent({ initialSearchParams = {} }) {
                         <span
                           key={signal.id}
                           className={cn(
-                            "rounded-full border-2 border-white/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/72 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]",
-                            "bg-[#0a0a0a]",
+                            "border-2 border-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]",
+                            "bg-[#FFE500]",
                           )}
                         >
                           {signal.content}
@@ -666,7 +713,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     <Link
                       href={primaryHeroHref}
                       data-testid="home-hero-primary-cta"
-                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:w-auto sm:px-6 sm:text-base"
+                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 border-[3px] border-black bg-[#00E5FF] px-6 py-3 text-sm font-black uppercase tracking-[0.03em] text-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:w-auto sm:text-base"
                     >
                       {primaryHeroCtaLabel}
                       <ArrowRight className="size-4" />
@@ -674,30 +721,38 @@ function HomeContent({ initialSearchParams = {} }) {
                     <button
                       type="button"
                       onClick={() => router.push("/search")}
-                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-black uppercase tracking-[0.02em] text-white transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:min-h-0 sm:w-auto sm:text-sm"
+                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 border-[3px] border-black bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.03em] text-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:min-h-0 sm:w-auto sm:text-sm"
                     >
                       Search
                     </button>
                   </div>
 
+                  {heroMetaLine ? (
+                    <div className="mt-6 flex flex-wrap items-center gap-3 text-white">
+                      <p className="text-sm font-black uppercase tracking-[0.1em] text-white">
+                        {heroMetaLine}
+                      </p>
+                    </div>
+                  ) : null}
+
                   <div className="mt-5 flex flex-wrap gap-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white sm:gap-3 sm:text-sm">
                     <button
                       type="button"
                       onClick={() => router.push("/comics")}
-                      className="inline-flex min-h-[40px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#FFE500] hover:bg-[#111111]"
+                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
                     >
                       Comics
                     </button>
                     <button
                       type="button"
                       onClick={() => router.push("/novels")}
-                      className="inline-flex min-h-[40px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111]"
+                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
                     >
                       Novels
                     </button>
                     <Link
                       href="/creators"
-                      className="inline-flex min-h-[40px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#FF007A] hover:bg-[#111111]"
+                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
                     >
                       Creators
                     </Link>
@@ -721,7 +776,7 @@ function HomeContent({ initialSearchParams = {} }) {
                     </div>
                   ) : null}
 
-                  <div className="relative w-full max-w-[300px] overflow-hidden rounded-[32px] border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:max-w-[340px] lg:max-w-[390px]">
+                  <div className="relative w-full max-w-[300px] overflow-hidden border-4 border-black bg-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] sm:max-w-[340px] lg:max-w-[390px]">
                     <div className="relative aspect-[3/4] w-full">
                       {heroSeries?.coverUrl ? (
                         <Image
@@ -736,11 +791,11 @@ function HomeContent({ initialSearchParams = {} }) {
                       )}
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/86 via-black/18 to-transparent" />
-                    <div className="absolute left-3 top-3 rounded-full border-2 border-white/20 bg-black/85 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/80 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
-                      {resumeSeries ? "Continue Reading" : heroEyebrow}
+                    <div className="absolute left-3 top-3 -rotate-6 border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
+                      {heroSeries?.latestEpisodeId ? formatEpisodeLabel(heroSeries.latestEpisodeId) : heroEyebrow}
                     </div>
-                    <div className="absolute bottom-3 right-3 rounded-full border-2 border-white/20 bg-black/85 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/80 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:bottom-4 sm:right-4 sm:px-3 sm:text-xs">
-                      {heroSeries?.latestEpisodeId ? formatEpisodeLabel(heroSeries.latestEpisodeId) : "Latest"}
+                    <div className="absolute bottom-3 right-3 rotate-3 border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:bottom-4 sm:right-4 sm:px-3 sm:text-xs">
+                      {resumeSeries ? "Keep Reading" : "New"}
                     </div>
                     <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                       <p className="line-clamp-2 text-[1.45rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-white sm:text-[1.8rem]">

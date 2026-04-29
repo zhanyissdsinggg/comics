@@ -933,6 +933,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   <button
                     type="button"
                     onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    data-testid="library-entry-cta"
                     className={primaryButtonClass}
                   >
                     Top Picks
@@ -996,6 +997,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       ? router.push("/search")
                       : router.push("/rankings?type=ttf&window=all")
                   }
+                  data-testid="library-entry-cta"
                   className={primaryButtonClass}
                 >
                   {viewerSignedIn ? "Search" : "Top Picks"}
