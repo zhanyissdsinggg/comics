@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
+import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import NetworkFallback from "../common/NetworkFallback";
 import Skeleton from "../common/Skeleton";
@@ -71,9 +72,6 @@ const CommentsSection = dynamic(() => import("./CommentsSection"), {
 });
 const SimilarSeriesSection = dynamic(() => import("./SimilarSeriesSection"), {
   ssr: false,
-});
-const EpisodeList = dynamic(() => import("./EpisodeList"), {
-  loading: () => <EpisodeListSkeleton />,
 });
 
 function getFirstEpisodeId(episodes) {

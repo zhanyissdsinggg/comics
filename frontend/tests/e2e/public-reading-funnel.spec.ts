@@ -14,6 +14,7 @@ const BANNED_STRINGS = [
   "smoke test",
   "reader QA",
   "Demo Action",
+  "Demo Episode",
   "Demo genre",
   "platform smoke tests",
   "QA",
@@ -924,6 +925,7 @@ test.describe("Public reading funnel", () => {
 
   test("series pages keep header, main, and footer in canonical order", async ({
     page,
+    request,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
@@ -939,6 +941,25 @@ test.describe("Public reading funnel", () => {
         waitUntil: "domcontentloaded",
       });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      const rawResponse = await request.get(routePath);
+      expect(rawResponse.ok(), `${routePath} raw HTML should load`).toBeTruthy();
+      const rawHtml = await rawResponse.text();
+      const expectedListMarker =
+        routePath === "/series/series-011" ? "Episodes" : "Chapters";
+      const footerIndex = rawHtml.indexOf('data-site-footer="1"');
+      const mainIndex = rawHtml.indexOf("<main");
+      const mainCloseIndex = rawHtml.indexOf("</main>");
+      const mainHtml =
+        mainIndex >= 0 && mainCloseIndex > mainIndex
+          ? rawHtml.slice(mainIndex, mainCloseIndex)
+          : "";
+      const entryIndex = mainHtml.indexOf(expectedListMarker);
+
+      expect(mainIndex, `${routePath} should render a main element in raw HTML`).toBeGreaterThanOrEqual(0);
+      expect(mainCloseIndex, `${routePath} should close main after content`).toBeGreaterThan(mainIndex);
+      expect(entryIndex, `${routePath} should render ${expectedListMarker} inside main`).toBeGreaterThanOrEqual(0);
+      expect(footerIndex, `${routePath} should render footer in raw HTML`).toBeGreaterThan(mainCloseIndex);
 
       await expect(page.locator("header").first()).toBeVisible({
         timeout: UI_TIMEOUT_MS,
@@ -969,9 +990,9 @@ test.describe("Public reading funnel", () => {
       const order = await page.evaluate(() => {
         const bodyChildren = Array.from(document.body.children);
         return {
-          headerIndex: bodyChildren.findIndex((node) => node.tagName === "HEADER"),
-          mainIndex: bodyChildren.findIndex((node) => node.tagName === "MAIN"),
-          footerIndex: bodyChildren.findIndex((node) => node.tagName === "FOOTER"),
+        headerIndex: bodyChildren.findIndex((node) => node.tagName === "HEADER"),
+        mainIndex: bodyChildren.findIndex((node) => node.tagName === "MAIN"),
+        footerIndex: bodyChildren.findIndex((node) => node.tagName === "FOOTER"),
         };
       });
 

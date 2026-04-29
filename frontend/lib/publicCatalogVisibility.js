@@ -4,6 +4,7 @@ const BLOCKED_PUBLIC_TEXT_PATTERNS = [
   "smoke test",
   "reader qa",
   "demo action",
+  "demo episode",
   "demo genre",
   "platform smoke tests",
   "fixture",

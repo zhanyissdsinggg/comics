@@ -530,19 +530,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           </>
         ) : null}
 
-        {!viewerSignedIn ? (
-          <SurfacePanel className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
-            <StorefrontSectionHeading title="Sign in to view purchases" />
-            <p className="text-sm font-semibold leading-6 text-white/70">
-              Need billing help?
-            </p>
-            <StorefrontPathwaysGrid
-              cards={signedOutActionCards}
-              columnsClassName="md:grid-cols-2"
-              appearance="dark"
-            />
-          </SurfacePanel>
-        ) : !hydrated || loading ? (
+        {!viewerSignedIn ? null : !hydrated || loading ? (
           <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
             <div className="space-y-2">
               <div

@@ -37,6 +37,7 @@ const BANNED_COPY = [
   "Demo Series",
   "Gush Demo Studio",
   "Demo Action",
+  "Demo Episode",
   "Demo genre",
   "platform smoke tests",
   "QA",
@@ -484,6 +485,29 @@ function assertHeaderAndFooterSingle(html, pathname) {
   }
 }
 
+function assertSeriesMainContentOrder(html, pathname, format) {
+  const mainStart = html.indexOf("<main");
+  const mainEnd = html.indexOf("</main>", mainStart);
+  const footerIndex = html.indexOf('data-site-footer="1"');
+  const mainHtml =
+    mainStart >= 0 && mainEnd > mainStart ? html.slice(mainStart, mainEnd) : "";
+  const listMarker =
+    String(format || "").toLowerCase() === "novel" ? "Episodes" : "Chapters";
+  const entryIndex = mainHtml.indexOf(listMarker);
+
+  if (mainStart < 0 || mainEnd < 0) {
+    throw new Error(`${pathname} should render a complete <main> block`);
+  }
+
+  if (entryIndex < 0) {
+    throw new Error(`${pathname} should server-render ${listMarker} inside <main>`);
+  }
+
+  if (footerIndex < 0 || footerIndex < mainEnd) {
+    throw new Error(`${pathname} footer must render after the entry list in server HTML`);
+  }
+}
+
 function assertSubscribePrelaunch(html) {
   const bannedPricingCopy = [
     "$4.99",
@@ -740,24 +764,28 @@ async function run() {
       }
 
       if (spec.path === "/series/series-001") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "comic");
         assertSeriesReaderLinks(direct.html, "series-001");
         assertSeriesTerminology(direct.html, "series-001", "comic");
         assertSeriesPrelaunchChrome(direct.html, "series-001");
       }
 
       if (spec.path === "/series/series-004") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "comic");
         assertSeriesReaderLinks(direct.html, "series-004");
         assertSeriesTerminology(direct.html, "series-004", "comic");
         assertSeriesPrelaunchChrome(direct.html, "series-004");
       }
 
       if (spec.path === "/series/series-005") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "comic");
         assertSeriesReaderLinks(direct.html, "series-005");
         assertSeriesTerminology(direct.html, "series-005", "comic");
         assertSeriesPrelaunchChrome(direct.html, "series-005");
       }
 
       if (spec.path === "/series/series-009") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "comic");
         assertSeriesReaderLinks(direct.html, "series-009");
         assertSeriesTerminology(direct.html, "series-009", "comic");
         assertSeriesPrelaunchChrome(direct.html, "series-009");
@@ -767,12 +795,14 @@ async function run() {
       }
 
       if (spec.path === "/series/series-010") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "comic");
         assertSeriesReaderLinks(direct.html, "series-010");
         assertSeriesTerminology(direct.html, "series-010", "comic");
         assertSeriesPrelaunchChrome(direct.html, "series-010");
       }
 
       if (spec.path === "/series/series-011") {
+        assertSeriesMainContentOrder(direct.html, spec.path, "novel");
         assertSeriesReaderLinks(direct.html, "series-011");
         assertSeriesTerminology(direct.html, "series-011", "novel");
         assertSeriesPrelaunchChrome(direct.html, "series-011");
