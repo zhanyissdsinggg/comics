@@ -12,7 +12,6 @@ import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import {
-  StorefrontDesk,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";

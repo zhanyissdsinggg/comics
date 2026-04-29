@@ -7,7 +7,6 @@ import PortraitCard from "./PortraitCard";
 import { ensureArray } from "../../lib/validators";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 const RAIL_THEME_BY_ID = {
   following: {
@@ -86,13 +85,13 @@ export default function Rail({
 
   return (
     <section>
-        <Card
+        <div
         className={cn(
           "relative overflow-hidden rounded-[26px] border py-0",
           railTheme.darkPanel,
         )}
       >
-        <CardContent className="relative p-5 sm:p-6">
+        <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-1.5">
               {eyebrow || railName ? (
@@ -139,10 +138,10 @@ export default function Rail({
           </div>
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
-            <Card
+            <div
               className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
-              <CardContent className="p-4">
+              <div className="p-4">
                 <CreatorShelfLinks
                   items={safeItems}
                   entryPoint={creatorEntryPoint}
@@ -152,20 +151,20 @@ export default function Rail({
                   compact
                   appearance={appearance}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : null}
 
           {safeItems.length === 0 ? (
-            <Card
+            <div
               className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
             >
-              <CardContent className="p-8 text-center">
+              <div className="p-8 text-center">
                 <p className="text-sm font-semibold text-white/70">
                   Nothing here yet.
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
             <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 no-scrollbar">
               {safeItems.map((item) => (
@@ -186,8 +185,8 @@ export default function Rail({
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </section>
   );
 }
