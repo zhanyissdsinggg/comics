@@ -10,7 +10,6 @@ import { siteConfig } from "../../lib/siteConfig";
 const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Creators", href: "/creators" },
   { label: "Trending", href: "/rankings" },
   { label: "Support", href: "/support" },
 ];
@@ -21,19 +20,29 @@ const fullFooterSections = [
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
-      { label: "Creators", href: "/creators" },
       { label: "Trending", href: "/rankings" },
       { label: "Support", href: "/support" },
     ],
   },
   {
     title: "Account",
-    links: [
-      { label: "Store", href: "/store" },
-      { label: "Plans", href: "/subscribe" },
-      { label: "Orders", href: "/orders" },
-      { label: "Account", href: "/account" },
-    ],
+    links: []
+      .concat(
+        siteConfig.monetization.pointPacksEnabled
+          ? [{ label: "Store", href: "/store" }]
+          : [],
+      )
+      .concat(
+        siteConfig.monetization.membershipEnabled
+          ? [{ label: "Plans", href: "/subscribe" }]
+          : [],
+      )
+      .concat(
+        siteConfig.monetization.checkoutEnabled
+          ? [{ label: "Orders", href: "/orders" }]
+          : [],
+      )
+      .concat([{ label: "Account", href: "/account" }]),
   },
   {
     title: "Support",
@@ -55,15 +64,12 @@ const compactMetaFooterLinks = [
 const homePrimaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Creators", href: "/creators" },
-  { label: "Support", href: "/support" },
-];
-
-const homeCompactMetaFooterLinks = [
   { label: "Support", href: "/support" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
 ];
+
+const homeCompactMetaFooterLinks = [];
 
 const fullMetaFooterLinks = [
   { label: "Privacy", href: "/privacy-policy" },
@@ -76,17 +82,6 @@ const socialLinks = [
   { label: "GitHub", href: siteConfig.githubUrl },
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
-
-function FooterAgeBadge() {
-  return (
-    <span
-      aria-label="18 plus only"
-      className="inline-flex items-center rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[11px] font-black tracking-[0.22em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-    >
-      18+
-    </span>
-  );
-}
 
 function VisaIcon() {
   return (
@@ -259,26 +254,20 @@ export default function SiteFooter({
             </nav>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t-[2px] border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-4 flex flex-col gap-3 border-t-[2px] border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-end">
             <div className="flex flex-col gap-3">
-              <a
-                href={`mailto:${siteConfig.supportEmail}`}
-                className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
-              >
-                {siteConfig.supportEmail}
-              </a>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                {footerMetaLinks.map((link) =>
-                  renderInternalLink(
-                    link,
-                    "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
-                  ),
-                )}
-                <FooterAgeBadge />
-              </div>
+              {footerMetaLinks.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {footerMetaLinks.map((link) =>
+                    renderInternalLink(
+                      link,
+                      "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
+                    ),
+                  )}
+                </div>
+              ) : null}
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
-              <PaymentIconRow />
               <p>
                 (c) {currentYear} {siteConfig.companyName}
               </p>
@@ -368,7 +357,10 @@ export default function SiteFooter({
                   "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
                 ),
               )}
-              <FooterAgeBadge />
+              {renderInternalLink(
+                { label: "Mature content settings", href: "/mature-content" },
+                "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {socialLinks.map((item) => (

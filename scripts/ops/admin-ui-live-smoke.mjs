@@ -15,8 +15,8 @@ const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_LOGIN_RETRIES = 3;
 const DEFAULT_LOGIN_RETRY_DELAY_MS = 1_000;
 
-const DEFAULT_DEMO_SERIES_ID = "demo-series";
-const DEFAULT_DEMO_CREATOR_NAME = "Gush Demo Studio";
+const DEFAULT_DEMO_SERIES_ID = "series-001";
+const DEFAULT_DEMO_CREATOR_NAME = "Mira Dane";
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();

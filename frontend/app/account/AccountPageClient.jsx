@@ -99,6 +99,15 @@ export default function AccountPage({ initialSignedIn = false }) {
       window.dispatchEvent(new CustomEvent("auth:open"));
     }
   }, []);
+  const openRegisterPrompt = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("auth:open", {
+          detail: { returnTo: "/account", mode: "register" },
+        }),
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const storedRegion = readStorage(REGION_KEY, "global");
@@ -321,24 +330,19 @@ export default function AccountPage({ initialSignedIn = false }) {
     if (!viewerSignedIn) {
       return [
         {
-            label: "Status",
-            value: "Signed out",
-            hint: "Sign in to keep your place.",
+          label: "Status",
+          value: "Signed out",
+          hint: "Sign in to save your reading.",
         },
         {
-          label: "This device",
-          value: "This device",
-          hint: "Settings and alerts",
+          label: "Access",
+          value: "Ready",
+          hint: "Sign in or create an account",
         },
         {
-          label: "Point packs",
-          value: "One-time",
-          hint: "Buy only what you need.",
-        },
-        {
-          label: "Plans",
-          value: "Monthly",
-          hint: "Monthly plan.",
+          label: "Support",
+          value: "Help",
+          hint: "Reset password or contact support",
         },
       ];
     }
@@ -412,6 +416,15 @@ export default function AccountPage({ initialSignedIn = false }) {
           accentClass: actionPrimaryButtonClass,
         },
         {
+          id: "create-account",
+          eyebrow: "New here?",
+          title: "Create account",
+          description: "",
+          cta: "Create account",
+          onClick: openRegisterPrompt,
+          accentClass: actionSecondaryButtonClass,
+        },
+        {
           id: "recover",
           eyebrow: "Recovery",
           title: "Reset password",
@@ -421,28 +434,18 @@ export default function AccountPage({ initialSignedIn = false }) {
           accentClass: actionSecondaryButtonClass,
         },
         {
-          id: "membership",
-          eyebrow: "Plans",
-          title: "Plans",
+          id: "support",
+          eyebrow: "Support",
+          title: "Support",
           description: "",
-          cta: "Plans",
+          cta: "Support",
           onClick: () =>
             router.push(
-              buildPathWithAttribution("/subscribe", {
-                entryPoint: "ACCOUNT_ACTIONS",
-                sourcePath: "/account",
-                returnTo: "/account",
+              buildSupportPath({
+                topic: "account",
+                context: "Account help",
               }),
             ),
-          accentClass: actionSecondaryButtonClass,
-        },
-        {
-          id: "store",
-          eyebrow: "Point packs",
-          title: "Point packs",
-          description: "",
-          cta: "Point packs",
-          onClick: () => router.push("/store"),
           accentClass: actionSecondaryButtonClass,
         },
       ];
@@ -514,6 +517,7 @@ export default function AccountPage({ initialSignedIn = false }) {
     actionPrimaryButtonClass,
     actionSecondaryButtonClass,
     openAuthPrompt,
+    openRegisterPrompt,
     orders.length,
     router,
     subscription?.active,
@@ -547,12 +551,12 @@ export default function AccountPage({ initialSignedIn = false }) {
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn
     ? "Account"
-    : "This device";
+    : "Need help?";
   const accountDeskCopy = viewerSignedIn
     ? orders.length > 0
       ? "Orders, plans, support"
       : "Settings"
-    : "Local settings";
+    : "Reset your password or get support.";
 
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
@@ -563,11 +567,11 @@ export default function AccountPage({ initialSignedIn = false }) {
             appearance="dark"
             accent="cyan"
             eyebrow="Account"
-            title={viewerSignedIn ? "Account" : "This device"}
+            title="Account"
             description={
               viewerSignedIn
                 ? "Reading, orders, security"
-                : ""
+                : "Sign in to save progress and favorites."
             }
             secondary=""
             stats={accountHeroStats}
@@ -590,7 +594,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   type="button"
                   onClick={() => {
                     if (!viewerSignedIn) {
-                      router.push("/auth/reset");
+                      openRegisterPrompt();
                       return;
                     }
                     router.push(
@@ -603,7 +607,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   }}
                   className={secondaryButtonClass}
                 >
-                  {viewerSignedIn ? "Plans" : "Reset password"}
+                  {viewerSignedIn ? "Plans" : "Create account"}
                 </button>
               </>
             }
@@ -658,25 +662,24 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <>
                   <button
                     type="button"
-                    onClick={openAuthPrompt}
+                    onClick={() => router.push("/auth/reset")}
                     className={primaryButtonClass}
                   >
-                    Sign in
+                    Reset password
                   </button>
                   <button
                     type="button"
                     onClick={() =>
                       router.push(
-                        buildPathWithAttribution("/subscribe", {
-                          entryPoint: "ACCOUNT_SUBSCRIPTION",
-                          sourcePath: "/account",
-                          returnTo: "/account",
+                        buildSupportPath({
+                          topic: "account",
+                          context: "Account help",
                         }),
                       )
                     }
                     className={secondaryButtonClass}
                   >
-                    Plans
+                    Support
                   </button>
                 </>
               )}
@@ -689,58 +692,6 @@ export default function AccountPage({ initialSignedIn = false }) {
             notice={commerceNotice}
             onDismiss={() => setCommerceNotice(null)}
           />
-        ) : null}
-
-        {!viewerSignedIn ? (
-          <SurfacePanel
-            className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-            appearance="dark"
-            accent="blue"
-            tone="muted"
-          >
-            <div>
-              <p className={sectionEyebrowClass}>Signed out</p>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                Sign in
-              </h2>
-              <h3 className="mt-3 text-lg font-black tracking-[-0.02em] text-white">
-                Local only.
-                </h3>
-                <p className="mt-3 text-sm font-semibold leading-6 text-white/70">
-                 Sign in to sync your account.
-                </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={openAuthPrompt}
-                className={primaryButtonClass}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/auth/reset")}
-                className={secondaryButtonClass}
-              >
-                Reset password
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    buildSupportPath({
-                      topic: "account",
-                      context: "Account help",
-                    }),
-                  )
-                }
-                className={secondaryButtonClass}
-              >
-                Support
-              </button>
-            </div>
-          </SurfacePanel>
         ) : null}
 
         {message ? (
@@ -763,8 +714,12 @@ export default function AccountPage({ initialSignedIn = false }) {
 
         <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
           <div className="space-y-2">
-            <p className={sectionEyebrowClass}>Actions</p>
-            <h2 className={sectionTitleClass}>Actions.</h2>
+            <p className={sectionEyebrowClass}>
+              {viewerSignedIn ? "Actions" : "Account access"}
+            </p>
+            <h2 className={sectionTitleClass}>
+              {viewerSignedIn ? "Actions." : "Sign in, recover, or get help"}
+            </h2>
           </div>
           <StorefrontPathwaysGrid
             cards={accountActionCards}
@@ -773,10 +728,12 @@ export default function AccountPage({ initialSignedIn = false }) {
           />
         </SurfacePanel>
 
-        <MyLibraryPanel
-          viewerSignedIn={viewerSignedIn}
-          onOpenAuth={openAuthPrompt}
-        />
+        {viewerSignedIn ? (
+          <MyLibraryPanel
+            viewerSignedIn={viewerSignedIn}
+            onOpenAuth={openAuthPrompt}
+          />
+        ) : null}
 
         {hydrated && isSignedIn ? <ReadingStats /> : null}
 
@@ -784,78 +741,122 @@ export default function AccountPage({ initialSignedIn = false }) {
           <div className="space-y-6">
             {viewerSignedIn ? null : (
               <SurfacePanel
-                className="space-y-5"
+                className="space-y-4"
                 appearance="dark"
                 accent="cyan"
               >
-                <div className="space-y-2">
-                  <p className={sectionEyebrowClass}>Local reading setup</p>
-                  <h2 className={sectionTitleClass}>This device</h2>
-                </div>
+                <details className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                    <div>
+                      <p className={sectionEyebrowClass}>Device settings</p>
+                      <h2 className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-white">
+                        Local preferences
+                      </h2>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/60 transition group-open:text-white">
+                      Expand
+                    </span>
+                  </summary>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className={fieldLabelClass}>Display name</label>
-                    <input
-                      value={displayName}
-                      onChange={(event) => setDisplayName(event.target.value)}
-                      placeholder="Your name"
-                      className={fieldClass}
-                    />
-                  </div>
-                  <div>
-                    <label className={fieldLabelClass}>Region</label>
-                    <select
-                      value={region}
-                      onChange={(event) => setRegion(event.target.value)}
-                      className={fieldClass}
-                    >
-                      {REGION_KEYS.map((item) => (
-                        <option key={item} value={item}>
-                          {getRegionConfig(item).label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
-                      Legal age: {regionConfig.legalAge}+
-                    </p>
-                  </div>
-                  <div>
-                    <label className={fieldLabelClass}>Language</label>
-                    <select
-                      value={language}
-                      onChange={(event) => setLanguage(event.target.value)}
-                      className={fieldClass}
-                    >
-                      {LANGUAGE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                  <div className="mt-5 space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label className={fieldLabelClass}>Display name</label>
+                        <input
+                          value={displayName}
+                          onChange={(event) => setDisplayName(event.target.value)}
+                          placeholder="Your name"
+                          className={fieldClass}
+                        />
+                      </div>
+                      <div>
+                        <label className={fieldLabelClass}>Region</label>
+                        <select
+                          value={region}
+                          onChange={(event) => setRegion(event.target.value)}
+                          className={fieldClass}
+                        >
+                          {REGION_KEYS.map((item) => (
+                            <option key={item} value={item}>
+                              {getRegionConfig(item).label}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
+                          Legal age: {regionConfig.legalAge}+
+                        </p>
+                      </div>
+                      <div>
+                        <label className={fieldLabelClass}>Language</label>
+                        <select
+                          value={language}
+                          onChange={(event) => setLanguage(event.target.value)}
+                          className={fieldClass}
+                        >
+                          {LANGUAGE_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
-                <label className={checkboxCardClass}>
-                  <input
-                    type="checkbox"
-                    checked={hideAdultHistory}
-                    onChange={(event) =>
-                      setHideAdultHistory(event.target.checked)
-                    }
-                    className={checkboxClass}
-                  />
-                  Hide 18+ history on this device
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/mature-content")}
-                    className={secondaryButtonClass}
-                  >
-                    18+ settings
-                  </button>
-                </div>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <p className={sectionEyebrowClass}>Device settings</p>
+                        <h3 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
+                          Alerts
+                        </h3>
+                      </div>
+
+                      <label className={checkboxCardClass}>
+                        <input
+                          type="checkbox"
+                          checked={notifyNew}
+                          onChange={(event) => setNotifyNew(event.target.checked)}
+                          className={checkboxClass}
+                        />
+                        New chapter alerts
+                      </label>
+                      <label className={checkboxCardClass}>
+                        <input
+                          type="checkbox"
+                          checked={notifyTtf}
+                          onChange={(event) => setNotifyTtf(event.target.checked)}
+                          className={checkboxClass}
+                        />
+                        Free read alerts
+                      </label>
+                      <label className={checkboxCardClass}>
+                        <input
+                          type="checkbox"
+                          checked={notifyPromo}
+                          onChange={(event) => setNotifyPromo(event.target.checked)}
+                          className={checkboxClass}
+                        />
+                        Deals and offers
+                      </label>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/mature-content")}
+                        className={secondaryButtonClass}
+                      >
+                        Mature content settings
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        className={primaryButtonClass}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </details>
               </SurfacePanel>
             )}
 
@@ -989,7 +990,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Reading setup</p>
                   <h2 className={sectionTitleClass}>
-                    Region, language, and 18+ history
+                    Region and language
                   </h2>
                 </div>
 
@@ -1028,95 +1029,66 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                 </div>
 
-                <label className={checkboxCardClass}>
-                  <input
-                    type="checkbox"
-                    checked={hideAdultHistory}
-                    onChange={(event) =>
-                      setHideAdultHistory(event.target.checked)
-                    }
-                    className={checkboxClass}
-                  />
-                  Hide 18+ history
-                </label>
+                <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  Mature content visibility and 18+ history controls live in a
+                  separate settings page.
+                </div>
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={() => router.push("/mature-content")}
                     className={secondaryButtonClass}
                   >
-                    18+ settings
+                    Mature content settings
                   </button>
                 </div>
               </SurfacePanel>
             ) : null}
 
-            <SurfacePanel
-              className="space-y-4"
-              appearance="light"
-              accent="blue"
-            >
-              <div className="space-y-2">
-                <p className={sectionEyebrowClass}>Notifications</p>
-                <h2 className={sectionTitleClass}>
-                  {viewerSignedIn ? "Alerts" : "Device alerts"}
-                </h2>
-              </div>
+            {viewerSignedIn ? (
+              <SurfacePanel
+                className="space-y-4"
+                appearance="light"
+                accent="blue"
+              >
+                <div className="space-y-2">
+                  <p className={sectionEyebrowClass}>Notifications</p>
+                  <h2 className={sectionTitleClass}>Alerts</h2>
+                </div>
 
-              <label className={checkboxCardClass}>
-                <input
-                  type="checkbox"
-                  checked={notifyNew}
-                  onChange={(event) => setNotifyNew(event.target.checked)}
-                  className={checkboxClass}
-                />
-                New chapter alerts
-              </label>
-              <label className={checkboxCardClass}>
-                <input
-                  type="checkbox"
-                  checked={notifyTtf}
-                  onChange={(event) => setNotifyTtf(event.target.checked)}
-                  className={checkboxClass}
-                />
-                Free read alerts
-              </label>
-              <label className={checkboxCardClass}>
-                <input
-                  type="checkbox"
-                  checked={notifyPromo}
-                  onChange={(event) => setNotifyPromo(event.target.checked)}
-                  className={checkboxClass}
-                />
-                Deals and offers
-              </label>
-            </SurfacePanel>
+                <label className={checkboxCardClass}>
+                  <input
+                    type="checkbox"
+                    checked={notifyNew}
+                    onChange={(event) => setNotifyNew(event.target.checked)}
+                    className={checkboxClass}
+                  />
+                  New chapter alerts
+                </label>
+                <label className={checkboxCardClass}>
+                  <input
+                    type="checkbox"
+                    checked={notifyTtf}
+                    onChange={(event) => setNotifyTtf(event.target.checked)}
+                    className={checkboxClass}
+                  />
+                  Free read alerts
+                </label>
+                <label className={checkboxCardClass}>
+                  <input
+                    type="checkbox"
+                    checked={notifyPromo}
+                    onChange={(event) => setNotifyPromo(event.target.checked)}
+                    className={checkboxClass}
+                  />
+                  Deals and offers
+                </label>
+              </SurfacePanel>
+            ) : null}
           </div>
 
           <div className="space-y-6">
-            {!viewerSignedIn ? (
-              <>
-                <SurfacePanel
-                  className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                  appearance="light"
-                  accent="blue"
-                >
-                  <div>
-                    <p className={sectionEyebrowClass}>Save</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                      This device only.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    className={primaryButtonClass}
-                  >
-                    Save
-                  </button>
-                </SurfacePanel>
-              </>
-            ) : (
+            {!viewerSignedIn ? null : (
               <>
                 <SurfacePanel
                   className="space-y-4"

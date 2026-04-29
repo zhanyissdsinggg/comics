@@ -13,14 +13,11 @@ const DEFAULT_NAV_ITEMS = [
   { id: "featured", label: "Trending", href: "/rankings" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
-  { id: "creators", label: "Creators", href: "/creators" },
 ];
 
 const HOME_NAV_ITEMS = [
-  { id: "featured", label: "Trending", href: "/rankings" },
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
-  { id: "creators", label: "Creators", href: "/creators" },
 ];
 
 export default function HeaderNav({ variant = "default" }) {
@@ -66,7 +63,7 @@ export default function HeaderNav({ variant = "default" }) {
               key={item.id}
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              className={`px-4 py-2 text-white transition-colors ${isActive ? "bg-[#FF007A] text-white" : "hover:bg-[#FF007A] hover:text-white"} font-bold`}
+              className={`rounded-full px-4 py-2 text-sm font-medium text-white transition-colors ${isActive ? "bg-white text-black" : "text-white/70 hover:bg-white/8 hover:text-white"}`}
             >
               {item.label}
             </NavItem>

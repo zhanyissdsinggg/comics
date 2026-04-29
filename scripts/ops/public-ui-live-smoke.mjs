@@ -8,7 +8,9 @@ const { chromium } = requireFromFrontend("@playwright/test");
 
 const DEFAULT_FRONTEND_URL = "https://www.gushcomics.com";
 const DEFAULT_TIMEOUT_MS = 20_000;
-const DEFAULT_DEMO_SERIES_ID = "demo-series";
+const DEFAULT_SMOKE_SERIES_ID = "series-001";
+const DEFAULT_SMOKE_EPISODE_ID = "series-001e1";
+const DEFAULT_SMOKE_SERIES_TITLE = "The Last Kingdom";
 
 function normalizeBaseUrl(value) {
   const normalized = String(value || "").trim();
@@ -157,8 +159,8 @@ async function runDesktopSuite(baseUrl) {
     {
       id: "series.primary-action-enters-reader",
       run: async () => {
-        // If we're already on a series page (from home or search), reuse it; otherwise use the demo series id.
-        let seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
+        // If we're already on a series page (from home or search), reuse it; otherwise use the default smoke title.
+        let seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_SMOKE_SERIES_ID);
         const currentPath = new URL(page.url()).pathname;
         if (currentPath.startsWith("/series/")) {
           seriesId = currentPath.split("/")[2] || seriesId;
@@ -309,8 +311,8 @@ async function runDesktopSuite(baseUrl) {
       run: async () => {
         const currentPath = new URL(page.url()).pathname;
         if (!currentPath.startsWith("/read/")) {
-          const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
-          const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", "demo-episode");
+          const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_SMOKE_SERIES_ID);
+          const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", DEFAULT_SMOKE_EPISODE_ID);
           await page.goto(`${baseUrl}/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`, {
             waitUntil: "domcontentloaded",
             timeout: 60_000,
@@ -336,7 +338,7 @@ async function runDesktopSuite(baseUrl) {
     {
       id: "search.type-and-open-first-result",
       run: async () => {
-        const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_DEMO_SERIES_ID);
+        const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_SMOKE_SERIES_ID);
         await page.goto(`${baseUrl}/search`, { waitUntil: "domcontentloaded", timeout: 60_000 });
         await page.waitForLoadState("networkidle", { timeout: 60_000 });
 
@@ -352,14 +354,14 @@ async function runDesktopSuite(baseUrl) {
         if (!input) {
           throw new Error("unable to locate search input");
         }
-        await input.fill("Demo Series");
+        await input.fill(readEnv("OPS_SMOKE_SERIES_TITLE", DEFAULT_SMOKE_SERIES_TITLE));
         await input.press("Enter");
 
         await page.waitForURL((url) => url.pathname === "/search" && url.searchParams.has("q"), {
           timeout: 60_000,
         });
 
-        // Open the demo series from results (href may include attribution query params).
+        // Open the smoke target from results (href may include attribution query params).
         await clickFirstMatching(page, `a[href^="/series/${seriesId}"]`);
         // Some deployments can be slow to navigate from /search -> /series; treat it as a DOM-level contract:
         // we should either navigate to the series route, or at least render a link back to the series route.

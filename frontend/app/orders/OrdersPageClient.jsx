@@ -27,6 +27,7 @@ import {
   STOREFRONT_TERMS,
 } from "../../lib/storefrontCopy";
 import { buildSupportPath } from "../../lib/supportRouting";
+import { siteConfig } from "../../lib/siteConfig";
 
 function formatOrderAmount(amount, currency) {
   const numericAmount = Number(amount || 0);
@@ -129,6 +130,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   const [billingAvailability, setBillingAvailability] = useState(null);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
+  const checkoutVisible = siteConfig.monetization.checkoutEnabled;
+  const membershipVisible = siteConfig.monetization.membershipEnabled;
+  const pointPacksVisible = siteConfig.monetization.pointPacksEnabled;
 
   useEffect(() => {
     let mounted = true;
@@ -252,57 +256,77 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       {
         id: "signin",
         eyebrow: "Account",
-        title: "Sign in",
+        title: "Sign in to view purchases",
         cta: "Sign in",
         onClick: () => router.push("/signin?returnTo=/orders"),
         accentClass: actionCardPrimaryClass,
       },
-        {
-          id: "support",
-          eyebrow: "Billing",
-          title: "Billing help.",
-          cta: "Support",
-          onClick: () => router.push(buildSupportHref("", "billing")),
-          accentClass: actionCardSecondaryClass,
+      {
+        id: "support",
+        eyebrow: "Billing",
+        title: "Need billing help?",
+        cta: "Support",
+        onClick: () => router.push(buildSupportHref("", "billing")),
+        accentClass: actionCardSecondaryClass,
       },
     ],
     [actionCardPrimaryClass, actionCardSecondaryClass, router],
   );
   const emptyOrderActionCards = useMemo(
-    () => [
-      {
-        id: "packs",
-        eyebrow: "Points",
-        title: "Get points",
-        cta: STOREFRONT_TERMS.viewPointPacks,
-        onClick: () => router.push("/store"),
-        accentClass: actionCardPrimaryClass,
-      },
-      {
-        id: "membership",
-        eyebrow: "Plans",
-        title: "Plans",
-        cta: STOREFRONT_TERMS.compareMembership,
-        onClick: () =>
-          router.push(
-            buildPathWithAttribution("/subscribe", {
-              entryPoint: "ORDERS_EMPTY_STATE",
-              sourcePath: "/orders",
-              returnTo: "/orders",
-            }),
-          ),
-        accentClass: actionCardSecondaryClass,
-      },
-        {
-          id: "support",
-          eyebrow: "Billing",
-          title: "Billing help.",
-          cta: "Support",
-          onClick: () => router.push(buildSupportHref("", "billing")),
-          accentClass: actionCardSecondaryClass,
-      },
+    () =>
+      []
+        .concat(
+          pointPacksVisible
+            ? [
+                {
+                  id: "packs",
+                  eyebrow: "Points",
+                  title: "Get points",
+                  cta: STOREFRONT_TERMS.viewPointPacks,
+                  onClick: () => router.push("/store"),
+                  accentClass: actionCardPrimaryClass,
+                },
+              ]
+            : [],
+        )
+        .concat(
+          membershipVisible
+            ? [
+                {
+                  id: "membership",
+                  eyebrow: "Plans",
+                  title: "Plans",
+                  cta: STOREFRONT_TERMS.compareMembership,
+                  onClick: () =>
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        entryPoint: "ORDERS_EMPTY_STATE",
+                        sourcePath: "/orders",
+                        returnTo: "/orders",
+                      }),
+                    ),
+                  accentClass: actionCardSecondaryClass,
+                },
+              ]
+            : [],
+        )
+        .concat([
+          {
+            id: "support",
+            eyebrow: "Billing",
+            title: "Billing help.",
+            cta: "Support",
+            onClick: () => router.push(buildSupportHref("", "billing")),
+            accentClass: actionCardSecondaryClass,
+          },
+        ]),
+    [
+      actionCardPrimaryClass,
+      actionCardSecondaryClass,
+      membershipVisible,
+      pointPacksVisible,
+      router,
     ],
-    [actionCardPrimaryClass, actionCardSecondaryClass, router],
   );
 
   const billingTaskCards = useMemo(
@@ -324,26 +348,30 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           : signInToOrders,
         accentClass: actionCardPrimaryClass,
       },
-      {
-        id: "membership-charges",
-        eyebrow: "Plans",
-        title: "Plans",
-        description: "",
-        cta: latestMembershipOrder
-          ? "See plan charges"
-          : STOREFRONT_TERMS.compareMembership,
-        onClick: latestMembershipOrder
-          ? () => scrollToSection("purchase-history")
-          : () =>
-              router.push(
-                buildPathWithAttribution("/subscribe", {
-                  entryPoint: "ORDERS_MEMBERSHIP_CHARGES",
-                  sourcePath: "/orders",
-                  returnTo: "/orders",
-                }),
-              ),
-        accentClass: actionCardSecondaryClass,
-      },
+      ...(membershipVisible
+        ? [
+            {
+              id: "membership-charges",
+              eyebrow: "Plans",
+              title: "Plans",
+              description: "",
+              cta: latestMembershipOrder
+                ? "See plan charges"
+                : STOREFRONT_TERMS.compareMembership,
+              onClick: latestMembershipOrder
+                ? () => scrollToSection("purchase-history")
+                : () =>
+                    router.push(
+                      buildPathWithAttribution("/subscribe", {
+                        entryPoint: "ORDERS_MEMBERSHIP_CHARGES",
+                        sourcePath: "/orders",
+                        returnTo: "/orders",
+                      }),
+                    ),
+              accentClass: actionCardSecondaryClass,
+            },
+          ]
+        : []),
       {
         id: "purchase-issue",
         eyebrow: "Missing points?",
@@ -359,6 +387,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
       actionCardSecondaryClass,
       latestMembershipOrder,
       latestPaidOrder,
+      membershipVisible,
       orders.length,
       refundActionsEnabled,
       router,
@@ -377,23 +406,25 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             appearance="dark"
             accent="blue"
             eyebrow="Orders"
-            title={viewerSignedIn ? "Orders" : "Sign in"}
-            description=""
+            title={viewerSignedIn ? "Orders" : "Sign in to view purchases"}
+            description={viewerSignedIn ? "" : "Need billing help? Support can help."}
           />
 
           <StorefrontDesk
             eyebrow="Desk"
-            title={viewerSignedIn ? "Orders" : "Sign in"}
+            title={viewerSignedIn ? "Orders" : "Need billing help?"}
             actions={
               viewerSignedIn ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection("purchase-history")}
-                    className={primaryButtonClass}
-                  >
-                    Orders
-                  </button>
+                  {checkoutVisible ? (
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection("purchase-history")}
+                      className={primaryButtonClass}
+                    >
+                      Orders
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() =>
@@ -503,10 +534,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {!viewerSignedIn ? (
           <SurfacePanel className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
-              <StorefrontSectionHeading title="Orders" />
-              <p className="text-sm font-semibold leading-6 text-white/70">
-                Sign in to view your orders.
-              </p>
+            <StorefrontSectionHeading title="Sign in to view purchases" />
+            <p className="text-sm font-semibold leading-6 text-white/70">
+              Need billing help?
+            </p>
             <StorefrontPathwaysGrid
               cards={signedOutActionCards}
               columnsClassName="md:grid-cols-2"
@@ -549,11 +580,17 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               title="No orders yet"
               description=""
             />
-            <StorefrontPathwaysGrid
-              cards={emptyOrderActionCards}
-              columnsClassName="md:grid-cols-2 xl:grid-cols-3"
-              appearance="dark"
-            />
+            {emptyOrderActionCards.length > 0 ? (
+              <StorefrontPathwaysGrid
+                cards={emptyOrderActionCards}
+                columnsClassName="md:grid-cols-2 xl:grid-cols-3"
+                appearance="dark"
+              />
+            ) : (
+              <p className="text-sm font-semibold leading-6 text-white/70">
+                Billing help is available if you need it.
+              </p>
+            )}
           </SurfacePanel>
         ) : (
           <SurfacePanel

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "@/lib/utils";
 
 function AuthSkeleton({ variant = "default" }) {
@@ -33,7 +34,11 @@ export default function HeaderActions({
   const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
   const walletTotal = paidPts + bonusPts;
-  const showWallet = hydrated && isSignedIn;
+  const showWallet =
+    hydrated &&
+    isSignedIn &&
+    variant !== "home" &&
+    siteConfig.monetization.pointPacksEnabled;
   const iconButtonClass = ICON_BUTTON_CLASS;
 
   return (

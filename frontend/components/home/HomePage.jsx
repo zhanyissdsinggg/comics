@@ -1,30 +1,16 @@
-/**
- * Home page shell focused on fast story discovery for mobile-first storefront traffic.
- */
-
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
-import { useHistoryStore } from "../../store/useHistoryStore";
-import { useProgressStore } from "../../store/useProgressStore";
-import { useAuthStore } from "../../store/useAuthStore";
 import { useBrandingStore } from "../../store/useBrandingStore";
 import { trackEvent } from "../../lib/trackEvent";
-import {
-  consumeCommerceSuccessForPath,
-  getCommerceSuccessPresentation,
-} from "../../lib/commerceSuccess";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
-import {
-  buildHomeHeroItems,
-  getHomeEditorialSnapshot,
-} from "../../lib/homeMerchandising";
+import { getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
@@ -33,62 +19,16 @@ import { cn } from "@/lib/utils";
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
 });
-const CommerceSuccessBanner = dynamic(
-  () => import("../common/CommerceSuccessBanner"),
-);
 const SiteHeader = dynamic(() => import("../layout/SiteHeader"), {
   ssr: false,
-  loading: () => (
-    <div className="sticky top-0 z-40 border-b-4 border-[#FFE500] bg-black/90 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[58px] max-w-[1320px] items-center justify-between gap-3 px-3 py-2 sm:min-h-[64px] sm:px-6 sm:py-2.5 lg:px-8">
-        <div className="h-10 w-28 animate-pulse rounded-full border-2 border-white/20 bg-[#111111]" />
-        <div className="hidden h-10 flex-1 animate-pulse rounded-full border-2 border-white/20 bg-[#111111] md:block" />
-        <div className="h-10 w-24 animate-pulse rounded-full border-2 border-white/20 bg-[#111111]" />
-      </div>
-    </div>
-  ),
 });
 const SiteFooter = dynamic(() => import("../layout/SiteFooter"), {
   ssr: false,
-  loading: () => <div className="h-24" aria-hidden="true" />,
-});
-const HomeContentSections = dynamic(() => import("./HomeContentSections"), {
-  ssr: false,
-  loading: () => (
-    <div className="space-y-8 md:space-y-10">
-      <div className="h-56 rounded-[28px] border-[3px] border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div
-            key={`home-section-skeleton-${index}`}
-            className="h-72 rounded-[26px] border-[3px] border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-          />
-        ))}
-      </div>
-    </div>
-  ),
 });
 
 function toTimestamp(value) {
   const parsed = typeof value === "number" ? value : Date.parse(value || "");
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatEpisodeLabel(value) {
-  const match = String(value || "").match(/(\d+)(?!.*\d)/);
-  return match ? `Chapter ${match[1]}` : "Latest";
-}
-
-function formatPercent(value) {
-  const numeric = Number(value);
-  return !Number.isFinite(numeric) || numeric <= 0
-    ? "0%"
-    : `${Math.round((numeric <= 1 ? numeric : numeric / 100) * 100)}%`;
-}
-
-function getReadingState(series) {
-  const completed = String(series?.status || "").toLowerCase() === "completed";
-  return completed ? "Finished" : "";
 }
 
 function dedupeSeries(seriesList) {
@@ -103,93 +43,6 @@ function dedupeSeries(seriesList) {
   });
 }
 
-function getPrimaryGenres(genres, limit = 2) {
-  return normalizeGenreList(genres).slice(0, limit);
-}
-
-function formatDisplayLabel(value) {
-  const normalized = String(value || "")
-    .replace(/[_-]+/g, " ")
-    .trim();
-
-  if (!normalized) {
-    return "";
-  }
-
-  return normalized
-    .split(/\s+/)
-    .map(
-      (segment) =>
-        segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase(),
-    )
-    .join(" ");
-}
-
-function getSeriesFormat(series) {
-  return String(series?.type || series?.seriesType || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-}
-
-function buildHeroCoverAltText(series) {
-  const title = String(series?.title || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  const seriesType = String(series?.type || series?.seriesType || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-
-  if (title && (seriesType === "comic" || seriesType === "novel")) {
-    return `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image for ${title}`;
-  }
-
-  if (title) {
-    return `Cover image for ${title}`;
-  }
-
-  if (seriesType === "comic" || seriesType === "novel") {
-    return `${seriesType.charAt(0).toUpperCase()}${seriesType.slice(1)} cover image`;
-  }
-
-  return "Series cover image";
-}
-
-function buildSeriesMetaLabel(series, creatorName) {
-  return [
-    creatorName,
-    formatDisplayLabel(series?.type || series?.seriesType || ""),
-    getReadingState(series),
-  ]
-    .filter(Boolean)
-    .join(" / ");
-}
-
-function buildCleanSeriesMetaLabel(series, creatorName) {
-  return buildSeriesMetaLabel(series, creatorName);
-}
-
-function splitHeroTitle(title) {
-  const normalized = String(title || "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!normalized) {
-    return { lead: "Trending", accent: "" };
-  }
-
-  const parts = normalized.split(" ");
-  if (parts.length === 1) {
-    return { lead: parts[0], accent: "" };
-  }
-
-  return {
-    lead: parts.slice(0, -1).join(" "),
-    accent: parts.at(-1) || "",
-  };
-}
-
 function buildHeroSummary(series) {
   const raw =
     series?.shortDescription ||
@@ -200,114 +53,311 @@ function buildHeroSummary(series) {
   const normalized = String(raw).replace(/\s+/g, " ").trim();
 
   if (!normalized) {
-    return "Pick up the latest chapter and keep going.";
+    return "A good place to start when you want one story worth opening right now.";
   }
 
-  const firstSentence = normalized.match(/[^.!?]+[.!?]?/u)?.[0]?.trim();
-  const summary = firstSentence || normalized;
-  return summary.length > 140 ? `${summary.slice(0, 137).trimEnd()}...` : summary;
+  const sentence = normalized.match(/[^.!?]+[.!?]?/u)?.[0]?.trim() || normalized;
+  return sentence.length > 110 ? `${sentence.slice(0, 107).trimEnd()}...` : sentence;
 }
 
-function buildHomeShelfItem(series) {
-  if (!series?.id) {
+function getPrimaryGenres(genres, limit = 3) {
+  return normalizeGenreList(genres).slice(0, limit);
+}
+
+function buildSeriesMeta(series) {
+  const creatorName = resolveSeriesCreatorName(series);
+  const typeLabel = String(series?.type || "")
+    .trim()
+    .toLowerCase();
+  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
+  const statusLabel = String(series?.status || "").trim();
+
+  return [
+    creatorName,
+    typeLabel ? `${typeLabel.charAt(0).toUpperCase()}${typeLabel.slice(1)}` : "",
+    episodeCount > 0 ? `${episodeCount} chapter${episodeCount === 1 ? "" : "s"}` : "",
+    statusLabel,
+  ]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+function buildUpdatedLabel(series) {
+  const updatedAtMs = toTimestamp(series?.updatedAt);
+  if (!updatedAtMs) {
+    return "New release";
+  }
+
+  if (updatedAtMs >= Date.now() - 24 * 60 * 60 * 1000) {
+    return "Updated Today";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(updatedAtMs));
+}
+
+function buildSeriesCardLabel(series, section) {
+  if (section === "completed") {
+    return "Finished Series";
+  }
+
+  if (section === "updates") {
+    return buildUpdatedLabel(series);
+  }
+
+  const genres = getPrimaryGenres(series?.genres, 1);
+  return genres[0] || "Trending";
+}
+
+function buildCoverAltText(series) {
+  const title = String(series?.title || "").trim();
+  const type = String(series?.type || "").trim().toLowerCase();
+
+  if (title && (type === "comic" || type === "novel")) {
+    return `${type.charAt(0).toUpperCase()}${type.slice(1)} cover for ${title}`;
+  }
+
+  if (title) {
+    return `Cover for ${title}`;
+  }
+
+  return "Series cover";
+}
+
+function buildSectionItems(seriesList, section, excludedIds = new Set(), limit = 6) {
+  const filtered = dedupeSeries(seriesList).filter((series) => {
+    const seriesId = String(series?.id || "").trim();
+    return seriesId && !excludedIds.has(seriesId);
+  });
+
+  let ranked = filtered;
+  if (section === "updates") {
+    ranked = [...filtered].sort(
+      (left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+    );
+  } else if (section === "completed") {
+    ranked = filtered.filter(
+      (series) => String(series?.status || "").trim().toLowerCase() === "completed",
+    );
+  }
+
+  return ranked.slice(0, limit);
+}
+
+function HomeSection({
+  title,
+  description,
+  ctaLabel,
+  ctaHref,
+  items,
+  onSeriesOpen,
+  section = "trending",
+}) {
+  if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
 
-  const creatorName = resolveSeriesCreatorName(series);
+  const sectionGridClass =
+    section === "completed"
+      ? "grid-cols-2 md:grid-cols-4"
+      : "grid-cols-2 md:grid-cols-3";
 
-  return {
-    id: series.id,
-    title: series.title,
-    coverUrl: series.coverUrl,
-    coverTone: series.coverTone,
-    genres: getPrimaryGenres(series?.genres, 1),
-    type: series?.type || "",
-    seriesType: series?.type || "",
-    status: series?.status || "",
-    author: creatorName,
-    adult: Boolean(series?.adult),
-    subtitle: "",
-    eyebrow: creatorName,
-    statusLabel: "",
-    metaLabel: buildCleanSeriesMetaLabel(series, creatorName),
-    badge: "",
-  };
-}
-
-function HeroRailPreviewCard({ item, tone = "light", onClick }) {
-  const coverUrl = String(item?.coverUrl || "").trim();
-  const title = String(item?.title || "Story").trim();
-  const meta = String(item?.metaLabel || item?.author || item?.eyebrow || "")
-    .replace(/\s+/g, " ")
-    .trim();
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex w-full items-center gap-3 text-left"
-    >
-        <div
-          className={cn(
-            "relative aspect-[3/4] w-[82px] shrink-0 overflow-hidden border-[3px] border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
-          )}
-        >
-        {coverUrl ? (
-          <Image
-            src={coverUrl}
-            alt={buildHeroCoverAltText(item)}
-            fill
-            sizes="82px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div
-            className="h-full w-full bg-[linear-gradient(135deg,#111827,#0f172a,#3f3f46)]"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p
-          className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50"
-        >
-          Top Picks
-        </p>
-        <p
-          className="mt-2 line-clamp-2 text-sm font-black leading-5 tracking-[-0.02em] text-white"
-        >
-          {title}
-        </p>
-        {meta ? (
-          <p
-            className="mt-1 line-clamp-1 text-[11px] font-semibold text-white/60"
+    <section className="border-t border-white/10 py-8 sm:py-10">
+      <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
+        <div className="space-y-1.5">
+          <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-white sm:text-[1.55rem]">
+            {title}
+          </h2>
+          {description ? (
+            <p className="max-w-[30rem] text-sm leading-6 text-white/60">
+              {description}
+            </p>
+          ) : null}
+        </div>
+        {ctaHref ? (
+          <Link
+            href={ctaHref}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white"
           >
-            {meta}
-          </p>
+            {ctaLabel}
+            <ArrowRight className="size-4" />
+          </Link>
         ) : null}
       </div>
-      <ArrowRight
-        className="size-4 shrink-0 text-white/60 transition-transform group-hover:translate-x-1"
-      />
-    </button>
+
+      <div className={cn("grid gap-3 sm:gap-4", sectionGridClass)}>
+        {items.map((series) => {
+          const title = String(series?.title || "Story").trim();
+          const creatorName = resolveSeriesCreatorName(series);
+          const meta = buildSeriesMeta(series);
+          const chips = getPrimaryGenres(series?.genres, 2);
+          const label = buildSeriesCardLabel(series, section);
+
+          return (
+            <button
+              key={series.id}
+              type="button"
+              onClick={() => onSeriesOpen(series.id, `HOME_${section.toUpperCase()}`)}
+              className="group overflow-hidden rounded-[22px] border border-white/10 bg-[#111111] text-left transition-all duration-200 hover:border-white/18 hover:bg-[#171717]"
+            >
+              <div className="relative aspect-[3/4] overflow-hidden bg-[#0b0b0b]">
+                {series?.coverUrl ? (
+                  <Image
+                    src={series.coverUrl}
+                    alt={buildCoverAltText(series)}
+                    fill
+                    sizes="(max-width: 768px) 45vw, 240px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[linear-gradient(180deg,#171717,#0b0b0b)]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                <div className="absolute left-3 top-3 rounded-full border border-white/12 bg-black/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white/82 backdrop-blur">
+                  {label}
+                </div>
+              </div>
+
+              <div className="space-y-2 p-3 sm:p-4">
+                <div className="space-y-1">
+                  <p className="line-clamp-2 text-[0.98rem] font-semibold leading-5 tracking-[-0.02em] text-white sm:text-[1.04rem]">
+                    {title}
+                  </p>
+                  {creatorName ? (
+                    <p className="line-clamp-1 text-xs text-white/55">
+                      {creatorName}
+                    </p>
+                  ) : null}
+                </div>
+
+                {chips.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {chips.map((chip) => (
+                      <span
+                        key={`${series.id}-${chip}`}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-white/68"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                {meta ? (
+                  <p className="line-clamp-1 text-xs text-white/45">{meta}</p>
+                ) : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function HomeHero({ featuredSeries, onOpenFeatured }) {
+  if (!featuredSeries) {
+    return (
+      <section className="border-b border-white/10 bg-[#0b0b0b]">
+        <div className="mx-auto max-w-[1180px] px-4 py-10 sm:px-6 sm:py-14">
+          <div className="rounded-[28px] border border-white/10 bg-[#111111] p-6 sm:p-8">
+            <p className="text-sm text-white/65">Nothing featured yet.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const title = String(featuredSeries?.title || "Featured").trim();
+  const creatorName = resolveSeriesCreatorName(featuredSeries);
+  const genres = getPrimaryGenres(featuredSeries?.genres, 3);
+  const summary = buildHeroSummary(featuredSeries);
+  const meta = buildSeriesMeta(featuredSeries);
+
+  return (
+    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,#1a1a1a_0%,#0b0b0b_55%,#050505_100%)]">
+      <div className="mx-auto grid max-w-[1180px] gap-6 px-4 py-6 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:gap-10">
+        <div className="order-2 space-y-5 lg:order-1 lg:space-y-6">
+          <div className="space-y-3">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
+              Featured
+            </p>
+            <h1 className="max-w-[11ch] text-[2rem] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-[2.75rem] lg:text-[3.5rem]">
+              {title}
+            </h1>
+            <p className="max-w-[34rem] text-[0.96rem] leading-7 text-white/68 sm:text-[1rem]">
+              {summary}
+            </p>
+          </div>
+
+          {genres.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {genres.map((genre) => (
+                <span
+                  key={`featured-${genre}`}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-white/82"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {meta ? (
+            <p className="text-sm text-white/45">{meta}</p>
+          ) : creatorName ? (
+            <p className="text-sm text-white/45">{creatorName}</p>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => onOpenFeatured(featuredSeries.id)}
+              data-testid="home-hero-primary-cta"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.01]"
+            >
+              Read Chapter 1 Free
+              <ArrowRight className="size-4" />
+            </button>
+            <Link
+              href="/comics"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/14 bg-white/[0.03] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.06] hover:text-white"
+            >
+              Browse Comics
+            </Link>
+          </div>
+        </div>
+
+        <div className="order-1 mx-auto w-full max-w-[260px] lg:order-2 lg:max-w-[320px]">
+          <div className="relative aspect-[3/4] overflow-hidden rounded-[26px] border border-white/12 bg-[#111111] shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
+            {featuredSeries?.coverUrl ? (
+              <Image
+                src={featuredSeries.coverUrl}
+                alt={buildCoverAltText(featuredSeries)}
+                fill
+                sizes="(max-width: 1024px) 260px, 320px"
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="h-full w-full bg-[linear-gradient(180deg,#181818,#0b0b0b)]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
 function HomeContent({ initialSearchParams = {} }) {
   const router = useRouter();
-  const { items: historyItems, loadHistory } = useHistoryStore();
-  const { bySeriesId: progressMap, loadProgress } = useProgressStore();
-  const { isSignedIn } = useAuthStore();
   const { branding } = useBrandingStore();
-  const { loading, seriesList, homepageSlots, hotKeywords } = useHomeData();
+  const { loading, seriesList, homepageSlots } = useHomeData();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [commerceNotice, setCommerceNotice] = useState(null);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      loadHistory();
-      loadProgress();
-    }
-  }, [isSignedIn, loadHistory, loadProgress]);
 
   useEffect(() => {
     const reason = getSearchParam(initialSearchParams, "reason");
@@ -332,263 +382,60 @@ function HomeContent({ initialSearchParams = {} }) {
     trackEvent("view_home", {});
   }, []);
 
-  useEffect(() => {
-    setCommerceNotice(
-      getCommerceSuccessPresentation(consumeCommerceSuccessForPath("/")),
-    );
-  }, []);
-
-  const heroItems = useMemo(
-    () =>
-      buildHomeHeroItems(seriesList, {
-        bannerUrl: branding?.homeBannerUrl,
-        homepageSlots,
-      }),
-    [branding?.homeBannerUrl, homepageSlots, seriesList],
-  );
-
   const editorialSnapshot = useMemo(
     () => getHomeEditorialSnapshot(seriesList, { homepageSlots }),
     [homepageSlots, seriesList],
   );
 
-  const seriesById = useMemo(
-    () => new Map(seriesList.map((series) => [series.id, series])),
-    [seriesList],
-  );
-
-  const featuredHero = heroItems[0] || null;
-  const featuredSeries =
-    (featuredHero?.seriesId ? seriesById.get(featuredHero.seriesId) : null) ||
-    editorialSnapshot.breakoutPick ||
-    editorialSnapshot.freeStartPick ||
-    editorialSnapshot.completedPick ||
-    seriesList[0] ||
-    null;
-
-  const progressEntries = useMemo(
+  const featuredSeries = useMemo(
     () =>
-      Object.entries(progressMap || {}).sort(
-        ([, left], [, right]) =>
-          toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
-      ),
-    [progressMap],
+      editorialSnapshot.breakoutPick ||
+      editorialSnapshot.freeStartPick ||
+      editorialSnapshot.safeCatalog?.[0] ||
+      seriesList[0] ||
+      null,
+    [editorialSnapshot, seriesList],
   );
 
-  const continueItems = useMemo(
-    () =>
-      progressEntries
-        .map(([seriesId, progress]) => {
-          const series = seriesById.get(seriesId);
-          return !series || !progress?.lastEpisodeId
-            ? null
-            : {
-                seriesId,
-                episodeId: progress.lastEpisodeId,
-                progressPercent: Number(progress.percent || 0),
-              };
-        })
-        .filter(Boolean),
-    [progressEntries, seriesById],
-  );
-
-  const recentHistoryItems = useMemo(
-    () =>
-      (Array.isArray(historyItems) ? historyItems : [])
-        .map((entry) => {
-          const series = seriesById.get(entry?.seriesId);
-          return !series || !entry?.episodeId
-            ? null
-            : {
-                seriesId: entry.seriesId,
-                episodeId: entry.episodeId,
-                updatedAt: toTimestamp(entry.createdAt),
-              };
-        })
-        .filter(Boolean)
-        .sort((left, right) => right.updatedAt - left.updatedAt),
-    [historyItems, seriesById],
-  );
-
-  const resumeSpotlight = continueItems[0] || recentHistoryItems[0] || null;
-  const resumeSeries = resumeSpotlight
-    ? seriesById.get(resumeSpotlight.seriesId) || null
-    : null;
-  const heroSeries = resumeSeries || featuredSeries || null;
-  const heroGenrePills = useMemo(
-    () => getPrimaryGenres(heroSeries?.genres, 2),
-    [heroSeries?.genres],
-  );
-  const heroCreatorName = useMemo(
-    () => (heroSeries ? resolveSeriesCreatorName(heroSeries) : ""),
-    [heroSeries],
-  );
-  const heroMetaLine = useMemo(
-    () => buildCleanSeriesMetaLabel(heroSeries, heroCreatorName),
-    [heroCreatorName, heroSeries],
-  );
-  const heroTitleParts = useMemo(
-    () => splitHeroTitle(heroSeries?.title || (resumeSeries ? "Keep Reading" : "Trending")),
-    [heroSeries?.title, resumeSeries],
-  );
-  const heroSummary = useMemo(() => buildHeroSummary(heroSeries), [heroSeries]);
-
-  const heroSignals = useMemo(() => {
-    if (!heroSeries) {
-      return [];
-    }
-
-    const signals = [];
-
-    if (resumeSpotlight?.episodeId) {
-      signals.push({
-        id: `episode-${resumeSpotlight.episodeId}`,
-        content: `${formatEpisodeLabel(resumeSpotlight.episodeId)}${
-          resumeSpotlight.progressPercent > 0
-            ? ` / ${formatPercent(resumeSpotlight.progressPercent)} complete`
-            : ""
-        }`,
-      });
-    }
-
-    const stateLabel = getReadingState(heroSeries);
-    if (stateLabel) {
-      signals.push({
-        id: `state-${String(heroSeries.status || "default").toLowerCase()}`,
-        content: stateLabel,
-      });
-    }
-
-    return signals.filter(Boolean).slice(0, 2);
-  }, [heroSeries, resumeSpotlight]);
-
-  const featuredSeriesItems = useMemo(
-    () =>
-      dedupeSeries([
+  const trendingItems = useMemo(() => {
+    const excludedIds = new Set([String(featuredSeries?.id || "").trim()].filter(Boolean));
+    return buildSectionItems(
+      [
         editorialSnapshot.breakoutPick,
-        editorialSnapshot.completedPick,
-        ...editorialSnapshot.safeCatalog,
-      ])
-        .filter(
-          (series) =>
-            String(series?.id || "").trim() !==
-            String(heroSeries?.id || "").trim(),
-        )
-        .slice(0, 4)
-        .map((series) => buildHomeShelfItem(series))
-        .filter(Boolean),
-    [editorialSnapshot, heroSeries?.id],
-  );
-
-  const startHereItems = useMemo(
-    () =>
-      dedupeSeries([
-        editorialSnapshot.freeStartPick,
-        ...(Array.isArray(editorialSnapshot.startHereSeries)
-          ? editorialSnapshot.startHereSeries
+        ...(Array.isArray(editorialSnapshot.safeCatalog)
+          ? editorialSnapshot.safeCatalog
           : []),
-      ])
-        .filter(
-          (series) =>
-            String(series?.id || "").trim() !==
-            String(heroSeries?.id || "").trim(),
-        )
-        .slice(0, 4)
-        .map((series) => buildHomeShelfItem(series))
+        ...seriesList,
+      ],
+      "trending",
+      excludedIds,
+      6,
+    );
+  }, [editorialSnapshot, featuredSeries?.id, seriesList]);
+
+  const newUpdateItems = useMemo(() => {
+    const excludedIds = new Set(
+      [featuredSeries?.id, ...trendingItems.map((item) => item.id)]
+        .map((value) => String(value || "").trim())
         .filter(Boolean),
-    [editorialSnapshot, heroSeries?.id],
-  );
+    );
+    return buildSectionItems(seriesList, "updates", excludedIds, 6);
+  }, [featuredSeries?.id, seriesList, trendingItems]);
 
-  const heroRailItems = useMemo(() => {
-    const seen = new Set();
-    return [...featuredSeriesItems, ...startHereItems]
-      .filter((item) => {
-        const itemId = String(item?.id || "").trim();
-        if (
-          !itemId ||
-          itemId === String(heroSeries?.id || "").trim() ||
-          seen.has(itemId)
-        ) {
-          return false;
-        }
-        seen.add(itemId);
-        return true;
-      })
-      .slice(0, 2);
-  }, [featuredSeriesItems, heroSeries?.id, startHereItems]);
-  const excludedShelfIds = useMemo(
-    () =>
-      new Set(
-        [
-          heroSeries?.id,
-          ...featuredSeriesItems.map((item) => item.id),
-          ...startHereItems.map((item) => item.id),
-        ]
-          .map((value) => String(value || "").trim())
-          .filter(Boolean),
-      ),
-    [featuredSeriesItems, heroSeries?.id, startHereItems],
-  );
-
-  const comicSpotlightItems = useMemo(
-    () =>
-      dedupeSeries([...editorialSnapshot.safeCatalog, ...seriesList])
-        .filter((series) => {
-          const seriesId = String(series?.id || "").trim();
-          return (
-            seriesId &&
-            !excludedShelfIds.has(seriesId) &&
-            getSeriesFormat(series) === "comic"
-          );
-        })
-        .slice(0, 4)
-        .map((series) => buildHomeShelfItem(series))
+  const completedItems = useMemo(() => {
+    const excludedIds = new Set(
+      [
+        featuredSeries?.id,
+        ...trendingItems.map((item) => item.id),
+        ...newUpdateItems.map((item) => item.id),
+      ]
+        .map((value) => String(value || "").trim())
         .filter(Boolean),
-    [editorialSnapshot.safeCatalog, excludedShelfIds, seriesList],
-  );
+    );
+    return buildSectionItems(seriesList, "completed", excludedIds, 4);
+  }, [featuredSeries?.id, newUpdateItems, seriesList, trendingItems]);
 
-  const novelSpotlightItems = useMemo(
-    () =>
-      dedupeSeries([...editorialSnapshot.safeCatalog, ...seriesList])
-        .filter((series) => {
-          const seriesId = String(series?.id || "").trim();
-          return (
-            seriesId &&
-            !excludedShelfIds.has(seriesId) &&
-            getSeriesFormat(series) === "novel"
-          );
-        })
-        .slice(0, 4)
-        .map((series) => buildHomeShelfItem(series))
-        .filter(Boolean),
-    [editorialSnapshot.safeCatalog, excludedShelfIds, seriesList],
-  );
-
-  const showCatalogFallback = !loading && !featuredSeries;
-
-  const homepageFallbackCards = useMemo(
-    () => [
-      {
-        id: "featured-series",
-        eyebrow: "Top Picks",
-        title: "Top Picks",
-        description: "",
-        label: "Start Reading",
-        href: "/search",
-      },
-      {
-        id: "browse-comics",
-        eyebrow: "Formats",
-        title: "Formats",
-        description: "",
-        label: "Comics",
-        href: "/comics",
-      },
-    ],
-    [],
-  );
-
-  const openHomeSeries = (seriesId, entryPoint, campaignId) => {
+  const openSeries = (seriesId, entryPoint = "HOME_CARD") => {
     if (!seriesId) {
       return;
     }
@@ -597,7 +444,7 @@ function HomeContent({ initialSearchParams = {} }) {
     router.push(
       buildPathWithAttribution(targetPath, {
         entryPoint,
-        campaignId,
+        campaignId: `${String(entryPoint || "home").toLowerCase()}_${seriesId}`,
         sourcePath: "/",
         sourceSeriesId: seriesId,
         returnTo: targetPath,
@@ -605,280 +452,61 @@ function HomeContent({ initialSearchParams = {} }) {
     );
   };
 
-  const primaryHeroHref = useMemo(() => {
-    if (resumeSpotlight?.seriesId) {
-      const targetPath = resumeSpotlight.episodeId
-        ? `/read/${resumeSpotlight.seriesId}/${resumeSpotlight.episodeId}`
-        : `/series/${resumeSpotlight.seriesId}`;
-
-      return buildPathWithAttribution(targetPath, {
-        entryPoint: "HOME_RETURN_LANE",
-        campaignId: "resume_spotlight",
-        sourcePath: "/",
-        sourceSeriesId: resumeSpotlight.seriesId,
-        sourceEpisodeId: resumeSpotlight.episodeId || undefined,
-        returnTo: targetPath,
-      });
-    }
-
-    if (heroSeries?.id) {
-      const targetPath = `/series/${heroSeries.id}`;
-      return buildPathWithAttribution(targetPath, {
-        entryPoint: "HOME_HERO_CARD",
-        campaignId: `home_hero_card_${heroSeries.id}`,
-        sourcePath: "/",
-        sourceSeriesId: heroSeries.id,
-        returnTo: targetPath,
-      });
-    }
-
-    return "/search";
-  }, [heroSeries?.id, resumeSpotlight?.episodeId, resumeSpotlight?.seriesId]);
-
-  const heroEyebrow = resumeSeries ? "Continue Reading" : "Trending";
-  const primaryHeroCtaLabel = resumeSeries
-    ? "Keep Reading"
-    : "Start Reading";
-
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="min-h-screen bg-[#050505] text-white">
       <SiteHeader variant="home" />
 
-      <main className="relative">
-        <section className="p-0">
-          {loading ? (
-            <div className="aspect-[5/6] w-full animate-pulse rounded-[34px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:aspect-[21/11] lg:aspect-[21/8]" />
-          ) : (
-            <section className="relative overflow-hidden border-b-4 border-black bg-[#FF007A]">
-              <div
-                className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle, #000000 2px, transparent 2px)",
-                  backgroundSize: "24px 24px",
-                }}
-              />
-              <div className="absolute -right-8 top-10 hidden h-32 w-32 rounded-full border-4 border-black bg-[#FFE500] md:block" />
-              <div className="absolute bottom-14 left-4 hidden h-20 w-20 rotate-12 border-4 border-black bg-[#00E5FF] md:block" />
-
-              <div className="relative mx-auto grid min-h-[480px] max-w-7xl gap-7 px-4 py-8 md:px-8 md:py-20 lg:grid-cols-[minmax(0,1fr)_420px] xl:min-h-[640px]">
-                <div className="flex flex-col justify-center">
-                  <div className="inline-block w-fit -rotate-2 border-2 border-black bg-black px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#FFE500] sm:text-sm">
-                    {resumeSeries ? "CONTINUE READING" : "TRENDING NOW"}
-                  </div>
-
-                  <h1 className="mt-5 max-w-[9.2ch] text-[clamp(3rem,8vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.06em] text-white">
-                    {heroTitleParts.lead}
-                    {heroTitleParts.accent ? (
-                      <>
-                        <br />
-                        <span className="mt-2 inline-block -rotate-1 border-4 border-black bg-[#FFE500] px-3 text-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                          {heroTitleParts.accent}
-                        </span>
-                      </>
-                    ) : null}
-                  </h1>
-
-                  <div className="mt-4 max-w-[32rem]">
-                    <p className="text-base font-semibold leading-7 text-white/90">
-                      {heroSummary}
-                    </p>
-                  </div>
-
-                  {heroGenrePills.length > 0 || heroSignals.length > 0 ? (
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {heroGenrePills.map((genre) => (
-                        <span
-                          key={`hero-genre-${genre}`}
-                          className="border-2 border-black bg-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]"
-                        >
-                          {genre}
-                        </span>
-                      ))}
-                      {heroSignals.slice(0, 2).map((signal, index) => (
-                        <span
-                          key={signal.id}
-                          className={cn(
-                            "border-2 border-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:px-3 sm:text-[11px]",
-                            "bg-[#FFE500]",
-                          )}
-                        >
-                          {signal.content}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                    <Link
-                      href={primaryHeroHref}
-                      data-testid="home-hero-primary-cta"
-                      className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 border-[3px] border-black bg-[#00E5FF] px-6 py-3 text-sm font-black uppercase tracking-[0.03em] text-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:w-auto sm:text-base"
-                    >
-                      {primaryHeroCtaLabel}
-                      <ArrowRight className="size-4" />
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/search")}
-                      className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 border-[3px] border-black bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.03em] text-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] sm:min-h-0 sm:w-auto sm:text-sm"
-                    >
-                      Search
-                    </button>
-                  </div>
-
-                  {heroMetaLine ? (
-                    <div className="mt-6 flex flex-wrap items-center gap-3 text-white">
-                      <p className="text-sm font-black uppercase tracking-[0.1em] text-white">
-                        {heroMetaLine}
-                      </p>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-5 flex flex-wrap gap-2.5 text-[11px] font-black uppercase tracking-[0.08em] text-white sm:gap-3 sm:text-sm">
-                    <button
-                      type="button"
-                      onClick={() => router.push("/comics")}
-                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
-                    >
-                      Comics
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/novels")}
-                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
-                    >
-                      Novels
-                    </button>
-                    <Link
-                      href="/creators"
-                      className="inline-flex min-h-[40px] items-center justify-center border-2 border-black bg-black px-3 py-1.5 text-center text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#111111]"
-                    >
-                      Creators
-                    </Link>
-                  </div>
+      <main>
+        {loading ? (
+          <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] p-5 sm:p-7">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
+                <div className="space-y-4">
+                  <div className="h-4 w-20 animate-pulse rounded-full bg-white/10" />
+                  <div className="h-16 max-w-[24rem] animate-pulse rounded-[18px] bg-white/10" />
+                  <div className="h-20 max-w-[34rem] animate-pulse rounded-[18px] bg-white/[0.06]" />
+                  <div className="h-12 w-44 animate-pulse rounded-full bg-white/10" />
                 </div>
-
-                <div className="relative flex items-center justify-center lg:justify-end">
-                  {heroRailItems[0] ? (
-                    <div className="absolute left-0 top-6 hidden w-36 -rotate-6 xl:block">
-                      <HeroRailPreviewCard
-                        item={heroRailItems[0]}
-                        tone="dark"
-                        onClick={() =>
-                          openHomeSeries(
-                            heroRailItems[0].id,
-                            "HOME_HERO_RAIL",
-                            `home_hero_rail_${heroRailItems[0].id}`,
-                          )
-                        }
-                      />
-                    </div>
-                  ) : null}
-
-                  <div className="relative w-full max-w-[300px] overflow-hidden border-4 border-black bg-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] sm:max-w-[340px] lg:max-w-[390px]">
-                    <div className="relative aspect-[3/4] w-full">
-                      {heroSeries?.coverUrl ? (
-                        <Image
-                          src={heroSeries.coverUrl}
-                          alt={buildHeroCoverAltText(heroSeries)}
-                          fill
-                          sizes="(max-width: 640px) 300px, (max-width: 1024px) 340px, 390px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-[linear-gradient(135deg,#111827,#374151,#0f172a)]" />
-                      )}
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/86 via-black/18 to-transparent" />
-                    <div className="absolute left-3 top-3 -rotate-6 border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:left-4 sm:top-4 sm:px-3 sm:text-xs">
-                      {heroSeries?.latestEpisodeId ? formatEpisodeLabel(heroSeries.latestEpisodeId) : heroEyebrow}
-                    </div>
-                    <div className="absolute bottom-3 right-3 rotate-3 border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:bottom-4 sm:right-4 sm:px-3 sm:text-xs">
-                      {resumeSeries ? "Keep Reading" : "New"}
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                      <p className="line-clamp-2 text-[1.45rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-white sm:text-[1.8rem]">
-                        {heroSeries?.title || "Trending"}
-                      </p>
-                      {heroCreatorName ? (
-                        <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-white/80">
-                          {heroCreatorName}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  {heroRailItems[1] ? (
-                    <div className="absolute bottom-6 right-0 hidden w-36 rotate-6 xl:block">
-                      <HeroRailPreviewCard
-                        item={heroRailItems[1]}
-                        tone="dark"
-                        onClick={() =>
-                          openHomeSeries(
-                            heroRailItems[1].id,
-                            "HOME_HERO_RAIL",
-                            `home_hero_rail_${heroRailItems[1].id}`,
-                          )
-                        }
-                      />
-                    </div>
-                  ) : null}
-                </div>
+                <div className="mx-auto aspect-[3/4] w-full max-w-[260px] animate-pulse rounded-[24px] bg-white/[0.06]" />
               </div>
-            </section>
-          )}
-        </section>
-
-        {commerceNotice ? (
-          <div className="mb-8 md:mb-10">
-            <CommerceSuccessBanner
-              notice={commerceNotice}
-              onDismiss={() => setCommerceNotice(null)}
-            />
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <HomeHero
+            featuredSeries={featuredSeries}
+            onOpenFeatured={(seriesId) => openSeries(seriesId, "HOME_FEATURED")}
+          />
+        )}
 
-        <HomeContentSections
-          showCatalogFallback={showCatalogFallback}
-          homepageFallbackCards={homepageFallbackCards}
-          featuredSeriesItems={featuredSeriesItems}
-          startHereItems={startHereItems}
-          comicSpotlightItems={comicSpotlightItems}
-          novelSpotlightItems={novelSpotlightItems}
-          hotKeywords={hotKeywords}
-          onFallbackClick={(href) => router.push(href)}
-          onBrowseAllSeries={() => router.push("/search")}
-          onFeaturedItemClick={(item) =>
-            openHomeSeries(
-              item.id,
-              "HOME_FEATURED_SERIES",
-              `home_featured_series_${item.id}`,
-            )
-          }
-          onStartHereItemClick={(item) =>
-            openHomeSeries(
-              item.id,
-              "HOME_START_HERE",
-              `home_start_here_${item.id}`,
-            )
-          }
-          onComicSpotlightItemClick={(item) =>
-            openHomeSeries(
-              item.id,
-              "HOME_COMIC_SPOTLIGHT",
-              `home_comic_spotlight_${item.id}`,
-            )
-          }
-          onNovelSpotlightItemClick={(item) =>
-            openHomeSeries(
-              item.id,
-              "HOME_NOVEL_SPOTLIGHT",
-              `home_novel_spotlight_${item.id}`,
-            )
-          }
-          onGuideClick={(href) => router.push(href)}
-        />
+        <div className="mx-auto max-w-[1180px] px-4 pb-10 pt-2 sm:px-6 sm:pb-14 sm:pt-4">
+          <HomeSection
+            title="Trending now"
+            description="Start here if you want the stories people are opening first."
+            ctaLabel="See all"
+            ctaHref="/rankings"
+            items={trendingItems}
+            onSeriesOpen={openSeries}
+            section="trending"
+          />
+          <HomeSection
+            title="New updates"
+            description="Fresh chapters and recent drops."
+            ctaLabel="Browse all"
+            ctaHref="/search?sort=updated"
+            items={newUpdateItems}
+            onSeriesOpen={openSeries}
+            section="updates"
+          />
+          <HomeSection
+            title="Completed reads"
+            description="Finished stories when you want a full binge."
+            ctaLabel="More finished series"
+            ctaHref="/search?status=Completed&sort=popular"
+            items={completedItems}
+            onSeriesOpen={openSeries}
+            section="completed"
+          />
+        </div>
 
         <LoginPrompt
           isOpen={showLoginPrompt}
@@ -894,7 +522,7 @@ function HomeContent({ initialSearchParams = {} }) {
       </main>
 
       <SiteFooter
-        tone="light"
+        tone={branding?.homeBannerUrl ? "home" : "light"}
         variant="compact"
         pathname="/"
         showTagline={false}

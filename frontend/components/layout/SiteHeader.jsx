@@ -33,6 +33,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
   const { isSignedIn, hydrated } = useAuthStore();
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
+  const [authMode, setAuthMode] = useState("login");
   const [pendingAdultToggle, setPendingAdultToggle] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -69,6 +70,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           window.sessionStorage.setItem("mn_return_to", returnTo);
         }
       }
+      setAuthMode(event?.detail?.mode === "register" ? "register" : "login");
       setActiveModal("login");
       setAuthError("");
     };
@@ -97,6 +99,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     window.sessionStorage.removeItem("mn_open_login");
     window.sessionStorage.setItem("mn_return_to", returnTo);
     setPendingAdultToggle(false);
+    setAuthMode(params.get("mode") === "register" ? "register" : "login");
     setActiveModal("login");
     setAuthError("");
   }, []);
@@ -112,6 +115,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
 
     if (status === "NEED_LOGIN") {
       setPendingAdultToggle(true);
+      setAuthMode("login");
       setActiveModal("login");
       return;
     }
@@ -141,6 +145,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
     }
 
     setPendingAdultToggle(false);
+    setAuthMode("login");
     setActiveModal("login");
   };
 
@@ -194,6 +199,7 @@ export default function SiteHeader({ onSearch, variant = "default" }) {
           onModalClose={handleModalClose}
           authError={authError}
           onAuthError={setAuthError}
+          authMode={authMode}
           pendingAdultToggle={pendingAdultToggle}
           onPendingAdultToggleChange={setPendingAdultToggle}
           variant={variant}

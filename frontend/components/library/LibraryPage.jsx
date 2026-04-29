@@ -824,25 +824,29 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
     return [
       {
-        id: "start-free",
-        eyebrow: "Top Picks",
-        title: "Start with a title.",
+        id: "signin",
+        eyebrow: "Library",
+        title: "Sign in",
         description: "",
-        cta: "Start Reading",
-        onClick: () => router.push("/rankings?type=ttf&window=all"),
+        cta: "Sign in",
+        onClick: () => openAuthPrompt(),
         accentClass: primaryAccentClass,
       },
       {
-        id: "sync",
-        eyebrow: "Sign In",
-        title: "Keep your place.",
+        id: "browse-free",
+        eyebrow: "Free",
+        title: "Browse free chapters",
         description: "",
-        cta: "Sign In",
-        onClick: () => openAuthPrompt(),
+        cta: "Browse free chapters",
+        onClick: () => router.push("/comics"),
         accentClass: commonAccentClass,
       },
     ];
   }, [openAuthPrompt, router]);
+  const signedOutRecommendedStarts = useMemo(
+    () => recommendedItems.slice(0, 3),
+    [recommendedItems],
+  );
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
@@ -851,7 +855,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
           ? "Jump back in."
           : "Saved titles and recent reads."
       : "Save a few titles to get started."
-    : "Sign in to keep your place.";
+    : "Sign in to save progress and favorites.";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
       ? "Your next read."
@@ -900,11 +904,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Library"
-            title={
-              viewerSignedIn || hasCuratedLibraryEntry
-                ? "Your library."
-                : "Build your library."
-            }
+            title="Your library"
             description={signedInHeroDescription}
             secondary=""
             stats={libraryStats}
@@ -931,18 +931,18 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    onClick={openAuthPrompt}
                     data-testid="library-entry-cta"
                     className={primaryButtonClass}
                   >
-                    Start Reading
+                    Sign in
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => {
                     if (!viewerSignedIn) {
-                      openAuthPrompt();
+                      router.push("/comics");
                       return;
                     }
                     if (visibleLibraryItems.length > 0) {
@@ -959,7 +959,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       : showCollectionManager
                         ? "Hide collections"
                         : "Collections"
-                    : "Sign In"}
+                    : "Browse free chapters"}
                 </button>
               </>
             }
@@ -1129,19 +1129,65 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 accent="blue"
                 tone="muted"
               >
-                    <div className="space-y-2">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                        Library
-                      </p>
-                      <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                        Build your library.
-                      </h2>
+                <div className="space-y-2">
+                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+                    Library
+                  </p>
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                    Your library
+                  </h2>
+                  <p className="text-sm font-semibold leading-6 text-white/70">
+                    Sign in to save progress and favorites.
+                  </p>
                 </div>
                 <StorefrontPathwaysGrid
                   cards={signedOutActionCards}
                   columnsClassName="md:grid-cols-2"
                   appearance="dark"
                 />
+                {signedOutRecommendedStarts.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                        Free starts
+                      </p>
+                      <h3 className="text-lg font-black uppercase tracking-[-0.03em] text-white">
+                        Try these first
+                      </h3>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-3">
+                      {signedOutRecommendedStarts.map((item) => (
+                        <button
+                          key={`signed-out-library-${item.id}`}
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              buildLibrarySeriesHref(
+                                item.seriesId,
+                                item.entryPoint || "LIBRARY_SIGNED_OUT_RECO",
+                                item.campaignId || "library_signed_out_reco",
+                              ),
+                            )
+                          }
+                          className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                        >
+                          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+                            {item.eyebrow || "Free start"}
+                          </p>
+                          <h3 className="mt-2 text-base font-black uppercase tracking-[-0.03em] text-white">
+                            {item.title}
+                          </h3>
+                          <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                            {item.subtitle || "Open the series page and start with chapter 1."}
+                          </p>
+                          <span className="mt-4 inline-flex rounded-full border-2 border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
+                            Start reading
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </SurfacePanel>
             )}
 

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }) {
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
   const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
   const creatorName =
-    hasCreatorItems ? creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug) : "Behind the Stories";
+    creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug);
 
   return createPageMetadata({
     title: creatorName,

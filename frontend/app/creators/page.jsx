@@ -13,13 +13,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const payload = await loadCreatorsDirectorySeoPayload();
   const leadCover = payload?.creators?.[0]?.spotlightSeries?.coverUrl || null;
-  const hasRealCreators = Array.isArray(payload?.creators) && payload.creators.length > 0;
 
   return createPageMetadata({
-    title: hasRealCreators ? "Creators" : "Behind the Stories",
-    description: hasRealCreators
-      ? "Writers, artists, and studios behind the stories on Gush."
-      : "Creator credits are still rolling out title by title.",
+    title: "Creators",
+    description: "Writers, artists, and studios behind the stories on Gush.",
     path: "/creators",
     image: leadCover,
   });

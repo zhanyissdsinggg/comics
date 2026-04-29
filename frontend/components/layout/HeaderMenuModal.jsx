@@ -13,26 +13,33 @@ import {
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "@/lib/utils";
 import {
   navigateWithDocument,
   shouldUseDocumentNavigation,
 } from "../../lib/adultRouteNavigation";
 
-const MENU_LINKS = [
-  { label: "Library", href: "/library", icon: Library },
-  { label: "Store", href: "/store", icon: ShoppingBag },
-  { label: "Plans", href: "/subscribe", icon: Crown },
-  { label: "Comics", href: "/comics" },
-  { label: "Novels", href: "/novels" },
-  { label: "Creators", href: "/creators" },
-  { label: "Support", href: "/support" },
-];
+const MENU_LINKS = [{ label: "Library", href: "/library", icon: Library }]
+  .concat(
+    siteConfig.monetization.pointPacksEnabled
+      ? [{ label: "Store", href: "/store", icon: ShoppingBag }]
+      : [],
+  )
+  .concat(
+    siteConfig.monetization.membershipEnabled
+      ? [{ label: "Plans", href: "/subscribe", icon: Crown }]
+      : [],
+  )
+  .concat([
+    { label: "Comics", href: "/comics" },
+    { label: "Novels", href: "/novels" },
+    { label: "Support", href: "/support" },
+  ]);
 
 const HOME_MENU_LINKS = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Creators", href: "/creators" },
   { label: "Support", href: "/support" },
 ];
 
@@ -90,6 +97,23 @@ export default function HeaderMenuModal({
       </Link>
     );
   };
+  const accountLinks = [
+    { label: "Account", href: "/account", icon: User },
+    ...(siteConfig.monetization.checkoutEnabled
+      ? [{ label: "Purchases", href: "/orders", icon: ShoppingBag }]
+      : []),
+    {
+      label: "Notifications",
+      href: "/notifications",
+      icon: Bell,
+      badge:
+        unreadCount > 0
+          ? unreadCount > 99
+            ? "99+"
+            : String(unreadCount)
+          : "",
+    },
+  ];
 
   if (!open) {
     return null;
@@ -138,26 +162,14 @@ export default function HeaderMenuModal({
                       Signed in
                     </p>
                   </div>
-                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                    {walletTotal.toLocaleString()} pts
-                  </span>
+                  {siteConfig.monetization.pointPacksEnabled ? (
+                    <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                      {walletTotal.toLocaleString()} pts
+                    </span>
+                  ) : null}
                 </div>
                 <div className="mt-4 grid gap-2">
-                  {[
-                    { label: "Account", href: "/account", icon: User },
-                    { label: "Purchases", href: "/orders", icon: ShoppingBag },
-                    {
-                      label: "Notifications",
-                      href: "/notifications",
-                      icon: Bell,
-                      badge:
-                        unreadCount > 0
-                          ? unreadCount > 99
-                            ? "99+"
-                            : String(unreadCount)
-                          : "",
-                    },
-                  ].map((item) => {
+                  {accountLinks.map((item) => {
                     const Icon = item.icon;
                     return renderMenuLink(
                       item,

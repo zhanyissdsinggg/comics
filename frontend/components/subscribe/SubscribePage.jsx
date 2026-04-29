@@ -33,6 +33,7 @@ import { buildSupportPath } from "../../lib/supportRouting";
 import { useAuthStore } from "../../store/useAuthStore";
 import { formatUSDate, formatUSDisplayCurrency } from "../../lib/localization";
 import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
+import { siteConfig } from "../../lib/siteConfig";
 
 function openAuthPrompt() {
   if (typeof window === "undefined") {
@@ -167,13 +168,21 @@ export default function SubscribePage({
     billingAvailability,
     "subscriptionActionsEnabled",
   );
-  const subscriptionActionsEnabled = subscriptionMode.isRealCommerceLive;
-  const subscriptionPrelaunch = subscriptionMode.isPrelaunch;
+  const subscriptionActionsEnabled =
+    subscriptionMode.isRealCommerceLive &&
+    siteConfig.monetization.checkoutEnabled &&
+    siteConfig.monetization.membershipEnabled;
+  const subscriptionPrelaunch =
+    subscriptionMode.isPrelaunch ||
+    !siteConfig.monetization.checkoutEnabled ||
+    !siteConfig.monetization.membershipEnabled;
+  const pointPacksVisible = siteConfig.monetization.pointPacksEnabled;
+  const ordersVisible = siteConfig.monetization.checkoutEnabled;
   const subscriptionAvailabilityLabel = isActive
     ? "Active"
     : subscriptionActionsEnabled
       ? "Live"
-      : "Preview";
+      : "Unavailable";
   const planComparisonRows = useMemo(
     () =>
       SUBSCRIPTION_OFFERS.map((plan) => {
@@ -220,7 +229,7 @@ export default function SubscribePage({
     }
 
     if (!subscriptionActionsEnabled) {
-      setFeedback("Preview only.");
+      setFeedback("Plans are not available right now.");
       return;
     }
 
@@ -356,7 +365,7 @@ export default function SubscribePage({
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
                   {subscriptionActionsEnabled
                     ? "Plans"
-                    : "Preview"}
+                    : "Plans"}
                 </h2>
               </div>
             </div>
@@ -373,13 +382,15 @@ export default function SubscribePage({
               >
                 {subscriptionActionsEnabled ? "See plans" : launchAccessLabel}
               </button>
-              <button
-                type="button"
-                onClick={() => router.push("/store")}
-                className={secondaryButtonClass}
-              >
-                {STOREFRONT_TERMS.viewPointPacks}
-              </button>
+              {pointPacksVisible ? (
+                <button
+                  type="button"
+                  onClick={() => router.push("/store")}
+                  className={secondaryButtonClass}
+                >
+                  {STOREFRONT_TERMS.viewPointPacks}
+                </button>
+              ) : null}
               {!isSignedIn && !isActive && subscriptionActionsEnabled ? (
                 <button
                   type="button"
@@ -402,7 +413,7 @@ export default function SubscribePage({
                 <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   {subscriptionActionsEnabled
                     ? "Monthly plans"
-                    : "Preview"}
+                    : "Monthly plans"}
                 </h2>
             </div>
           </div>
@@ -410,10 +421,10 @@ export default function SubscribePage({
           {!subscriptionActionsEnabled ? (
             <div className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
               <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
-                Preview only
+                Plans unavailable
               </h3>
               <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                Plans are listed. Checkout is off for now.
+                Membership checkout is not available right now.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -422,7 +433,7 @@ export default function SubscribePage({
                     router.push(
                       buildSupportPath({
                         topic: "billing",
-                        context: "Plan preview. Checkout disabled.",
+                        context: "Membership checkout is unavailable.",
                       }),
                     )
                   }
@@ -440,17 +451,17 @@ export default function SubscribePage({
                 title: "Now",
                 body: subscriptionActionsEnabled
                   ? "Starts at checkout."
-                  : "Preview only.",
+                  : "Unavailable right now.",
               },
               {
                 title: "Billing",
                 body: subscriptionActionsEnabled
                   ? "Renews monthly."
-                  : "Checkout not live.",
+                  : "Try again later.",
               },
               {
                 title: "Orders",
-                body: "In Orders.",
+                body: ordersVisible ? "In Orders." : "Available after launch.",
               },
               {
                 title: "Help",
@@ -484,13 +495,15 @@ export default function SubscribePage({
             >
               Support
             </button>
-            <button
-              type="button"
-              onClick={() => router.push("/orders")}
-              className={secondaryButtonClass}
-            >
-              Orders
-            </button>
+            {ordersVisible ? (
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                Orders
+              </button>
+            ) : null}
           </div>
         </SurfacePanel>
 

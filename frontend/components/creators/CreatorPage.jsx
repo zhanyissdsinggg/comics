@@ -3,14 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SiteHeader from "../layout/SiteHeader";
-import Cover from "../common/Cover";
-import NetworkFallback from "../common/NetworkFallback";
-import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
-import SkeletonCard from "../common/SkeletonCard";
+import Cover from "../common/Cover";
+import EmptyState from "../common/EmptyState";
 import PortraitCard from "../home/PortraitCard";
-import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
-import StorefrontPathwaysGrid from "../common/StorefrontPathwaysGrid";
 import { apiGet } from "../../lib/apiClient";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import {
@@ -20,10 +16,6 @@ import {
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
-import {
-  consumeCommerceSuccessForPath,
-  getCommerceSuccessPresentation,
-} from "../../lib/commerceSuccess";
 import {
   buildCreatorPathFromSlug,
   humanizeCreatorSlug,
@@ -35,26 +27,33 @@ import {
   seriesMatchesCreatorSlug,
 } from "../../lib/creatorIdentity";
 
-function toNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+function formatCreditTypeLabel(creditType) {
+  if (creditType === "studio") {
+    return "Studio";
+  }
+
+  if (creditType === "team") {
+    return "Team";
+  }
+
+  return "Creator";
 }
 
 function formatDateLabel(value) {
   if (!value) {
-    return "Recently updated";
+    return "";
   }
 
-  const parsed = Date.parse(value);
-  if (Number.isNaN(parsed)) {
-    return "Recently updated";
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return "";
   }
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(parsed));
+  }).format(new Date(timestamp));
 }
 
 function getCatalogPriority(series) {
@@ -74,25 +73,17 @@ function getCatalogPriority(series) {
   );
 }
 
-function getCreatorShelfBadge(series) {
-  if (String(series?.status || "").toLowerCase() === "completed") {
-    return "Finished";
-  }
+function buildCreatorItems(seriesList, creatorSlug) {
+  return (Array.isArray(seriesList) ? seriesList : [])
+    .filter((item) => item?.id && seriesMatchesCreatorSlug(item, creatorSlug))
+    .sort((left, right) => {
+      const scoreDelta = getCatalogPriority(right) - getCatalogPriority(left);
+      if (scoreDelta !== 0) {
+        return scoreDelta;
+      }
 
-  const updatedAtMs = Date.parse(series?.updatedAt || 0);
-  if (
-    !Number.isNaN(updatedAtMs) &&
-    updatedAtMs >= Date.now() - 14 * 24 * 60 * 60 * 1000
-  ) {
-    return "Updated";
-  }
-
-  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
-  if (episodeCount > 0 && episodeCount <= 12) {
-    return "Top Pick";
-  }
-
-  return "";
+      return Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
+    });
 }
 
 function getTopGenres(items) {
@@ -104,6 +95,7 @@ function getTopGenres(items) {
       if (!key) {
         return;
       }
+
       counts.set(key, (counts.get(key) || 0) + 1);
     });
   });
@@ -112,146 +104,63 @@ function getTopGenres(items) {
     .sort(
       (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
     )
-    .map(([genre]) => genre);
+    .map(([genre]) => genre)
+    .slice(0, 4);
 }
 
-function buildCreatorItems(seriesList, creatorSlug) {
-  return seriesList
-    .filter((item) => item?.id && seriesMatchesCreatorSlug(item, creatorSlug))
-    .sort((left, right) => {
-      const popularityDelta =
-        getCatalogPriority(right) - getCatalogPriority(left);
-      if (popularityDelta !== 0) {
-        return popularityDelta;
-      }
-
-      return new Date(right?.updatedAt || 0) - new Date(left?.updatedAt || 0);
-    });
-}
-
-function getSpotlightSeries(items, originSeriesId) {
-  if (!items.length) {
-    return null;
-  }
-
-  if (originSeriesId) {
-    const matched = items.find((item) => item.id === originSeriesId);
-    if (matched) {
-      return matched;
-    }
-  }
-
-  return items[0];
-}
-
-function formatTitleCountLabel(count) {
-  return `${count} title${count === 1 ? "" : "s"}`;
-}
-
-function formatCreatorCreditTypeLabel(creditType) {
-  if (creditType === "studio") {
-    return "Studio";
-  }
-
-  if (creditType === "team") {
-    return "Team";
-  }
-
-  return "Creator";
-}
-
-function getCreatorHeroCopy(creatorName, creditType, topGenres) {
-  if (creditType === "studio") {
-    return {
-      title: "Studio",
-      description: "",
-    };
-  }
-
-  if (creditType === "team") {
-    return {
-      title: "Team",
-      description: "",
-    };
-  }
-
-  return {
-    title: creatorName,
-    description: "",
-  };
-}
-
-function summarizeSpotlightDescription(text, fallback) {
+function summarizeText(text, fallback = "") {
   const source = String(text || "")
     .replace(/\s+/g, " ")
     .trim();
-
   if (!source) {
     return fallback;
   }
 
-  if (source.length <= 120) {
+  if (source.length <= 160) {
     return source;
   }
 
-  return `${source.slice(0, 117).trimEnd()}...`;
+  return `${source.slice(0, 157).trimEnd()}...`;
+}
+
+function buildGridItems(items) {
+  return items.map((item) => ({
+    ...item,
+    subtitle:
+      Array.isArray(item?.genres) && item.genres.length > 0
+        ? item.genres.slice(0, 2).join(" / ")
+        : String(item?.status || "Story"),
+  }));
 }
 
 function CreatorPageSkeleton() {
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <SurfacePanel appearance="dark" accent="cyan" className="space-y-6">
-            <div className="space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded-full bg-white/20" />
-              <div className="h-14 w-full max-w-3xl animate-pulse rounded-[24px] bg-white/20" />
-              <div className="h-20 w-full max-w-2xl animate-pulse rounded-[24px] bg-[#111111]" />
-            </div>
-          </SurfacePanel>
-          <SurfacePanel
-            tone="muted"
-            appearance="dark"
-            accent="cyan"
-            className="space-y-3"
-          >
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={`creator-hero-skeleton-${index}`}
-                className="h-24 animate-pulse rounded-[24px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-              />
-            ))}
-          </SurfacePanel>
-        </div>
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+          <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
+          <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/20" />
+          <div className="h-16 w-full max-w-3xl animate-pulse rounded-[24px] bg-[#111111]" />
+        </SurfacePanel>
 
-        <SurfacePanel appearance="dark" accent="cyan">
-          <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <div className="aspect-[3/4] animate-pulse rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
-            <div className="space-y-4">
-              <div className="h-4 w-32 animate-pulse rounded-full bg-white/20" />
-              <div className="h-12 w-full max-w-2xl animate-pulse rounded-[24px] bg-white/20" />
-              <div className="h-24 w-full animate-pulse rounded-[24px] bg-[#111111]" />
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className="aspect-[3/4] animate-pulse rounded-[26px] bg-[#111111]" />
+            <div className="space-y-3">
+              <div className="h-8 w-48 animate-pulse rounded-full bg-white/20" />
+              <div className="h-14 w-full animate-pulse rounded-[24px] bg-[#111111]" />
               <div className="grid gap-3 sm:grid-cols-3">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
-                    key={`creator-spotlight-skeleton-${index}`}
-                    className="h-28 animate-pulse rounded-[24px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                    key={`creator-stat-${index}`}
+                    className="h-24 animate-pulse rounded-[22px] bg-[#111111]"
                   />
                 ))}
               </div>
             </div>
           </div>
         </SurfacePanel>
-
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <SkeletonCard
-              key={`creator-grid-skeleton-${index}`}
-              appearance="light"
-            />
-          ))}
-        </div>
       </div>
     </main>
   );
@@ -270,8 +179,6 @@ export default function CreatorPage({
   );
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
-  const [commerceNotice, setCommerceNotice] = useState(null);
-  const [retryTick, setRetryTick] = useState(0);
   const requestRef = useRef(0);
 
   const creatorPath = useMemo(
@@ -282,9 +189,6 @@ export default function CreatorPage({
     () => readPaymentAttributionFromSearchParams(searchParams),
     [searchParams],
   );
-  const retryCreatorPage = useCallback(() => {
-    setRetryTick((current) => current + 1);
-  }, []);
 
   useEffect(() => {
     if (!routeAttribution) {
@@ -300,75 +204,48 @@ export default function CreatorPage({
     }
   }, [routeAttribution]);
 
-  useEffect(() => {
-    setCommerceNotice(
-      getCommerceSuccessPresentation(
-        consumeCommerceSuccessForPath(creatorPath),
-      ),
-    );
-  }, [creatorPath]);
-
-  useEffect(() => {
-    const requestId = requestRef.current + 1;
-    requestRef.current = requestId;
+  const fetchCreatorCatalog = useCallback(() => {
+    requestRef.current += 1;
+    const currentRequest = requestRef.current;
     const adultFlag = isAdultMode ? "1" : "0";
-    if (!hasInitialCatalog) {
-      setLoading(true);
-    }
+
+    setLoading(true);
     setError("");
-
-    const isCurrentRequest = () => requestRef.current === requestId;
-    const applyResponse = (response) => {
-      if (!isCurrentRequest()) {
-        return false;
-      }
-
-      if (!response.ok) {
-        if (response.error === "ADULT_GATED") {
-          forceDisableAdultMode();
-          setCatalog([]);
-          setError("");
-        } else {
-          if (!hasInitialCatalog) {
-            setCatalog([]);
-            setError(response.error || "Unable to load creator page.");
-          }
-        }
-        return true;
-      }
-
-      setCatalog(
-        Array.isArray(response.data?.series) ? response.data.series : [],
-      );
-      setError("");
-      return true;
-    };
 
     apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then(
       (response) => {
-        if (!applyResponse(response)) {
+        if (currentRequest !== requestRef.current) {
           return;
         }
 
-        if (isCurrentRequest()) {
+        if (!response.ok) {
+          if (response.error === "ADULT_GATED") {
+            forceDisableAdultMode();
+            setCatalog([]);
+            setError("");
+          } else {
+            setCatalog([]);
+            setError(response.error || "Unable to load creator page.");
+          }
           setLoading(false);
+          return;
         }
 
-        if (response.ok && response.stale) {
-          apiGet(`/api/series?adult=${adultFlag}`, {
-            cacheMs: 30000,
-            bust: true,
-            dedupeMs: 0,
-          }).then((freshResponse) => {
-            if (!isCurrentRequest()) {
-              return;
-            }
-            applyResponse(freshResponse);
-          });
-        }
+        setCatalog(Array.isArray(response.data?.series) ? response.data.series : []);
+        setError("");
+        setLoading(false);
       },
     );
-  }, [forceDisableAdultMode, hasInitialCatalog, isAdultMode, retryTick]);
+  }, [forceDisableAdultMode, isAdultMode]);
+
+  useEffect(() => {
+    if (hasInitialCatalog) {
+      setLoading(false);
+      return;
+    }
+
+    fetchCreatorCatalog();
+  }, [fetchCreatorCatalog, hasInitialCatalog]);
 
   const creatorItems = useMemo(
     () => buildCreatorItems(catalog, creatorSlug),
@@ -394,79 +271,13 @@ export default function CreatorPage({
     [creatorIdentity.slug, creatorName, creatorSlug],
   );
   const topGenres = useMemo(() => getTopGenres(creatorItems), [creatorItems]);
-  const originSeriesId = routeAttribution?.sourceSeriesId || "";
-  const originSeries = useMemo(
-    () => creatorItems.find((item) => item.id === originSeriesId) || null,
-    [creatorItems, originSeriesId],
-  );
-  const spotlightSeries = useMemo(
-    () => getSpotlightSeries(creatorItems, originSeriesId),
-    [creatorItems, originSeriesId],
-  );
-
-  const heroCopy = useMemo(
-    () =>
-      getCreatorHeroCopy(creatorName, creatorIdentity.creditType, topGenres),
-    [creatorIdentity.creditType, creatorName, topGenres],
-  );
-
-  const creatorStats = useMemo(() => {
-    const completedCount = creatorItems.filter(
-      (item) => String(item?.status || "").toLowerCase() === "completed",
-    ).length;
-    const strongestGenre = topGenres[0] || "Mixed";
-    const latestUpdatedAt = creatorItems[0]?.updatedAt;
-
-    return [
-      {
-        label: "Titles",
-        value: formatTitleCountLabel(creatorItems.length),
-      },
-      {
-        label: "Status",
-        value:
-          completedCount > 0 ? `${completedCount} complete` : "Mostly ongoing",
-      },
-      {
-        label: "Latest",
-        value: latestUpdatedAt ? formatDateLabel(latestUpdatedAt) : "Live now",
-      },
-      {
-        label: "Genre",
-        value: strongestGenre,
-      },
-    ];
-  }, [creatorItems, topGenres]);
-
-  const spotlightMeta = useMemo(() => {
-    if (!spotlightSeries) {
-      return [];
-    }
-
-    const isCompleted =
-      String(spotlightSeries?.status || "").toLowerCase() === "completed";
-
-    return [
-      isCompleted
-        ? "Finished"
-        : `Updated ${formatDateLabel(spotlightSeries?.updatedAt)}`,
-      Array.isArray(spotlightSeries?.genres) &&
-      spotlightSeries.genres.length > 0
-        ? spotlightSeries.genres.slice(0, 2).join(" / ")
-        : "Trending",
-    ].filter(Boolean);
-  }, [spotlightSeries]);
-
-  const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
-  const secondaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-5 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
-  const creatorCardClass =
-    "overflow-hidden rounded-[30px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
-  const neutralChipClass =
-    "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
-  const softActionClass = secondaryButtonClass;
-  const strongActionClass = primaryButtonClass;
+  const spotlightSeries = creatorItems[0] || null;
+  const latestUpdatedAt = spotlightSeries?.updatedAt || "";
+  const completedCount = creatorItems.filter(
+    (item) => String(item?.status || "").toLowerCase() === "completed",
+  ).length;
+  const ongoingCount = Math.max(creatorItems.length - completedCount, 0);
+  const gridItems = useMemo(() => buildGridItems(creatorItems), [creatorItems]);
 
   const handleOpenTitle = useCallback(
     (series) => {
@@ -488,142 +299,9 @@ export default function CreatorPage({
     [creatorPath, creatorSlugKey, router],
   );
 
-  const handleBrowseGenre = useCallback(() => {
-    const primaryGenre = topGenres[0];
-    if (!primaryGenre) {
-      router.push("/search?sort=latest");
-      return;
-    }
-
-    router.push(
-      `/search?genre=${encodeURIComponent(primaryGenre)}&sort=latest`,
-    );
-  }, [router, topGenres]);
-
-  const handleReturn = useCallback(() => {
-    const returnTo = routeAttribution?.returnTo;
-    if (returnTo) {
-      router.push(returnTo);
-      return;
-    }
-
-    if (originSeriesId) {
-      router.push(`/series/${originSeriesId}`);
-      return;
-    }
-
+  const handleBackToSearch = useCallback(() => {
     router.push("/search");
-  }, [originSeriesId, routeAttribution?.returnTo, router]);
-
-  const gridItems = useMemo(
-    () =>
-      creatorItems.map((item) => ({
-        ...item,
-        subtitle:
-          Array.isArray(item?.genres) && item.genres.length > 0
-            ? item.genres.slice(0, 2).join(" | ")
-            : String(item?.status || "Story"),
-      })),
-    [creatorItems],
-  );
-  const creatorPathways = useMemo(
-    () =>
-      [
-        spotlightSeries
-          ? {
-              id: "lead-title",
-              eyebrow: "Spotlight",
-              title: `${spotlightSeries.title}.`,
-              cta: "Read More",
-              onClick: () => handleOpenTitle(spotlightSeries),
-              accentClass: strongActionClass,
-            }
-          : null,
-        {
-          id: "genre",
-          eyebrow: "Genres",
-          title: topGenres[0]
-            ? `Explore ${topGenres[0]}.`
-            : "Genres.",
-          cta: topGenres[0] ? `Explore ${topGenres[0]}` : "Genres",
-          onClick: handleBrowseGenre,
-          accentClass: softActionClass,
-        },
-        {
-          id: "return",
-          eyebrow: "Back",
-          title: originSeries ? `${originSeries.title}.` : "Back.",
-          cta: originSeries ? "Read More" : "Back",
-          onClick: handleReturn,
-          accentClass: softActionClass,
-        },
-      ].filter(Boolean),
-    [
-      handleBrowseGenre,
-      handleOpenTitle,
-      handleReturn,
-      originSeries,
-      spotlightSeries,
-      topGenres,
-    ],
-  );
-  const creatorDeskStats = [
-      {
-        label: "Profile",
-        value: formatCreatorCreditTypeLabel(creatorIdentity.creditType),
-        tone: "bg-black",
-      },
-      {
-        label: "Titles",
-        value: String(creatorItems.length || 0),
-        tone: "bg-black",
-      },
-      {
-        label: "Top genre",
-        value: topGenres[0] || "Mixed",
-        tone: "bg-black",
-      },
-  ];
-  const emptyCreatorPathways = useMemo(
-    () => [
-      {
-        id: "search-series",
-        eyebrow: "Search",
-        title: `Search ${creatorName}.`,
-        cta: "Search",
-        onClick: () =>
-          router.push(
-            `/search?q=${encodeURIComponent(creatorName)}&sort=latest`,
-          ),
-        accentClass: strongActionClass,
-      },
-      {
-        id: "featured-series",
-        eyebrow: "Trending",
-        title: "Trending",
-        cta: "Trending",
-        onClick: () => router.push("/rankings?view=featured"),
-        accentClass: softActionClass,
-      },
-      {
-        id: "catalog",
-        eyebrow: "Comics",
-        title: "Comics",
-        cta: "Comics",
-        onClick: () => router.push("/comics"),
-        accentClass: softActionClass,
-      },
-      {
-        id: "return",
-        eyebrow: "Back",
-        title: originSeries ? `${originSeries.title}.` : "Back.",
-        cta: originSeries ? "Read More" : "Back",
-        onClick: handleReturn,
-        accentClass: softActionClass,
-      },
-    ],
-    [creatorName, handleReturn, originSeries, router, softActionClass, strongActionClass],
-  );
+  }, [router]);
 
   if (loading) {
     return <CreatorPageSkeleton />;
@@ -634,20 +312,16 @@ export default function CreatorPage({
       <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <NetworkFallback
-            compact
-            title="This creator page isn't loading right now."
-            description=""
-            onRetry={retryCreatorPage}
-          >
-            <button
-              type="button"
-              onClick={() => router.push("/search")}
-              className={secondaryButtonClass}
-            >
-              Search
-            </button>
-          </NetworkFallback>
+          <SurfacePanel appearance="dark" accent="cyan">
+            <EmptyState
+              appearance="dark"
+              icon="alert"
+              eyebrow="Load failed"
+              title="Couldn't load this creator."
+              description=""
+              action={{ label: "Retry", onClick: fetchCreatorCatalog }}
+            />
+          </SurfacePanel>
         </div>
       </main>
     );
@@ -657,77 +331,24 @@ export default function CreatorPage({
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
         <SiteHeader variant="home" />
-        <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <EditorialHero
-              accent="blue"
+        <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
+              {formatCreditTypeLabel(creatorIdentity.creditType)}
+            </p>
+            <h1 className="text-[2.35rem] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:text-[3rem]">
+              {creatorName}
+            </h1>
+          </SurfacePanel>
+
+          <SurfacePanel appearance="dark" accent="cyan">
+            <EmptyState
               appearance="dark"
-              eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
-              title={`${creatorName} isn't live here yet.`}
+              icon="search"
+              eyebrow="No titles"
+              title="No titles found."
               description=""
-              stats={[
-                {
-                  label: formatCreatorCreditTypeLabel(
-                    creatorIdentity.creditType,
-                  ),
-                  value: creatorName,
-                },
-                {
-                  label: "Mode",
-                  value: isAdultMode ? "18+" : "Standard",
-                },
-              ]}
-            />
-
-            <SurfacePanel
-              tone="muted"
-              accent="blue"
-              appearance="dark"
-              className="flex h-full flex-col justify-between space-y-6"
-            >
-              <div className="space-y-3">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                  Search
-                </p>
-                <div>
-                  <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
-                    Search
-                  </h2>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => router.push("/search")}
-                  className={primaryButtonClass}
-                >
-                  Search
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReturn}
-                  className={secondaryButtonClass}
-                >
-                  Back
-                </button>
-              </div>
-            </SurfacePanel>
-          </section>
-
-          <SurfacePanel appearance="dark" accent="blue" className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <div className="space-y-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                Picks
-              </p>
-              <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
-                Picks
-              </h2>
-            </div>
-            <StorefrontPathwaysGrid
-              cards={emptyCreatorPathways}
-              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-              appearance="dark"
+              action={{ label: "Search", onClick: handleBackToSearch }}
             />
           </SurfacePanel>
         </div>
@@ -739,184 +360,118 @@ export default function CreatorPage({
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <SiteHeader variant="home" />
 
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <EditorialHero
-            accent="blue"
-            appearance="dark"
-            eyebrow={formatCreatorCreditTypeLabel(creatorIdentity.creditType)}
-            title={heroCopy.title}
-            description={heroCopy.description}
-            secondary={originSeries ? `From ${originSeries.title}.` : ""}
-            stats={creatorStats}
-          />
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
+          <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
+            <div className="overflow-hidden rounded-[28px] border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+              <Cover
+                tone={spotlightSeries?.coverTone}
+                coverUrl={spotlightSeries?.coverUrl}
+                label={spotlightSeries?.title || creatorName}
+                eyebrow={creatorName}
+                badge=""
+                fallbackVariant="minimal-card"
+                className="aspect-[3/4] rounded-[22px]"
+              />
+            </div>
 
-          <SurfacePanel
-            tone="highlight"
-            accent="amber"
-            appearance="dark"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                Creator
+            <div className="min-w-0">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
+                {formatCreditTypeLabel(creatorIdentity.creditType)}
               </p>
-              <div>
-                <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
-                  {creatorName}
-                </h2>
-              </div>
-            </div>
+              <h1 className="mt-3 text-[2.35rem] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:text-[3rem]">
+                {creatorName}
+              </h1>
 
-            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              {creatorDeskStats.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                >
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/60">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
-                    {item.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              {spotlightSeries ? (
-                <button
-                  type="button"
-                  onClick={() => handleOpenTitle(spotlightSeries)}
-                  className={primaryButtonClass}
-                >
-                  Read More
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => router.push("/rankings?view=featured")}
-                  className={primaryButtonClass}
-                >
-                  Trending
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleBrowseGenre}
-                className={secondaryButtonClass}
-              >
-                {topGenres[0] ? topGenres[0] : "Genres"}
-              </button>
-              <button
-                type="button"
-                onClick={handleReturn}
-                className={secondaryButtonClass}
-              >
-                {originSeries ? "Read More" : "Back"}
-              </button>
-            </div>
-          </SurfacePanel>
-        </section>
-
-        {commerceNotice ? (
-          <CommerceSuccessBanner
-            notice={commerceNotice}
-            onDismiss={() => setCommerceNotice(null)}
-          />
-        ) : null}
-
-        {spotlightSeries ? (
-          <SurfacePanel appearance="dark" accent="cyan" className="space-y-6 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-              <div className={creatorCardClass}>
-                <div className="aspect-[3/4] w-full overflow-hidden">
-                  <Cover
-                    tone={spotlightSeries.coverTone}
-                    coverUrl={spotlightSeries.coverUrl}
-                    label={spotlightSeries.title}
-                    eyebrow={creatorName}
-                    badge={getCreatorShelfBadge(spotlightSeries)}
-                    className="h-full w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                  Spotlight
-                </p>
-                <h2 className="mt-3 font-display text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-4xl">
-                  {spotlightSeries.title}
-                </h2>
-                <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-white/70 sm:text-base">
-                  {summarizeSpotlightDescription(
-                    spotlightSeries.description,
-                    `Start with ${spotlightSeries.title}.`,
-                  )}
-                </p>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {(Array.isArray(spotlightSeries?.genres)
-                    ? spotlightSeries.genres
-                    : []
-                  ).map((genre) => (
-                    <span key={genre} className={neutralChipClass}>
+              {topGenres.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {topGenres.map((genre) => (
+                    <span
+                      key={`${creatorSlugKey}-${genre}`}
+                      className="rounded-full border-2 border-white/15 bg-[#111111] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/75"
+                    >
                       {genre}
                     </span>
                   ))}
-                  {spotlightSeries?.status ? (
-                    <span className={neutralChipClass}>
-                      {spotlightSeries.status}
-                    </span>
-                  ) : null}
                 </div>
+              ) : null}
 
-                <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/60">
-                  {spotlightMeta.map((item, index) => (
-                    <span
-                      key={`${spotlightSeries.id}-meta-${index}`}
-                      className={neutralChipClass}
-                    >
-                      {item}
-                    </span>
-                  ))}
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    Titles
+                  </p>
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
+                    {creatorItems.length}
+                  </p>
                 </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenTitle(spotlightSeries)}
-                    className={primaryButtonClass}
-                  >
-                    Read More
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBrowseGenre}
-                    className={secondaryButtonClass}
-                  >
-                    {topGenres[0] ? topGenres[0] : "Genres"}
-                  </button>
+                <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    Ongoing
+                  </p>
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
+                    {ongoingCount}
+                  </p>
+                </div>
+                <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    Finished
+                  </p>
+                  <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
+                    {completedCount}
+                  </p>
+                </div>
+                <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    Latest
+                  </p>
+                  <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-white">
+                    {formatDateLabel(latestUpdatedAt) || "Live"}
+                  </p>
                 </div>
               </div>
             </div>
+          </div>
+        </SurfacePanel>
+
+        {spotlightSeries ? (
+          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+                  Latest Updated Title
+                </p>
+                <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white">
+                  {spotlightSeries.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenTitle(spotlightSeries)}
+                className="rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-black uppercase tracking-[0.04em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
+              >
+                Read More
+              </button>
+            </div>
+
+            <p className="max-w-3xl text-sm font-semibold leading-7 text-white/72">
+              {summarizeText(spotlightSeries?.description, "")}
+            </p>
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel appearance="dark" accent="blue" className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                Series
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+                Works
               </p>
-              <h2 className="mt-2 font-display text-[2.2rem] font-black uppercase tracking-[-0.05em] text-white sm:text-[2.8rem]">
+              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white">
                 {creatorName}
               </h2>
             </div>
-            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-white/60">
-              {formatTitleCountLabel(gridItems.length)}
+            <p className="text-sm font-bold uppercase tracking-[0.08em] text-white/55">
+              {creatorItems.length} title{creatorItems.length === 1 ? "" : "s"}
             </p>
           </div>
 

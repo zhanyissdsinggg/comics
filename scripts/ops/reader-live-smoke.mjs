@@ -26,8 +26,8 @@ async function main() {
   // This smoke test is a UI contract check, so it must always target the frontend base URL.
   // Avoid falling back to BACKEND_URL because that may point at an API domain.
   const baseUrl = normalizeBaseUrl(process.env.FRONTEND_URL);
-  const seriesId = readEnv("OPS_SMOKE_SERIES_ID", "demo-series");
-  const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", "demo-episode");
+  const seriesId = readEnv("OPS_SMOKE_SERIES_ID", "series-001");
+  const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", "series-001e1");
   const targetUrl = `${baseUrl}/read/${seriesId}/${episodeId}`;
 
   console.log(`[ops-reader] url=${targetUrl}`);

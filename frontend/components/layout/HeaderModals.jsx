@@ -17,6 +17,7 @@ export default function HeaderModals({
   onModalClose,
   authError,
   onAuthError,
+  authMode = "login",
   pendingAdultToggle,
   onPendingAdultToggleChange,
   variant = "default",
@@ -117,6 +118,7 @@ export default function HeaderModals({
           onAuthError("");
         }}
         allowRegister
+        initialMode={authMode}
         title="Sign in"
         description={
           pendingAdultToggle

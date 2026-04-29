@@ -40,9 +40,6 @@ type SeriesSeed = {
   credits: CreditSeed[];
 };
 
-const DEMO_SERIES_ID = "demo-series";
-const DEMO_EPISODE_ID = "demo-episode";
-
 type InteractiveStorySeed = {
   id: string;
   seriesId: string;
@@ -106,7 +103,7 @@ function buildReaderPageDataUrl(options: {
       <circle cx="170" cy="1040" r="280" fill="${tone}" opacity="0.12" />
       <rect x="48" y="48" width="704" height="1104" rx="40" fill="#0b1020" fill-opacity="0.84" stroke="${tone}" stroke-opacity="0.45" />
       <rect x="80" y="88" width="186" height="34" rx="17" fill="${tone}" fill-opacity="0.22" />
-      <text x="102" y="111" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.8">EDITORIAL PREVIEW</text>
+      <text x="102" y="111" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.8">CHAPTER</text>
       <text x="80" y="182" fill="#E5E7EB" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">${safeTitle}</text>
       <text x="80" y="226" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="24">${escapeXml(episodeLabel)} | ${escapeXml(pageLabel)}</text>
 
@@ -137,7 +134,7 @@ function buildReaderPageDataUrl(options: {
       <rect x="132" y="946" width="466" height="16" rx="8" fill="#E2E8F0" fill-opacity="0.76" />
       <rect x="132" y="978" width="422" height="12" rx="6" fill="#94A3B8" fill-opacity="0.56" />
 
-      <text x="80" y="1112" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="18">Local QA artwork for the storefront reader.</text>
+      <text x="80" y="1112" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="18">Story preview artwork.</text>
 
       <defs>
         <linearGradient id="bg" x1="96" y1="72" x2="704" y2="1128" gradientUnits="userSpaceOnUse">
@@ -795,121 +792,6 @@ async function seedEpisodes() {
   }
 }
 
-async function seedDemoSeries() {
-  // This demo fixture exists purely so production can reliably open the
-  // canonical smoke-check routes: /series/demo-series and /read/demo-series/demo-episode.
-  // It is safe to run multiple times (upsert) and intentionally minimal.
-  const credits: CreditSeed[] = [
-    {
-      name: "Gush Demo Studio",
-      role: CreditRole.STUDIO,
-      type: CreatorType.STUDIO,
-      isPrimary: true,
-      bio: "Demo creator used for smoke checks.",
-    },
-  ];
-  const author = buildSeriesAuthor(credits);
-  const coverTone = "#0ea5e9";
-
-  await prisma.series.upsert({
-    where: { id: DEMO_SERIES_ID },
-    update: {
-      title: "Demo Series",
-      author,
-      type: "comic",
-      adult: false,
-      isPublished: true,
-      genres: ["Demo", "Action"],
-      coverTone,
-      coverUrl: "/mock-covers/series-001.jpg",
-      status: "Ongoing",
-      description:
-        "A lightweight demo series used for platform smoke tests and reader QA.",
-      episodePrice: 0,
-      ttfEnabled: false,
-      ttfIntervalHours: 24,
-      latestEpisodeId: DEMO_EPISODE_ID,
-    },
-    create: {
-      id: DEMO_SERIES_ID,
-      title: "Demo Series",
-      author,
-      type: "comic",
-      adult: false,
-      isPublished: true,
-      genres: ["Demo", "Action"],
-      coverTone,
-      coverUrl: "/mock-covers/series-001.jpg",
-      status: "Ongoing",
-      description:
-        "A lightweight demo series used for platform smoke tests and reader QA.",
-      episodePrice: 0,
-      ttfEnabled: false,
-      ttfIntervalHours: 24,
-      latestEpisodeId: DEMO_EPISODE_ID,
-    },
-  });
-
-  await upsertCreatorCredits({
-    id: DEMO_SERIES_ID,
-    title: "Demo Series",
-    type: "comic",
-    adult: false,
-    genres: ["Demo", "Action"],
-    coverUrl: "/mock-covers/series-001.jpg",
-    coverTone,
-    status: "Ongoing",
-    description:
-      "A lightweight demo series used for platform smoke tests and reader QA.",
-    episodePrice: 0,
-    ttfEnabled: false,
-    ttfIntervalHours: 24,
-    credits,
-  });
-
-  const releasedAt = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-  await prisma.episode.upsert({
-    where: { id: DEMO_EPISODE_ID },
-    update: {
-      seriesId: DEMO_SERIES_ID,
-      number: 1,
-      title: "Demo Episode",
-      releasedAt,
-      pricePts: 0,
-      ttfEligible: false,
-      ttfReadyAt: null,
-      previewFreePages: 3,
-      pages: buildEpisodePages(
-        { title: "Demo Series", coverTone },
-        1,
-      ),
-      paragraphs: [],
-      text: null,
-      isDeleted: false,
-    },
-    create: {
-      id: DEMO_EPISODE_ID,
-      seriesId: DEMO_SERIES_ID,
-      number: 1,
-      title: "Demo Episode",
-      releasedAt,
-      pricePts: 0,
-      ttfEligible: false,
-      ttfReadyAt: null,
-      previewFreePages: 3,
-      pages: buildEpisodePages(
-        { title: "Demo Series", coverTone },
-        1,
-      ),
-      paragraphs: [],
-      text: null,
-      isDeleted: false,
-    },
-  });
-
-  console.log(`seeded demo series ${DEMO_SERIES_ID} + episode ${DEMO_EPISODE_ID}`);
-}
-
 async function seedTopupPackages() {
   const topupPackages = [
     {
@@ -1094,7 +976,6 @@ async function main() {
     console.error(
       [
         "Refusing to run full seed in production without explicit override.",
-        "If you only need the demo smoke routes, run: npm run seed:demo",
         "If you truly intend to seed a production database, set ALLOW_PROD_SEED=1 and rerun.",
       ].join("\n"),
     );
@@ -1104,7 +985,6 @@ async function main() {
   console.log("seeding backend fixtures...");
   await seedSeries();
   await seedEpisodes();
-  await seedDemoSeries();
   await seedInteractiveStories();
   await seedRecommendationSlots();
   await seedTopupPackages();

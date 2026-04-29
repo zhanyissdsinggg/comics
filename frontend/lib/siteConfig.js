@@ -2,6 +2,25 @@ function clean(value) {
   return String(value || "").trim();
 }
 
+function parseEnvFlag(...keys) {
+  for (const key of keys) {
+    const raw = clean(process.env[key]);
+    if (!raw) {
+      continue;
+    }
+
+    const normalized = raw.toLowerCase();
+    if (["1", "true", "yes", "on"].includes(normalized)) {
+      return true;
+    }
+    if (["0", "false", "no", "off"].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 const DEFAULT_SITE_URL = "https://www.gushcomics.com";
 
 function normalizeSiteUrl(value) {
@@ -41,7 +60,26 @@ export const siteConfig = {
   twitterUrl: clean(process.env.NEXT_PUBLIC_TWITTER_URL),
   twitterHandle: clean(process.env.NEXT_PUBLIC_TWITTER_HANDLE),
   githubUrl: clean(process.env.NEXT_PUBLIC_GITHUB_URL),
+  monetization: {
+    checkoutEnabled: parseEnvFlag(
+      "NEXT_PUBLIC_ENABLE_CHECKOUT",
+      "ENABLE_CHECKOUT",
+    ),
+    membershipEnabled: parseEnvFlag(
+      "NEXT_PUBLIC_ENABLE_MEMBERSHIP",
+      "ENABLE_MEMBERSHIP",
+    ),
+    pointPacksEnabled: parseEnvFlag(
+      "NEXT_PUBLIC_ENABLE_POINT_PACKS",
+      "ENABLE_POINT_PACKS",
+    ),
+  },
 };
+
+siteConfig.monetization.publicCommerceNavEnabled =
+  siteConfig.monetization.checkoutEnabled ||
+  siteConfig.monetization.membershipEnabled ||
+  siteConfig.monetization.pointPacksEnabled;
 
 export function absoluteUrl(path = "/") {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

@@ -237,7 +237,7 @@ const LIBRARY_RETURN_SLOT_PRIORITIES = [
   },
   {
     slotId: "home-binge-ready",
-    sourceLabel: "Binge-ready fallback",
+    sourceLabel: "Binge-ready pick",
     entryPoint: "LIBRARY_BINGE_FILL",
     campaignId: "library_binge_fill",
     limit: 2,

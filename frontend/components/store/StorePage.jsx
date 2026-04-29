@@ -38,6 +38,7 @@ import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { buildSupportPath } from "../../lib/supportRouting";
 import { resolvePublicCommerceMode } from "../../lib/storefrontBillingState";
+import { siteConfig } from "../../lib/siteConfig";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -335,11 +336,19 @@ export default function StorePage({
     billingAvailability,
     "purchaseActionsEnabled",
   );
-  const purchaseActionsEnabled = purchaseMode.isRealCommerceLive;
-  const purchasePrelaunch = purchaseMode.isPrelaunch;
+  const purchaseActionsEnabled =
+    purchaseMode.isRealCommerceLive &&
+    siteConfig.monetization.checkoutEnabled &&
+    siteConfig.monetization.pointPacksEnabled;
+  const purchasePrelaunch =
+    purchaseMode.isPrelaunch ||
+    !siteConfig.monetization.checkoutEnabled ||
+    !siteConfig.monetization.pointPacksEnabled;
+  const membershipVisible = siteConfig.monetization.membershipEnabled;
+  const ordersVisible = siteConfig.monetization.checkoutEnabled;
   const purchaseAvailabilityLabel = purchaseActionsEnabled
     ? "Live"
-    : "Preview";
+    : "Unavailable";
   const packageComparisonRows = useMemo(
     () =>
       orderedPackages.map((pkg) => {
@@ -372,7 +381,7 @@ export default function StorePage({
     }
 
     if (!purchaseActionsEnabled) {
-      setErrorMessage("Point-pack checkout opens later.");
+      setErrorMessage("Point packs are not available right now.");
       return;
     }
 
@@ -495,15 +504,17 @@ export default function StorePage({
           value: "One-time packs",
           hint: isSubscriber ? "Separate from plans." : "One-time.",
         },
-        {
-          label: "Plans",
-          value: membershipStartingPrice
-            ? `${membershipStartingPrice}/mo`
-            : "Monthly option",
-          hint: subscriptionStats
-            ? `Up to ${subscriptionStats.maxDiscount}% off chapters.`
-            : "Monthly option.",
-        },
+        membershipVisible
+          ? {
+              label: "Plans",
+              value: membershipStartingPrice
+                ? `${membershipStartingPrice}/mo`
+                : "Monthly option",
+              hint: subscriptionStats
+                ? `Up to ${subscriptionStats.maxDiscount}% off chapters.`
+                : "Monthly option.",
+            }
+          : null,
       ].filter(Boolean),
     [
       purchaseAvailabilityLabel,
@@ -534,12 +545,12 @@ export default function StorePage({
           <EditorialHero
             eyebrow="Point packs"
             title={
-              purchaseActionsEnabled ? "Points." : "Points preview."
+              purchaseActionsEnabled ? "Points." : "Points."
             }
             description={
               purchaseActionsEnabled
                 ? "Pick a pack."
-                : "See the packs."
+                : "Point packs are not available right now."
             }
             secondary={purchaseActionsEnabled ? regionConfig.label : ""}
             stats={storeHeroStats}
@@ -559,7 +570,7 @@ export default function StorePage({
               </p>
               <div>
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
-                  {purchaseActionsEnabled ? "Point packs" : "Packs"}
+                  {purchaseActionsEnabled ? "Point packs" : "Point packs"}
                 </h2>
               </div>
             </div>
@@ -576,7 +587,7 @@ export default function StorePage({
               >
                 {purchaseActionsEnabled ? "See packs" : launchAccessLabel}
               </button>
-              {subscriptionStats ? (
+              {subscriptionStats && membershipVisible ? (
                 <button
                   type="button"
                   onClick={() =>
@@ -647,7 +658,7 @@ export default function StorePage({
                 Store
               </p>
               <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                {purchaseActionsEnabled ? "Store" : "Preview"}
+                {purchaseActionsEnabled ? "Store" : "Store"}
               </h2>
             </div>
           </div>
@@ -655,10 +666,10 @@ export default function StorePage({
           {!purchaseActionsEnabled ? (
             <div className={quietCardClass}>
                 <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
-                  Preview only
+                  Point packs unavailable
                 </h3>
                 <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
-                Packs are listed. Checkout is off for now.
+                Point-pack checkout is not available right now.
                 </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -667,7 +678,7 @@ export default function StorePage({
                     router.push(
                       buildSupportPath({
                         topic: "billing",
-                        context: "Point packs are in preview. Checkout is not live yet.",
+                        context: "Point-pack checkout is unavailable.",
                       }),
                     )
                   }
@@ -685,13 +696,13 @@ export default function StorePage({
                 label: "Now",
                 detail: purchaseActionsEnabled
                   ? "Buy what you need."
-                  : "Preview only.",
+                  : "Unavailable right now.",
               },
               {
                 label: "Orders",
-                detail: purchaseActionsEnabled
+                detail: ordersVisible && purchaseActionsEnabled
                   ? "Past charges are in Orders."
-                  : "After launch.",
+                  : "Available after launch.",
               },
               {
                 label: "Help",
@@ -725,13 +736,15 @@ export default function StorePage({
             >
               Support
             </button>
-            <button
-              type="button"
-              onClick={() => router.push("/orders")}
-              className={secondaryButtonClass}
-            >
-              Orders
-            </button>
+            {ordersVisible ? (
+              <button
+                type="button"
+                onClick={() => router.push("/orders")}
+                className={secondaryButtonClass}
+              >
+                Orders
+              </button>
+            ) : null}
           </div>
         </SurfacePanel>
 
@@ -773,13 +786,15 @@ export default function StorePage({
                 >
                     Trending
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/subscribe")}
-                    className={secondaryButtonClass}
-                  >
-                    Plans
-                  </button>
+                  {membershipVisible ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/subscribe")}
+                      className={secondaryButtonClass}
+                    >
+                      Plans
+                    </button>
+                  ) : null}
                 </div>
               </SurfacePanel>
             ) : null}
@@ -804,38 +819,42 @@ export default function StorePage({
                     Buy once.
                   </p>
                 </div>
-                <div className={quietCardClass}>
-                  <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
-                    Plans
-                  </p>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
-                    {subscriptionStats
-                      ? `From ${membershipStartingPrice || "current price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
-                      : "Monthly plans."}
-                  </p>
-                </div>
+                {membershipVisible ? (
+                  <div className={quietCardClass}>
+                    <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
+                      Plans
+                    </p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
+                      {subscriptionStats
+                        ? `From ${membershipStartingPrice || "current price"} a month. Up to ${subscriptionStats.maxDiscount}% off.`
+                        : "Monthly plans."}
+                    </p>
+                  </div>
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      buildPathWithAttribution("/subscribe", {
-                        promotionId: promotionId || undefined,
-                        campaignId: campaignId || undefined,
-                        entryPoint: "STORE_SIDEBAR_COMPARE",
-                        sourcePath,
-                        sourceSeriesId: sourceSeriesId || undefined,
-                        sourceEpisodeId: sourceEpisodeId || undefined,
-                        returnTo,
-                      }),
-                    )
-                  }
-                  className={secondaryButtonClass}
-                >
-                  {STOREFRONT_TERMS.compareMembership}
-                </button>
-                {purchaseActionsEnabled ? (
+                {membershipVisible ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        buildPathWithAttribution("/subscribe", {
+                          promotionId: promotionId || undefined,
+                          campaignId: campaignId || undefined,
+                          entryPoint: "STORE_SIDEBAR_COMPARE",
+                          sourcePath,
+                          sourceSeriesId: sourceSeriesId || undefined,
+                          sourceEpisodeId: sourceEpisodeId || undefined,
+                          returnTo,
+                        }),
+                      )
+                    }
+                    className={secondaryButtonClass}
+                  >
+                    {STOREFRONT_TERMS.compareMembership}
+                  </button>
+                ) : null}
+                {purchaseActionsEnabled && ordersVisible ? (
                   <button
                     type="button"
                     onClick={() => router.push("/orders")}
@@ -1057,13 +1076,15 @@ export default function StorePage({
 
             {purchaseActionsEnabled ? (
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => router.push("/orders")}
-                  className={secondaryButtonClass}
-                >
-                  Orders
-                </button>
+                {ordersVisible ? (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/orders")}
+                    className={secondaryButtonClass}
+                  >
+                    Orders
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() =>

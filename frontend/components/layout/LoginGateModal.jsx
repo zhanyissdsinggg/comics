@@ -18,6 +18,7 @@ export default function LoginGateModal({
   onClose,
   onSubmit,
   allowRegister = false,
+  initialMode = "login",
   title = LOGIN_GATE_TITLE,
   description = LOGIN_GATE_DESCRIPTION,
   errorMessage = "",
@@ -53,7 +54,7 @@ export default function LoginGateModal({
     if (open) {
       setEmail("");
       setPassword("");
-      setMode("login");
+      setMode(initialMode === "register" ? "register" : "login");
       setStep("login");
       setOtpCode("");
       setOtpStatus("");
@@ -63,7 +64,7 @@ export default function LoginGateModal({
       setResetStatus("");
       setSocialError("");
     }
-  }, [open]);
+  }, [initialMode, open]);
 
   useEffect(() => {
     if (!open) {

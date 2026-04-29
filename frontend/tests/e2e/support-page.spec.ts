@@ -30,12 +30,14 @@ test.describe("Support page", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Send a request." }),
+      page.getByRole("heading", { name: "Send a request" }),
     ).toBeVisible();
     await expect(page.locator("#support-topic")).toBeVisible();
     await expect(page.locator("#support-email")).toBeVisible();
     await expect(page.locator("#support-order-id")).toBeVisible();
-    await expect(page.getByText("1-2 days")).toBeVisible();
+    await expect(
+      page.getByText("We'll reply in 1-2 business days."),
+    ).toBeVisible();
 
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-email", "reader@example.com");
@@ -65,5 +67,40 @@ test.describe("Support page", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.locator("#support-order-id")).toHaveValue("ord_12345");
+  });
+
+  test("falls back to mailto when backend support submit is unavailable", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+
+    await page.addInitScript(() => {
+      window.localStorage.setItem("cookie_consent", "accepted");
+    });
+
+    await page.route("**/api/support", async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: false, error: "UNAVAILABLE" }),
+      });
+    });
+
+    const response = await page.goto("/support", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.selectOption("#support-topic", "technical");
+    await page.fill("#support-email", "reader@example.com");
+    await page.fill("#support-subject", "Reader won't load");
+    await page.fill("#support-message", "Chapter 12 freezes on open.");
+    await page.click("button[type='submit']");
+
+    await expect(page.getByText("Email backup ready")).toBeVisible();
+    const mailtoLink = page.getByRole("link", { name: "Open email app" });
+    await expect(mailtoLink).toBeVisible();
+    await expect(mailtoLink).toHaveAttribute("href", /^mailto:/);
+    await expectNoRuntimeIssues("/support", runtimeIssues);
   });
 });

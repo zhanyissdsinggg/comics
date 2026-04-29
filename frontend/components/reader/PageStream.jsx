@@ -66,8 +66,8 @@ function readPlaceholdPageMeta(url) {
 }
 
 function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
-  const title = meta?.title || "Editorial preview";
-  const episodeLabel = meta?.episodeNumber ? `Chapter ${meta.episodeNumber}` : "Preview";
+  const title = meta?.title || "Story";
+  const episodeLabel = meta?.episodeNumber ? `Chapter ${meta.episodeNumber}` : "Chapter";
   const pageLabel = meta?.pageNumber ? `Page ${meta.pageNumber}` : `Panel ${index + 1}`;
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
   const accentMap = ["#60a5fa", "#34d399", "#f59e0b", "#f472b6"];
@@ -84,7 +84,7 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(96,165,250,0.18),transparent_28%),radial-gradient(circle_at_18%_82%,rgba(52,211,153,0.18),transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]" />
       <div className="absolute inset-[6%] rounded-[28px] border-2 border-white/10 bg-[#0b0b0b] shadow-[0_30px_80px_rgba(2,6,23,0.55)]" />
       <div className="absolute left-[10%] top-[9%] rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/80" style={{ backgroundColor: `${accent}33` }}>
-        Reader Preview
+        Story Page
       </div>
 
       <div className="absolute left-[10%] right-[10%] top-[15%]">
