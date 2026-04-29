@@ -10,6 +10,11 @@ import {
 } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
+import {
+  buildPublicSeriesVisibilityWhere,
+  filterBlockedPublicSeries,
+  isBlockedPublicSeriesRecord,
+} from "../../common/utils/public-catalog-visibility";
 
 type SeriesListRow = {
   id: string;
@@ -66,6 +71,7 @@ type SeriesCommerceEpisodeAccess = {
 
 const SERIES_LIST_TTL_SECONDS = 300;
 const SERIES_DETAIL_TTL_SECONDS = 180;
+const PUBLIC_CATALOG_CACHE_VERSION = "v2";
 
 @Injectable()
 export class SeriesService {
@@ -151,17 +157,17 @@ export class SeriesService {
 
   async list(adult: boolean | null) {
     const adultEnabled = adult === true;
-    const cacheKey = `series:list:${adultEnabled ? "adult" : "standard"}`;
+    const cacheKey = `series:list:${adultEnabled ? "adult" : "standard"}:${PUBLIC_CATALOG_CACHE_VERSION}`;
     const cached =
       await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (Array.isArray(cached) && cached.length > 0) {
       return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
     }
 
-    const where = {
+    const where = buildPublicSeriesVisibilityWhere({
       isPublished: true,
       adult: adultEnabled,
-    };
+    });
 
     const rows = await this.prisma.series.findMany({
       where,
@@ -182,13 +188,14 @@ export class SeriesService {
       },
     });
 
-    const seriesIds = rows.map((row) => row.id);
+    const visibleRows = filterBlockedPublicSeries(rows);
+    const seriesIds = visibleRows.map((row) => row.id);
     const [analyticsMap, creditsMap] = await Promise.all([
       loadSeriesAnalytics(this.prisma, seriesIds),
       this.creatorCreditsService.getCreditsMap(seriesIds),
     ]);
 
-    const series = rows.map((row) =>
+    const series = visibleRows.map((row) =>
       this.buildSeriesSummary(
         row,
         analyticsMap.get(row.id) || {
@@ -205,7 +212,7 @@ export class SeriesService {
   }
 
   private async loadCachedDetail(seriesId: string) {
-    const cacheKey = `series:detail:${seriesId}`;
+    const cacheKey = `series:detail:${seriesId}:${PUBLIC_CATALOG_CACHE_VERSION}`;
     let cached = await this.cacheService.get<CachedSeriesDetail>(cacheKey);
 
     if (!cached) {
@@ -230,6 +237,9 @@ export class SeriesService {
       });
 
       if (!row || row.isPublished === false) {
+        return null;
+      }
+      if (isBlockedPublicSeriesRecord(row)) {
         return null;
       }
 

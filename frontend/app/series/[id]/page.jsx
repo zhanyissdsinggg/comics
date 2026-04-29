@@ -4,6 +4,7 @@ import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
 import { WalletProvider } from "../../../store/useWalletStore";
+import { notFound } from "next/navigation";
 import { createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
@@ -54,6 +55,9 @@ export async function generateMetadata({ params }) {
 export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const routePayload = await loadSeriesRoutePayload(resolvedParams.id);
+  if (routePayload?.state === "not-found") {
+    notFound();
+  }
   const structuredData = routePayload?.payload ? buildSeriesStructuredData(routePayload.payload) : [];
 
   return (

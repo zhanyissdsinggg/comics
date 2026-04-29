@@ -9,6 +9,10 @@ import {
 } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
+import {
+  filterBlockedPublicSeries,
+  isBlockedPublicSeriesRecord,
+} from "../../common/utils/public-catalog-visibility";
 
 type SearchOptions = {
   q?: string;
@@ -92,7 +96,7 @@ function buildSearchResultsCacheKey(input: {
   pageSize: number;
 }): string {
   return [
-    "search:results",
+    "search:results:v2",
     input.adult ? "adult" : "standard",
     input.query || "all",
     input.requestedTypes.join("|") || "all-types",
@@ -128,13 +132,14 @@ export class SearchService {
   }
 
   private async hydrateSeries(rows: SearchSeriesRow[]) {
-    const seriesIds = rows.map((row) => row.id);
+    const visibleRows = filterBlockedPublicSeries(rows);
+    const seriesIds = visibleRows.map((row) => row.id);
     const [analyticsMap, creditsMap] = await Promise.all([
       loadSeriesAnalytics(this.prisma, seriesIds),
       this.creatorCreditsService.getCreditsMap(seriesIds),
     ]);
 
-    return rows.map((row) => {
+    return visibleRows.map((row) => {
       const credits = creditsMap.get(row.id) || [];
       const identity = this.creatorCreditsService.buildIdentity(credits);
       return mapStorefrontSeriesSummary(
@@ -206,6 +211,44 @@ export class SearchService {
     requestedGenres: string[];
   }) {
     const clauses: Prisma.Sql[] = [Prisma.sql`s."isPublished" = true`];
+    const blockedIds = ["demo-series", "fixture-series"];
+    const blockedIdTokens = ["demo", "fixture", "placeholder", "qa"];
+    const blockedTextPatterns = [
+      "demo series",
+      "gush demo studio",
+      "smoke test",
+      "reader qa",
+      "demo action",
+      "demo genre",
+      "platform smoke tests",
+      "fixture",
+      "placeholder",
+    ];
+
+    clauses.push(Prisma.sql`s."id" NOT IN (${Prisma.join(blockedIds)})`);
+    clauses.push(
+      Prisma.sql`NOT (${Prisma.join(
+        blockedIdTokens.map(
+          (pattern) => Prisma.sql`LOWER(s."id") LIKE ${`%${pattern}%`}`,
+        ),
+        " OR ",
+      )})`,
+    );
+    clauses.push(
+      Prisma.sql`NOT (${Prisma.join(
+        blockedTextPatterns.flatMap((pattern) => [
+          Prisma.sql`LOWER(COALESCE(s."title", '')) LIKE ${`%${pattern}%`}`,
+          Prisma.sql`LOWER(COALESCE(s."description", '')) LIKE ${`%${pattern}%`}`,
+          Prisma.sql`LOWER(COALESCE(s."author", '')) LIKE ${`%${pattern}%`}`,
+          Prisma.sql`EXISTS (
+            SELECT 1
+            FROM unnest(s."genres") AS genre
+            WHERE LOWER(genre) LIKE ${`%${pattern}%`}
+          )`,
+        ]),
+        " OR ",
+      )})`,
+    );
 
     if (!input.adult) {
       clauses.push(Prisma.sql`s."adult" = false`);
@@ -374,8 +417,9 @@ export class SearchService {
       pageSize,
     });
 
+    const visibleRows = filterBlockedPublicSeries(rows);
     const payload = {
-      results: await this.hydrateSeries(rows),
+      results: await this.hydrateSeries(visibleRows),
       total,
       page,
       pageSize,
@@ -386,7 +430,7 @@ export class SearchService {
   }
 
   async keywords(adult: boolean) {
-    const cacheKey = `search:keywords:${adult ? "adult" : "standard"}`;
+    const cacheKey = `search:keywords:${adult ? "adult" : "standard"}:v2`;
     const cached = await this.cacheService.get<string[]>(cacheKey);
     if (cached) {
       return cached;
@@ -414,14 +458,22 @@ export class SearchService {
           : { isPublished: true, adult: false },
         orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
         take: 4,
-        select: { title: true },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          genres: true,
+          author: true,
+        },
       }),
     ]);
 
     const keywords = Array.from(
       new Set([
         ...genres.map((item) => item.genre),
-        ...titles.map((item) => item.title),
+        ...titles
+          .filter((item) => !isBlockedPublicSeriesRecord(item))
+          .map((item) => item.title),
       ]),
     ).slice(0, 10);
 
@@ -435,7 +487,7 @@ export class SearchService {
       return [];
     }
 
-    const cacheKey = `search:suggest:${adult ? "adult" : "standard"}:${normalizedQuery}`;
+    const cacheKey = `search:suggest:${adult ? "adult" : "standard"}:${normalizedQuery}:v2`;
     const cached = await this.cacheService.get<string[]>(cacheKey);
     if (cached) {
       return cached;
@@ -471,7 +523,11 @@ export class SearchService {
     ]);
 
     const suggestions = Array.from(
-      new Set([...titles, ...genres].map((item) => item.value)),
+      new Set(
+        [...titles, ...genres]
+          .filter((item) => !isBlockedPublicSeriesRecord({ title: item.value, genres: [item.value] }))
+          .map((item) => item.value),
+      ),
     ).slice(0, 8);
     await this.cacheService.set(cacheKey, suggestions, 120);
     return suggestions;
@@ -483,7 +539,7 @@ export class SearchService {
     )
       ? windowParam
       : "day";
-    const cacheKey = `search:hot:${adult ? "adult" : "standard"}:${windowKey}`;
+    const cacheKey = `search:hot:${adult ? "adult" : "standard"}:${windowKey}:v2`;
     const cached = await this.cacheService.get<string[]>(cacheKey);
     if (cached) {
       return cached;

@@ -232,12 +232,11 @@ async function seedDemo() {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_NON_PROD_FIXTURES !== "1") {
+  if (process.env.NODE_ENV === "production") {
     console.error(
       [
         "Refusing to seed fixture content in production.",
         "This script is reserved for local and non-production fixture data.",
-        "If you absolutely need it in a controlled environment, set ALLOW_NON_PROD_FIXTURES=1.",
       ].join("\n"),
     );
     process.exit(1);

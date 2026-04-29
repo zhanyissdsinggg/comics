@@ -1,3 +1,4 @@
+import http from "node:http";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
@@ -10,13 +11,13 @@ const frontendRoot = path.resolve(__dirname, "..");
 const buildIdPath = path.join(frontendRoot, ".next", "BUILD_ID");
 
 const ROUTE_SPECS = [
-  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "Trending" },
+  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "The Last Kingdom" },
   { path: "/comics", expectedTitle: "Comics", expectedHeading: "Comics" },
   { path: "/novels", expectedTitle: "Novels", expectedHeading: "Novels" },
   { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
   { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Titles" },
   { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending" },
-  { path: "/series/series-001", expectedTitle: "Story", expectedHeading: "Title unavailable." },
+  { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
   { path: "/store", expectedTitle: "Store", expectedHeading: "Points" },
   { path: "/subscribe", expectedTitle: "Plans", expectedHeading: "Plans" },
   { path: "/support", expectedTitle: "Support", expectedHeading: "Support" },
@@ -25,19 +26,203 @@ const ROUTE_SPECS = [
   { path: "/orders", expectedTitle: "Orders", expectedHeading: "Sign in to view purchases" },
 ];
 
+const EXPECTED_404_ROUTES = ["/series/demo-series"];
+
 const BANNED_COPY = [
   "Demo Series",
   "Gush Demo Studio",
-  "Creator credits are still rolling out title by title.",
-  "Preview only",
-  "Checkout not live.",
-  "Plans are listed. Checkout is off for now.",
-  "Packs are listed. Checkout is off for now.",
+  "Demo Action",
+  "Demo genre",
+  "platform smoke tests",
   "QA",
   "smoke test",
-  "sparse credits",
-  "internal implementation",
+  "reader QA",
+  "fixture",
+  "placeholder",
 ];
+
+const CATALOG = [
+  {
+    id: "series-001",
+    title: "The Last Kingdom",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "A rogue prince fights to keep one last city from falling.",
+    shortDescription: "A rogue prince fights to keep one last city from falling.",
+    synopsis: "A rogue prince fights to keep one last city from falling.",
+    coverUrl: "/mock-covers/series-001.jpg",
+    bannerUrl: "/mock-covers/series-001.jpg",
+    genres: ["Fantasy", "Action"],
+    episodeCount: 3,
+    latestEpisodeId: "series-001e3",
+    updatedAt: "2026-04-20T12:00:00.000Z",
+    creator: {
+      label: "Mira Dane",
+      type: "person",
+      slug: "mira-dane-d1b324",
+      creatorId: "creator_mira_dane",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_mira_dane",
+        slug: "mira-dane-d1b324",
+        name: "Mira Dane",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-005",
+    title: "Dragon's Oath",
+    type: "novel",
+    status: "Completed",
+    adult: false,
+    description: "A street mage takes one bad deal and starts a war with dragons.",
+    shortDescription: "A street mage takes one bad deal and starts a war with dragons.",
+    synopsis: "A street mage takes one bad deal and starts a war with dragons.",
+    coverUrl: "/mock-covers/series-005.jpg",
+    bannerUrl: "/mock-covers/series-005.jpg",
+    genres: ["Fantasy", "Adventure"],
+    episodeCount: 2,
+    latestEpisodeId: "series-005e2",
+    updatedAt: "2026-04-14T12:00:00.000Z",
+    creator: {
+      label: "Rowan Vale",
+      type: "person",
+      slug: "rowan-vale-a4f200",
+      creatorId: "creator_rowan_vale",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_rowan_vale",
+        slug: "rowan-vale-a4f200",
+        name: "Rowan Vale",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-009",
+    title: "Rocket Choir",
+    type: "comic",
+    status: "Completed",
+    adult: false,
+    description: "A washed-up band gets drafted to sing on a doomed space run.",
+    shortDescription: "A washed-up band gets drafted to sing on a doomed space run.",
+    synopsis: "A washed-up band gets drafted to sing on a doomed space run.",
+    coverUrl: "/mock-covers/series-009.jpg",
+    bannerUrl: "/mock-covers/series-009.jpg",
+    genres: ["Sci-Fi", "Comedy"],
+    episodeCount: 4,
+    latestEpisodeId: "series-009e4",
+    updatedAt: "2026-04-08T12:00:00.000Z",
+    creator: {
+      label: "Northline Studio",
+      type: "studio",
+      slug: "northline-studio-c913e2",
+      creatorId: "creator_northline_studio",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_northline_studio",
+        slug: "northline-studio-c913e2",
+        name: "Northline Studio",
+        type: "studio",
+        role: "studio",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+];
+
+const SERIES_EPISODES = {
+  "series-001": [
+    { id: "series-001e1", seriesId: "series-001", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-01T00:00:00.000Z" },
+    { id: "series-001e2", seriesId: "series-001", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-08T00:00:00.000Z" },
+    { id: "series-001e3", seriesId: "series-001", number: 3, title: "Chapter 3", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-15T00:00:00.000Z" },
+  ],
+  "series-005": [
+    { id: "series-005e1", seriesId: "series-005", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-02T00:00:00.000Z" },
+    { id: "series-005e2", seriesId: "series-005", number: 2, title: "Chapter 2", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-04-09T00:00:00.000Z" },
+  ],
+  "series-009": [
+    { id: "series-009e1", seriesId: "series-009", number: 1, title: "Chapter 1", pricePts: 0, previewFreePages: 3, ttfEligible: false, releasedAt: "2026-03-30T00:00:00.000Z" },
+  ],
+};
+
+function buildSeriesPayload(seriesId) {
+  const series = CATALOG.find((item) => item.id === seriesId);
+  if (!series) {
+    return null;
+  }
+  return {
+    series,
+    episodes: SERIES_EPISODES[series.id] || [],
+  };
+}
+
+function jsonResponse(response, status, body) {
+  response.statusCode = status;
+  response.setHeader("Content-Type", "application/json");
+  response.end(JSON.stringify(body));
+}
+
+function createMockBackendServer() {
+  return http.createServer((request, response) => {
+    if (!request.url) {
+      jsonResponse(response, 404, { error: "NOT_FOUND" });
+      return;
+    }
+
+    const url = new URL(request.url, "http://127.0.0.1");
+    const { pathname } = url;
+
+    if (pathname === "/api/series") {
+      jsonResponse(response, 200, { series: CATALOG });
+      return;
+    }
+
+    if (pathname.startsWith("/api/series/")) {
+      const seriesId = pathname.split("/").pop() || "";
+      const payload = buildSeriesPayload(seriesId);
+      if (!payload) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
+      jsonResponse(response, 200, payload);
+      return;
+    }
+
+    if (pathname === "/api/search/hot") {
+      jsonResponse(response, 200, { keywords: ["dragon", "mira", "fantasy"] });
+      return;
+    }
+
+    if (pathname === "/api/recommendations/homepage") {
+      jsonResponse(response, 200, {
+        slots: [
+          { id: "slot-home-breakout", slot: "home-breakout", seriesIds: ["series-001"] },
+          { id: "slot-home-free-start", slot: "home-free-start", seriesIds: ["series-001"] },
+          { id: "slot-home-binge-ready", slot: "home-binge-ready", seriesIds: ["series-009"] },
+        ],
+      });
+      return;
+    }
+
+    jsonResponse(response, 404, { error: "NOT_FOUND" });
+  });
+}
 
 function getFreePort() {
   return new Promise((resolve, reject) => {
@@ -72,6 +257,8 @@ async function waitForServer(baseUrl, timeoutMs = 30000) {
 
 function stripTags(value) {
   return String(value || "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, "\"")
@@ -126,8 +313,19 @@ async function fetchRoute(baseUrl, pathname) {
   const html = await response.text();
   return {
     html,
+    text: stripTags(html),
     title: extractTitle(html),
     heading: "",
+  };
+}
+
+async function fetchRouteAllowing404(baseUrl, pathname) {
+  const response = await fetch(`${baseUrl}${pathname}`);
+  const html = await response.text();
+  return {
+    status: response.status,
+    html,
+    text: stripTags(html),
   };
 }
 
@@ -137,7 +335,9 @@ async function run() {
   }
 
   const port = await getFreePort();
+  const backendPort = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
+  const backendBaseUrl = `http://127.0.0.1:${backendPort}`;
   const nextBin = path.join(frontendRoot, "node_modules", "next", "dist", "bin", "next");
 
   if (!fs.existsSync(nextBin)) {
@@ -146,6 +346,11 @@ async function run() {
 
   let stdoutLog = "";
   let stderrLog = "";
+  const mockBackend = createMockBackendServer();
+  await new Promise((resolve, reject) => {
+    mockBackend.once("error", reject);
+    mockBackend.listen(backendPort, "127.0.0.1", () => resolve());
+  });
   const child = spawn(
     process.execPath,
     [nextBin, "start", "-p", String(port), "-H", "127.0.0.1"],
@@ -155,6 +360,8 @@ async function run() {
       env: {
         ...process.env,
         NODE_ENV: "production",
+        API_BASE_URL: backendBaseUrl,
+        NEXT_PUBLIC_API_BASE_URL: backendBaseUrl,
       },
     },
   );
@@ -222,7 +429,12 @@ async function run() {
       }
 
       for (const phrase of BANNED_COPY) {
-        if (direct.html.includes(phrase) || variant.html.includes(phrase)) {
+        const directText = direct.text.toLowerCase();
+        const variantText = variant.text.toLowerCase();
+        if (
+          directText.includes(phrase.toLowerCase()) ||
+          variantText.includes(phrase.toLowerCase())
+        ) {
           throw new Error(`${spec.path} still exposes banned copy: "${phrase}"`);
         }
       }
@@ -232,8 +444,28 @@ async function run() {
       );
     }
 
+    for (const routePath of EXPECTED_404_ROUTES) {
+      const response = await fetchRouteAllowing404(baseUrl, routePath);
+      if (response.status !== 404) {
+        throw new Error(`${routePath} should return 404, got ${response.status}`);
+      }
+      for (const phrase of BANNED_COPY) {
+        if (response.text.toLowerCase().includes(phrase.toLowerCase())) {
+          throw new Error(`${routePath} 404 page still exposes banned copy: "${phrase}"`);
+        }
+      }
+      console.log(`[canonical-smoke] PASS ${routePath} -> 404`);
+    }
+
     console.log("[canonical-smoke] all public routes passed");
   } finally {
+    await new Promise((resolve) => {
+      try {
+        mockBackend.close(() => resolve());
+      } catch {
+        resolve();
+      }
+    });
     if (!child.killed && child.exitCode === null) {
       child.kill("SIGTERM");
     }

@@ -982,7 +982,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("seeding backend fixtures...");
+  console.log("seeding backend catalog...");
   await seedSeries();
   await seedEpisodes();
   await seedInteractiveStories();

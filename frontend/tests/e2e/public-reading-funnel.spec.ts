@@ -10,11 +10,15 @@ import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 const UI_TIMEOUT_MS = 15000;
 const BANNED_STRINGS = [
   "Demo Series",
+  "Gush Demo Studio",
   "smoke test",
   "reader QA",
-  "credits missing",
-  "sparse",
-  "fallback",
+  "Demo Action",
+  "Demo genre",
+  "platform smoke tests",
+  "QA",
+  "fixture",
+  "placeholder",
 ] as const;
 
 const CATALOG = [
@@ -205,8 +209,21 @@ const CANONICAL_ROUTE_SPECS = [
   { path: "/orders", title: /Orders/i, heading: /Sign in to view purchases/i },
 ] as const;
 
+const BANNED_COPY_ROUTE_PATHS = [
+  "/",
+  "/comics",
+  "/novels",
+  "/creators",
+  "/search",
+  "/rankings",
+  "/series/series-001",
+] as const;
+
 function buildSeriesPayload(seriesId: string) {
-  const series = CATALOG.find((item) => item.id === seriesId) || CATALOG[0];
+  const series = CATALOG.find((item) => item.id === seriesId);
+  if (!series) {
+    return null;
+  }
   return {
     series,
     episodes: SERIES_EPISODES[series.id] || [],
@@ -295,7 +312,12 @@ function createMockBackendServer() {
 
     if (pathname.startsWith("/api/series/")) {
       const seriesId = pathname.split("/").pop() || "series-001";
-      jsonResponse(response, 200, buildSeriesPayload(seriesId));
+      const payload = buildSeriesPayload(seriesId);
+      if (!payload) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
+      jsonResponse(response, 200, payload);
       return;
     }
 
@@ -384,7 +406,12 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
 
     if (pathname.startsWith("/api/series/")) {
       const seriesId = pathname.split("/").pop() || "series-001";
-      await fulfillJson(route, buildSeriesPayload(seriesId));
+      const payload = buildSeriesPayload(seriesId);
+      if (!payload) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      await fulfillJson(route, payload);
       return;
     }
 
@@ -822,5 +849,18 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("canonical-public-routes", runtimeIssues);
+  });
+
+  test("public catalog routes stay free of demo and fixture copy", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    for (const routePath of BANNED_COPY_ROUTE_PATHS) {
+      const response = await page.goto(routePath, { waitUntil: "domcontentloaded" });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+      await expectNoBannedCopy(page, routePath);
+    }
+
+    await expectNoRuntimeIssues("public-banned-copy-crawl", runtimeIssues);
   });
 });

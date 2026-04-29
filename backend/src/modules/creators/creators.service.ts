@@ -3,7 +3,7 @@ import { CacheService } from "../../common/cache/cache.service";
 import { CreatorCreditsService } from "../../common/creators/creator-credits.service";
 
 function buildCreatorsListCacheKey(adult: boolean): string {
-  return `creators:list:${adult ? "adult" : "standard"}:public`;
+  return `creators:list:${adult ? "adult" : "standard"}:public:v2`;
 }
 
 @Injectable()
@@ -28,7 +28,7 @@ export class CreatorsService {
   }
 
   async getPublicCreator(slug: string, adult = false) {
-    const cacheKey = `creators:detail:${adult ? "adult" : "standard"}:${slug}`;
+    const cacheKey = `creators:detail:${adult ? "adult" : "standard"}:${slug}:v2`;
     const cached = await this.cacheService.get<Awaited<ReturnType<CreatorCreditsService["getPublicCreatorBySlug"]>>>(
       cacheKey,
     );

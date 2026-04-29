@@ -7,6 +7,10 @@ import {
 } from "../../common/mappers/storefront-series.mapper";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { loadSeriesAnalytics } from "../../common/queries/series-analytics";
+import {
+  buildPublicSeriesVisibilityWhere,
+  filterBlockedPublicSeries,
+} from "../../common/utils/public-catalog-visibility";
 
 type StorefrontSeriesSummary = ReturnType<typeof mapStorefrontSeriesSummary>;
 
@@ -20,14 +24,16 @@ export class RankingsService {
 
   async list(type: string, adult: boolean) {
     const normalizedType = String(type || "").toLowerCase() === "new" ? "new" : "popular";
-    const cacheKey = `rankings:${normalizedType}:${adult ? "adult" : "standard"}`;
+    const cacheKey = `rankings:${normalizedType}:${adult ? "adult" : "standard"}:v2`;
     const cached = await this.cacheService.get<StorefrontSeriesSummary[]>(cacheKey);
     if (cached) {
       return cached.map((item) => sanitizeStorefrontSeriesSummary(item));
     }
 
     const rows = await this.prisma.series.findMany({
-      where: adult ? { isPublished: true } : { isPublished: true, adult: false },
+      where: buildPublicSeriesVisibilityWhere(
+        adult ? { isPublished: true } : { isPublished: true, adult: false },
+      ),
       orderBy:
         normalizedType === "new"
           ? [{ updatedAt: "desc" }, { createdAt: "desc" }]
@@ -49,13 +55,16 @@ export class RankingsService {
       },
     });
 
+    const visibleRows = filterBlockedPublicSeries(rows);
     const analyticsMap = await loadSeriesAnalytics(
       this.prisma,
-      rows.map((row) => row.id),
+      visibleRows.map((row) => row.id),
     );
-    const creditsMap = await this.creatorCreditsService.getCreditsMap(rows.map((row) => row.id));
+    const creditsMap = await this.creatorCreditsService.getCreditsMap(
+      visibleRows.map((row) => row.id),
+    );
 
-    const payload = rows.map((row) => {
+    const payload = visibleRows.map((row) => {
       const credits = creditsMap.get(row.id) || [];
       const identity = this.creatorCreditsService.buildIdentity(credits);
       return mapStorefrontSeriesSummary(

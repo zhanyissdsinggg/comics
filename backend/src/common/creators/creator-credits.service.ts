@@ -16,6 +16,12 @@ import {
   type PublicCreatorCredit,
   type PublicCreatorIdentity,
 } from "./creator-identity";
+import {
+  buildPublicSeriesVisibilityWhere,
+  filterBlockedPublicCreators,
+  filterBlockedPublicSeries,
+  isBlockedPublicCreatorRecord,
+} from "../utils/public-catalog-visibility";
 
 export type AdminSeriesCreditRecord = {
   id: string;
@@ -133,14 +139,16 @@ export class CreatorCreditsService {
   constructor(private readonly prisma: PrismaService) {}
 
   private buildPublicSeriesVisibilityWhere(adult: boolean) {
-    return adult
-      ? {
-          isPublished: true,
-        }
-      : {
-          isPublished: true,
-          adult: false,
-        };
+    return buildPublicSeriesVisibilityWhere(
+      adult
+        ? {
+            isPublished: true,
+          }
+        : {
+            isPublished: true,
+            adult: false,
+          },
+    );
   }
 
   private async reserveSlug(
@@ -564,10 +572,12 @@ export class CreatorCreditsService {
       },
     });
 
-    return creators
+    return filterBlockedPublicCreators(
+      creators
       .filter((creator) => !isGenericCreatorPlaceholder(creator.name))
       .map((creator) => {
-        const titles = creator.seriesCredits
+        const titles = filterBlockedPublicSeries(
+          creator.seriesCredits
           .map((credit) => credit.series)
           .filter(Boolean)
           .map((series) => ({
@@ -580,7 +590,8 @@ export class CreatorCreditsService {
             coverUrl: series.coverUrl || "",
             description: series.description || "",
             updatedAt: series.updatedAt,
-          }));
+          })),
+        );
 
         return {
           id: creator.id,
@@ -599,7 +610,8 @@ export class CreatorCreditsService {
           spotlightSeries: titles[0] || null,
         };
       })
-      .filter((creator) => creator.titleCount > 0);
+      .filter((creator) => creator.titleCount > 0),
+    );
   }
 
   async getPublicCreatorBySlug(slug: string, adult = false) {
@@ -641,24 +653,27 @@ export class CreatorCreditsService {
     if (
       !creator ||
       creator.isPublic === false ||
-      isGenericCreatorPlaceholder(creator.name)
+      isGenericCreatorPlaceholder(creator.name) ||
+      isBlockedPublicCreatorRecord(creator)
     ) {
       return null;
     }
 
-    const series = creator.seriesCredits.map((credit) => ({
-      id: credit.series.id,
-      title: credit.series.title,
-      type: credit.series.type,
-      status: credit.series.status,
-      genres: Array.isArray(credit.series.genres) ? credit.series.genres : [],
-      coverTone: credit.series.coverTone || "",
-      coverUrl: credit.series.coverUrl || "",
-      description: credit.series.description || "",
-      updatedAt: credit.series.updatedAt,
-      role: String(credit.role || "").toLowerCase(),
-      isPrimary: Boolean(credit.isPrimary),
-    }));
+    const series = filterBlockedPublicSeries(
+      creator.seriesCredits.map((credit) => ({
+        id: credit.series.id,
+        title: credit.series.title,
+        type: credit.series.type,
+        status: credit.series.status,
+        genres: Array.isArray(credit.series.genres) ? credit.series.genres : [],
+        coverTone: credit.series.coverTone || "",
+        coverUrl: credit.series.coverUrl || "",
+        description: credit.series.description || "",
+        updatedAt: credit.series.updatedAt,
+        role: String(credit.role || "").toLowerCase(),
+        isPrimary: Boolean(credit.isPrimary),
+      })),
+    );
 
     if (series.length === 0) {
       return null;
