@@ -936,7 +936,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     data-testid="library-entry-cta"
                     className={primaryButtonClass}
                   >
-                    Top Picks
+                    Start Reading
                   </button>
                 )}
                 <button
@@ -962,71 +962,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         : "Collections"
                     : "Sign In"}
                 </button>
-              </>
-            }
-          />
-
-      <StorefrontDesk
-            eyebrow="Library"
-            title={libraryDeskTitle}
-            description={libraryDeskCopy}
-            className=""
-            actions={
-              <>
-              {resumeSpotlightReadHref ? (
-                <button
-                  type="button"
-                  onClick={() => router.push(resumeSpotlightReadHref)}
-                  className={primaryButtonClass}
-                >
-                  Continue Reading
-                </button>
-              ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("saved-series")}
-                  className={primaryButtonClass}
-                >
-                  Library
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    viewerSignedIn
-                      ? router.push("/search")
-                      : router.push("/rankings?type=ttf&window=all")
-                  }
-                  data-testid="library-entry-cta"
-                  className={primaryButtonClass}
-                >
-                  {viewerSignedIn ? "Search" : "Top Picks"}
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (!viewerSignedIn) {
-                    openAuthPrompt();
-                    return;
-                  }
-                  if (showCollectionManager || !visibleLibraryItems.length) {
-                    setShowCollectionManager((value) => !value);
-                    return;
-                  }
-                  router.push("/search");
-                }}
-                className={secondaryButtonClass}
-              >
-                {viewerSignedIn
-                    ? showCollectionManager || !visibleLibraryItems.length
-                      ? showCollectionManager
-                        ? "Hide collections"
-                        : "Collections"
-                    : "Search"
-                  : "Sign in"}
-              </button>
               </>
             }
           />

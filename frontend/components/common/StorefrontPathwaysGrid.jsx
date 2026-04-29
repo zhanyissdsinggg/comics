@@ -4,7 +4,6 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function StorefrontPathwaysGrid({
   cards = [],
@@ -18,14 +17,14 @@ export default function StorefrontPathwaysGrid({
   return (
     <div className={cn("grid gap-4", columnsClassName, className)}>
       {cards.map((card) => (
-        <Card
+        <div
           key={card.id}
           className={cn(
-            "h-full rounded-[26px] py-0 transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+            "h-full rounded-[26px] border-2 py-0 transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
             card.accentClass || "border-2 border-black bg-[#0b0b0b] text-white",
           )}
         >
-          <CardContent className="flex h-full flex-col p-5 sm:p-6">
+          <div className="flex h-full flex-col p-5 sm:p-6">
             <Badge
               variant="outline"
               className={cn(
@@ -65,8 +64,8 @@ export default function StorefrontPathwaysGrid({
               {card.cta || card.ctaLabel}
               <ArrowUpRight className="size-4" />
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );
