@@ -435,7 +435,7 @@ export default function RankingsPage({
                 <button
                   type="button"
                   onClick={() => router.push("/creators")}
-                  className="rounded-full border-2 border-black bg-[#FF007A] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
+                  className="rounded-full border-2 border-black bg-[#FF007A] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
                 >
                   Creators
                 </button>
@@ -621,7 +621,7 @@ export default function RankingsPage({
                         {getSeriesMeta(series).map((item) => (
                           <span
                             key={`${series.id}-support-meta-${item}`}
-                            className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1.5 font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                            className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1.5 font-black uppercase tracking-[0.04em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                           >
                             {item}
                           </span>

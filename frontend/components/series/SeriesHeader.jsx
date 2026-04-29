@@ -188,7 +188,7 @@ export default function SeriesHeader({
                   {formatSeriesKind(series.type)}
                 </span>
               {isAdult ? (
-                <span className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <span className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   18+
                 </span>
               ) : null}
