@@ -921,14 +921,19 @@ test.describe("Public reading funnel", () => {
 
     const comicsHeader = page.locator("header").first();
     const comicsFooter = page.locator("footer").first();
-    await expect(page.getByText("Mature", { exact: true }).first()).toBeVisible({
+    await expect(page.getByRole("button", { name: "Mature" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(comicsHeader).not.toContainText(/^18\+$/);
     await expect(comicsFooter).not.toContainText(/^18\+$/);
+    await page.getByRole("button", { name: "Mature" }).click();
+    await expect(
+      page.getByRole("button", { name: /Yes, I am 18 or older/i }),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
     await Promise.all([
       page.waitForURL(/\/comics\?genre=Mature/, { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: "Mature" }).click(),
       page.getByRole("button", { name: /Yes, I am 18 or older/i }).click(),
     ]);
     await expect(page.getByRole("link", { name: /Midnight Heat/i }).first()).toBeVisible({
@@ -941,7 +946,10 @@ test.describe("Public reading funnel", () => {
 
     const searchHeader = page.locator("header").first();
     const searchFooter = page.locator("footer").first();
-    await expect(page.getByText("Mature", { exact: true }).first()).toBeVisible({
+    const searchMatureFilter = page.locator(
+      'button:has-text("Mature"), a:has-text("Mature")',
+    );
+    await expect(searchMatureFilter.first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(searchHeader).not.toContainText(/^18\+$/);
@@ -1298,8 +1306,13 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByRole("heading", { level: 1, name: "Trending" })).toHaveCount(1);
-    await expect(page.getByText("Jump in", { exact: true })).toHaveCount(1);
-    await expect(page.locator("body")).not.toContainText("List Titles");
+    await expect(page.locator("body")).toContainText(
+      "The stories readers are opening most this week.",
+    );
+    await expect(page.locator("body")).toContainText(/\d+ titles/i);
+    await expect(page.locator("body")).not.toContainText("Jump in");
+    await expect(page.locator("body")).not.toContainText("In this view.");
+    await expect(page.locator("body")).not.toContainText("Open the lane you want");
 
     await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
   });

@@ -7,10 +7,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isMatureGenreValue } from "../../lib/matureContent";
 import Chip from "./Chip";
+import MatureFilterChip from "./MatureFilterChip";
 
 export default function FilterBar({
   genres = [],
+  genreHrefMap = {},
   selectedGenre = "all",
   onGenreChange,
   sortBy = "latest",
@@ -55,11 +58,51 @@ export default function FilterBar({
     if (onStatusChange) onStatusChange(id);
   };
 
-  const handleGenreChange = (genre) => {
+  const handleGenreChange = (genre, options = {}) => {
     if (isQuiet) {
       setShowGenrePicker(false);
     }
-    if (onGenreChange) onGenreChange(genre);
+    if (onGenreChange) onGenreChange(genre, options);
+  };
+
+  const renderGenreChip = (genre) => {
+    if (!isMatureGenreValue(genre)) {
+      return (
+        <Chip
+          key={genre}
+          label={genre}
+          active={selectedGenre === genre}
+          onClick={() => handleGenreChange(genre)}
+          appearance={appearance}
+          className={chipClassName}
+        />
+      );
+    }
+
+    return (
+      <MatureFilterChip
+        key={genre}
+        href={genreHrefMap?.[genre] || ""}
+        active={selectedGenre === genre}
+        onNavigate={() => handleGenreChange(genre, { bypassGate: true })}
+        label={genre}
+        className={chipClassName}
+        activeClassName={cn(
+          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+          isLight
+            ? "border-black bg-[#FFE500] text-black"
+            : "border-[#FFE500] bg-black text-white",
+          chipClassName,
+        )}
+        inactiveClassName={cn(
+          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+          isLight
+            ? "border-black bg-black text-white hover:bg-[#00E5FF] hover:text-black"
+            : "border-white/20 bg-black text-white hover:border-[#00E5FF] hover:bg-[#111111]",
+          chipClassName,
+        )}
+      />
+    );
   };
 
   useEffect(() => {
@@ -291,16 +334,7 @@ export default function FilterBar({
                         appearance={appearance}
                         className={chipClassName}
                       />
-                      {displayedGenres.map((genre) => (
-                        <Chip
-                          key={genre}
-                          label={genre}
-                          active={selectedGenre === genre}
-                          onClick={() => handleGenreChange(genre)}
-                          appearance={appearance}
-                          className={chipClassName}
-                        />
-                      ))}
+                      {displayedGenres.map((genre) => renderGenreChip(genre))}
                     </div>
 
                     {genres.length > 8 ? (
@@ -348,16 +382,7 @@ export default function FilterBar({
                     appearance={appearance}
                     className={chipClassName}
                   />
-                  {displayedGenres.map((genre) => (
-                    <Chip
-                      key={genre}
-                      label={genre}
-                      active={selectedGenre === genre}
-                      onClick={() => handleGenreChange(genre)}
-                      appearance={appearance}
-                      className={chipClassName}
-                    />
-                  ))}
+                  {displayedGenres.map((genre) => renderGenreChip(genre))}
                 </div>
               </>
             )}

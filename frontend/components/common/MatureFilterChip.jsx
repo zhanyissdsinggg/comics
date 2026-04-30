@@ -14,6 +14,7 @@ import {
 
 export default function MatureFilterChip({
   href,
+  onNavigate,
   active = false,
   label = "Mature",
   className = "",
@@ -34,6 +35,11 @@ export default function MatureFilterChip({
   const [authError, setAuthError] = useState("");
 
   const handleNavigate = () => {
+    if (typeof onNavigate === "function") {
+      onNavigate();
+      return;
+    }
+
     if (!href) {
       return;
     }
@@ -86,6 +92,9 @@ export default function MatureFilterChip({
 
   const handleAgeConfirm = () => {
     confirmAge(ageRuleKey);
+    if (!isAdultMode) {
+      enableAdultMode();
+    }
     setActiveModal(null);
     handleNavigate();
   };
@@ -96,7 +105,7 @@ export default function MatureFilterChip({
 
   return (
     <>
-      {active ? (
+      {active && href ? (
         <Link href={href} className={buttonClassName}>
           {label}
         </Link>

@@ -23,27 +23,27 @@ const VIEWS = [
   {
     id: "featured",
     label: "Trending",
-    description: "",
+    description: "The stories readers are opening most this week.",
   },
   {
     id: "start-here",
     label: "Top Picks",
-    description: "",
+    description: "Easy starts with strong early chapters.",
   },
   {
     id: "completed",
     label: "Finished",
-    description: "",
+    description: "Completed series ready to binge.",
   },
   {
     id: "comics",
     label: "Comics",
-    description: "",
+    description: "The comics readers are opening right now.",
   },
   {
     id: "novels",
     label: "Novels",
-    description: "",
+    description: "The novels readers are sticking with this week.",
   },
 ];
 
@@ -316,14 +316,9 @@ export default function RankingsPage({
   const boardEntries = curatedSeries.slice(3, 12);
   const heroStats = [
     {
-      label: "List",
-      value: activeView.label,
-      hint: activeView.description,
-    },
-    {
       label: "Titles",
-      value: loading ? "..." : curatedSeries.length.toLocaleString(),
-      hint: loading ? "Updating." : "In this view.",
+      value: loading ? "..." : `${curatedSeries.length.toLocaleString()} titles`,
+      hint: "",
     },
   ];
 
@@ -369,9 +364,9 @@ export default function RankingsPage({
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
       <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-5">
+        <section>
           <EditorialHero
-            eyebrow="This Week"
+            eyebrow=""
             title={heroTitle}
             description={activeView.description}
             secondary=""
@@ -380,44 +375,6 @@ export default function RankingsPage({
             appearance="dark"
             accent="cyan"
           />
-
-          <SurfacePanel
-            tone="muted"
-            accent="cyan"
-            appearance="dark"
-            className="flex h-full flex-col justify-between space-y-5 p-4 sm:p-5"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                Browse
-              </p>
-              <div>
-                <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                  Jump in
-                </h2>
-                <p className="mt-3 text-sm font-semibold leading-6 text-white/72">
-                  Open the lane you want without repeating the main stats.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex flex-col gap-2.5">
-                <Link
-                  href="/comics"
-                  className="rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-center text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
-                >
-                  Comics
-                </Link>
-                <Link
-                  href="/novels"
-                  className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-center text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
-                >
-                  Novels
-                </Link>
-              </div>
-            </div>
-          </SurfacePanel>
         </section>
 
         {commerceNotice ? (

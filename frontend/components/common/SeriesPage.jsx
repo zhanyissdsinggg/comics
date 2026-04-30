@@ -262,6 +262,16 @@ export default function SeriesPage({
     );
   }, [matureCatalogAvailable, series]);
 
+  const genreHrefMap = useMemo(() => {
+    return genres.reduce((map, genre) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("genre", genre);
+      const nextQuery = params.toString();
+      map[genre] = nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname;
+      return map;
+    }, {});
+  }, [config.pathname, genres, searchParams]);
+
   const filteredAndSortedSeries = useMemo(() => {
     let result = [...series];
 
@@ -332,8 +342,13 @@ export default function SeriesPage({
   const smallNovelCatalog = isNovelPage && series.length < 6;
   const showNovelShelves = !isNovelPage || series.length >= 6;
   const handleGenreChange = useCallback(
-    (value) => {
+    (value, options = {}) => {
       if (!isMatureGenreValue(value)) {
+        updateParams({ genre: value });
+        return;
+      }
+
+      if (options?.bypassGate) {
         updateParams({ genre: value });
         return;
       }
@@ -489,6 +504,7 @@ export default function SeriesPage({
 
               <FilterBar
                 genres={genres}
+                genreHrefMap={genreHrefMap}
                 selectedGenre={selectedGenre}
                 onGenreChange={handleGenreChange}
                 sortBy={sortBy}

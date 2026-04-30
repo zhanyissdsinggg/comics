@@ -63,6 +63,17 @@ export function appendMatureGenre(items, options = {}) {
   return [...values, MATURE_GENRE_LABEL];
 }
 
+function prioritizeMatureGenre(items) {
+  const values = Array.isArray(items) ? [...items] : [];
+  const matureIndex = values.findIndex((item) => isMatureGenreValue(item));
+  if (matureIndex <= 0) {
+    return values;
+  }
+
+  const [matureLabel] = values.splice(matureIndex, 1);
+  return [matureLabel, ...values];
+}
+
 export function canViewMatureContent(value) {
   if (value && typeof value.get === "function") {
     return canReadMatureFromCookieStore(value);
@@ -85,5 +96,5 @@ export function canReadMatureFromCookieStore(cookieStore) {
 
 export function getPublicGenres(items, options = {}) {
   const genres = Array.isArray(items) ? items : [];
-  return appendMatureGenre(genres, options);
+  return prioritizeMatureGenre(appendMatureGenre(genres, options));
 }
