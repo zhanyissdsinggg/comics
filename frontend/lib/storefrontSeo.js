@@ -198,8 +198,12 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
   }
 });
 
-export const loadSeriesCatalogSeoPayload = cache(async () => {
-  const payload = await fetchSeoApiJson("/api/series?adult=0", "series-catalog");
+export const loadSeriesCatalogSeoPayload = cache(async (options = {}) => {
+  const includeAdult = options?.includeAdult === true;
+  const payload = await fetchSeoApiJson(
+    `/api/series?adult=${includeAdult ? "1" : "0"}`,
+    "series-catalog",
+  );
   return {
     series: filterBlockedPublicSeries(
       Array.isArray(payload?.series) ? payload.series : [],

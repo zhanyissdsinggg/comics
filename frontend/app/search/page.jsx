@@ -1,6 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
+import { cookies } from "next/headers";
+import MatureFilterChip from "../../components/common/MatureFilterChip";
 import { createPageMetadata } from "../../lib/seo";
+import {
+  appendMatureGenre,
+  canReadMatureFromCookieStore,
+  isMatureGenreValue,
+  shouldShowMatureFilter,
+} from "../../lib/matureContent";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeGenreList } from "../../lib/coverPresentation";
@@ -233,7 +241,7 @@ function FilterGroup({ title, options, currentValue, buildHref }) {
   );
 }
 
-function GenreFilters({ genres, currentGenre, buildHref }) {
+function GenreFilters({ genres, currentGenre, buildHref, showMatureFilter }) {
   if (!Array.isArray(genres) || genres.length === 0) {
     return null;
   }
@@ -256,15 +264,29 @@ function GenreFilters({ genres, currentGenre, buildHref }) {
         </Link>
         {genres.map((genre) => {
           const active = currentGenre === genre;
+          const commonClassName = `rounded-full px-3 py-2 text-sm transition-colors ${
+            active
+              ? "bg-white text-black"
+              : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
+          }`;
+          if (showMatureFilter && isMatureGenreValue(genre)) {
+            return (
+              <MatureFilterChip
+                key={`genre-${genre}`}
+                href={buildHref(genre)}
+                active={active}
+                label={genre}
+                className={commonClassName}
+                activeClassName=""
+                inactiveClassName=""
+              />
+            );
+          }
           return (
             <Link
               key={`genre-${genre}`}
               href={buildHref(genre)}
-              className={`rounded-full px-3 py-2 text-sm transition-colors ${
-                active
-                  ? "bg-white text-black"
-                  : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
-              }`}
+              className={commonClassName}
             >
               {genre}
             </Link>
@@ -434,23 +456,42 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function Page({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
+  const cookieStore = await cookies();
+  const includeAdult = canReadMatureFromCookieStore(cookieStore);
   const q = readSingleParam(resolvedSearchParams, "q");
   const format = normalizeFormat(readSingleParam(resolvedSearchParams, "format"));
   const status = normalizeStatus(readSingleParam(resolvedSearchParams, "status"));
   const genre = readSingleParam(resolvedSearchParams, "genre");
   const normalizedQuery = normalizeSearchValue(q);
 
-  const catalogPayload = await loadSeriesCatalogSeoPayload();
+  const [catalogPayload, maturePayload] = await Promise.all([
+    loadSeriesCatalogSeoPayload({ includeAdult }),
+    includeAdult
+      ? Promise.resolve(null)
+      : loadSeriesCatalogSeoPayload({ includeAdult: true }),
+  ]);
   const catalog = filterBlockedPublicSeries(
     Array.isArray(catalogPayload?.series) ? catalogPayload.series : [],
   );
   const creators = filterBlockedPublicCreators(buildCreatorDirectory(catalog));
+  const matureCatalogSeries = filterBlockedPublicSeries(
+    Array.isArray(maturePayload?.series) ? maturePayload.series : [],
+  );
+  const showMatureFilter =
+    shouldShowMatureFilter(catalog) || matureCatalogSeries.some((item) => item?.adult);
 
-  const allGenres = Array.from(new Set(filterBlockedPublicGenres(
-    catalog
-      .flatMap((series) => normalizeGenreList(series?.genres))
-      .filter(Boolean),
-  )))
+  const allGenres = Array.from(
+    new Set(
+      appendMatureGenre(
+        filterBlockedPublicGenres(
+          catalog
+            .flatMap((series) => normalizeGenreList(series?.genres))
+            .filter(Boolean),
+        ),
+        { includeMature: showMatureFilter },
+      ),
+    ),
+  )
     .sort((left, right) => left.localeCompare(right))
     .slice(0, 18);
 
@@ -465,8 +506,10 @@ export default async function Page({ searchParams }) {
       }
 
       if (genre) {
-        const genreSet = new Set(normalizeGenreList(series?.genres));
-        if (!genreSet.has(genre)) {
+        const matchesMatureGenre = isMatureGenreValue(genre)
+          ? Boolean(series?.adult)
+          : new Set(normalizeGenreList(series?.genres)).has(genre);
+        if (!matchesMatureGenre) {
           return false;
         }
       }
@@ -543,6 +586,7 @@ export default async function Page({ searchParams }) {
               genres={allGenres}
               currentGenre={genre}
               buildHref={buildGenreHref}
+              showMatureFilter={showMatureFilter}
             />
           </div>
 

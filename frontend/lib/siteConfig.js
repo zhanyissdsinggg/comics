@@ -88,6 +88,12 @@ export const siteConfig = {
       "ENABLE_MONETIZATION_NAV",
     ),
   },
+  matureContent: {
+    enabled: parseEnvFlag(
+      "NEXT_PUBLIC_ENABLE_MATURE_CONTENT",
+      "ENABLE_MATURE_CONTENT",
+    ),
+  },
 };
 
 siteConfig.monetization.publicCommerceNavEnabled =

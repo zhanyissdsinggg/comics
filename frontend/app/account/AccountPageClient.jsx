@@ -1028,8 +1028,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  Mature content visibility and 18+ history controls live in a
-                  separate settings page.
+                  Manage mature visibility and device history in one place.
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button

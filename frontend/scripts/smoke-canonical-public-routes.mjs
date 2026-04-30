@@ -292,6 +292,9 @@ const SERIES_EPISODES = {
 };
 
 function buildSeriesPayload(seriesId) {
+  if (seriesId === "demo-series" || seriesId === "fixture-series") {
+    return null;
+  }
   const series = CATALOG.find((item) => item.id === seriesId);
   if (!series) {
     return null;

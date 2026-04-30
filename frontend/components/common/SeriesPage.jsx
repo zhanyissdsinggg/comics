@@ -9,10 +9,22 @@ import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
 import SurfacePanel from "../common/SurfacePanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
+import {
+  appendMatureGenre,
+  isMatureGenreValue,
+  shouldShowMatureFilter,
+} from "../../lib/matureContent";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
+import AgeGateModal from "../layout/AgeGateModal";
+import LoginGateModal from "../layout/LoginGateModal";
+import {
+  LOGIN_GATE_DESCRIPTION,
+  LOGIN_GATE_TITLE,
+} from "../../lib/adultGateCopy";
 
 const PAGE_CONFIG = {
   comic: {
@@ -156,11 +168,22 @@ export default function SeriesPage({
   initialSearchParams = {},
   initialSeries = [],
   hasInitialSeries = false,
+  matureCatalogAvailable = false,
 }) {
   const router = useRouter();
-  const { isAdultMode } = useAdultGateStore();
+  const {
+    adultConfirmed,
+    ageRuleKey,
+    legalAge,
+    isAdultMode,
+    enableAdultMode,
+    confirmAge,
+  } = useAdultGateStore();
+  const { hydrated, isSignedIn, signIn } = useAuthStore();
   const [series, setSeries] = useState(Array.isArray(initialSeries) ? initialSeries : []);
   const [loading, setLoading] = useState(!hasInitialSeries);
+  const [activeModal, setActiveModal] = useState(null);
+  const [authError, setAuthError] = useState("");
 
   const config = PAGE_CONFIG[type] || PAGE_CONFIG.comic;
   const searchParams = useMemo(
@@ -229,19 +252,27 @@ export default function SeriesPage({
         item.genres.forEach((genre) => genreSet.add(genre));
       }
     });
-    return Array.from(genreSet).sort((left, right) => left.localeCompare(right));
-  }, [series]);
+    return appendMatureGenre(
+      Array.from(genreSet).sort((left, right) => left.localeCompare(right)),
+      {
+        includeMature:
+          shouldShowMatureFilter(series) || Boolean(matureCatalogAvailable),
+      },
+    );
+  }, [matureCatalogAvailable, series]);
 
   const filteredAndSortedSeries = useMemo(() => {
     let result = [...series];
 
     if (selectedGenre !== "all") {
       result = result.filter((item) =>
-        Array.isArray(item.genres)
-          ? item.genres.some(
-              (genre) => genre.toLowerCase() === selectedGenre.toLowerCase(),
-            )
-          : false,
+        isMatureGenreValue(selectedGenre)
+          ? Boolean(item?.adult)
+          : Array.isArray(item.genres)
+            ? item.genres.some(
+                (genre) => genre.toLowerCase() === selectedGenre.toLowerCase(),
+              )
+            : false,
       );
     }
 
@@ -299,10 +330,78 @@ export default function SeriesPage({
 
   const smallNovelCatalog = isNovelPage && series.length < 6;
   const showNovelShelves = !isNovelPage || series.length >= 6;
+  const handleGenreChange = useCallback(
+    (value) => {
+      if (!isMatureGenreValue(value)) {
+        updateParams({ genre: value });
+        return;
+      }
+
+      if (!hydrated || !isSignedIn) {
+        setActiveModal("login");
+        return;
+      }
+
+      if (!adultConfirmed) {
+        setActiveModal("age");
+        return;
+      }
+
+      if (!isAdultMode) {
+        enableAdultMode();
+      }
+
+      updateParams({ genre: value });
+    },
+    [
+      adultConfirmed,
+      enableAdultMode,
+      hydrated,
+      isAdultMode,
+      isSignedIn,
+      updateParams,
+    ],
+  );
+
+  const handleLogin = useCallback(
+    async ({ email, password, mode }) => {
+      const response = await signIn(email, password, mode);
+      if (response?.status === 202) {
+        setAuthError("");
+        return response;
+      }
+      if (!response?.ok) {
+        setAuthError("Invalid email or password.");
+        return response;
+      }
+
+      setAuthError("");
+      if (!adultConfirmed) {
+        setActiveModal("age");
+        return response;
+      }
+
+      if (!isAdultMode) {
+        enableAdultMode();
+      }
+
+      setActiveModal(null);
+      updateParams({ genre: "Mature" });
+      return response;
+    },
+    [adultConfirmed, enableAdultMode, isAdultMode, signIn, updateParams],
+  );
+
+  const handleAgeConfirm = useCallback(() => {
+    confirmAge(ageRuleKey);
+    setActiveModal(null);
+    updateParams({ genre: "Mature" });
+  }, [ageRuleKey, confirmAge, updateParams]);
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+    <>
+      <main className="min-h-screen bg-[#050505] text-white">
+        <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
         <section className="rounded-[28px] border border-white/10 bg-[#0b0b0b] p-5 sm:p-6">
           <div className="space-y-4">
             <div className="space-y-2">
@@ -390,7 +489,7 @@ export default function SeriesPage({
               <FilterBar
                 genres={genres}
                 selectedGenre={selectedGenre}
-                onGenreChange={(value) => updateParams({ genre: value })}
+                onGenreChange={handleGenreChange}
                 sortBy={sortBy}
                 onSortChange={(value) => updateParams({ sort: value })}
                 status={status}
@@ -429,8 +528,27 @@ export default function SeriesPage({
             </section>
           </>
         )}
-      </div>
+        </div>
+      </main>
 
-    </main>
+      <LoginGateModal
+        open={activeModal === "login"}
+        onClose={() => {
+          setActiveModal(null);
+          setAuthError("");
+        }}
+        onSubmit={handleLogin}
+        title={LOGIN_GATE_TITLE}
+        description={LOGIN_GATE_DESCRIPTION}
+        errorMessage={authError}
+      />
+      <AgeGateModal
+        open={activeModal === "age"}
+        onClose={() => setActiveModal(null)}
+        onConfirm={handleAgeConfirm}
+        ageRuleKey={ageRuleKey}
+        legalAge={legalAge}
+      />
+    </>
   );
 }

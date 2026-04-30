@@ -1,5 +1,7 @@
 import ComicsPage from "../../components/comics/ComicsPage";
 import ErrorBoundary from "../../components/common/ErrorBoundary";
+import { cookies } from "next/headers";
+import { canReadMatureFromCookieStore } from "../../lib/matureContent";
 import { createPageMetadata } from "../../lib/seo";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
@@ -11,8 +13,21 @@ export const metadata = createPageMetadata({
 
 export default async function Page({ searchParams }) {
   const initialSearchParams = (await searchParams) || {};
-  const payload = await loadSeriesCatalogSeoPayload();
+  const cookieStore = await cookies();
+  const includeAdult = canReadMatureFromCookieStore(cookieStore);
+  const [payload, maturePayload] = await Promise.all([
+    loadSeriesCatalogSeoPayload({
+      includeAdult,
+    }),
+    includeAdult
+      ? Promise.resolve(null)
+      : loadSeriesCatalogSeoPayload({ includeAdult: true }),
+  ]);
   const initialSeries = (payload?.series || []).filter((item) => item?.type === "comic");
+  const matureCatalogAvailable = (includeAdult
+    ? payload?.series || []
+    : maturePayload?.series || []
+  ).some((item) => item?.type === "comic" && item?.adult);
 
   return (
     <ErrorBoundary
@@ -23,6 +38,7 @@ export default async function Page({ searchParams }) {
         initialSearchParams={initialSearchParams}
         initialSeries={initialSeries}
         hasInitialSeries={payload?.ready === true}
+        matureCatalogAvailable={matureCatalogAvailable}
       />
     </ErrorBoundary>
   );
