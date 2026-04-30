@@ -679,35 +679,6 @@ export default function RankingsPage({
                 appearance="dark"
                 className=""
               />
-
-              <SurfacePanel
-                className="space-y-4"
-                appearance="dark"
-                accent="cyan"
-              >
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                    Browse
-                  </p>
-                  <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    Browse
-                  </h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href="/comics"
-                    className="rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
-                  >
-                    Comics
-                  </Link>
-                  <Link
-                    href="/novels"
-                    className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
-                  >
-                    Novels
-                  </Link>
-                </div>
-              </SurfacePanel>
             </div>
           </div>
         )}

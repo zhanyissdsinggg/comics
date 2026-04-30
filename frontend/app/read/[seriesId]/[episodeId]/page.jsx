@@ -27,6 +27,13 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const seriesId = String(resolvedParams?.seriesId || "").trim();
   const episodeId = String(resolvedParams?.episodeId || "").trim();
+  if (
+    shouldBlockDemoContentInProduction() &&
+    (isBlockedPublicSeriesIdentifier(seriesId) ||
+      isBlockedPublicSeriesIdentifier(episodeId))
+  ) {
+    notFound();
+  }
   const { series, episode } = await loadReaderSeoPayload(seriesId, episodeId);
 
   if (!series || !episode) {

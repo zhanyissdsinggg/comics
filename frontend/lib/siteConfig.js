@@ -2,7 +2,20 @@ function clean(value) {
   return String(value || "").trim();
 }
 
-function parseEnvFlag(...keys) {
+function parseEnvFlag(keysOrKey, ...restKeys) {
+  const keys = Array.isArray(keysOrKey) ? keysOrKey : [keysOrKey, ...restKeys];
+  let defaultValue = false;
+
+  if (
+    keys.length > 0 &&
+    typeof keys[keys.length - 1] === "object" &&
+    keys[keys.length - 1] !== null &&
+    !Array.isArray(keys[keys.length - 1])
+  ) {
+    const options = keys.pop();
+    defaultValue = Boolean(options.defaultValue);
+  }
+
   for (const key of keys) {
     const raw = clean(process.env[key]);
     if (!raw) {
@@ -18,7 +31,7 @@ function parseEnvFlag(...keys) {
     }
   }
 
-  return false;
+  return defaultValue;
 }
 
 const DEFAULT_SITE_URL = "https://www.gushcomics.com";
@@ -90,8 +103,7 @@ export const siteConfig = {
   },
   matureContent: {
     enabled: parseEnvFlag(
-      "NEXT_PUBLIC_ENABLE_MATURE_CONTENT",
-      "ENABLE_MATURE_CONTENT",
+      ["NEXT_PUBLIC_ENABLE_MATURE_CONTENT", "ENABLE_MATURE_CONTENT", { defaultValue: true }],
     ),
   },
 };

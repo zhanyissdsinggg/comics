@@ -22,6 +22,12 @@ export const revalidate = 300;
 export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const seriesId = resolvedParams?.id;
+  if (
+    shouldBlockDemoContentInProduction() &&
+    isBlockedPublicSeriesIdentifier(seriesId)
+  ) {
+    notFound();
+  }
   const payload = await loadSeriesSeoPayload(seriesId);
   const series = payload?.series || null;
 
