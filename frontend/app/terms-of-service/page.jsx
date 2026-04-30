@@ -17,6 +17,10 @@ export const metadata = createPageMetadata({
 });
 
 const effectiveDate = "March 9, 2026";
+const monetizationLive =
+  siteConfig.monetization.checkoutEnabled ||
+  siteConfig.monetization.membershipEnabled ||
+  siteConfig.monetization.pointPacksEnabled;
 
 const TERMS_SECTIONS = [
   {
@@ -37,8 +41,12 @@ const TERMS_SECTIONS = [
   {
     title: "Purchases and digital access",
     paragraphs: [
-      `When you buy packs, memberships, credits, or promo benefits, you are getting personal access inside ${siteConfig.siteName} unless a separate written agreement says otherwise.`,
-      "Prices, catalog availability, and promo rules can change, but we will not retroactively remove content you already unlocked lawfully unless we have to for legal or operational reasons.",
+      monetizationLive
+        ? `When you buy packs, memberships, credits, or promo benefits, you are getting personal access inside ${siteConfig.siteName} unless a separate written agreement says otherwise.`
+        : `If packs, memberships, credits, or promo benefits are enabled later, they will provide personal access inside ${siteConfig.siteName} unless a separate written agreement says otherwise.`,
+      monetizationLive
+        ? "Prices, catalog availability, and promo rules can change, but we will not retroactively remove content you already unlocked lawfully unless we have to for legal or operational reasons."
+        : "If payments are enabled later, prices, catalog availability, and promo rules may change before launch or while those features roll out.",
     ],
   },
   {
@@ -77,8 +85,8 @@ const TERMS_SECTIONS = [
   {
     title: "Governing law",
     paragraphs: [
-      `These Terms are governed by the laws that apply to the place where ${siteConfig.companyName} operates, without regard to conflict-of-law principles.`,
-      "Disputes will be resolved in the courts or forums with competent jurisdiction over that place, unless mandatory law requires a different venue.",
+      "These Terms will be updated with the governing law and venue once the operating jurisdiction is finalized.",
+      "Until then, any mandatory consumer protection rules that apply where you live will still apply where required by law.",
     ],
   },
 ];
@@ -163,7 +171,7 @@ export default function TermsOfServicePage() {
               },
               {
                 label: "Covers",
-                value: "Browsing + purchases",
+                value: monetizationLive ? "Browsing + purchases" : "Browsing + future purchases",
               },
             ]}
           />

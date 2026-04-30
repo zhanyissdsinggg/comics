@@ -84,7 +84,7 @@ export default function FilterBar({
         key={genre}
         href={genreHrefMap?.[genre] || ""}
         active={selectedGenre === genre}
-        onNavigate={() => handleGenreChange(genre, { bypassGate: true })}
+        onNavigate={() => handleGenreChange(genre)}
         label={genre}
         className={chipClassName}
         activeClassName={cn(
@@ -308,12 +308,16 @@ export default function FilterBar({
                   </button>
 
                   {selectedGenre !== "all" ? (
-                    <Chip
-                      label={selectedGenre}
-                      active
-                      appearance={appearance}
-                      className={chipClassName}
-                    />
+                    isMatureGenreValue(selectedGenre) ? (
+                      renderGenreChip(selectedGenre)
+                    ) : (
+                      <Chip
+                        label={selectedGenre}
+                        active
+                        appearance={appearance}
+                        className={chipClassName}
+                      />
+                    )
                   ) : null}
                 </div>
 

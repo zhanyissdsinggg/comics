@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
@@ -359,27 +360,21 @@ export default function SubscribePage({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => router.push("/comics")}
+              <Link
+                href="/comics"
                 className={primaryButtonClass}
               >
                 Browse Comics
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    buildSupportPath({
-                      topic: "billing",
-                      context: "Membership is coming soon.",
-                    }),
-                  )
-                }
+              </Link>
+              <Link
+                href={buildSupportPath({
+                  topic: "billing",
+                  context: "Membership is coming soon.",
+                })}
                 className={secondaryButtonClass}
               >
                 Contact Support
-              </button>
+              </Link>
             </div>
           </SurfacePanel>
         </main>

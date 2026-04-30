@@ -114,6 +114,22 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
     ),
   ]);
 
+  if (
+    shouldBlockDemoContentInProduction() &&
+    (isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.id) ||
+      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.slug) ||
+      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.handle) ||
+      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.fixtureKey) ||
+      isBlockedPublicSeriesIdentifier(episodePayload?.episode?.seriesId) ||
+      isBlockedPublicSeriesIdentifier(episodePayload?.episode?.id))
+  ) {
+    return {
+      series: null,
+      episode: null,
+      episodes: [],
+    };
+  }
+
   return {
     series: seriesRoutePayload?.payload?.series || null,
     episode: episodePayload?.episode || null,
@@ -184,6 +200,20 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
     if (payload?.series) {
       const safeSeries = filterBlockedPublicSeries([payload.series])[0] || null;
       if (!safeSeries) {
+        return {
+          payload: null,
+          state: "not-found",
+          gateReason: null,
+        };
+      }
+
+      if (
+        shouldBlockDemoContentInProduction() &&
+        (isBlockedPublicSeriesIdentifier(safeSeries?.id) ||
+          isBlockedPublicSeriesIdentifier(safeSeries?.slug) ||
+          isBlockedPublicSeriesIdentifier(safeSeries?.handle) ||
+          isBlockedPublicSeriesIdentifier(safeSeries?.fixtureKey))
+      ) {
         return {
           payload: null,
           state: "not-found",

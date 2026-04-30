@@ -32,9 +32,21 @@ const STATUS_OPTIONS = [
 ];
 
 function readSingleParam(searchParams, key) {
+  if (searchParams && typeof searchParams.get === "function") {
+    return String(searchParams.get(key) || "").trim();
+  }
   const raw = searchParams?.[key];
   const value = Array.isArray(raw) ? raw[0] : raw;
   return String(value || "").trim();
+}
+
+function normalizeSearchParams(searchParams) {
+  return {
+    q: readSingleParam(searchParams, "q"),
+    format: readSingleParam(searchParams, "format"),
+    status: readSingleParam(searchParams, "status"),
+    genre: readSingleParam(searchParams, "genre"),
+  };
 }
 
 function normalizeSearchValue(value) {
@@ -449,7 +461,7 @@ function ShelfSection({ title, ctaHref, ctaLabel, items }) {
 
 export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const query = readSingleParam(resolvedSearchParams, "q");
+  const { q: query } = normalizeSearchParams(resolvedSearchParams);
 
   return createPageMetadata({
     title: query ? `Search: ${query}` : "Search Comics & Novels",
@@ -466,11 +478,17 @@ export default async function Page({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
   const cookieStore = await cookies();
   const includeAdult = canReadMatureFromCookieStore(cookieStore);
-  const q = readSingleParam(resolvedSearchParams, "q");
-  const format = normalizeFormat(readSingleParam(resolvedSearchParams, "format"));
-  const status = normalizeStatus(readSingleParam(resolvedSearchParams, "status"));
-  const genre = readSingleParam(resolvedSearchParams, "genre");
+  const rawParams = normalizeSearchParams(resolvedSearchParams);
+  const q = rawParams.q;
+  const format = normalizeFormat(rawParams.format);
+  const status = normalizeStatus(rawParams.status);
+  const genre = String(rawParams.genre || "").trim();
   const normalizedQuery = normalizeSearchValue(q);
+  const normalizedGenre = normalizeSearchValue(genre);
+  const hasActiveQuery = normalizedQuery.length > 0;
+  const hasActiveFormat = format.length > 0;
+  const hasActiveStatus = status.length > 0;
+  const hasActiveGenre = normalizedGenre.length > 0;
 
   const [catalogPayload, maturePayload] = await Promise.all([
     loadSeriesCatalogSeoPayload({ includeAdult }),
@@ -513,16 +531,19 @@ export default async function Page({ searchParams }) {
         return false;
       }
 
-      if (genre) {
-        const matchesMatureGenre = isMatureGenreValue(genre)
+      if (hasActiveGenre) {
+        const seriesGenres = normalizeGenreList(series?.genres).map((item) =>
+          normalizeSearchValue(item),
+        );
+        const matchesMatureGenre = isMatureGenreValue(normalizedGenre)
           ? Boolean(series?.adult)
-          : new Set(normalizeGenreList(series?.genres)).has(genre);
+          : seriesGenres.includes(normalizedGenre);
         if (!matchesMatureGenre) {
           return false;
         }
       }
 
-      if (!normalizedQuery) {
+      if (!hasActiveQuery) {
         return true;
       }
 
@@ -538,7 +559,11 @@ export default async function Page({ searchParams }) {
       )
     : [];
 
-  const hasActiveFilters = Boolean(normalizedQuery || format || status || genre);
+  const hasExplicitFilters = Boolean(
+    hasActiveQuery || hasActiveFormat || hasActiveStatus || hasActiveGenre,
+  );
+  const showDefaultShelves = !hasExplicitFilters;
+  const hasActiveFilters = hasExplicitFilters;
   const resultCount = filteredSeries.length + filteredCreators.length;
   const emptyTrending = sortSeries(catalog).slice(0, 6);
   const emptyUpdates = sortSeries(
@@ -606,7 +631,7 @@ export default async function Page({ searchParams }) {
               : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
           </p>
 
-          {!hasActiveFilters ? (
+          {showDefaultShelves ? (
             <div className="space-y-10">
               <ShelfSection
                 title="Trending titles"

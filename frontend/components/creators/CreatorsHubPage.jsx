@@ -521,8 +521,8 @@ export default function CreatorsHubPage({
                 </h2>
               </div>
               <p className="text-sm font-bold uppercase tracking-[0.08em] text-white/55">
-                {filteredCreators.length} match
-                {filteredCreators.length === 1 ? "" : "es"}
+                {filteredCreators.length}{" "}
+                {filteredCreators.length === 1 ? "match" : "matches"}
               </p>
             </div>
 

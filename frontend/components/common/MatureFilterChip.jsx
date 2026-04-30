@@ -11,6 +11,7 @@ import {
   LOGIN_GATE_DESCRIPTION,
   LOGIN_GATE_TITLE,
 } from "../../lib/adultGateCopy";
+import { cn } from "@/lib/utils";
 
 export default function MatureFilterChip({
   href,
@@ -34,13 +35,15 @@ export default function MatureFilterChip({
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
 
-  const handleNavigate = () => {
+  const handleNavigate = (options = {}) => {
+    let handled = false;
+
     if (typeof onNavigate === "function") {
-      onNavigate();
-      return;
+      const result = onNavigate(options);
+      handled = result === false;
     }
 
-    if (!href) {
+    if (handled || !href) {
       return;
     }
     router.push(href);
@@ -86,7 +89,7 @@ export default function MatureFilterChip({
     }
 
     setActiveModal(null);
-    handleNavigate();
+    handleNavigate({ bypassGate: true });
     return response;
   };
 
@@ -96,21 +99,30 @@ export default function MatureFilterChip({
       enableAdultMode();
     }
     setActiveModal(null);
-    handleNavigate();
+    handleNavigate({ bypassGate: true });
   };
 
   const buttonClassName = `${className} ${
     active ? activeClassName : inactiveClassName
   }`.trim();
+  const sharedClassName = cn(
+    "inline-flex items-center justify-center rounded-full",
+    buttonClassName,
+  );
 
   return (
     <>
       {active && href ? (
-        <Link href={href} className={buttonClassName}>
+        <Link href={href} className={sharedClassName}>
           {label}
         </Link>
       ) : (
-        <button type="button" onClick={openGate} className={buttonClassName}>
+        <button
+          type="button"
+          onClick={openGate}
+          className={sharedClassName}
+          aria-pressed={active}
+        >
           {label}
         </button>
       )}

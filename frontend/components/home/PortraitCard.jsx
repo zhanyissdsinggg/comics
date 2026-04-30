@@ -49,8 +49,16 @@ function PortraitCard({
     ? item.genres.length > 0
     : typeof item?.genres === "string" && item.genres.trim();
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
-  const genrePills = normalizeGenreList(rawGenreData);
-  const visibleGenrePills = genrePills.slice(0, isCompact ? 1 : 2);
+  const normalizedMetaTokens = new Set(
+    String(metaLine || "")
+      .split(/[\/·|,]/)
+      .map((part) => part.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const genrePills = normalizeGenreList(rawGenreData).filter(
+    (genre) => !normalizedMetaTokens.has(String(genre || "").trim().toLowerCase()),
+  );
+  const visibleGenrePills = genrePills.slice(0, isCompact ? 2 : 2);
   const visiblePills = [];
 
   if (coverMeta.badgeLabel) {

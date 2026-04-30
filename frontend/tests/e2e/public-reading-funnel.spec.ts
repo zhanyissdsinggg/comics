@@ -984,25 +984,32 @@ test.describe("Public reading funnel", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.getByText(/1 result matches your filters\./i)).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
     await expect(page.getByRole("link", { name: /Crimson Tide/i }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("main")).toContainText("Horror");
+    await expect(page.locator("main")).not.toContainText("Trending titles");
     await expect(page.locator("main")).not.toContainText("Neon Nights");
 
     response = await page.goto("/search?genre=Mystery", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.getByText(/1 result matches your filters\./i)).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
     await expect(page.getByRole("link", { name: /Neon Nights/i }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("main")).toContainText("Mystery");
+    await expect(page.locator("main")).not.toContainText("Trending titles");
     await expect(page.locator("main")).not.toContainText("Crimson Tide");
+
+    response = await page.goto("/search?format=novel", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("Solar Wind");
+    await expect(page.locator("main")).toContainText("Neon Nights");
+    await expect(page.locator("main")).not.toContainText("Crimson Tide");
+    await expect(page.locator("main")).not.toContainText("The Last Kingdom");
 
     await expectNoRuntimeIssues("/search filter params", runtimeIssues);
   });
@@ -1388,6 +1395,17 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("body")).toContainText(/Points are coming soon/i);
       await expect(page.locator("body")).not.toContainText(/\$4\.99|\$7\.99|\$12\.99/i);
       await expectNoBannedCopy(page, "/store");
+    }
+
+    response = await page.goto("/subscribe", {
+      waitUntil: "domcontentloaded",
+    });
+    expect([200, 404]).toContain(response?.status() ?? 0);
+    if ((response?.status() ?? 0) === 200) {
+      const browseComicsLink = page.getByRole("link", { name: "Browse Comics" });
+      const contactSupportLink = page.getByRole("link", { name: "Contact Support" });
+      await expect(browseComicsLink).toHaveAttribute("href", "/comics");
+      await expect(contactSupportLink).toHaveAttribute("href", /\/support/);
     }
 
     await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);

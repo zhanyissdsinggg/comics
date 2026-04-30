@@ -16,13 +16,19 @@ export const metadata = createPageMetadata({
 });
 
 const effectiveDate = "March 9, 2026";
+const monetizationLive =
+  siteConfig.monetization.checkoutEnabled ||
+  siteConfig.monetization.membershipEnabled ||
+  siteConfig.monetization.pointPacksEnabled;
 
 const PRIVACY_SECTIONS = [
   {
     title: "What we collect",
     bullets: [
       "Account details like email address, sign-in identifiers, and profile preferences.",
-      "Purchase data tied to memberships, point packs, refunds, and promo redemptions.",
+      monetizationLive
+        ? "Purchase data tied to memberships, point packs, refunds, and promo redemptions."
+        : "If payments are enabled later, purchase data may include memberships, point packs, refunds, and promo redemptions.",
       "Reading and device data such as pages visited, reading progress, device type, and basic diagnostics.",
       "Messages you send us through support, feedback forms, or direct email.",
     ],
@@ -30,7 +36,9 @@ const PRIVACY_SECTIONS = [
   {
     title: "How we use it",
     bullets: [
-      "Run the site, sign readers in, and process payments.",
+      monetizationLive
+        ? "Run the site, sign readers in, and process payments."
+        : "Run the site, sign readers in, and support future payment features when they are enabled.",
       "Fix bugs, prevent abuse, and keep the product secure.",
       "Personalize recommendations, reading tools, and product messages.",
       "Meet legal obligations, enforce our Terms, and respond to valid requests from authorities.",
@@ -39,7 +47,9 @@ const PRIVACY_SECTIONS = [
   {
     title: "Why we process and share it",
     paragraphs: [
-      `We process information when we need it to run ${siteConfig.siteName}, honor purchases, comply with law, protect the site, or improve the product.`,
+      monetizationLive
+        ? `We process information when we need it to run ${siteConfig.siteName}, honor purchases, comply with law, protect the site, or improve the product.`
+        : `We process information when we need it to run ${siteConfig.siteName}, comply with law, protect the site, or improve the product. If payments are enabled later, we may also process information needed to support purchases.`,
       "We may share data with hosting providers, payment processors, analytics vendors, support tools, or rights holders when that is required to run the site.",
     ],
   },
