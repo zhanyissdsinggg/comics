@@ -4,8 +4,9 @@ import { cookies } from "next/headers";
 import MatureFilterChip from "../../components/common/MatureFilterChip";
 import { createPageMetadata } from "../../lib/seo";
 import {
-  appendMatureGenre,
   canReadMatureFromCookieStore,
+  getPublicGenres,
+  isMatureTitle,
   isMatureGenreValue,
   shouldShowMatureFilter,
 } from "../../lib/matureContent";
@@ -302,6 +303,9 @@ function ResultSeriesCard({ series }) {
   const description = summarizeText(series?.description || "", 108);
   const format = formatDisplayLabel(series?.type || "");
   const status = formatDisplayLabel(series?.status || "");
+  const chips = isMatureTitle(series)
+    ? ["18+", ...genres.filter((genre) => !isMatureGenreValue(genre)).slice(0, 2)]
+    : genres;
 
   return (
     <Link
@@ -330,12 +334,16 @@ function ResultSeriesCard({ series }) {
           <h2 className="text-[1.08rem] font-semibold tracking-[-0.03em] text-white">
             {series?.title || "Story"}
           </h2>
-          {genres.length > 0 ? (
+          {chips.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
-              {genres.map((genre) => (
+              {chips.map((genre) => (
                 <span
                   key={`${series.id}-${genre}`}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-white/68"
+                  className={`rounded-full border px-2.5 py-1 text-[11px] ${
+                    genre === "18+"
+                      ? "border-[#ff7aa8]/30 bg-[#ff4d8d]/18 text-[#ffd6e7]"
+                      : "border-white/10 bg-white/[0.04] text-white/68"
+                  }`}
                 >
                   {genre}
                 </span>
@@ -482,7 +490,7 @@ export default async function Page({ searchParams }) {
 
   const allGenres = Array.from(
     new Set(
-      appendMatureGenre(
+      getPublicGenres(
         filterBlockedPublicGenres(
           catalog
             .flatMap((series) => normalizeGenreList(series?.genres))

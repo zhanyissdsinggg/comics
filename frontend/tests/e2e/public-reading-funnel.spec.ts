@@ -193,6 +193,41 @@ const CATALOG = [
       },
     ],
   },
+  {
+    id: "series-012",
+    title: "Midnight Heat",
+    type: "comic",
+    status: "Ongoing",
+    adult: true,
+    rating: "18+",
+    description: "Two rivals drag a city secret into a late-night spiral.",
+    shortDescription: "Two rivals drag a city secret into a late-night spiral.",
+    synopsis: "Two rivals drag a city secret into a late-night spiral.",
+    coverUrl: createPosterPlaceholder("Midnight Heat"),
+    bannerUrl: createBannerPlaceholder("Midnight Heat"),
+    genres: ["Mature", "Thriller"],
+    episodeCount: 2,
+    latestEpisodeId: "series-012e2",
+    updatedAt: "2026-04-24T12:00:00.000Z",
+    creator: {
+      label: "Vale After Dark",
+      type: "studio",
+      slug: "vale-after-dark-9921ab",
+      creatorId: "creator_vale_after_dark",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_vale_after_dark",
+        slug: "vale-after-dark-9921ab",
+        name: "Vale After Dark",
+        type: "studio",
+        role: "studio",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
 ] as const;
 
 const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
@@ -326,6 +361,28 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       releasedAt: "2026-04-19T00:00:00.000Z",
     },
   ],
+  "series-012": [
+    {
+      id: "series-012e1",
+      seriesId: "series-012",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-10T00:00:00.000Z",
+    },
+    {
+      id: "series-012e2",
+      seriesId: "series-012",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-17T00:00:00.000Z",
+    },
+  ],
 };
 
 const CANONICAL_ROUTE_SPECS = [
@@ -402,8 +459,13 @@ function filterCatalog(searchParams: URLSearchParams) {
   const type = String(searchParams.get("type") || "").trim().toLowerCase();
   const status = String(searchParams.get("status") || "").trim().toLowerCase();
   const genre = String(searchParams.get("genre") || "").trim().toLowerCase();
+  const adult = String(searchParams.get("adult") || "0").trim();
 
   return CATALOG.filter((series) => {
+    if (adult !== "1" && series.adult) {
+      return false;
+    }
+
     const matchesQuery =
       !query ||
       series.title.toLowerCase().includes(query) ||
@@ -419,7 +481,10 @@ function filterCatalog(searchParams: URLSearchParams) {
       normalizedStatus === status ||
       (status === "ongoing" && normalizedStatus !== "completed");
     const matchesGenre =
-      !genre || series.genres.some((item) => item.toLowerCase() === genre);
+      !genre ||
+      (genre === "mature"
+        ? Boolean(series.adult)
+        : series.genres.some((item) => item.toLowerCase() === genre));
 
     return matchesQuery && matchesType && matchesStatus && matchesGenre;
   });
@@ -450,7 +515,10 @@ function createMockBackendServer() {
     const { pathname, searchParams } = url;
 
     if (pathname === "/api/series") {
-      jsonResponse(response, 200, { series: CATALOG });
+      const adult = searchParams.get("adult") || "0";
+      jsonResponse(response, 200, {
+        series: CATALOG.filter((series) => adult === "1" || !series.adult),
+      });
       return;
     }
 
@@ -544,7 +612,10 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
     }
 
     if (pathname === "/api/series") {
-      await fulfillJson(route, { series: CATALOG });
+      const adult = searchParams.get("adult") || "0";
+      await fulfillJson(route, {
+        series: CATALOG.filter((series) => adult === "1" || !series.adult),
+      });
       return;
     }
 
@@ -837,6 +908,46 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
+  });
+
+  test("comics and search expose a controlled Mature filter without random 18+ chrome", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, { signedIn: true });
+
+    let response = await page.goto("/comics", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const comicsHeader = page.locator("header").first();
+    const comicsFooter = page.locator("footer").first();
+    await expect(page.getByText("Mature", { exact: true }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(comicsHeader).not.toContainText(/^18\+$/);
+    await expect(comicsFooter).not.toContainText(/^18\+$/);
+    await Promise.all([
+      page.waitForURL(/\/comics\?genre=Mature/, { timeout: UI_TIMEOUT_MS }),
+      page.getByRole("button", { name: "Mature" }).click(),
+      page.getByRole("button", { name: /Yes, I am 18 or older/i }).click(),
+    ]);
+    await expect(page.getByRole("link", { name: /Midnight Heat/i }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).toContainText("18+");
+
+    response = await page.goto("/search", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const searchHeader = page.locator("header").first();
+    const searchFooter = page.locator("footer").first();
+    await expect(page.getByText("Mature", { exact: true }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(searchHeader).not.toContainText(/^18\+$/);
+    await expect(searchFooter).not.toContainText(/^18\+$/);
+
+    await expectNoRuntimeIssues("mature-filter-catalog-entry", runtimeIssues);
   });
 
   test("comics title card opens canonical series detail", async ({ page }) => {
@@ -1175,6 +1286,22 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);
+  });
+
+  test("rankings keeps one hero block and one stats summary", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/rankings", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { level: 1, name: "Trending" })).toHaveCount(1);
+    await expect(page.getByText("Jump in", { exact: true })).toHaveCount(1);
+    await expect(page.locator("body")).not.toContainText("List Titles");
+
+    await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
   });
 
   test("public catalog routes stay free of demo and fixture copy", async ({ page }) => {

@@ -51,13 +51,59 @@ function arrayContainsBlockedText(values) {
   return values.some((value) => containsBlockedPublicText(value));
 }
 
+function parseFlag(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) {
+    return false;
+  }
+
+  return ["1", "true", "yes", "on"].includes(normalized);
+}
+
+export function isDemoContentEnabled() {
+  if (typeof process === "undefined") {
+    return false;
+  }
+
+  return parseFlag(
+    process.env?.NEXT_PUBLIC_ENABLE_DEMO_CONTENT ||
+      process.env?.ENABLE_DEMO_CONTENT,
+  );
+}
+
+export function shouldBlockDemoContentInProduction() {
+  if (typeof process === "undefined") {
+    return true;
+  }
+
+  return process.env?.NODE_ENV === "production" && !isDemoContentEnabled();
+}
+
+export function isBlockedPublicSeriesIdentifier(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) {
+    return false;
+  }
+
+  return (
+    BLOCKED_PUBLIC_IDS.has(normalized) ||
+    containsBlockedPublicText(normalized) ||
+    containsBlockedPublicToken(normalized)
+  );
+}
+
 export function isBlockedPublicSeriesRecord(value) {
   if (!value || typeof value !== "object") {
     return false;
   }
 
-  const seriesId = normalizeValue(value.id);
-  if (BLOCKED_PUBLIC_IDS.has(seriesId) || containsBlockedPublicToken(seriesId)) {
+  if (
+    isBlockedPublicSeriesIdentifier(value.id) ||
+    isBlockedPublicSeriesIdentifier(value.slug) ||
+    isBlockedPublicSeriesIdentifier(value.handle) ||
+    isBlockedPublicSeriesIdentifier(value.key) ||
+    isBlockedPublicSeriesIdentifier(value.fixtureKey)
+  ) {
     return true;
   }
 

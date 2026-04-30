@@ -6,7 +6,11 @@ import { RewardsProvider } from "../../../../store/useRewardsStore";
 import { WalletProvider } from "../../../../store/useWalletStore";
 import { notFound } from "next/navigation";
 import { resolveSeriesCreatorName } from "../../../../lib/creatorIdentity";
-import { isBlockedPublicSeriesRecord } from "../../../../lib/publicCatalogVisibility";
+import {
+  isBlockedPublicSeriesIdentifier,
+  isBlockedPublicSeriesRecord,
+  shouldBlockDemoContentInProduction,
+} from "../../../../lib/publicCatalogVisibility";
 import { createPageMetadata } from "../../../../lib/seo";
 import {
   formatInstallmentLabel,
@@ -73,6 +77,13 @@ export default async function Page({ params }) {
   const resolvedParams = await Promise.resolve(params);
   const seriesId = String(resolvedParams?.seriesId || "").trim();
   const episodeId = String(resolvedParams?.episodeId || "").trim();
+  if (
+    shouldBlockDemoContentInProduction() &&
+    (isBlockedPublicSeriesIdentifier(seriesId) ||
+      isBlockedPublicSeriesIdentifier(episodeId))
+  ) {
+    notFound();
+  }
   if (isBlockedPublicSeriesRecord({ id: seriesId })) {
     notFound();
   }

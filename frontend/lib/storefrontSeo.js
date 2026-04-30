@@ -11,6 +11,8 @@ import { buildHomeHeroItems, getHomeEditorialSnapshot } from "./homeMerchandisin
 import {
   filterBlockedPublicSeries,
   isBlockedPublicCreatorSlug,
+  isBlockedPublicSeriesIdentifier,
+  shouldBlockDemoContentInProduction,
 } from "./publicCatalogVisibility";
 
 export const SEO_REVALIDATE_SECONDS = 300;
@@ -92,6 +94,18 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
     };
   }
 
+  if (
+    shouldBlockDemoContentInProduction() &&
+    (isBlockedPublicSeriesIdentifier(seriesId) ||
+      isBlockedPublicSeriesIdentifier(episodeId))
+  ) {
+    return {
+      series: null,
+      episode: null,
+      episodes: [],
+    };
+  }
+
   const [seriesRoutePayload, episodePayload] = await Promise.all([
     loadSeriesRoutePayload(seriesId),
     fetchSeoApiJson(
@@ -120,7 +134,10 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
 
   try {
     const normalizedSeriesId = String(seriesId || "").trim().toLowerCase();
-    if (normalizedSeriesId === "demo-series" || normalizedSeriesId === "fixture-series") {
+    if (
+      shouldBlockDemoContentInProduction() &&
+      isBlockedPublicSeriesIdentifier(normalizedSeriesId)
+    ) {
       return {
         payload: null,
         state: "not-found",

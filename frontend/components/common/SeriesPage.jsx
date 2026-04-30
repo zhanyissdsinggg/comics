@@ -13,7 +13,8 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
-  appendMatureGenre,
+  canViewMatureContent,
+  getPublicGenres,
   isMatureGenreValue,
   shouldShowMatureFilter,
 } from "../../lib/matureContent";
@@ -252,7 +253,7 @@ export default function SeriesPage({
         item.genres.forEach((genre) => genreSet.add(genre));
       }
     });
-    return appendMatureGenre(
+    return getPublicGenres(
       Array.from(genreSet).sort((left, right) => left.localeCompare(right)),
       {
         includeMature:
@@ -342,7 +343,7 @@ export default function SeriesPage({
         return;
       }
 
-      if (!adultConfirmed) {
+      if (!canViewMatureContent({ adultConfirmed, isAdultMode })) {
         setActiveModal("age");
         return;
       }

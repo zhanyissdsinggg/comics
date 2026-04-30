@@ -51,7 +51,33 @@ function PortraitCard({
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
   const genrePills = normalizeGenreList(rawGenreData);
   const visibleGenrePills = genrePills.slice(0, isCompact ? 1 : 2);
-  const showGenrePills = visibleGenrePills.length > 0;
+  const visiblePills = [];
+
+  if (coverMeta.badgeLabel) {
+    visiblePills.push({
+      key: `${item?.id || item?.title || "series"}-badge-${coverMeta.badgeLabel}`,
+      label: coverMeta.badgeLabel,
+      tone: coverMeta.badgeLabel === "18+" ? "danger" : "default",
+    });
+  }
+
+  visibleGenrePills.forEach((genre) => {
+    if (
+      visiblePills.some(
+        (pill) => pill.label.toLowerCase() === String(genre).toLowerCase(),
+      )
+    ) {
+      return;
+    }
+
+    visiblePills.push({
+      key: `${item?.id || item?.title || "series"}-genre-${genre}`,
+      label: genre,
+      tone: "default",
+    });
+  });
+
+  const showGenrePills = visiblePills.length > 0;
   const rawDetailCopy =
     item.statusLabel || item.metaLabel || coverMeta.detailText || "";
   const normalizedMetaLine = String(metaLine || "")
@@ -174,18 +200,20 @@ function PortraitCard({
 
         {showGenrePills ? (
           <div className="flex flex-wrap gap-2">
-            {visibleGenrePills.map((genre) => (
+            {visiblePills.map((pill) => (
               <span
-                key={`${item?.id || item?.title || "series"}-${genre}`}
+                key={pill.key}
                 className={cn(
                   "inline-flex items-center whitespace-nowrap rounded-full border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
                   isCompact
                     ? "px-2.5 py-1 text-[10px]"
                     : "px-3 py-1 text-[11px]",
-                  "bg-[#FFE500] text-black",
+                  pill.tone === "danger"
+                    ? "bg-[#FF4D8D] text-white"
+                    : "bg-[#FFE500] text-black",
                 )}
               >
-                {genre}
+                {pill.label}
               </span>
             ))}
           </div>

@@ -389,38 +389,19 @@ export default function RankingsPage({
           >
             <div className="space-y-3">
               <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                Explore
+                Browse
               </p>
               <div>
                 <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                  {activeView.label}
+                  Jump in
                 </h2>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <div className="rounded-[24px] border-2 border-black bg-[#FFE500] px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65">
-                  List
-                </p>
-                <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
-                  {activeView.label}
-                </p>
-              </div>
-              <div className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/60">
-                  Titles
-                </p>
-                <p className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.04em]">
-                  {loading ? "..." : curatedSeries.length.toLocaleString()}
+                <p className="mt-3 text-sm font-semibold leading-6 text-white/72">
+                  Open the lane you want without repeating the main stats.
                 </p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                Browse
-              </p>
               <div className="flex flex-col gap-2.5">
                 <Link
                   href="/comics"
