@@ -7,6 +7,7 @@ import ShareButton from "../common/ShareButton";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import {
   formatInstallmentLabel,
+  getLatestEntryLabel,
   getInstallmentLabel,
 } from "../../lib/seriesFormatLabels";
 
@@ -114,9 +115,7 @@ export default function SeriesHeader({
   const normalizedPrimaryActionHref = String(primaryActionHref || "").trim();
   const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
-  const latestEpisodeValue = latestEpisodeNumber
-    ? formatInstallmentLabel(series, latestEpisodeNumber)
-    : "Coming soon";
+  const latestEpisodeValue = getLatestEntryLabel(series, latestEpisodeNumber);
   const installmentPluralLabel = getInstallmentLabel(series, { plural: true });
   const creatorPresentation = getCreatorPresentation(series);
   const coverBackdropUrl = String(series?.coverUrl || "").trim();

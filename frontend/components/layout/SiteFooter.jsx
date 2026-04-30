@@ -114,72 +114,6 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
-function VisaIcon() {
-  return (
-    <svg viewBox="0 0 64 24" aria-hidden="true" className="h-4 w-auto">
-      <text
-        x="8"
-        y="16"
-        fill="currentColor"
-        fontSize="11"
-        fontStyle="italic"
-        fontWeight="700"
-        letterSpacing=".16em"
-        className="font-sans"
-      >
-        VISA
-      </text>
-    </svg>
-  );
-}
-
-function MastercardIcon() {
-  return (
-    <svg viewBox="0 0 64 24" aria-hidden="true" className="h-4 w-auto">
-      <circle cx="23" cy="12" r="6.5" fill="#ef4444" />
-      <circle cx="31" cy="12" r="6.5" fill="#f59e0b" fillOpacity="0.92" />
-      <text
-        x="40"
-        y="15"
-        fill="currentColor"
-        fontSize="5.5"
-        fontWeight="700"
-        textAnchor="middle"
-        className="font-sans"
-      >
-        MC
-      </text>
-    </svg>
-  );
-}
-
-function PaymentIconRow() {
-  if (!siteConfig.monetization.publicCommerceNavEnabled) {
-    return null;
-  }
-
-  const iconTone = "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 opacity-60">
-      <span
-        className={`inline-flex h-8 min-w-[64px] items-center justify-center rounded-md border px-3 ${iconTone}`}
-        aria-label="Visa accepted"
-        title="Visa"
-      >
-        <VisaIcon />
-      </span>
-      <span
-        className={`inline-flex h-8 min-w-[64px] items-center justify-center rounded-md border px-3 ${iconTone}`}
-        aria-label="Mastercard accepted"
-        title="Mastercard"
-      >
-        <MastercardIcon />
-      </span>
-    </div>
-  );
-}
-
 function normalizeFooterPath(href) {
   return String(href || "").split("?")[0];
 }
@@ -410,7 +344,6 @@ export default function SiteFooter({
             </div>
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
-            <PaymentIconRow />
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <span>
                 (c) {currentYear} {siteConfig.companyName}

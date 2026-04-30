@@ -557,6 +557,233 @@ export default function AccountPage({ initialSignedIn = false }) {
       : "Settings"
     : "Reset your password or get support.";
 
+  if (!viewerSignedIn) {
+    return (
+      <div className="min-h-screen overflow-hidden bg-black text-white">
+        <main className="mx-auto flex max-w-[1080px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <EditorialHero
+              appearance="dark"
+              accent="cyan"
+              eyebrow="Account"
+              title="Account"
+              description="Sign in to save progress and favorites."
+              secondary=""
+              stats={accountHeroStats}
+              actions={
+                <>
+                  <button
+                    type="button"
+                    onClick={openAuthPrompt}
+                    className={primaryButtonClass}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openRegisterPrompt}
+                    className={secondaryButtonClass}
+                  >
+                    Create account
+                  </button>
+                </>
+              }
+            />
+
+            <SurfacePanel
+              tone="muted"
+              accent="cyan"
+              appearance="dark"
+              className="flex h-full flex-col justify-between space-y-6"
+            >
+              <div className="space-y-3">
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                  Desk
+                </p>
+                <div>
+                  <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
+                    Need help?
+                  </h2>
+                  <p className="mt-3 text-sm font-semibold leading-7 text-white/70">
+                    Reset your password or contact support.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/auth/reset")}
+                  className={primaryButtonClass}
+                >
+                  Reset password
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      buildSupportPath({
+                        topic: "account",
+                        context: "Account help",
+                      }),
+                    )
+                  }
+                  className={secondaryButtonClass}
+                >
+                  Support
+                </button>
+              </div>
+            </SurfacePanel>
+          </section>
+
+          {message ? (
+            <SurfacePanel
+              appearance="dark"
+              accent={messageIsError ? "rose" : "amber"}
+              className={
+                messageIsError
+                  ? "border-2 border-[#FF007A] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                  : "border-2 border-[#FFE500] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+              }
+            >
+              <p
+                className={`text-sm font-semibold ${messageIsError ? "text-[#FF007A]" : "text-white/78"}`}
+              >
+                {message}
+              </p>
+            </SurfacePanel>
+          ) : null}
+
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
+            <div className="space-y-2">
+              <p className={sectionEyebrowClass}>Account access</p>
+              <h2 className={sectionTitleClass}>Sign in, recover, or get help</h2>
+            </div>
+            <StorefrontPathwaysGrid
+              cards={accountActionCards}
+              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              appearance="dark"
+            />
+          </SurfacePanel>
+
+          <SurfacePanel
+            className="space-y-4"
+            appearance="dark"
+            accent="cyan"
+          >
+            <details className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                <div>
+                  <p className={sectionEyebrowClass}>Device settings</p>
+                  <h2 className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-white">
+                    Local preferences
+                  </h2>
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/60 transition group-open:text-white">
+                  Expand
+                </span>
+              </summary>
+
+              <div className="mt-5 space-y-5">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className={fieldLabelClass}>Display name</label>
+                    <input
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.target.value)}
+                      placeholder="Your name"
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={fieldLabelClass}>Region</label>
+                    <select
+                      value={region}
+                      onChange={(event) => setRegion(event.target.value)}
+                      className={fieldClass}
+                    >
+                      {REGION_KEYS.map((item) => (
+                        <option key={item} value={item}>
+                          {getRegionConfig(item).label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
+                      Legal age: {regionConfig.legalAge}+
+                    </p>
+                  </div>
+                  <div>
+                    <label className={fieldLabelClass}>Language</label>
+                    <select
+                      value={language}
+                      onChange={(event) => setLanguage(event.target.value)}
+                      className={fieldClass}
+                    >
+                      {LANGUAGE_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className={sectionEyebrowClass}>Alerts</p>
+
+                  <label className={checkboxCardClass}>
+                    <input
+                      type="checkbox"
+                      checked={notifyNew}
+                      onChange={(event) => setNotifyNew(event.target.checked)}
+                      className={checkboxClass}
+                    />
+                    New chapter alerts
+                  </label>
+                  <label className={checkboxCardClass}>
+                    <input
+                      type="checkbox"
+                      checked={notifyTtf}
+                      onChange={(event) => setNotifyTtf(event.target.checked)}
+                      className={checkboxClass}
+                    />
+                    Free read alerts
+                  </label>
+                  <label className={checkboxCardClass}>
+                    <input
+                      type="checkbox"
+                      checked={notifyPromo}
+                      onChange={(event) => setNotifyPromo(event.target.checked)}
+                      className={checkboxClass}
+                    />
+                    Deals and offers
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/mature-content")}
+                    className={secondaryButtonClass}
+                  >
+                    Mature content settings
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    className={primaryButtonClass}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </details>
+          </SurfacePanel>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">

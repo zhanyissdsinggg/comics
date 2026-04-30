@@ -126,6 +126,40 @@ const CATALOG = [
     ],
   },
   {
+    id: "series-006",
+    title: "Neon Nights",
+    type: "novel",
+    status: "Ongoing",
+    adult: false,
+    description: "A night courier tracks a missing singer through a city full of glitches.",
+    shortDescription: "A night courier tracks a missing singer through a city full of glitches.",
+    synopsis: "A night courier tracks a missing singer through a city full of glitches.",
+    coverUrl: createPosterPlaceholder("Neon Nights"),
+    bannerUrl: createBannerPlaceholder("Neon Nights"),
+    genres: ["Mystery", "Sci-Fi"],
+    episodeCount: 3,
+    latestEpisodeId: "series-006e3",
+    updatedAt: "2026-04-21T12:00:00.000Z",
+    creator: {
+      label: "Iris Voss",
+      type: "person",
+      slug: "iris-voss-e120c9",
+      creatorId: "creator_iris_voss",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_iris_voss",
+        slug: "iris-voss-e120c9",
+        name: "Iris Voss",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
     id: "series-009",
     title: "Rocket Choir",
     type: "comic",
@@ -170,7 +204,7 @@ const CATALOG = [
     synopsis: "A harbor crew outruns a city-wide blackout and the people behind it.",
     coverUrl: createPosterPlaceholder("Crimson Tide"),
     bannerUrl: createBannerPlaceholder("Crimson Tide"),
-    genres: ["Thriller", "Action"],
+    genres: ["Horror", "Action"],
     episodeCount: 3,
     latestEpisodeId: "series-010e3",
     updatedAt: "2026-04-18T12:00:00.000Z",
@@ -295,6 +329,38 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       previewFreePages: 3,
       ttfEligible: false,
       releasedAt: "2026-03-30T00:00:00.000Z",
+    },
+  ],
+  "series-006": [
+    {
+      id: "series-006e1",
+      seriesId: "series-006",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-03T00:00:00.000Z",
+    },
+    {
+      id: "series-006e2",
+      seriesId: "series-006",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-10T00:00:00.000Z",
+    },
+    {
+      id: "series-006e3",
+      seriesId: "series-006",
+      number: 3,
+      title: "Episode 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-17T00:00:00.000Z",
     },
   ],
   "series-010": [
@@ -908,6 +974,37 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
+  });
+
+  test("search filters change result sets from URL params", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    let response = await page.goto("/search?genre=Horror", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.getByText(/1 result matches your filters\./i)).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("link", { name: /Crimson Tide/i }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).not.toContainText("Neon Nights");
+
+    response = await page.goto("/search?genre=Mystery", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.getByText(/1 result matches your filters\./i)).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("link", { name: /Neon Nights/i }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).not.toContainText("Crimson Tide");
+
+    await expectNoRuntimeIssues("/search filter params", runtimeIssues);
   });
 
   test("comics and search expose a controlled Mature filter without random 18+ chrome", async ({

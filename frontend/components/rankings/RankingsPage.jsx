@@ -391,8 +391,8 @@ export default function RankingsPage({
           className="space-y-4"
         >
           <RankingsSectionHeader
-            eyebrow="Views"
-            title="Lists"
+            eyebrow="Browse"
+            title="Pick a lane"
             description=""
           />
           <div className="flex flex-wrap gap-2.5">
@@ -424,9 +424,6 @@ export default function RankingsPage({
               accent="cyan"
             >
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                  List
-                </p>
                 <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   Nothing here yet.
                 </h2>

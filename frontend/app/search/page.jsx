@@ -538,7 +538,7 @@ export default async function Page({ searchParams }) {
       )
     : [];
 
-  const hasQuery = Boolean(normalizedQuery);
+  const hasActiveFilters = Boolean(normalizedQuery || format || status || genre);
   const resultCount = filteredSeries.length + filteredCreators.length;
   const emptyTrending = sortSeries(catalog).slice(0, 6);
   const emptyUpdates = sortSeries(
@@ -599,12 +599,14 @@ export default async function Page({ searchParams }) {
           </div>
 
           <p className="text-sm text-white/58">
-            {hasQuery
-              ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
+            {hasActiveFilters
+              ? normalizedQuery
+                ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
+                : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
               : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
           </p>
 
-          {!hasQuery ? (
+          {!hasActiveFilters ? (
             <div className="space-y-10">
               <ShelfSection
                 title="Trending titles"

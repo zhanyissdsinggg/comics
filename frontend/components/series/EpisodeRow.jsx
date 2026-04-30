@@ -356,10 +356,10 @@ function EpisodeRow({
       return;
     }
 
-    if (
-      accessState.actionKind === "read" ||
-      accessState.actionKind === "preview"
-    ) {
+  if (
+    accessState.actionKind === "read" ||
+    accessState.actionKind === "preview"
+  ) {
       onRead(seriesId, episode?.id);
       return;
     }
@@ -372,16 +372,22 @@ function EpisodeRow({
     if (accessState.actionKind === "unlock") {
       openUnlockModal();
       return;
-    }
+  }
 
-    onSubscribe(seriesId, episode?.id);
-  };
+  if (accessState.actionKind === "locked") {
+    return;
+  }
+
+  onSubscribe(seriesId, episode?.id);
+};
 
   const actionClassName =
     accessState.actionKind === "claim" ||
     accessState.actionKind === "read" ||
     accessState.actionKind === "preview"
       ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontPrimaryButtonClass}`
+      : accessState.actionKind === "locked"
+        ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
       : accessState.actionKind === "subscribe"
         ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
         : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
@@ -402,7 +408,7 @@ function EpisodeRow({
     <button
       type="button"
       onClick={handlePrimaryAction}
-      disabled={isWorking}
+      disabled={isWorking || accessState.actionKind === "locked"}
       className={actionClassName}
       style={{ willChange: "transform" }}
     >

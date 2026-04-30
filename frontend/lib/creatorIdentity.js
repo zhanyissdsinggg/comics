@@ -28,9 +28,8 @@ const GENERIC_CREATOR_PLACEHOLDER_PATTERNS = [
   /^n\/a$/i,
 ];
 
-export const CREATOR_FALLBACK_LABEL = "Creator details coming soon";
-export const CREATOR_FALLBACK_DETAIL =
-  "Public creator names have not been listed on this title yet.";
+export const CREATOR_FALLBACK_LABEL = "";
+export const CREATOR_FALLBACK_DETAIL = "";
 
 export function isGenericCreatorPlaceholder(name) {
   const normalized = normalizeCreatorName(name);

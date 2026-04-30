@@ -1,33 +1,25 @@
 const SUPPORT_TOPIC_MAP = {
   billing: {
     id: "billing",
-    label: "Billing",
-    title: "Billing & receipts",
+    label: "Billing & purchases",
+    title: "Billing & purchases",
     subject: "Billing issue",
-    description: "Wrong charge, missing points, duplicate payment, receipts, renewals, or taxes that look off.",
-    draft: "What happened? Add the charge, receipt, or order details.",
+    description: "Wrong charge, missing purchase, duplicate payment, refund issue, or receipt problem.",
+    draft: "What happened? Add the charge or order details.",
   },
   login: {
     id: "login",
-    label: "Login",
-    title: "Login & account access",
+    label: "Login & account",
+    title: "Login & account",
     subject: "Login help",
     description: "Email verification, password reset, sign-in trouble, account recovery, or sync issues.",
     draft: "What part of sign-in is not working?",
   },
-  subscription: {
-    id: "subscription",
-    label: "Plan",
-    title: "Plan & billing",
-    subject: "Plan help",
-    description: "Plan charges, renewals, changes, or access that looks off.",
-    draft: "Which plan or renewal is affected?",
-  },
   technical: {
     id: "technical",
-    label: "Technical issue",
-    title: "Technical & reader issue",
-    subject: "Technical issue",
+    label: "Reader issue",
+    title: "Reader issue",
+    subject: "Reader issue",
     description: "Broken reader pages, missing chapters, progress problems, playback failures, or pages that will not load.",
     draft: "Which title or chapter broke?",
   },
@@ -54,9 +46,9 @@ export const SUPPORT_TOPICS = Object.values(SUPPORT_TOPIC_MAP);
 export const SUPPORT_PRIMARY_TOPICS = [
   SUPPORT_TOPIC_MAP.billing,
   SUPPORT_TOPIC_MAP.login,
-  SUPPORT_TOPIC_MAP.subscription,
-  SUPPORT_TOPIC_MAP.content,
   SUPPORT_TOPIC_MAP.technical,
+  SUPPORT_TOPIC_MAP.adult,
+  SUPPORT_TOPIC_MAP.content,
 ];
 
 const SUPPORT_TOPIC_ALIASES = {

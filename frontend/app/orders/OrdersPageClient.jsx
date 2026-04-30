@@ -396,6 +396,57 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
     ],
   );
 
+  if (!viewerSignedIn) {
+    return (
+      <div className="min-h-screen overflow-hidden bg-black text-white">
+        <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+          <EditorialHero
+            appearance="dark"
+            accent="blue"
+            eyebrow="Orders"
+            title="Sign in to view purchases"
+            description="Need billing help? Support can help."
+          />
+
+          <SurfacePanel
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
+            accent="blue"
+          >
+            <div className="space-y-2">
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
+                Account
+              </p>
+              <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                Sign in to view purchases
+              </h2>
+              <p className="text-sm font-semibold leading-6 text-white/70">
+                Need billing help? Support can help.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={signInToOrders}
+                className={primaryButtonClass}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(buildSupportHref("", "billing"))}
+                className={secondaryButtonClass}
+              >
+                Support
+              </button>
+            </div>
+          </SurfacePanel>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen overflow-hidden bg-black text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
@@ -530,7 +581,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           </>
         ) : null}
 
-        {!viewerSignedIn ? null : !hydrated || loading ? (
+        {!hydrated || loading ? (
           <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
             <div className="space-y-2">
               <div

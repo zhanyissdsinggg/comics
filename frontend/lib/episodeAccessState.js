@@ -68,17 +68,17 @@ function buildEpisodeAvailabilityExplainer(series, counts, hasCountdown) {
   const installmentPlural = getInstallmentLabel(series, { plural: true }).toLowerCase();
 
   if (counts.free > 0 && counts.preview > 0) {
-    return "Unlock later.";
+    return "";
   }
 
   if (counts.free > 0) {
     return counts.points > 0 || counts.membership > 0 || counts.locked > 0
-      ? "Unlock later."
+      ? ""
       : "";
   }
 
   if (counts.preview > 0) {
-    return "Unlock after the preview.";
+    return "";
   }
 
   if (counts.points > 0 && hasCountdown) {
@@ -308,7 +308,7 @@ export function getEpisodeAccessState({
       countdownMs,
       shortLabel: `${previewPages} page${previewPages === 1 ? "" : "s"}`,
       helperText: "",
-      rowHelperText: `Preview ${previewPages} page${previewPages === 1 ? "" : "s"}.`,
+      rowHelperText: "",
       supportLabel: "",
       supportTone: "muted",
     });
@@ -351,8 +351,8 @@ export function getEpisodeAccessState({
   if (hasTtf && !isTtfReady) {
     return buildEpisodeAccessState("locked", {
       kind: "locked",
-      actionLabel: "See Plans",
-      actionKind: "subscribe",
+      actionLabel: "Locked",
+      actionKind: "locked",
       claimRequired: false,
       pricing,
       effectivePrice,
@@ -361,7 +361,7 @@ export function getEpisodeAccessState({
       countdownMs,
       shortLabel: countdownMs ? `In ${formatEpisodeCountdown(countdownMs)}` : "Locked",
       helperText: "",
-      rowHelperText: "This episode opens later.",
+      rowHelperText: "",
       supportLabel: "",
       supportTone: "muted",
     });
@@ -369,8 +369,8 @@ export function getEpisodeAccessState({
 
   return buildEpisodeAccessState("locked", {
     kind: "locked",
-    actionLabel: "Unlock Access",
-    actionKind: "subscribe",
+    actionLabel: "Locked",
+    actionKind: "locked",
     claimRequired: false,
     pricing,
     effectivePrice,
@@ -379,7 +379,7 @@ export function getEpisodeAccessState({
     countdownMs,
     shortLabel: "Locked",
     helperText: "",
-    rowHelperText: "Locked right now.",
+    rowHelperText: "",
     supportLabel: "",
     supportTone: "muted",
   });
