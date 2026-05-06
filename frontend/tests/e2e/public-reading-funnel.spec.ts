@@ -802,18 +802,18 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
 };
 
 const REAL_SERIES_ROUTE_SPECS = [
-  { id: "series-001", title: "The Last Kingdom", listLabel: "Chapters" },
-  { id: "series-002", title: "Moonlight Sonata", listLabel: "Chapters" },
-  { id: "series-003", title: "Shadow Protocol", listLabel: "Chapters" },
-  { id: "series-004", title: "Cherry Blossom High", listLabel: "Chapters" },
-  { id: "series-005", title: "Dragon's Oath", listLabel: "Episodes" },
-  { id: "series-006", title: "Neon Nights", listLabel: "Episodes" },
-  { id: "series-007", title: "The Quiet Storm", listLabel: "Chapters" },
-  { id: "series-008", title: "Apex Predator", listLabel: "Chapters" },
-  { id: "series-009", title: "Starfall Academy", listLabel: "Chapters" },
-  { id: "series-010", title: "Crimson Tide", listLabel: "Chapters" },
-  { id: "series-011", title: "Solar Wind", listLabel: "Episodes" },
-  { id: "series-012", title: "Midnight Heat", listLabel: "Chapters" },
+  { id: "series-001", title: "The Last Kingdom", listLabel: "Chapters", adult: false },
+  { id: "series-002", title: "Moonlight Sonata", listLabel: "Chapters", adult: false },
+  { id: "series-003", title: "Shadow Protocol", listLabel: "Chapters", adult: false },
+  { id: "series-004", title: "Cherry Blossom High", listLabel: "Chapters", adult: false },
+  { id: "series-005", title: "Dragon's Oath", listLabel: "Episodes", adult: false },
+  { id: "series-006", title: "Neon Nights", listLabel: "Episodes", adult: false },
+  { id: "series-007", title: "The Quiet Storm", listLabel: "Chapters", adult: false },
+  { id: "series-008", title: "Apex Predator", listLabel: "Chapters", adult: false },
+  { id: "series-009", title: "Starfall Academy", listLabel: "Chapters", adult: false },
+  { id: "series-010", title: "Crimson Tide", listLabel: "Chapters", adult: false },
+  { id: "series-011", title: "Solar Wind", listLabel: "Episodes", adult: false },
+  { id: "series-012", title: "Midnight Heat", listLabel: "Chapters", adult: true },
 ] as const;
 
 const CANONICAL_ROUTE_SPECS = [
@@ -1539,17 +1539,25 @@ test.describe("Public reading funnel", () => {
       });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
 
-      await expect(
-        page.getByRole("heading", { level: 1, name: seriesSpec.title }),
-      ).toBeVisible({
-        timeout: UI_TIMEOUT_MS,
-      });
-      await expect(page.locator("main")).toContainText(seriesSpec.listLabel);
-
       const readLinks = page.locator(`a[href^="/read/${seriesSpec.id}/"]`);
-      await expect(readLinks.first()).toBeVisible({
-        timeout: UI_TIMEOUT_MS,
-      });
+      if (seriesSpec.adult) {
+        await expect(
+          page.getByRole("heading", { level: 1, name: seriesSpec.title }),
+        ).toHaveCount(0);
+        await expect(page.locator("main")).toContainText("18+ access");
+        await expect(page.locator("main")).not.toContainText(seriesSpec.listLabel);
+        await expect(readLinks).toHaveCount(0);
+      } else {
+        await expect(
+          page.getByRole("heading", { level: 1, name: seriesSpec.title }),
+        ).toBeVisible({
+          timeout: UI_TIMEOUT_MS,
+        });
+        await expect(page.locator("main")).toContainText(seriesSpec.listLabel);
+        await expect(readLinks.first()).toBeVisible({
+          timeout: UI_TIMEOUT_MS,
+        });
+      }
 
       const ssrOrder = await page.evaluate(() => {
         const header = document.querySelector("body > header");
@@ -1587,10 +1595,23 @@ test.describe("Public reading funnel", () => {
       expect(ssrOrder.hasTopLevelHeader, `${routePath} should keep the public header`).toBeTruthy();
       expect(ssrOrder.hasTopLevelMain, `${routePath} should render top-level main`).toBeTruthy();
       expect(ssrOrder.hasTopLevelFooter, `${routePath} should keep the public footer`).toBeTruthy();
-      expect(ssrOrder.hasMainHeading, `${routePath} should SSR an h1`).toBeTruthy();
-      expect(ssrOrder.hasEntryLink, `${routePath} should SSR at least one reader link`).toBeTruthy();
-      expect(ssrOrder.hasEntryList, `${routePath} should SSR a chapter or episode list`).toBeTruthy();
-      expect(ssrOrder.headerOnlyLayout, `${routePath} should not collapse to header/footer only`).toBeFalsy();
+      if (seriesSpec.adult) {
+        expect(ssrOrder.hasMainHeading, `${routePath} should show the adult gate instead of the detail heading`).toBeFalsy();
+        expect(ssrOrder.hasEntryLink, `${routePath} should stay gated until age confirmation`).toBeFalsy();
+        expect(ssrOrder.hasEntryList, `${routePath} should not expose the entry list while gated`).toBeFalsy();
+      } else {
+        expect(ssrOrder.hasMainHeading, `${routePath} should SSR an h1`).toBeTruthy();
+        expect(ssrOrder.hasEntryLink, `${routePath} should SSR at least one reader link`).toBeTruthy();
+        expect(ssrOrder.hasEntryList, `${routePath} should SSR a chapter or episode list`).toBeTruthy();
+      }
+      if (seriesSpec.adult) {
+        expect(
+          ssrOrder.headerOnlyLayout,
+          `${routePath} should render an intentional adult gate instead of collapsing to layout chrome`,
+        ).toBeTruthy();
+      } else {
+        expect(ssrOrder.headerOnlyLayout, `${routePath} should not collapse to header/footer only`).toBeFalsy();
+      }
       expect(ssrOrder.headerIndex, `${routePath} should keep header first`).toBeGreaterThanOrEqual(0);
       expect(ssrOrder.mainIndex, `${routePath} should keep main after header`).toBeGreaterThan(
         ssrOrder.headerIndex,
@@ -1601,6 +1622,68 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("all-series-ssr-detail-content", runtimeIssues);
+  });
+
+  test("series detail pages render exactly one canonical detail block", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    for (const seriesSpec of REAL_SERIES_ROUTE_SPECS.filter((item) => !item.adult)) {
+      const routePath = `/series/${seriesSpec.id}`;
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      await expect(
+        page.getByRole("heading", { level: 1, name: seriesSpec.title }),
+      ).toHaveCount(1);
+      await expect(page.locator("footer")).toHaveCount(1);
+      await expect(
+        page.locator(`a[href^="/read/${seriesSpec.id}/"]`).first(),
+      ).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+
+      const duplicateCheck = await page.evaluate((title) => {
+        const main = document.querySelector("body > main");
+        const footer = document.querySelector("body > footer");
+        const bodyChildren = Array.from(document.body.children);
+        const titleMatches = Array.from(
+          document.querySelectorAll("main h1, main [data-testid='series-title']"),
+        ).filter((node) => (node.textContent || "").trim() === title).length;
+
+        return {
+          titleMatches,
+          entryHeadingCount: Array.from(
+            document.querySelectorAll("main h1, main h2, main h3"),
+          ).filter((node) =>
+            /chapters|episodes/i.test((node.textContent || "").trim()),
+          ).length,
+          footerAfterMain:
+            Boolean(main) &&
+            Boolean(footer) &&
+            bodyChildren.indexOf(footer) > bodyChildren.indexOf(main),
+        };
+      }, seriesSpec.title);
+
+      expect(
+        duplicateCheck.titleMatches,
+        `${routePath} should keep a single title heading inside main`,
+      ).toBe(1);
+      expect(
+        duplicateCheck.entryHeadingCount,
+        `${routePath} should keep one visible list heading`,
+      ).toBe(1);
+      expect(
+        duplicateCheck.footerAfterMain,
+        `${routePath} should keep the footer after main`,
+      ).toBeTruthy();
+    }
+
+    await expectNoRuntimeIssues("series-single-detail-block", runtimeIssues);
   });
 
   test("series pages keep header, main, and footer in canonical order", async ({
