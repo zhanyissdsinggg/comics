@@ -39,6 +39,14 @@ const SUPPORT_TOPIC_MAP = {
     description: "Cover issues, translation quality, metadata mistakes, title reports, or creator-credit problems.",
     draft: "Which title or creator page needs review?",
   },
+  other: {
+    id: "other",
+    label: "Other",
+    title: "Other",
+    subject: "Support request",
+    description: "Anything else that does not fit the other support categories.",
+    draft: "Tell us what you need help with.",
+  },
 };
 
 export const SUPPORT_TOPICS = Object.values(SUPPORT_TOPIC_MAP);
@@ -49,6 +57,7 @@ export const SUPPORT_PRIMARY_TOPICS = [
   SUPPORT_TOPIC_MAP.technical,
   SUPPORT_TOPIC_MAP.adult,
   SUPPORT_TOPIC_MAP.content,
+  SUPPORT_TOPIC_MAP.other,
 ];
 
 const SUPPORT_TOPIC_ALIASES = {

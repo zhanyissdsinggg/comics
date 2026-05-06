@@ -1,6 +1,4 @@
-import SeriesPage from "../../../components/series/SeriesPage";
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
-import { Suspense } from "react";
 import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
@@ -28,8 +26,9 @@ import {
   shouldForceNotFoundForSeries,
 } from "../../../lib/publicSeriesRouteValidation";
 import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
+import SeriesRouteClientShell from "./SeriesRouteClientShell";
 
-export const revalidate = 300;
+export const revalidate = 0;
 export const dynamic = "force-dynamic";
 export async function generateStaticParams() {
   return buildPublicSeriesStaticParams();
@@ -320,7 +319,14 @@ export default async function SeriesRoutePage({ params, searchParams }) {
     });
     notFound();
   }
+  if (!routePayload?.payload?.series && routePayload?.state === "ready") {
+    logSeriesInvariant("Series route resolved ready without series payload", {
+      seriesId,
+    });
+    notFound();
+  }
   const structuredData = buildSafeSeriesStructuredData(routePayload?.payload);
+  const routeFallback = <SeriesRouteFallback payload={routePayload?.payload || null} />;
 
   return (
     <>
@@ -329,15 +335,14 @@ export default async function SeriesRoutePage({ params, searchParams }) {
         <RewardsProvider>
           <EntitlementProvider>
             <CouponProvider>
-              <Suspense fallback={<SeriesRouteFallback payload={routePayload?.payload || null} />}>
-                <SeriesPage
-                  seriesId={seriesId}
-                  initialSeriesPayload={routePayload?.payload || null}
-                  initialSeriesState={routePayload?.state || "unavailable"}
-                  initialGateStatus={routePayload?.gateReason || "OK"}
-                  initialSearchParams={resolvedSearchParams}
-                />
-              </Suspense>
+              <SeriesRouteClientShell
+                fallback={routeFallback}
+                seriesId={seriesId}
+                initialSeriesPayload={routePayload?.payload || null}
+                initialSeriesState={routePayload?.state || "unavailable"}
+                initialGateStatus={routePayload?.gateReason || "OK"}
+                initialSearchParams={resolvedSearchParams}
+              />
             </CouponProvider>
           </EntitlementProvider>
         </RewardsProvider>

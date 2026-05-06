@@ -33,6 +33,7 @@ test.describe("Support page", () => {
       page.getByRole("heading", { name: "Send a request" }),
     ).toBeVisible();
     await expect(page.locator("#support-topic")).toBeVisible();
+    await expect(page.locator("#support-topic")).toContainText("Other");
     await expect(page.locator("#support-email")).toBeVisible();
     await expect(page.locator("#support-order-id")).toBeVisible();
     await expect(

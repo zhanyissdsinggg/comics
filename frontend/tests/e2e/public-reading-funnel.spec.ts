@@ -1749,6 +1749,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("heading", { name: "Send a request" })).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("#support-topic")).toContainText("Other");
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-subject", "Need help");
     await page.fill("#support-message", "I need a billing receipt.");

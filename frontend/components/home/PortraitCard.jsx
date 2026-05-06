@@ -29,7 +29,7 @@ function PortraitCard({
   href = "",
   showActionLabel = true,
   actionLabel = "Read More",
-  coverFallbackVariant = "default",
+  coverFallbackVariant = "minimal-card",
   interactionMode = "link",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
