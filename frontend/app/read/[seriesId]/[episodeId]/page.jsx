@@ -18,12 +18,20 @@ import {
   isDefaultInstallmentTitle,
 } from "../../../../lib/seriesFormatLabels";
 import { siteConfig } from "../../../../lib/siteConfig";
+import { buildPublicSeriesStaticParams } from "../../../../lib/publicSeriesCatalog";
+import {
+  logSeriesInvariant,
+  validateReaderPayload,
+} from "../../../../lib/publicSeriesRouteValidation";
 import { loadReaderSeoPayload } from "../../../../lib/storefrontSeo";
 import ReaderPageShell from "./ReaderPageShell";
 
 export const revalidate = 300;
+export const dynamic = "force-dynamic";
 export async function generateStaticParams() {
-  return [];
+  return buildPublicSeriesStaticParams().flatMap(({ id }) => [
+    { seriesId: id, episodeId: `${id}e1` },
+  ]);
 }
 
 export async function generateMetadata({ params }) {
@@ -101,7 +109,14 @@ export default async function Page({ params }) {
     seriesId,
     episodeId,
   );
-  if (!series || !episode) {
+  if (!validateReaderPayload(seriesId, episodeId, { series, episode, episodes })) {
+    logSeriesInvariant("Reader route payload failed validation", {
+      seriesId,
+      episodeId,
+      hasSeries: Boolean(series),
+      hasEpisode: Boolean(episode),
+      episodeListCount: Array.isArray(episodes) ? episodes.length : -1,
+    });
     notFound();
   }
   const currentIndex = episodes.findIndex(
