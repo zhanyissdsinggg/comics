@@ -21,6 +21,9 @@ const monetizationLive =
   siteConfig.monetization.checkoutEnabled ||
   siteConfig.monetization.membershipEnabled ||
   siteConfig.monetization.pointPacksEnabled;
+const hasResolvedLegalJurisdiction = Boolean(
+  siteConfig.governingLaw && siteConfig.legalVenue,
+);
 
 const TERMS_SECTIONS = [
   {
@@ -47,6 +50,15 @@ const TERMS_SECTIONS = [
       monetizationLive
         ? "Prices, catalog availability, and promo rules can change, but we will not retroactively remove content you already unlocked lawfully unless we have to for legal or operational reasons."
         : "If payments are enabled later, prices, catalog availability, and promo rules may change before launch or while those features roll out.",
+    ],
+  },
+  {
+    title: "Refunds and cancellations",
+    paragraphs: [
+      monetizationLive
+        ? "If a purchase, membership, or other paid feature goes live, any refund or cancellation terms shown during checkout will control together with applicable law."
+        : "If purchases are enabled later, any refund or cancellation terms will be shown at checkout before you pay.",
+      "Unless local law requires otherwise, digital access that has already been delivered may be limited or non-refundable once unlocked.",
     ],
   },
   {
@@ -83,13 +95,6 @@ const TERMS_SECTIONS = [
     ],
   },
   {
-    title: "Governing law",
-    paragraphs: [
-      `These Terms are governed by the laws that apply to ${siteConfig.companyName} where it is established, without regard to conflict-of-law rules, except where mandatory consumer protection law requires otherwise.`,
-      "Any mandatory consumer protection rules that apply where you live will still apply where required by law.",
-    ],
-  },
-  {
     title: "Mature content",
     paragraphs: [
       "Some titles may be marked Mature or 18+. Access to those titles can require sign-in, age confirmation, or device-level visibility settings before the title opens.",
@@ -97,6 +102,18 @@ const TERMS_SECTIONS = [
     ],
   },
 ];
+
+if (hasResolvedLegalJurisdiction) {
+  TERMS_SECTIONS.splice(8, 0, {
+    title: "Governing law",
+    paragraphs: [
+      `These Terms are governed by the laws of ${siteConfig.governingLaw}, without regard to conflict-of-law rules, except where mandatory consumer protection law requires otherwise.`,
+      `The courts located in ${siteConfig.legalVenue} will have exclusive venue for disputes arising out of or relating to these Terms, unless applicable law gives you a different forum.`,
+    ],
+  });
+} else {
+  // TODO: Populate NEXT_PUBLIC_GOVERNING_LAW and NEXT_PUBLIC_LEGAL_VENUE before public launch.
+}
 
 function LegalSection({
   title,

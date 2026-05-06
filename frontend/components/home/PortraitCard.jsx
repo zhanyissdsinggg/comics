@@ -21,6 +21,18 @@ function isModifiedEvent(event) {
   );
 }
 
+function formatMetaToken(value) {
+  const normalized = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 function PortraitCard({
   item,
   tone,
@@ -33,12 +45,8 @@ function PortraitCard({
   interactionMode = "link",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
-  const normalizedType = String(item?.seriesType || item?.type || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  const normalizedStatus = String(item?.status || item?.statusLabel || "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const normalizedType = formatMetaToken(item?.seriesType || item?.type || "");
+  const normalizedStatus = formatMetaToken(item?.status || item?.statusLabel || "");
   const formatStatusLine = [normalizedType, normalizedStatus]
     .filter(Boolean)
     .join(" / ");
@@ -75,31 +83,6 @@ function PortraitCard({
   }
 
   const showGenrePills = visiblePills.length > 0;
-  const rawDetailCopy =
-    item.statusLabel || item.metaLabel || coverMeta.detailText || "";
-  const normalizedMetaLine = String(metaLine || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-  const normalizedDetailCopy =
-    typeof rawDetailCopy === "string"
-      ? String(rawDetailCopy || "")
-          .replace(/\s+/g, " ")
-          .trim()
-          .toLowerCase()
-      : "";
-  const normalizedBadgeLabel = String(coverMeta.badgeLabel || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-  const detailText =
-    typeof rawDetailCopy === "string"
-      ? normalizedDetailCopy &&
-        normalizedDetailCopy !== normalizedMetaLine &&
-        normalizedDetailCopy !== normalizedBadgeLabel
-        ? rawDetailCopy
-        : ""
-      : rawDetailCopy;
   const genreLine = normalizeGenreList(rawGenreData)
     .filter(
       (genre) =>
@@ -214,24 +197,12 @@ function PortraitCard({
         {genreLine ? (
           <p
             className={cn(
-              "line-clamp-1 transition-colors",
+              "line-clamp-2 transition-colors",
               isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
               "text-white/60 group-hover:text-white/78",
             )}
           >
             {genreLine}
-          </p>
-        ) : null}
-
-        {detailText && detailText !== genreLine ? (
-          <p
-            className={cn(
-              "line-clamp-1 transition-colors",
-              isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
-              "text-white/60 group-hover:text-white/78",
-            )}
-          >
-            {detailText}
           </p>
         ) : null}
 
@@ -270,7 +241,6 @@ function PortraitCard({
             <ArrowRight className="size-4" />
           </span>
         </div>
-        <div className="sr-only">{actionLabel}</div>
       </div>
     </div>
   );

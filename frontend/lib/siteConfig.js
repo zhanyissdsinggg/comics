@@ -70,6 +70,8 @@ export const siteConfig = {
     clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) ||
     "legal@gushcomics.com",
   companyAddress: clean(process.env.NEXT_PUBLIC_COMPANY_ADDRESS),
+  governingLaw: clean(process.env.NEXT_PUBLIC_GOVERNING_LAW),
+  legalVenue: clean(process.env.NEXT_PUBLIC_LEGAL_VENUE),
   twitterUrl: clean(process.env.NEXT_PUBLIC_TWITTER_URL),
   twitterHandle: clean(process.env.NEXT_PUBLIC_TWITTER_HANDLE),
   githubUrl: clean(process.env.NEXT_PUBLIC_GITHUB_URL),

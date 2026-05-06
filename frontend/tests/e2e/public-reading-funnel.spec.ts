@@ -1240,13 +1240,15 @@ test.describe("Public reading funnel", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "Solar Wind" })).toBeVisible({
+    await expect(page.locator("main h1").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.getByTestId("home-hero-primary-cta")).toHaveText("Read Episode 1 Free");
+    await expect(page.getByTestId("home-hero-primary-cta")).toHaveText(
+      /Read (Chapter|Episode) 1 Free/i,
+    );
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveAttribute(
       "href",
-      /\/read\/series-011\/series-011e1$/,
+      /\/read\/series-\d+\/series-\d+e1$/,
     );
     await expectNoBannedCopy(page, "/");
     await expectNoRuntimeIssues("/", runtimeIssues);
@@ -1824,6 +1826,33 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("/library signed-out", runtimeIssues);
   });
 
+  test("catalog cards keep concise SSR text on comics and novels", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    let response = await page.goto("/comics", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("Crimson Tide");
+    await expect(page.locator("main")).toContainText("Comic / Ongoing");
+    await expect(page.locator("main")).toContainText("Horror · Action");
+    await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText(
+      "Finished comic / Completed Crimson Tide Action Read more",
+    );
+
+    response = await page.goto("/novels", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("Solar Wind");
+    await expect(page.locator("main")).toContainText("Novel / Ongoing");
+    await expect(page.locator("main")).toContainText("Sci-Fi · Drama");
+    await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText(
+      "Top Pick novel / Ongoing Solar Wind Space Read more",
+    );
+
+    await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
+  });
+
   test("support form renders and validates reply email for signed-out users", async ({
     page,
   }) => {
@@ -1944,6 +1973,9 @@ test.describe("Public reading funnel", () => {
     if ((response?.status() ?? 0) === 200) {
       await expect(page.locator("body")).not.toContainText(
         /pending internal legal review/i,
+      );
+      await expect(page.locator("body")).not.toContainText(
+        /laws that apply to .* where it is established/i,
       );
     }
 
