@@ -7,6 +7,7 @@ import PortraitCard from "../home/PortraitCard";
 import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
+import MatureCatalogState from "../common/MatureCatalogState";
 import SurfacePanel from "../common/SurfacePanel";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -340,6 +341,8 @@ export default function SeriesPage({
 
   const smallNovelCatalog = isNovelPage && series.length < 6;
   const showNovelShelves = !isNovelPage || series.length >= 6;
+  const matureGenreActive = isMatureGenreValue(selectedGenre);
+  const canAccessMature = canViewMatureContent({ adultConfirmed, isAdultMode });
   const handleGenreChange = useCallback(
     (value, options = {}) => {
       if (!isMatureGenreValue(value)) {
@@ -515,17 +518,27 @@ export default function SeriesPage({
                 density={isNovelPage ? "quiet" : "default"}
               />
 
-              {filteredAndSortedSeries.length === 0 ? (
-                <EmptyState
-                  icon={isNovelPage ? "book" : "search"}
-                  title={config.emptyTitle}
-                  description={config.emptyDescription}
-                  appearance="dark"
-                  action={{
-                    label: "Reset filters",
-                    onClick: handleResetFilters,
-                  }}
-                />
+              {matureGenreActive && !canAccessMature ? (
+                <MatureCatalogState className="mt-2" browseHref={config.pathname} />
+              ) : filteredAndSortedSeries.length === 0 ? (
+                matureGenreActive ? (
+                  <MatureCatalogState
+                    mode="empty"
+                    className="mt-2"
+                    browseHref={config.pathname}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={isNovelPage ? "book" : "search"}
+                    title={config.emptyTitle}
+                    description={config.emptyDescription}
+                    appearance="dark"
+                    action={{
+                      label: "Reset filters",
+                      onClick: handleResetFilters,
+                    }}
+                  />
+                )
               ) : (
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {filteredAndSortedSeries.map((item) => (

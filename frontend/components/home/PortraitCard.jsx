@@ -58,7 +58,7 @@ function PortraitCard({
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
   const normalizedMetaTokens = new Set(
     String(metaLine || "")
-      .split(/[\/|,·]/)
+      .split(/[\/|,·路]/)
       .map((part) => part.trim().toLowerCase())
       .filter(Boolean),
   );

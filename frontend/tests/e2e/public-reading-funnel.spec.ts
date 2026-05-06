@@ -1383,6 +1383,7 @@ test.describe("Public reading funnel", () => {
 
   test("comics and search expose a controlled Mature filter without random 18+ chrome", async ({
     page,
+    browser,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page, { signedIn: true });
@@ -1440,7 +1441,32 @@ test.describe("Public reading funnel", () => {
       });
     }
 
+    const gatedContext = await browser.newContext();
+    const gatedPage = await gatedContext.newPage();
+    const gatedRuntimeIssues = collectRuntimeIssues(gatedPage);
+    await mockPublicApi(gatedPage, { signedIn: false });
+
+    response = await gatedPage.goto("/search?genre=Mature", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(gatedPage.locator("main")).toContainText(
+      "Confirm legal age to view mature titles.",
+    );
+    await expect(gatedPage.locator("main")).not.toContainText("No exact match");
+
+    response = await gatedPage.goto("/comics?genre=Mature", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(gatedPage.locator("main")).toContainText(
+      "Confirm legal age to view mature titles.",
+    );
+    await expect(gatedPage.locator("main")).not.toContainText("No comics found");
+
     await expectNoRuntimeIssues("mature-filter-catalog-entry", runtimeIssues);
+    await expectNoRuntimeIssues("mature-filter-catalog-gated", gatedRuntimeIssues);
+    await gatedContext.close();
   });
 
   test("comics title card opens canonical series detail", async ({ page }) => {
@@ -1847,6 +1873,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Comic / Ongoing");
     await expect(page.locator("main")).toContainText("Horror · Action");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
       "Finished comic / Completed Crimson Tide Action Read more",
     );
@@ -1857,6 +1884,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Novel / Ongoing");
     await expect(page.locator("main")).toContainText("Sci-Fi · Drama");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
       "Top Pick novel / Ongoing Solar Wind Space Read more",
     );
@@ -1864,10 +1892,15 @@ test.describe("Public reading funnel", () => {
     response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText("Read more Read more");
 
     response = await page.goto("/rankings", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
+    await expect(page.locator("body")).not.toContainText("Read more Read more");
+    await expect(page.locator("body")).not.toContainText(
+      "Finished Horror Crimson Tide Supernatural Crimson Tide comic Completed",
+    );
 
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });

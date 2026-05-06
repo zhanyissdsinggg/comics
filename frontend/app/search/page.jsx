@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
+import MatureCatalogState from "../../components/common/MatureCatalogState";
 import MatureFilterChip from "../../components/common/MatureFilterChip";
 import { createPageMetadata } from "../../lib/seo";
 import {
@@ -499,6 +500,7 @@ export default async function Page({ searchParams }) {
   const hasActiveFormat = format.length > 0;
   const hasActiveStatus = status.length > 0;
   const hasActiveGenre = normalizedGenre.length > 0;
+  const isMatureGenreActive = hasActiveGenre && isMatureGenreValue(normalizedGenre);
 
   const [catalogPayload, maturePayload] = await Promise.all([
     loadSeriesCatalogSeoPayload({ includeAdult }),
@@ -661,6 +663,14 @@ export default async function Page({ searchParams }) {
                 items={emptyCompleted}
               />
             </div>
+          ) : isMatureGenreActive && !includeAdult ? (
+            <MatureCatalogState className="rounded-[24px]" browseHref="/search" />
+          ) : isMatureGenreActive && filteredSeries.length === 0 ? (
+            <MatureCatalogState
+              mode="empty"
+              className="rounded-[24px]"
+              browseHref="/search"
+            />
           ) : resultCount === 0 ? (
             <section className="space-y-6 rounded-[24px] border border-white/10 bg-[#111111] p-5 sm:p-6">
               <div className="space-y-2">
