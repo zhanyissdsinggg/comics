@@ -84,7 +84,7 @@ export default function FilterBar({
         key={genre}
         href={genreHrefMap?.[genre] || ""}
         active={selectedGenre === genre}
-        onNavigate={() => handleGenreChange(genre)}
+        onNavigate={(options) => handleGenreChange(genre, options)}
         label={genre}
         className={chipClassName}
         activeClassName={cn(

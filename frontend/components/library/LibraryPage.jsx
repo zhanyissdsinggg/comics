@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import Rail from "../home/Rail";
@@ -899,38 +900,37 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       Library
                     </button>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={openAuthPrompt}
+                  <Link
+                    href="/account"
                     data-testid="library-entry-cta"
                     className={primaryButtonClass}
                   >
                     Sign in
-                  </button>
+                  </Link>
                 )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!viewerSignedIn) {
-                      router.push("/comics");
-                      return;
-                    }
-                    if (visibleLibraryItems.length > 0) {
-                      scrollToSection("saved-series");
-                      return;
-                    }
-                    setShowCollectionManager((value) => !value);
-                  }}
-                  className={secondaryButtonClass}
-                >
-                  {viewerSignedIn
-                    ? visibleLibraryItems.length > 0
+                {viewerSignedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (visibleLibraryItems.length > 0) {
+                        scrollToSection("saved-series");
+                        return;
+                      }
+                      setShowCollectionManager((value) => !value);
+                    }}
+                    className={secondaryButtonClass}
+                  >
+                    {visibleLibraryItems.length > 0
                       ? "Library"
                       : showCollectionManager
                         ? "Hide collections"
-                        : "Collections"
-                    : "Browse free chapters"}
-                </button>
+                        : "Collections"}
+                  </button>
+                ) : (
+                  <Link href="/comics" className={secondaryButtonClass}>
+                    Browse free chapters
+                  </Link>
+                )}
               </>
             }
           />

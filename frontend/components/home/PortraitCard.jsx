@@ -145,6 +145,7 @@ function PortraitCard({
             genres={item.genres}
             seriesType={item.seriesType || item.type}
             fallbackVariant={coverFallbackVariant}
+            decorative
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent" />
@@ -169,6 +170,15 @@ function PortraitCard({
         )}
       >
         <div className="space-y-2">
+          <p
+            className={cn(
+              "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
+              isCompact ? "text-[1.08rem] leading-5" : "text-[1.12rem] leading-6",
+              "text-white group-hover:text-white",
+            )}
+          >
+            {item.title}
+          </p>
           {formatStatusLine ? (
             <p
               className={cn(
@@ -180,15 +190,6 @@ function PortraitCard({
               {formatStatusLine}
             </p>
           ) : null}
-          <p
-            className={cn(
-              "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
-              isCompact ? "text-[1.08rem] leading-5" : "text-[1.12rem] leading-6",
-              "text-white group-hover:text-white",
-            )}
-          >
-            {item.title}
-          </p>
         </div>
 
         {showGenrePills ? (
@@ -269,7 +270,7 @@ function PortraitCard({
             <ArrowRight className="size-4" />
           </span>
         </div>
-        <div className="sr-only">Read more</div>
+        <div className="sr-only">{actionLabel}</div>
       </div>
     </div>
   );
@@ -281,7 +282,6 @@ function PortraitCard({
         onClick={handleClick}
         className="group relative block w-full text-left"
         style={{ WebkitTapHighlightColor: "transparent" }}
-        aria-label={item?.title ? `Read more ${item.title}` : "Read more"}
       >
         {cardContent}
       </button>
@@ -294,7 +294,6 @@ function PortraitCard({
       onClick={handleClick}
       className="group relative block w-full text-left"
       style={{ WebkitTapHighlightColor: "transparent" }}
-      aria-label={item?.title ? `Read more ${item.title}` : "Read more"}
     >
       {cardContent}
     </Link>

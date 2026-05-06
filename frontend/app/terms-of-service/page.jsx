@@ -85,8 +85,8 @@ const TERMS_SECTIONS = [
   {
     title: "Governing law",
     paragraphs: [
-      "Governing law and venue are pending internal legal review before launch. We will publish the final jurisdiction here before paid commerce goes live.",
-      "Until then, any mandatory consumer protection rules that apply where you live will still apply where required by law.",
+      `These Terms are governed by the laws that apply to ${siteConfig.companyName} where it is established, without regard to conflict-of-law rules, except where mandatory consumer protection law requires otherwise.`,
+      "Any mandatory consumer protection rules that apply where you live will still apply where required by law.",
     ],
   },
   {

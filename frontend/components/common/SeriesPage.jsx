@@ -105,20 +105,18 @@ function getSeriesSubtitle(series) {
 }
 
 function mapSeriesCardItem(series) {
-  const creatorName = resolveSeriesCreatorName(series);
   return {
     id: series.id,
     title: series.title,
-    subtitle: getSeriesSubtitle(series),
+    subtitle: "",
     genres: Array.isArray(series?.genres) ? series.genres : [],
     type: series?.type || "",
     seriesType: series?.type || "",
     status: series?.status || "",
     adult: Boolean(series?.adult),
-    author: creatorName,
     coverUrl: series.coverUrl,
     coverTone: series.coverTone,
-    badge: getSeriesBadge(series),
+    badge: "",
   };
 }
 
@@ -155,7 +153,8 @@ function CatalogSection({
             tone={item.coverTone}
             href={`/series/${encodeURIComponent(item.id)}`}
             density="compact"
-            showActionLabel={false}
+            showActionLabel
+            actionLabel="Read more"
             interactionMode="link"
           />
         ))}
@@ -536,7 +535,8 @@ export default function SeriesPage({
                       tone={item.coverTone}
                       href={`/series/${encodeURIComponent(item.id)}`}
                       density="compact"
-                      showActionLabel={false}
+                      showActionLabel
+                      actionLabel="Read more"
                       interactionMode="link"
                     />
                   ))}

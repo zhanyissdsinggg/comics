@@ -35,18 +35,16 @@ export default function MatureFilterChip({
   const [activeModal, setActiveModal] = useState(null);
   const [authError, setAuthError] = useState("");
 
-  const handleNavigate = (options = {}) => {
-    let handled = false;
-
+  const navigateViaHandler = (options = {}) => {
     if (typeof onNavigate === "function") {
-      const result = onNavigate(options);
-      handled = result === false;
+      return onNavigate(options);
     }
 
-    if (handled || !href) {
-      return;
+    if (href) {
+      router.push(href);
     }
-    router.push(href);
+
+    return undefined;
   };
 
   const openGate = () => {
@@ -64,7 +62,7 @@ export default function MatureFilterChip({
       enableAdultMode();
     }
 
-    handleNavigate();
+    navigateViaHandler({ bypassGate: true });
   };
 
   const handleLogin = async ({ email, password, mode }) => {
@@ -89,7 +87,7 @@ export default function MatureFilterChip({
     }
 
     setActiveModal(null);
-    handleNavigate({ bypassGate: true });
+    navigateViaHandler({ bypassGate: true });
     return response;
   };
 
@@ -99,7 +97,20 @@ export default function MatureFilterChip({
       enableAdultMode();
     }
     setActiveModal(null);
-    handleNavigate({ bypassGate: true });
+    navigateViaHandler({ bypassGate: true });
+  };
+
+  const handleClick = (event) => {
+    if (!hydrated || !isSignedIn || !adultConfirmed || !isAdultMode) {
+      event.preventDefault();
+      openGate();
+      return;
+    }
+
+    if (typeof onNavigate === "function") {
+      event.preventDefault();
+      navigateViaHandler({ bypassGate: true });
+    }
   };
 
   const buttonClassName = `${className} ${
@@ -112,8 +123,13 @@ export default function MatureFilterChip({
 
   return (
     <>
-      {active && href ? (
-        <Link href={href} className={sharedClassName}>
+      {href ? (
+        <Link
+          href={href}
+          onClick={handleClick}
+          className={sharedClassName}
+          aria-pressed={active}
+        >
           {label}
         </Link>
       ) : (

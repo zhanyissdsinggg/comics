@@ -225,9 +225,11 @@ function RankingsSectionHeader({
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-[42rem]">
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-          {eyebrow}
-        </p>
+        {eyebrow ? (
+          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+            {eyebrow}
+          </p>
+        ) : null}
         <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
           {title}
         </h2>
@@ -316,7 +318,7 @@ export default function RankingsPage({
   const boardEntries = curatedSeries.slice(3, 12);
   const heroStats = [
     {
-      label: "Titles",
+      label: "This week",
       value: loading ? "..." : `${curatedSeries.length.toLocaleString()} titles`,
       hint: "",
     },
@@ -359,7 +361,7 @@ export default function RankingsPage({
     "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
   const secondaryButtonClass =
     "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
-  const heroTitle = activeView.label;
+  const heroTitle = "Trending";
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -368,7 +370,7 @@ export default function RankingsPage({
           <EditorialHero
             eyebrow=""
             title={heroTitle}
-            description={activeView.description}
+            description="The stories readers are opening most this week."
             secondary=""
             stats={heroStats}
             className="min-h-full"
@@ -383,31 +385,6 @@ export default function RankingsPage({
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
-
-        <SurfacePanel
-          tone="muted"
-          accent="cyan"
-          appearance="dark"
-          className="space-y-4"
-        >
-          <div className="flex flex-wrap gap-2.5">
-            {VIEWS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.replace(`/rankings?view=${item.id}`)}
-                className={[
-                  "rounded-full border-2 border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.02em] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform",
-                  activeView.id === item.id
-                    ? "bg-[#FFE500] text-black"
-                     : "border-white/20 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30",
-                ].join(" ")}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </SurfacePanel>
 
         {loading ? (
           <RankingsLoadingState />
@@ -481,16 +458,13 @@ export default function RankingsPage({
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
                       label={leadEntry.title}
-                      eyebrow={activeView.label}
+                      eyebrow="Trending"
                       badge={getSeriesBadge(leadEntry)}
                       genres={leadEntry.genres}
                       seriesType={leadEntry.type}
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
-                        {activeView.label}
-                      </p>
                       <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-white sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
@@ -525,9 +499,6 @@ export default function RankingsPage({
                         className="group rounded-[28px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 sm:p-4"
                       aria-label={`View ${series.title}`}
                     >
-                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
-                        {activeView.label}
-                      </p>
                       <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-white sm:text-2xl">
                         {series.title}
                       </h3>
@@ -536,7 +507,7 @@ export default function RankingsPage({
                         coverUrl={series.coverUrl}
                         label={series.title}
                         eyebrow={
-                          resolveSeriesCreatorName(series) || activeView.label
+                          resolveSeriesCreatorName(series) || "Trending"
                         }
                         badge={getSeriesBadge(series)}
                         genres={series.genres}
@@ -564,9 +535,9 @@ export default function RankingsPage({
               {boardEntries.length > 0 ? (
                 <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
                   <RankingsSectionHeader
-                    eyebrow="Trending"
-                    title="More stories this week"
-                    description="Readers are opening these next."
+                    eyebrow=""
+                    title="Ranking"
+                    description="Keep scrolling through the titles readers are opening next."
                   />
 
                   <div className="space-y-3">
@@ -589,7 +560,7 @@ export default function RankingsPage({
                           coverUrl={series.coverUrl}
                           label={series.title}
                           eyebrow={
-                            resolveSeriesCreatorName(series) || activeView.label
+                            resolveSeriesCreatorName(series) || "Trending"
                           }
                           badge={getSeriesBadge(series)}
                           genres={series.genres}

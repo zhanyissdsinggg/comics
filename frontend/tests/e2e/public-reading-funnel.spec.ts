@@ -1390,12 +1390,15 @@ test.describe("Public reading funnel", () => {
 
     const comicsHeader = page.locator("header").first();
     const comicsFooter = page.locator("footer").first();
-    await expect(page.getByRole("button", { name: "Mature" }).first()).toBeVisible({
+    const comicsMatureFilter = page.locator(
+      'a:has-text("Mature"), button:has-text("Mature")',
+    );
+    await expect(comicsMatureFilter.first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(comicsHeader).not.toContainText(/^18\+$/);
     await expect(comicsFooter).not.toContainText(/^18\+$/);
-    await page.getByRole("button", { name: "Mature" }).click();
+    await comicsMatureFilter.first().click();
     await expect(
       page.getByRole("button", { name: /Yes, I am 18 or older/i }),
     ).toBeVisible({
@@ -1811,6 +1814,13 @@ test.describe("Public reading funnel", () => {
     });
 
     expect(signedOutCopyCount).toBe(1);
+    await expect(page.getByRole("link", { name: "Sign in" }).first()).toHaveAttribute(
+      "href",
+      "/account",
+    );
+    await expect(
+      page.getByRole("link", { name: "Browse free chapters" }).first(),
+    ).toHaveAttribute("href", "/comics");
     await expectNoRuntimeIssues("/library signed-out", runtimeIssues);
   });
 
@@ -1941,6 +1951,8 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText("Jump in");
     await expect(page.locator("body")).not.toContainText("Pick a lane");
     await expect(page.locator("body")).not.toContainText("More to Read");
+    await expect(page.locator("body")).not.toContainText(/^Titles$/);
+    await expect(page.locator("body")).not.toContainText("More stories this week");
 
     await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
   });

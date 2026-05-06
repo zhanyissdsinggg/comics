@@ -61,6 +61,7 @@ function CoverFallback({
   style = {},
   fallbackVariant = "default",
   ariaLabel = "Series cover image",
+  decorative = false,
 }) {
   const isMinimalCard = fallbackVariant === "minimal-card";
   const title = label
@@ -99,8 +100,9 @@ function CoverFallback({
     <div
       className={`relative overflow-hidden ${className}`.trim()}
       style={{ background: artDirection.background, ...style }}
-      role="img"
-      aria-label={ariaLabel}
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : ariaLabel}
+      aria-hidden={decorative ? "true" : undefined}
     >
       <div
         className="absolute inset-0"
@@ -205,6 +207,7 @@ export default function Cover({
   badge = "",
   fallbackVariant = "default",
   sizes = "(max-width: 768px) 160px, 240px",
+  decorative = false,
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -234,6 +237,7 @@ export default function Cover({
         className={className}
         style={style}
         ariaLabel={altText}
+        decorative={decorative}
       />
     );
   }
@@ -261,12 +265,13 @@ export default function Cover({
             fallbackVariant={fallbackVariant}
             className="absolute inset-0"
             ariaLabel={altText}
+            decorative={decorative}
           />
         ) : (
           <>
             <Image
               src={resolvedUrl}
-              alt={altText}
+              alt={decorative ? "" : altText}
               fill
               sizes={sizes}
               className={`object-cover transition-opacity duration-500 ${
@@ -299,6 +304,7 @@ export default function Cover({
       className={`cover ${className}`.trim()}
       style={style}
       ariaLabel={altText}
+      decorative={decorative}
     />
   );
 }
