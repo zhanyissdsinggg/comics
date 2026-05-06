@@ -8,8 +8,11 @@ import Cover from "../common/Cover";
 import { cn } from "@/lib/utils";
 import {
   getCoverCardMeta,
-  normalizeGenreList,
 } from "../../lib/coverPresentation";
+import {
+  formatTitleCardFormatStatus,
+  formatTitleCardGenres,
+} from "../../lib/titleCardText";
 
 function isModifiedEvent(event) {
   return Boolean(
@@ -19,18 +22,6 @@ function isModifiedEvent(event) {
       event.shiftKey ||
       event.button !== 0,
   );
-}
-
-function formatMetaToken(value) {
-  const normalized = String(value || "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!normalized) {
-    return "";
-  }
-
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function PortraitCard({
@@ -45,11 +36,10 @@ function PortraitCard({
   interactionMode = "link",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
-  const normalizedType = formatMetaToken(item?.seriesType || item?.type || "");
-  const normalizedStatus = formatMetaToken(item?.status || item?.statusLabel || "");
-  const formatStatusLine = [normalizedType, normalizedStatus]
-    .filter(Boolean)
-    .join(" / ");
+  const formatStatusLine = formatTitleCardFormatStatus(
+    item?.seriesType || item?.type || "",
+    item?.status || item?.statusLabel || "",
+  );
   const progressPercent = Number(item.progressPercent || 0);
   const progressWidth = Math.max(
     0,
@@ -83,12 +73,12 @@ function PortraitCard({
   }
 
   const showGenrePills = visiblePills.length > 0;
-  const genreLine = normalizeGenreList(rawGenreData)
+  const genreLine = formatTitleCardGenres(rawGenreData, { limit: 3 })
+    .split(" · ")
     .filter(
       (genre) =>
         !normalizedMetaTokens.has(String(genre || "").trim().toLowerCase()),
     )
-    .filter((genre) => String(genre || "").trim() !== "18+")
     .join(" · ");
 
   const handleClick = (event) => {

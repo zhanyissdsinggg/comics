@@ -729,34 +729,15 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
 
                 <div className="space-y-3">
-                  <p className={sectionEyebrowClass}>Alerts</p>
-
+                  <p className={sectionEyebrowClass}>Reading preferences</p>
                   <label className={checkboxCardClass}>
                     <input
                       type="checkbox"
-                      checked={notifyNew}
-                      onChange={(event) => setNotifyNew(event.target.checked)}
+                      checked={hideAdultHistory}
+                      onChange={(event) => setHideAdultHistory(event.target.checked)}
                       className={checkboxClass}
                     />
-                    New chapter alerts
-                  </label>
-                  <label className={checkboxCardClass}>
-                    <input
-                      type="checkbox"
-                      checked={notifyTtf}
-                      onChange={(event) => setNotifyTtf(event.target.checked)}
-                      className={checkboxClass}
-                    />
-                    Free read alerts
-                  </label>
-                  <label className={checkboxCardClass}>
-                    <input
-                      type="checkbox"
-                      checked={notifyPromo}
-                      onChange={(event) => setNotifyPromo(event.target.checked)}
-                      className={checkboxClass}
-                    />
-                    Deals and offers
+                    Hide mature titles from this device
                   </label>
                 </div>
 

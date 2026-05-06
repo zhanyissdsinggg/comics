@@ -18,6 +18,11 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { getSearchParam } from "../../lib/pageSearchParams";
+import {
+  formatTitleCardCreator,
+  formatTitleCardFormatStatus,
+  formatTitleCardGenres,
+} from "../../lib/titleCardText";
 
 const VIEWS = [
   {
@@ -121,11 +126,11 @@ function normalizeView(initialSearchParams = {}) {
 
 function getSeriesMeta(series) {
   const creatorName = resolveSeriesCreatorName(series);
-  return [
-    String(series?.type || "").trim(),
-    String(series?.status || "").trim(),
-    creatorName,
-  ].filter(Boolean);
+  return {
+    formatStatus: formatTitleCardFormatStatus(series?.type, series?.status),
+    genres: formatTitleCardGenres(series?.genres, { limit: 3 }),
+    creator: formatTitleCardCreator(creatorName),
+  };
 }
 
 function sortFeaturedSeries(seriesList = []) {
@@ -462,22 +467,29 @@ export default function RankingsPage({
                       badge={getSeriesBadge(leadEntry)}
                       genres={leadEntry.genres}
                       seriesType={leadEntry.type}
+                      decorative
+                      fallbackVariant="minimal-card"
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
                     <div className="min-w-0">
                       <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-white sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                        {getSeriesMeta(leadEntry).map((item) => (
-                          <span
-                            key={`${leadEntry.id}-lead-meta-${item}`}
-                            className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
+                      {getSeriesMeta(leadEntry).formatStatus ? (
+                        <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-white/60">
+                          {getSeriesMeta(leadEntry).formatStatus}
+                        </p>
+                      ) : null}
+                      {getSeriesMeta(leadEntry).genres ? (
+                        <p className="mt-2 text-sm font-semibold text-white/72">
+                          {getSeriesMeta(leadEntry).genres}
+                        </p>
+                      ) : null}
+                      {getSeriesMeta(leadEntry).creator ? (
+                        <p className="mt-2 text-sm font-semibold text-white/52">
+                          {getSeriesMeta(leadEntry).creator}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </Link>
@@ -503,27 +515,34 @@ export default function RankingsPage({
                         {series.title}
                       </h3>
                       <Cover
-                        tone={series.coverTone}
-                        coverUrl={series.coverUrl}
-                        label={series.title}
-                        eyebrow={
-                          resolveSeriesCreatorName(series) || "Trending"
-                        }
-                        badge={getSeriesBadge(series)}
-                        genres={series.genres}
-                        seriesType={series.type}
-                        className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
-                      />
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                        {getSeriesMeta(series).map((item) => (
-                          <span
-                            key={`${series.id}-support-meta-${item}`}
-                            className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1.5 font-black uppercase tracking-[0.04em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
+                      tone={series.coverTone}
+                      coverUrl={series.coverUrl}
+                      label={series.title}
+                      eyebrow={
+                        resolveSeriesCreatorName(series) || "Trending"
+                      }
+                      badge={getSeriesBadge(series)}
+                      genres={series.genres}
+                      seriesType={series.type}
+                      decorative
+                      fallbackVariant="minimal-card"
+                      className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
+                    />
+                      {getSeriesMeta(series).formatStatus ? (
+                        <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-white/60">
+                          {getSeriesMeta(series).formatStatus}
+                        </p>
+                      ) : null}
+                      {getSeriesMeta(series).genres ? (
+                        <p className="mt-2 text-sm font-semibold text-white/72">
+                          {getSeriesMeta(series).genres}
+                        </p>
+                      ) : null}
+                      {getSeriesMeta(series).creator ? (
+                        <p className="mt-2 text-sm font-semibold text-white/52">
+                          {getSeriesMeta(series).creator}
+                        </p>
+                      ) : null}
                       <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
                         Open series
                       </p>
@@ -565,19 +584,27 @@ export default function RankingsPage({
                           badge={getSeriesBadge(series)}
                           genres={series.genres}
                           seriesType={series.type}
+                          decorative
+                          fallbackVariant="minimal-card"
                           className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-base font-black uppercase tracking-[-0.02em] text-white">
                             {series.title}
                           </p>
-                          <p className="mt-1 text-xs font-medium text-white/58">
-                            {getSeriesMeta(series).join(" / ")}
-                          </p>
-                          {Array.isArray(series.genres) &&
-                          series.genres.length > 0 ? (
-                              <p className="mt-1 truncate text-xs font-medium text-white/46">
-                              {series.genres.slice(0, 2).join(" / ")}
+                          {getSeriesMeta(series).formatStatus ? (
+                            <p className="mt-1 text-xs font-medium text-white/58">
+                              {getSeriesMeta(series).formatStatus}
+                            </p>
+                          ) : null}
+                          {getSeriesMeta(series).genres ? (
+                            <p className="mt-1 truncate text-xs font-medium text-white/46">
+                              {getSeriesMeta(series).genres}
+                            </p>
+                          ) : null}
+                          {getSeriesMeta(series).creator ? (
+                            <p className="mt-1 truncate text-xs font-medium text-white/40">
+                              {getSeriesMeta(series).creator}
                             </p>
                           ) : null}
                         </div>

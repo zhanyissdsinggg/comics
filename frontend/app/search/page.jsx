@@ -18,6 +18,11 @@ import {
   filterBlockedPublicGenres,
   filterBlockedPublicSeries,
 } from "../../lib/publicCatalogVisibility";
+import {
+  formatTitleCardCreator,
+  formatTitleCardFormatStatus,
+  formatTitleCardGenres,
+} from "../../lib/titleCardText";
 
 const FORMAT_OPTIONS = [
   { label: "All", value: "" },
@@ -254,7 +259,7 @@ function FilterGroup({ title, options, currentValue, buildHref }) {
   );
 }
 
-function GenreFilters({ genres, currentGenre, buildHref, showMatureFilter }) {
+function GenreFilters({ genres, currentGenre, buildHref }) {
   if (!Array.isArray(genres) || genres.length === 0) {
     return null;
   }
@@ -282,7 +287,7 @@ function GenreFilters({ genres, currentGenre, buildHref, showMatureFilter }) {
               ? "bg-white text-black"
               : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
           }`;
-          if (showMatureFilter && isMatureGenreValue(genre)) {
+          if (isMatureGenreValue(genre)) {
             return (
               <MatureFilterChip
                 key={`genre-${genre}`}
@@ -311,13 +316,16 @@ function GenreFilters({ genres, currentGenre, buildHref, showMatureFilter }) {
 }
 
 function ResultSeriesCard({ series }) {
-  const genres = normalizeGenreList(series?.genres).slice(0, 3);
   const description = summarizeText(series?.description || "", 108);
-  const format = formatDisplayLabel(series?.type || "");
-  const status = formatDisplayLabel(series?.status || "");
-  const chips = isMatureTitle(series)
-    ? ["18+", ...genres.filter((genre) => !isMatureGenreValue(genre)).slice(0, 2)]
-    : genres;
+  const formatStatusLine = formatTitleCardFormatStatus(
+    series?.type || "",
+    series?.status || "",
+  );
+  const genreLine = formatTitleCardGenres(series?.genres, { limit: 3 });
+  const creatorLine = formatTitleCardCreator(
+    series?.creatorCredits?.[0]?.name || series?.creator?.label || series?.author || "",
+  );
+  const matureBadgeVisible = isMatureTitle(series);
 
   return (
     <Link
@@ -328,7 +336,8 @@ function ResultSeriesCard({ series }) {
         {series?.coverUrl ? (
           <Image
             src={series.coverUrl}
-            alt={getCoverAltText(series?.title, series?.type)}
+            alt=""
+            aria-hidden="true"
             fill
             sizes="120px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -340,27 +349,28 @@ function ResultSeriesCard({ series }) {
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <p className="text-xs uppercase tracking-[0.12em] text-white/42">
-            {format || "Series"}{status ? ` / ${status}` : ""}
-          </p>
           <h2 className="text-[1.08rem] font-semibold tracking-[-0.03em] text-white">
             {series?.title || "Story"}
           </h2>
-          {chips.length > 0 ? (
+          {formatStatusLine ? (
+            <p className="text-xs uppercase tracking-[0.12em] text-white/42">
+              {formatStatusLine}
+            </p>
+          ) : null}
+          {genreLine || matureBadgeVisible ? (
             <div className="flex flex-wrap gap-1.5">
-              {chips.map((genre) => (
-                <span
-                  key={`${series.id}-${genre}`}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] ${
-                    genre === "18+"
-                      ? "border-[#ff7aa8]/30 bg-[#ff4d8d]/18 text-[#ffd6e7]"
-                      : "border-white/10 bg-white/[0.04] text-white/68"
-                  }`}
-                >
-                  {genre}
+              {matureBadgeVisible ? (
+                <span className="rounded-full border border-[#ff7aa8]/30 bg-[#ff4d8d]/18 px-2.5 py-1 text-[11px] text-[#ffd6e7]">
+                  18+
                 </span>
-              ))}
+              ) : null}
+              {genreLine ? (
+                <p className="text-sm leading-6 text-white/64">{genreLine}</p>
+              ) : null}
             </div>
+          ) : null}
+          {creatorLine ? (
+            <p className="text-xs text-white/48">{creatorLine}</p>
           ) : null}
         </div>
 
@@ -619,7 +629,6 @@ export default async function Page({ searchParams }) {
               genres={allGenres}
               currentGenre={genre}
               buildHref={buildGenreHref}
-              showMatureFilter={showMatureFilter}
             />
           </div>
 

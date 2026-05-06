@@ -121,6 +121,10 @@ export default function SeriesHeader({
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
   const latestUpdateLabel = getLatestLabel(latestEpisode, series.updatedAt);
   const summaryText = summarizeSeriesDescription(series?.description, "");
+  const creatorLine = creatorPresentation.value
+    ? `By ${creatorPresentation.value}`
+    : "";
+  const latestLine = latestEpisodeValue ? `Latest ${latestEpisodeValue}` : "";
   const heroFacts = [
     {
       label: "Format",
@@ -224,29 +228,26 @@ export default function SeriesHeader({
             </h1>
 
             <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] font-black uppercase tracking-[0.05em] text-white/80 sm:mt-3 sm:text-sm sm:gap-x-2.5 sm:gap-y-2 sm:tracking-[0.06em]">
-              <span>{creatorPresentation.value}</span>
-              {latestEpisodeValue ? (
-                <>
-                  <span className="text-white/45">
-                    /
-                  </span>
-                  <span>{latestEpisodeValue}</span>
-                </>
-              ) : null}
-              {creatorHref ? (
-                <>
-                  <span className="text-white/45">
-                    /
-                  </span>
+              {creatorLine ? (
+                creatorHref ? (
                   <Link
                     href={creatorHref}
                     className="font-black uppercase tracking-[0.04em] text-[#00E5FF] transition-colors hover:text-[#00E5FF]/80"
                     data-testid="series-creator-link"
                   >
-                    Creator
+                    {creatorLine}
                   </Link>
+                ) : (
+                  <span>{creatorLine}</span>
+                )
+              ) : null}
+              {creatorLine && latestLine ? (
+                <>
+                  <span className="text-white/45">·</span>
+                  <span>{latestLine}</span>
                 </>
               ) : null}
+              {!creatorLine && latestLine ? <span>{latestLine}</span> : null}
             </div>
 
             {summaryText ? (

@@ -1428,6 +1428,17 @@ test.describe("Public reading funnel", () => {
     });
     await expect(searchHeader).not.toContainText(/^18\+$/);
     await expect(searchFooter).not.toContainText(/^18\+$/);
+    for (const routePath of [
+      "/search?genre=Horror",
+      "/search?genre=Mystery",
+      "/search?format=novel",
+    ]) {
+      response = await page.goto(routePath, { waitUntil: "domcontentloaded" });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+      await expect(page.getByRole("link", { name: "Mature" }).first()).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+    }
 
     await expectNoRuntimeIssues("mature-filter-catalog-entry", runtimeIssues);
   });
@@ -1850,7 +1861,31 @@ test.describe("Public reading funnel", () => {
       "Top Pick novel / Ongoing Solar Wind Space Read more",
     );
 
+    response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Read moreRead more");
+
+    response = await page.goto("/rankings", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Read moreRead more");
+
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
+  });
+
+  test("series hero metadata keeps readable separators", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/series/series-001", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("main")).toContainText("By Mira Dane");
+    await expect(page.locator("main")).toContainText("Latest Chapter 3");
+    await expect(page.locator("main")).not.toContainText(/Mira Dane\/Chapter 3\/Creator/i);
+
+    await expectNoRuntimeIssues("/series/series-001 metadata separators", runtimeIssues);
   });
 
   test("support form renders and validates reply email for signed-out users", async ({

@@ -18,6 +18,11 @@ import {
   formatInstallmentCount,
   getStartReadingLabel,
 } from "../../lib/seriesFormatLabels";
+import {
+  formatTitleCardCreator,
+  formatTitleCardFormatStatus,
+  formatTitleCardGenres,
+} from "../../lib/titleCardText";
 import { cn } from "@/lib/utils";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
@@ -68,20 +73,16 @@ function getPrimaryGenres(genres, limit = 3) {
 
 function buildSeriesMeta(series) {
   const creatorName = resolveSeriesCreatorName(series);
-  const typeLabel = String(series?.type || "")
-    .trim()
-    .toLowerCase();
-  const episodeCount = Math.max(0, Number(series?.episodeCount || 0));
   const statusLabel = String(series?.status || "").trim();
 
   return [
-    creatorName,
-    typeLabel ? `${typeLabel.charAt(0).toUpperCase()}${typeLabel.slice(1)}` : "",
-    episodeCount > 0 ? formatInstallmentCount(series, episodeCount) : "",
+    formatTitleCardCreator(creatorName),
+    formatTitleCardFormatStatus(series?.type, statusLabel),
     statusLabel,
   ]
     .filter(Boolean)
-    .join(" / ");
+    .slice(0, 2)
+    .join(" · ");
 }
 
 function buildUpdatedLabel(series) {
@@ -302,9 +303,12 @@ function HomeSection({
         {items.map((series) => {
           const title = String(series?.title || "Story").trim();
           const creatorName = resolveSeriesCreatorName(series);
-          const meta = buildSeriesMeta(series);
-          const chips = getPrimaryGenres(series?.genres, 2);
-          const label = buildSeriesCardLabel(series, section);
+          const formatStatusLine = formatTitleCardFormatStatus(
+            series?.type,
+            series?.status,
+          );
+          const genreLine = formatTitleCardGenres(series?.genres, { limit: 3 });
+          const creatorLine = formatTitleCardCreator(creatorName);
 
           return (
             <Link
@@ -316,7 +320,8 @@ function HomeSection({
                 {series?.coverUrl ? (
                   <Image
                     src={series.coverUrl}
-                    alt={buildCoverAltText(series)}
+                    alt=""
+                    aria-hidden="true"
                     fill
                     sizes="(max-width: 768px) 45vw, 240px"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -325,39 +330,33 @@ function HomeSection({
                   <div className="h-full w-full bg-[linear-gradient(180deg,#171717,#0b0b0b)]" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-                <div className="absolute left-3 top-3 rounded-full border border-white/12 bg-black/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-white/82 backdrop-blur">
-                  {label}
-                </div>
               </div>
 
-              <div className="space-y-2 p-3 sm:p-4">
+              <div className="space-y-2.5 p-3 sm:p-4">
                 <div className="space-y-1">
                   <p className="line-clamp-2 text-[0.98rem] font-semibold leading-5 tracking-[-0.02em] text-white sm:text-[1.04rem]">
                     {title}
                   </p>
-                  {creatorName ? (
-                    <p className="line-clamp-1 text-xs text-white/55">
-                      {creatorName}
+                  {formatStatusLine ? (
+                    <p className="line-clamp-1 text-xs uppercase tracking-[0.12em] text-white/55">
+                      {formatStatusLine}
                     </p>
                   ) : null}
                 </div>
 
-                {chips.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {chips.map((chip) => (
-                      <span
-                        key={`${series.id}-${chip}`}
-                        className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-white/68"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
+                {genreLine ? (
+                  <p className="line-clamp-2 text-xs leading-5 text-white/68">
+                    {genreLine}
+                  </p>
                 ) : null}
 
-                {meta ? (
-                  <p className="line-clamp-1 text-xs text-white/45">{meta}</p>
+                {creatorLine ? (
+                  <p className="line-clamp-1 text-xs text-white/48">{creatorLine}</p>
                 ) : null}
+
+                <span className="inline-flex text-xs font-medium uppercase tracking-[0.12em] text-white/60">
+                  Read more
+                </span>
               </div>
             </Link>
           );
