@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import SeriesHeader from "./SeriesHeader";
 import EpisodeList from "./EpisodeList";
 import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
@@ -27,6 +27,7 @@ import {
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
+import { toURLSearchParams } from "../../lib/pageSearchParams";
 import { focusInteractiveTarget } from "../../lib/focusTarget";
 import {
   consumeCommerceSuccessForPath,
@@ -134,9 +135,9 @@ export default function SeriesPage({
   initialSeriesPayload = null,
   initialSeriesState = "unavailable",
   initialGateStatus = "OK",
+  initialSearchParams = null,
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const hasInitialSeriesPayload = hasSeriesPayload(initialSeriesPayload);
   const [data, setData] = useState(() =>
     hasInitialSeriesPayload ? initialSeriesPayload : null,
@@ -188,9 +189,13 @@ export default function SeriesPage({
     getProgress,
     loadProgress,
   } = useProgressStore();
+  const resolvedInitialSearchParams = useMemo(
+    () => toURLSearchParams(initialSearchParams),
+    [initialSearchParams],
+  );
   const routeAttribution = useMemo(
-    () => readPaymentAttributionFromSearchParams(searchParams),
-    [searchParams],
+    () => readPaymentAttributionFromSearchParams(resolvedInitialSearchParams),
+    [resolvedInitialSearchParams],
   );
 
   const series = data?.series || {};

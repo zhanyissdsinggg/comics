@@ -292,8 +292,9 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function SeriesRoutePage({ params }) {
+export default async function SeriesRoutePage({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = (await Promise.resolve(searchParams)) || {};
   const seriesId = String(resolvedParams?.id || "").trim();
   if (
     shouldBlockDemoContentInProduction() &&
@@ -334,6 +335,7 @@ export default async function SeriesRoutePage({ params }) {
                   initialSeriesPayload={routePayload?.payload || null}
                   initialSeriesState={routePayload?.state || "unavailable"}
                   initialGateStatus={routePayload?.gateReason || "OK"}
+                  initialSearchParams={resolvedSearchParams}
                 />
               </Suspense>
             </CouponProvider>

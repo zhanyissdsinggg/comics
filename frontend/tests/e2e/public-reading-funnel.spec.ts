@@ -58,6 +58,108 @@ const CATALOG = [
     ],
   },
   {
+    id: "series-002",
+    title: "Moonlight Sonata",
+    type: "comic",
+    status: "Completed",
+    adult: false,
+    description: "A concert pianist uncovers a family conspiracy hidden inside a final recital.",
+    shortDescription: "A concert pianist uncovers a family conspiracy hidden inside a final recital.",
+    synopsis: "A concert pianist uncovers a family conspiracy hidden inside a final recital.",
+    coverUrl: createPosterPlaceholder("Moonlight Sonata"),
+    bannerUrl: createBannerPlaceholder("Moonlight Sonata"),
+    genres: ["Drama", "Mystery"],
+    episodeCount: 3,
+    latestEpisodeId: "series-002e3",
+    updatedAt: "2026-04-16T12:00:00.000Z",
+    creator: {
+      label: "Elena Park",
+      type: "person",
+      slug: "elena-park-f1b201",
+      creatorId: "creator_elena_park",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_elena_park",
+        slug: "elena-park-f1b201",
+        name: "Elena Park",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-003",
+    title: "Shadow Protocol",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "A covert courier gets trapped between a vanished agent and a citywide surveillance dragnet.",
+    shortDescription: "A covert courier gets trapped between a vanished agent and a citywide surveillance dragnet.",
+    synopsis: "A covert courier gets trapped between a vanished agent and a citywide surveillance dragnet.",
+    coverUrl: createPosterPlaceholder("Shadow Protocol"),
+    bannerUrl: createBannerPlaceholder("Shadow Protocol"),
+    genres: ["Action", "Thriller"],
+    episodeCount: 3,
+    latestEpisodeId: "series-003e3",
+    updatedAt: "2026-04-17T12:00:00.000Z",
+    creator: {
+      label: "Aster Quinn",
+      type: "person",
+      slug: "aster-quinn-421f0a",
+      creatorId: "creator_aster_quinn",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_aster_quinn",
+        slug: "aster-quinn-421f0a",
+        name: "Aster Quinn",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-004",
+    title: "Cherry Blossom High",
+    type: "comic",
+    status: "Completed",
+    adult: false,
+    description: "A shy transfer student stumbles into one spring of confessions, festivals, and second chances.",
+    shortDescription: "A shy transfer student stumbles into one spring of confessions, festivals, and second chances.",
+    synopsis: "A shy transfer student stumbles into one spring of confessions, festivals, and second chances.",
+    coverUrl: createPosterPlaceholder("Cherry Blossom High"),
+    bannerUrl: createBannerPlaceholder("Cherry Blossom High"),
+    genres: ["Romance", "Comedy"],
+    episodeCount: 3,
+    latestEpisodeId: "series-004e3",
+    updatedAt: "2026-04-12T12:00:00.000Z",
+    creator: {
+      label: "Hana Seo",
+      type: "person",
+      slug: "hana-seo-b0a4d1",
+      creatorId: "creator_hana_seo",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_hana_seo",
+        slug: "hana-seo-b0a4d1",
+        name: "Hana Seo",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
     id: "series-005",
     title: "Dragon's Oath",
     type: "novel",
@@ -161,33 +263,33 @@ const CATALOG = [
   },
   {
     id: "series-009",
-    title: "Rocket Choir",
+    title: "Starfall Academy",
     type: "comic",
-    status: "Completed",
+    status: "Ongoing",
     adult: false,
-    description: "A washed-up band gets drafted to sing on a doomed space run.",
-    shortDescription: "A washed-up band gets drafted to sing on a doomed space run.",
-    synopsis: "A washed-up band gets drafted to sing on a doomed space run.",
-    coverUrl: createPosterPlaceholder("Rocket Choir"),
-    bannerUrl: createBannerPlaceholder("Rocket Choir"),
-    genres: ["Sci-Fi", "Comedy"],
-    episodeCount: 4,
-    latestEpisodeId: "series-009e4",
-    updatedAt: "2026-04-08T12:00:00.000Z",
+    description: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
+    shortDescription: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
+    synopsis: "A scholarship student finds out the academy's stars are hiding a dangerous secret.",
+    coverUrl: createPosterPlaceholder("Starfall Academy"),
+    bannerUrl: createBannerPlaceholder("Starfall Academy"),
+    genres: ["Fantasy", "School Life"],
+    episodeCount: 3,
+    latestEpisodeId: "series-009e3",
+    updatedAt: "2026-04-18T12:00:00.000Z",
     creator: {
-      label: "Northline Studio",
-      type: "studio",
-      slug: "northline-studio-c913e2",
-      creatorId: "creator_northline_studio",
+      label: "Naomi Vale",
+      type: "person",
+      slug: "naomi-vale-f7a3c1",
+      creatorId: "creator_naomi_vale",
       isFallback: false,
     },
     creatorCredits: [
       {
-        creatorId: "creator_northline_studio",
-        slug: "northline-studio-c913e2",
-        name: "Northline Studio",
-        type: "studio",
-        role: "studio",
+        creatorId: "creator_naomi_vale",
+        slug: "naomi-vale-f7a3c1",
+        name: "Naomi Vale",
+        type: "person",
+        role: "writer",
         isPrimary: true,
         sortOrder: 0,
       },
@@ -262,6 +364,74 @@ const CATALOG = [
       },
     ],
   },
+  {
+    id: "series-007",
+    title: "The Quiet Storm",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "A storm watcher returns home and finds the coast hiding more than bad weather.",
+    shortDescription: "A storm watcher returns home and finds the coast hiding more than bad weather.",
+    synopsis: "A storm watcher returns home and finds the coast hiding more than bad weather.",
+    coverUrl: createPosterPlaceholder("The Quiet Storm"),
+    bannerUrl: createBannerPlaceholder("The Quiet Storm"),
+    genres: ["Drama", "Mystery"],
+    episodeCount: 3,
+    latestEpisodeId: "series-007e3",
+    updatedAt: "2026-04-15T12:00:00.000Z",
+    creator: {
+      label: "Lena Shore",
+      type: "person",
+      slug: "lena-shore-d3f9ac",
+      creatorId: "creator_lena_shore",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_lena_shore",
+        slug: "lena-shore-d3f9ac",
+        name: "Lena Shore",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    id: "series-008",
+    title: "Apex Predator",
+    type: "comic",
+    status: "Ongoing",
+    adult: false,
+    description: "A rescue team lands on a hunting moon and realizes it was bait all along.",
+    shortDescription: "A rescue team lands on a hunting moon and realizes it was bait all along.",
+    synopsis: "A rescue team lands on a hunting moon and realizes it was bait all along.",
+    coverUrl: createPosterPlaceholder("Apex Predator"),
+    bannerUrl: createBannerPlaceholder("Apex Predator"),
+    genres: ["Action", "Sci-Fi"],
+    episodeCount: 3,
+    latestEpisodeId: "series-008e3",
+    updatedAt: "2026-04-19T12:00:00.000Z",
+    creator: {
+      label: "Kade Mercer",
+      type: "person",
+      slug: "kade-mercer-2f8b14",
+      creatorId: "creator_kade_mercer",
+      isFallback: false,
+    },
+    creatorCredits: [
+      {
+        creatorId: "creator_kade_mercer",
+        slug: "kade-mercer-2f8b14",
+        name: "Kade Mercer",
+        type: "person",
+        role: "writer",
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
 ] as const;
 
 const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
@@ -319,6 +489,102 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       releasedAt: "2026-04-09T00:00:00.000Z",
     },
   ],
+  "series-002": [
+    {
+      id: "series-002e1",
+      seriesId: "series-002",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-02T00:00:00.000Z",
+    },
+    {
+      id: "series-002e2",
+      seriesId: "series-002",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-09T00:00:00.000Z",
+    },
+    {
+      id: "series-002e3",
+      seriesId: "series-002",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-16T00:00:00.000Z",
+    },
+  ],
+  "series-003": [
+    {
+      id: "series-003e1",
+      seriesId: "series-003",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-03T00:00:00.000Z",
+    },
+    {
+      id: "series-003e2",
+      seriesId: "series-003",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-10T00:00:00.000Z",
+    },
+    {
+      id: "series-003e3",
+      seriesId: "series-003",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-17T00:00:00.000Z",
+    },
+  ],
+  "series-004": [
+    {
+      id: "series-004e1",
+      seriesId: "series-004",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-01T00:00:00.000Z",
+    },
+    {
+      id: "series-004e2",
+      seriesId: "series-004",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-08T00:00:00.000Z",
+    },
+    {
+      id: "series-004e3",
+      seriesId: "series-004",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-15T00:00:00.000Z",
+    },
+  ],
   "series-009": [
     {
       id: "series-009e1",
@@ -329,6 +595,26 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       previewFreePages: 3,
       ttfEligible: false,
       releasedAt: "2026-03-30T00:00:00.000Z",
+    },
+    {
+      id: "series-009e2",
+      seriesId: "series-009",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-06T00:00:00.000Z",
+    },
+    {
+      id: "series-009e3",
+      seriesId: "series-009",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-13T00:00:00.000Z",
     },
   ],
   "series-006": [
@@ -449,7 +735,86 @@ const SERIES_EPISODES: Record<string, Array<Record<string, unknown>>> = {
       releasedAt: "2026-04-17T00:00:00.000Z",
     },
   ],
+  "series-007": [
+    {
+      id: "series-007e1",
+      seriesId: "series-007",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-04T00:00:00.000Z",
+    },
+    {
+      id: "series-007e2",
+      seriesId: "series-007",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-11T00:00:00.000Z",
+    },
+    {
+      id: "series-007e3",
+      seriesId: "series-007",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-18T00:00:00.000Z",
+    },
+  ],
+  "series-008": [
+    {
+      id: "series-008e1",
+      seriesId: "series-008",
+      number: 1,
+      title: "Chapter 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-05T00:00:00.000Z",
+    },
+    {
+      id: "series-008e2",
+      seriesId: "series-008",
+      number: 2,
+      title: "Chapter 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-12T00:00:00.000Z",
+    },
+    {
+      id: "series-008e3",
+      seriesId: "series-008",
+      number: 3,
+      title: "Chapter 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+      releasedAt: "2026-04-19T00:00:00.000Z",
+    },
+  ],
 };
+
+const REAL_SERIES_ROUTE_SPECS = [
+  { id: "series-001", title: "The Last Kingdom", listLabel: "Chapters" },
+  { id: "series-002", title: "Moonlight Sonata", listLabel: "Chapters" },
+  { id: "series-003", title: "Shadow Protocol", listLabel: "Chapters" },
+  { id: "series-004", title: "Cherry Blossom High", listLabel: "Chapters" },
+  { id: "series-005", title: "Dragon's Oath", listLabel: "Episodes" },
+  { id: "series-006", title: "Neon Nights", listLabel: "Episodes" },
+  { id: "series-007", title: "The Quiet Storm", listLabel: "Chapters" },
+  { id: "series-008", title: "Apex Predator", listLabel: "Chapters" },
+  { id: "series-009", title: "Starfall Academy", listLabel: "Chapters" },
+  { id: "series-010", title: "Crimson Tide", listLabel: "Chapters" },
+  { id: "series-011", title: "Solar Wind", listLabel: "Episodes" },
+  { id: "series-012", title: "Midnight Heat", listLabel: "Chapters" },
+] as const;
 
 const CANONICAL_ROUTE_SPECS = [
   { path: "/", title: /Trending Comics, Novels, and Interactive Stories \| Gush/i, heading: /Solar Wind/i },
@@ -1159,6 +1524,83 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("#episode-series-011e3")).toContainText("Episode 3");
     await expect(page.locator("body")).not.toContainText(/Chapter 1|Chapter 2|Chapter 3/i);
     await expectNoRuntimeIssues("/series/series-011 terminology", runtimeIssues);
+  });
+
+  test("all real series routes render non-empty SSR detail content", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    for (const seriesSpec of REAL_SERIES_ROUTE_SPECS) {
+      const routePath = `/series/${seriesSpec.id}`;
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      await expect(
+        page.getByRole("heading", { level: 1, name: seriesSpec.title }),
+      ).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+      await expect(page.locator("main")).toContainText(seriesSpec.listLabel);
+
+      const readLinks = page.locator(`a[href^="/read/${seriesSpec.id}/"]`);
+      await expect(readLinks.first()).toBeVisible({
+        timeout: UI_TIMEOUT_MS,
+      });
+
+      const ssrOrder = await page.evaluate(() => {
+        const header = document.querySelector("body > header");
+        const main = document.querySelector("body > main");
+        const footer = document.querySelector("body > footer");
+        const mainText = (main?.textContent || "").replace(/\s+/g, " ").trim();
+        const bodyText = (document.body.textContent || "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        return {
+          hasTopLevelHeader: Boolean(header),
+          hasTopLevelMain: Boolean(main),
+          hasTopLevelFooter: Boolean(footer),
+          hasMainHeading: Boolean(main?.querySelector("h1")),
+          hasEntryLink: Boolean(main?.querySelector('a[href^="/read/"]')),
+          hasEntryList:
+            Boolean(main?.querySelector("[id^='episode-']")) ||
+            /chapters|episodes/i.test(mainText),
+          headerOnlyLayout:
+            !mainText ||
+            (!/read/i.test(mainText) && !/chapter|episode/i.test(mainText)),
+          headerIndex: Array.from(document.body.children).findIndex(
+            (node) => node.tagName === "HEADER",
+          ),
+          mainIndex: Array.from(document.body.children).findIndex(
+            (node) => node.tagName === "MAIN",
+          ),
+          footerIndex: Array.from(document.body.children).findIndex(
+            (node) => node.tagName === "FOOTER",
+          ),
+        };
+      });
+
+      expect(ssrOrder.hasTopLevelHeader, `${routePath} should keep the public header`).toBeTruthy();
+      expect(ssrOrder.hasTopLevelMain, `${routePath} should render top-level main`).toBeTruthy();
+      expect(ssrOrder.hasTopLevelFooter, `${routePath} should keep the public footer`).toBeTruthy();
+      expect(ssrOrder.hasMainHeading, `${routePath} should SSR an h1`).toBeTruthy();
+      expect(ssrOrder.hasEntryLink, `${routePath} should SSR at least one reader link`).toBeTruthy();
+      expect(ssrOrder.hasEntryList, `${routePath} should SSR a chapter or episode list`).toBeTruthy();
+      expect(ssrOrder.headerOnlyLayout, `${routePath} should not collapse to header/footer only`).toBeFalsy();
+      expect(ssrOrder.headerIndex, `${routePath} should keep header first`).toBeGreaterThanOrEqual(0);
+      expect(ssrOrder.mainIndex, `${routePath} should keep main after header`).toBeGreaterThan(
+        ssrOrder.headerIndex,
+      );
+      expect(ssrOrder.footerIndex, `${routePath} should keep footer after main`).toBeGreaterThan(
+        ssrOrder.mainIndex,
+      );
+    }
+
+    await expectNoRuntimeIssues("all-series-ssr-detail-content", runtimeIssues);
   });
 
   test("series pages keep header, main, and footer in canonical order", async ({

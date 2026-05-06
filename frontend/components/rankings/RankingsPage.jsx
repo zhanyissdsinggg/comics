@@ -390,14 +390,6 @@ export default function RankingsPage({
           appearance="dark"
           className="space-y-4"
         >
-          <div className="space-y-2">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-              Lists
-            </p>
-            <p className="text-sm font-semibold leading-6 text-white/72">
-              Switch between the lists readers are using right now.
-            </p>
-          </div>
           <div className="flex flex-wrap gap-2.5">
             {VIEWS.map((item) => (
               <button
@@ -572,9 +564,9 @@ export default function RankingsPage({
               {boardEntries.length > 0 ? (
                 <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
                   <RankingsSectionHeader
-                    eyebrow="Rankings"
-                    title="More in this list"
-                    description="More stories readers are opening this week."
+                    eyebrow="Trending"
+                    title="More stories this week"
+                    description="Readers are opening these next."
                   />
 
                   <div className="space-y-3">
