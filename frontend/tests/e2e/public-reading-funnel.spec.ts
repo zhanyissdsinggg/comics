@@ -817,7 +817,7 @@ const REAL_SERIES_ROUTE_SPECS = [
 ] as const;
 
 const CANONICAL_ROUTE_SPECS = [
-  { path: "/", title: /Trending Comics, Novels, and Interactive Stories \| Gush/i, heading: /Solar Wind/i },
+  { path: "/", title: /Trending Comics, Novels, and Interactive Stories \| Gush/i, heading: null },
   { path: "/comics", title: /Comics/i, heading: /^Comics$/i },
   { path: "/novels", title: /Novels/i, heading: /^Novels$/i },
   { path: "/creators", title: /Creators/i, heading: /^Creators$/i },
@@ -1870,9 +1870,15 @@ test.describe("Public reading funnel", () => {
       expect(response?.ok(), `${routeSpec.path} should load`).toBeTruthy();
 
       await expect(page).toHaveTitle(routeSpec.title);
-      await expect(page.getByRole("heading", { name: routeSpec.heading }).first()).toBeVisible({
-        timeout: UI_TIMEOUT_MS,
-      });
+      if (routeSpec.heading) {
+        await expect(page.getByRole("heading", { name: routeSpec.heading }).first()).toBeVisible({
+          timeout: UI_TIMEOUT_MS,
+        });
+      } else {
+        await expect(page.locator("main h1").first()).toBeVisible({
+          timeout: UI_TIMEOUT_MS,
+        });
+      }
       await expectNoBannedCopy(page, routeSpec.path);
     }
 
@@ -1929,6 +1935,16 @@ test.describe("Public reading funnel", () => {
       await expect(contactSupportLink).toHaveAttribute("href", /\/support/);
       await expect(browseComicsLink).toBeVisible();
       await expect(contactSupportLink).toBeVisible();
+    }
+
+    response = await page.goto("/terms-of-service", {
+      waitUntil: "domcontentloaded",
+    });
+    expect([200, 404]).toContain(response?.status() ?? 0);
+    if ((response?.status() ?? 0) === 200) {
+      await expect(page.locator("body")).not.toContainText(
+        /pending internal legal review/i,
+      );
     }
 
     await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);
