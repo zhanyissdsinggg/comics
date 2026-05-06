@@ -14,10 +14,10 @@ import {
 function isModifiedEvent(event) {
   return Boolean(
     event.metaKey ||
-    event.altKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.button !== 0,
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0,
   );
 }
 
@@ -33,6 +33,15 @@ function PortraitCard({
   interactionMode = "link",
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
+  const normalizedType = String(item?.seriesType || item?.type || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const normalizedStatus = String(item?.status || item?.statusLabel || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const formatStatusLine = [normalizedType, normalizedStatus]
+    .filter(Boolean)
+    .join(" / ");
   const progressPercent = Number(item.progressPercent || 0);
   const progressWidth = Math.max(
     0,
@@ -51,39 +60,19 @@ function PortraitCard({
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
   const normalizedMetaTokens = new Set(
     String(metaLine || "")
-      .split(/[\/·|,]/)
+      .split(/[\/|,·]/)
       .map((part) => part.trim().toLowerCase())
       .filter(Boolean),
   );
-  const genrePills = normalizeGenreList(rawGenreData).filter(
-    (genre) => !normalizedMetaTokens.has(String(genre || "").trim().toLowerCase()),
-  );
-  const visibleGenrePills = genrePills.slice(0, isCompact ? 2 : 2);
   const visiblePills = [];
 
-  if (coverMeta.badgeLabel) {
+  if (coverMeta.badgeLabel === "18+") {
     visiblePills.push({
       key: `${item?.id || item?.title || "series"}-badge-${coverMeta.badgeLabel}`,
       label: coverMeta.badgeLabel,
-      tone: coverMeta.badgeLabel === "18+" ? "danger" : "default",
+      tone: "danger",
     });
   }
-
-  visibleGenrePills.forEach((genre) => {
-    if (
-      visiblePills.some(
-        (pill) => pill.label.toLowerCase() === String(genre).toLowerCase(),
-      )
-    ) {
-      return;
-    }
-
-    visiblePills.push({
-      key: `${item?.id || item?.title || "series"}-genre-${genre}`,
-      label: genre,
-      tone: "default",
-    });
-  });
 
   const showGenrePills = visiblePills.length > 0;
   const rawDetailCopy =
@@ -111,6 +100,13 @@ function PortraitCard({
         ? rawDetailCopy
         : ""
       : rawDetailCopy;
+  const genreLine = normalizeGenreList(rawGenreData)
+    .filter(
+      (genre) =>
+        !normalizedMetaTokens.has(String(genre || "").trim().toLowerCase()),
+    )
+    .filter((genre) => String(genre || "").trim() !== "18+")
+    .join(" · ");
 
   const handleClick = (event) => {
     if (typeof onClick !== "function") {
@@ -151,18 +147,9 @@ function PortraitCard({
             fallbackVariant={coverFallbackVariant}
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
           />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent"
-          />
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]"
-          />
-          <div
-            className={cn(
-              "absolute inset-[1px]",
-              "border border-white/40",
-            )}
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]" />
+          <div className={cn("absolute inset-[1px]", "border border-white/40")} />
 
           {typeof item.progressPercent === "number" &&
           item.progressPercent > 0 ? (
@@ -182,7 +169,7 @@ function PortraitCard({
         )}
       >
         <div className="space-y-2">
-          {metaLine ? (
+          {formatStatusLine ? (
             <p
               className={cn(
                 "line-clamp-1 font-black uppercase tracking-[0.2em]",
@@ -190,16 +177,14 @@ function PortraitCard({
                 "text-white/55",
               )}
             >
-              {metaLine}
+              {formatStatusLine}
             </p>
           ) : null}
-            <p
-              className={cn(
-                "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
-                isCompact
-                  ? "text-[1.08rem] leading-5"
-                  : "text-[1.12rem] leading-6",
-                "text-white group-hover:text-white",
+          <p
+            className={cn(
+              "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
+              isCompact ? "text-[1.08rem] leading-5" : "text-[1.12rem] leading-6",
+              "text-white group-hover:text-white",
             )}
           >
             {item.title}
@@ -213,9 +198,7 @@ function PortraitCard({
                 key={pill.key}
                 className={cn(
                   "inline-flex items-center whitespace-nowrap rounded-full border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
-                  isCompact
-                    ? "px-2.5 py-1 text-[10px]"
-                    : "px-3 py-1 text-[11px]",
+                  isCompact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1 text-[11px]",
                   pill.tone === "danger"
                     ? "bg-[#FF4D8D] text-white"
                     : "bg-[#FFE500] text-black",
@@ -227,7 +210,19 @@ function PortraitCard({
           </div>
         ) : null}
 
-        {detailText ? (
+        {genreLine ? (
+          <p
+            className={cn(
+              "line-clamp-1 transition-colors",
+              isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
+              "text-white/60 group-hover:text-white/78",
+            )}
+          >
+            {genreLine}
+          </p>
+        ) : null}
+
+        {detailText && detailText !== genreLine ? (
           <p
             className={cn(
               "line-clamp-1 transition-colors",
@@ -251,12 +246,7 @@ function PortraitCard({
         >
           {typeof item.progressPercent === "number" &&
           item.progressPercent > 0 ? (
-            <p
-              className={cn(
-                "text-[11px] font-medium",
-                "text-white/45",
-              )}
-            >
+            <p className={cn("text-[11px] font-medium", "text-white/45")}>
               {Math.round(progressWidth)}% read
             </p>
           ) : showActionLabel ? (

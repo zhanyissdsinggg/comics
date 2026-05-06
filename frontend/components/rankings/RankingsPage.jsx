@@ -390,11 +390,14 @@ export default function RankingsPage({
           appearance="dark"
           className="space-y-4"
         >
-          <RankingsSectionHeader
-            eyebrow="Browse"
-            title="Pick a lane"
-            description=""
-          />
+          <div className="space-y-2">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+              Lists
+            </p>
+            <p className="text-sm font-semibold leading-6 text-white/72">
+              Switch between the lists readers are using right now.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2.5">
             {VIEWS.map((item) => (
               <button
@@ -494,7 +497,7 @@ export default function RankingsPage({
                     />
                     <div className="min-w-0">
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
-                        Featured
+                        {activeView.label}
                       </p>
                       <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-white sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
@@ -567,8 +570,12 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                  <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
-                  <RankingsSectionHeader eyebrow="More to Read" title="More to Read" description="" />
+                <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
+                  <RankingsSectionHeader
+                    eyebrow="Rankings"
+                    title="More in this list"
+                    description="More stories readers are opening this week."
+                  />
 
                   <div className="space-y-3">
                     {boardEntries.map((series) => (

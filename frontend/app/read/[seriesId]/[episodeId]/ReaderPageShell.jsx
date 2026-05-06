@@ -38,6 +38,15 @@ function ReaderShellFallback({ fallbackData }) {
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <div className="rounded-[28px] border-2 border-white/15 bg-[#080808] p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/55">
+            <span className="rounded-full border-2 border-white/12 bg-[#111111] px-3 py-1">
+              Reader loading
+            </span>
+            <span className="rounded-full border-2 border-white/12 bg-[#111111] px-3 py-1">
+              {seriesTitle}
+            </span>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3 text-sm text-white/72">
             {fallbackData?.previousEpisode?.href ? (
               <Link
@@ -70,6 +79,21 @@ function ReaderShellFallback({ fallbackData }) {
             Loading the full reader now. If it takes a second, you can still jump
             back to the series or move to the next entry from here.
           </p>
+
+          <div className="mt-4 flex flex-wrap gap-3 text-sm">
+            <Link
+              href={fallbackData?.backToSeriesHref || "/"}
+              className="inline-flex items-center rounded-full border-2 border-white/15 bg-[#111111] px-4 py-2 font-semibold text-white hover:border-white/25"
+            >
+              Back to series
+            </Link>
+            <Link
+              href="/support"
+              className="inline-flex items-center rounded-full border-2 border-white/15 bg-[#111111] px-4 py-2 font-semibold text-white hover:border-white/25"
+            >
+              Reader help
+            </Link>
+          </div>
         </div>
       </div>
     </main>

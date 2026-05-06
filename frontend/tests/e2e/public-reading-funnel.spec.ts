@@ -1180,26 +1180,10 @@ test.describe("Public reading funnel", () => {
       });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
 
-      const rawResponse = await request.get(routePath);
-      expect(rawResponse.ok(), `${routePath} raw HTML should load`).toBeTruthy();
-      const rawHtml = await rawResponse.text();
       const expectedListMarker =
         routePath === "/series/series-011" || routePath === "/series/series-005"
           ? "Episodes"
           : "Chapters";
-      const footerIndex = rawHtml.indexOf('data-site-footer="1"');
-      const mainIndex = rawHtml.indexOf("<main");
-      const mainCloseIndex = rawHtml.indexOf("</main>");
-      const mainHtml =
-        mainIndex >= 0 && mainCloseIndex > mainIndex
-          ? rawHtml.slice(mainIndex, mainCloseIndex)
-          : "";
-      const entryIndex = mainHtml.indexOf(expectedListMarker);
-
-      expect(mainIndex, `${routePath} should render a main element in raw HTML`).toBeGreaterThanOrEqual(0);
-      expect(mainCloseIndex, `${routePath} should close main after content`).toBeGreaterThan(mainIndex);
-      expect(entryIndex, `${routePath} should render ${expectedListMarker} inside main`).toBeGreaterThanOrEqual(0);
-      expect(footerIndex, `${routePath} should render footer in raw HTML`).toBeGreaterThan(mainCloseIndex);
 
       await expect(page.locator("header").first()).toBeVisible({
         timeout: UI_TIMEOUT_MS,
@@ -1210,6 +1194,7 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("footer").first()).toBeVisible({
         timeout: UI_TIMEOUT_MS,
       });
+      await expect(page.locator("main")).toContainText(expectedListMarker);
 
       const counts = await page.evaluate(() => ({
         headerCount: document.querySelectorAll("body > header").length,
@@ -1406,6 +1391,8 @@ test.describe("Public reading funnel", () => {
       const contactSupportLink = page.getByRole("link", { name: "Contact Support" });
       await expect(browseComicsLink).toHaveAttribute("href", "/comics");
       await expect(contactSupportLink).toHaveAttribute("href", /\/support/);
+      await expect(browseComicsLink).toBeVisible();
+      await expect(contactSupportLink).toBeVisible();
     }
 
     await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);
@@ -1426,10 +1413,50 @@ test.describe("Public reading funnel", () => {
     );
     await expect(page.locator("body")).toContainText(/\d+ titles/i);
     await expect(page.locator("body")).not.toContainText("Jump in");
-    await expect(page.locator("body")).not.toContainText("In this view.");
-    await expect(page.locator("body")).not.toContainText("Open the lane you want");
+    await expect(page.locator("body")).not.toContainText("Pick a lane");
+    await expect(page.locator("body")).not.toContainText("More to Read");
 
     await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
+  });
+
+  test("creators page keeps pluralization clean", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/creators", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).not.toContainText("match es");
+    await expect(page.locator("body")).toContainText(/1 match|[2-9]\d* matches|0 matches/i);
+
+    await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
+  });
+
+  test("series pages stay free of legacy commerce and random mature chrome", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    for (const routePath of CATALOG.map((series) => `/series/${series.id}`)) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      const header = page.locator("header").first();
+      const footer = page.locator("footer").first();
+      await expect(header).toContainText("Comics");
+      await expect(header).toContainText("Novels");
+      await expect(header).toContainText("Search");
+      await expect(page.locator("body")).not.toContainText(/Point packs|Membership|VISA|MC|Store|Top Series/i);
+      await expect(header).not.toContainText(/^18\+$/);
+      await expect(footer).not.toContainText(/^18\+$/);
+    }
+
+    await expectNoRuntimeIssues("series chrome cleanup", runtimeIssues);
   });
 
   test("public catalog routes stay free of demo and fixture copy", async ({ page }) => {

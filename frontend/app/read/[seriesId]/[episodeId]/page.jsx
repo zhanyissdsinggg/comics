@@ -22,6 +22,9 @@ import { loadReaderSeoPayload } from "../../../../lib/storefrontSeo";
 import ReaderPageShell from "./ReaderPageShell";
 
 export const revalidate = 300;
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);

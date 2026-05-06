@@ -85,8 +85,15 @@ const TERMS_SECTIONS = [
   {
     title: "Governing law",
     paragraphs: [
-      "These Terms will be updated with the governing law and venue once the operating jurisdiction is finalized.",
+      "Governing law and venue are pending internal legal review before launch. We will publish the final jurisdiction here before paid commerce goes live.",
       "Until then, any mandatory consumer protection rules that apply where you live will still apply where required by law.",
+    ],
+  },
+  {
+    title: "Mature content",
+    paragraphs: [
+      "Some titles may be marked Mature or 18+. Access to those titles can require sign-in, age confirmation, or device-level visibility settings before the title opens.",
+      "Do not try to bypass age gates, regional access limits, or mature visibility controls.",
     ],
   },
 ];

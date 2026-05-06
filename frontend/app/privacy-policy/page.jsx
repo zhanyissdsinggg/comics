@@ -41,6 +41,7 @@ const PRIVACY_SECTIONS = [
         : "Run the site, sign readers in, and support future payment features when they are enabled.",
       "Fix bugs, prevent abuse, and keep the product secure.",
       "Personalize recommendations, reading tools, and product messages.",
+      "Apply mature-content settings, age checks, and device-level visibility choices when a title is marked 18+.",
       "Meet legal obligations, enforce our Terms, and respond to valid requests from authorities.",
     ],
   },
@@ -77,6 +78,13 @@ const PRIVACY_SECTIONS = [
     title: "Children",
     paragraphs: [
       "The site is not directed to children under the age required by applicable law in their jurisdiction. If you believe a child provided personal information without proper consent, contact us so we can review it.",
+    ],
+  },
+  {
+    title: "Mature content controls",
+    paragraphs: [
+      "If a title is marked 18+, we may store age-gate confirmation and mature visibility settings on your device or account so the site can respect your current reading preferences.",
+      "Hide mature history settings only affect how 18+ activity appears on the device you are using unless we explicitly say an account-level setting applies.",
     ],
   },
   {
