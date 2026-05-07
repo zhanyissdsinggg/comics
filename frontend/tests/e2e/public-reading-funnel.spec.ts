@@ -1901,6 +1901,10 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText(
       "Finished Horror Crimson Tide Supernatural Crimson Tide comic Completed",
     );
+    await expect(page.locator("main")).toContainText("Crimson Tide");
+    await expect(page.locator("main")).toContainText("Comic / Ongoing");
+    await expect(page.locator("main")).toContainText("By Rook Hollow Studio");
+    await expect(page.locator("main")).toContainText("Open series");
 
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });
@@ -1914,9 +1918,9 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.locator("main")).toContainText("By Mira Dane");
-    await expect(page.locator("main")).toContainText("Latest Chapter 3");
+    await expect(page.locator("main")).toContainText("By Mira Dane · Latest Chapter 3");
     await expect(page.locator("main")).not.toContainText(/Mira Dane\/Chapter 3\/Creator/i);
+    await expect(page.locator("main")).not.toContainText(/Mira Dane·Latest/i);
 
     await expectNoRuntimeIssues("/series/series-001 metadata separators", runtimeIssues);
   });
@@ -2045,6 +2049,13 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("body")).not.toContainText(
         /laws that apply to .* where it is established/i,
       );
+      await expect(
+        page.getByRole("link", { name: "Email legal team" }),
+      ).toHaveAttribute("href", /^mailto:/);
+      await expect(
+        page.getByRole("link", { name: "View privacy policy" }),
+      ).toHaveAttribute("href", "/privacy-policy");
+      await expect(page.locator("body")).not.toContainText("Email legal Privacy");
     }
 
     await expectNoRuntimeIssues("hidden-production-routes", runtimeIssues);
@@ -2069,8 +2080,45 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText("More to Read");
     await expect(page.locator("body")).not.toContainText(/^Titles$/);
     await expect(page.locator("body")).not.toContainText("More stories this week");
+    await expect(page.locator("main")).not.toContainText(
+      /Finished\s+Crimson Tide[\s\S]*Comic \/ Ongoing/i,
+    );
+    await expect(page.locator("main")).not.toContainText(
+      /Top Pick\s+Solar Wind[\s\S]*Novel \/ Ongoing/i,
+    );
 
     await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
+  });
+
+  test("legal contact areas render readable links", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    let response = await page.goto("/privacy-policy", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("link", { name: "Email privacy team" }),
+    ).toHaveAttribute("href", /^mailto:/);
+    await expect(
+      page.getByRole("link", { name: "Contact support" }),
+    ).toHaveAttribute("href", "/support");
+    await expect(page.locator("body")).not.toContainText("Email privacy Support");
+
+    response = await page.goto("/terms-of-service", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("link", { name: "Email legal team" }),
+    ).toHaveAttribute("href", /^mailto:/);
+    await expect(
+      page.getByRole("link", { name: "View privacy policy" }),
+    ).toHaveAttribute("href", "/privacy-policy");
+    await expect(page.locator("body")).not.toContainText("Email legal Privacy");
+
+    await expectNoRuntimeIssues("legal-contact-links", runtimeIssues);
   });
 
   test("creators page keeps pluralization clean", async ({ page }) => {

@@ -205,18 +205,18 @@ export default function TermsOfServicePage() {
             title="Contact."
             actions={
               <>
-              <a
-                href={`mailto:${siteConfig.legalEmail}`}
-                className={storefrontPrimaryButtonClass}
-              >
-                Email legal
-              </a>
-              <Link
-                href="/privacy-policy"
-                className={storefrontSecondaryButtonClass}
-              >
-                Privacy
-              </Link>
+                <a
+                  href={`mailto:${siteConfig.legalEmail}`}
+                  className={storefrontPrimaryButtonClass}
+                >
+                  Email legal team
+                </a>
+                <Link
+                  href="/privacy-policy"
+                  className={storefrontSecondaryButtonClass}
+                >
+                  View privacy policy
+                </Link>
               </>
             }
           />

@@ -91,19 +91,6 @@ function getFeaturedScore(series) {
   );
 }
 
-function getSeriesBadge(series) {
-  if (normalizeStatus(series?.status) === "completed") {
-    return "Finished";
-  }
-  if (isRecentlyUpdated(series, 14)) {
-    return "Updated Today";
-  }
-  if (hasReaderFriendlyStart(series)) {
-    return "Top Pick";
-  }
-  return "";
-}
-
 function normalizeView(initialSearchParams = {}) {
   const requestedView = getSearchParam(initialSearchParams, "view", "featured");
   if (VIEWS.some((item) => item.id === requestedView)) {
@@ -319,6 +306,7 @@ export default function RankingsPage({
     [activeView.id, seriesList],
   );
   const leadEntry = curatedSeries[0] || null;
+  const leadMeta = leadEntry ? getSeriesMeta(leadEntry) : null;
   const supportingEntries = curatedSeries.slice(1, 3);
   const boardEntries = curatedSeries.slice(3, 12);
   const heroStats = [
@@ -463,10 +451,10 @@ export default function RankingsPage({
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}
                       label={leadEntry.title}
-                      eyebrow="Trending"
-                      badge={getSeriesBadge(leadEntry)}
-                      genres={leadEntry.genres}
-                      seriesType={leadEntry.type}
+                      eyebrow=""
+                      badge=""
+                      genres={[]}
+                      seriesType=""
                       decorative
                       fallbackVariant="minimal-card"
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
@@ -475,21 +463,24 @@ export default function RankingsPage({
                       <h2 className="mt-2.5 text-[1.65rem] font-black uppercase tracking-[-0.05em] text-white sm:mt-3 sm:text-4xl">
                         {leadEntry.title}
                       </h2>
-                      {getSeriesMeta(leadEntry).formatStatus ? (
+                      {leadMeta?.formatStatus ? (
                         <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-white/60">
-                          {getSeriesMeta(leadEntry).formatStatus}
+                          {leadMeta.formatStatus}
                         </p>
                       ) : null}
-                      {getSeriesMeta(leadEntry).genres ? (
+                      {leadMeta?.genres ? (
                         <p className="mt-2 text-sm font-semibold text-white/72">
-                          {getSeriesMeta(leadEntry).genres}
+                          {leadMeta.genres}
                         </p>
                       ) : null}
-                      {getSeriesMeta(leadEntry).creator ? (
+                      {leadMeta?.creator ? (
                         <p className="mt-2 text-sm font-semibold text-white/52">
-                          {getSeriesMeta(leadEntry).creator}
+                          {leadMeta.creator}
                         </p>
                       ) : null}
+                      <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
+                        Open series
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -497,57 +488,59 @@ export default function RankingsPage({
 
               {supportingEntries.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-                  {supportingEntries.map((series) => (
-                    <Link
-                      key={series.id}
-                      href={`/series/${encodeURIComponent(series.id)}`}
-                      onClick={(event) =>
-                        handleSeriesLinkClick(
-                          event,
-                          series.id,
-                          "FEATURED_SUPPORTING",
-                      )
-                      }
+                  {supportingEntries.map((series) => {
+                    const seriesMeta = getSeriesMeta(series);
+
+                    return (
+                      <Link
+                        key={series.id}
+                        href={`/series/${encodeURIComponent(series.id)}`}
+                        onClick={(event) =>
+                          handleSeriesLinkClick(
+                            event,
+                            series.id,
+                            "FEATURED_SUPPORTING",
+                          )
+                        }
                         className="group rounded-[28px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 sm:p-4"
-                      aria-label={`View ${series.title}`}
-                    >
-                      <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-white sm:text-2xl">
-                        {series.title}
-                      </h3>
-                      <Cover
-                      tone={series.coverTone}
-                      coverUrl={series.coverUrl}
-                      label={series.title}
-                      eyebrow={
-                        resolveSeriesCreatorName(series) || "Trending"
-                      }
-                      badge={getSeriesBadge(series)}
-                      genres={series.genres}
-                      seriesType={series.type}
-                      decorative
-                      fallbackVariant="minimal-card"
-                      className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
-                    />
-                      {getSeriesMeta(series).formatStatus ? (
-                        <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-white/60">
-                          {getSeriesMeta(series).formatStatus}
+                        aria-label={`View ${series.title}`}
+                      >
+                        <h3 className="mt-2 text-[1.35rem] font-black uppercase tracking-[-0.05em] text-white sm:text-2xl">
+                          {series.title}
+                        </h3>
+                        <Cover
+                          tone={series.coverTone}
+                          coverUrl={series.coverUrl}
+                          label={series.title}
+                          eyebrow=""
+                          badge=""
+                          genres={[]}
+                          seriesType=""
+                          decorative
+                          fallbackVariant="minimal-card"
+                          className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
+                        />
+                        {seriesMeta.formatStatus ? (
+                          <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-white/60">
+                            {seriesMeta.formatStatus}
+                          </p>
+                        ) : null}
+                        {seriesMeta.genres ? (
+                          <p className="mt-2 text-sm font-semibold text-white/72">
+                            {seriesMeta.genres}
+                          </p>
+                        ) : null}
+                        {seriesMeta.creator ? (
+                          <p className="mt-2 text-sm font-semibold text-white/52">
+                            {seriesMeta.creator}
+                          </p>
+                        ) : null}
+                        <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
+                          Open series
                         </p>
-                      ) : null}
-                      {getSeriesMeta(series).genres ? (
-                        <p className="mt-2 text-sm font-semibold text-white/72">
-                          {getSeriesMeta(series).genres}
-                        </p>
-                      ) : null}
-                      {getSeriesMeta(series).creator ? (
-                        <p className="mt-2 text-sm font-semibold text-white/52">
-                          {getSeriesMeta(series).creator}
-                        </p>
-                      ) : null}
-                      <p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-white/60">
-                        Open series
-                      </p>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               ) : null}
 
@@ -560,59 +553,61 @@ export default function RankingsPage({
                   />
 
                   <div className="space-y-3">
-                    {boardEntries.map((series) => (
-                      <Link
-                        key={series.id}
-                        href={`/series/${encodeURIComponent(series.id)}`}
-                        onClick={(event) =>
-                          handleSeriesLinkClick(
-                            event,
-                            series.id,
-                            "FEATURED_LIST",
-                          )
-                        }
-                        className="flex w-full items-center gap-4 rounded-[24px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25"
-                        aria-label={`View ${series.title}`}
-                      >
-                        <Cover
-                          tone={series.coverTone}
-                          coverUrl={series.coverUrl}
-                          label={series.title}
-                          eyebrow={
-                            resolveSeriesCreatorName(series) || "Trending"
+                    {boardEntries.map((series) => {
+                      const seriesMeta = getSeriesMeta(series);
+
+                      return (
+                        <Link
+                          key={series.id}
+                          href={`/series/${encodeURIComponent(series.id)}`}
+                          onClick={(event) =>
+                            handleSeriesLinkClick(
+                              event,
+                              series.id,
+                              "FEATURED_LIST",
+                            )
                           }
-                          badge={getSeriesBadge(series)}
-                          genres={series.genres}
-                          seriesType={series.type}
-                          decorative
-                          fallbackVariant="minimal-card"
-                          className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-base font-black uppercase tracking-[-0.02em] text-white">
-                            {series.title}
-                          </p>
-                          {getSeriesMeta(series).formatStatus ? (
-                            <p className="mt-1 text-xs font-medium text-white/58">
-                              {getSeriesMeta(series).formatStatus}
+                          className="flex w-full items-center gap-4 rounded-[24px] border-2 border-white/15 bg-black p-3 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25"
+                          aria-label={`View ${series.title}`}
+                        >
+                          <Cover
+                            tone={series.coverTone}
+                            coverUrl={series.coverUrl}
+                            label={series.title}
+                            eyebrow=""
+                            badge=""
+                            genres={[]}
+                            seriesType=""
+                            decorative
+                            fallbackVariant="minimal-card"
+                            className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-base font-black uppercase tracking-[-0.02em] text-white">
+                              {series.title}
                             </p>
-                          ) : null}
-                          {getSeriesMeta(series).genres ? (
-                            <p className="mt-1 truncate text-xs font-medium text-white/46">
-                              {getSeriesMeta(series).genres}
-                            </p>
-                          ) : null}
-                          {getSeriesMeta(series).creator ? (
-                            <p className="mt-1 truncate text-xs font-medium text-white/40">
-                              {getSeriesMeta(series).creator}
-                            </p>
-                          ) : null}
-                        </div>
-                        <span className="hidden rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] sm:inline-flex">
-                          Open series
-                        </span>
-                      </Link>
-                    ))}
+                            {seriesMeta.formatStatus ? (
+                              <p className="mt-1 text-xs font-medium text-white/58">
+                                {seriesMeta.formatStatus}
+                              </p>
+                            ) : null}
+                            {seriesMeta.genres ? (
+                              <p className="mt-1 truncate text-xs font-medium text-white/46">
+                                {seriesMeta.genres}
+                              </p>
+                            ) : null}
+                            {seriesMeta.creator ? (
+                              <p className="mt-1 truncate text-xs font-medium text-white/40">
+                                {seriesMeta.creator}
+                              </p>
+                            ) : null}
+                          </div>
+                          <span className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                            Open series
+                          </span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </section>
               ) : null}

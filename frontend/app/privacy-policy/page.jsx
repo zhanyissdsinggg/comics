@@ -1,3 +1,4 @@
+import Link from "next/link";
 import EditorialHero from "../../components/common/EditorialHero";
 import {
   StorefrontDesk,
@@ -174,18 +175,18 @@ export default function PrivacyPolicyPage() {
             title="Contact."
             actions={
               <>
-              <a
-                href={`mailto:${siteConfig.privacyEmail}`}
-                className={storefrontPrimaryButtonClass}
-              >
-                Email privacy
-              </a>
-              <a
-                href={`mailto:${siteConfig.supportEmail}`}
-                className={storefrontSecondaryButtonClass}
-              >
-                Support
-              </a>
+                <a
+                  href={`mailto:${siteConfig.privacyEmail}`}
+                  className={storefrontPrimaryButtonClass}
+                >
+                  Email privacy team
+                </a>
+                <Link
+                  href="/support"
+                  className={storefrontSecondaryButtonClass}
+                >
+                  Contact support
+                </Link>
               </>
             }
           />

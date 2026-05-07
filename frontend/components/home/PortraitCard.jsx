@@ -6,9 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Cover from "../common/Cover";
 import { cn } from "@/lib/utils";
-import {
-  getCoverCardMeta,
-} from "../../lib/coverPresentation";
+import { getCoverCardMeta } from "../../lib/coverPresentation";
 import {
   formatTitleCardFormatStatus,
   formatTitleCardGenres,
@@ -58,7 +56,7 @@ function PortraitCard({
   const rawGenreData = hasItemGenres ? item.genres : coverMeta.genres;
   const normalizedMetaTokens = new Set(
     String(metaLine || "")
-      .split(/[\/|,·路]/)
+      .split(/[\/|,·]/)
       .map((part) => part.trim().toLowerCase())
       .filter(Boolean),
   );
@@ -114,9 +112,9 @@ function PortraitCard({
             coverUrl={item.coverUrl}
             label={item.title}
             eyebrow={metaLine}
-            badge={item.badge}
-            genres={item.genres}
-            seriesType={item.seriesType || item.type}
+            badge=""
+            genres={[]}
+            seriesType=""
             fallbackVariant={coverFallbackVariant}
             decorative
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
