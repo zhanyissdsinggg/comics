@@ -358,6 +358,8 @@ export default function SupportPage() {
   const fieldClass =
     "mt-2 w-full rounded-[22px] border-2 border-white/15 bg-black px-4 py-3.5 text-sm font-semibold text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 placeholder:text-white/35 focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15";
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
+  const topicCardClass =
+    "rounded-[22px] border-2 bg-black p-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
   const supportHeroStats = [
     {
       label: "Replies",
@@ -503,41 +505,63 @@ export default function SupportPage() {
                     Choose the issue type and the best reply email for this request.
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="support-topic" className={fieldLabelClass}>
-                        Issue type
-                      </label>
-                      <select
+                    <div className="sm:col-span-2">
+                      <span className={fieldLabelClass}>Issue type</span>
+                      <div
                         id="support-topic"
-                        value={activeTopic}
-                        onChange={(event) => {
-                          const nextPreset = getSupportTopicPreset(
-                            event.target.value,
-                          );
-                          setActiveTopic(event.target.value);
-                          setSuccessState(null);
-
-                          if (nextPreset) {
-                            setSubject((current) =>
-                              current.trim() ? current : nextPreset.subject || "",
-                            );
-                            setMessage((current) => {
-                              if (!isAutofilledSupportMessage(current)) {
-                                return current;
-                              }
-                              return nextPreset.draft || "";
-                            });
-                          }
-                        }}
-                        className={fieldClass}
+                        role="radiogroup"
+                        aria-label="Issue type"
+                        className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
                       >
-                        <option value="">Choose a topic</option>
-                        {SUPPORT_TOPICS.map((preset) => (
-                          <option key={preset.id} value={preset.id}>
-                            {preset.title}
-                          </option>
-                        ))}
-                      </select>
+                        {SUPPORT_TOPICS.map((preset) => {
+                          const active = activeTopic === preset.id;
+                          return (
+                            <label
+                              key={preset.id}
+                              className={`${topicCardClass} ${
+                                active
+                                  ? "border-[#00E5FF] text-white"
+                                  : "border-white/15 text-white/72 hover:border-white/30"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="support-topic"
+                                value={preset.id}
+                                checked={active}
+                                onChange={(event) => {
+                                  const nextPreset = getSupportTopicPreset(
+                                    event.target.value,
+                                  );
+                                  setActiveTopic(event.target.value);
+                                  setSuccessState(null);
+
+                                  if (nextPreset) {
+                                    setSubject((current) =>
+                                      current.trim()
+                                        ? current
+                                        : nextPreset.subject || "",
+                                    );
+                                    setMessage((current) => {
+                                      if (!isAutofilledSupportMessage(current)) {
+                                        return current;
+                                      }
+                                      return nextPreset.draft || "";
+                                    });
+                                  }
+                                }}
+                                className="sr-only"
+                              />
+                              <span className="block text-sm font-black uppercase tracking-[0.04em] text-white">
+                                {preset.title}
+                              </span>
+                              <span className="mt-2 block text-sm leading-6 text-inherit">
+                                {preset.description}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div>

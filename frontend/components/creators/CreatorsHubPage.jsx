@@ -439,47 +439,57 @@ export default function CreatorsHubPage({
               />
             </label>
 
-            <div
-              role="group"
-              aria-label="Creator type filters"
-              className="flex flex-wrap gap-2"
-            >
-              {roleFilters.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveRole(item.id)}
-                  className={filterButtonClass(activeRole === item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/42">
+                Profile type
+              </p>
+              <div
+                role="group"
+                aria-label="Creator type filters"
+                className="flex flex-wrap gap-2"
+              >
+                {roleFilters.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveRole(item.id)}
+                    className={filterButtonClass(activeRole === item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {genreOptions.length > 0 ? (
-            <div
-              role="group"
-              aria-label="Creator genre filters"
-              className="flex flex-wrap gap-2"
-            >
-              <button
-                type="button"
-                onClick={() => setActiveGenre("All")}
-                className={filterButtonClass(activeGenre === "All")}
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/42">
+                Genres
+              </p>
+              <div
+                role="group"
+                aria-label="Creator genre filters"
+                className="flex flex-wrap gap-2"
               >
-                All
-              </button>
-              {genreOptions.map((genre) => (
                 <button
-                  key={genre}
                   type="button"
-                  onClick={() => setActiveGenre(genre)}
-                  className={filterButtonClass(activeGenre === genre)}
+                  onClick={() => setActiveGenre("All")}
+                  className={filterButtonClass(activeGenre === "All")}
                 >
-                  {genre}
+                  All
                 </button>
-              ))}
+                {genreOptions.map((genre) => (
+                  <button
+                    key={genre}
+                    type="button"
+                    onClick={() => setActiveGenre(genre)}
+                    className={filterButtonClass(activeGenre === genre)}
+                  >
+                    {genre}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : null}
         </SurfacePanel>

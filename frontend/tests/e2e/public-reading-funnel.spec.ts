@@ -2036,7 +2036,15 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.getByText("Choose the issue type and the best reply email for this request."),
     ).toBeVisible();
-    await expect(page.getByLabel("Issue type")).toBeVisible();
+    await expect(
+      page.locator('[role="radiogroup"][aria-label="Issue type"]'),
+    ).toBeVisible();
+    await expect(page.getByText("Billing & purchases")).toBeVisible();
+    await expect(page.getByText("Login & account")).toBeVisible();
+    await expect(page.getByText("Reader issue")).toBeVisible();
+    await expect(page.getByText("Mature content access")).toBeVisible();
+    await expect(page.getByText("Content report")).toBeVisible();
+    await expect(page.getByRole("radio", { name: /Other/i })).toBeVisible();
     await expect(page.getByLabel("Reply email")).toBeVisible();
     await expect(page.getByText("Request details")).toBeVisible();
     await expect(
@@ -2046,8 +2054,8 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByLabel("Subject")).toBeVisible();
     await expect(page.getByLabel("Message")).toBeVisible();
     await expect(page.getByRole("link", { name: "Email backup" })).toBeVisible();
-    await expect(page.locator("#support-topic")).toContainText("Other");
-    await page.selectOption("#support-topic", "billing");
+    await expect(page.locator("body")).not.toContainText("Submit Email backup");
+    await page.getByText("Billing & purchases", { exact: true }).click();
     await page.fill("#support-subject", "Need help");
     await page.fill("#support-message", "I need a billing receipt.");
     await page.click("button[type='submit']");
@@ -2338,9 +2346,11 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.locator('[role="group"][aria-label="Creator type filters"]'),
     ).toBeVisible();
+    await expect(page.locator("main")).toContainText("Profile type");
     await expect(
       page.locator('[role="group"][aria-label="Creator genre filters"]'),
     ).toBeVisible();
+    await expect(page.locator("main")).toContainText("Genres");
 
     await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
   });
