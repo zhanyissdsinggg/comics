@@ -608,7 +608,7 @@ export default async function Page({ searchParams }) {
           (Date.parse(left?.updatedAt || 0) || 0),
       ),
     ),
-    6,
+    4,
     emptyTrendingIds,
   );
   const emptyCompleted = takeUniqueSeries(
@@ -681,24 +681,30 @@ export default async function Page({ searchParams }) {
 
           {showDefaultShelves ? (
             <div className="space-y-10">
-              <ShelfSection
-                title="Trending titles"
-                ctaHref="/rankings"
-                ctaLabel="See all"
-                items={emptyTrending}
-              />
-              <ShelfSection
-                title="New updates"
-                ctaHref="/search?status=ongoing"
-                ctaLabel="Browse all"
-                items={emptyUpdates}
-              />
-              <ShelfSection
-                title="Completed reads"
-                ctaHref="/search?status=completed"
-                ctaLabel="More finished series"
-                items={emptyCompleted}
-              />
+              <div data-testid="search-default-trending">
+                <ShelfSection
+                  title="Trending titles"
+                  ctaHref="/rankings"
+                  ctaLabel="See all"
+                  items={emptyTrending}
+                />
+              </div>
+              <div data-testid="search-default-updates">
+                <ShelfSection
+                  title="New updates"
+                  ctaHref="/search?status=ongoing"
+                  ctaLabel="Browse all"
+                  items={emptyUpdates}
+                />
+              </div>
+              <div data-testid="search-default-completed">
+                <ShelfSection
+                  title="Completed reads"
+                  ctaHref="/search?status=completed"
+                  ctaLabel="More finished series"
+                  items={emptyCompleted}
+                />
+              </div>
             </div>
           ) : isMatureGenreActive && !includeAdult ? (
             <MatureCatalogState className="rounded-[24px]" browseHref="/search" />

@@ -542,6 +542,14 @@ export default function AccountPage({ initialSignedIn = false }) {
       ? "Orders, plans, support"
       : "Settings"
     : "Reset your password or contact support.";
+  const signedOutSignInHref = "/account?openLogin=1&returnTo=%2Faccount";
+  const signedOutCreateAccountHref =
+    "/account?openLogin=1&mode=register&returnTo=%2Faccount";
+  const signedOutResetPasswordHref = "/auth/reset";
+  const signedOutSupportHref = buildSupportPath({
+    topic: "account",
+    context: "Account help",
+  });
 
   if (!viewerSignedIn) {
     return (
@@ -558,20 +566,18 @@ export default function AccountPage({ initialSignedIn = false }) {
               stats={accountHeroStats}
               actions={
                 <>
-                  <button
-                    type="button"
-                    onClick={openAuthPrompt}
-                    className={primaryButtonClass}
+                  <a
+                    href={signedOutSignInHref}
+                    className={`${primaryButtonClass} no-underline`}
                   >
                     Sign in
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openRegisterPrompt}
-                    className={secondaryButtonClass}
+                  </a>
+                  <a
+                    href={signedOutCreateAccountHref}
+                    className={`${secondaryButtonClass} no-underline`}
                   >
                     Create account
-                  </button>
+                  </a>
                 </>
               }
             />
@@ -596,29 +602,20 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => router.push("/auth/reset")}
-                  className={secondaryButtonClass}
+              <nav aria-label="Account help" className="flex flex-col gap-3">
+                <a
+                  href={signedOutResetPasswordHref}
+                  className={`${secondaryButtonClass} no-underline`}
                 >
                   Reset password
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      buildSupportPath({
-                        topic: "account",
-                        context: "Account help",
-                      }),
-                    )
-                  }
-                  className={secondaryButtonClass}
+                </a>
+                <a
+                  href={signedOutSupportHref}
+                  className={`${secondaryButtonClass} no-underline`}
                 >
                   Support
-                </button>
-              </div>
+                </a>
+              </nav>
             </SurfacePanel>
           </section>
 
@@ -911,21 +908,19 @@ export default function AccountPage({ initialSignedIn = false }) {
           </SurfacePanel>
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-          <div className="space-y-2">
-            <p className={sectionEyebrowClass}>
-              {viewerSignedIn ? "Actions" : "Account access"}
-            </p>
-            <h2 className={sectionTitleClass}>
-              {viewerSignedIn ? "Actions." : "Sign in, recover, or get help"}
-            </h2>
-          </div>
-          <StorefrontPathwaysGrid
-            cards={accountActionCards}
-            columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-            appearance="dark"
-          />
-        </SurfacePanel>
+        {viewerSignedIn ? (
+          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
+            <div className="space-y-2">
+              <p className={sectionEyebrowClass}>Actions</p>
+              <h2 className={sectionTitleClass}>Actions.</h2>
+            </div>
+            <StorefrontPathwaysGrid
+              cards={accountActionCards}
+              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
+              appearance="dark"
+            />
+          </SurfacePanel>
+        ) : null}
 
         {viewerSignedIn ? (
           <MyLibraryPanel

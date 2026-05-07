@@ -1900,10 +1900,20 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("heading", { name: "Account" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Sign in" }).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Create account" }).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Reset password" }).first()).toBeVisible();
-    await expect(page.getByRole("button", { name: "Support" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign in" }).first()).toHaveAttribute(
+      "href",
+      /\/account\?openLogin=1/,
+    );
+    await expect(
+      page.getByRole("link", { name: "Create account" }).first(),
+    ).toHaveAttribute("href", /\/account\?openLogin=1&mode=register/);
+    await expect(
+      page.getByRole("link", { name: "Reset password" }).first(),
+    ).toHaveAttribute("href", "/auth/reset");
+    await expect(page.getByRole("link", { name: "Support" }).first()).toHaveAttribute(
+      "href",
+      /\/support/,
+    );
     await expect(page.locator("body")).not.toContainText("Need help?");
     await expect(page.locator("body")).not.toContainText("Account access");
 
@@ -2020,6 +2030,14 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("heading", { name: "Send a request" })).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.getByText("Issue details")).toBeVisible();
+    await expect(page.getByLabel("Issue type")).toBeVisible();
+    await expect(page.getByLabel("Reply email")).toBeVisible();
+    await expect(page.getByText("Request details")).toBeVisible();
+    await expect(page.getByLabel("Order ID optional")).toBeVisible();
+    await expect(page.getByLabel("Subject")).toBeVisible();
+    await expect(page.getByLabel("Message")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Email backup" })).toBeVisible();
     await expect(page.locator("#support-topic")).toContainText("Other");
     await page.selectOption("#support-topic", "billing");
     await page.fill("#support-subject", "Need help");
@@ -2033,6 +2051,44 @@ test.describe("Public reading funnel", () => {
     expect(emailValidationMessage).toBeTruthy();
     expect(supportRequestCount).toBe(0);
     await expectNoRuntimeIssues("/support validation", runtimeIssues);
+  });
+
+  test("search default shelves avoid repeated adjacent full card sets", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/search", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const trendingShelf = page.getByTestId("search-default-trending");
+    const updatesShelf = page.getByTestId("search-default-updates");
+    const completedShelf = page.getByTestId("search-default-completed");
+
+    await expect(trendingShelf).toContainText("Trending titles");
+    await expect(updatesShelf).toContainText("New updates");
+    await expect(completedShelf).toContainText("Completed reads");
+
+    const trendingTitles = await trendingShelf
+      .getByRole("heading", { level: 2 })
+      .allTextContents();
+    const updateTitles = await updatesShelf
+      .getByRole("heading", { level: 2 })
+      .allTextContents();
+
+    const normalizedTrendingTitles = trendingTitles
+      .map((item) => item.trim())
+      .filter((item) => item && item !== "Trending titles");
+    const normalizedUpdateTitles = updateTitles
+      .map((item) => item.trim())
+      .filter((item) => item && item !== "New updates");
+
+    expect(normalizedUpdateTitles.length).toBeLessThanOrEqual(4);
+    const repeatedTitles = normalizedUpdateTitles.filter((title) =>
+      normalizedTrendingTitles.includes(title),
+    );
+    expect(repeatedTitles).toEqual([]);
+
+    await expectNoRuntimeIssues("/search default shelves", runtimeIssues);
   });
 
   test("canonical public pages keep expected headings and ban internal copy", async ({

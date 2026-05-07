@@ -1388,7 +1388,11 @@ export default function SearchPage() {
 
             <div className="space-y-8">
               {visibleRecoRails.map((rail) => (
-                <section key={rail.id} className="space-y-4">
+                <section
+                  key={rail.id}
+                  className="space-y-4"
+                  data-testid={`search-rail-${rail.id}`}
+                >
                   <h3 className="text-lg font-black uppercase tracking-[0.03em] text-white">
                     {rail.title}
                   </h3>
