@@ -230,7 +230,10 @@ export default function SeriesHeader({
               {series.title || "Series"}
             </h1>
 
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] font-black uppercase tracking-[0.05em] text-white/80 sm:mt-3 sm:text-sm sm:gap-x-2.5 sm:gap-y-2 sm:tracking-[0.06em]">
+            <div
+              data-testid="series-hero-metadata"
+              className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] font-black uppercase tracking-[0.05em] text-white/80 sm:mt-3 sm:text-sm sm:gap-x-2.5 sm:gap-y-2 sm:tracking-[0.06em]"
+            >
               {creatorLine ? (
                 creatorHref ? (
                   <Link

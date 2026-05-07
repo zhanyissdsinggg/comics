@@ -8,6 +8,8 @@ import {
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const UI_TIMEOUT_MS = 15000;
+const LEGAL_ENTITY_NAME = "Targaryen technology Co., Limited";
+const BRAND_OPERATED_STATEMENT = `Gush Comics is operated by ${LEGAL_ENTITY_NAME}.`;
 const BANNED_STRINGS = [
   "Demo Series",
   "Gush Demo Studio",
@@ -1200,6 +1202,13 @@ async function expectNoBannedCopy(page: Page, routePath: string) {
   }
 }
 
+function getSeriesHeroMetadataText(series) {
+  const creatorName = String(series?.creator?.label || "").trim();
+  const installmentLabel = series?.type === "novel" ? "Episode" : "Chapter";
+  const latestNumber = Number(series?.episodeCount || 0);
+  return `By ${creatorName} · Latest ${installmentLabel} ${latestNumber}`;
+}
+
 test.describe("Public reading funnel", () => {
   test.describe.configure({ mode: "serial" });
 
@@ -1963,34 +1972,34 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });
 
-  test("series hero metadata keeps readable separators", async ({ page }) => {
+  test("series hero metadata stays normalized across all real series", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page);
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mn_adult_confirmed", "1");
+      window.localStorage.setItem("mn_adult_mode", "1");
+      window.localStorage.setItem("mn_age_rule", "global");
+    });
+    await mockPublicApi(page, { signedIn: true });
 
-    for (const routePath of CATALOG.map((series) => `/series/${series.id}`)) {
+    for (const series of CATALOG) {
+      const routePath = `/series/${series.id}`;
       const response = await page.goto(routePath, {
         waitUntil: "domcontentloaded",
       });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+      await expect(page.locator("main h1")).toHaveCount(1);
 
-      await expect(page.locator("main")).not.toContainText(/\S·Latest/i);
-      await expect(page.locator("main")).not.toContainText(/Team·Latest/i);
-      await expect(page.locator("main")).not.toContainText(/Dane·Latest/i);
+      const metadata = page.getByTestId("series-hero-metadata");
+      await expect(metadata).toContainText(getSeriesHeroMetadataText(series));
+      await expect(metadata).not.toContainText(/\/Creator|\/Chapter|\/Episode/i);
+
+      const footer = page.locator("footer");
+      await expect(footer).toHaveCount(1);
+      await expect(footer).toContainText(LEGAL_ENTITY_NAME);
+      await expect(footer).toContainText(BRAND_OPERATED_STATEMENT);
     }
 
-    let response = await page.goto("/series/series-001", {
-      waitUntil: "domcontentloaded",
-    });
-    expect(response?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("By Mira Dane · Latest Chapter 3");
-
-    response = await page.goto("/series/series-005", {
-      waitUntil: "domcontentloaded",
-    });
-    expect(response?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("By Rowan Vale · Latest Episode 2");
-
-    await expectNoRuntimeIssues("/series/series-001 metadata separators", runtimeIssues);
+    await expectNoRuntimeIssues("/series metadata normalized", runtimeIssues);
   });
 
   test("support form renders and validates reply email for signed-out users", async ({
@@ -2124,9 +2133,7 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("body")).toContainText(
         "Any dispute will be resolved in the courts located in Hong Kong, unless applicable consumer law gives you rights in another location.",
       );
-      await expect(page.locator("body")).toContainText(
-        "Gush Comics is operated by Targaryen technology Co., Limited.",
-      );
+      await expect(page.locator("body")).toContainText(BRAND_OPERATED_STATEMENT);
       await expect(
         page.getByRole("link", { name: "Email legal team" }),
       ).toHaveAttribute("href", /^mailto:/);
@@ -2176,6 +2183,42 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("/rankings single hero", runtimeIssues);
   });
 
+  test("public pages keep one consistent footer legal name", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mn_adult_confirmed", "1");
+      window.localStorage.setItem("mn_adult_mode", "1");
+      window.localStorage.setItem("mn_age_rule", "global");
+    });
+    await mockPublicApi(page, { signedIn: true });
+
+    const routePaths = [
+      "/",
+      "/comics",
+      "/novels",
+      "/search",
+      "/rankings",
+      "/support",
+      "/privacy-policy",
+      "/terms-of-service",
+      ...CATALOG.map((series) => `/series/${series.id}`),
+    ];
+
+    for (const routePath of routePaths) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      const footer = page.locator("footer");
+      await expect(footer).toHaveCount(1);
+      await expect(footer).toContainText(LEGAL_ENTITY_NAME);
+      await expect(footer).toContainText(BRAND_OPERATED_STATEMENT);
+    }
+
+    await expectNoRuntimeIssues("public-footer-legal-name", runtimeIssues);
+  });
+
   test("legal contact areas render readable links", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
@@ -2212,9 +2255,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).toContainText(
       "Any dispute will be resolved in the courts located in Hong Kong, unless applicable consumer law gives you rights in another location.",
     );
-    await expect(page.locator("body")).toContainText(
-      "Gush Comics is operated by Targaryen technology Co., Limited.",
-    );
+    await expect(page.locator("body")).toContainText(BRAND_OPERATED_STATEMENT);
 
     await expectNoRuntimeIssues("legal-contact-links", runtimeIssues);
   });

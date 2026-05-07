@@ -49,7 +49,9 @@ function normalizeSiteUrl(value) {
 
 export const siteConfig = {
   siteName: clean(process.env.NEXT_PUBLIC_SITE_NAME) || "Gush",
-  companyName: clean(process.env.NEXT_PUBLIC_COMPANY_NAME) || "Gush Comics",
+  companyName:
+    clean(process.env.NEXT_PUBLIC_COMPANY_NAME) ||
+    "Targaryen technology Co., Limited",
   siteUrl: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
@@ -70,8 +72,10 @@ export const siteConfig = {
     clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) ||
     "legal@gushcomics.com",
   companyAddress: clean(process.env.NEXT_PUBLIC_COMPANY_ADDRESS),
-  governingLaw: clean(process.env.NEXT_PUBLIC_GOVERNING_LAW),
-  legalVenue: clean(process.env.NEXT_PUBLIC_LEGAL_VENUE),
+  governingLaw:
+    clean(process.env.NEXT_PUBLIC_GOVERNING_LAW) ||
+    "Hong Kong Special Administrative Region",
+  legalVenue: clean(process.env.NEXT_PUBLIC_LEGAL_VENUE) || "Hong Kong",
   twitterUrl: clean(process.env.NEXT_PUBLIC_TWITTER_URL),
   twitterHandle: clean(process.env.NEXT_PUBLIC_TWITTER_HANDLE),
   githubUrl: clean(process.env.NEXT_PUBLIC_GITHUB_URL),

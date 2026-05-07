@@ -114,6 +114,8 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
+const footerLegalStatement = `Gush Comics is operated by ${siteConfig.companyName}.`;
+
 function normalizeFooterPath(href) {
   return String(href || "").split("?")[0];
 }
@@ -238,9 +240,8 @@ export default function SiteFooter({
               ) : null}
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
-              <p>
-                (c) {currentYear} {siteConfig.companyName}
-              </p>
+              <p>© {currentYear} {siteConfig.companyName}</p>
+              <p className="text-white/40">{footerLegalStatement}</p>
             </div>
           </div>
         </div>
@@ -345,13 +346,12 @@ export default function SiteFooter({
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span>
-                (c) {currentYear} {siteConfig.companyName}
-              </span>
+              <span>© {currentYear} {siteConfig.companyName}</span>
               {siteConfig.companyAddress ? (
                 <span>{siteConfig.companyAddress}</span>
               ) : null}
             </div>
+            <p className="text-white/40">{footerLegalStatement}</p>
           </div>
         </div>
       </div>

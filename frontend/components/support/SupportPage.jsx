@@ -491,104 +491,110 @@ export default function SupportPage() {
                   </div>
                 ) : null}
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="support-topic" className={fieldLabelClass}>
-                      Issue type
-                    </label>
-                    <select
-                      id="support-topic"
-                      value={activeTopic}
-                      onChange={(event) => {
-                        const nextPreset = getSupportTopicPreset(
-                          event.target.value,
-                        );
-                        setActiveTopic(event.target.value);
-                        setSuccessState(null);
-
-                        if (nextPreset) {
-                          setSubject((current) =>
-                            current.trim() ? current : nextPreset.subject || "",
+                <fieldset className="space-y-4">
+                  <legend className={fieldLabelClass}>Issue details</legend>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="support-topic" className={fieldLabelClass}>
+                        Issue type
+                      </label>
+                      <select
+                        id="support-topic"
+                        value={activeTopic}
+                        onChange={(event) => {
+                          const nextPreset = getSupportTopicPreset(
+                            event.target.value,
                           );
-                          setMessage((current) => {
-                            if (!isAutofilledSupportMessage(current)) {
-                              return current;
-                            }
-                            return nextPreset.draft || "";
-                          });
-                        }
-                      }}
-                      className={fieldClass}
-                    >
-                      <option value="">Choose a topic</option>
-                      {SUPPORT_TOPICS.map((preset) => (
-                        <option key={preset.id} value={preset.id}>
-                          {preset.title}
-                        </option>
-                      ))}
-                    </select>
+                          setActiveTopic(event.target.value);
+                          setSuccessState(null);
+
+                          if (nextPreset) {
+                            setSubject((current) =>
+                              current.trim() ? current : nextPreset.subject || "",
+                            );
+                            setMessage((current) => {
+                              if (!isAutofilledSupportMessage(current)) {
+                                return current;
+                              }
+                              return nextPreset.draft || "";
+                            });
+                          }
+                        }}
+                        className={fieldClass}
+                      >
+                        <option value="">Choose a topic</option>
+                        {SUPPORT_TOPICS.map((preset) => (
+                          <option key={preset.id} value={preset.id}>
+                            {preset.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="support-email" className={fieldLabelClass}>
+                        Reply email
+                      </label>
+                      <input
+                        id="support-email"
+                        type="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        placeholder="name@example.com"
+                        className={fieldClass}
+                        required={!signedInReader}
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                <fieldset className="space-y-4">
+                  <legend className={fieldLabelClass}>Request details</legend>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="support-order-id" className={fieldLabelClass}>
+                        Order ID optional
+                      </label>
+                      <input
+                        ref={orderIdInputRef}
+                        id="support-order-id"
+                        type="text"
+                        value={orderId}
+                        onChange={(event) => setOrderId(event.target.value)}
+                        placeholder="ord_12345"
+                        className={fieldClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="support-subject" className={fieldLabelClass}>
+                        Subject
+                      </label>
+                      <input
+                        id="support-subject"
+                        type="text"
+                        value={subject}
+                        onChange={(event) => setSubject(event.target.value)}
+                        placeholder="What do you need help with?"
+                        className={fieldClass}
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label htmlFor="support-email" className={fieldLabelClass}>
-                      Reply email
+                    <label htmlFor="support-message" className={fieldLabelClass}>
+                      Message
                     </label>
-                    <input
-                      id="support-email"
-                      type="email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="name@example.com"
-                      className={fieldClass}
-                      required={!signedInReader}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="support-order-id" className={fieldLabelClass}>
-                      Order ID optional
-                    </label>
-                    <input
-                      ref={orderIdInputRef}
-                      id="support-order-id"
-                      type="text"
-                      value={orderId}
-                      onChange={(event) => setOrderId(event.target.value)}
-                      placeholder="ord_12345"
+                    <textarea
+                      id="support-message"
+                      rows={8}
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
+                      placeholder="Tell us what happened. Add the title, chapter, page, or order ID if it helps."
                       className={fieldClass}
                     />
                   </div>
-
-                  <div>
-                    <label htmlFor="support-subject" className={fieldLabelClass}>
-                      Subject
-                    </label>
-                    <input
-                      id="support-subject"
-                      type="text"
-                      value={subject}
-                      onChange={(event) => setSubject(event.target.value)}
-                      placeholder="What do you need help with?"
-                      className={fieldClass}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="support-message" className={fieldLabelClass}>
-                    Message
-                  </label>
-                  <textarea
-                    id="support-message"
-                    rows={8}
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    placeholder="Tell us what happened. Add the title, chapter, page, or order ID if it helps."
-                    className={fieldClass}
-                  />
-                </div>
+                </fieldset>
 
                 <div className="flex flex-wrap items-center gap-3">
                   <button
