@@ -105,10 +105,11 @@ const TERMS_SECTIONS = [
 
 if (hasResolvedLegalJurisdiction) {
   TERMS_SECTIONS.splice(8, 0, {
-    title: "Governing law",
+    title: "Governing Law and Venue",
     paragraphs: [
-      `These Terms are governed by the laws of ${siteConfig.governingLaw}, without regard to conflict-of-law rules, except where mandatory consumer protection law requires otherwise.`,
-      `The courts located in ${siteConfig.legalVenue} will have exclusive venue for disputes arising out of or relating to these Terms, unless applicable law gives you a different forum.`,
+      `These Terms are governed by the laws of ${siteConfig.governingLaw}, without regard to conflict-of-law rules.`,
+      `Any dispute will be resolved in ${siteConfig.legalVenue}, unless applicable consumer law gives a reader rights in another location.`,
+      `Gush Comics is operated by ${siteConfig.companyName}.`,
     ],
   });
 } else {

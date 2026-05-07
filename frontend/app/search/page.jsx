@@ -196,6 +196,27 @@ function sortCreators(items) {
   });
 }
 
+function takeUniqueSeries(items, limit, excludedIds = new Set()) {
+  const uniqueItems = [];
+  const seenIds = new Set(excludedIds);
+
+  for (const series of items) {
+    const id = String(series?.id || "").trim();
+    if (!id || seenIds.has(id)) {
+      continue;
+    }
+
+    seenIds.add(id);
+    uniqueItems.push(series);
+
+    if (uniqueItems.length >= limit) {
+      break;
+    }
+  }
+
+  return uniqueItems;
+}
+
 function SearchInput({ q, format, status, genre }) {
   return (
     <form
@@ -577,13 +598,29 @@ export default async function Page({ searchParams }) {
   const showDefaultShelves = !hasExplicitFilters;
   const hasActiveFilters = hasExplicitFilters;
   const resultCount = filteredSeries.length + filteredCreators.length;
-  const emptyTrending = sortSeries(catalog).slice(0, 6);
-  const emptyUpdates = sortSeries(
-    [...catalog].sort((left, right) => (Date.parse(right?.updatedAt || 0) || 0) - (Date.parse(left?.updatedAt || 0) || 0)),
-  ).slice(0, 6);
-  const emptyCompleted = sortSeries(
-    catalog.filter((series) => normalizeStatus(series?.status) === "completed"),
-  ).slice(0, 4);
+  const emptyTrending = takeUniqueSeries(sortSeries(catalog), 6);
+  const emptyTrendingIds = new Set(emptyTrending.map((series) => series.id));
+  const emptyUpdates = takeUniqueSeries(
+    sortSeries(
+      [...catalog].sort(
+        (left, right) =>
+          (Date.parse(right?.updatedAt || 0) || 0) -
+          (Date.parse(left?.updatedAt || 0) || 0),
+      ),
+    ),
+    6,
+    emptyTrendingIds,
+  );
+  const emptyCompleted = takeUniqueSeries(
+    sortSeries(
+      catalog.filter((series) => normalizeStatus(series?.status) === "completed"),
+    ),
+    4,
+    new Set([
+      ...emptyTrending.map((series) => series.id),
+      ...emptyUpdates.map((series) => series.id),
+    ]),
+  );
   const noResultGenres = allGenres
     .filter((item) => item !== genre)
     .slice(0, 6);

@@ -8,6 +8,10 @@ import {
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const UI_TIMEOUT_MS = 15000;
+const EXPECT_PUBLIC_LEGAL_JURISDICTION = Boolean(
+  process.env.NEXT_PUBLIC_GOVERNING_LAW &&
+    process.env.NEXT_PUBLIC_LEGAL_VENUE,
+);
 const BANNED_STRINGS = [
   "Demo Series",
   "Gush Demo Studio",
@@ -2109,6 +2113,9 @@ test.describe("Public reading funnel", () => {
       await expect(page.locator("body")).not.toContainText(
         /laws that apply to .* where it is established/i,
       );
+      if (EXPECT_PUBLIC_LEGAL_JURISDICTION) {
+        await expect(page.locator("body")).toContainText("Governing Law and Venue");
+      }
       await expect(
         page.getByRole("link", { name: "Email legal team" }),
       ).toHaveAttribute("href", /^mailto:/);
@@ -2187,6 +2194,9 @@ test.describe("Public reading funnel", () => {
     ).toHaveAttribute("href", "/privacy-policy");
     await expect(page.locator("body")).not.toContainText("Email legal Privacy");
     await expect(page.locator("body")).not.toContainText(/teamView/i);
+    if (EXPECT_PUBLIC_LEGAL_JURISDICTION) {
+      await expect(page.locator("body")).toContainText("Governing Law and Venue");
+    }
 
     await expectNoRuntimeIssues("legal-contact-links", runtimeIssues);
   });
