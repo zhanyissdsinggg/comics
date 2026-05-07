@@ -671,13 +671,22 @@ export default function AccountPage({ initialSignedIn = false }) {
             appearance="dark"
             accent="cyan"
           >
+            <div className="space-y-2">
+              <p className={sectionEyebrowClass}>Device settings</p>
+              <h2 className={sectionTitleClass}>Local preferences</h2>
+              <p className={mutedCopyClass}>
+                Device-only options stay tucked away until you need them.
+              </p>
+            </div>
             <details className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <div>
-                  <p className={sectionEyebrowClass}>Device settings</p>
-                  <h2 className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-white">
-                    Local preferences
-                  </h2>
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                    Collapsed by default
+                  </p>
+                  <h3 className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-white">
+                    Device settings
+                  </h3>
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/60 transition group-open:text-white">
                   Expand

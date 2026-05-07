@@ -244,8 +244,7 @@ export default function SeriesHeader({
               {creatorLine && latestLine ? (
                 <>
                   <span className="text-white/45" aria-hidden="true">
-                    {" "}
-                    ·{" "}
+                    {" · "}
                   </span>
                   <span>{latestLine}</span>
                 </>

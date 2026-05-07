@@ -1863,6 +1863,37 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("/library signed-out", runtimeIssues);
   });
 
+  test("account signed-out view prioritizes account actions and collapses device settings", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, { signedIn: false });
+
+    const response = await page.goto("/account", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Account" }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("button", { name: "Sign in" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create account" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Reset password" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Support" }).first()).toBeVisible();
+
+    const detailsState = await page.locator("details").first().evaluate((element) => ({
+      open: element.hasAttribute("open"),
+      summaryText:
+        element.querySelector("summary")?.textContent?.replace(/\s+/g, " ").trim() || "",
+    }));
+
+    expect(detailsState.open).toBeFalsy();
+    expect(detailsState.summaryText).toContain("Collapsed by default");
+    expect(detailsState.summaryText).toContain("Device settings");
+    await expect(page.getByText("Deals and offers").first()).toBeHidden();
+
+    await expectNoRuntimeIssues("/account signed-out", runtimeIssues);
+  });
+
   test("catalog cards keep concise SSR text on comics and novels", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
