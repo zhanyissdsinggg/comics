@@ -719,24 +719,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 bookmarkCountTotal > 0 ? "Saved moments" : "No bookmarks yet",
             },
           ]
-        : [
-            {
-              label: "On device",
-              value:
-                continueRailItems.length > 0
-                  ? continueRailItems.length.toLocaleString()
-                  : "Ready",
-              hint:
-                continueRailItems.length > 0
-                  ? "Pick up here"
-                  : "Start a title",
-            },
-            {
-              label: "Sign In",
-              value: "Sync",
-              hint: "Keep your place",
-            },
-          ],
+        : [],
     [
       bookmarkCountTotal,
       continueRailItems,
@@ -828,6 +811,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
           : "Saved titles and recent reads."
       : "Save a few titles to get started."
     : "Sign in to save progress and favorites.";
+  const signedOutHeroSecondary =
+    !viewerSignedIn && continueRailItems.length > 0
+      ? "Local progress stays on this device until you sign in."
+      : "";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
       ? "Your next read."
@@ -877,7 +864,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
             eyebrow="Library"
             title="Your library"
             description={signedInHeroDescription}
-            secondary=""
+            secondary={signedOutHeroSecondary}
             stats={libraryStats}
             appearance="dark"
             accent="cyan"

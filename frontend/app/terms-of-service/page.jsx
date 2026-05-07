@@ -108,7 +108,7 @@ if (hasResolvedLegalJurisdiction) {
     title: "Governing Law and Venue",
     paragraphs: [
       `These Terms are governed by the laws of ${siteConfig.governingLaw}, without regard to conflict-of-law rules.`,
-      `Any dispute will be resolved in ${siteConfig.legalVenue}, unless applicable consumer law gives a reader rights in another location.`,
+      `Any dispute will be resolved in the courts located in ${siteConfig.legalVenue}, unless applicable consumer law gives you rights in another location.`,
       `Gush Comics is operated by ${siteConfig.companyName}.`,
     ],
   });
