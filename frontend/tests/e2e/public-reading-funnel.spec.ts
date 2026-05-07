@@ -1900,6 +1900,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("heading", { name: "Account" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.getByRole("navigation", { name: "Account actions" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Sign in" }).first()).toHaveAttribute(
       "href",
       /\/account\?openLogin=1/,
@@ -1914,6 +1915,7 @@ test.describe("Public reading funnel", () => {
       "href",
       /\/support/,
     );
+    await expect(page.getByRole("navigation", { name: "Account help" })).toBeVisible();
     await expect(page.locator("body")).not.toContainText("Need help?");
     await expect(page.locator("body")).not.toContainText("Account access");
 
@@ -2031,9 +2033,15 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.getByText("Issue details")).toBeVisible();
+    await expect(
+      page.getByText("Choose the issue type and the best reply email for this request."),
+    ).toBeVisible();
     await expect(page.getByLabel("Issue type")).toBeVisible();
     await expect(page.getByLabel("Reply email")).toBeVisible();
     await expect(page.getByText("Request details")).toBeVisible();
+    await expect(
+      page.getByText("Add any order details, a short subject, and the full message."),
+    ).toBeVisible();
     await expect(page.getByLabel("Order ID optional")).toBeVisible();
     await expect(page.getByLabel("Subject")).toBeVisible();
     await expect(page.getByLabel("Message")).toBeVisible();
@@ -2327,6 +2335,12 @@ test.describe("Public reading funnel", () => {
 
     await expect(page.locator("body")).not.toContainText("match es");
     await expect(page.locator("body")).toContainText(/1 match|[2-9]\d* matches|0 matches/i);
+    await expect(
+      page.locator('[role="group"][aria-label="Creator type filters"]'),
+    ).toBeVisible();
+    await expect(
+      page.locator('[role="group"][aria-label="Creator genre filters"]'),
+    ).toBeVisible();
 
     await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
   });

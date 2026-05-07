@@ -439,7 +439,11 @@ export default function CreatorsHubPage({
               />
             </label>
 
-            <div className="flex flex-wrap gap-2">
+            <div
+              role="group"
+              aria-label="Creator type filters"
+              className="flex flex-wrap gap-2"
+            >
               {roleFilters.map((item) => (
                 <button
                   key={item.id}
@@ -454,7 +458,11 @@ export default function CreatorsHubPage({
           </div>
 
           {genreOptions.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div
+              role="group"
+              aria-label="Creator genre filters"
+              className="flex flex-wrap gap-2"
+            >
               <button
                 type="button"
                 onClick={() => setActiveGenre("All")}

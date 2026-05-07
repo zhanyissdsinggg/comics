@@ -565,7 +565,10 @@ export default function AccountPage({ initialSignedIn = false }) {
               secondary=""
               stats={accountHeroStats}
               actions={
-                <>
+                <nav
+                  aria-label="Account actions"
+                  className="flex flex-wrap gap-3"
+                >
                   <a
                     href={signedOutSignInHref}
                     className={`${primaryButtonClass} no-underline`}
@@ -578,7 +581,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   >
                     Create account
                   </a>
-                </>
+                </nav>
               }
             />
 
@@ -602,7 +605,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </div>
               </div>
 
-              <nav aria-label="Account help" className="flex flex-col gap-3">
+              <nav aria-label="Account help" className="space-y-3">
                 <a
                   href={signedOutResetPasswordHref}
                   className={`${secondaryButtonClass} no-underline`}

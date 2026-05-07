@@ -491,8 +491,17 @@ export default function SupportPage() {
                   </div>
                 ) : null}
 
-                <fieldset className="space-y-4">
+                <fieldset
+                  className="space-y-4"
+                  aria-describedby="support-issue-details-copy"
+                >
                   <legend className={fieldLabelClass}>Issue details</legend>
+                  <p
+                    id="support-issue-details-copy"
+                    className="text-sm font-semibold leading-6 text-white/70"
+                  >
+                    Choose the issue type and the best reply email for this request.
+                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label htmlFor="support-topic" className={fieldLabelClass}>
@@ -548,8 +557,17 @@ export default function SupportPage() {
                   </div>
                 </fieldset>
 
-                <fieldset className="space-y-4">
+                <fieldset
+                  className="space-y-4"
+                  aria-describedby="support-request-details-copy"
+                >
                   <legend className={fieldLabelClass}>Request details</legend>
+                  <p
+                    id="support-request-details-copy"
+                    className="text-sm font-semibold leading-6 text-white/70"
+                  >
+                    Add any order details, a short subject, and the full message.
+                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label htmlFor="support-order-id" className={fieldLabelClass}>
@@ -596,20 +614,27 @@ export default function SupportPage() {
                   </div>
                 </fieldset>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className={primaryButtonClass}
-                  >
-                    {submitting ? "Sending..." : "Submit"}
-                  </button>
-                  <a
-                    href={supportMailtoHref}
-                    className={storefrontSecondaryButtonClass}
-                  >
-                    Email backup
-                  </a>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className={primaryButtonClass}
+                    >
+                      {submitting ? "Sending..." : "Submit"}
+                    </button>
+                  </div>
+                  <div className="border-t-2 border-white/10 pt-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                      Email backup
+                    </p>
+                    <a
+                      href={supportMailtoHref}
+                      className={`${storefrontSecondaryButtonClass} mt-3`}
+                    >
+                      Email backup
+                    </a>
+                  </div>
                 </div>
               </form>
             )}
