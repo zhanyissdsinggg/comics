@@ -2140,6 +2140,14 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText("More to Read");
     await expect(page.locator("body")).not.toContainText(/^Titles$/);
     await expect(page.locator("body")).not.toContainText("More stories this week");
+    await expect(page.locator("main")).toContainText("More trending stories");
+    await expect(page.locator("main")).toContainText(
+      "Keep reading what readers are opening next.",
+    );
+    await expect(page.locator("main")).not.toContainText("Ranking");
+    await expect(page.locator("main")).not.toContainText(
+      "Keep scrolling through the titles readers are opening next.",
+    );
     await expect(page.locator("main")).not.toContainText(
       /Finished\s+Crimson Tide[\s\S]*Comic \/ Ongoing/i,
     );

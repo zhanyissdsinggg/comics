@@ -548,8 +548,8 @@ export default function RankingsPage({
                 <section className="space-y-4 rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-3.5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:space-y-5 sm:p-6">
                   <RankingsSectionHeader
                     eyebrow=""
-                    title="Ranking"
-                    description="Keep scrolling through the titles readers are opening next."
+                    title="More trending stories"
+                    description="Keep reading what readers are opening next."
                   />
 
                   <div className="space-y-3">
