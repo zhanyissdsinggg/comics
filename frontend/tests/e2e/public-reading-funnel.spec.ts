@@ -1475,7 +1475,7 @@ test.describe("Public reading funnel", () => {
       gatedPage.getByRole("link", { name: "Sign in to continue" }),
     ).toHaveAttribute("href", "/account");
     await expect(
-      gatedPage.getByRole("link", { name: "Browse all comics" }),
+      gatedPage.getByRole("link", { name: "Browse non-mature titles" }),
     ).toHaveAttribute("href", "/comics");
     await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
     await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
