@@ -6,18 +6,13 @@ import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { canViewMatureContent } from "../../lib/matureContent";
 import AgeGateModal from "../layout/AgeGateModal";
-import LoginGateModal from "../layout/LoginGateModal";
-import {
-  LOGIN_GATE_DESCRIPTION,
-  LOGIN_GATE_TITLE,
-} from "../../lib/adultGateCopy";
 
 export default function MatureCatalogState({
   mode = "gate",
   className = "",
   browseHref = "/search",
 }) {
-  const { hydrated, isSignedIn, signIn } = useAuthStore();
+  const { hydrated, isSignedIn } = useAuthStore();
   const {
     adultConfirmed,
     ageRuleKey,
@@ -27,14 +22,11 @@ export default function MatureCatalogState({
     confirmAge,
   } = useAdultGateStore();
   const [activeModal, setActiveModal] = useState(null);
-  const [authError, setAuthError] = useState("");
-
   const canAccessMature = canViewMatureContent({ adultConfirmed, isAdultMode });
   const isEmptyMode = mode === "empty";
 
   const openGate = () => {
     if (!hydrated || !isSignedIn) {
-      setActiveModal("login");
       return;
     }
 
@@ -46,31 +38,6 @@ export default function MatureCatalogState({
     if (!isAdultMode) {
       enableAdultMode();
     }
-  };
-
-  const handleLogin = async ({ email, password, mode: authMode }) => {
-    const response = await signIn(email, password, authMode);
-    if (response?.status === 202) {
-      setAuthError("");
-      return response;
-    }
-    if (!response?.ok) {
-      setAuthError("Invalid email or password.");
-      return response;
-    }
-
-    setAuthError("");
-    if (!adultConfirmed) {
-      setActiveModal("age");
-      return response;
-    }
-
-    if (!isAdultMode) {
-      enableAdultMode();
-    }
-
-    setActiveModal(null);
-    return response;
   };
 
   const handleAgeConfirm = () => {
@@ -104,29 +71,19 @@ export default function MatureCatalogState({
             : hydrated && isSignedIn
               ? "Confirm legal age"
               : "Sign in to continue",
-          onClick: () => {
-            if (isEmptyMode) {
-              if (typeof window !== "undefined") {
-                window.location.assign(browseHref);
-              }
-              return;
-            }
-
-            openGate();
-          },
+          href:
+            isEmptyMode || !hydrated || !isSignedIn
+              ? isEmptyMode
+                ? browseHref
+                : "/account"
+              : "",
+          onClick:
+            isEmptyMode || !hydrated || !isSignedIn
+              ? null
+              : () => {
+                  openGate();
+                },
         }}
-      />
-
-      <LoginGateModal
-        open={activeModal === "login"}
-        onClose={() => {
-          setActiveModal(null);
-          setAuthError("");
-        }}
-        onSubmit={handleLogin}
-        title={LOGIN_GATE_TITLE}
-        description={LOGIN_GATE_DESCRIPTION}
-        errorMessage={authError}
       />
       <AgeGateModal
         open={activeModal === "age"}

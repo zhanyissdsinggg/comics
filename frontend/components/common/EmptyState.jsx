@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Link from "next/link";
 import NetworkFallback from "./NetworkFallback";
 import {
   AlertCircle,
@@ -44,6 +45,10 @@ export const EmptyState = memo(function EmptyState({
       ? { onClick: action, label: actionText }
       : action && typeof action === "object"
         ? {
+            href:
+              typeof action.href === "string" && action.href.trim()
+                ? action.href.trim()
+                : "",
             onClick:
               typeof action.onClick === "function" ? action.onClick : null,
             label: action.label || actionText,
@@ -105,21 +110,37 @@ export const EmptyState = memo(function EmptyState({
           </p>
         ) : null}
 
-        {resolvedAction?.onClick && resolvedAction?.label ? (
-          <button
-            type="button"
-            onClick={resolvedAction.onClick}
-            className={`mt-6 ${
-              isLight
-                ? icon === "alert"
-                  ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+        {resolvedAction?.label ? (
+          resolvedAction.href ? (
+            <Link
+              href={resolvedAction.href}
+              className={`mt-6 ${
+                isLight
+                  ? icon === "alert"
+                    ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+                    : `${storefrontPrimaryButtonClass} gap-2`
                   : `${storefrontPrimaryButtonClass} gap-2`
-                : `${storefrontPrimaryButtonClass} gap-2`
-            }`}
-          >
-            <span>{resolvedAction.label}</span>
-            <ArrowRight size={16} />
-          </button>
+              }`}
+            >
+              <span>{resolvedAction.label}</span>
+              <ArrowRight size={16} />
+            </Link>
+          ) : resolvedAction.onClick ? (
+            <button
+              type="button"
+              onClick={resolvedAction.onClick}
+              className={`mt-6 ${
+                isLight
+                  ? icon === "alert"
+                    ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+                    : `${storefrontPrimaryButtonClass} gap-2`
+                  : `${storefrontPrimaryButtonClass} gap-2`
+              }`}
+            >
+              <span>{resolvedAction.label}</span>
+              <ArrowRight size={16} />
+            </button>
+          ) : null
         ) : null}
       </div>
     </div>

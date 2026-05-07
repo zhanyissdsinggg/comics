@@ -204,21 +204,29 @@ export default function TermsOfServicePage() {
             eyebrow="Legal"
             title="Contact."
             actions={
-              <>
-                <a
-                  href={`mailto:${siteConfig.legalEmail}`}
-                  className={storefrontPrimaryButtonClass}
-                >
-                  Email legal team
-                </a>
-                <Link
-                  href="/privacy-policy"
-                  className={storefrontSecondaryButtonClass}
-                >
-                  View privacy policy
-                </Link>
-              </>
+              <ul className="grid gap-2.5">
+                <li>
+                  <a
+                    href={`mailto:${siteConfig.legalEmail}`}
+                    className={storefrontPrimaryButtonClass}
+                  >
+                    Email legal team
+                  </a>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/45">
+                    For legal questions.
+                  </p>
+                </li>
+                <li>
+                  <Link
+                    href="/privacy-policy"
+                    className={storefrontSecondaryButtonClass}
+                  >
+                    View privacy policy
+                  </Link>
+                </li>
+              </ul>
             }
+            description="Choose the legal contact link you need below."
           />
         </section>
 

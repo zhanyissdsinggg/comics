@@ -91,6 +91,8 @@ export default function AccountPage({ initialSignedIn = false }) {
   const [providerStatus, setProviderStatus] = useState("");
   const [providerBusy, setProviderBusy] = useState(false);
   const [commerceNotice, setCommerceNotice] = useState(null);
+  const [signedOutDeviceSettingsOpen, setSignedOutDeviceSettingsOpen] =
+    useState(false);
   const googleAuthEnabled = isGoogleAuthEnabled();
   const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
   const openAuthPrompt = useCallback(() => {
@@ -678,7 +680,13 @@ export default function AccountPage({ initialSignedIn = false }) {
                 Device-only options stay tucked away until you need them.
               </p>
             </div>
-            <details className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <details
+              open={signedOutDeviceSettingsOpen}
+              onToggle={(event) =>
+                setSignedOutDeviceSettingsOpen(event.currentTarget.open)
+              }
+              className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
@@ -693,80 +701,84 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </span>
               </summary>
 
-              <div className="mt-5 space-y-5">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className={fieldLabelClass}>Display name</label>
-                    <input
-                      value={displayName}
-                      onChange={(event) => setDisplayName(event.target.value)}
-                      placeholder="Your name"
-                      className={fieldClass}
-                    />
+              {signedOutDeviceSettingsOpen ? (
+                <div className="mt-5 space-y-5">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={fieldLabelClass}>Display name</label>
+                      <input
+                        value={displayName}
+                        onChange={(event) => setDisplayName(event.target.value)}
+                        placeholder="Your name"
+                        className={fieldClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={fieldLabelClass}>Region</label>
+                      <select
+                        value={region}
+                        onChange={(event) => setRegion(event.target.value)}
+                        className={fieldClass}
+                      >
+                        {REGION_KEYS.map((item) => (
+                          <option key={item} value={item}>
+                            {getRegionConfig(item).label}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
+                        Legal age: {regionConfig.legalAge}+
+                      </p>
+                    </div>
+                    <div>
+                      <label className={fieldLabelClass}>Language</label>
+                      <select
+                        value={language}
+                        onChange={(event) => setLanguage(event.target.value)}
+                        className={fieldClass}
+                      >
+                        {LANGUAGE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label className={fieldLabelClass}>Region</label>
-                    <select
-                      value={region}
-                      onChange={(event) => setRegion(event.target.value)}
-                      className={fieldClass}
-                    >
-                      {REGION_KEYS.map((item) => (
-                        <option key={item} value={item}>
-                          {getRegionConfig(item).label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
-                      Legal age: {regionConfig.legalAge}+
-                    </p>
-                  </div>
-                  <div>
-                    <label className={fieldLabelClass}>Language</label>
-                    <select
-                      value={language}
-                      onChange={(event) => setLanguage(event.target.value)}
-                      className={fieldClass}
-                    >
-                      {LANGUAGE_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
 
-                <div className="space-y-3">
-                  <p className={sectionEyebrowClass}>Reading preferences</p>
-                  <label className={checkboxCardClass}>
-                    <input
-                      type="checkbox"
-                      checked={hideAdultHistory}
-                      onChange={(event) => setHideAdultHistory(event.target.checked)}
-                      className={checkboxClass}
-                    />
-                    Hide mature titles from this device
-                  </label>
-                </div>
+                  <div className="space-y-3">
+                    <p className={sectionEyebrowClass}>Reading preferences</p>
+                    <label className={checkboxCardClass}>
+                      <input
+                        type="checkbox"
+                        checked={hideAdultHistory}
+                        onChange={(event) =>
+                          setHideAdultHistory(event.target.checked)
+                        }
+                        className={checkboxClass}
+                      />
+                      Hide mature titles from this device
+                    </label>
+                  </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/mature-content")}
-                    className={secondaryButtonClass}
-                  >
-                    Mature content settings
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    className={primaryButtonClass}
-                  >
-                    Save
-                  </button>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/mature-content")}
+                      className={secondaryButtonClass}
+                    >
+                      Mature content settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      className={primaryButtonClass}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </details>
           </SurfacePanel>
         </main>

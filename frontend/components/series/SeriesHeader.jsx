@@ -6,7 +6,7 @@ import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import {
-  formatInstallmentLabel,
+  getSeriesHeroMetadataParts,
   getLatestEntryLabel,
   getInstallmentLabel,
 } from "../../lib/seriesFormatLabels";
@@ -121,10 +121,13 @@ export default function SeriesHeader({
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
   const latestUpdateLabel = getLatestLabel(latestEpisode, series.updatedAt);
   const summaryText = summarizeSeriesDescription(series?.description, "");
-  const creatorLine = creatorPresentation.value
-    ? `By ${creatorPresentation.value}`
-    : "";
-  const latestLine = latestEpisodeValue ? `Latest ${latestEpisodeValue}` : "";
+  const heroMetadata = getSeriesHeroMetadataParts(
+    series,
+    creatorPresentation.value,
+    latestEpisodeNumber,
+  );
+  const creatorLine = heroMetadata.creatorText;
+  const latestLine = heroMetadata.latestText;
   const heroFacts = [
     {
       label: "Format",
@@ -244,7 +247,7 @@ export default function SeriesHeader({
               {creatorLine && latestLine ? (
                 <>
                   <span className="text-white/45" aria-hidden="true">
-                    {" · "}
+                    {heroMetadata.separator}
                   </span>
                   <span>{latestLine}</span>
                 </>

@@ -1454,6 +1454,11 @@ test.describe("Public reading funnel", () => {
       "Confirm legal age to view mature titles.",
     );
     await expect(gatedPage.locator("main")).not.toContainText("No exact match");
+    await expect(
+      gatedPage.getByRole("link", { name: "Sign in to continue" }),
+    ).toHaveAttribute("href", "/account");
+    await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
+    await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
     response = await gatedPage.goto("/comics?genre=Mature", {
       waitUntil: "domcontentloaded",
@@ -1463,6 +1468,11 @@ test.describe("Public reading funnel", () => {
       "Confirm legal age to view mature titles.",
     );
     await expect(gatedPage.locator("main")).not.toContainText("No comics found");
+    await expect(
+      gatedPage.getByRole("link", { name: "Sign in to continue" }),
+    ).toHaveAttribute("href", "/account");
+    await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
+    await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
     await expectNoRuntimeIssues("mature-filter-catalog-entry", runtimeIssues);
     await expectNoRuntimeIssues("mature-filter-catalog-gated", gatedRuntimeIssues);
@@ -1889,7 +1899,12 @@ test.describe("Public reading funnel", () => {
     expect(detailsState.open).toBeFalsy();
     expect(detailsState.summaryText).toContain("Collapsed by default");
     expect(detailsState.summaryText).toContain("Device settings");
-    await expect(page.getByText("Deals and offers").first()).toBeHidden();
+    await expect(page.locator("body")).not.toContainText("Region");
+    await expect(page.locator("body")).not.toContainText("Legal age");
+    await expect(page.locator("body")).not.toContainText("Language");
+    await expect(page.locator("body")).not.toContainText("Hide mature titles from this device");
+    await expect(page.locator("body")).not.toContainText(/^Save$/);
+    await expect(page.locator("body")).not.toContainText("Deals and offers");
 
     await expectNoRuntimeIssues("/account signed-out", runtimeIssues);
   });
@@ -1944,14 +1959,28 @@ test.describe("Public reading funnel", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
 
-    const response = await page.goto("/series/series-001", {
+    for (const routePath of CATALOG.map((series) => `/series/${series.id}`)) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+
+      await expect(page.locator("main")).not.toContainText(/\S·Latest/i);
+      await expect(page.locator("main")).not.toContainText(/Team·Latest/i);
+      await expect(page.locator("main")).not.toContainText(/Dane·Latest/i);
+    }
+
+    let response = await page.goto("/series/series-001", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-
     await expect(page.locator("main")).toContainText("By Mira Dane · Latest Chapter 3");
-    await expect(page.locator("main")).not.toContainText(/Mira Dane\/Chapter 3\/Creator/i);
-    await expect(page.locator("main")).not.toContainText(/Mira Dane·Latest/i);
+
+    response = await page.goto("/series/series-005", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("By Rowan Vale · Latest Episode 2");
 
     await expectNoRuntimeIssues("/series/series-001 metadata separators", runtimeIssues);
   });
@@ -2136,6 +2165,7 @@ test.describe("Public reading funnel", () => {
       page.getByRole("link", { name: "Contact support" }),
     ).toHaveAttribute("href", "/support");
     await expect(page.locator("body")).not.toContainText("Email privacy Support");
+    await expect(page.locator("body")).not.toContainText(/teamContact/i);
 
     response = await page.goto("/terms-of-service", {
       waitUntil: "domcontentloaded",
@@ -2148,6 +2178,7 @@ test.describe("Public reading funnel", () => {
       page.getByRole("link", { name: "View privacy policy" }),
     ).toHaveAttribute("href", "/privacy-policy");
     await expect(page.locator("body")).not.toContainText("Email legal Privacy");
+    await expect(page.locator("body")).not.toContainText(/teamView/i);
 
     await expectNoRuntimeIssues("legal-contact-links", runtimeIssues);
   });

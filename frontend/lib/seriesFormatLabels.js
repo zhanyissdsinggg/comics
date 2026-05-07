@@ -63,6 +63,27 @@ export function getLatestEntryLabel(series, latestEntryNumber) {
   return `${getEntryLabelSingular(series)} ${latestEntryNumber}`;
 }
 
+export function getSeriesHeroMetadataParts(series, creatorName, latestEntryNumber) {
+  const normalizedCreatorName = String(creatorName || "").trim();
+  const creatorText = normalizedCreatorName
+    ? `By ${normalizedCreatorName}`
+    : "";
+  const hasLatestNumber =
+    latestEntryNumber !== null &&
+    latestEntryNumber !== undefined &&
+    String(latestEntryNumber).trim() !== "";
+  const latestEntryLabel = getLatestEntryLabel(series, latestEntryNumber);
+  const latestText = hasLatestNumber ? `Latest ${latestEntryLabel}` : "";
+  const separator = creatorText && latestText ? " \u00b7 " : "";
+
+  return {
+    creatorText,
+    latestText,
+    separator,
+    combinedText: `${creatorText}${separator}${latestText}`,
+  };
+}
+
 export function formatInstallmentLabel(input, number, options = {}) {
   const label = getInstallmentLabel(input, options);
 

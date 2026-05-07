@@ -174,21 +174,29 @@ export default function PrivacyPolicyPage() {
             eyebrow="Contact"
             title="Contact."
             actions={
-              <>
-                <a
-                  href={`mailto:${siteConfig.privacyEmail}`}
-                  className={storefrontPrimaryButtonClass}
-                >
-                  Email privacy team
-                </a>
-                <Link
-                  href="/support"
-                  className={storefrontSecondaryButtonClass}
-                >
-                  Contact support
-                </Link>
-              </>
+              <ul className="grid gap-2.5">
+                <li>
+                  <a
+                    href={`mailto:${siteConfig.privacyEmail}`}
+                    className={storefrontPrimaryButtonClass}
+                  >
+                    Email privacy team
+                  </a>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/45">
+                    For privacy requests.
+                  </p>
+                </li>
+                <li>
+                  <Link
+                    href="/support"
+                    className={storefrontSecondaryButtonClass}
+                  >
+                    Contact support
+                  </Link>
+                </li>
+              </ul>
             }
+            description="Choose the privacy contact link you need below."
           />
         </section>
 
