@@ -33,6 +33,7 @@ export const EmptyState = memo(function EmptyState({
   title = "Nothing here yet",
   description,
   action,
+  secondaryAction,
   actionText,
   eyebrow = "Next step",
   className = "",
@@ -52,6 +53,23 @@ export const EmptyState = memo(function EmptyState({
             onClick:
               typeof action.onClick === "function" ? action.onClick : null,
             label: action.label || actionText,
+          }
+        : null;
+  const resolvedSecondaryAction =
+    typeof secondaryAction === "function"
+      ? { onClick: secondaryAction, label: "" }
+      : secondaryAction && typeof secondaryAction === "object"
+        ? {
+            href:
+              typeof secondaryAction.href === "string" &&
+              secondaryAction.href.trim()
+                ? secondaryAction.href.trim()
+                : "",
+            onClick:
+              typeof secondaryAction.onClick === "function"
+                ? secondaryAction.onClick
+                : null,
+            label: secondaryAction.label || "",
           }
         : null;
   const accentClass =
@@ -110,37 +128,68 @@ export const EmptyState = memo(function EmptyState({
           </p>
         ) : null}
 
-        {resolvedAction?.label ? (
-          resolvedAction.href ? (
-            <Link
-              href={resolvedAction.href}
-              className={`mt-6 ${
-                isLight
-                  ? icon === "alert"
-                    ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
-                    : `${storefrontPrimaryButtonClass} gap-2`
-                  : `${storefrontPrimaryButtonClass} gap-2`
-              }`}
-            >
-              <span>{resolvedAction.label}</span>
-              <ArrowRight size={16} />
-            </Link>
-          ) : resolvedAction.onClick ? (
-            <button
-              type="button"
-              onClick={resolvedAction.onClick}
-              className={`mt-6 ${
-                isLight
-                  ? icon === "alert"
-                    ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
-                    : `${storefrontPrimaryButtonClass} gap-2`
-                  : `${storefrontPrimaryButtonClass} gap-2`
-              }`}
-            >
-              <span>{resolvedAction.label}</span>
-              <ArrowRight size={16} />
-            </button>
-          ) : null
+        {resolvedAction?.label || resolvedSecondaryAction?.label ? (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            {resolvedAction?.label ? (
+              resolvedAction.href ? (
+                <Link
+                  href={resolvedAction.href}
+                  className={`${
+                    isLight
+                      ? icon === "alert"
+                        ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+                        : `${storefrontPrimaryButtonClass} gap-2`
+                      : `${storefrontPrimaryButtonClass} gap-2`
+                  }`}
+                >
+                  <span>{resolvedAction.label}</span>
+                  <ArrowRight size={16} />
+                </Link>
+              ) : resolvedAction.onClick ? (
+                <button
+                  type="button"
+                  onClick={resolvedAction.onClick}
+                  className={`${
+                    isLight
+                      ? icon === "alert"
+                        ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
+                        : `${storefrontPrimaryButtonClass} gap-2`
+                      : `${storefrontPrimaryButtonClass} gap-2`
+                  }`}
+                >
+                  <span>{resolvedAction.label}</span>
+                  <ArrowRight size={16} />
+                </button>
+              ) : null
+            ) : null}
+
+            {resolvedSecondaryAction?.label ? (
+              resolvedSecondaryAction.href ? (
+                <Link
+                  href={resolvedSecondaryAction.href}
+                  className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
+                    isLight
+                      ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
+                      : "border-white/18 bg-transparent text-white/88 hover:border-white/35 hover:bg-white/5"
+                  }`}
+                >
+                  <span>{resolvedSecondaryAction.label}</span>
+                </Link>
+              ) : resolvedSecondaryAction.onClick ? (
+                <button
+                  type="button"
+                  onClick={resolvedSecondaryAction.onClick}
+                  className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
+                    isLight
+                      ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
+                      : "border-white/18 bg-transparent text-white/88 hover:border-white/35 hover:bg-white/5"
+                  }`}
+                >
+                  <span>{resolvedSecondaryAction.label}</span>
+                </button>
+              ) : null
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>

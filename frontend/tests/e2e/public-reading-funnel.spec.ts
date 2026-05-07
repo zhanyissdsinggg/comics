@@ -1457,6 +1457,9 @@ test.describe("Public reading funnel", () => {
     await expect(
       gatedPage.getByRole("link", { name: "Sign in to continue" }),
     ).toHaveAttribute("href", "/account");
+    await expect(
+      gatedPage.getByRole("link", { name: "Browse non-mature titles" }),
+    ).toHaveAttribute("href", "/search");
     await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
     await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
@@ -1471,6 +1474,9 @@ test.describe("Public reading funnel", () => {
     await expect(
       gatedPage.getByRole("link", { name: "Sign in to continue" }),
     ).toHaveAttribute("href", "/account");
+    await expect(
+      gatedPage.getByRole("link", { name: "Browse all comics" }),
+    ).toHaveAttribute("href", "/comics");
     await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
     await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
@@ -1889,6 +1895,8 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("button", { name: "Create account" }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Reset password" }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Support" }).first()).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("Need help?");
+    await expect(page.locator("body")).not.toContainText("Account access");
 
     const detailsState = await page.locator("details").first().evaluate((element) => ({
       open: element.hasAttribute("open"),

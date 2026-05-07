@@ -24,6 +24,8 @@ export default function MatureCatalogState({
   const [activeModal, setActiveModal] = useState(null);
   const canAccessMature = canViewMatureContent({ adultConfirmed, isAdultMode });
   const isEmptyMode = mode === "empty";
+  const safeBrowseLabel =
+    browseHref === "/search" ? "Browse non-mature titles" : "Browse all comics";
 
   const openGate = () => {
     if (!hydrated || !isSignedIn) {
@@ -84,6 +86,14 @@ export default function MatureCatalogState({
                   openGate();
                 },
         }}
+        secondaryAction={
+          isEmptyMode
+            ? null
+            : {
+                label: safeBrowseLabel,
+                href: browseHref,
+              }
+        }
       />
       <AgeGateModal
         open={activeModal === "age"}

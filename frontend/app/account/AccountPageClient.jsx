@@ -329,23 +329,7 @@ export default function AccountPage({ initialSignedIn = false }) {
 
   const accountHeroStats = useMemo(() => {
     if (!viewerSignedIn) {
-      return [
-        {
-          label: "Status",
-          value: "Signed out",
-          hint: "Sign in to save your reading.",
-        },
-        {
-          label: "Access",
-          value: "Ready",
-          hint: "Sign in or create an account",
-        },
-        {
-          label: "Support",
-          value: "Help",
-          hint: "Reset password or contact support",
-        },
-      ];
+      return [];
     }
 
     return [
@@ -552,12 +536,12 @@ export default function AccountPage({ initialSignedIn = false }) {
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn
     ? "Account"
-    : "Need help?";
+    : "Support";
   const accountDeskCopy = viewerSignedIn
     ? orders.length > 0
       ? "Orders, plans, support"
       : "Settings"
-    : "Reset your password or get support.";
+    : "Reset your password or contact support.";
 
   if (!viewerSignedIn) {
     return (
@@ -604,7 +588,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 </p>
                 <div>
                   <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
-                    Need help?
+                    Support
                   </h2>
                   <p className="mt-3 text-sm font-semibold leading-7 text-white/70">
                     Reset your password or contact support.
@@ -616,7 +600,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 <button
                   type="button"
                   onClick={() => router.push("/auth/reset")}
-                  className={primaryButtonClass}
+                  className={secondaryButtonClass}
                 >
                   Reset password
                 </button>
@@ -655,18 +639,6 @@ export default function AccountPage({ initialSignedIn = false }) {
               </p>
             </SurfacePanel>
           ) : null}
-
-          <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-            <div className="space-y-2">
-              <p className={sectionEyebrowClass}>Account access</p>
-              <h2 className={sectionTitleClass}>Sign in, recover, or get help</h2>
-            </div>
-            <StorefrontPathwaysGrid
-              cards={accountActionCards}
-              columnsClassName="md:grid-cols-2 xl:grid-cols-4"
-              appearance="dark"
-            />
-          </SurfacePanel>
 
           <SurfacePanel
             className="space-y-4"
