@@ -17,6 +17,7 @@ const config = [
   {
     ignores: [
       ".next/**",
+      ".next-playwright/**",
       ".logs/**",
       "out/**",
       "build/**",

@@ -616,10 +616,7 @@ export default async function Page({ searchParams }) {
       catalog.filter((series) => normalizeStatus(series?.status) === "completed"),
     ),
     4,
-    new Set([
-      ...emptyTrending.map((series) => series.id),
-      ...emptyUpdates.map((series) => series.id),
-    ]),
+    new Set(emptyUpdates.map((series) => series.id)),
   );
   const noResultGenres = allGenres
     .filter((item) => item !== genre)
