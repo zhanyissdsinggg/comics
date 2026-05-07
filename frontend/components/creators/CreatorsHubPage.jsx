@@ -209,6 +209,9 @@ function CreatorCard({ creator }) {
   );
 }
 
+const creatorFilterChipClass =
+  "rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150";
+
 function CreatorsHubSkeleton() {
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
@@ -352,8 +355,8 @@ export default function CreatorsHubPage({
 
   const filterButtonClass = (active) =>
     active
-      ? "rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-sm font-black uppercase tracking-[0.04em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-      : "rounded-full border-2 border-white/15 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.04em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
+      ? `${creatorFilterChipClass} border-black bg-[#FFE500] text-black`
+      : `${creatorFilterChipClass} border-white/15 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30`;
 
   if (loading) {
     return <CreatorsHubSkeleton />;
@@ -446,6 +449,7 @@ export default function CreatorsHubPage({
               <div
                 role="group"
                 aria-label="Creator type filters"
+                aria-controls="creator-results-grid"
                 className="flex flex-wrap gap-2"
               >
                 {roleFilters.map((item) => (
@@ -453,6 +457,7 @@ export default function CreatorsHubPage({
                     key={item.id}
                     type="button"
                     onClick={() => setActiveRole(item.id)}
+                    aria-pressed={activeRole === item.id}
                     className={filterButtonClass(activeRole === item.id)}
                   >
                     {item.label}
@@ -470,11 +475,13 @@ export default function CreatorsHubPage({
               <div
                 role="group"
                 aria-label="Creator genre filters"
+                aria-controls="creator-results-grid"
                 className="flex flex-wrap gap-2"
               >
                 <button
                   type="button"
                   onClick={() => setActiveGenre("All")}
+                  aria-pressed={activeGenre === "All"}
                   className={filterButtonClass(activeGenre === "All")}
                 >
                   All
@@ -484,6 +491,7 @@ export default function CreatorsHubPage({
                     key={genre}
                     type="button"
                     onClick={() => setActiveGenre(genre)}
+                    aria-pressed={activeGenre === genre}
                     className={filterButtonClass(activeGenre === genre)}
                   >
                     {genre}
@@ -544,7 +552,10 @@ export default function CreatorsHubPage({
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div
+              id="creator-results-grid"
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
               {filteredCreators.map((creator) => (
                 <CreatorCard key={creator.slug} creator={creator} />
               ))}

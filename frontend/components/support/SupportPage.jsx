@@ -360,6 +360,8 @@ export default function SupportPage() {
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const topicCardClass =
     "rounded-[22px] border-2 bg-black p-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+  const supportSectionCardClass =
+    "rounded-[24px] border-2 border-white/15 bg-[#111111] p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const supportHeroStats = [
     {
       label: "Replies",
@@ -494,7 +496,7 @@ export default function SupportPage() {
                 ) : null}
 
                 <fieldset
-                  className="space-y-4"
+                  className={`space-y-4 ${supportSectionCardClass}`}
                   aria-describedby="support-issue-details-copy"
                 >
                   <legend className={fieldLabelClass}>Issue details</legend>
@@ -506,61 +508,78 @@ export default function SupportPage() {
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
-                      <span className={fieldLabelClass}>Issue type</span>
+                      <div className="space-y-2">
+                        <span className={fieldLabelClass}>Issue type</span>
+                        <p className="text-sm font-medium leading-6 text-white/62">
+                          Pick one option below.
+                        </p>
+                      </div>
                       <div
                         id="support-topic"
                         role="radiogroup"
                         aria-label="Issue type"
+                        aria-describedby="support-topic-help"
                         className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
                       >
-                        {SUPPORT_TOPICS.map((preset) => {
-                          const active = activeTopic === preset.id;
-                          return (
-                            <label
-                              key={preset.id}
-                              className={`${topicCardClass} ${
-                                active
-                                  ? "border-[#00E5FF] text-white"
-                                  : "border-white/15 text-white/72 hover:border-white/30"
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name="support-topic"
-                                value={preset.id}
-                                checked={active}
-                                onChange={(event) => {
-                                  const nextPreset = getSupportTopicPreset(
-                                    event.target.value,
-                                  );
-                                  setActiveTopic(event.target.value);
-                                  setSuccessState(null);
+                        <p id="support-topic-help" className="sr-only">
+                          Choose one support topic. Each option includes a short description.
+                        </p>
+                        <ul className="contents">
+                          {SUPPORT_TOPICS.map((preset) => {
+                            const active = activeTopic === preset.id;
+                            const descriptionId = `support-topic-description-${preset.id}`;
+                            return (
+                              <li key={preset.id} className="list-none">
+                                <label
+                                  className={`${topicCardClass} block ${
+                                    active
+                                      ? "border-[#00E5FF] text-white"
+                                      : "border-white/15 text-white/72 hover:border-white/30"
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="support-topic"
+                                    value={preset.id}
+                                    checked={active}
+                                    aria-describedby={descriptionId}
+                                    onChange={(event) => {
+                                      const nextPreset = getSupportTopicPreset(
+                                        event.target.value,
+                                      );
+                                      setActiveTopic(event.target.value);
+                                      setSuccessState(null);
 
-                                  if (nextPreset) {
-                                    setSubject((current) =>
-                                      current.trim()
-                                        ? current
-                                        : nextPreset.subject || "",
-                                    );
-                                    setMessage((current) => {
-                                      if (!isAutofilledSupportMessage(current)) {
-                                        return current;
+                                      if (nextPreset) {
+                                        setSubject((current) =>
+                                          current.trim()
+                                            ? current
+                                            : nextPreset.subject || "",
+                                        );
+                                        setMessage((current) => {
+                                          if (!isAutofilledSupportMessage(current)) {
+                                            return current;
+                                          }
+                                          return nextPreset.draft || "";
+                                        });
                                       }
-                                      return nextPreset.draft || "";
-                                    });
-                                  }
-                                }}
-                                className="sr-only"
-                              />
-                              <span className="block text-sm font-black uppercase tracking-[0.04em] text-white">
-                                {preset.title}
-                              </span>
-                              <span className="mt-2 block text-sm leading-6 text-inherit">
-                                {preset.description}
-                              </span>
-                            </label>
-                          );
-                        })}
+                                    }}
+                                    className="sr-only"
+                                  />
+                                  <span className="block text-sm font-black uppercase tracking-[0.04em] text-white">
+                                    {preset.title}
+                                  </span>
+                                  <span
+                                    id={descriptionId}
+                                    className="mt-2 block text-sm leading-6 text-inherit"
+                                  >
+                                    {preset.description}
+                                  </span>
+                                </label>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
                     </div>
 
@@ -582,7 +601,7 @@ export default function SupportPage() {
                 </fieldset>
 
                 <fieldset
-                  className="space-y-4"
+                  className={`space-y-4 ${supportSectionCardClass}`}
                   aria-describedby="support-request-details-copy"
                 >
                   <legend className={fieldLabelClass}>Request details</legend>
@@ -638,8 +657,10 @@ export default function SupportPage() {
                   </div>
                 </fieldset>
 
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-3">
+                <div className="space-y-4">
+                  <div
+                    className={`${supportSectionCardClass} flex flex-wrap items-center gap-3`}
+                  >
                     <button
                       type="submit"
                       disabled={submitting}
@@ -648,9 +669,12 @@ export default function SupportPage() {
                       {submitting ? "Sending..." : "Submit"}
                     </button>
                   </div>
-                  <div className="border-t-2 border-white/10 pt-3">
+                  <div className={supportSectionCardClass}>
                     <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                       Email backup
+                    </p>
+                    <p className="mt-2 text-sm font-medium leading-6 text-white/70">
+                      If the form is unavailable, use your email app instead.
                     </p>
                     <a
                       href={supportMailtoHref}

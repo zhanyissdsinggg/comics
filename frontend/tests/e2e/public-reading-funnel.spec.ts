@@ -1278,7 +1278,9 @@ test.describe("Public reading funnel", () => {
 
     await Promise.all([
       page.waitForURL(/\/search(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      mobileNav.getByRole("link", { name: "Search" }).click(),
+      mobileNav
+        .locator('a[href="/search"]')
+        .click({ force: true }),
     ]);
     await expect(page.getByRole("heading", { name: "Titles" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
@@ -2043,6 +2045,7 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.locator('[role="radiogroup"][aria-label="Issue type"]'),
     ).toBeVisible();
+    await expect(page.getByText("Pick one option below.")).toBeVisible();
     await expect(page.getByText("Billing & purchases")).toBeVisible();
     await expect(page.getByText("Login & account")).toBeVisible();
     await expect(page.getByText("Reader issue")).toBeVisible();
@@ -2057,6 +2060,9 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByLabel("Order ID optional")).toBeVisible();
     await expect(page.getByLabel("Subject")).toBeVisible();
     await expect(page.getByLabel("Message")).toBeVisible();
+    await expect(
+      page.getByText("If the form is unavailable, use your email app instead."),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "Email backup" })).toBeVisible();
     await expect(page.locator("body")).not.toContainText("Submit Email backup");
     await page.getByText("Billing & purchases", { exact: true }).click();
@@ -2356,6 +2362,14 @@ test.describe("Public reading funnel", () => {
       page.locator('[role="group"][aria-label="Creator genre filters"]'),
     ).toBeVisible();
     await expect(page.locator("main")).toContainText("Genres");
+    await expect(
+      page.locator('[role="group"][aria-label="Creator type filters"] button[aria-pressed]'),
+    ).toHaveCount(3);
+    expect(
+      await page
+        .locator('[role="group"][aria-label="Creator genre filters"] button[aria-pressed]')
+        .count(),
+    ).toBeGreaterThan(0);
 
     await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
   });
