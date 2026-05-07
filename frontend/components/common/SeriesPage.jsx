@@ -343,6 +343,7 @@ export default function SeriesPage({
   const showNovelShelves = !isNovelPage || series.length >= 6;
   const matureGenreActive = isMatureGenreValue(selectedGenre);
   const canAccessMature = canViewMatureContent({ adultConfirmed, isAdultMode });
+  const shouldPrioritizeMatureGate = matureGenreActive && !canAccessMature;
   const handleGenreChange = useCallback(
     (value, options = {}) => {
       if (!isMatureGenreValue(value)) {
@@ -445,7 +446,9 @@ export default function SeriesPage({
           </div>
         </section>
 
-        {loading ? (
+        {shouldPrioritizeMatureGate ? (
+          <MatureCatalogState browseHref={config.pathname} />
+        ) : loading ? (
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
               {Array.from({ length: 6 }).map((_, index) => (
@@ -518,9 +521,7 @@ export default function SeriesPage({
                 density={isNovelPage ? "quiet" : "default"}
               />
 
-              {matureGenreActive && !canAccessMature ? (
-                <MatureCatalogState className="mt-2" browseHref={config.pathname} />
-              ) : filteredAndSortedSeries.length === 0 ? (
+              {filteredAndSortedSeries.length === 0 ? (
                 matureGenreActive ? (
                   <MatureCatalogState
                     mode="empty"

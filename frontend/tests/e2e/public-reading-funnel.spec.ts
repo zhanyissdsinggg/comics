@@ -1476,10 +1476,14 @@ test.describe("Public reading funnel", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(gatedPage.locator("main")).toContainText(
+    const gatedComicsMain = gatedPage.locator("main");
+    await expect(gatedComicsMain).toContainText(
       "Confirm legal age to view mature titles.",
     );
-    await expect(gatedPage.locator("main")).not.toContainText("No comics found");
+    await expect(gatedComicsMain).not.toContainText("No comics found");
+    await expect(gatedComicsMain).not.toContainText("Trending");
+    await expect(gatedComicsMain).not.toContainText("New updates");
+    await expect(gatedComicsMain).not.toContainText("Completed");
     await expect(
       gatedPage.getByRole("link", { name: "Sign in to continue" }),
     ).toHaveAttribute("href", "/account");
@@ -2270,6 +2274,7 @@ test.describe("Public reading funnel", () => {
       "/novels",
       "/search",
       "/rankings",
+      "/subscribe",
       "/support",
       "/privacy-policy",
       "/terms-of-service",
