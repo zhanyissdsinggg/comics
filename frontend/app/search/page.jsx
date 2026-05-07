@@ -598,6 +598,8 @@ export default async function Page({ searchParams }) {
   const showDefaultShelves = !hasExplicitFilters;
   const hasActiveFilters = hasExplicitFilters;
   const resultCount = filteredSeries.length + filteredCreators.length;
+  const shouldHideGenericResultsSummary =
+    isMatureGenreActive && !includeAdult;
   const emptyTrending = takeUniqueSeries(sortSeries(catalog), 6);
   const emptyTrendingIds = new Set(emptyTrending.map((series) => series.id));
   const emptyUpdates = takeUniqueSeries(
@@ -668,13 +670,15 @@ export default async function Page({ searchParams }) {
             />
           </div>
 
-          <p className="text-sm text-white/58">
-            {hasActiveFilters
-              ? normalizedQuery
-                ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
-                : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
-              : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
-          </p>
+          {!shouldHideGenericResultsSummary ? (
+            <p className="text-sm text-white/58">
+              {hasActiveFilters
+                ? normalizedQuery
+                  ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
+                  : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
+                : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
+            </p>
+          ) : null}
 
           {showDefaultShelves ? (
             <div className="space-y-10">

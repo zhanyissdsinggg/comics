@@ -1276,12 +1276,9 @@ test.describe("Public reading funnel", () => {
       name: "Mobile bottom navigation",
     });
 
-    await Promise.all([
-      page.waitForURL(/\/search(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      mobileNav
-        .locator('a[href="/search"]')
-        .click({ force: true }),
-    ]);
+    await mobileNav
+      .locator('a[href="/search"]')
+      .click({ force: true });
     await expect(page.getByRole("heading", { name: "Titles" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1463,6 +1460,9 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(gatedPage.locator("main")).toContainText(
       "Confirm legal age to view mature titles.",
+    );
+    await expect(gatedPage.locator("main")).not.toContainText(
+      /0 results? match(?:es)? your filters\./i,
     );
     await expect(gatedPage.locator("main")).not.toContainText("No exact match");
     await expect(
@@ -2045,6 +2045,7 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.locator('[role="radiogroup"][aria-label="Issue type"]'),
     ).toBeVisible();
+    await expect(page.locator("#support-topic ul > li")).toHaveCount(6);
     await expect(page.getByText("Pick one option below.")).toBeVisible();
     await expect(page.getByText("Billing & purchases")).toBeVisible();
     await expect(page.getByText("Login & account")).toBeVisible();
@@ -2357,10 +2358,12 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.locator('[role="group"][aria-label="Creator type filters"]'),
     ).toBeVisible();
+    await expect(page.getByTestId("creator-type-filters")).toBeVisible();
     await expect(page.locator("main")).toContainText("Profile type");
     await expect(
       page.locator('[role="group"][aria-label="Creator genre filters"]'),
     ).toBeVisible();
+    await expect(page.getByTestId("creator-genre-filters")).toBeVisible();
     await expect(page.locator("main")).toContainText("Genres");
     await expect(
       page.locator('[role="group"][aria-label="Creator type filters"] button[aria-pressed]'),

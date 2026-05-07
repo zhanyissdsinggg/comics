@@ -519,12 +519,12 @@ export default function SupportPage() {
                         role="radiogroup"
                         aria-label="Issue type"
                         aria-describedby="support-topic-help"
-                        className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+                        className="mt-3"
                       >
                         <p id="support-topic-help" className="sr-only">
                           Choose one support topic. Each option includes a short description.
                         </p>
-                        <ul className="contents">
+                        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                           {SUPPORT_TOPICS.map((preset) => {
                             const active = activeTopic === preset.id;
                             const descriptionId = `support-topic-description-${preset.id}`;

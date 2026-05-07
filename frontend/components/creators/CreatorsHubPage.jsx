@@ -450,6 +450,7 @@ export default function CreatorsHubPage({
                 role="group"
                 aria-label="Creator type filters"
                 aria-controls="creator-results-grid"
+                data-testid="creator-type-filters"
                 className="flex flex-wrap gap-2"
               >
                 {roleFilters.map((item) => (
@@ -458,6 +459,7 @@ export default function CreatorsHubPage({
                     type="button"
                     onClick={() => setActiveRole(item.id)}
                     aria-pressed={activeRole === item.id}
+                    aria-label={`Filter creators by ${item.label}`}
                     className={filterButtonClass(activeRole === item.id)}
                   >
                     {item.label}
@@ -476,12 +478,14 @@ export default function CreatorsHubPage({
                 role="group"
                 aria-label="Creator genre filters"
                 aria-controls="creator-results-grid"
+                data-testid="creator-genre-filters"
                 className="flex flex-wrap gap-2"
               >
                 <button
                   type="button"
                   onClick={() => setActiveGenre("All")}
                   aria-pressed={activeGenre === "All"}
+                  aria-label="Filter creators by all genres"
                   className={filterButtonClass(activeGenre === "All")}
                 >
                   All
@@ -492,6 +496,7 @@ export default function CreatorsHubPage({
                     type="button"
                     onClick={() => setActiveGenre(genre)}
                     aria-pressed={activeGenre === genre}
+                    aria-label={`Filter creators by ${genre}`}
                     className={filterButtonClass(activeGenre === genre)}
                   >
                     {genre}
