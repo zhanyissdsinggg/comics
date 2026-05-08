@@ -401,6 +401,60 @@ const seriesData: SeriesSeed[] = [
       { name: "Rafael Cruz", role: CreditRole.ARTIST },
     ],
   },
+  {
+    id: "series-013",
+    title: "After Hours",
+    type: "comic",
+    adult: true,
+    genres: ["Mature", "Drama", "Romance"],
+    coverUrl: "/mock-covers/series-003.jpg",
+    coverTone: "#3c0f2a",
+    status: "Ongoing",
+    description:
+      "A restrained late-night workplace drama about ambition, blurred boundaries, and two adults trying to keep their private decisions from detonating the office.",
+    episodePrice: 4,
+    ttfEnabled: true,
+    ttfIntervalHours: 24,
+    credits: [
+      { name: "Iris Vale", role: CreditRole.WRITER, isPrimary: true },
+      { name: "Sable House Studio", role: CreditRole.STUDIO, type: CreatorType.STUDIO },
+    ],
+  },
+  {
+    id: "series-014",
+    title: "Velvet Alley",
+    type: "novel",
+    adult: true,
+    genres: ["Mature", "Noir", "Thriller"],
+    coverUrl: "/mock-covers/series-006.jpg",
+    coverTone: "#221126",
+    status: "Ongoing",
+    description:
+      "A city-noir serial about adult relationships, old debts, and the kind of secrets that only surface after midnight.",
+    episodePrice: 3,
+    ttfEnabled: true,
+    ttfIntervalHours: 48,
+    credits: [{ name: "Maren Cross", role: CreditRole.AUTHOR, isPrimary: true }],
+  },
+  {
+    id: "series-015",
+    title: "Glass Hearts",
+    type: "comic",
+    adult: true,
+    genres: ["Mature", "Slice of Life", "Drama"],
+    coverUrl: "/mock-covers/series-010.jpg",
+    coverTone: "#4b1730",
+    status: "Completed",
+    description:
+      "Three adults sharing one apartment discover that honesty, rent, and desire are a volatile mix when no one can afford to leave.",
+    episodePrice: 2,
+    ttfEnabled: false,
+    ttfIntervalHours: 24,
+    credits: [
+      { name: "Nora Flint", role: CreditRole.WRITER, isPrimary: true },
+      { name: "Jun Atelier", role: CreditRole.ARTIST },
+    ],
+  },
 ];
 
 const recommendationSlotData: Array<{

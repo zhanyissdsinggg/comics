@@ -1,6 +1,7 @@
 import OrdersPageClient from "./OrdersPageClient";
 import { createPageMetadata } from "../../lib/seo";
 import { cookies } from "next/headers";
+import { hasServerSessionCookie } from "../../lib/serverAdultGate";
 
 export const metadata = createPageMetadata({
   title: "Orders",
@@ -14,7 +15,9 @@ export const metadata = createPageMetadata({
 
 export default async function Page() {
   const cookieStore = await cookies();
-  const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
+  const initialSignedIn =
+    cookieStore.get("mn_is_signed_in")?.value === "1" ||
+    hasServerSessionCookie(cookieStore);
 
   return <OrdersPageClient initialSignedIn={initialSignedIn} />;
 }

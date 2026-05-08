@@ -1,7 +1,7 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdultHubPage from "../../components/adult/AdultHubPage";
 import { createPageMetadata } from "../../lib/seo";
+import { resolveServerAdultGate } from "../../lib/serverAdultGate";
 
 export const metadata = createPageMetadata({
   title: "Mature Catalog",
@@ -14,23 +14,17 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const cookieStore = await cookies();
-  const isSignedIn =
-    String(cookieStore.get("mn_is_signed_in")?.value || "").trim() === "1";
-  const adultConfirmed =
-    String(cookieStore.get("mn_adult_confirmed")?.value || "").trim() === "1";
-  const matureModeEnabled =
-    String(cookieStore.get("mn_adult_mode")?.value || "").trim() === "1";
+  const gate = await resolveServerAdultGate();
 
-  if (!isSignedIn) {
+  if (gate.reason === "NEED_LOGIN") {
     redirect("/adult-gate?reason=NEED_LOGIN&returnTo=%2Fadult");
   }
 
-  if (!adultConfirmed) {
+  if (gate.reason === "NEED_AGE_CONFIRM") {
     redirect("/adult-gate?reason=NEED_AGE_CONFIRM&returnTo=%2Fadult");
   }
 
-  if (!matureModeEnabled) {
+  if (gate.reason === "NEED_ADULT_MODE") {
     redirect("/adult-gate?reason=NEED_ADULT_MODE&returnTo=%2Fadult");
   }
 
