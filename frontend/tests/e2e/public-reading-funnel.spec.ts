@@ -1275,10 +1275,11 @@ test.describe("Public reading funnel", () => {
     const mobileNav = page.getByRole("navigation", {
       name: "Mobile bottom navigation",
     });
+    await expect(mobileNav).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const mobileSearchLink = mobileNav.locator('a[href="/search"]');
+    await expect(mobileSearchLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
-    await mobileNav
-      .locator('a[href="/search"]')
-      .click({ force: true });
+    await mobileSearchLink.click({ force: true });
     await expect(page.getByRole("heading", { name: "Titles" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1442,11 +1443,18 @@ test.describe("Public reading funnel", () => {
       "/search?genre=Mystery",
       "/search?format=novel",
     ]) {
-      response = await page.goto(routePath, { waitUntil: "domcontentloaded" });
+      const filterCheckPage = await browser.newPage();
+      await mockPublicApi(filterCheckPage, { signedIn: true });
+      response = await filterCheckPage.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
-      await expect(page.getByRole("link", { name: "Mature" }).first()).toBeVisible({
+      await expect(
+        filterCheckPage.getByRole("link", { name: "Mature" }).first(),
+      ).toBeVisible({
         timeout: UI_TIMEOUT_MS,
       });
+      await filterCheckPage.close();
     }
 
     const gatedContext = await browser.newContext();
@@ -2065,6 +2073,9 @@ test.describe("Public reading funnel", () => {
       page.getByText("If the form is unavailable, use your email app instead."),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Email backup" })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/purchasesWrong/i);
+    await expect(page.locator("body")).not.toContainText(/accountEmail/i);
+    await expect(page.locator("body")).not.toContainText(/issueBroken/i);
     await expect(page.locator("body")).not.toContainText("Submit Email backup");
     await page.getByText("Billing & purchases", { exact: true }).click();
     await page.fill("#support-subject", "Need help");

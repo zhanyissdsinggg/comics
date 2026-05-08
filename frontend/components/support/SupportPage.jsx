@@ -571,8 +571,11 @@ export default function SupportPage() {
                                   </span>
                                   <span
                                     id={descriptionId}
-                                    className="mt-2 block text-sm leading-6 text-inherit"
+                                    className="mt-3 block border-t border-white/10 pt-3 text-sm leading-6 text-inherit"
                                   >
+                                    <span className="font-black uppercase tracking-[0.04em] text-white/62">
+                                      Details
+                                    </span>{" "}
                                     {preset.description}
                                   </span>
                                 </label>
