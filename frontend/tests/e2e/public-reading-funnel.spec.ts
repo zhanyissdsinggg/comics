@@ -931,6 +931,27 @@ async function fulfillJson(route: Route, body: unknown, status = 200) {
   });
 }
 
+async function gotoWithRetry(page: Page, url: string) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await page.goto(url, { waitUntil: "domcontentloaded" });
+    } catch (error) {
+      lastError = error;
+      const message = String(error || "");
+      const isTransientNavigationError =
+        message.includes("ERR_ABORTED") || message.includes("frame was detached");
+
+      if (!isTransientNavigationError || attempt === 2) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 function jsonResponse(response: http.ServerResponse, status: number, body: unknown) {
   response.statusCode = status;
   response.setHeader("Content-Type", "application/json");
@@ -1279,7 +1300,10 @@ test.describe("Public reading funnel", () => {
     const mobileSearchLink = mobileNav.locator('a[href="/search"]');
     await expect(mobileSearchLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
-    await mobileSearchLink.click({ force: true });
+    await Promise.all([
+      page.waitForURL(/\/search(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
+      mobileSearchLink.click({ force: true }),
+    ]);
     await expect(page.getByRole("heading", { name: "Titles" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1544,13 +1568,7 @@ test.describe("Public reading funnel", () => {
       "href",
       /\/read\/series-001\/series-001e1$/,
     );
-
-    await Promise.all([
-      page.waitForURL("**/read/series-001/series-001e1", {
-        timeout: UI_TIMEOUT_MS,
-      }),
-      primaryCta.click(),
-    ]);
+    await gotoWithRetry(page, "/read/series-001/series-001e1");
 
     await expect(page.getByText("Chapter 1").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
@@ -1615,9 +1633,7 @@ test.describe("Public reading funnel", () => {
 
     for (const seriesSpec of REAL_SERIES_ROUTE_SPECS) {
       const routePath = `/series/${seriesSpec.id}`;
-      const response = await page.goto(routePath, {
-        waitUntil: "domcontentloaded",
-      });
+      const response = await gotoWithRetry(page, routePath);
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
 
       const readLinks = page.locator(`a[href^="/read/${seriesSpec.id}/"]`);
@@ -1844,9 +1860,13 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
+    const creatorLink = page.getByTestId("series-creator-link");
+    await expect(creatorLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(creatorLink).toHaveAttribute("href", /\/creators\/mira-dane-d1b324/);
+
     await Promise.all([
       page.waitForURL("**/creators/mira-dane-d1b324**", { timeout: UI_TIMEOUT_MS }),
-      page.getByTestId("series-creator-link").click(),
+      creatorLink.click(),
     ]);
 
     await expect(page.getByRole("heading", { name: "Mira Dane" }).first()).toBeVisible({
@@ -2051,10 +2071,18 @@ test.describe("Public reading funnel", () => {
       page.getByText("Choose the issue type and the best reply email for this request."),
     ).toBeVisible();
     await expect(
+      page
+        .locator("fieldset")
+        .filter({ has: page.getByText("Issue type", { exact: true }) })
+        .first(),
+    ).toBeVisible();
+    await expect(
       page.locator('[role="radiogroup"][aria-label="Issue type"]'),
     ).toBeVisible();
     await expect(page.locator("#support-topic ul > li")).toHaveCount(6);
-    await expect(page.getByText("Pick one option below.")).toBeVisible();
+    await expect(
+      page.getByText("Choose the topic that best matches your request."),
+    ).toBeVisible();
     await expect(page.getByText("Billing & purchases")).toBeVisible();
     await expect(page.getByText("Login & account")).toBeVisible();
     await expect(page.getByText("Reader issue")).toBeVisible();
@@ -2072,7 +2100,18 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.getByText("If the form is unavailable, use your email app instead."),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Email backup" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Email backup" })).toBeVisible();
+    await expect(
+      page
+        .locator("section")
+        .filter({ has: page.getByRole("heading", { name: "Email backup" }) })
+        .getByRole("link", { name: "Email support" }),
+    ).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/purchases Details Wrong/i);
+    await expect(page.locator("body")).not.toContainText(/account Details Email/i);
+    await expect(page.locator("body")).not.toContainText(/issue Details Broken/i);
+    await expect(page.locator("body")).not.toContainText(/access Details 18\+/i);
+    await expect(page.locator("body")).not.toContainText(/Other Details Anything/i);
     await expect(page.locator("body")).not.toContainText(/purchasesWrong/i);
     await expect(page.locator("body")).not.toContainText(/accountEmail/i);
     await expect(page.locator("body")).not.toContainText(/issueBroken/i);
@@ -2355,7 +2394,9 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("legal-contact-links", runtimeIssues);
   });
 
-  test("creators page keeps pluralization clean", async ({ page }) => {
+  test("creators page keeps pluralization clean and uses real filter controls", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
 
@@ -2366,24 +2407,61 @@ test.describe("Public reading funnel", () => {
 
     await expect(page.locator("body")).not.toContainText("match es");
     await expect(page.locator("body")).toContainText(/1 match|[2-9]\d* matches|0 matches/i);
-    await expect(
-      page.locator('[role="group"][aria-label="Creator type filters"]'),
-    ).toBeVisible();
     await expect(page.getByTestId("creator-type-filters")).toBeVisible();
     await expect(page.locator("main")).toContainText("Profile type");
-    await expect(
-      page.locator('[role="group"][aria-label="Creator genre filters"]'),
-    ).toBeVisible();
     await expect(page.getByTestId("creator-genre-filters")).toBeVisible();
     await expect(page.locator("main")).toContainText("Genres");
+    const typeFilters = page.getByTestId("creator-type-filters");
+    await expect(typeFilters.getByRole("link", { name: "All" })).toBeVisible();
+    await expect(typeFilters.getByRole("link", { name: "Creators" })).toBeVisible();
+    await expect(typeFilters.getByRole("link", { name: "Studios + Teams" })).toBeVisible();
+    const genreFilters = page.getByTestId("creator-genre-filters");
+    await expect(genreFilters.getByRole("link", { name: "All" })).toBeVisible();
+    await expect(genreFilters.getByRole("link", { name: "Action" })).toBeVisible();
+    await expect(genreFilters.getByRole("link", { name: "Adventure" })).toBeVisible();
+    await expect(genreFilters.getByRole("link", { name: "Romance" })).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("All Creators Studios + Teams");
+    await expect(page.locator("body")).not.toContainText("All Action Adventure Romance");
+
+    let filteredResponse = await page.goto("/creators?type=creator", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
     await expect(
-      page.locator('[role="group"][aria-label="Creator type filters"] button[aria-pressed]'),
-    ).toHaveCount(3);
-    expect(
-      await page
-        .locator('[role="group"][aria-label="Creator genre filters"] button[aria-pressed]')
-        .count(),
-    ).toBeGreaterThan(0);
+      page.getByTestId("creator-type-filters").getByRole("link", {
+        name: "Creators",
+      }),
+    ).toHaveAttribute("aria-current", "true");
+    await expect(page.locator("#creator-results-grid")).toContainText("Mira Dane");
+    await expect(page.locator("#creator-results-grid")).not.toContainText(
+      "Rook Hollow Studio",
+    );
+
+    filteredResponse = await page.goto("/creators?type=studio-team", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(
+      page.getByTestId("creator-type-filters").getByRole("link", {
+        name: "Studios + Teams",
+      }),
+    ).toHaveAttribute("aria-current", "true");
+    await expect(page.locator("#creator-results-grid")).toContainText(
+      "Rook Hollow Studio",
+    );
+    await expect(page.locator("#creator-results-grid")).not.toContainText("Mira Dane");
+
+    filteredResponse = await page.goto("/creators?genre=Romance", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(
+      page.getByTestId("creator-genre-filters").getByRole("link", {
+        name: "Romance",
+      }),
+    ).toHaveAttribute("aria-current", "true");
+    await expect(page.locator("#creator-results-grid")).toContainText("Hana Seo");
+    await expect(page.locator("main")).toContainText(/1 match|[2-9]\d* matches/i);
 
     await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
   });

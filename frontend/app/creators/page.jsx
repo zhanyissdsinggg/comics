@@ -22,7 +22,8 @@ export async function generateMetadata() {
   });
 }
 
-export default async function CreatorsPageRoute() {
+export default async function CreatorsPageRoute({ searchParams }) {
+  const resolvedSearchParams = (await searchParams) || {};
   const [payload, catalogPayload] = await Promise.all([
     loadCreatorsDirectorySeoPayload(),
     loadSeriesCatalogSeoPayload(),
@@ -48,6 +49,8 @@ export default async function CreatorsPageRoute() {
           (payload?.ready === true && creatorCatalog.length > 0) ||
             (catalogPayload?.ready === true && initialCatalog.length > 0)
         )}
+        initialTypeFilter={resolvedSearchParams.type || ""}
+        initialGenreFilter={resolvedSearchParams.genre || ""}
       />
     </>
   );

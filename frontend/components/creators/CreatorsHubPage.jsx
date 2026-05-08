@@ -210,7 +210,46 @@ function CreatorCard({ creator }) {
 }
 
 const creatorFilterChipClass =
-  "rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150";
+  "rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[transform,border-color,background-color,color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#00E5FF]/20";
+
+function normalizeRoleFilter(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (normalized === "creator") {
+    return "creator";
+  }
+  if (normalized === "studio-team" || normalized === "collective") {
+    return "studio-team";
+  }
+  return "all";
+}
+
+function normalizeGenreFilter(value, genres) {
+  const normalized = String(value || "").trim();
+  if (!normalized) {
+    return "All";
+  }
+
+  const match = (Array.isArray(genres) ? genres : []).find(
+    (genre) => genre.toLowerCase() === normalized.toLowerCase(),
+  );
+
+  return match || "All";
+}
+
+function buildCreatorsFilterHref({ role, genre }) {
+  const params = new URLSearchParams();
+  if (role && role !== "all") {
+    params.set("type", role);
+  }
+  if (genre && genre !== "All") {
+    params.set("genre", genre);
+  }
+
+  const query = params.toString();
+  return query ? `/creators?${query}` : "/creators";
+}
 
 function CreatorsHubSkeleton() {
   return (
@@ -252,6 +291,8 @@ function CreatorsHubSkeleton() {
 export default function CreatorsHubPage({
   initialCatalog = [],
   hasInitialCatalog = false,
+  initialTypeFilter = "",
+  initialGenreFilter = "",
 }) {
   const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const [catalog, setCatalog] = useState(
@@ -260,7 +301,7 @@ export default function CreatorsHubPage({
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [activeRole, setActiveRole] = useState("all");
+  const [activeRole, setActiveRole] = useState(normalizeRoleFilter(initialTypeFilter));
   const [activeGenre, setActiveGenre] = useState("All");
   const requestRef = useRef(0);
 
@@ -316,6 +357,15 @@ export default function CreatorsHubPage({
   );
   const genreOptions = useMemo(() => buildGenreOptions(creators), [creators]);
   const featuredCreators = useMemo(() => creators.slice(0, 3), [creators]);
+
+  useEffect(() => {
+    setActiveRole(normalizeRoleFilter(initialTypeFilter));
+  }, [initialTypeFilter]);
+
+  useEffect(() => {
+    setActiveGenre(normalizeGenreFilter(initialGenreFilter, genreOptions));
+  }, [genreOptions, initialGenreFilter]);
+
   const filteredCreators = useMemo(() => {
     const normalizedQuery = String(query || "").trim().toLowerCase();
 
@@ -323,12 +373,12 @@ export default function CreatorsHubPage({
       const role = normalizeCreatorRole(creator);
       const matchesRole =
         activeRole === "all" ||
-        (activeRole === "collective"
+        (activeRole === "studio-team"
           ? role === "studio" || role === "team"
           : role === "creator");
       const matchesGenre =
         activeGenre === "All" ||
-        (Array.isArray(creator?.topGenres) ? creator.topGenres : []).includes(
+        (Array.isArray(creator?.genres) ? creator.genres : []).includes(
           activeGenre,
         );
       const matchesQuery =
@@ -350,13 +400,16 @@ export default function CreatorsHubPage({
   const roleFilters = [
     { id: "all", label: "All" },
     { id: "creator", label: "Creators" },
-    { id: "collective", label: "Studios + Teams" },
+    { id: "studio-team", label: "Studios + Teams" },
   ];
 
   const filterButtonClass = (active) =>
     active
       ? `${creatorFilterChipClass} border-black bg-[#FFE500] text-black`
-      : `${creatorFilterChipClass} border-white/15 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30`;
+      : `${creatorFilterChipClass} border-white/15 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-white/[0.03]`;
+  const normalizedQuery = String(query || "").trim().toLowerCase();
+  const showFeaturedCreators =
+    !normalizedQuery && activeRole === "all" && activeGenre === "All";
 
   if (loading) {
     return <CreatorsHubSkeleton />;
@@ -409,7 +462,7 @@ export default function CreatorsHubPage({
           </div>
         </SurfacePanel>
 
-        {featuredCreators.length > 0 ? (
+        {showFeaturedCreators && featuredCreators.length > 0 ? (
           <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
             <div className="flex items-end justify-between gap-3">
               <div>
@@ -442,66 +495,81 @@ export default function CreatorsHubPage({
               />
             </label>
 
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/42">
+            <div
+              role="group"
+              aria-labelledby="creator-type-filters-label"
+              aria-controls="creator-results-grid"
+              data-testid="creator-type-filters"
+              className="space-y-2"
+            >
+              <p
+                id="creator-type-filters-label"
+                className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
+              >
                 Profile type
               </p>
-              <div
-                role="group"
-                aria-label="Creator type filters"
-                aria-controls="creator-results-grid"
-                data-testid="creator-type-filters"
-                className="flex flex-wrap gap-2"
-              >
-                {roleFilters.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveRole(item.id)}
-                    aria-pressed={activeRole === item.id}
-                    aria-label={`Filter creators by ${item.label}`}
-                    className={filterButtonClass(activeRole === item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {roleFilters.map((item) => {
+                  const active = activeRole === item.id;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={buildCreatorsFilterHref({
+                        role: item.id,
+                        genre: activeGenre,
+                      })}
+                      aria-current={active ? "true" : undefined}
+                      className={filterButtonClass(active)}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {genreOptions.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-white/42">
+            <div
+              role="group"
+              aria-labelledby="creator-genre-filters-label"
+              aria-controls="creator-results-grid"
+              data-testid="creator-genre-filters"
+              className="space-y-2"
+            >
+              <p
+                id="creator-genre-filters-label"
+                className="text-xs font-medium uppercase tracking-[0.12em] text-white/42"
+              >
                 Genres
               </p>
-              <div
-                role="group"
-                aria-label="Creator genre filters"
-                aria-controls="creator-results-grid"
-                data-testid="creator-genre-filters"
-                className="flex flex-wrap gap-2"
-              >
-                <button
-                  type="button"
-                  onClick={() => setActiveGenre("All")}
-                  aria-pressed={activeGenre === "All"}
-                  aria-label="Filter creators by all genres"
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href={buildCreatorsFilterHref({
+                    role: activeRole,
+                    genre: "All",
+                  })}
+                  aria-current={activeGenre === "All" ? "true" : undefined}
                   className={filterButtonClass(activeGenre === "All")}
                 >
                   All
-                </button>
-                {genreOptions.map((genre) => (
-                  <button
-                    key={genre}
-                    type="button"
-                    onClick={() => setActiveGenre(genre)}
-                    aria-pressed={activeGenre === genre}
-                    aria-label={`Filter creators by ${genre}`}
-                    className={filterButtonClass(activeGenre === genre)}
-                  >
-                    {genre}
-                  </button>
-                ))}
+                </Link>
+                {genreOptions.map((genre) => {
+                  const active = activeGenre === genre;
+                  return (
+                    <Link
+                      key={genre}
+                      href={buildCreatorsFilterHref({
+                        role: activeRole,
+                        genre,
+                      })}
+                      aria-current={active ? "true" : undefined}
+                      className={filterButtonClass(active)}
+                    >
+                      {genre}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ) : null}
@@ -526,15 +594,11 @@ export default function CreatorsHubPage({
               appearance="dark"
               icon="search"
               eyebrow="No match"
-              title="No creators found."
+              title="No creators match these filters."
               description=""
               action={{
                 label: "Clear filters",
-                onClick: () => {
-                  setQuery("");
-                  setActiveRole("all");
-                  setActiveGenre("All");
-                },
+                href: "/creators",
               }}
             />
           </SurfacePanel>

@@ -3,7 +3,10 @@ import {
   getCreatorDisplayName,
 } from "./creators";
 import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
-import { filterBlockedPublicSeries } from "./publicCatalogVisibility";
+import {
+  filterBlockedPublicGenres,
+  filterBlockedPublicSeries,
+} from "./publicCatalogVisibility";
 
 function toNumber(value) {
   const parsed = Number(value);
@@ -58,6 +61,7 @@ function buildCreatorBucket(identity) {
     readerProof: 0,
     latestUpdatedAt: null,
     topGenres: [],
+    genres: [],
     spotlightSeries: null,
     series: [],
   };
@@ -132,9 +136,13 @@ export function buildCreatorDirectory(seriesList) {
         .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
         .map(([genre]) => genre)
         .slice(0, 3);
+      const genres = filterBlockedPublicGenres(
+        Array.from(genreCounts.keys()).sort((left, right) => left.localeCompare(right)),
+      );
 
       return {
         ...creator,
+        genres,
         topGenres,
         spotlightSeries: sortedSeries[0] || null,
         series: sortedSeries,
