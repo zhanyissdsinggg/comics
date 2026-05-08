@@ -7,7 +7,6 @@ import Cover from "../common/Cover";
 import EmptyState from "../common/EmptyState";
 import PortraitCard from "../home/PortraitCard";
 import { apiGet } from "../../lib/apiClient";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
   buildPathWithAttribution,
@@ -172,7 +171,6 @@ export default function CreatorPage({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const [catalog, setCatalog] = useState(
     Array.isArray(initialCatalog) ? initialCatalog : [],
   );
@@ -206,26 +204,19 @@ export default function CreatorPage({
   const fetchCreatorCatalog = useCallback(() => {
     requestRef.current += 1;
     const currentRequest = requestRef.current;
-    const adultFlag = isAdultMode ? "1" : "0";
 
     setLoading(true);
     setError("");
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then(
+    apiGet("/api/series?adult=0", { cacheMs: 30000 }).then(
       (response) => {
         if (currentRequest !== requestRef.current) {
           return;
         }
 
         if (!response.ok) {
-          if (response.error === "ADULT_GATED") {
-            forceDisableAdultMode();
-            setCatalog([]);
-            setError("");
-          } else {
-            setCatalog([]);
-            setError(response.error || "Unable to load creator page.");
-          }
+          setCatalog([]);
+          setError(response.error || "Unable to load creator page.");
           setLoading(false);
           return;
         }
@@ -239,7 +230,7 @@ export default function CreatorPage({
         setLoading(false);
       },
     );
-  }, [forceDisableAdultMode, isAdultMode]);
+  }, []);
 
   useEffect(() => {
     if (hasInitialCatalog) {

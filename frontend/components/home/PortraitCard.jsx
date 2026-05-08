@@ -97,14 +97,14 @@ function PortraitCard({
   const cardContent = (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
-        "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:translate-y-0.5",
+        "overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,21,38,0.98)_0%,rgba(15,13,26,0.98)_100%)] shadow-[0_18px_42px_rgba(8,6,20,0.24)]",
+        "transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/18 group-hover:shadow-[0_24px_50px_rgba(8,6,20,0.32)]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "relative aspect-[3/4] overflow-hidden rounded-[22px] border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+            "relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-[#0e0c18] shadow-[0_12px_28px_rgba(8,6,20,0.2)]",
           )}
         >
           <Cover
@@ -121,7 +121,7 @@ function PortraitCard({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]" />
-          <div className={cn("absolute inset-[1px]", "border border-white/40")} />
+          <div className={cn("absolute inset-[1px] rounded-[21px]", "border border-white/18")} />
 
           {typeof item.progressPercent === "number" &&
           item.progressPercent > 0 ? (
@@ -169,11 +169,11 @@ function PortraitCard({
               <span
                 key={pill.key}
                 className={cn(
-                  "inline-flex items-center whitespace-nowrap rounded-full border-2 border-black font-black uppercase shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                  "inline-flex items-center whitespace-nowrap rounded-full border font-semibold uppercase shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
                   isCompact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1 text-[11px]",
                   pill.tone === "danger"
-                    ? "bg-[#FF4D8D] text-white"
-                    : "bg-[#FFE500] text-black",
+                    ? "border-[rgba(255,152,189,0.24)] bg-[rgba(255,102,156,0.18)] text-[#ffd8e7]"
+                    : "border-[rgba(255,239,170,0.28)] bg-[rgba(255,231,128,0.16)] text-[#fff4bf]",
                 )}
               >
                 {pill.label}
@@ -222,8 +222,8 @@ function PortraitCard({
           ) : null}
           <span
             className={cn(
-              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
-              "transition-transform duration-150 group-hover:translate-x-0.5",
+              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[rgba(186,245,255,0.24)] bg-[rgba(163,241,255,0.12)] text-[#b9f4ff] shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
+              "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(163,241,255,0.16)]",
             )}
           >
             <ArrowRight className="size-4" />

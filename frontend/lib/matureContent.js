@@ -44,7 +44,10 @@ export function hasMatureTitles(items) {
 }
 
 export function shouldShowMatureFilter(items, flags = {}) {
-  return Boolean(flags.enabled ?? siteConfig.matureContent.enabled) || hasMatureTitles(items);
+  if (typeof flags.enabled === "boolean") {
+    return flags.enabled;
+  }
+  return Boolean(siteConfig.matureContent.enabled && hasMatureTitles(items));
 }
 
 export function appendMatureGenre(items, options = {}) {
@@ -89,6 +92,18 @@ export function canViewMatureContent(value) {
 }
 
 export function canReadMatureFromCookieStore(cookieStore) {
+  const statusCookie = String(
+    cookieStore?.get?.("mn_mature_status")?.value || "",
+  ).trim();
+  if (statusCookie) {
+    try {
+      const parsed = JSON.parse(statusCookie);
+      return Boolean(parsed?.verified) && Boolean(parsed?.matureModeEnabled);
+    } catch {
+      // Fall through to legacy cookie checks.
+    }
+  }
+
   const confirmed = String(cookieStore?.get?.("mn_adult_confirmed")?.value || "").trim() === "1";
   const enabled = String(cookieStore?.get?.("mn_adult_mode")?.value || "").trim() === "1";
   return confirmed && enabled;

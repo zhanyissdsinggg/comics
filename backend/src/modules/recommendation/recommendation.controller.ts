@@ -1,13 +1,17 @@
 import { Controller, Get, Header, Param, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { parseBool, resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { RecommendationService } from "./recommendation.service";
+import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Controller("recommendations")
 export class RecommendationController {
-  constructor(private readonly recommendationService: RecommendationService) {}
+  constructor(
+    private readonly recommendationService: RecommendationService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get("homepage")
   @Header("Cache-Control", "public, max-age=60, s-maxage=60")
@@ -18,7 +22,7 @@ export class RecommendationController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -43,7 +47,7 @@ export class RecommendationController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req?.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req || {});
       if (!gate.ok) {
         res?.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -77,7 +81,7 @@ export class RecommendationController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req?.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req || {});
       if (!gate.ok) {
         res?.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -108,7 +112,7 @@ export class RecommendationController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req?.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req || {});
       if (!gate.ok) {
         res?.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });

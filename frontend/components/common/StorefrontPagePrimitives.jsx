@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import SurfacePanel from "./SurfacePanel";
 
 export const storefrontPrimaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-black bg-[#00E5FF] px-5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] h-11";
+  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-[rgba(255,182,211,0.35)] bg-[linear-gradient(135deg,#ff7faa_0%,#ff8fcf_100%)] px-5 text-sm font-semibold tracking-[-0.01em] text-[#241221] shadow-[0_12px_30px_rgba(255,118,170,0.28)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(255,118,170,0.34)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]";
 
 export const storefrontSecondaryButtonClass =
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-white/20 bg-black px-5 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out outline-none select-none hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500] h-11";
+  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-5 text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_10px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c1f5ff]";
 
 export const storefrontInfoCardClass =
-  "rounded-[22px] border-2 border-white/20 bg-black px-5 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+  "rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-5 py-4 shadow-[0_14px_34px_rgba(8,6,20,0.22)]";
 
 export function StorefrontSectionHeading({
   eyebrow,
@@ -19,16 +19,16 @@ export function StorefrontSectionHeading({
   return (
     <div className={cn("space-y-3", className)}>
       {eyebrow ? (
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
           {eyebrow}
         </p>
       ) : null}
       <div>
-        <h2 className="text-[1.9rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
+        <h2 className="text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+          <p className="mt-3 text-sm leading-7 text-white/72">
             {description}
           </p>
         ) : null}
@@ -73,15 +73,15 @@ export function StorefrontInfoCard({
   return (
     <div className={cn(storefrontInfoCardClass, "text-white", className)}>
       {eyebrow ? (
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
           {eyebrow}
         </p>
       ) : null}
-      <h3 className="text-base font-black uppercase tracking-[-0.02em] text-white">
+      <h3 className="text-base font-semibold tracking-[-0.02em] text-white">
         {title}
       </h3>
       {description ? (
-        <p className="mt-3 text-sm font-semibold leading-7 text-white/72">
+        <p className="mt-3 text-sm leading-7 text-white/70">
           {description}
         </p>
       ) : null}

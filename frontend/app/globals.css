@@ -13,44 +13,44 @@
     var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
   --font-display: var(--font-ui-body), var(--font-body);
-  --gush-accent: #ff007a;
-  --gush-accent-strong: #e0006b;
-  --gush-accent-secondary: #00e5ff;
-  --gush-accent-tertiary: #ffe500;
-  --gush-page-bg: #ffffff;
-  --gush-page-bg-elevated: #ffffff;
-  --gush-page-bg-muted: #fff8dd;
-  --gush-surface: #ffffff;
-  --gush-surface-strong: #ffffff;
-  --gush-surface-muted: #fffdf7;
-  --gush-surface-accent: #fff0f7;
-  --gush-border: rgba(0, 0, 0, 0.14);
-  --gush-border-strong: rgba(0, 0, 0, 0.92);
-  --gush-border-faint: rgba(0, 0, 0, 0.08);
-  --gush-ink-strong: #000000;
-  --gush-ink: #171717;
-  --gush-ink-soft: rgba(0, 0, 0, 0.68);
-  --gush-ink-faint: rgba(0, 0, 0, 0.5);
-  --gush-success: #00c767;
-  --gush-warning: #ff9100;
-  --gush-danger: #e11d48;
-  --gush-shadow-soft: 4px 4px 0 0 rgba(0, 0, 0, 1);
-  --gush-shadow-panel: 10px 10px 0 0 rgba(0, 0, 0, 1);
-  --gush-shadow-floating: 8px 8px 0 0 rgba(0, 0, 0, 1);
-  --gush-shadow-button: 4px 4px 0 0 rgba(0, 0, 0, 1);
-  --gush-shadow-card: 6px 6px 0 0 rgba(0, 0, 0, 1);
-  --gush-shadow-header: 0 8px 0 0 rgba(0, 0, 0, 1);
-  --gush-radius-sm: 0px;
-  --gush-radius-md: 0px;
-  --gush-radius-lg: 0px;
-  --gush-radius-xl: 0px;
-  --gush-home-bg: #ffffff;
-  --gush-home-surface: #ffffff;
-  --gush-home-surface-strong: #ffffff;
-  --gush-home-border: rgba(0, 0, 0, 0.12);
-  --gush-home-ink: #000000;
-  --gush-home-ink-soft: rgba(0, 0, 0, 0.68);
-  --gush-home-accent: #ff007a;
+  --gush-accent: #f47aa6;
+  --gush-accent-strong: #df5c92;
+  --gush-accent-secondary: #7be6f3;
+  --gush-accent-tertiary: #b6f0d4;
+  --gush-page-bg: #fbf5ef;
+  --gush-page-bg-elevated: #fffaf6;
+  --gush-page-bg-muted: #f6ecdf;
+  --gush-surface: rgba(255, 250, 246, 0.92);
+  --gush-surface-strong: rgba(255, 252, 248, 0.98);
+  --gush-surface-muted: rgba(249, 241, 233, 0.92);
+  --gush-surface-accent: rgba(255, 240, 246, 0.92);
+  --gush-border: rgba(58, 44, 86, 0.12);
+  --gush-border-strong: rgba(33, 24, 49, 0.22);
+  --gush-border-faint: rgba(58, 44, 86, 0.08);
+  --gush-ink-strong: #181220;
+  --gush-ink: #2f2740;
+  --gush-ink-soft: rgba(47, 39, 64, 0.72);
+  --gush-ink-faint: rgba(47, 39, 64, 0.5);
+  --gush-success: #37bf8f;
+  --gush-warning: #ffb35c;
+  --gush-danger: #df688f;
+  --gush-shadow-soft: 0 10px 26px rgba(87, 62, 108, 0.12);
+  --gush-shadow-panel: 0 18px 44px rgba(87, 62, 108, 0.14);
+  --gush-shadow-floating: 0 24px 64px rgba(87, 62, 108, 0.18);
+  --gush-shadow-button: 0 12px 26px rgba(244, 122, 166, 0.22);
+  --gush-shadow-card: 0 18px 40px rgba(87, 62, 108, 0.14);
+  --gush-shadow-header: 0 12px 32px rgba(87, 62, 108, 0.1);
+  --gush-radius-sm: 16px;
+  --gush-radius-md: 20px;
+  --gush-radius-lg: 24px;
+  --gush-radius-xl: 28px;
+  --gush-home-bg: #fbf5ef;
+  --gush-home-surface: rgba(255, 250, 246, 0.95);
+  --gush-home-surface-strong: rgba(255, 252, 248, 0.98);
+  --gush-home-border: rgba(58, 44, 86, 0.12);
+  --gush-home-ink: #181220;
+  --gush-home-ink-soft: rgba(47, 39, 64, 0.7);
+  --gush-home-accent: #f47aa6;
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
@@ -69,33 +69,33 @@
 
 html.dark {
   color-scheme: dark;
-  --gush-accent: #ff4aa4;
-  --gush-accent-strong: #ff6cb6;
-  --gush-accent-secondary: #2befff;
-  --gush-accent-tertiary: #ffe500;
-  --gush-page-bg: #080808;
-  --gush-page-bg-elevated: #111111;
-  --gush-page-bg-muted: #181818;
-  --gush-surface: #111111;
-  --gush-surface-strong: #121212;
-  --gush-surface-muted: #181818;
-  --gush-surface-accent: #29101f;
-  --gush-border: rgba(255, 255, 255, 0.16);
-  --gush-border-strong: rgba(255, 255, 255, 0.94);
-  --gush-border-faint: rgba(255, 255, 255, 0.08);
-  --gush-ink-strong: #ffffff;
-  --gush-ink: #f3f3f3;
-  --gush-ink-soft: rgba(255, 255, 255, 0.74);
-  --gush-ink-faint: rgba(255, 255, 255, 0.52);
-  --gush-success: #00d47e;
-  --gush-warning: #ffb300;
-  --gush-danger: #ff5f8a;
-  --gush-shadow-soft: 4px 4px 0 0 rgba(255, 255, 255, 0.18);
-  --gush-shadow-panel: 10px 10px 0 0 rgba(255, 255, 255, 0.18);
-  --gush-shadow-floating: 8px 8px 0 0 rgba(255, 255, 255, 0.16);
-  --gush-shadow-button: 4px 4px 0 0 rgba(255, 255, 255, 0.16);
-  --gush-shadow-card: 6px 6px 0 0 rgba(255, 255, 255, 0.16);
-  --gush-shadow-header: 0 8px 0 0 rgba(255, 255, 255, 0.16);
+  --gush-accent: #f589b1;
+  --gush-accent-strong: #ffabc8;
+  --gush-accent-secondary: #8be9f6;
+  --gush-accent-tertiary: #9ce9c7;
+  --gush-page-bg: #120f1c;
+  --gush-page-bg-elevated: #171320;
+  --gush-page-bg-muted: #1e1829;
+  --gush-surface: rgba(20, 18, 33, 0.88);
+  --gush-surface-strong: rgba(26, 23, 40, 0.96);
+  --gush-surface-muted: rgba(23, 20, 36, 0.9);
+  --gush-surface-accent: rgba(43, 27, 42, 0.92);
+  --gush-border: rgba(255, 255, 255, 0.1);
+  --gush-border-strong: rgba(255, 255, 255, 0.18);
+  --gush-border-faint: rgba(255, 255, 255, 0.06);
+  --gush-ink-strong: #f7f2ff;
+  --gush-ink: #f1ecfb;
+  --gush-ink-soft: rgba(241, 236, 251, 0.76);
+  --gush-ink-faint: rgba(241, 236, 251, 0.5);
+  --gush-success: #59d5a0;
+  --gush-warning: #ffc07a;
+  --gush-danger: #ff88b1;
+  --gush-shadow-soft: 0 12px 28px rgba(3, 2, 8, 0.3);
+  --gush-shadow-panel: 0 22px 56px rgba(3, 2, 8, 0.34);
+  --gush-shadow-floating: 0 32px 74px rgba(3, 2, 8, 0.42);
+  --gush-shadow-button: 0 16px 30px rgba(245, 137, 177, 0.22);
+  --gush-shadow-card: 0 18px 42px rgba(3, 2, 8, 0.34);
+  --gush-shadow-header: 0 14px 36px rgba(3, 2, 8, 0.22);
 }
 
 html.light {
@@ -130,8 +130,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at top right, rgba(255, 229, 0, 0.18), transparent 28%),
-    radial-gradient(circle at top left, rgba(255, 0, 122, 0.14), transparent 34%);
+    radial-gradient(circle at top right, rgba(182, 240, 212, 0.18), transparent 28%),
+    radial-gradient(circle at top left, rgba(244, 122, 166, 0.12), transparent 34%),
+    radial-gradient(circle at 55% 10%, rgba(188, 166, 255, 0.1), transparent 30%);
   opacity: 0.85;
   z-index: 0;
 }
@@ -142,9 +143,10 @@ html.dark body {
 
 html.dark body::before {
   background:
-    radial-gradient(circle at top right, rgba(255, 229, 0, 0.18), transparent 28%),
-    radial-gradient(circle at top left, rgba(255, 0, 122, 0.14), transparent 34%);
-  opacity: 0.42;
+    radial-gradient(circle at top right, rgba(139, 233, 246, 0.16), transparent 26%),
+    radial-gradient(circle at top left, rgba(245, 137, 177, 0.16), transparent 34%),
+    radial-gradient(circle at 55% 12%, rgba(188, 166, 255, 0.14), transparent 32%);
+  opacity: 0.58;
 }
 
 * {
@@ -192,8 +194,9 @@ main {
 
   body::before {
     background:
-      radial-gradient(circle at top right, rgba(255, 229, 0, 0.12), transparent 24%),
-      radial-gradient(circle at top left, rgba(255, 0, 122, 0.1), transparent 28%);
+      radial-gradient(circle at top right, rgba(182, 240, 212, 0.12), transparent 24%),
+      radial-gradient(circle at top left, rgba(244, 122, 166, 0.1), transparent 28%),
+      radial-gradient(circle at 50% 10%, rgba(188, 166, 255, 0.08), transparent 24%);
     opacity: 0.78;
   }
 }
@@ -261,7 +264,7 @@ button:disabled,
 
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(255, 0, 122, 0.18);
+  box-shadow: 0 0 0 4px rgba(244, 122, 166, 0.2);
 }
 
 input,

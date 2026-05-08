@@ -2,7 +2,7 @@ import { Controller, Get, Logger, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { StatsService } from "../../common/services/stats.service";
 import { getUserIdFromRequest } from "../../common/utils/auth";
-import { checkAdultGate } from "../../common/utils/adult-gate";
+import { resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { EpisodeService } from "./episode.service";
@@ -60,7 +60,7 @@ export class EpisodeController {
       }
 
       if (series.adult) {
-        const gate = checkAdultGate(req.cookies || {});
+        const gate = await resolveAdultGateContext(this.prisma, req);
         if (!gate.ok) {
           res.status(403);
           return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });

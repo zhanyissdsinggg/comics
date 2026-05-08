@@ -9,7 +9,6 @@ import { apiGet } from "../../lib/apiClient";
 import { parallelRequests3 } from "../../lib/parallelRequests";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 
 const HomeDataContext = createContext(null);
 
@@ -22,7 +21,6 @@ export function useHomeData() {
 }
 
 export function HomeDataProvider({ children, initialData = null }) {
-  const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const { shouldRetry } = useRetryPolicy();
   const requestRef = useRef(0);
   const initialSeriesList = Array.isArray(initialData?.seriesList) ? initialData.seriesList : [];
@@ -42,7 +40,7 @@ export function HomeDataProvider({ children, initialData = null }) {
   useEffect(() => {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
-    const adultFlag = isAdultMode ? "1" : "0";
+    const adultFlag = "0";
     if (!hasInitialData) {
       setLoading(true);
     }
@@ -77,9 +75,6 @@ export function HomeDataProvider({ children, initialData = null }) {
               }
             });
           }
-        } else if (nextSeriesResponse.error === "ADULT_GATED") {
-          forceDisableAdultMode();
-          setSeriesList([]);
         } else if (nextSeriesResponse.status === 0 || nextSeriesResponse.status >= 500) {
           if (shouldRetry(`home_series_${adultFlag}`)) {
             setTimeout(() => {
@@ -113,9 +108,6 @@ export function HomeDataProvider({ children, initialData = null }) {
               setHotKeywords(freshResponse.data?.keywords || []);
             });
           }
-        } else if (nextHotKeywordsResponse.error === "ADULT_GATED") {
-          forceDisableAdultMode();
-          setHotKeywords([]);
         }
 
         if (nextHomepageSlotsResponse.ok) {
@@ -132,9 +124,6 @@ export function HomeDataProvider({ children, initialData = null }) {
               setHomepageSlots(freshResponse.data?.slots || []);
             });
           }
-        } else if (nextHomepageSlotsResponse.error === "ADULT_GATED") {
-          forceDisableAdultMode();
-          setHomepageSlots([]);
         } else {
           setHomepageSlots([]);
         }
@@ -144,7 +133,7 @@ export function HomeDataProvider({ children, initialData = null }) {
           setLoading(false);
         }
       });
-  }, [forceDisableAdultMode, hasInitialData, hotWindow, isAdultMode, shouldRetry]);
+  }, [hasInitialData, hotWindow, shouldRetry]);
 
   return (
     <HomeDataContext.Provider

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
+import PortraitCard from "./PortraitCard";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
 import { buildHomeHeroItems, getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
@@ -15,7 +16,6 @@ import { normalizeGenreList } from "../../lib/coverPresentation";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
-  formatInstallmentCount,
   getStartReadingLabel,
 } from "../../lib/seriesFormatLabels";
 import {
@@ -23,11 +23,21 @@ import {
   formatTitleCardFormatStatus,
   formatTitleCardGenres,
 } from "../../lib/titleCardText";
-import { cn } from "@/lib/utils";
 
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
 });
+
+const VIBE_OPTIONS = [
+  "Romance",
+  "Fantasy",
+  "School life",
+  "Action",
+  "Funny",
+  "Dark",
+  "Quick read",
+  "Binge-worthy",
+];
 
 function toTimestamp(value) {
   const parsed = typeof value === "number" ? value : Date.parse(value || "");
@@ -60,11 +70,11 @@ function buildHeroSummary(series) {
   const normalized = String(raw).replace(/\s+/g, " ").trim();
 
   if (!normalized) {
-    return "A good place to start when you want one story worth opening right now.";
+    return "One standout story for right now.";
   }
 
   const sentence = normalized.match(/[^.!?]+[.!?]?/u)?.[0]?.trim() || normalized;
-  return sentence.length > 110 ? `${sentence.slice(0, 107).trimEnd()}...` : sentence;
+  return sentence.length > 108 ? `${sentence.slice(0, 105).trimEnd()}...` : sentence;
 }
 
 function getPrimaryGenres(genres, limit = 3) {
@@ -82,17 +92,17 @@ function buildSeriesMeta(series) {
   ]
     .filter(Boolean)
     .slice(0, 2)
-    .join(" · ");
+    .join(" / ");
 }
 
 function buildUpdatedLabel(series) {
   const updatedAtMs = toTimestamp(series?.updatedAt);
   if (!updatedAtMs) {
-    return "New release";
+    return "Fresh drop";
   }
 
   if (updatedAtMs >= Date.now() - 24 * 60 * 60 * 1000) {
-    return "Updated Today";
+    return "Updated today";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -101,17 +111,23 @@ function buildUpdatedLabel(series) {
   }).format(new Date(updatedAtMs));
 }
 
-function buildSeriesCardLabel(series, section) {
+function buildSeriesSignal(series, section) {
+  const updatedAtLabel = buildUpdatedLabel(series);
+  const installmentCount = Math.max(0, Number(series?.episodeCount || 0));
+
   if (section === "completed") {
-    return "Finished Series";
+    return "Binge-worthy";
   }
-
   if (section === "updates") {
-    return buildUpdatedLabel(series);
+    return updatedAtLabel;
   }
-
-  const genres = getPrimaryGenres(series?.genres, 1);
-  return genres[0] || "Trending";
+  if (installmentCount > 0 && installmentCount <= 12) {
+    return "Quick read";
+  }
+  if (String(series?.status || "").toLowerCase() === "completed") {
+    return "Complete";
+  }
+  return "Hot this week";
 }
 
 function buildCoverAltText(series) {
@@ -258,6 +274,35 @@ function createCanonicalHomeView(seriesList, homepageSlots, preferredFeaturedSer
   };
 }
 
+function VibeChips({ items, onSelect }) {
+  return (
+    <section className="space-y-3">
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-ink-faint)]">
+          Choose your vibe
+        </p>
+        <h2 className="text-[1.35rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
+          Pick a mood. Keep it moving.
+        </h2>
+      </div>
+      <div className="-mx-4 overflow-x-auto px-4 no-scrollbar overscroll-x-contain sm:mx-0 sm:px-0">
+        <div className="flex min-w-max gap-2.5 pb-1">
+          {items.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onSelect(item)}
+              className="shrink-0 rounded-full border border-[var(--gush-border)] bg-[var(--gush-surface-strong)] px-4 py-2.5 text-sm font-medium text-[var(--gush-ink)] shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[rgba(244,122,166,0.28)] hover:bg-[var(--gush-surface-accent)]"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomeSection({
   title,
   description,
@@ -270,28 +315,26 @@ function HomeSection({
     return null;
   }
 
-  const sectionGridClass =
-    section === "completed"
-      ? "grid-cols-2 md:grid-cols-4"
-      : "grid-cols-2 md:grid-cols-3";
-
   return (
-    <section className="border-t border-white/10 py-8 sm:py-10">
-      <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
-        <div className="space-y-1.5">
-          <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-white sm:text-[1.55rem]">
-            {title}
-          </h2>
-          {description ? (
-            <p className="max-w-[30rem] text-sm leading-6 text-white/60">
-              {description}
-            </p>
-          ) : null}
+    <section className="space-y-4">
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--gush-ink-faint)]">
+            Shelf
+          </p>
+          <div>
+            <h2 className="text-[1.45rem] font-semibold tracking-[-0.05em] text-[var(--gush-ink-strong)]">
+              {title}
+            </h2>
+            {description ? (
+              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">{description}</p>
+            ) : null}
+          </div>
         </div>
         {ctaHref ? (
           <Link
             href={ctaHref}
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white"
+            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--gush-ink-soft)] transition-colors hover:text-[var(--gush-ink-strong)]"
           >
             {ctaLabel}
             <ArrowRight className="size-4" />
@@ -299,68 +342,61 @@ function HomeSection({
         ) : null}
       </div>
 
-      <div className={cn("grid gap-3 sm:gap-4", sectionGridClass)}>
-        {items.map((series) => {
-          const title = String(series?.title || "Story").trim();
-          const creatorName = resolveSeriesCreatorName(series);
-          const formatStatusLine = formatTitleCardFormatStatus(
-            series?.type,
-            series?.status,
-          );
-          const genreLine = formatTitleCardGenres(series?.genres, { limit: 3 });
-          const creatorLine = formatTitleCardCreator(creatorName);
+      <div className="-mx-4 overflow-x-auto px-4 pb-2 no-scrollbar overscroll-x-contain sm:mx-0 sm:px-0">
+        <div className="flex min-w-max gap-3 sm:gap-4">
+          {items.map((series) => {
+            const creatorName = resolveSeriesCreatorName(series);
+            const formatStatusLine = formatTitleCardFormatStatus(
+              series?.type,
+              series?.status,
+            );
+            const genreLine = formatTitleCardGenres(series?.genres, { limit: 3 });
+            const creatorLine = formatTitleCardCreator(creatorName);
+            const signal = buildSeriesSignal(series, section);
 
-          return (
-            <Link
-              key={series.id}
-              href={`/series/${encodeURIComponent(series.id)}`}
-              className="group overflow-hidden rounded-[22px] border border-white/10 bg-[#111111] text-left transition-all duration-200 hover:border-white/18 hover:bg-[#171717]"
-            >
-              <div className="relative aspect-[3/4] overflow-hidden bg-[#0b0b0b]">
-                {series?.coverUrl ? (
-                  <Image
-                    src={series.coverUrl}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    sizes="(max-width: 768px) 45vw, 240px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-[linear-gradient(180deg,#171717,#0b0b0b)]" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-              </div>
-
-              <div className="space-y-2.5 p-3 sm:p-4">
-                <div className="space-y-1">
-                  <p className="line-clamp-2 text-[0.98rem] font-semibold leading-5 tracking-[-0.02em] text-white sm:text-[1.04rem]">
-                    {title}
-                  </p>
+            return (
+              <div
+                key={series.id}
+                className="w-[156px] shrink-0 sm:w-[188px] lg:w-[208px]"
+              >
+                <PortraitCard
+                  item={{
+                    id: series.id,
+                    title: series.title,
+                    subtitle: "",
+                    genres: Array.isArray(series?.genres) ? series.genres : [],
+                    type: series?.type || "",
+                    seriesType: series?.type || "",
+                    status: series?.status || "",
+                    coverUrl: series.coverUrl,
+                    coverTone: series.coverTone,
+                    badge: "",
+                  }}
+                  tone={series.coverTone}
+                  href={`/series/${encodeURIComponent(series.id)}`}
+                  density="compact"
+                  actionLabel="Start reading"
+                />
+                <div className="mt-2 space-y-1 px-1">
                   {formatStatusLine ? (
-                    <p className="line-clamp-1 text-xs uppercase tracking-[0.12em] text-white/55">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--gush-ink-faint)]">
                       {formatStatusLine}
                     </p>
                   ) : null}
-                </div>
-
-                {genreLine ? (
-                  <p className="line-clamp-2 text-xs leading-5 text-white/68">
-                    {genreLine}
+                  {genreLine ? (
+                    <p className="line-clamp-2 text-xs text-[var(--gush-ink-soft)]">
+                      {genreLine}
+                    </p>
+                  ) : null}
+                  <p className="text-xs text-[var(--gush-ink-faint)]">
+                    {signal}
+                    {creatorLine ? ` • ${creatorLine}` : ""}
                   </p>
-                ) : null}
-
-                {creatorLine ? (
-                  <p className="line-clamp-1 text-xs text-white/48">{creatorLine}</p>
-                ) : null}
-
-                <span className="inline-flex text-xs font-medium uppercase tracking-[0.12em] text-white/60">
-                  Read more
-                </span>
+                </div>
               </div>
-            </Link>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -368,15 +404,7 @@ function HomeSection({
 
 function HomeHero({ featuredSeries, featuredReadHref }) {
   if (!featuredSeries) {
-    return (
-      <section className="border-b border-white/10 bg-[#0b0b0b]">
-        <div className="mx-auto max-w-[1180px] px-4 py-10 sm:px-6 sm:py-14">
-          <div className="rounded-[28px] border border-white/10 bg-[#111111] p-6 sm:p-8">
-            <p className="text-sm text-white/65">Nothing featured yet.</p>
-          </div>
-        </div>
-      </section>
-    );
+    return null;
   }
 
   const title = String(featuredSeries?.title || "Featured").trim();
@@ -386,17 +414,18 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
   const meta = buildSeriesMeta(featuredSeries);
 
   return (
-    <section className="border-b border-white/10 bg-[radial-gradient(circle_at_top,#1a1a1a_0%,#0b0b0b_55%,#050505_100%)]">
-      <div className="mx-auto grid max-w-[1180px] gap-6 px-4 py-6 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:gap-10">
-        <div className="order-2 space-y-5 lg:order-1 lg:space-y-6">
-          <div className="space-y-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
-              Featured
+    <section className="relative overflow-hidden rounded-[32px] border border-[rgba(244,122,166,0.18)] bg-[linear-gradient(135deg,rgba(255,247,244,0.98)_0%,rgba(255,239,246,0.92)_42%,rgba(240,248,250,0.94)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:p-6 lg:p-7">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(123,230,243,0.24),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(244,122,166,0.18),transparent_28%),radial-gradient(circle_at_50%_50%,rgba(188,166,255,0.12),transparent_34%)]" />
+      <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_178px] lg:items-center xl:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <p className="inline-flex rounded-full border border-[rgba(244,122,166,0.18)] bg-white/65 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--gush-ink-faint)]">
+              Today’s Pick
             </p>
-            <h1 className="max-w-[11ch] text-[2rem] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-[2.75rem] lg:text-[3.5rem]">
+            <h1 className="max-w-[12ch] text-[2.25rem] font-semibold leading-[0.92] tracking-[-0.06em] text-[var(--gush-ink-strong)] sm:text-[2.8rem]">
               {title}
             </h1>
-            <p className="max-w-[34rem] text-[0.96rem] leading-7 text-white/68 sm:text-[1rem]">
+            <p className="max-w-[34rem] text-[0.98rem] leading-7 text-[var(--gush-ink-soft)]">
               {summary}
             </p>
           </div>
@@ -406,7 +435,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
               {genres.map((genre) => (
                 <span
                   key={`featured-${genre}`}
-                  className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-white/82"
+                  className="rounded-full border border-[rgba(47,39,64,0.1)] bg-white/72 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--gush-ink)]"
                 >
                   {genre}
                 </span>
@@ -415,45 +444,51 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
           ) : null}
 
           {meta ? (
-            <p className="text-sm text-white/45">{meta}</p>
+            <p className="text-sm text-[var(--gush-ink-faint)]">{meta}</p>
           ) : creatorName ? (
-            <p className="text-sm text-white/45">{creatorName}</p>
+            <p className="text-sm text-[var(--gush-ink-faint)]">{creatorName}</p>
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
               href={featuredReadHref}
               data-testid="home-hero-primary-cta"
-              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.01]"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-[rgba(244,122,166,0.24)] bg-[linear-gradient(135deg,#f47aa6_0%,#ff98bd_100%)] px-6 text-sm font-semibold text-[#23111d] shadow-[var(--gush-shadow-button)] transition-all duration-150 hover:-translate-y-0.5"
             >
-              {getStartReadingLabel(featuredSeries, 1)} Free
+              {getStartReadingLabel(featuredSeries, 1) || "Start reading"}
               <ArrowRight className="size-4" />
             </Link>
             <Link
-              href="/comics"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/14 bg-white/[0.03] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.06] hover:text-white"
+              href={`/series/${encodeURIComponent(featuredSeries.id)}`}
+              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-[var(--gush-border)] bg-white/72 px-5 text-sm font-medium text-[var(--gush-ink)] transition-colors hover:bg-white"
             >
-              Browse Comics
+              Add to Library
+              <Plus className="size-4" />
             </Link>
           </div>
         </div>
 
-        <div className="order-1 mx-auto w-full max-w-[260px] lg:order-2 lg:max-w-[320px]">
-          <div className="relative aspect-[3/4] overflow-hidden rounded-[26px] border border-white/12 bg-[#111111] shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
+        <div className="mx-auto w-full max-w-[178px] lg:max-w-[220px]">
+          <div className="relative aspect-[3/4] overflow-hidden rounded-[26px] border border-white/50 bg-[rgba(255,255,255,0.7)] shadow-[0_18px_44px_rgba(82,63,108,0.22)]">
             {featuredSeries?.coverUrl ? (
               <Image
                 src={featuredSeries.coverUrl}
                 alt={buildCoverAltText(featuredSeries)}
                 fill
-                sizes="(max-width: 1024px) 260px, 320px"
+                sizes="(max-width: 1024px) 178px, 220px"
                 className="object-cover"
                 priority
               />
             ) : (
-              <div className="h-full w-full bg-[linear-gradient(180deg,#181818,#0b0b0b)]" />
+              <div className="h-full w-full bg-[linear-gradient(180deg,#f6dce9,#dbeef4)]" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1424]/18 via-transparent to-white/20" />
           </div>
+          <p className="mt-3 text-center text-xs text-[var(--gush-ink-faint)]">
+            {Array.isArray(featuredSeries?.genres) && featuredSeries.genres.length > 0
+              ? featuredSeries.genres.slice(0, 2).join(" • ")
+              : buildUpdatedLabel(featuredSeries)}
+          </p>
         </div>
       </div>
     </section>
@@ -512,19 +547,10 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
   }, []);
 
   useEffect(() => {
-    if (canonicalHomeView.featuredSeries || !seriesList.length) {
-      return;
-    }
-
     setCanonicalHomeView(
       createCanonicalHomeView(seriesList, homepageSlots, initialFeaturedSeriesId),
     );
-  }, [
-    canonicalHomeView.featuredSeries,
-    homepageSlots,
-    initialFeaturedSeriesId,
-    seriesList,
-  ]);
+  }, [homepageSlots, initialFeaturedSeriesId, seriesList]);
 
   useEffect(() => {
     const featuredSeriesId = String(canonicalHomeView.featuredSeries?.id || "").trim();
@@ -568,53 +594,106 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
   }, [canonicalHomeView.featuredSeries, featuredReadHref]);
 
   const { featuredSeries, trendingItems, newUpdateItems, completedItems } = canonicalHomeView;
+  const editorialSnapshot = useMemo(
+    () => getHomeEditorialSnapshot(seriesList, { homepageSlots }),
+    [homepageSlots, seriesList],
+  );
+
+  const handleVibeSelect = (vibe) => {
+    const normalized = String(vibe || "").trim().toLowerCase();
+    if (normalized === "quick read") {
+      router.push("/search?status=ongoing");
+      return;
+    }
+    if (normalized === "binge-worthy") {
+      router.push("/search?status=completed");
+      return;
+    }
+    router.push(`/search?genre=${encodeURIComponent(vibe)}`);
+  };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      <main>
-        {loading ? (
-          <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
-            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#111111] p-5 sm:p-7">
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
+    <div className="min-h-screen bg-[var(--gush-home-bg)] text-[var(--gush-home-ink)]">
+      <main className="mx-auto max-w-[1180px] px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7">
+        <div className="space-y-6 sm:space-y-8">
+          {loading ? (
+            <div className="overflow-hidden rounded-[32px] border border-[var(--gush-border)] bg-[var(--gush-home-surface)] p-5 shadow-[var(--gush-shadow-panel)] sm:p-7">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center">
                 <div className="space-y-4">
-                  <div className="h-4 w-20 animate-pulse rounded-full bg-white/10" />
-                  <div className="h-16 max-w-[24rem] animate-pulse rounded-[18px] bg-white/10" />
-                  <div className="h-20 max-w-[34rem] animate-pulse rounded-[18px] bg-white/[0.06]" />
-                  <div className="h-12 w-44 animate-pulse rounded-full bg-white/10" />
+                  <div className="h-4 w-28 animate-pulse rounded-full bg-[rgba(47,39,64,0.08)]" />
+                  <div className="h-16 max-w-[24rem] animate-pulse rounded-[18px] bg-[rgba(47,39,64,0.08)]" />
+                  <div className="h-20 max-w-[34rem] animate-pulse rounded-[18px] bg-[rgba(47,39,64,0.06)]" />
+                  <div className="h-12 w-44 animate-pulse rounded-full bg-[rgba(244,122,166,0.16)]" />
                 </div>
-                <div className="mx-auto aspect-[3/4] w-full max-w-[260px] animate-pulse rounded-[24px] bg-white/[0.06]" />
+                <div className="mx-auto aspect-[3/4] w-full max-w-[180px] animate-pulse rounded-[24px] bg-[rgba(47,39,64,0.08)]" />
               </div>
             </div>
-          </div>
-        ) : (
-          <HomeHero
-            featuredSeries={featuredSeries}
-            featuredReadHref={featuredReadHref}
-          />
-        )}
+          ) : (
+            <HomeHero
+              featuredSeries={featuredSeries}
+              featuredReadHref={featuredReadHref}
+            />
+          )}
 
-        <div className="mx-auto max-w-[1180px] px-4 pb-10 pt-2 sm:px-6 sm:pb-14 sm:pt-4">
+          <section className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[24px] border border-[var(--gush-border)] bg-[var(--gush-home-surface-strong)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--gush-ink-faint)]">
+                Live now
+              </p>
+              <p className="mt-2 text-[1.55rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
+                {editorialSnapshot.seriesCount.toLocaleString()}
+              </p>
+              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
+                Comics and novels in one feed.
+              </p>
+            </div>
+            <div className="rounded-[24px] border border-[var(--gush-border)] bg-[var(--gush-home-surface-strong)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--gush-ink-faint)]">
+                Fresh drops
+              </p>
+              <p className="mt-2 text-[1.55rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
+                {editorialSnapshot.newCount.toLocaleString()}
+              </p>
+              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
+                Recently updated stories worth checking first.
+              </p>
+            </div>
+            <div className="rounded-[24px] border border-[var(--gush-border)] bg-[var(--gush-home-surface-strong)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--gush-ink-faint)]">
+                Genre mix
+              </p>
+              <p className="mt-2 text-[1.55rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
+                {editorialSnapshot.genreCount.toLocaleString()}
+              </p>
+              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
+                Romance, school life, fantasy, thriller, and more.
+              </p>
+            </div>
+          </section>
+
+          <VibeChips items={VIBE_OPTIONS} onSelect={handleVibeSelect} />
+
           <HomeSection
-            title="Trending now"
-            description="Start here if you want the stories people are opening first."
+            title="Hot this week"
+            description="The stories readers are opening first."
             ctaLabel="See all"
             ctaHref="/rankings"
             items={trendingItems}
             section="trending"
           />
           <HomeSection
-            title="New updates"
-            description="Fresh updates and recent drops."
+            title="Fresh drops"
+            description="Recent updates, quick returns, and new chapter energy."
             ctaLabel="Browse all"
-            ctaHref="/search?sort=updated"
+            ctaHref="/search?status=ongoing"
             items={newUpdateItems}
             section="updates"
           />
           <HomeSection
-            title="Completed reads"
-            description="Finished stories when you want a full binge."
-            ctaLabel="More finished series"
-            ctaHref="/search?status=Completed&sort=popular"
+            title="Binge-ready"
+            description="Completed stories when you want the full run."
+            ctaLabel="More finished reads"
+            ctaHref="/search?status=completed"
             items={completedItems}
             section="completed"
           />

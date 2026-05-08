@@ -55,6 +55,12 @@ npm run build
 Builds the frontend first, then the backend.
 
 ```bash
+npm run smoke:routes
+```
+
+Runs the root storefront route smoke by delegating to the existing frontend route smoke suite.
+
+```bash
 BACKEND_URL=https://comics-production-07fa.up.railway.app \
 OPS_ADMIN_KEY=<production-admin-key> \
 OPS_ADMIN_WRITE_ALLOWED=1 \
@@ -128,6 +134,13 @@ npm run smoke:routes
 ```
 
 The storefront is the public product surface. Keep UI experiments inside the existing component system instead of creating parallel one-off components.
+
+Storefront and Mature Mode guardrails:
+
+- Public home, search, rankings, library, comics, novels, and creator surfaces must keep mature catalog entries hidden by default.
+- `/adult`, `/adult-gate`, and `/mature-content` stay within the existing route structure and must remain `noindex`.
+- Mature access is decided server-side from session plus verification state, not from a raw `adult=1` query flag alone.
+- Mature reading history and mode state stay isolated from the public library and public search flows.
 
 ## Backend workspace
 

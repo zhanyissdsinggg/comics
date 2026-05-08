@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { MoonStar, ShieldCheck, ToggleLeft } from "lucide-react";
 import Rail from "../home/Rail";
 import Skeleton from "../common/Skeleton";
-import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import EmptyState from "../common/EmptyState";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -39,7 +40,7 @@ function getPopularityScore(series) {
   );
 }
 
-function mapAdultItem(series, subtitle) {
+function mapAdultItem(series, subtitle, signal) {
   return {
     id: series.id,
     seriesId: series.id,
@@ -47,7 +48,11 @@ function mapAdultItem(series, subtitle) {
     subtitle,
     coverTone: series.coverTone,
     coverUrl: series.coverUrl,
-    badge: series.badge || "18+",
+    badge: "",
+    genres: Array.isArray(series?.genres) ? series.genres : [],
+    seriesType: series?.type || "",
+    status: series?.status || "",
+    statusLabel: signal,
   };
 }
 
@@ -107,20 +112,20 @@ export default function AdultHubPage() {
     }
     if (!response.ok) {
       setAuthError("Invalid email or password.");
-      return;
+      return response;
     }
     const status = requestAdultToggle(true);
     if (status === "NEED_AGE_CONFIRM") {
       setActiveModal("age");
-      return;
+      return response;
     }
     setActiveModal(null);
     return response;
   };
 
-  const handleAgeConfirm = (ruleKey) => {
+  const handleAgeConfirm = async (ruleKey) => {
     trackEvent("adult_gate_confirm", { source: "adult-hub", ruleKey });
-    confirmAge(ruleKey);
+    await confirmAge(ruleKey);
     setActiveModal(null);
     trackEvent("adult_gate_enabled", { source: "adult-hub" });
   };
@@ -217,7 +222,8 @@ export default function AdultHubPage() {
         .map((series) =>
           mapAdultItem(
             series,
-            series.genres?.slice(0, 2).join(" | ") || "18+ title",
+            series.genres?.slice(0, 2).join(" / ") || "Mature title",
+            "Hot this week",
           ),
         ),
     [seriesList],
@@ -230,121 +236,102 @@ export default function AdultHubPage() {
           (series) => String(series.status || "").toLowerCase() === "completed",
         )
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, "Completed")),
+        .map((series) => mapAdultItem(series, "Completed", "Binge-worthy")),
     [seriesList],
   );
 
-  const freeUnlockItems = useMemo(
+  const recentItems = useMemo(
     () =>
-      seriesList
-        .filter((series) => series.ttf?.enabled)
+      [...seriesList]
+        .sort(
+          (left, right) =>
+            Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0),
+        )
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, "Free reads")),
+        .map((series) => mapAdultItem(series, "Recently updated", "Fresh drop")),
     [seriesList],
   );
-
-  const adultStats = useMemo(
-    () => [
-      {
-        label: "Titles",
-        value: loading ? "--" : seriesList.length.toLocaleString(),
-      },
-      {
-        label: "Finished",
-        value: loading ? "--" : completedItems.length.toLocaleString(),
-      },
-        {
-        label: "Free reads",
-        value: loading ? "--" : freeUnlockItems.length.toLocaleString(),
-      },
-      {
-        label: "Mode",
-        value: isAdultMode ? "18+ on" : "Locked",
-      },
-    ],
-    [
-      completedItems.length,
-      freeUnlockItems.length,
-      isAdultMode,
-      loading,
-      seriesList.length,
-    ],
-  );
-  const adultModeLabel = isAdultMode ? "18+ on." : "18+ off.";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <EditorialHero
-            eyebrow="18+ catalog"
-            title="18+"
-            description=""
-            secondary={isAdultMode ? "Access on." : "Sign in to enter."}
-            stats={adultStats}
-            accent="blue"
-            appearance="dark"
-          />
-
-          <SurfacePanel
-            tone="muted"
-            accent="blue"
-            appearance="dark"
-            className="flex h-full flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                Access
-              </p>
-              <div>
-                <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.05em] text-white">
-                  {adultModeLabel}
-                </h2>
+    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d18_0%,#09080f_100%)] text-white">
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
+          <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-0">
+            <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+                    Mature catalog
+                  </p>
+                  <h1 className="max-w-[12ch] text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.85rem]">
+                    Mature Mode On
+                  </h1>
+                </div>
+                <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[#ffd8e6] shadow-[0_14px_34px_rgba(8,6,20,0.24)]">
+                  <MoonStar className="size-5" />
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2.5">
-              {isAdultMode ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/rankings?type=popular&window=week")
-                    }
-                    className={storefrontPrimaryButtonClass}
-                  >
-                    Rankings
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/rankings?type=ttf&window=all")}
-                    className={storefrontSecondaryButtonClass}
-                  >
-                    Free reads
-                  </button>
-                </>
-              ) : (
+              <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
+                Mature titles stay in their own catalog. Public homepage shelves, search, rankings, library views, and mobile navigation remain standard-content only.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={handleGate}
+                  onClick={() => {
+                    forceDisableAdultMode();
+                    router.push("/mature-content");
+                  }}
                   className={storefrontPrimaryButtonClass}
                 >
-                  Enable 18+ mode
+                  Turn off Mature Mode
                 </button>
-              )}
+                <Link href="/mature-content" className={storefrontSecondaryButtonClass}>
+                  Mature content settings
+                </Link>
+              </div>
+            </div>
+          </SurfacePanel>
+
+          <SurfacePanel appearance="dark" tone="muted" accent="cyan">
+            <div className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/56">
+                Access status
+              </p>
+              <div className="space-y-3">
+                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <ShieldCheck className="size-4 text-[#b9f4ff]" />
+                    18+ verified
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    Access is active for this device while Mature Mode stays on.
+                  </p>
+                </div>
+                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <ToggleLeft className="size-4 text-[#ffd8e6]" />
+                    Hidden from public surfaces
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    Mature titles are not mixed into public search, recommendations, or the public library experience.
+                  </p>
+                </div>
+              </div>
             </div>
           </SurfacePanel>
         </section>
 
         {showStale ? (
-          <div className="rounded-[24px] border-2 border-white/20 bg-[#0a0a0a] px-4 py-3 text-sm font-semibold text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            Showing saved results.
+          <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/72 shadow-[0_12px_26px_rgba(8,6,20,0.2)]">
+            Showing saved results while fresh data loads.
           </div>
         ) : null}
 
         {!isAdultMode ? (
           <AdultGateBlockingPanel
-            status={panelStatus === "OK" ? "NEED_AGE_CONFIRM" : panelStatus}
+            status={panelStatus === "OK" ? "NEED_ADULT_MODE" : panelStatus}
             onOpenModal={handleGate}
           />
         ) : loading ? (
@@ -357,62 +344,57 @@ export default function AdultHubPage() {
           <SurfacePanel appearance="dark" accent="blue">
             <EmptyState
               icon="search"
-              title="No 18+ titles."
-              description=""
+              title="No mature titles available."
+              description="Check back later or review your settings."
               action={{
-                label: "Rankings",
-                onClick: () =>
-                  router.push("/rankings?type=popular&window=week"),
+                label: "Open settings",
+                onClick: () => router.push("/mature-content"),
               }}
               appearance="dark"
             />
           </SurfacePanel>
         ) : (
           <div className="space-y-6">
-            <SurfacePanel appearance="dark" accent="blue">
-                <Rail
-                  title="18+ Picks"
-                  items={spotlightItems}
-                  reason=""
-                  href="/rankings?type=popular&window=week"
-                  ctaLabel="Rankings"
+            <Rail
+              eyebrow="Featured shelf"
+              title="Hot this week"
+              items={spotlightItems}
+              reason="Mature titles that readers are opening most right now."
+              href="/mature-content"
+              ctaLabel="Settings"
+              railName="adult"
+              appearance="dark"
+              onItemClick={(item) =>
+                router.push(`/series/${item.seriesId || item.id}`)
+              }
+            />
+
+            {recentItems.length > 0 ? (
+              <Rail
+                eyebrow="Recent updates"
+                title="Fresh drops"
+                items={recentItems}
+                reason="New chapters and recent returns inside Mature Mode."
+                railName="new"
                 appearance="dark"
                 onItemClick={(item) =>
                   router.push(`/series/${item.seriesId || item.id}`)
                 }
               />
-            </SurfacePanel>
-
-            {completedItems.length > 0 ? (
-              <SurfacePanel appearance="dark" accent="blue">
-                <Rail
-                  title="Finished"
-                  items={completedItems}
-                  reason=""
-                  href="/rankings?type=completed&window=all"
-                  ctaLabel="Finished"
-                  appearance="dark"
-                  onItemClick={(item) =>
-                    router.push(`/series/${item.seriesId || item.id}`)
-                  }
-                />
-              </SurfacePanel>
             ) : null}
 
-            {freeUnlockItems.length > 0 ? (
-              <SurfacePanel appearance="dark" accent="blue">
-                <Rail
-                  title="Free Later"
-                  items={freeUnlockItems}
-                  reason=""
-                  href="/rankings?type=ttf&window=all"
-                  ctaLabel="Top Picks"
-                  appearance="dark"
-                  onItemClick={(item) =>
-                    router.push(`/series/${item.seriesId || item.id}`)
-                  }
-                />
-              </SurfacePanel>
+            {completedItems.length > 0 ? (
+              <Rail
+                eyebrow="Completed shelf"
+                title="Binge-worthy"
+                items={completedItems}
+                reason="Finished mature series when you want a full run."
+                railName="completed"
+                appearance="dark"
+                onItemClick={(item) =>
+                  router.push(`/series/${item.seriesId || item.id}`)
+                }
+              />
             ) : null}
           </div>
         )}

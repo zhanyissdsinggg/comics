@@ -7,26 +7,12 @@ import PortraitCard from "../home/PortraitCard";
 import SkeletonCard from "../common/SkeletonCard";
 import FilterBar from "../common/FilterBar";
 import EmptyState from "../common/EmptyState";
-import MatureCatalogState from "../common/MatureCatalogState";
 import SurfacePanel from "../common/SurfacePanel";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
-import { useAuthStore } from "../../store/useAuthStore";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
-import {
-  canViewMatureContent,
-  getPublicGenres,
-  isMatureGenreValue,
-  shouldShowMatureFilter,
-} from "../../lib/matureContent";
+import { getPublicGenres, isMatureGenreValue } from "../../lib/matureContent";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
-import AgeGateModal from "../layout/AgeGateModal";
-import LoginGateModal from "../layout/LoginGateModal";
-import {
-  LOGIN_GATE_DESCRIPTION,
-  LOGIN_GATE_TITLE,
-} from "../../lib/adultGateCopy";
 
 const PAGE_CONFIG = {
   comic: {
@@ -169,22 +155,10 @@ export default function SeriesPage({
   initialSearchParams = {},
   initialSeries = [],
   hasInitialSeries = false,
-  matureCatalogAvailable = false,
 }) {
   const router = useRouter();
-  const {
-    adultConfirmed,
-    ageRuleKey,
-    legalAge,
-    isAdultMode,
-    enableAdultMode,
-    confirmAge,
-  } = useAdultGateStore();
-  const { hydrated, isSignedIn, signIn } = useAuthStore();
   const [series, setSeries] = useState(Array.isArray(initialSeries) ? initialSeries : []);
   const [loading, setLoading] = useState(!hasInitialSeries);
-  const [activeModal, setActiveModal] = useState(null);
-  const [authError, setAuthError] = useState("");
 
   const config = PAGE_CONFIG[type] || PAGE_CONFIG.comic;
   const searchParams = useMemo(
@@ -204,7 +178,7 @@ export default function SeriesPage({
           setLoading(true);
         }
 
-        const response = await apiGet(`/api/series?adult=${isAdultMode ? "1" : "0"}`, {
+        const response = await apiGet("/api/series?adult=0", {
           cacheMs: 300000,
         });
 
@@ -221,7 +195,7 @@ export default function SeriesPage({
     }
 
     loadSeries();
-  }, [hasInitialSeries, isAdultMode, type]);
+  }, [hasInitialSeries, type]);
 
   const updateParams = useCallback(
     (updates) => {
@@ -256,11 +230,10 @@ export default function SeriesPage({
     return getPublicGenres(
       Array.from(genreSet).sort((left, right) => left.localeCompare(right)),
       {
-        includeMature:
-          shouldShowMatureFilter(series) || Boolean(matureCatalogAvailable),
+        includeMature: false,
       },
     );
-  }, [matureCatalogAvailable, series]);
+  }, [series]);
 
   const genreHrefMap = useMemo(() => {
     return genres.reduce((map, genre) => {
@@ -277,13 +250,11 @@ export default function SeriesPage({
 
     if (selectedGenre !== "all") {
       result = result.filter((item) =>
-        isMatureGenreValue(selectedGenre)
-          ? Boolean(item?.adult)
-          : Array.isArray(item.genres)
-            ? item.genres.some(
-                (genre) => genre.toLowerCase() === selectedGenre.toLowerCase(),
-              )
-            : false,
+        Array.isArray(item.genres)
+          ? item.genres.some(
+              (genre) => genre.toLowerCase() === selectedGenre.toLowerCase(),
+            )
+          : false,
       );
     }
 
@@ -341,86 +312,21 @@ export default function SeriesPage({
 
   const smallNovelCatalog = isNovelPage && series.length < 6;
   const showNovelShelves = !isNovelPage || series.length >= 6;
-  const matureGenreActive = isMatureGenreValue(selectedGenre);
-  const canAccessMature = canViewMatureContent({ adultConfirmed, isAdultMode });
-  const shouldPrioritizeMatureGate = matureGenreActive && !canAccessMature;
   const handleGenreChange = useCallback(
-    (value, options = {}) => {
-      if (!isMatureGenreValue(value)) {
-        updateParams({ genre: value });
+    (value) => {
+      if (isMatureGenreValue(value)) {
+        router.push("/adult-gate?reason=NEED_AGE_CONFIRM&returnTo=%2Fadult");
         return;
-      }
-
-      if (options?.bypassGate) {
-        updateParams({ genre: value });
-        return;
-      }
-
-      if (!hydrated || !isSignedIn) {
-        setActiveModal("login");
-        return;
-      }
-
-      if (!canViewMatureContent({ adultConfirmed, isAdultMode })) {
-        setActiveModal("age");
-        return;
-      }
-
-      if (!isAdultMode) {
-        enableAdultMode();
       }
 
       updateParams({ genre: value });
     },
-    [
-      adultConfirmed,
-      enableAdultMode,
-      hydrated,
-      isAdultMode,
-      isSignedIn,
-      updateParams,
-    ],
+    [router, updateParams],
   );
-
-  const handleLogin = useCallback(
-    async ({ email, password, mode }) => {
-      const response = await signIn(email, password, mode);
-      if (response?.status === 202) {
-        setAuthError("");
-        return response;
-      }
-      if (!response?.ok) {
-        setAuthError("Invalid email or password.");
-        return response;
-      }
-
-      setAuthError("");
-      if (!adultConfirmed) {
-        setActiveModal("age");
-        return response;
-      }
-
-      if (!isAdultMode) {
-        enableAdultMode();
-      }
-
-      setActiveModal(null);
-      updateParams({ genre: "Mature" });
-      return response;
-    },
-    [adultConfirmed, enableAdultMode, isAdultMode, signIn, updateParams],
-  );
-
-  const handleAgeConfirm = useCallback(() => {
-    confirmAge(ageRuleKey);
-    setActiveModal(null);
-    updateParams({ genre: "Mature" });
-  }, [ageRuleKey, confirmAge, updateParams]);
 
   return (
-    <>
-      <main className="min-h-screen bg-[#050505] text-white">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#050505] text-white">
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
         <section className="rounded-[28px] border border-white/10 bg-[#0b0b0b] p-5 sm:p-6">
           <div className="space-y-4">
             <div className="space-y-2">
@@ -446,9 +352,7 @@ export default function SeriesPage({
           </div>
         </section>
 
-        {shouldPrioritizeMatureGate ? (
-          <MatureCatalogState browseHref={config.pathname} />
-        ) : loading ? (
+        {loading ? (
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
               {Array.from({ length: 6 }).map((_, index) => (
@@ -522,24 +426,16 @@ export default function SeriesPage({
               />
 
               {filteredAndSortedSeries.length === 0 ? (
-                matureGenreActive ? (
-                  <MatureCatalogState
-                    mode="empty"
-                    className="mt-2"
-                    browseHref={config.pathname}
-                  />
-                ) : (
-                  <EmptyState
-                    icon={isNovelPage ? "book" : "search"}
-                    title={config.emptyTitle}
-                    description={config.emptyDescription}
-                    appearance="dark"
-                    action={{
-                      label: "Reset filters",
-                      onClick: handleResetFilters,
-                    }}
-                  />
-                )
+                <EmptyState
+                  icon={isNovelPage ? "book" : "search"}
+                  title={config.emptyTitle}
+                  description={config.emptyDescription}
+                  appearance="dark"
+                  action={{
+                    label: "Reset filters",
+                    onClick: handleResetFilters,
+                  }}
+                />
               ) : (
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   {filteredAndSortedSeries.map((item) => (
@@ -559,27 +455,7 @@ export default function SeriesPage({
             </section>
           </>
         )}
-        </div>
-      </main>
-
-      <LoginGateModal
-        open={activeModal === "login"}
-        onClose={() => {
-          setActiveModal(null);
-          setAuthError("");
-        }}
-        onSubmit={handleLogin}
-        title={LOGIN_GATE_TITLE}
-        description={LOGIN_GATE_DESCRIPTION}
-        errorMessage={authError}
-      />
-      <AgeGateModal
-        open={activeModal === "age"}
-        onClose={() => setActiveModal(null)}
-        onConfirm={handleAgeConfirm}
-        ageRuleKey={ageRuleKey}
-        legalAge={legalAge}
-      />
-    </>
+      </div>
+    </main>
   );
 }

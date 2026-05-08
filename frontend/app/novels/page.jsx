@@ -11,7 +11,7 @@ export const metadata = createPageMetadata({
 
 export default async function Page({ searchParams }) {
   const initialSearchParams = (await searchParams) || {};
-  const payload = await loadSeriesCatalogSeoPayload();
+  const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
   const initialSeries = (payload?.series || []).filter((item) => item?.type === "novel");
 
   return (
@@ -23,6 +23,7 @@ export default async function Page({ searchParams }) {
         initialSearchParams={initialSearchParams}
         initialSeries={initialSeries}
         hasInitialSeries={payload?.ready === true}
+        matureCatalogAvailable={false}
       />
     </ErrorBoundary>
   );

@@ -1,7 +1,7 @@
 import { Controller, Get, Logger, Param, Query, Req, Res } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { parseBool, resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { getSubscriptionPayload } from "../../common/utils/subscription";
@@ -20,7 +20,7 @@ export class SeriesController {
   async list(@Query("adult") adultParam: string, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -39,7 +39,7 @@ export class SeriesController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -60,7 +60,7 @@ export class SeriesController {
       }
 
       if (result.adult) {
-        const gate = checkAdultGate(req.cookies || {});
+        const gate = await resolveAdultGateContext(this.prisma, req);
         if (!gate.ok) {
           res.status(403);
           return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -85,7 +85,7 @@ export class SeriesController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -100,7 +100,7 @@ export class SeriesController {
       }
 
       if (result.series.adult) {
-        const gate = checkAdultGate(req.cookies || {});
+        const gate = await resolveAdultGateContext(this.prisma, req);
         if (!gate.ok) {
           res.status(403);
           return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });

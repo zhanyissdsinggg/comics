@@ -11,51 +11,51 @@ import { Button } from "@/components/ui/button";
 const RAIL_THEME_BY_ID = {
   following: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   continue: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   trending: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   completed: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   new: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   ttf: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   adult: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-[rgba(255,182,211,0.16)] bg-[linear-gradient(180deg,rgba(17,15,27,0.98)_0%,rgba(8,8,15,0.98)_100%)] text-white shadow-[0_24px_56px_rgba(4,4,12,0.4)]",
   },
   history: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   starter: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   "ai-recommended": {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   recommended: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   default: {
     darkAccent: "text-white/65",
-    darkPanel: "border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
 };
 
@@ -129,7 +129,7 @@ export default function Rail({
                 type="button"
                 variant="ghost"
                 onClick={() => router.push(href)}
-                className="h-10 justify-start gap-2 rounded-full border-2 border-black bg-[#00E5FF] px-4 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                className="h-10 justify-start gap-2 rounded-full border border-[rgba(255,182,211,0.32)] bg-[linear-gradient(135deg,#ff7faa_0%,#ff8fcf_100%)] px-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#26121e] shadow-[0_12px_26px_rgba(255,118,170,0.28)] transition-all duration-150 ease-out hover:-translate-y-0.5"
               >
                 {ctaLabel}
                 <ArrowRight className="size-4" />
@@ -139,7 +139,7 @@ export default function Rail({
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
             <div
-              className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+              className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]"
             >
               <div className="p-4">
                 <CreatorShelfLinks
@@ -157,7 +157,7 @@ export default function Rail({
 
           {safeItems.length === 0 ? (
             <div
-              className="mt-5 rounded-[22px] border-2 border-black bg-black py-0 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+              className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]"
             >
               <div className="p-8 text-center">
                 <p className="text-sm font-semibold text-white/70">
@@ -166,11 +166,11 @@ export default function Rail({
               </div>
             </div>
           ) : (
-            <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 no-scrollbar">
+            <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 no-scrollbar overscroll-x-contain [scrollbar-width:none]">
               {safeItems.map((item) => (
                 <div
                   key={item.id}
-                  className="w-[164px] shrink-0 sm:w-[188px] lg:w-[208px]"
+                  className="w-[158px] shrink-0 sm:w-[188px] lg:w-[208px]"
                 >
                   <PortraitCard
                     item={item}

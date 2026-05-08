@@ -8,7 +8,6 @@ import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 
 function formatCreditTypeLabel(creditType) {
   if (creditType === "studio") {
@@ -344,7 +343,6 @@ export default function CreatorsHubPage({
   initialTypeFilter = "",
   initialGenreFilter = "",
 }) {
-  const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
   const [catalog, setCatalog] = useState(
     Array.isArray(initialCatalog) ? initialCatalog : [],
   );
@@ -361,24 +359,17 @@ export default function CreatorsHubPage({
     requestRef.current += 1;
     setLoading(true);
     setError("");
-    const adultFlag = isAdultMode ? "1" : "0";
     const currentRequest = requestRef.current;
 
-    apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }).then(
+    apiGet("/api/series?adult=0", { cacheMs: 30000 }).then(
       (response) => {
         if (currentRequest !== requestRef.current) {
           return;
         }
 
         if (!response.ok) {
-          if (response.error === "ADULT_GATED") {
-            forceDisableAdultMode();
-            setCatalog([]);
-            setError("");
-          } else {
-            setCatalog([]);
-            setError(response.error || "Unable to load creators.");
-          }
+          setCatalog([]);
+          setError(response.error || "Unable to load creators.");
           setLoading(false);
           return;
         }
@@ -392,7 +383,7 @@ export default function CreatorsHubPage({
         setLoading(false);
       },
     );
-  }, [forceDisableAdultMode, isAdultMode]);
+  }, []);
 
   useEffect(() => {
     if (hasInitialCatalog) {

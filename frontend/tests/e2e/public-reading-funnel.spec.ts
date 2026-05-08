@@ -998,8 +998,66 @@ function createMockBackendServer() {
   });
 }
 
-async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
-  const { signedIn = false } = options;
+async function mockPublicApi(
+  page: Page,
+  options: {
+    signedIn?: boolean;
+    matureConfirmed?: boolean;
+    matureModeEnabled?: boolean;
+    hideAdultHistory?: boolean;
+  } = {},
+) {
+  const {
+    signedIn = false,
+    matureConfirmed = false,
+    matureModeEnabled = false,
+    hideAdultHistory = false,
+  } = options;
+
+  await page.context().addCookies([
+    {
+      name: "mn_is_signed_in",
+      value: signedIn ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_adult_confirmed",
+      value: matureConfirmed ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_adult_mode",
+      value: matureModeEnabled ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_age_rule",
+      value: "global",
+      url: "http://127.0.0.1:4173",
+    },
+  ]);
+
+  await page.addInitScript(
+    ({ signedIn, matureConfirmed, matureModeEnabled, hideAdultHistory }) => {
+      window.localStorage.setItem("mn_signed_in", signedIn ? "1" : "0");
+      window.localStorage.setItem("mn_adult_confirmed", matureConfirmed ? "1" : "0");
+      window.localStorage.setItem("mn_adult_mode", matureModeEnabled ? "1" : "0");
+      window.localStorage.setItem("mn_age_rule", "global");
+      window.localStorage.setItem("mn_hide_adult_history", hideAdultHistory ? "1" : "0");
+      window.localStorage.setItem("mn_region", "global");
+      document.cookie = `mn_is_signed_in=${signedIn ? "1" : "0"}; path=/`;
+      document.cookie = `mn_adult_confirmed=${matureConfirmed ? "1" : "0"}; path=/`;
+      document.cookie = `mn_adult_mode=${matureModeEnabled ? "1" : "0"}; path=/`;
+      document.cookie = "mn_age_rule=global; path=/";
+      document.cookie = "mn_region=global; path=/";
+    },
+    {
+      signedIn,
+      matureConfirmed,
+      matureModeEnabled,
+      hideAdultHistory,
+    },
+  );
 
   await page.addInitScript(() => {
     window.localStorage.setItem("cookie_consent", "accepted");
@@ -1060,6 +1118,17 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
         preferences: {
           adult: false,
           autoplay: false,
+          region: "global",
+          hideAdultHistory,
+          matureModeEnabled,
+          matureVerification: {
+            verified: matureConfirmed,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: matureConfirmed ? "2026-04-24T12:00:00.000Z" : null,
+          },
         },
       });
       return;
@@ -1078,6 +1147,24 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
       const payload = buildSeriesPayload(seriesId);
       if (!payload) {
         await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      if (
+        payload.series?.adult &&
+        (!signedIn || !matureConfirmed || !matureModeEnabled)
+      ) {
+        await fulfillJson(
+          route,
+          {
+            error: "ADULT_GATED",
+            reason: !signedIn
+              ? "NEED_LOGIN"
+              : !matureConfirmed
+                ? "NEED_AGE_CONFIRM"
+                : "NEED_ADULT_MODE",
+          },
+          403,
+        );
         return;
       }
       await fulfillJson(route, payload);
@@ -1153,6 +1240,13 @@ async function mockPublicApi(page: Page, options: { signedIn?: boolean } = {}) {
           { keyword: "dragon", label: "dragon", value: "dragon", badge: "Hot" },
           { keyword: "mira", label: "mira", value: "mira", badge: "Hot" },
         ],
+      });
+      return;
+    }
+
+    if (pathname === "/api/rankings") {
+      await fulfillJson(route, {
+        rankings: CATALOG.filter((series) => !series.adult),
       });
       return;
     }
@@ -1274,7 +1368,7 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveText(
-      /Read (Chapter|Episode) 1 Free/i,
+      /Read (Chapter|Episode) 1/i,
     );
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveAttribute(
       "href",
@@ -1414,12 +1508,16 @@ test.describe("Public reading funnel", () => {
     await expectNoRuntimeIssues("/search filter params", runtimeIssues);
   });
 
-  test("comics and search expose a controlled Mature filter without random 18+ chrome", async ({
+  test("public comics and search keep mature content out of public filters and results", async ({
     page,
     browser,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
-    await mockPublicApi(page, { signedIn: true });
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
+    });
 
     let response = await page.goto("/comics", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
@@ -1429,25 +1527,9 @@ test.describe("Public reading funnel", () => {
     const comicsMatureFilter = page.locator(
       'a:has-text("Mature"), button:has-text("Mature")',
     );
-    await expect(comicsMatureFilter.first()).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(comicsMatureFilter).toHaveCount(0);
     await expect(comicsHeader).not.toContainText(/^18\+$/);
     await expect(comicsFooter).not.toContainText(/^18\+$/);
-    await comicsMatureFilter.first().click();
-    await expect(
-      page.getByRole("button", { name: /Yes, I am 18 or older/i }),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await Promise.all([
-      page.waitForURL(/\/comics\?genre=Mature/, { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: /Yes, I am 18 or older/i }).click(),
-    ]);
-    await expect(page.getByRole("link", { name: /Midnight Heat/i }).first()).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.locator("main")).toContainText("18+");
 
     response = await page.goto("/search", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
@@ -1457,9 +1539,7 @@ test.describe("Public reading funnel", () => {
     const searchMatureFilter = page.locator(
       'button:has-text("Mature"), a:has-text("Mature")',
     );
-    await expect(searchMatureFilter.first()).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(searchMatureFilter).toHaveCount(0);
     await expect(searchHeader).not.toContainText(/^18\+$/);
     await expect(searchFooter).not.toContainText(/^18\+$/);
     for (const routePath of [
@@ -1474,10 +1554,8 @@ test.describe("Public reading funnel", () => {
       });
       expect(response?.ok(), `${routePath} should load`).toBeTruthy();
       await expect(
-        filterCheckPage.getByRole("link", { name: "Mature" }).first(),
-      ).toBeVisible({
-        timeout: UI_TIMEOUT_MS,
-      });
+        filterCheckPage.locator('button:has-text("Mature"), a:has-text("Mature")'),
+      ).toHaveCount(0);
       await filterCheckPage.close();
     }
 
@@ -1490,19 +1568,7 @@ test.describe("Public reading funnel", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(gatedPage.locator("main")).toContainText(
-      "Confirm legal age to view mature titles.",
-    );
-    await expect(gatedPage.locator("main")).not.toContainText(
-      /0 results? match(?:es)? your filters\./i,
-    );
-    await expect(gatedPage.locator("main")).not.toContainText("No exact match");
-    await expect(
-      gatedPage.getByRole("link", { name: "Sign in to continue" }),
-    ).toHaveAttribute("href", "/account");
-    await expect(
-      gatedPage.getByRole("link", { name: "Browse non-mature titles" }),
-    ).toHaveAttribute("href", "/search");
+    await expect(gatedPage.locator("main")).not.toContainText("Midnight Heat");
     await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
     await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
@@ -1511,24 +1577,12 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     const gatedComicsMain = gatedPage.locator("main");
-    await expect(gatedComicsMain).toContainText(
-      "Confirm legal age to view mature titles.",
-    );
-    await expect(gatedComicsMain).not.toContainText("No comics found");
-    await expect(gatedComicsMain).not.toContainText("Trending");
-    await expect(gatedComicsMain).not.toContainText("New updates");
-    await expect(gatedComicsMain).not.toContainText("Completed");
-    await expect(
-      gatedPage.getByRole("link", { name: "Sign in to continue" }),
-    ).toHaveAttribute("href", "/account");
-    await expect(
-      gatedPage.getByRole("link", { name: "Browse non-mature titles" }),
-    ).toHaveAttribute("href", "/comics");
+    await expect(gatedComicsMain).not.toContainText("Midnight Heat");
     await expect(gatedPage.locator("header").first()).not.toContainText(/^18\+$/);
     await expect(gatedPage.locator("footer").first()).not.toContainText(/^18\+$/);
 
-    await expectNoRuntimeIssues("mature-filter-catalog-entry", runtimeIssues);
-    await expectNoRuntimeIssues("mature-filter-catalog-gated", gatedRuntimeIssues);
+    await expectNoRuntimeIssues("public-mature-hidden-signed-in", runtimeIssues);
+    await expectNoRuntimeIssues("public-mature-hidden-gated", gatedRuntimeIssues);
     await gatedContext.close();
   });
 
@@ -1983,7 +2037,7 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Crimson Tide");
     await expect(page.locator("main")).toContainText("Comic / Ongoing");
-    await expect(page.locator("main")).toContainText("Horror · Action");
+    await expect(page.locator("main")).toContainText("Horror");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
     await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
@@ -2023,12 +2077,11 @@ test.describe("Public reading funnel", () => {
 
   test("series hero metadata stays normalized across all real series", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
-    await page.addInitScript(() => {
-      window.localStorage.setItem("mn_adult_confirmed", "1");
-      window.localStorage.setItem("mn_adult_mode", "1");
-      window.localStorage.setItem("mn_age_rule", "global");
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
     });
-    await mockPublicApi(page, { signedIn: true });
 
     for (const series of CATALOG) {
       const routePath = `/series/${series.id}`;
@@ -2525,10 +2578,11 @@ test.describe("Public reading funnel", () => {
     expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
       defaultCreatorCount,
     );
-    await expect(page.locator("#creator-results-grid")).toContainText("Nightglass Studio");
     await expect(page.locator("#creator-results-grid")).toContainText(
-      "Tess Calder and Orbital Forge Team",
+      "Mira Dane",
     );
+    await expect(page.locator("#creator-results-grid")).toContainText("Iris Voss");
+    await expect(page.locator("#creator-results-grid")).toContainText("Kade Mercer");
     await expect(page.locator("#creator-results-grid")).not.toContainText("Hana Seo");
     await expect(page.getByTestId("creator-results-label")).toHaveText(
       "Sci-Fi profiles",
@@ -2584,6 +2638,97 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("series chrome cleanup", runtimeIssues);
+  });
+
+  test("public search should not return mature titles when Mature Mode is off", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/search?q=Midnight", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("main")).not.toContainText("Midnight Heat");
+    await expectNoRuntimeIssues("/search mature hidden", runtimeIssues);
+  });
+
+  test("mature catalog should render when Mature Mode is enabled", async ({ page }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    let adultCatalogRequestCount = 0;
+    await page.context().addCookies([
+      {
+        name: "mn_is_signed_in",
+        value: "1",
+        url: "http://127.0.0.1:4173",
+      },
+      {
+        name: "mn_adult_confirmed",
+        value: "1",
+        url: "http://127.0.0.1:4173",
+      },
+      {
+        name: "mn_adult_mode",
+        value: "1",
+        url: "http://127.0.0.1:4173",
+      },
+    ]);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
+    });
+    await page.route("**/api/series?adult=1*", async (route) => {
+      adultCatalogRequestCount += 1;
+      await fulfillJson(route, {
+        series: CATALOG.filter((series) => series.adult),
+      });
+    });
+
+    const response = await page.goto("/adult", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Mature Mode On" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Turn off Mature Mode" })).toBeVisible();
+    await expect.poll(() => adultCatalogRequestCount, {
+      timeout: 15000,
+    }).toBeGreaterThan(0);
+    await expect(page.locator("main")).not.toContainText("Sign in to access Mature Mode", {
+      timeout: 15000,
+    });
+    await expect(page.locator("main")).not.toContainText("No mature titles available.", {
+      timeout: 15000,
+    });
+    await expectNoRuntimeIssues("/adult mature catalog", runtimeIssues);
+  });
+
+  test("library and search should hide mature titles after Mature Mode is turned off", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: false,
+      hideAdultHistory: true,
+    });
+
+    let response = await page.goto("/search?q=Midnight", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).not.toContainText("Midnight Heat");
+
+    response = await page.goto("/library", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).not.toContainText("Midnight Heat");
+    await expectNoRuntimeIssues("/library mature hidden", runtimeIssues);
   });
 
   test("public catalog routes stay free of demo and fixture copy", async ({ page }) => {

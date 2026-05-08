@@ -2,13 +2,17 @@ import { Body, Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
 import { ApiQuery } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { getUserIdFromRequest } from "../../common/utils/auth";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { parseBool, resolveAdultGateContext } from "../../common/utils/adult-gate";
+import { PrismaService } from "../../common/prisma/prisma.service";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { SearchService } from "./search.service";
 
 @Controller("search")
 export class SearchController {
-  constructor(private readonly searchService: SearchService) {}
+  constructor(
+    private readonly searchService: SearchService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
   @ApiQuery({ name: "q", required: false, type: String })
@@ -33,7 +37,7 @@ export class SearchController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -60,7 +64,7 @@ export class SearchController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -79,7 +83,7 @@ export class SearchController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });
@@ -98,7 +102,7 @@ export class SearchController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });

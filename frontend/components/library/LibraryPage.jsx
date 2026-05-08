@@ -19,7 +19,6 @@ import { useProgressStore } from "../../store/useProgressStore";
 import { apiGet } from "../../lib/apiClient";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
 import { useRewardsStore } from "../../store/useRewardsStore";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
@@ -173,7 +172,6 @@ function getReadingState({
 export default function LibraryPage({ initialSignedIn = false }) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
-  const { isAdultMode } = useAdultGateStore();
   const { bySeriesId, loadProgress } = useProgressStore();
   const { bookmarksBySeries } = useBookmarkStore();
   const { followedSeriesIds, loadFollowed } = useFollowStore();
@@ -365,7 +363,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
   ]);
 
   useEffect(() => {
-    const adultFlag = isAdultMode ? "1" : "0";
+    const adultFlag = "0";
     parallelRequests2(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
       () =>
@@ -428,7 +426,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
       setInitialLoading(false);
     });
-  }, [isAdultMode, shouldRetry]);
+  }, [shouldRetry]);
 
   const handleCheckIn = async () => {
     setCheckinWorking(true);

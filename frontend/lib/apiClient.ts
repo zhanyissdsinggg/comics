@@ -152,7 +152,7 @@ function getBaseUrl(): string {
     return envBase.replace(/\/$/, "");
   }
 
-  return "http://localhost:4000";
+  return "http://127.0.0.1:4000";
 }
 
 function notifyAdminAuthInvalidated(): void {
@@ -361,6 +361,10 @@ function invalidateCacheByPrefix(prefix: string): void {
   } catch (err) {
     // ignore storage errors
   }
+}
+
+export function invalidateApiCacheByPrefix(prefix: string): void {
+  invalidateCacheByPrefix(prefix);
 }
 
 function invalidateCacheForWrite(path: string): void {

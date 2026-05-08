@@ -33,7 +33,7 @@ function getBackendCandidates(requestUrl) {
     process.env.API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
-    "http://localhost:4000";
+    "http://127.0.0.1:4000";
   const configuredFallbacks = String(process.env.API_BASE_FALLBACKS || "")
     .split(",")
     .map((item) => normalizeBaseUrl(item))

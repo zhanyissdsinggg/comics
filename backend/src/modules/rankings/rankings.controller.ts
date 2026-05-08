@@ -1,13 +1,17 @@
 import { Controller, Get, Query, Req, Res } from "@nestjs/common";
 import { RankingsService } from "./rankings.service";
 import { Request } from "express";
-import { checkAdultGate, parseBool } from "../../common/utils/adult-gate";
+import { parseBool, resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { Response } from "express";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
+import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Controller("rankings")
 export class RankingsController {
-  constructor(private readonly rankingsService: RankingsService) {}
+  constructor(
+    private readonly rankingsService: RankingsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
   async list(
@@ -18,7 +22,7 @@ export class RankingsController {
   ) {
     const adult = parseBool(adultParam);
     if (adult === true) {
-      const gate = checkAdultGate(req.cookies || {});
+      const gate = await resolveAdultGateContext(this.prisma, req);
       if (!gate.ok) {
         res.status(403);
         return buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason });

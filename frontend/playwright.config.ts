@@ -30,6 +30,16 @@ export default defineConfig({
     command: usePrebuiltServer
       ? "cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1"
       : "cross-env NEXT_DIST_DIR=.next-playwright npm run build && cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1",
+    env: {
+      ...process.env,
+      API_BASE_URL: process.env.API_BASE_URL || "http://127.0.0.1:4000",
+      NEXT_PUBLIC_API_BASE_URL:
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000",
+      NEXT_PUBLIC_BASE_URL:
+        process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:4173",
+      NEXT_PUBLIC_SITE_URL:
+        process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:4173",
+    },
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: usePrebuiltServer ? 60000 : 180000,

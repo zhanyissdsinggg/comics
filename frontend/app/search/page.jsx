@@ -1,15 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { cookies } from "next/headers";
-import MatureCatalogState from "../../components/common/MatureCatalogState";
-import MatureFilterChip from "../../components/common/MatureFilterChip";
 import { createPageMetadata } from "../../lib/seo";
 import {
-  canReadMatureFromCookieStore,
   getPublicGenres,
   isMatureTitle,
-  isMatureGenreValue,
-  shouldShowMatureFilter,
 } from "../../lib/matureContent";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
@@ -309,19 +303,6 @@ function GenreFilters({ genres, currentGenre, buildHref }) {
               ? "bg-white text-black"
               : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
           }`;
-          if (isMatureGenreValue(genre)) {
-            return (
-              <MatureFilterChip
-                key={`genre-${genre}`}
-                href={buildHref(genre)}
-                active={active}
-                label={genre}
-                className={commonClassName}
-                activeClassName=""
-                inactiveClassName=""
-              />
-            );
-          }
           return (
             <Link
               key={`genre-${genre}`}
@@ -508,8 +489,6 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function Page({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const cookieStore = await cookies();
-  const includeAdult = canReadMatureFromCookieStore(cookieStore);
   const rawParams = normalizeSearchParams(resolvedSearchParams);
   const q = rawParams.q;
   const format = normalizeFormat(rawParams.format);
@@ -521,23 +500,12 @@ export default async function Page({ searchParams }) {
   const hasActiveFormat = format.length > 0;
   const hasActiveStatus = status.length > 0;
   const hasActiveGenre = normalizedGenre.length > 0;
-  const isMatureGenreActive = hasActiveGenre && isMatureGenreValue(normalizedGenre);
 
-  const [catalogPayload, maturePayload] = await Promise.all([
-    loadSeriesCatalogSeoPayload({ includeAdult }),
-    includeAdult
-      ? Promise.resolve(null)
-      : loadSeriesCatalogSeoPayload({ includeAdult: true }),
-  ]);
+  const catalogPayload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
   const catalog = filterBlockedPublicSeries(
     Array.isArray(catalogPayload?.series) ? catalogPayload.series : [],
   );
   const creators = filterBlockedPublicCreators(buildCreatorDirectory(catalog));
-  const matureCatalogSeries = filterBlockedPublicSeries(
-    Array.isArray(maturePayload?.series) ? maturePayload.series : [],
-  );
-  const showMatureFilter =
-    shouldShowMatureFilter(catalog) || matureCatalogSeries.some((item) => item?.adult);
 
   const allGenres = Array.from(
     new Set(
@@ -547,7 +515,7 @@ export default async function Page({ searchParams }) {
             .flatMap((series) => normalizeGenreList(series?.genres))
             .filter(Boolean),
         ),
-        { includeMature: showMatureFilter },
+        { includeMature: false },
       ),
     ),
   )
@@ -568,10 +536,7 @@ export default async function Page({ searchParams }) {
         const seriesGenres = normalizeGenreList(series?.genres).map((item) =>
           normalizeSearchValue(item),
         );
-        const matchesMatureGenre = isMatureGenreValue(normalizedGenre)
-          ? Boolean(series?.adult)
-          : seriesGenres.includes(normalizedGenre);
-        if (!matchesMatureGenre) {
+        if (!seriesGenres.includes(normalizedGenre)) {
           return false;
         }
       }
@@ -598,8 +563,6 @@ export default async function Page({ searchParams }) {
   const showDefaultShelves = !hasExplicitFilters;
   const hasActiveFilters = hasExplicitFilters;
   const resultCount = filteredSeries.length + filteredCreators.length;
-  const shouldHideGenericResultsSummary =
-    isMatureGenreActive && !includeAdult;
   const emptyTrending = takeUniqueSeries(sortSeries(catalog), 6);
   const emptyTrendingIds = new Set(emptyTrending.map((series) => series.id));
   const emptyUpdates = takeUniqueSeries(
@@ -670,15 +633,13 @@ export default async function Page({ searchParams }) {
             />
           </div>
 
-          {!shouldHideGenericResultsSummary ? (
-            <p className="text-sm text-white/58">
-              {hasActiveFilters
-                ? normalizedQuery
-                  ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
-                  : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
-                : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
-            </p>
-          ) : null}
+          <p className="text-sm text-white/58">
+            {hasActiveFilters
+              ? normalizedQuery
+                ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
+                : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
+              : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
+          </p>
 
           {showDefaultShelves ? (
             <div className="space-y-10">
@@ -707,14 +668,6 @@ export default async function Page({ searchParams }) {
                 />
               </div>
             </div>
-          ) : isMatureGenreActive && !includeAdult ? (
-            <MatureCatalogState className="rounded-[24px]" browseHref="/search" />
-          ) : isMatureGenreActive && filteredSeries.length === 0 ? (
-            <MatureCatalogState
-              mode="empty"
-              className="rounded-[24px]"
-              browseHref="/search"
-            />
           ) : resultCount === 0 ? (
             <section className="space-y-6 rounded-[24px] border border-white/10 bg-[#111111] p-5 sm:p-6">
               <div className="space-y-2">

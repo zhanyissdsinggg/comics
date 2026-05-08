@@ -5,21 +5,21 @@ import { cn } from "@/lib/utils";
 const toneClasses = {
   dark: {
     default:
-      "border-2 border-white/20 bg-black/90 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-white/10 bg-[rgba(17,16,29,0.82)] text-white shadow-[0_18px_48px_rgba(8,6,20,0.32)]",
     muted:
-      "border-2 border-white/20 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-white/10 bg-[rgba(20,18,33,0.9)] text-white shadow-[0_18px_46px_rgba(8,6,20,0.28)]",
     highlight:
-      "border-2 border-[#FFE500] bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-[rgba(255,179,208,0.24)] bg-[linear-gradient(180deg,rgba(25,22,39,0.98)_0%,rgba(17,16,29,0.96)_100%)] text-white shadow-[0_22px_56px_rgba(10,8,24,0.34)]",
     warning: "border border-amber-200/10 bg-[#1d1811] text-white",
     danger: "border border-rose-200/10 bg-[#1e1316] text-white",
   },
   light: {
     default:
-      "border-2 border-black bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-[rgba(43,33,65,0.12)] bg-[rgba(255,252,247,0.94)] text-black shadow-[0_18px_42px_rgba(58,44,86,0.12)]",
     muted:
-      "border-2 border-black bg-[#f3f3f5] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-[rgba(43,33,65,0.1)] bg-[rgba(251,248,244,0.98)] text-black shadow-[0_14px_36px_rgba(58,44,86,0.1)]",
     highlight:
-      "border-2 border-black bg-[#FFE500] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+      "border border-[rgba(255,130,173,0.22)] bg-[linear-gradient(180deg,rgba(255,247,244,0.98)_0%,rgba(255,240,246,0.96)_100%)] text-black shadow-[0_16px_38px_rgba(76,51,93,0.12)]",
     warning:
       "border border-amber-200/70 bg-[linear-gradient(180deg,#fffdf7_0%,#fff8eb_100%)] text-slate-900 dark:border-amber-300/20 dark:bg-[rgba(59,43,16,0.9)] dark:text-white",
     danger:
@@ -103,10 +103,11 @@ export default function SurfacePanel({
         className={cn(
           "pointer-events-none absolute inset-0",
           isLight
-            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.55),transparent_52%)]"
-            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_34%)]",
+            ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.46),transparent_52%)]"
+            : "bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_36%)]",
         )}
       />
+      <div className="pointer-events-none absolute inset-[1px] rounded-[27px] border border-white/6" />
       <div className="relative">{children}</div>
     </section>
   );

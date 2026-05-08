@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import {
   StorefrontInfoCard,
@@ -52,15 +51,30 @@ export default function MatureContentSettingsPage() {
 
   const viewerSignedIn = hydrated && isSignedIn;
   const regionConfig = useMemo(() => getRegionConfig(region), [region]);
-  const maturityStatusLabel = useMemo(() => {
+  const maturityStatus = useMemo(() => {
     if (!viewerSignedIn) {
-      return "Sign in required";
+      return {
+        label: "Signed out",
+        description: "Sign in to manage mature access on this device.",
+      };
     }
     if (!adultConfirmed) {
-      return "Age confirmation needed";
+      return {
+        label: "Need age verification",
+        description: `Current regional requirement: ${regionConfig.legalAge}+.`,
+      };
     }
-    return isAdultMode ? "Visible on this device" : "Hidden on this device";
-  }, [adultConfirmed, isAdultMode, viewerSignedIn]);
+    if (isAdultMode) {
+      return {
+        label: "Mature Mode On",
+        description: "Mature titles can be opened from the separate mature catalog.",
+      };
+    }
+    return {
+      label: "Hidden",
+      description: "Mature titles stay hidden until you turn Mature Mode back on.",
+    };
+  }, [adultConfirmed, isAdultMode, regionConfig.legalAge, viewerSignedIn]);
 
   useEffect(() => {
     setRegion(readStorage(REGION_KEY, "global"));
@@ -121,16 +135,16 @@ export default function MatureContentSettingsPage() {
     if (status === "OK") {
       setFeedback(
         isAdultMode
-          ? "Mature content is now hidden on this device."
-          : "Mature content is now visible on this device.",
+          ? "Mature Mode is now off on this device."
+          : "Mature Mode is now on for this device.",
       );
     }
   }, [isAdultMode, openAuthPrompt, requestAdultToggle, viewerSignedIn]);
 
-  const handleAgeConfirm = useCallback(() => {
-    confirmAge(ageRuleKey);
+  const handleAgeConfirm = useCallback(async () => {
+    await confirmAge(ageRuleKey);
     setActiveModal(null);
-    setFeedback("Age confirmed. Mature content is now visible on this device.");
+    setFeedback("Age verification saved. Mature Mode is now on for this device.");
   }, [ageRuleKey, confirmAge]);
 
   const handleHideHistoryChange = useCallback(
@@ -145,14 +159,13 @@ export default function MatureContentSettingsPage() {
       }
 
       setSaving(true);
-      const payload = {
-        hideAdultHistory: nextValue,
-      };
       const response = await apiPost("/api/preferences", {
-        preferences: payload,
+        preferences: {
+          hideAdultHistory: nextValue,
+        },
       });
       if (response.ok) {
-        setFeedback("Saved to your account and this device.");
+        setFeedback("Mature history preference saved.");
       } else {
         setFeedback(response.error || "Couldn't save that setting.");
       }
@@ -162,41 +175,117 @@ export default function MatureContentSettingsPage() {
   );
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
-      <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <EditorialHero
-            appearance="dark"
-            accent="cyan"
-            eyebrow="Mature content"
-            title="18+ settings"
-            description="Control mature title visibility and how 18+ reading history is handled."
-            stats={[
-              {
-                label: "Visibility",
-                value: maturityStatusLabel,
-              },
-              {
-                label: "Legal age",
-                value: `${regionConfig.legalAge}+`,
-              },
-              {
-                label: "History",
-                value: hideAdultHistory ? "Hidden on device" : "Visible on device",
-              },
-            ]}
-          />
-
-          <SurfacePanel
-            className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-            appearance="dark"
-            accent="blue"
-          >
+    <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#120f1c_0%,#0d0b14_100%)] text-white">
+      <main className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_340px]">
+          <SurfacePanel appearance="dark" tone="highlight" accent="rose">
             <StorefrontSectionHeading
-              eyebrow="Support"
-              title="Need help?"
-              description="Use the mature content access support topic if the gate or visibility settings get stuck."
+              eyebrow="Mature content settings"
+              title="Control 18+ access on this device"
+              description="Mature titles remain separate from the public storefront. Use these settings to manage visibility, age verification, and mature reading history."
             />
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <StorefrontInfoCard
+                title={maturityStatus.label}
+                description={maturityStatus.description}
+              />
+              <StorefrontInfoCard
+                title={`${regionConfig.legalAge}+ rule`}
+                description={`Current region: ${regionConfig.label}.`}
+              />
+              <StorefrontInfoCard
+                title={hideAdultHistory ? "History hidden" : "History visible"}
+                description="This only affects mature reading history on the current device."
+              />
+            </div>
+          </SurfacePanel>
+
+          <SurfacePanel appearance="dark" tone="muted" accent="cyan">
+            <div className="space-y-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/56">
+                Quick actions
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={handleMatureVisibility}
+                  className={storefrontPrimaryButtonClass}
+                >
+                  {!viewerSignedIn
+                    ? "Sign in to manage Mature Mode"
+                    : !adultConfirmed
+                      ? "Verify age for Mature Mode"
+                      : isAdultMode
+                        ? "Turn off Mature Mode"
+                        : "Turn on Mature Mode"}
+                </button>
+                <Link href="/adult" className={storefrontSecondaryButtonClass}>
+                  Open mature catalog
+                </Link>
+              </div>
+              <p className="text-sm leading-6 text-white/62">
+                Mature content is never recommended to minors and stays out of the public homepage, public search, and public library views.
+              </p>
+            </div>
+          </SurfacePanel>
+        </section>
+
+        {feedback ? (
+          <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/74 shadow-[0_12px_26px_rgba(8,6,20,0.2)]">
+            {feedback}
+          </div>
+        ) : null}
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <SurfacePanel appearance="dark" tone="muted" accent="blue">
+            <StorefrontSectionHeading
+              eyebrow="Visibility"
+              title="Current mature visibility"
+              description="Signed-out visitors and readers without age verification cannot open mature titles. Even verified readers still need Mature Mode turned on."
+            />
+
+            <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                Current status
+              </p>
+              <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-white">
+                {maturityStatus.label}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-white/64">
+                {maturityStatus.description}
+              </p>
+            </div>
+          </SurfacePanel>
+
+          <SurfacePanel appearance="dark" tone="muted" accent="blue">
+            <StorefrontSectionHeading
+              eyebrow="History"
+              title="Hide mature reading history on this device"
+              description="This keeps mature reading history separate from the standard library view on the current device."
+            />
+
+            <label className="mt-5 flex items-start gap-3 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/78 shadow-[0_12px_26px_rgba(8,6,20,0.18)]">
+              <input
+                type="checkbox"
+                checked={hideAdultHistory}
+                onChange={(event) =>
+                  handleHideHistoryChange(event.target.checked)
+                }
+                disabled={saving}
+                className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-[#8be9f6] focus:ring-0"
+              />
+              <span>Hide mature reading history on this device</span>
+            </label>
+          </SurfacePanel>
+        </div>
+
+        <SurfacePanel appearance="dark" tone="muted" accent="cyan">
+          <StorefrontSectionHeading
+            eyebrow="Support"
+            title="Need help with mature access?"
+            description="If Mature Mode gets stuck, use the support topic below so we can point you to the right policy or access flow."
+          />
+          <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href={buildSupportPath({
                 topic: "adult",
@@ -206,141 +295,6 @@ export default function MatureContentSettingsPage() {
             >
               Contact support
             </Link>
-          </SurfacePanel>
-        </section>
-
-        {feedback ? (
-          <SurfacePanel
-            className="border-2 border-white/15 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-            appearance="dark"
-            accent="blue"
-          >
-            <p className="text-sm font-semibold text-white/80">{feedback}</p>
-          </SurfacePanel>
-        ) : null}
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <SurfacePanel
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-            appearance="dark"
-            accent="blue"
-          >
-            <StorefrontSectionHeading
-              eyebrow="Mature content visibility"
-              title="Choose when 18+ titles can appear"
-              description="Mature titles stay hidden until you sign in and confirm your age on this device."
-            />
-
-            <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                Current status
-              </p>
-              <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-white">
-                {maturityStatusLabel}
-              </p>
-              <p className="mt-3 text-sm font-medium leading-6 text-white/70">
-                {viewerSignedIn
-                  ? adultConfirmed
-                    ? "You can turn mature visibility on or off for this device anytime."
-                    : `Your region is set to ${regionConfig.label}. Confirm ${regionConfig.legalAge}+ access before opening mature titles.`
-                  : "Sign in first. Mature access is not enabled for signed-out readers."}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleMatureVisibility}
-                className={storefrontPrimaryButtonClass}
-              >
-                {!viewerSignedIn
-                  ? "Sign in to manage 18+"
-                  : !adultConfirmed
-                    ? "Confirm age for 18+"
-                    : isAdultMode
-                      ? "Hide mature titles"
-                      : "Show mature titles"}
-              </button>
-              <Link
-                href="/adult"
-                className={storefrontSecondaryButtonClass}
-              >
-                Open mature catalog
-              </Link>
-            </div>
-          </SurfacePanel>
-
-          <SurfacePanel
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-            appearance="dark"
-            accent="blue"
-          >
-            <StorefrontSectionHeading
-              eyebrow="History"
-              title="Hide mature reading history on this device"
-              description="This only changes how 18+ reading activity appears on the device you're using right now."
-            />
-
-            <label className="flex items-start gap-3 rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 text-sm font-semibold text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <input
-                type="checkbox"
-                checked={hideAdultHistory}
-                onChange={(event) =>
-                  handleHideHistoryChange(event.target.checked)
-                }
-                disabled={saving}
-                className="mt-1 h-4 w-4 rounded-none border-[2px] border-white/30 bg-black text-[#00E5FF] focus:ring-0"
-              />
-              <span>
-                Hide mature reading history on this device
-              </span>
-            </label>
-
-            <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                Local vs account-level
-              </p>
-              <div className="mt-3 space-y-3 text-sm font-medium leading-6 text-white/70">
-                <p>
-                  Mature visibility and age confirmation are stored on this device
-                  using your existing local access settings.
-                </p>
-                <p>
-                  Hide 18+ history changes the visible reading history on this
-                  device first. If you're signed in, we also save that preference
-                  to your account so it can sync back later.
-                </p>
-              </div>
-            </div>
-          </SurfacePanel>
-        </div>
-
-        <SurfacePanel
-          className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-          appearance="dark"
-          accent="blue"
-        >
-          <StorefrontSectionHeading
-            eyebrow="How it works"
-            title="What 18+ means here"
-            description="Mature titles stay gated until the reader signs in, passes the age check for their region, and turns mature visibility on."
-          />
-          <div className="grid gap-3 md:grid-cols-3">
-            <StorefrontInfoCard
-              title="Sign in first"
-              description="Signed-out users can't open mature titles."
-              className="border-2 border-white/15 bg-black"
-            />
-            <StorefrontInfoCard
-              title="Confirm age"
-              description={`Your current region uses a ${regionConfig.legalAge}+ age rule.`}
-              className="border-2 border-white/15 bg-black"
-            />
-            <StorefrontInfoCard
-              title="Prompt before opening"
-              description="If a title is marked 18+, the age gate appears before the title opens."
-              className="border-2 border-white/15 bg-black"
-            />
           </div>
         </SurfacePanel>
 

@@ -11,7 +11,6 @@ import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
   consumeCommerceSuccessForPath,
@@ -254,7 +253,6 @@ export default function RankingsPage({
   );
   const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
-  const { isAdultMode } = useAdultGateStore();
   const activeViewId = normalizeView(initialSearchParams);
   const activeView = VIEWS.find((item) => item.id === activeViewId) || VIEWS[0];
   const featuredPath = `/rankings?view=${activeView.id}`;
@@ -263,7 +261,7 @@ export default function RankingsPage({
     if (!hasInitialSeries) {
       setLoading(true);
     }
-    const adultFlag = isAdultMode ? "1" : "0";
+    const adultFlag = "0";
     apiGet(`/api/rankings?adult=${adultFlag}&view=${activeView.id}`).then(
       (response) => {
         if (response.ok) {
@@ -291,7 +289,7 @@ export default function RankingsPage({
         });
       },
     );
-  }, [activeView.id, hasInitialSeries, isAdultMode]);
+  }, [activeView.id, hasInitialSeries]);
 
   useEffect(() => {
     setCommerceNotice(

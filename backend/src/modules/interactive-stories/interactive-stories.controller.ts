@@ -8,7 +8,7 @@ import {
   Res,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { checkAdultGate } from "../../common/utils/adult-gate";
+import { resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -44,7 +44,7 @@ export class InteractiveStoriesController {
       return true;
     }
 
-    const gate = checkAdultGate(req.cookies || {});
+    const gate = await resolveAdultGateContext(this.prisma, req);
     if (gate.ok) {
       return true;
     }

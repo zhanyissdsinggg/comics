@@ -13,7 +13,6 @@ const STATIC_SITEMAP_PATHS = [
   "/support",
   "/faq",
   "/how-it-works",
-  "/mature-content",
   "/privacy-policy",
   "/terms-of-service",
 ].filter((path) =>
@@ -30,7 +29,6 @@ const ROUTE_PRIORITIES = {
   "/support": 0.8,
   "/faq": 0.8,
   "/how-it-works": 0.8,
-  "/mature-content": 0.75,
   "/subscribe": 0.7,
   "/privacy-policy": 0.5,
   "/terms-of-service": 0.5,
@@ -43,7 +41,6 @@ const ROUTE_CHANGE_FREQUENCIES = {
   "/store": "weekly",
   "/subscribe": "weekly",
   "/how-it-works": "monthly",
-  "/mature-content": "monthly",
   "/support": "monthly",
   "/faq": "monthly",
   "/about": "monthly",

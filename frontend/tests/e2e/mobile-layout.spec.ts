@@ -18,6 +18,9 @@ test.describe("Mobile layout", () => {
     );
 
     expect(overflow).toBeLessThanOrEqual(1);
+    await expect(
+      page.getByRole("heading", { name: "Pick a mood. Keep it moving." }),
+    ).toBeVisible();
     await expectNoRuntimeIssues("/", runtime);
   });
 

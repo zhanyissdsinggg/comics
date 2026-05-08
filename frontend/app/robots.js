@@ -14,6 +14,7 @@ export default function robots() {
           "/profile",
           "/adult-gate",
           "/adult",
+          "/mature-content",
           "/admin",
           "/api",
           "/auth/reset",

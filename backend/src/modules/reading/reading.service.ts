@@ -54,15 +54,24 @@ export class ReadingService {
     const rows = await this.prisma.readingHistory.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
+      include: {
+        series: {
+          select: {
+            adult: true,
+          },
+        },
+      },
     });
-    return rows.map((row) => ({
-      id: row.id,
-      seriesId: row.seriesId,
-      episodeId: row.episodeId,
-      title: row.title,
-      percent: toClientReadingPercent(row.percent),
-      createdAt: row.createdAt,
-    }));
+    return rows
+      .filter((row) => row.series?.adult !== true)
+      .map((row) => ({
+        id: row.id,
+        seriesId: row.seriesId,
+        episodeId: row.episodeId,
+        title: row.title,
+        percent: toClientReadingPercent(row.percent),
+        createdAt: row.createdAt,
+      }));
   }
 
   async addHistory(userId: string, payload: any) {

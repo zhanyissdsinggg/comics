@@ -52,7 +52,20 @@ export async function generateMetadata({ params }) {
   ) {
     notFound();
   }
-  const payload = await loadSeriesSeoPayload(seriesId);
+  const routePayload = await loadSeriesRoutePayload(seriesId);
+  if (routePayload?.state === "adult-gated") {
+    return createPageMetadata({
+      title: "Mature title",
+      description: `Sign in and confirm mature access to continue on ${siteConfig.siteName}.`,
+      path: `/series/${seriesId || ""}`,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    });
+  }
+
+  const payload = routePayload?.payload || null;
   const series = payload?.series || null;
 
   if (!series) {
