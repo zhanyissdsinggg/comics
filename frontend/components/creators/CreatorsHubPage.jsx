@@ -43,7 +43,7 @@ function buildGenreOptions(creators) {
   const counts = new Map();
 
   (Array.isArray(creators) ? creators : []).forEach((creator) => {
-    (Array.isArray(creator?.topGenres) ? creator.topGenres : []).forEach(
+    (Array.isArray(creator?.genres) ? creator.genres : []).forEach(
       (genre) => {
         const key = String(genre || "").trim();
         if (!key) {
@@ -59,8 +59,7 @@ function buildGenreOptions(creators) {
     .sort(
       (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
     )
-    .map(([genre]) => genre)
-    .slice(0, 8);
+    .map(([genre]) => genre);
 }
 
 function normalizeCreatorRole(creator) {
@@ -94,7 +93,7 @@ function buildCreatorSearchText(creator) {
   return [
     creator?.name,
     creator?.spotlightSeries?.title,
-    ...(Array.isArray(creator?.topGenres) ? creator.topGenres : []),
+    ...(Array.isArray(creator?.genres) ? creator.genres : []),
   ]
     .filter(Boolean)
     .join(" ")
@@ -226,16 +225,67 @@ function normalizeRoleFilter(value) {
 }
 
 function normalizeGenreFilter(value, genres) {
-  const normalized = String(value || "").trim();
+  const normalized = String(value || "")
+    .trim()
+    .replace(/\s+/g, " ");
   if (!normalized) {
     return "All";
   }
 
   const match = (Array.isArray(genres) ? genres : []).find(
-    (genre) => genre.toLowerCase() === normalized.toLowerCase(),
+    (genre) => normalizeGenreValue(genre) === normalizeGenreValue(normalized),
   );
 
-  return match || "All";
+  return match || normalized;
+}
+
+function normalizeGenreValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function creatorMatchesGenre(creator, genre) {
+  if (!genre || genre === "All") {
+    return true;
+  }
+
+  const normalizedGenre = normalizeGenreValue(genre);
+  return (Array.isArray(creator?.genres) ? creator.genres : []).some(
+    (item) => normalizeGenreValue(item) === normalizedGenre,
+  );
+}
+
+function getCreatorResultsLabel(role, genre) {
+  const hasGenre = Boolean(genre && genre !== "All");
+
+  if (hasGenre) {
+    if (role === "creator") {
+      return `${genre} creators`;
+    }
+
+    if (role === "studio-team") {
+      return `${genre} studios + teams`;
+    }
+
+    return `${genre} profiles`;
+  }
+
+  if (role === "creator") {
+    return "Creators";
+  }
+
+  if (role === "studio-team") {
+    return "Studios + Teams";
+  }
+
+  return "All Profiles";
+}
+
+function getCreatorResultsTitle(role, genre) {
+  const label = getCreatorResultsLabel(role, genre);
+  return label === "All Profiles" ? "Browse Creators" : label;
 }
 
 function buildCreatorsFilterHref({ role, genre }) {
@@ -302,7 +352,9 @@ export default function CreatorsHubPage({
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [activeRole, setActiveRole] = useState(normalizeRoleFilter(initialTypeFilter));
-  const [activeGenre, setActiveGenre] = useState("All");
+  const [activeGenre, setActiveGenre] = useState(
+    normalizeGenreFilter(initialGenreFilter, []),
+  );
   const requestRef = useRef(0);
 
   const retryLoad = useCallback(() => {
@@ -376,11 +428,7 @@ export default function CreatorsHubPage({
         (activeRole === "studio-team"
           ? role === "studio" || role === "team"
           : role === "creator");
-      const matchesGenre =
-        activeGenre === "All" ||
-        (Array.isArray(creator?.genres) ? creator.genres : []).includes(
-          activeGenre,
-        );
+      const matchesGenre = creatorMatchesGenre(creator, activeGenre);
       const matchesQuery =
         !normalizedQuery ||
         buildCreatorSearchText(creator).includes(normalizedQuery);
@@ -410,6 +458,8 @@ export default function CreatorsHubPage({
   const normalizedQuery = String(query || "").trim().toLowerCase();
   const showFeaturedCreators =
     !normalizedQuery && activeRole === "all" && activeGenre === "All";
+  const creatorResultsLabel = getCreatorResultsLabel(activeRole, activeGenre);
+  const creatorResultsTitle = getCreatorResultsTitle(activeRole, activeGenre);
 
   if (loading) {
     return <CreatorsHubSkeleton />;
@@ -463,7 +513,12 @@ export default function CreatorsHubPage({
         </SurfacePanel>
 
         {showFeaturedCreators && featuredCreators.length > 0 ? (
-          <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
+          <SurfacePanel
+            appearance="dark"
+            accent="cyan"
+            className="space-y-4"
+            data-testid="creator-featured-section"
+          >
             <div className="flex items-end justify-between gap-3">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
@@ -608,11 +663,17 @@ export default function CreatorsHubPage({
           <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                  All Profiles
+                <p
+                  data-testid="creator-results-label"
+                  className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55"
+                >
+                  {creatorResultsLabel}
                 </p>
-                <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white">
-                  Browse Creators
+                <h2
+                  data-testid="creator-results-heading"
+                  className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white"
+                >
+                  {creatorResultsTitle}
                 </h2>
               </div>
               <p className="text-sm font-bold uppercase tracking-[0.08em] text-white/55">

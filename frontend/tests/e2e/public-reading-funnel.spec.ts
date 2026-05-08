@@ -1863,7 +1863,14 @@ test.describe("Public reading funnel", () => {
     const creatorLink = page.getByTestId("series-creator-link");
     await expect(creatorLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(creatorLink).toHaveAttribute("href", /\/creators\/mira-dane-d1b324/);
-    await gotoWithRetry(page, "/creators/mira-dane-d1b324");
+    const creatorHref = await creatorLink.getAttribute("href");
+    expect(new URL(creatorHref || "/creators/mira-dane-d1b324", "http://127.0.0.1").pathname).toBe(
+      "/creators/mira-dane-d1b324",
+    );
+    const creatorResponse = await page.goto(creatorHref || "/creators/mira-dane-d1b324", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(creatorResponse?.ok()).toBeTruthy();
 
     await expect(page.getByRole("heading", { name: "Mira Dane" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
@@ -2107,10 +2114,14 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("body")).not.toContainText(/account Details Email/i);
     await expect(page.locator("body")).not.toContainText(/issue Details Broken/i);
     await expect(page.locator("body")).not.toContainText(/access Details 18\+/i);
+    await expect(page.locator("body")).not.toContainText(/report Details Cover/i);
     await expect(page.locator("body")).not.toContainText(/Other Details Anything/i);
     await expect(page.locator("body")).not.toContainText(/purchasesWrong/i);
     await expect(page.locator("body")).not.toContainText(/accountEmail/i);
     await expect(page.locator("body")).not.toContainText(/issueBroken/i);
+    await expect(page.locator("body")).not.toContainText(/access18\+/i);
+    await expect(page.locator("body")).not.toContainText(/reportCover/i);
+    await expect(page.locator("body")).not.toContainText(/OtherAnything/i);
     await expect(page.locator("body")).not.toContainText("Submit Email backup");
     await page.getByText("Billing & purchases", { exact: true }).click();
     await page.fill("#support-subject", "Need help");
@@ -2400,6 +2411,7 @@ test.describe("Public reading funnel", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
+    const defaultCreatorCount = await page.locator("#creator-results-grid > a").count();
 
     await expect(page.locator("body")).not.toContainText("match es");
     await expect(page.locator("body")).toContainText(/1 match|[2-9]\d* matches|0 matches/i);
@@ -2428,10 +2440,15 @@ test.describe("Public reading funnel", () => {
         name: "Creators",
       }),
     ).toHaveAttribute("aria-current", "true");
+    expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
+      defaultCreatorCount,
+    );
     await expect(page.locator("#creator-results-grid")).toContainText("Mira Dane");
     await expect(page.locator("#creator-results-grid")).not.toContainText(
       "Rook Hollow Studio",
     );
+    await expect(page.getByTestId("creator-results-label")).toHaveText("Creators");
+    await expect(page.getByTestId("creator-featured-section")).toHaveCount(0);
 
     filteredResponse = await page.goto("/creators?type=studio-team", {
       waitUntil: "domcontentloaded",
@@ -2442,10 +2459,17 @@ test.describe("Public reading funnel", () => {
         name: "Studios + Teams",
       }),
     ).toHaveAttribute("aria-current", "true");
+    expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
+      defaultCreatorCount,
+    );
     await expect(page.locator("#creator-results-grid")).toContainText(
       "Rook Hollow Studio",
     );
     await expect(page.locator("#creator-results-grid")).not.toContainText("Mira Dane");
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Studios + Teams",
+    );
+    await expect(page.getByTestId("creator-featured-section")).toHaveCount(0);
 
     filteredResponse = await page.goto("/creators?genre=Romance", {
       waitUntil: "domcontentloaded",
@@ -2456,8 +2480,83 @@ test.describe("Public reading funnel", () => {
         name: "Romance",
       }),
     ).toHaveAttribute("aria-current", "true");
+    expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
+      defaultCreatorCount,
+    );
     await expect(page.locator("#creator-results-grid")).toContainText("Hana Seo");
+    await expect(page.locator("#creator-results-grid")).not.toContainText("Rook Hollow Studio");
     await expect(page.locator("main")).toContainText(/1 match|[2-9]\d* matches/i);
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Romance profiles",
+    );
+    await expect(page.getByTestId("creator-featured-section")).toHaveCount(0);
+
+    filteredResponse = await page.goto("/creators?genre=Action", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(
+      page.getByTestId("creator-genre-filters").getByRole("link", {
+        name: "Action",
+      }),
+    ).toHaveAttribute("aria-current", "true");
+    expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
+      defaultCreatorCount,
+    );
+    await expect(page.locator("#creator-results-grid")).toContainText("Mira Dane");
+    await expect(page.locator("#creator-results-grid")).toContainText(
+      "Rook Hollow Studio",
+    );
+    await expect(page.locator("#creator-results-grid")).not.toContainText("Hana Seo");
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Action profiles",
+    );
+    await expect(page.getByTestId("creator-featured-section")).toHaveCount(0);
+
+    filteredResponse = await page.goto("/creators?genre=Sci-Fi", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(
+      page.getByTestId("creator-genre-filters").getByRole("link", {
+        name: "Sci-Fi",
+      }),
+    ).toHaveAttribute("aria-current", "true");
+    expect(await page.locator("#creator-results-grid > a").count()).toBeLessThan(
+      defaultCreatorCount,
+    );
+    await expect(page.locator("#creator-results-grid")).toContainText("Nightglass Studio");
+    await expect(page.locator("#creator-results-grid")).toContainText(
+      "Tess Calder and Orbital Forge Team",
+    );
+    await expect(page.locator("#creator-results-grid")).not.toContainText("Hana Seo");
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Sci-Fi profiles",
+    );
+
+    filteredResponse = await page.goto("/creators?type=creator&genre=Romance", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Romance creators",
+    );
+    await expect(page.locator("#creator-results-grid")).toContainText("Hana Seo");
+    await expect(page.locator("#creator-results-grid")).not.toContainText(
+      "Rook Hollow Studio",
+    );
+
+    filteredResponse = await page.goto("/creators?type=studio-team&genre=Action", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(filteredResponse?.ok()).toBeTruthy();
+    await expect(page.getByTestId("creator-results-label")).toHaveText(
+      "Action studios + teams",
+    );
+    await expect(page.locator("#creator-results-grid")).toContainText(
+      "Rook Hollow Studio",
+    );
+    await expect(page.locator("#creator-results-grid")).not.toContainText("Mira Dane");
 
     await expectNoRuntimeIssues("/creators pluralization", runtimeIssues);
   });

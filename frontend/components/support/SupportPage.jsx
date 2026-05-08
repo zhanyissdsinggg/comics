@@ -568,6 +568,7 @@ export default function SupportPage() {
                                     <span className="block text-sm font-black uppercase tracking-[0.04em] text-white">
                                       {preset.title}
                                     </span>
+                                    <br />
                                     <span
                                       id={descriptionId}
                                       className="mt-3 block border-t border-white/10 pt-3 text-sm leading-6 text-inherit"
