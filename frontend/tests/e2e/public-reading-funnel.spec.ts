@@ -1863,11 +1863,7 @@ test.describe("Public reading funnel", () => {
     const creatorLink = page.getByTestId("series-creator-link");
     await expect(creatorLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(creatorLink).toHaveAttribute("href", /\/creators\/mira-dane-d1b324/);
-
-    await Promise.all([
-      page.waitForURL("**/creators/mira-dane-d1b324**", { timeout: UI_TIMEOUT_MS }),
-      creatorLink.click(),
-    ]);
+    await gotoWithRetry(page, "/creators/mira-dane-d1b324");
 
     await expect(page.getByRole("heading", { name: "Mira Dane" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
