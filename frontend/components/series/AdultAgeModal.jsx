@@ -19,16 +19,16 @@ export default function AdultAgeModal({ open, onClose, onConfirm, legalAge }) {
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[30px] border-2 border-white/20 bg-black/95 p-6 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        className="w-full max-w-md rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(21,18,31,0.98)_0%,rgba(14,12,20,0.98)_100%)] p-6 text-white shadow-[0_28px_80px_rgba(6,5,16,0.5)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-          Age check
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/56">
+          Mature access
         </p>
-        <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-white">
+        <h3 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
           {AGE_GATE_TITLE}
         </h3>
-        <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+        <p className="mt-3 text-sm leading-7 text-white/72">
           You must be at least {legalAge} years old to access mature content.
         </p>
 

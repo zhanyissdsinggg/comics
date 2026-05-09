@@ -35,27 +35,27 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
       <SurfacePanel
         appearance="dark"
         tone="muted"
-        accent="cyan"
+        accent="rose"
         className="w-full max-w-2xl p-6 sm:p-7"
       >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/70">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/58">
               18+ access
             </p>
-            <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.04em] text-white">
+            <h2 className="mt-3 font-display text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
               {title}
             </h2>
-            <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-white/80">
+            <p className="mt-3 max-w-xl text-sm leading-7 text-white/72">
               {description}
             </p>
           </div>
-          <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+          <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-4 text-left shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
               Access
             </p>
-            <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
-              Sign in to open it.
+            <p className="mt-2 text-sm leading-6 text-white/72">
+              Private by default.
             </p>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function AdultGateBlockingPanel({ status, onOpenModal }) {
           {trustItems.map((item) => (
             <span
               key={item}
-              className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.06em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+              className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white/62"
             >
               {item}
             </span>

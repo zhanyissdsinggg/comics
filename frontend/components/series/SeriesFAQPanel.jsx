@@ -29,10 +29,10 @@ export default function SeriesFAQPanel({
     <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/58">
             FAQ
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white sm:text-3xl">
+          <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
             Answers
           </h2>
         </div>
@@ -42,12 +42,12 @@ export default function SeriesFAQPanel({
         {faqItems.map((item) => (
           <article
             key={item.id || item.question}
-            className="rounded-[26px] border-2 border-white/20 bg-black px-5 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            className="rounded-[26px] border border-white/10 bg-white/[0.03] px-5 py-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
           >
-            <h3 className="text-base font-black uppercase tracking-[-0.02em] text-white sm:text-lg">
+            <h3 className="text-base font-semibold tracking-[-0.03em] text-white sm:text-lg">
               {item.question}
             </h3>
-            <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+            <p className="mt-3 text-sm leading-7 text-white/72">
               {item.answer}
             </p>
           </article>

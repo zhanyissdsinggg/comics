@@ -44,19 +44,19 @@ function openAuthModal() {
 
 function getSignalClass(tone) {
   if (tone === "free" || tone === "ready" || tone === "membership") {
-    return "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    return "border border-cyan-200/18 bg-cyan-300/10 text-cyan-100";
   }
   if (tone === "preview") {
-    return "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    return "border border-amber-200/18 bg-amber-300/10 text-amber-100";
   }
   if (tone === "points") {
-    return "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    return "border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd6e5]";
   }
   if (tone === "locked") {
-    return "border-2 border-white/20 bg-black text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    return "border border-white/10 bg-white/[0.04] text-white/62";
   }
 
-  return "border-2 border-white/20 bg-black text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+  return "border border-white/10 bg-white/[0.04] text-white/62";
 }
 
 function EpisodeRow({
@@ -421,47 +421,47 @@ function EpisodeRow({
   return (
     <li
       id={`episode-${episode?.id}`}
-      className="group overflow-hidden rounded-[28px] border-2 border-white/15 bg-[#0a0a0a] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF]"
+      className="group overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,21,34,0.96)_0%,rgba(15,13,21,0.98)_100%)] p-4 shadow-[0_18px_48px_rgba(8,6,20,0.28)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:shadow-[0_26px_58px_rgba(8,6,20,0.34)]"
     >
-      <div className="flex flex-col items-center gap-3 text-center">
-        <div className="min-w-0 w-full">
+      <div className="flex flex-col gap-4 text-left sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1">
           {hasCustomEpisodeTitle ? (
             <>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                   {episodeNumberLabel}
                 </span>
                 {showStateBadge ? (
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${getSignalClass(accessState.stateTone)}`}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getSignalClass(accessState.stateTone)}`}
                   >
                     {accessState.stateLabel}
                   </span>
                 ) : null}
                 {isLastReadEpisode ? (
-                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ffd6e5]">
                     Last read
                   </span>
                 ) : null}
               </div>
-              <strong className="mt-2 block text-[1.02rem] font-black uppercase tracking-[-0.02em] text-white">
+              <strong className="mt-2 block text-[1.06rem] font-semibold tracking-[-0.03em] text-white">
                 {episodeHeading}
               </strong>
             </>
           ) : (
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <strong className="text-[1.02rem] font-black uppercase tracking-[-0.02em] text-white">
+            <div className="flex flex-wrap items-center gap-2">
+              <strong className="text-[1.06rem] font-semibold tracking-[-0.03em] text-white">
                 {episodeHeading}
               </strong>
               {showStateBadge ? (
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${getSignalClass(accessState.stateTone)}`}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${getSignalClass(accessState.stateTone)}`}
                 >
                   {accessState.stateLabel}
                 </span>
               ) : null}
               {isLastReadEpisode ? (
-                <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ffd6e5]">
                   Last read
                 </span>
               ) : null}
@@ -469,15 +469,15 @@ function EpisodeRow({
           )}
 
           {helperLabel && helperLabel !== rowHelperText ? (
-            <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
+            <p className="mt-3 text-sm leading-6 text-white/74">
               {helperLabel}
             </p>
           ) : null}
 
           {isLastReadEpisode ? (
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#111111]">
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
               <div
-                className="h-full rounded-full bg-[#00E5FF]"
+                className="h-full rounded-full bg-[linear-gradient(90deg,rgba(255,79,154,0.92)_0%,rgba(255,173,200,0.92)_100%)]"
                 style={{
                   width: `${Math.round((progress.percent || 0) * 100)}%`,
                 }}
@@ -486,9 +486,9 @@ function EpisodeRow({
           ) : null}
         </div>
 
-        <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:max-w-[240px] sm:items-end">
           {sideLabel ? (
-            <p className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+            <p className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/62">
               {sideLabel}
             </p>
           ) : null}

@@ -9,6 +9,11 @@ import AdultGateBlockingPanel from "./AdultGateBlockingPanel";
 import NetworkFallback from "../common/NetworkFallback";
 import Skeleton from "../common/Skeleton";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
+import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
@@ -37,28 +42,36 @@ import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 import { buildReaderPath } from "../../lib/readerRoutes";
 
+const seriesPageShellClass =
+  "min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(43,28,56,0.48)_0%,rgba(19,16,27,0.96)_34%,#0f0d13_100%)] text-white";
+
 function EpisodeListSkeleton() {
   return (
-    <section className="mt-6 rounded-[28px] border-2 border-white/20 bg-black/80 p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:mt-8 sm:p-6">
-      <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
+    <SurfacePanel
+      appearance="dark"
+      tone="muted"
+      accent="cyan"
+      className="mt-6 sm:mt-8"
+    >
+      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-2">
-          <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
-          <Skeleton className="h-4 w-10 rounded-full bg-[#111111]" />
+          <Skeleton className="h-6 w-28 rounded-full bg-white/16" />
+          <Skeleton className="h-4 w-10 rounded-full bg-white/[0.06]" />
         </div>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
-          <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
+          <Skeleton className="h-9 w-24 rounded-full bg-white/16" />
+          <Skeleton className="h-9 w-24 rounded-full bg-white/16" />
         </div>
       </div>
       <div className="space-y-2">
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton
             key={`episode-list-skeleton-${index}`}
-            className="h-24 w-full rounded-[24px] bg-[#111111]"
+            className="h-24 w-full rounded-[24px] bg-white/[0.05]"
           />
         ))}
       </div>
-    </section>
+    </SurfacePanel>
   );
 }
 
@@ -659,10 +672,6 @@ export default function SeriesPage({
       )[0] || null
     );
   }, [episodes]);
-  const primaryButtonClass =
-    "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
-  const secondaryButtonClass =
-    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
   const primaryReadAction = useMemo(
     () =>
       getSeriesPrimaryReadAction({
@@ -797,58 +806,44 @@ export default function SeriesPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
+      <main className={seriesPageShellClass}>
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <section className="rounded-[30px] border-2 border-[#FFE500] bg-black/85 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-7">
+          <SurfacePanel
+            appearance="dark"
+            tone="highlight"
+            accent="rose"
+            className="p-5 sm:p-7"
+          >
             <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
-              <Skeleton className="aspect-[3/4] w-full rounded-[28px] border-2 border-white/20 bg-[#111111] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" />
+              <Skeleton className="aspect-[3/4] w-full rounded-[28px] bg-white/[0.06]" />
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
-                  <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
-                  <Skeleton className="h-7 w-24 rounded-full bg-white/20" />
+                  <Skeleton className="h-7 w-24 rounded-full bg-white/16" />
+                  <Skeleton className="h-7 w-24 rounded-full bg-white/16" />
                 </div>
-                <Skeleton className="h-12 w-4/5 rounded-[20px] bg-white/20" />
-                <Skeleton className="h-5 w-3/5 rounded-full bg-[#111111]" />
+                <Skeleton className="h-12 w-4/5 rounded-[20px] bg-white/16" />
+                <Skeleton className="h-5 w-3/5 rounded-full bg-white/[0.06]" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-full rounded-full bg-[#111111]" />
-                  <Skeleton className="h-4 w-[92%] rounded-full bg-[#111111]" />
-                  <Skeleton className="h-4 w-[76%] rounded-full bg-[#111111]" />
+                  <Skeleton className="h-4 w-full rounded-full bg-white/[0.06]" />
+                  <Skeleton className="h-4 w-[92%] rounded-full bg-white/[0.06]" />
+                  <Skeleton className="h-4 w-[76%] rounded-full bg-white/[0.06]" />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Skeleton className="h-9 w-36 rounded-full bg-white/20" />
-                  <Skeleton className="h-9 w-32 rounded-full bg-white/20" />
+                  <Skeleton className="h-9 w-36 rounded-full bg-white/16" />
+                  <Skeleton className="h-9 w-32 rounded-full bg-white/16" />
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <Skeleton
                       key={`series-header-skeleton-${index}`}
-                      className="h-28 rounded-[22px] bg-[#111111]"
+                      className="h-28 rounded-[22px] bg-white/[0.05]"
                     />
                   ))}
                 </div>
               </div>
             </div>
-          </section>
-          <section className="mt-6 rounded-[28px] border-2 border-white/20 bg-black/80 p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <div className="mb-4 flex items-center justify-between border-b-2 border-white/15 pb-4">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-6 w-28 rounded-full bg-white/20" />
-                <Skeleton className="h-4 w-12 rounded-full bg-[#111111]" />
-              </div>
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
-                <Skeleton className="h-9 w-24 rounded-full bg-white/20" />
-              </div>
-            </div>
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Skeleton
-                  key={`episode-${index}`}
-                  className="h-20 w-full rounded-[24px] bg-[#111111]"
-                />
-              ))}
-            </div>
-          </section>
+          </SurfacePanel>
+          <EpisodeListSkeleton />
         </div>
       </main>
     );
@@ -856,39 +851,43 @@ export default function SeriesPage({
 
   if (error === "NOT_FOUND") {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
+      <main className={seriesPageShellClass}>
         <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
-          <div className="rounded-[28px] border-2 border-[#FFE500] bg-black/85 p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+          <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-6 sm:p-7">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/58">
               Series unavailable
             </p>
-            <h1 className="mt-3 text-3xl font-black uppercase tracking-[0.03em] text-white sm:text-4xl">
-              Title unavailable.
+            <h1 className="mt-3 max-w-2xl font-display text-[2.3rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[3.15rem]">
+              This title isn&apos;t available right now.
             </h1>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/72">
+              Try another hit from rankings, jump back into comics, or search
+              for something new.
+            </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => router.push("/rankings?view=featured")}
-                className={primaryButtonClass}
+                className={storefrontPrimaryButtonClass}
               >
-                Trending
+                Explore rankings
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/comics")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Comics
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/search")}
-                className={secondaryButtonClass}
+                className={storefrontSecondaryButtonClass}
               >
                 Search
               </button>
             </div>
-          </div>
+          </SurfacePanel>
         </div>
       </main>
     );
@@ -898,35 +897,35 @@ export default function SeriesPage({
     const isUnavailable = error === "UNAVAILABLE";
 
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
+      <main className={seriesPageShellClass}>
         <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
           <NetworkFallback
             compact
             title={
               isUnavailable
-                ? "Title unavailable."
-                : "Load failed."
+                ? "This title isn't available right now."
+                : "We couldn't load this page."
             }
             description={
               isUnavailable
-                ? ""
-                : ""
+                ? "You can head to support, or jump into another title while this one is offline."
+                : "Try again in a moment, or keep exploring while we catch up."
             }
             onRetry={() => fetchSeries({ bust: true })}
           >
             <button
               type="button"
               onClick={() => router.push("/rankings?view=featured")}
-              className={secondaryButtonClass}
+              className={storefrontSecondaryButtonClass}
             >
-              Trending
+              Explore rankings
             </button>
             <button
               type="button"
               onClick={() =>
                 router.push(isUnavailable ? "/support" : "/search")
               }
-              className={secondaryButtonClass}
+              className={storefrontSecondaryButtonClass}
             >
               {isUnavailable ? "Support" : "Search"}
             </button>
@@ -938,7 +937,7 @@ export default function SeriesPage({
 
   if ((series?.adult || error === "ADULT_GATED") && gateStatus !== "OK") {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
+      <main className={seriesPageShellClass}>
         <AdultGateBlockingPanel
           status={gateStatus}
           onOpenModal={openGateModal}
@@ -968,7 +967,7 @@ export default function SeriesPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
+    <main className={seriesPageShellClass}>
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
           <div className="pt-6">
@@ -1002,25 +1001,34 @@ export default function SeriesPage({
         />
 
         {interactiveStory ? (
-          <section className="rounded-[24px] border-2 border-white/20 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <SurfacePanel
+            appearance="dark"
+            tone="muted"
+            accent="rose"
+            className="p-4 sm:p-5"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/56">
                   Interactive
                 </p>
-                <p className="mt-1 text-sm font-black uppercase tracking-[0.02em] text-white">
-                  Interactive story
+                <p className="mt-1 text-base font-semibold tracking-[-0.03em] text-white">
+                  Make a choice. Change the route.
+                </p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+                  This title includes an interactive edition with branch
+                  moments, quick decisions, and replayable paths.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
-                className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                className={storefrontSecondaryButtonClass}
               >
-                Start Story
+                Start reading
               </button>
             </div>
-          </section>
+          </SurfacePanel>
         ) : null}
 
         <EpisodeList
@@ -1040,7 +1048,7 @@ export default function SeriesPage({
         {showSecondarySections ? (
           <>
             <SimilarSeriesSection seriesId={seriesId} series={series} />
-            <div className="mt-8 border-t-[3px] border-black pt-6" />
+            <div className="mt-8 border-t border-white/10 pt-6" />
             <CommentsSection
               seriesId={seriesId}
               seriesTitle={series.title}
@@ -1058,10 +1066,15 @@ export default function SeriesPage({
             />
           </>
         ) : (
-          <div className="mt-8 space-y-4">
-            <Skeleton className="h-8 w-48 rounded-lg" />
-            <Skeleton className="h-36 w-full rounded-2xl" />
-          </div>
+          <SurfacePanel
+            appearance="dark"
+            tone="muted"
+            accent="cyan"
+            className="mt-8 space-y-4"
+          >
+            <Skeleton className="h-8 w-48 rounded-lg bg-white/[0.08]" />
+            <Skeleton className="h-36 w-full rounded-2xl bg-white/[0.05]" />
+          </SurfacePanel>
         )}
       </div>
 

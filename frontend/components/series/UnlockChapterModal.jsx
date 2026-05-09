@@ -296,13 +296,13 @@ export default function UnlockChapterModal({
         role="dialog"
         aria-modal="true"
         aria-label={`Unlock ${installmentLabelLower}${installmentSuffix}`}
-        className="relative w-full max-w-[32rem] overflow-hidden rounded-[32px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        className="relative w-full max-w-[32rem] overflow-hidden rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(21,18,31,0.98)_0%,rgba(14,12,20,0.98)_100%)] text-white shadow-[0_28px_80px_rgba(6,5,16,0.5)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="relative border-b-2 border-white/10 bg-black/80 p-5 sm:p-6">
+        <div className="relative border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[#ffd6e5] shadow-[0_16px_34px_rgba(8,6,20,0.22)]">
                 {view === "packs" ? (
                   <Wallet size={20} />
                 ) : (
@@ -310,10 +310,10 @@ export default function UnlockChapterModal({
                 )}
               </div>
               <div>
-                <p className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <p className="inline-flex rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.12)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#ffd6e5]">
                   {view === "packs" ? "More points" : "Unlock"}
                 </p>
-                <p className="mt-3 text-sm font-semibold text-white/80">
+                <p className="mt-3 text-sm text-white/70">
                   {view === "packs"
                     ? "Pick a pack."
                     : "Unlock stays on this account after checkout."}
@@ -324,7 +324,7 @@ export default function UnlockChapterModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+              className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-white/78 shadow-[0_14px_30px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08]"
               aria-label="Close unlock modal"
             >
               <X size={18} />
@@ -336,13 +336,13 @@ export default function UnlockChapterModal({
         <div className="relative p-5 sm:p-6">
           {view === "confirm" ? (
             <div className="mt-6">
-              <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-white">
+              <h2 className="font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                 Unlock {installmentLabel}
                 {installmentSuffix} for{" "}
-                <span className="text-[#00E5FF]">{formatUSNumber(resolvedPrice)}</span>{" "}
+                <span className="text-[#ffd6e5]">{formatUSNumber(resolvedPrice)}</span>{" "}
                 Points
               </h2>
-              <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+              <p className="mt-3 text-sm leading-7 text-white/72">
                 {!isSignedIn
                   ? "Sign in to unlock"
                   : insufficient
@@ -351,29 +351,29 @@ export default function UnlockChapterModal({
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+                <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                     Your balance
                   </p>
-                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
                     {isSignedIn ? formatUSNumber(resolvedWalletBalance) : "--"}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-white/70">
+                  <p className="mt-1 text-xs text-white/62">
                     {isSignedIn
                       ? "Points ready to use."
                       : "Sign in for balance."}
                   </p>
                 </div>
-                <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+                <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
                     {installmentLabel} price
                   </p>
-                  <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
-                    <span className="text-[#FFE500]">
+                  <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
+                    <span className="text-[#f4c95d]">
                       {formatUSNumber(resolvedPrice)}
                     </span>
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-white/70">
+                  <p className="mt-1 text-xs text-white/62">
                     {insufficient
                       ? `Need ${formatUSNumber(computedShortfall)} more points.`
                       : "Used when you confirm."}
@@ -381,16 +381,16 @@ export default function UnlockChapterModal({
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-200/18 bg-cyan-300/10 text-cyan-100">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-black uppercase tracking-[0.05em] text-white">
+                    <p className="font-semibold uppercase tracking-[0.16em] text-white/68">
                       Quick note
                     </p>
-                    <p className="mt-1 text-xs font-semibold leading-6 text-white/70">
+                    <p className="mt-1 text-xs leading-6 text-white/62">
                       Point options stay in USD and on this account.
                     </p>
                   </div>
@@ -420,10 +420,10 @@ export default function UnlockChapterModal({
             <div className="mt-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-[1.9rem] font-black uppercase tracking-[0.04em] text-white">
+                  <h2 className="font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                     Get points
                   </h2>
-                  <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
+                  <p className="mt-3 text-sm leading-7 text-white/72">
                     Add a pack to unlock {installmentLabel}
                     {installmentSuffix}.
                   </p>
@@ -439,12 +439,12 @@ export default function UnlockChapterModal({
                 </button>
               </div>
 
-              <div className="mt-5 rounded-[22px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
                 <div className="flex items-center justify-between gap-3">
                   <span>
                     Need {formatUSNumber(computedShortfall)} more points
                   </span>
-                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="rounded-full border border-amber-200/18 bg-amber-300/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">
                     Secure checkout
                   </span>
                 </div>
@@ -462,30 +462,30 @@ export default function UnlockChapterModal({
                   return (
                     <div
                       key={pkg.id}
-                      className={`rounded-[24px] border-2 px-4 py-4 transition shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] ${
+                      className={`rounded-[24px] border px-4 py-4 transition-all shadow-[0_18px_40px_rgba(8,6,20,0.22)] ${
                         isHighlighted
-                          ? "border-[#00E5FF] bg-[#101010]"
-                          : "border-white/20 bg-black"
+                          ? "border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.08)]"
+                          : "border-white/10 bg-white/[0.03]"
                       }`}
                     >
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-lg font-black uppercase tracking-[0.03em] text-white">
+                            <span className="text-lg font-semibold tracking-[-0.03em] text-white">
                               {pkg.name}
                             </span>
                             {pkg.tag ? (
-                              <span className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200/18 bg-amber-300/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-100">
                                 <Sparkles size={10} />
                                 {pkg.tag}
                               </span>
                             ) : null}
                           </div>
-                          <p className="mt-2 text-2xl font-black uppercase tracking-[0.03em] text-white">
+                          <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">
                             {pkg.priceLabel} for {formatUSNumber(pkg.totalPts)}{" "}
                             Points
                           </p>
-                          <p className="mt-1 text-xs font-semibold text-white/70">
+                          <p className="mt-1 text-xs text-white/62">
                             {bonusLabel}
                           </p>
                         </div>
@@ -506,16 +506,16 @@ export default function UnlockChapterModal({
                 })}
               </div>
 
-              <div className="mt-5 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-200/18 bg-cyan-300/10 text-cyan-100">
                     <ShieldCheck size={16} />
                   </div>
                   <div>
-                    <p className="font-black uppercase tracking-[0.05em] text-white">
+                    <p className="font-semibold uppercase tracking-[0.16em] text-white/68">
                       Checkout
                     </p>
-                    <p className="mt-1 text-xs font-semibold leading-6 text-white/70">
+                    <p className="mt-1 text-xs leading-6 text-white/62">
                       {packagesUsingFallback
                         ? "Showing current pack defaults."
                         : "USD pricing. Points land on this account after purchase."}
@@ -543,7 +543,7 @@ export default function UnlockChapterModal({
                     Store
                   </button>
                 ) : null}
-                <span className="inline-flex items-center justify-center rounded-full border-2 border-white/20 bg-black px-5 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.12em] text-white/62">
                   {isLoadingPackages ? "Refreshing..." : "Point options"}
                 </span>
               </div>

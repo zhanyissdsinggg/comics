@@ -34,45 +34,45 @@ export default function SeriesArrivalPanel({
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/58">
             Found in
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.04em] text-white sm:text-3xl">
+          <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.35rem]">
             {context.title}
           </h2>
         </div>
-        <div className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-left shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Back to
           </p>
-          <p className="mt-3 text-sm font-black uppercase tracking-[0.03em] text-white">
+          <p className="mt-3 text-sm font-semibold tracking-[-0.01em] text-white">
             {context.returnTitle}
           </p>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Source
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
             {context.sourceLabel}
           </p>
         </div>
-        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Row
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
             {context.laneValue}
           </p>
         </div>
-        <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Back to
           </p>
-          <p className="mt-3 text-2xl font-black uppercase tracking-[0.03em] text-white">
+          <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
             {context.returnTitle}
           </p>
         </div>

@@ -33,6 +33,13 @@ export default function ActionModal({
     return null;
   }
 
+  const toneLabel =
+    type === "SHORTFALL"
+      ? "Reading access"
+      : type === "SUCCESS"
+        ? "Ready to read"
+        : "Heads up";
+
   const resolvedActions =
     Array.isArray(actions) && actions.length > 0
       ? actions
@@ -52,19 +59,15 @@ export default function ActionModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-[34rem] overflow-hidden rounded-[30px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        className="w-full max-w-[34rem] overflow-hidden rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(21,18,31,0.98)_0%,rgba(14,12,20,0.98)_100%)] text-white shadow-[0_28px_80px_rgba(6,5,16,0.5)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b-2 border-white/10 bg-black/80 p-5">
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-5">
           <div>
-            <p className="inline-flex rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              {type === "SHORTFALL"
-                ? "Keep reading"
-                : type === "SUCCESS"
-                  ? "Ready"
-                  : "Quick note"}
+            <p className="inline-flex rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.12)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd6e5]">
+              {toneLabel}
             </p>
-            <h3 className="mt-3 text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white">
+            <h3 className="mt-3 font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.05em] text-white">
               {title}
             </h3>
           </div>
@@ -78,26 +81,26 @@ export default function ActionModal({
         </div>
 
         <div className="p-5">
-          <p className="text-sm font-semibold leading-7 text-white/80">
+          <p className="text-sm leading-7 text-white/72">
             {description}
           </p>
 
           {type === "SHORTFALL" ? (
-            <div className="mt-4 rounded-[24px] border-2 border-black bg-[#FFE500] px-4 py-3 text-sm font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="mt-4 rounded-[24px] border border-amber-200/16 bg-[rgba(244,201,93,0.12)] px-4 py-3 text-sm text-amber-100 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
               Need{" "}
-                <span className="font-black text-black">{shortfallPts}</span>{" "}
-                more points for this chapter.
-              </div>
-            ) : null}
+              <span className="font-semibold text-amber-50">{shortfallPts}</span>{" "}
+              more points for this chapter.
+            </div>
+          ) : null}
 
           {offer ? (
-            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black p-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-black uppercase tracking-[0.01em] text-white">
+                <span className="font-semibold tracking-[-0.02em] text-white">
                   {offer.title || offer.name}
                 </span>
                 {offerBadge ? (
-                  <span className="rounded-full border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="rounded-full border border-cyan-200/18 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
                     {offerBadge}
                   </span>
                 ) : null}
@@ -108,7 +111,7 @@ export default function ActionModal({
                 </p>
               ) : null}
               {offerSavingsText ? (
-                <p className="mt-2 text-xs font-black uppercase tracking-[0.08em] text-white/75">
+                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/64">
                   {offerSavingsText}
                 </p>
               ) : null}
@@ -116,8 +119,8 @@ export default function ActionModal({
           ) : null}
 
           {Array.isArray(compareItems) && compareItems.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black p-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
+            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {compareTitle}
               </p>
               {compareItems.map((item) => (
@@ -135,15 +138,13 @@ export default function ActionModal({
           ) : null}
 
           {Array.isArray(tips) && tips.length > 0 ? (
-            <div className="mt-4 rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
+            <div className="mt-4 rounded-[24px] border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/76 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58">
                 {tipsTitle}
               </p>
               {tips.map((tip) => (
                 <div key={tip} className="flex gap-2">
-                  <span className="font-black text-[#FF007A]">
-                    -
-                  </span>
+                  <span className="font-semibold text-[#ff76ad]">•</span>
                   <span>{tip}</span>
                 </div>
               ))}
