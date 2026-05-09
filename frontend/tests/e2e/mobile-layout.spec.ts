@@ -19,7 +19,7 @@ test.describe("Mobile layout", () => {
 
     expect(overflow).toBeLessThanOrEqual(1);
     await expect(
-      page.getByRole("heading", { name: "Pick a mood. Keep it moving." }),
+      page.getByRole("heading", { name: "What are you in the mood for?" }),
     ).toBeVisible();
     await expectNoRuntimeIssues("/", runtime);
   });
@@ -48,10 +48,11 @@ test.describe("Mobile layout", () => {
     const bottomNav = page.getByRole("navigation", { name: "Mobile bottom navigation" });
 
     await expect(bottomNav).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: "Library" })).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: "Search" })).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: "Account" })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: "Home", exact: true })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: "Explore", exact: true })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: "Library", exact: true })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: "Rankings", exact: true })).toBeVisible();
+    await expect(bottomNav.getByRole("link", { name: "Me", exact: true })).toBeVisible();
     await expect(header.getByRole("link", { name: "Comics" })).toHaveCount(0);
 
     const bodyPaddingBottom = await page.evaluate(() =>
@@ -76,8 +77,8 @@ test.describe("Mobile layout", () => {
   for (const { route, activeTab } of [
     { route: "/", activeTab: "Home" },
     { route: "/library", activeTab: "Library" },
-    { route: "/search", activeTab: "Search" },
-    { route: "/account", activeTab: "Account" },
+    { route: "/search", activeTab: "Explore" },
+    { route: "/account", activeTab: "Me" },
   ]) {
     test(`mobile bottom nav should highlight ${activeTab} on ${route}`, async ({ page }) => {
       const runtime = collectRuntimeIssues(page);
@@ -87,7 +88,7 @@ test.describe("Mobile layout", () => {
       expect(response?.ok()).toBeTruthy();
 
       const bottomNav = page.getByRole("navigation", { name: "Mobile bottom navigation" });
-      const activeLink = bottomNav.getByRole("link", { name: activeTab });
+      const activeLink = bottomNav.getByRole("link", { name: activeTab, exact: true });
       await expect(bottomNav).toBeVisible();
       await expect(activeLink).toHaveAttribute("aria-current", "page");
       await activeLink.focus();

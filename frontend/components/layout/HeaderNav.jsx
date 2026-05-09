@@ -12,11 +12,11 @@ import { siteConfig } from "../../lib/siteConfig";
 const PUBLIC_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
-  { id: "search", label: "Search", href: "/search" },
+  { id: "interactive", label: "Interactive", href: "/search?type=interactive" },
 ]
   .concat(
     siteConfig.navigation.showRankingsInNav
-      ? [{ id: "rankings", label: "Trending", href: "/rankings" }]
+      ? [{ id: "rankings", label: "Rankings", href: "/rankings" }]
       : [],
   )
   .concat(
@@ -32,7 +32,7 @@ export default function HeaderNav({ variant = "default" }) {
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">
-      <div className="inline-flex items-center gap-1">
+      <div className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.02] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         {navItems.map((item) => {
           const isActive =
             item.href === "/"
@@ -68,7 +68,7 @@ export default function HeaderNav({ variant = "default" }) {
               key={item.id}
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
-              className={`rounded-full px-4 py-2 text-sm font-medium text-white transition-colors ${isActive ? "bg-white text-black" : "text-white/70 hover:bg-white/8 hover:text-white"}`}
+              className={`rounded-full px-4 py-2.5 text-sm font-medium tracking-[0.01em] transition-all duration-150 ${isActive ? "bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.14)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14),0_10px_22px_rgba(0,0,0,0.24)]" : "text-white/68 hover:bg-white/[0.05] hover:text-white"}`}
             >
               {item.label}
             </NavItem>

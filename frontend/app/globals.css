@@ -5,97 +5,87 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --font-ui-body:
-    "Avenir Next", "SF Pro Text", "Segoe UI", "Helvetica Neue", "PingFang SC",
-    "Hiragino Sans GB", Arial, sans-serif;
+    "Avenir Next", "Inter", "SF Pro Text", "Segoe UI", "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
   --font-body:
     var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
     "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
-  --font-display: var(--font-ui-body), var(--font-body);
-  --gush-accent: #f47aa6;
-  --gush-accent-strong: #df5c92;
-  --gush-accent-secondary: #7be6f3;
-  --gush-accent-tertiary: #b6f0d4;
-  --gush-page-bg: #fbf5ef;
-  --gush-page-bg-elevated: #fffaf6;
-  --gush-page-bg-muted: #f6ecdf;
-  --gush-surface: rgba(255, 250, 246, 0.92);
-  --gush-surface-strong: rgba(255, 252, 248, 0.98);
-  --gush-surface-muted: rgba(249, 241, 233, 0.92);
-  --gush-surface-accent: rgba(255, 240, 246, 0.92);
-  --gush-border: rgba(58, 44, 86, 0.12);
-  --gush-border-strong: rgba(33, 24, 49, 0.22);
-  --gush-border-faint: rgba(58, 44, 86, 0.08);
-  --gush-ink-strong: #181220;
-  --gush-ink: #2f2740;
-  --gush-ink-soft: rgba(47, 39, 64, 0.72);
-  --gush-ink-faint: rgba(47, 39, 64, 0.5);
-  --gush-success: #37bf8f;
-  --gush-warning: #ffb35c;
-  --gush-danger: #df688f;
-  --gush-shadow-soft: 0 10px 26px rgba(87, 62, 108, 0.12);
-  --gush-shadow-panel: 0 18px 44px rgba(87, 62, 108, 0.14);
-  --gush-shadow-floating: 0 24px 64px rgba(87, 62, 108, 0.18);
-  --gush-shadow-button: 0 12px 26px rgba(244, 122, 166, 0.22);
-  --gush-shadow-card: 0 18px 40px rgba(87, 62, 108, 0.14);
-  --gush-shadow-header: 0 12px 32px rgba(87, 62, 108, 0.1);
+  --font-display:
+    "Fraunces", Georgia, "Times New Roman", serif;
+  --gush-bg: #0f0d13;
+  --gush-bg-soft: #17131d;
+  --gush-card: #1e1926;
+  --gush-card-soft: #251f2f;
+  --gush-text: #f8f4ee;
+  --gush-text-muted: rgba(248, 244, 238, 0.68);
+  --gush-text-faint: rgba(248, 244, 238, 0.42);
+  --gush-rose: #ff4f9a;
+  --gush-rose-soft: rgba(255, 79, 154, 0.16);
+  --gush-lavender: #a78bfa;
+  --gush-cyan: #67e8f9;
+  --gush-mint: #83f6d8;
+  --gush-gold: #f4c95d;
+  --gush-border: rgba(255, 255, 255, 0.09);
+  --gush-border-strong: rgba(255, 255, 255, 0.16);
+  --gush-border-faint: rgba(255, 255, 255, 0.06);
+  --gush-success: #59d5a0;
+  --gush-warning: #ffbf70;
+  --gush-danger: #ff8ab9;
+  --gush-shadow-soft: 0 16px 38px rgba(4, 3, 9, 0.22);
+  --gush-shadow-panel: 0 24px 72px rgba(4, 3, 9, 0.32);
+  --gush-shadow-floating: 0 32px 100px rgba(0, 0, 0, 0.48);
+  --gush-shadow-button: 0 18px 42px rgba(255, 79, 154, 0.22);
+  --gush-shadow-card: 0 24px 80px rgba(0, 0, 0, 0.34);
+  --gush-shadow-header: 0 20px 56px rgba(4, 3, 9, 0.3);
   --gush-radius-sm: 16px;
   --gush-radius-md: 20px;
   --gush-radius-lg: 24px;
   --gush-radius-xl: 28px;
-  --gush-home-bg: #fbf5ef;
-  --gush-home-surface: rgba(255, 250, 246, 0.95);
-  --gush-home-surface-strong: rgba(255, 252, 248, 0.98);
-  --gush-home-border: rgba(58, 44, 86, 0.12);
-  --gush-home-ink: #181220;
-  --gush-home-ink-soft: rgba(47, 39, 64, 0.7);
-  --gush-home-accent: #f47aa6;
+  --gush-radius-card: 28px;
+  --gush-radius-panel: 36px;
+  --gush-radius-pill: 999px;
+  --gush-page-bg: var(--gush-bg);
+  --gush-page-bg-elevated: #14101a;
+  --gush-page-bg-muted: #191420;
+  --gush-surface: rgba(23, 19, 29, 0.84);
+  --gush-surface-strong: rgba(30, 25, 38, 0.96);
+  --gush-surface-muted: rgba(37, 31, 47, 0.84);
+  --gush-surface-accent: rgba(255, 79, 154, 0.12);
+  --gush-ink-strong: var(--gush-text);
+  --gush-ink: rgba(248, 244, 238, 0.92);
+  --gush-ink-soft: var(--gush-text-muted);
+  --gush-ink-faint: var(--gush-text-faint);
+  --gush-accent: var(--gush-rose);
+  --gush-accent-strong: #ff77b0;
+  --gush-accent-secondary: var(--gush-cyan);
+  --gush-accent-tertiary: var(--gush-mint);
+  --gush-home-bg: radial-gradient(circle at top, rgba(167, 139, 250, 0.08), transparent 22%), linear-gradient(180deg, #0f0d13 0%, #130f18 42%, #17131d 100%);
+  --gush-home-surface: rgba(23, 19, 29, 0.86);
+  --gush-home-surface-strong: rgba(30, 25, 38, 0.96);
+  --gush-home-border: var(--gush-border);
+  --gush-home-ink: var(--gush-text);
+  --gush-home-ink-soft: var(--gush-text-muted);
+  --gush-home-accent: var(--gush-rose);
   --gush-page-gutter: clamp(1rem, 3vw, 2rem);
   --gush-page-max: 1280px;
   --gush-page-max-wide: 1320px;
   --gush-section-gap: clamp(2rem, 4vw, 3.5rem);
-  --gush-text-display-xl: clamp(2.75rem, 6.1vw, 5.6rem);
-  --gush-text-display-lg: clamp(2.1rem, 4.2vw, 3.7rem);
-  --gush-text-title-lg: clamp(1.42rem, 2.8vw, 2rem);
-  --gush-text-title-md: clamp(1.12rem, 1.9vw, 1.42rem);
+  --gush-text-display-xl: clamp(3.25rem, 7vw, 6.4rem);
+  --gush-text-display-lg: clamp(2.5rem, 5.6vw, 4.8rem);
+  --gush-text-title-lg: clamp(1.52rem, 3vw, 2.1rem);
+  --gush-text-title-md: clamp(1.14rem, 2vw, 1.48rem);
   --gush-text-body-lg: 1.08rem;
   --gush-text-body: 0.98rem;
   --gush-text-body-sm: 0.875rem;
-  --gush-leading-display: 0.94;
+  --gush-leading-display: 0.92;
   --gush-leading-copy: 1.7;
-  --gush-mobile-bottom-nav-height: 5.9rem;
+  --gush-mobile-bottom-nav-height: 6.4rem;
 }
 
 html.dark {
   color-scheme: dark;
-  --gush-accent: #f589b1;
-  --gush-accent-strong: #ffabc8;
-  --gush-accent-secondary: #8be9f6;
-  --gush-accent-tertiary: #9ce9c7;
-  --gush-page-bg: #120f1c;
-  --gush-page-bg-elevated: #171320;
-  --gush-page-bg-muted: #1e1829;
-  --gush-surface: rgba(20, 18, 33, 0.88);
-  --gush-surface-strong: rgba(26, 23, 40, 0.96);
-  --gush-surface-muted: rgba(23, 20, 36, 0.9);
-  --gush-surface-accent: rgba(43, 27, 42, 0.92);
-  --gush-border: rgba(255, 255, 255, 0.1);
-  --gush-border-strong: rgba(255, 255, 255, 0.18);
-  --gush-border-faint: rgba(255, 255, 255, 0.06);
-  --gush-ink-strong: #f7f2ff;
-  --gush-ink: #f1ecfb;
-  --gush-ink-soft: rgba(241, 236, 251, 0.76);
-  --gush-ink-faint: rgba(241, 236, 251, 0.5);
-  --gush-success: #59d5a0;
-  --gush-warning: #ffc07a;
-  --gush-danger: #ff88b1;
-  --gush-shadow-soft: 0 12px 28px rgba(3, 2, 8, 0.3);
-  --gush-shadow-panel: 0 22px 56px rgba(3, 2, 8, 0.34);
-  --gush-shadow-floating: 0 32px 74px rgba(3, 2, 8, 0.42);
-  --gush-shadow-button: 0 16px 30px rgba(245, 137, 177, 0.22);
-  --gush-shadow-card: 0 18px 42px rgba(3, 2, 8, 0.34);
-  --gush-shadow-header: 0 14px 36px rgba(3, 2, 8, 0.22);
 }
 
 html.light {
@@ -130,10 +120,11 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at top right, rgba(182, 240, 212, 0.18), transparent 28%),
-    radial-gradient(circle at top left, rgba(244, 122, 166, 0.12), transparent 34%),
-    radial-gradient(circle at 55% 10%, rgba(188, 166, 255, 0.1), transparent 30%);
-  opacity: 0.85;
+    radial-gradient(circle at 84% 8%, rgba(103, 232, 249, 0.11), transparent 18%),
+    radial-gradient(circle at 16% 10%, rgba(255, 79, 154, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%);
+  opacity: 0.96;
   z-index: 0;
 }
 
@@ -143,10 +134,11 @@ html.dark body {
 
 html.dark body::before {
   background:
-    radial-gradient(circle at top right, rgba(139, 233, 246, 0.16), transparent 26%),
-    radial-gradient(circle at top left, rgba(245, 137, 177, 0.16), transparent 34%),
-    radial-gradient(circle at 55% 12%, rgba(188, 166, 255, 0.14), transparent 32%);
-  opacity: 0.58;
+    radial-gradient(circle at 84% 8%, rgba(103, 232, 249, 0.11), transparent 18%),
+    radial-gradient(circle at 16% 10%, rgba(255, 79, 154, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%);
+  opacity: 0.96;
 }
 
 * {
@@ -154,12 +146,12 @@ html.dark body::before {
 }
 
 ::selection {
-  background: rgba(49, 87, 214, 0.18);
+  background: rgba(255, 79, 154, 0.24);
   color: var(--gush-ink-strong);
 }
 
 html.dark ::selection {
-  background: rgba(137, 167, 255, 0.22);
+  background: rgba(255, 79, 154, 0.28);
   color: #ffffff;
 }
 
@@ -194,10 +186,10 @@ main {
 
   body::before {
     background:
-      radial-gradient(circle at top right, rgba(182, 240, 212, 0.12), transparent 24%),
-      radial-gradient(circle at top left, rgba(244, 122, 166, 0.1), transparent 28%),
-      radial-gradient(circle at 50% 10%, rgba(188, 166, 255, 0.08), transparent 24%);
-    opacity: 0.78;
+      radial-gradient(circle at 88% 6%, rgba(103, 232, 249, 0.1), transparent 18%),
+      radial-gradient(circle at 12% 8%, rgba(255, 79, 154, 0.11), transparent 22%),
+      radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.08), transparent 24%);
+    opacity: 0.98;
   }
 }
 
@@ -209,8 +201,8 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.05em;
-  line-height: 0.92;
+  letter-spacing: -0.055em;
+  line-height: 0.9;
   font-weight: 600;
   font-optical-sizing: auto;
   text-wrap: balance;
@@ -271,6 +263,7 @@ input,
 select,
 textarea {
   font-size: 14px;
+  color: var(--gush-ink-strong);
 }
 
 .scroll-snap-x {
@@ -294,7 +287,7 @@ textarea {
 
 .skeleton {
   @apply relative overflow-hidden rounded;
-  background-color: rgba(15, 23, 42, 0.07);
+  background-color: rgba(255, 255, 255, 0.07);
 }
 
 .skeleton::after {
@@ -303,9 +296,9 @@ textarea {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.22) 36%,
-    rgba(49, 87, 214, 0.12) 50%,
-    rgba(255, 255, 255, 0.22) 64%,
+    rgba(255, 255, 255, 0.12) 36%,
+    rgba(255, 79, 154, 0.12) 50%,
+    rgba(255, 255, 255, 0.12) 64%,
     transparent 100%
   );
   animation: gush-shimmer 1.8s ease-in-out infinite;
@@ -328,11 +321,11 @@ textarea {
 }
 
 .gush-home-shell {
-  background: var(--gush-page-bg);
+  background: var(--gush-home-bg);
 }
 
 html.dark .gush-home-shell {
-  background: var(--gush-page-bg);
+  background: var(--gush-home-bg);
 }
 
 .gush-page-ambient {
@@ -340,35 +333,35 @@ html.dark .gush-home-shell {
   position: absolute;
   inset-inline: 0;
   top: 0;
-  height: clamp(19rem, 36vw, 30rem);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  height: clamp(20rem, 40vw, 33rem);
+  background:
+    radial-gradient(circle at 80% 6%, rgba(103, 232, 249, 0.08), transparent 18%),
+    radial-gradient(circle at 12% 10%, rgba(255, 79, 154, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 html.dark .gush-page-ambient {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background:
+    radial-gradient(circle at 80% 6%, rgba(103, 232, 249, 0.08), transparent 18%),
+    radial-gradient(circle at 12% 10%, rgba(255, 79, 154, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .gush-home-shell .gush-page-ambient {
-  height: clamp(24rem, 40vw, 35rem);
+  height: clamp(28rem, 48vw, 42rem);
   background:
-    radial-gradient(circle at top right, rgba(255, 229, 0, 0.24), transparent 24%),
-    radial-gradient(circle at top left, rgba(0, 229, 255, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.2) 100%);
+    radial-gradient(circle at 84% 8%, rgba(103, 232, 249, 0.12), transparent 18%),
+    radial-gradient(circle at 14% 12%, rgba(255, 79, 154, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 html.dark .gush-home-shell .gush-page-ambient {
   background:
-    radial-gradient(circle at top right, rgba(255, 229, 0, 0.16), transparent 24%),
-    radial-gradient(circle at top left, rgba(0, 229, 255, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+    radial-gradient(circle at 84% 8%, rgba(103, 232, 249, 0.12), transparent 18%),
+    radial-gradient(circle at 14% 12%, rgba(255, 79, 154, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .gush-page-main {

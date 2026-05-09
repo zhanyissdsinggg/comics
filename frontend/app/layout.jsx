@@ -72,7 +72,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning className="font-sans light">
+    <html lang="en" suppressHydrationWarning className="font-sans dark">
       <body className="min-h-screen font-sans antialiased">
         {GOOGLE_CLIENT_ID ? (
           <Script

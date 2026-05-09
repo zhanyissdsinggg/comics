@@ -253,27 +253,27 @@ export default function AdultHubPage() {
   );
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d18_0%,#09080f_100%)] text-white">
+    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
       <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-0">
             <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
-                    Mature catalog
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[rgba(244,201,93,0.72)]">
+                    Private vault
                   </p>
-                  <h1 className="max-w-[12ch] text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.85rem]">
+                  <h1 className="max-w-[12ch] font-display text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.9rem]">
                     Mature Mode On
                   </h1>
                 </div>
-                <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-[#ffd8e6] shadow-[0_14px_34px_rgba(8,6,20,0.24)]">
+                <div className="inline-flex size-12 items-center justify-center rounded-2xl border border-[rgba(244,201,93,0.16)] bg-[rgba(244,201,93,0.08)] text-[rgba(244,201,93,0.92)] shadow-[0_14px_34px_rgba(8,6,20,0.24)]">
                   <MoonStar className="size-5" />
                 </div>
               </div>
 
               <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
-                Mature titles stay in their own catalog. Public homepage shelves, search, rankings, library views, and mobile navigation remain standard-content only.
+                Mature titles stay isolated here. Public shelves, search, rankings, library views, and mobile navigation remain standard-content only.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -300,16 +300,16 @@ export default function AdultHubPage() {
                 Access status
               </p>
               <div className="space-y-3">
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[22px] border border-[rgba(244,201,93,0.12)] bg-[rgba(255,255,255,0.02)] p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-white">
-                    <ShieldCheck className="size-4 text-[#b9f4ff]" />
+                    <ShieldCheck className="size-4 text-[rgba(244,201,93,0.92)]" />
                     18+ verified
                   </div>
                   <p className="mt-2 text-sm leading-6 text-white/64">
                     Access is active for this device while Mature Mode stays on.
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.02)] p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-white">
                     <ToggleLeft className="size-4 text-[#ffd8e6]" />
                     Hidden from public surfaces

@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import SurfacePanel from "./SurfacePanel";
 
 export const storefrontPrimaryButtonClass =
-  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-[rgba(255,182,211,0.35)] bg-[linear-gradient(135deg,#ff7faa_0%,#ff8fcf_100%)] px-5 text-sm font-semibold tracking-[-0.01em] text-[#241221] shadow-[0_12px_30px_rgba(255,118,170,0.28)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(255,118,170,0.34)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]";
+  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-[rgba(255,79,154,0.35)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-5 text-sm font-semibold tracking-[0.01em] text-[#1a0e16] shadow-[0_16px_34px_rgba(255,79,154,0.24)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(255,79,154,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]";
 
 export const storefrontSecondaryButtonClass =
-  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-5 text-sm font-semibold tracking-[-0.01em] text-white shadow-[0_10px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c1f5ff]";
+  "inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-5 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out outline-none select-none hover:-translate-y-0.5 hover:border-white/20 hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c1f5ff]";
 
 export const storefrontInfoCardClass =
-  "rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-5 py-4 shadow-[0_14px_34px_rgba(8,6,20,0.22)]";
+  "rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-5 py-4 shadow-[0_18px_38px_rgba(8,6,20,0.24)]";
 
 export function StorefrontSectionHeading({
   eyebrow,
@@ -24,11 +24,11 @@ export function StorefrontSectionHeading({
         </p>
       ) : null}
       <div>
-        <h2 className="text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
+        <h2 className="font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 text-sm leading-7 text-white/72">
+          <p className="mt-3 text-sm leading-7 text-white/66">
             {description}
           </p>
         ) : null}

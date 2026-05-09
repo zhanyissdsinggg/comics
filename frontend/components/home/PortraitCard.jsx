@@ -94,17 +94,22 @@ function PortraitCard({
     onClick(event);
   };
 
+  const rankLabel = Number.isFinite(Number(item?.rank))
+    ? `#${Number(item.rank)}`
+    : String(item?.rankLabel || "").trim();
+  const hookLine = String(item?.hook || item?.description || "").trim();
+
   const cardContent = (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,21,38,0.98)_0%,rgba(15,13,26,0.98)_100%)] shadow-[0_18px_42px_rgba(8,6,20,0.24)]",
-        "transition-all duration-200 group-hover:-translate-y-1 group-hover:border-white/18 group-hover:shadow-[0_24px_50px_rgba(8,6,20,0.32)]",
+        "overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] shadow-[0_24px_80px_rgba(0,0,0,0.34)]",
+        "transition-all duration-200 group-hover:-translate-y-1.5 group-hover:border-white/16 group-hover:shadow-[0_30px_90px_rgba(0,0,0,0.4)] group-focus-visible:translate-y-[-4px]",
       )}
     >
       <div className={cn("p-2", isCompact ? "pb-1.5" : "pb-2")}>
         <div
           className={cn(
-            "relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-[#0e0c18] shadow-[0_12px_28px_rgba(8,6,20,0.2)]",
+            "relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-[#0e0c18] shadow-[0_18px_42px_rgba(8,6,20,0.24)]",
           )}
         >
           <Cover
@@ -117,17 +122,23 @@ function PortraitCard({
             seriesType=""
             fallbackVariant={coverFallbackVariant}
             decorative
-            className="h-full w-full transition-transform duration-700 group-hover:scale-[1.02]"
+            className="h-full w-full transition-transform duration-700 group-hover:scale-[1.045]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/44 via-black/10 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/8 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,79,154,0.14),transparent_26%)]" />
           <div className={cn("absolute inset-[1px] rounded-[21px]", "border border-white/18")} />
+
+          {rankLabel ? (
+            <div className="absolute left-3 top-3 inline-flex rounded-full border border-white/14 bg-[rgba(10,9,16,0.78)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+              {rankLabel}
+            </div>
+          ) : null}
 
           {typeof item.progressPercent === "number" &&
           item.progressPercent > 0 ? (
             <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/30">
               <div
-                className="h-full bg-[var(--gush-accent,#3157d6)]"
+                className="h-full bg-[var(--gush-accent,#ff4f9a)]"
                 style={{ width: `${Math.round(progressWidth)}%` }}
               />
             </div>
@@ -143,8 +154,8 @@ function PortraitCard({
         <div className="space-y-2">
           <p
             className={cn(
-              "line-clamp-2 font-black tracking-[-0.04em] transition-colors",
-              isCompact ? "text-[1.08rem] leading-5" : "text-[1.12rem] leading-6",
+              "line-clamp-2 font-display font-semibold tracking-[-0.04em] transition-colors",
+              isCompact ? "text-[1.08rem] leading-5" : "text-[1.16rem] leading-6",
               "text-white group-hover:text-white",
             )}
           >
@@ -162,6 +173,17 @@ function PortraitCard({
             </p>
           ) : null}
         </div>
+
+        {hookLine ? (
+          <p
+            className={cn(
+              "line-clamp-2 text-white/62 transition-colors group-hover:text-white/78",
+              isCompact ? "text-[0.8rem] leading-5" : "text-[0.9rem] leading-6",
+            )}
+          >
+            {hookLine}
+          </p>
+        ) : null}
 
         {showGenrePills ? (
           <div className="flex flex-wrap gap-2">
@@ -222,8 +244,8 @@ function PortraitCard({
           ) : null}
           <span
             className={cn(
-              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[rgba(186,245,255,0.24)] bg-[rgba(163,241,255,0.12)] text-[#b9f4ff] shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
-              "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(163,241,255,0.16)]",
+              "inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] text-white shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
+              "transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(255,79,154,0.14)]",
             )}
           >
             <ArrowRight className="size-4" />
@@ -238,7 +260,7 @@ function PortraitCard({
       <button
         type="button"
         onClick={handleClick}
-        className="group relative block w-full text-left"
+        className="group relative block w-full rounded-[28px] text-left focus-visible:ring-2 focus-visible:ring-[rgba(255,79,154,0.48)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--gush-bg)]"
         style={{ WebkitTapHighlightColor: "transparent" }}
       >
         {cardContent}
@@ -250,7 +272,7 @@ function PortraitCard({
     <Link
       href={resolvedHref || "#"}
       onClick={handleClick}
-      className="group relative block w-full text-left"
+      className="group relative block w-full rounded-[28px] text-left focus-visible:ring-2 focus-visible:ring-[rgba(255,79,154,0.48)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--gush-bg)]"
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       {cardContent}

@@ -66,37 +66,33 @@ export default function ReaderTopBar({
   const canToggleLayout = typeof onToggleLayout === "function";
   const canPrev = typeof onPrev === "function";
   const canNext = typeof onNext === "function";
+  const topBarButtonClass =
+    "shrink-0 rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-1.5 text-xs text-white shadow-[0_12px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
+  const activeChipClass =
+    "border-[rgba(255,79,154,0.34)] bg-[rgba(255,79,154,0.16)] text-white shadow-[0_12px_24px_rgba(255,79,154,0.14)]";
+  const lockedChipClass =
+    "border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.18)] text-white";
+  const mutedChipClass =
+    "border-white/6 bg-[rgba(255,255,255,0.02)] text-white/34 shadow-none";
 
   return (
     <header
-      className={`sticky top-0 z-40 backdrop-blur-xl ${
-        isNightMode
-          ? "border-b border-white/10 bg-neutral-950/80 text-neutral-100"
-          : "border-b-4 border-[#FFE500] bg-black/92 text-white shadow-[0_6px_0px_0px_rgba(0,0,0,1)]"
-      }`}
+      className="sticky top-0 z-40 border-b border-white/8 bg-[rgba(11,10,16,0.82)] text-neutral-100 backdrop-blur-2xl"
     >
       {typeof progress === "number" ? (
-        <div
-          className={`h-1 w-full ${
-            isNightMode ? "bg-neutral-900" : "bg-black/[0.06]"
-          }`}
-        >
+        <div className="h-1 w-full bg-[rgba(255,255,255,0.04)]">
           <div
-            className="h-full bg-brand-gradient shadow-glow-sm transition-all duration-300"
+            className="h-full bg-[linear-gradient(90deg,#ff4f9a_0%,#ff76ad_55%,#67e8f9_100%)] transition-all duration-300"
             style={{ width: `${Math.round(progress * 100)}%` }}
           />
         </div>
       ) : null}
 
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap sm:justify-between">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-3 py-3 sm:flex-nowrap sm:justify-between sm:px-4">
         <button
           type="button"
           onClick={onBack}
-          className={`shrink-0 rounded-full border px-2 py-1 text-xs transition-all duration-300 hover:shadow-glow-sm active:scale-95 md:px-3 ${
-            isNightMode
-              ? "border-neutral-800 text-neutral-200 hover:border-brand-primary/50 hover:bg-neutral-800 hover:text-brand-primary"
-              : lightButtonClass
-            }`}
+          className={topBarButtonClass}
         >
           Back
         </button>
@@ -117,11 +113,7 @@ export default function ReaderTopBar({
             <button
               type="button"
               onClick={onOpenToc}
-              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-                isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-              }`}
+              className={topBarButtonClass}
               aria-label={installmentPlural}
             >
               {installmentPlural}
@@ -131,11 +123,7 @@ export default function ReaderTopBar({
             <button
               type="button"
               onClick={onAddBookmark}
-              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-                isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-              }`}
+              className={topBarButtonClass}
             >
               Save
             </button>
@@ -146,19 +134,15 @@ export default function ReaderTopBar({
             description={`${episodeLabel} from ${title} on Gush`}
             className={`!w-auto !shrink-0 !rounded-full !px-2 !py-1 !text-xs md:!px-3 ${
               isNightMode
-                ? "!border !border-neutral-800"
-                : "!border-2 !border-white/20 !bg-black !text-white !shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:!translate-x-0.5 hover:!translate-y-0.5 hover:!border-white/35 hover:!bg-[#111111]"
+                ? "!border !border-white/10 !bg-[rgba(255,255,255,0.04)]"
+                : "!border !border-white/10 !bg-[rgba(255,255,255,0.04)] !text-white !shadow-[0_12px_24px_rgba(0,0,0,0.24)] hover:!translate-y-[-2px] hover:!border-white/16 hover:!bg-[rgba(255,255,255,0.08)]"
             }`}
           />
           {onOpenSettings ? (
             <button
               type="button"
               onClick={onOpenSettings}
-              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-                isNightMode
-                  ? "border-neutral-800 text-neutral-200"
-                  : lightButtonClass
-              }`}
+              className={topBarButtonClass}
               title="Reader Settings"
               aria-label="Reader Settings"
             >
@@ -173,15 +157,7 @@ export default function ReaderTopBar({
                 onToggleNight?.();
               }}
               aria-pressed={nightState}
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-                nightState
-                  ? isNightMode
-                    ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
-                    : lightActiveButtonClass
-                  : isNightMode
-                    ? "border-neutral-800 text-neutral-200"
-                    : lightButtonClass
-                }`}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${nightState ? activeChipClass : topBarButtonClass}`}
             >
               Night {nightState ? "On" : "Off"}
             </button>
@@ -194,15 +170,7 @@ export default function ReaderTopBar({
                 onToggleAutoScroll?.();
               }}
               aria-pressed={autoScrollState}
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-                autoScrollState
-                ? isNightMode
-                    ? "border-emerald-400 bg-emerald-500/15 text-emerald-200 shadow-[0_0_0_1px_rgba(74,222,128,0.28)]"
-                    : lightActiveButtonClass
-                  : isNightMode
-                    ? "border-neutral-800 text-neutral-200"
-                    : lightButtonClass
-              }`}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${autoScrollState ? activeChipClass : topBarButtonClass}`}
             >
               Auto {autoScrollState ? "On" : "Off"}
             </button>
@@ -212,15 +180,7 @@ export default function ReaderTopBar({
               type="button"
               onClick={onToggleLayout}
               disabled={disableLayoutToggle}
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs ${
-                disableLayoutToggle
-                  ? isNightMode
-                    ? "border-neutral-900 text-neutral-600"
-                    : lightMutedButtonClass
-                  : isNightMode
-                    ? "border-neutral-800 text-neutral-200"
-                    : lightButtonClass
-                }`}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${disableLayoutToggle ? mutedChipClass : topBarButtonClass}`}
             >
               {layoutMode === "horizontal" ? "Wide" : "Scroll"}
             </button>
@@ -231,15 +191,7 @@ export default function ReaderTopBar({
               onClick={onPrev}
               aria-label={`Previous ${installmentSingle}`}
               disabled={!hasPrev}
-              className={`shrink-0 rounded-full border px-2 py-1 text-xs md:px-3 ${
-                hasPrev
-                  ? isNightMode
-                    ? "border-neutral-800 text-neutral-200"
-                    : lightButtonClass
-                  : isNightMode
-                    ? "border-neutral-900 text-neutral-600"
-                    : lightMutedButtonClass
-                }`}
+              className={`shrink-0 rounded-full border px-2 py-1.5 text-xs md:px-3 ${hasPrev ? topBarButtonClass : mutedChipClass}`}
             >
               Prev
             </button>
@@ -256,16 +208,12 @@ export default function ReaderTopBar({
                     : `Next ${installmentSingle}`
               }
               disabled={!hasNext}
-              className={`shrink-0 rounded-full px-3 py-1 text-xs ${
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${
                 !hasNext
-                  ? isNightMode
-                    ? "border border-neutral-900 text-neutral-600"
-                    : lightMutedButtonClass
+                  ? mutedChipClass
                   : nextLocked
-                    ? lightLockedButtonClass
-                    : isNightMode
-                      ? "border border-neutral-800 text-neutral-200"
-                      : lightButtonClass
+                    ? lockedChipClass
+                    : topBarButtonClass
               }`}
             >
               {!hasNext ? "End" : nextLocked ? "Locked" : "Next"}

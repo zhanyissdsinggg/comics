@@ -85,9 +85,9 @@ export default function Rail({
 
   return (
     <section>
-        <div
+      <div
         className={cn(
-          "relative overflow-hidden rounded-[26px] border py-0",
+          "relative overflow-hidden rounded-[32px] border py-0",
           railTheme.darkPanel,
         )}
       >
@@ -97,7 +97,7 @@ export default function Rail({
               {eyebrow || railName ? (
                 <p
                   className={cn(
-                    "text-[11px] font-black uppercase tracking-[0.28em]",
+                    "text-[11px] font-semibold uppercase tracking-[0.28em]",
                     railTheme.darkAccent,
                   )}
                 >
@@ -106,7 +106,7 @@ export default function Rail({
               ) : null}
               <h2
                 className={cn(
-                  "font-display text-2xl font-black tracking-[-0.05em] md:text-[1.95rem]",
+                  "font-display text-[1.9rem] font-semibold tracking-[-0.05em] md:text-[2.2rem]",
                   "text-white",
                 )}
               >
@@ -129,7 +129,7 @@ export default function Rail({
                 type="button"
                 variant="ghost"
                 onClick={() => router.push(href)}
-                className="h-10 justify-start gap-2 rounded-full border border-[rgba(255,182,211,0.32)] bg-[linear-gradient(135deg,#ff7faa_0%,#ff8fcf_100%)] px-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#26121e] shadow-[0_12px_26px_rgba(255,118,170,0.28)] transition-all duration-150 ease-out hover:-translate-y-0.5"
+                className="h-10 justify-start gap-2 rounded-full border border-white/12 bg-white/[0.04] px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_12px_26px_rgba(0,0,0,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.08]"
               >
                 {ctaLabel}
                 <ArrowRight className="size-4" />
@@ -167,13 +167,16 @@ export default function Rail({
             </div>
           ) : (
             <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 no-scrollbar overscroll-x-contain [scrollbar-width:none]">
-              {safeItems.map((item) => (
+              {safeItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className="w-[158px] shrink-0 sm:w-[188px] lg:w-[208px]"
+                  className="w-[72vw] max-w-[280px] shrink-0 sm:w-[220px] lg:w-[280px]"
                 >
                   <PortraitCard
-                    item={item}
+                    item={{
+                      ...item,
+                      rank: item.rank || index + 1,
+                    }}
                     tone={tone}
                     appearance={appearance}
                     showActionLabel={showActionLabel}

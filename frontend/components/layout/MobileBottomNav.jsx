@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bookmark, House, Search, User } from "lucide-react";
+import { Bookmark, Compass, House, Trophy, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   navigateWithDocument,
@@ -31,6 +31,16 @@ const TAB_ITEMS = [
       !ACCOUNT_PREFIXES.some((prefix) => pathname.startsWith(prefix)),
   },
   {
+    id: "explore",
+    label: "Explore",
+    href: "/search",
+    icon: Compass,
+    isActive: (pathname) =>
+      pathname.startsWith("/search") ||
+      pathname.startsWith("/comics") ||
+      pathname.startsWith("/novels"),
+  },
+  {
     id: "library",
     label: "Library",
     href: "/library",
@@ -38,15 +48,15 @@ const TAB_ITEMS = [
     isActive: (pathname) => pathname.startsWith("/library"),
   },
   {
-    id: "search",
-    label: "Search",
-    href: "/search",
-    icon: Search,
-    isActive: (pathname) => pathname.startsWith("/search"),
+    id: "rankings",
+    label: "Rankings",
+    href: "/rankings",
+    icon: Trophy,
+    isActive: (pathname) => pathname.startsWith("/rankings"),
   },
   {
-    id: "account",
-    label: "Account",
+    id: "me",
+    label: "Me",
     href: "/account",
     icon: User,
     isActive: (pathname) =>
@@ -102,7 +112,7 @@ export default function MobileBottomNav() {
       data-mobile-bottom-nav="1"
       className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom,0px))] md:hidden"
     >
-      <div className="mx-auto grid max-w-[720px] grid-cols-4 gap-1 border-2 border-[#FFE500] bg-black px-1.5 py-1.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-xl">
+      <div className="mx-auto grid max-w-[720px] grid-cols-5 gap-1 rounded-[28px] border border-white/10 bg-[rgba(20,16,27,0.94)] px-1.5 py-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.38)] backdrop-blur-2xl">
         {TAB_ITEMS.map((item) => {
           const isActive = item.isActive(pathname);
           const Icon = item.icon;
@@ -127,23 +137,23 @@ export default function MobileBottomNav() {
               {...navItemProps}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "relative flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-[18px] px-1.5 py-2 text-center transition-all duration-150",
+                "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
                 isActive
-                  ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-transparent text-white/68 hover:border-white/10 hover:bg-[#111111] hover:text-white",
+                  ? "border border-white/12 bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(167,139,250,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_14px_26px_rgba(0,0,0,0.24)]"
+                  : "border border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.04] hover:text-white",
               )}
             >
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-black opacity-100" : "bg-transparent opacity-0",
+                  isActive ? "bg-[var(--gush-cyan)] opacity-100" : "bg-transparent opacity-0",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />
               <span
                 className={cn(
                   "text-[10px] leading-none",
-                  isActive ? "font-semibold uppercase tracking-[0.08em]" : "font-medium uppercase tracking-[0.06em]",
+                  isActive ? "font-semibold uppercase tracking-[0.1em]" : "font-medium uppercase tracking-[0.08em]",
                 )}
               >
                 {item.label}
