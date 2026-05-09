@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import FigmaLoginPage from "../../components/figma/FigmaLoginPage";
 import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
@@ -11,14 +11,6 @@ export const metadata = createPageMetadata({
   },
 });
 
-export default async function LoginPage({ searchParams }) {
-  const resolvedSearchParams = await Promise.resolve(searchParams);
-  const returnTo = Array.isArray(resolvedSearchParams?.returnTo)
-    ? resolvedSearchParams.returnTo[0]
-    : resolvedSearchParams?.returnTo;
-  const href = returnTo
-    ? `/?openLogin=1&returnTo=${encodeURIComponent(String(returnTo))}`
-    : "/?openLogin=1";
-
-  redirect(href);
+export default function LoginPage() {
+  return <FigmaLoginPage />;
 }

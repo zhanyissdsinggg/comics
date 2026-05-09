@@ -1,5 +1,5 @@
-import NovelsPage from "../../components/novels/NovelsPage";
-import ErrorBoundary from "../../components/common/ErrorBoundary";
+import FigmaHomePage from "../../components/figma/FigmaHomePage";
+import { FIGMA_CONTENT_TYPES } from "../../components/figma/figma-utils";
 import { createPageMetadata } from "../../lib/seo";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
@@ -9,22 +9,13 @@ export const metadata = createPageMetadata({
   path: "/novels",
 });
 
-export default async function Page({ searchParams }) {
-  const initialSearchParams = (await searchParams) || {};
+export default async function Page() {
   const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
-  const initialSeries = (payload?.series || []).filter((item) => item?.type === "novel");
 
   return (
-    <ErrorBoundary
-      title="Failed to load novels page"
-      message="Couldn't load novels."
-    >
-      <NovelsPage
-        initialSearchParams={initialSearchParams}
-        initialSeries={initialSeries}
-        hasInitialSeries={payload?.ready === true}
-        matureCatalogAvailable={false}
-      />
-    </ErrorBoundary>
+    <FigmaHomePage
+      seriesList={payload?.series || []}
+      initialContentType={FIGMA_CONTENT_TYPES.NOVELS}
+    />
   );
 }

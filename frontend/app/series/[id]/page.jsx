@@ -1,5 +1,5 @@
-import SeriesPage from "../../../components/series/SeriesPage";
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
+import FigmaSeriesDetailPage from "../../../components/figma/FigmaSeriesDetailPage";
 import { CouponProvider } from "../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../store/useEntitlementStore";
 import { RewardsProvider } from "../../../store/useRewardsStore";
@@ -10,7 +10,6 @@ import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
 import {
   formatInstallmentCount,
-  getLatestEntryLabel,
 } from "../../../lib/seriesFormatLabels";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
 import {
@@ -23,10 +22,11 @@ import {
   logSeriesInvariant,
   shouldForceNotFoundForSeries,
 } from "../../../lib/publicSeriesRouteValidation";
-import { loadSeriesRoutePayload, loadSeriesSeoPayload } from "../../../lib/storefrontSeo";
+import { loadSeriesRoutePayload } from "../../../lib/storefrontSeo";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return buildPublicSeriesStaticParams();
 }
@@ -101,9 +101,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function SeriesRoutePage({ params, searchParams }) {
+export default async function SeriesRoutePage({ params }) {
   const resolvedParams = await Promise.resolve(params);
-  const resolvedSearchParams = (await Promise.resolve(searchParams)) || {};
   const seriesId = String(resolvedParams?.id || "").trim();
   if (
     shouldBlockDemoContentInProduction() &&
@@ -144,12 +143,9 @@ export default async function SeriesRoutePage({ params, searchParams }) {
         <RewardsProvider>
           <EntitlementProvider>
             <CouponProvider>
-              <SeriesPage
-                seriesId={seriesId}
-                initialSeriesPayload={routePayload?.payload || null}
-                initialSeriesState={routePayload?.state || "unavailable"}
-                initialGateStatus={routePayload?.gateReason || "OK"}
-                initialSearchParams={resolvedSearchParams}
+              <FigmaSeriesDetailPage
+                series={routePayload?.payload?.series || null}
+                episodes={routePayload?.payload?.episodes || []}
               />
             </CouponProvider>
           </EntitlementProvider>

@@ -1,9 +1,8 @@
-import AccountPageClient from "./AccountPageClient";
-import { createPageMetadata } from "../../lib/seo";
-import { cookies } from "next/headers";
 import { BookmarkProvider } from "../../store/useBookmarkStore";
 import { WalletProvider } from "../../store/useWalletStore";
-import { hasServerSessionCookie } from "../../lib/serverAdultGate";
+import FigmaAccountPage from "../../components/figma/FigmaAccountPage";
+import { createPageMetadata } from "../../lib/seo";
+import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Account",
@@ -16,15 +15,12 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const cookieStore = await cookies();
-  const initialSignedIn =
-    cookieStore.get("mn_is_signed_in")?.value === "1" ||
-    hasServerSessionCookie(cookieStore);
+  const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
 
   return (
     <WalletProvider>
       <BookmarkProvider>
-        <AccountPageClient initialSignedIn={initialSignedIn} />
+        <FigmaAccountPage seriesList={payload?.series || []} />
       </BookmarkProvider>
     </WalletProvider>
   );

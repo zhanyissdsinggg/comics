@@ -1,10 +1,8 @@
-import LibraryPage from "../../components/library/LibraryPage";
 import { BookmarkProvider } from "../../store/useBookmarkStore";
-import { RewardsProvider } from "../../store/useRewardsStore";
-import { createPageMetadata } from "../../lib/seo";
-import { cookies } from "next/headers";
 import { WalletProvider } from "../../store/useWalletStore";
-import { hasServerSessionCookie } from "../../lib/serverAdultGate";
+import FigmaAccountPage from "../../components/figma/FigmaAccountPage";
+import { createPageMetadata } from "../../lib/seo";
+import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Library",
@@ -17,18 +15,13 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const cookieStore = await cookies();
-  const initialSignedIn =
-    cookieStore.get("mn_is_signed_in")?.value === "1" ||
-    hasServerSessionCookie(cookieStore);
+  const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
 
   return (
     <WalletProvider>
-      <RewardsProvider>
-        <BookmarkProvider>
-          <LibraryPage initialSignedIn={initialSignedIn} />
-        </BookmarkProvider>
-      </RewardsProvider>
+      <BookmarkProvider>
+        <FigmaAccountPage seriesList={payload?.series || []} />
+      </BookmarkProvider>
     </WalletProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { createPageMetadata } from "../../lib/seo";
-import NotificationsPageClient from "./NotificationsPageClient";
+import FigmaNotificationsPage from "../../components/figma/FigmaNotificationsPage";
 
 export const metadata = createPageMetadata({
   title: "Notifications",
@@ -12,5 +12,5 @@ export const metadata = createPageMetadata({
 });
 
 export default function Page() {
-  return <NotificationsPageClient />;
+  return <FigmaNotificationsPage />;
 }

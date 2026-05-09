@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Download, Smartphone, X } from "lucide-react";
+import { isFigmaRoute } from "../../lib/figmaRoutes";
 
 const PWAInstallPrompt = React.memo(() => {
   const pathname = usePathname();
@@ -12,6 +13,7 @@ const PWAInstallPrompt = React.memo(() => {
   const [isIOS, setIsIOS] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const isAdminRoute = pathname?.startsWith("/admin");
+  const useFigmaChrome = isFigmaRoute(pathname);
 
   useEffect(() => {
     if (
@@ -39,7 +41,7 @@ const PWAInstallPrompt = React.memo(() => {
   }, []);
 
   useEffect(() => {
-    if (isAdminRoute) {
+    if (isAdminRoute || useFigmaChrome) {
       setShowPrompt(false);
       return;
     }
@@ -94,7 +96,7 @@ const PWAInstallPrompt = React.memo(() => {
       );
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, [isAdminRoute, isMobileViewport]);
+  }, [isAdminRoute, isMobileViewport, useFigmaChrome]);
 
   const handleInstall = useCallback(async () => {
     if (!deferredPrompt) {
@@ -113,7 +115,7 @@ const PWAInstallPrompt = React.memo(() => {
     localStorage.setItem("mn_pwa_prompt_dismissed", "true");
   }, []);
 
-  if (isAdminRoute || isInstalled || isMobileViewport || !showPrompt) {
+  if (isAdminRoute || useFigmaChrome || isInstalled || isMobileViewport || !showPrompt) {
     return null;
   }
 

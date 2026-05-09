@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Cookie, X } from "lucide-react";
+import { isFigmaRoute } from "../../lib/figmaRoutes";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -23,13 +24,14 @@ export default function CookieConsent() {
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
   const isHomeRoute = pathname === "/";
+  const useFigmaChrome = isFigmaRoute(pathname);
   const useDocumentNavigation = shouldUseDocumentNavigation(
     pathname,
     "/privacy-policy",
   );
 
   useEffect(() => {
-    if (isAdminRoute || isReaderRoute) {
+    if (isAdminRoute || isReaderRoute || useFigmaChrome) {
       setShowBanner(false);
       return;
     }
@@ -44,7 +46,7 @@ export default function CookieConsent() {
       );
       return () => clearTimeout(timer);
     }
-  }, [isAdminRoute, isHomeRoute, isReaderRoute]);
+  }, [isAdminRoute, isHomeRoute, isReaderRoute, useFigmaChrome]);
 
   const handleAccept = () => {
     localStorage.setItem("cookie_consent", "accepted");
@@ -56,7 +58,7 @@ export default function CookieConsent() {
     setShowBanner(false);
   };
 
-  if (isAdminRoute || isReaderRoute || !showBanner) return null;
+  if (isAdminRoute || isReaderRoute || useFigmaChrome || !showBanner) return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-3 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.45rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
