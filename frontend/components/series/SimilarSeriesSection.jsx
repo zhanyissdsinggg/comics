@@ -35,18 +35,18 @@ export default function SimilarSeriesSection({ seriesId }) {
     error,
   } = useSimilarRecommendations(seriesId, 6);
   const cardClass =
-    "group overflow-hidden rounded-[28px] border-[3px] border-white/20 bg-black text-left shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
+    "group overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] text-left shadow-[0_24px_64px_rgba(8,6,20,0.3)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_30px_72px_rgba(8,6,20,0.36)]";
   const chipClass =
-    "rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    "rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/76";
 
   if (loading) {
     return (
       <SurfacePanel className="mt-8 space-y-4" appearance="dark" accent="cyan">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             More stories
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-white">
             More to try.
           </h2>
         </div>
@@ -70,10 +70,10 @@ export default function SimilarSeriesSection({ seriesId }) {
     <SurfacePanel className="mt-8 space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             More stories
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-white">
             More to try.
           </h2>
         </div>
@@ -104,13 +104,13 @@ export default function SimilarSeriesSection({ seriesId }) {
                   isLeadCard ? "aspect-[1.2/1] w-full" : "aspect-[3/4] w-full"
                 }
               />
-              <div className="space-y-2 border-t-[3px] border-white/15 p-4">
+              <div className="space-y-2 border-t border-white/10 p-4">
                 <h3
-                  className={`line-clamp-2 font-black uppercase tracking-[0.03em] text-white ${isLeadCard ? "text-base" : "text-sm"}`}
+                  className={`line-clamp-2 font-display font-semibold tracking-[-0.03em] text-white ${isLeadCard ? "text-[1.05rem]" : "text-sm"}`}
                 >
                   {item.title}
                 </h3>
-                <p className="line-clamp-1 text-xs font-medium uppercase tracking-[0.12em] text-white/45">
+                <p className="line-clamp-1 text-xs uppercase tracking-[0.14em] text-white/45">
                   {creatorName || item.subtitle || "Series"}
                 </p>
                 {Array.isArray(item.genres) && item.genres.length > 0 ? (
@@ -123,8 +123,8 @@ export default function SimilarSeriesSection({ seriesId }) {
                   </div>
                 ) : null}
                 {isLeadCard ? (
-                  <p className="pt-1 text-xs font-black uppercase tracking-[0.22em] text-white/45">
-                    Read now
+                  <p className="pt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/45">
+                    View title
                   </p>
                 ) : null}
               </div>

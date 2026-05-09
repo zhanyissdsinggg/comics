@@ -4,6 +4,11 @@ import Link from "next/link";
 import { BookOpen, Heart } from "lucide-react";
 import Cover from "../common/Cover";
 import ShareButton from "../common/ShareButton";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontInfoCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import {
   getSeriesHeroMetadataParts,
@@ -47,11 +52,11 @@ function summarizeSeriesDescription(text, fallback) {
     return fallback;
   }
 
-  if (source.length <= 120) {
+  if (source.length <= 140) {
     return source;
   }
 
-  return `${source.slice(0, 117).trimEnd()}...`;
+  return `${source.slice(0, 137).trimEnd()}...`;
 }
 
 function getLatestLabel(latestEpisode, updatedAt) {
@@ -91,6 +96,32 @@ function assignRef(ref, value) {
   ref.current = value;
 }
 
+function HeroFactCard({ label, value, detail, href = "" }) {
+  const content = (
+    <div className={storefrontInfoCardClass}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+        {label}
+      </p>
+      <p className="mt-3 text-base font-semibold tracking-[-0.02em] text-white">
+        {value}
+      </p>
+      {detail ? (
+        <p className="mt-2 text-sm leading-6 text-white/64">{detail}</p>
+      ) : null}
+    </div>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link href={href} className="block transition-transform duration-150 hover:-translate-y-0.5">
+      {content}
+    </Link>
+  );
+}
+
 export default function SeriesHeader({
   series,
   episodeCount = 0,
@@ -105,21 +136,19 @@ export default function SeriesHeader({
   highlightPrimaryAction = false,
   creatorHref = "",
 }) {
-  const genres = series.genres || [];
-  const isAdult = Boolean(series.adult);
-  const isCompleted = String(series.status || "").toLowerCase() === "completed";
-  const headerHighlights = genres
-    .slice(0, 2)
-    .map((genre) => ({ label: genre, tone: "genre" }));
+  const genres = Array.isArray(series?.genres) ? series.genres : [];
+  const isAdult = Boolean(series?.adult);
+  const isCompleted = String(series?.status || "").toLowerCase() === "completed";
+  const headerHighlights = genres.slice(0, 3).filter(Boolean);
   const primaryAction = onPrimaryAction || null;
   const normalizedPrimaryActionHref = String(primaryActionHref || "").trim();
-  const primaryActionLabel = primaryActionLabelOverride || "Start Reading";
+  const primaryActionLabel = primaryActionLabelOverride || "Start reading";
   const latestEpisodeNumber = formatEpisodeNumber(latestEpisode?.number || "");
   const latestEpisodeValue = getLatestEntryLabel(series, latestEpisodeNumber);
   const installmentPluralLabel = getInstallmentLabel(series, { plural: true });
   const creatorPresentation = getCreatorPresentation(series);
   const coverBackdropUrl = String(series?.coverUrl || "").trim();
-  const latestUpdateLabel = getLatestLabel(latestEpisode, series.updatedAt);
+  const latestUpdateLabel = getLatestLabel(latestEpisode, series?.updatedAt);
   const summaryText = summarizeSeriesDescription(series?.description, "");
   const heroMetadata = getSeriesHeroMetadataParts(
     series,
@@ -131,21 +160,16 @@ export default function SeriesHeader({
   const heroFacts = [
     {
       label: "Format",
-      value: formatSeriesKind(series.type),
+      value: formatSeriesKind(series?.type),
       detail:
-        Array.isArray(genres) && genres.length > 0
+        genres.length > 0
           ? genres.slice(0, 2).join(" / ")
-          : "Format",
+          : "Story format",
     },
     {
       label: "Status",
-      value: isCompleted
-        ? "Finished"
-        : capitalize(series.status || "updating"),
-      detail:
-        isCompleted
-          ? "Full run"
-          : `New ${installmentPluralLabel.toLowerCase()}`,
+      value: isCompleted ? "Finished" : capitalize(series?.status || "updating"),
+      detail: isCompleted ? "Full run" : `New ${installmentPluralLabel.toLowerCase()}`,
     },
     {
       label: installmentPluralLabel,
@@ -158,87 +182,79 @@ export default function SeriesHeader({
       detail: latestUpdateLabel,
     },
   ];
-  const primaryActionClassName = [
-    "inline-flex w-full min-h-[52px] items-center justify-center gap-2 rounded-full border-2 border-black px-5 py-3 text-sm font-black uppercase tracking-[0.02em] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5",
-    highlightPrimaryAction
-      ? "bg-[#00E5FF] text-black"
-      : "bg-[#00E5FF] text-black",
-  ].join(" ");
+
+  const primaryButtonClass = highlightPrimaryAction
+    ? `${storefrontPrimaryButtonClass} shadow-[0_18px_40px_rgba(255,79,154,0.3)]`
+    : storefrontPrimaryButtonClass;
+
   const primaryActions = normalizedPrimaryActionHref ? (
-    <div className="grid gap-3">
-      <Link
-        ref={(node) => {
-          assignRef(desktopPrimaryActionRef, node);
-          assignRef(mobilePrimaryActionRef, node);
-        }}
-        href={normalizedPrimaryActionHref}
-        onClick={primaryAction || undefined}
-        data-testid="series-primary-action"
-        className={`flex ${primaryActionClassName}`}
-      >
-        <BookOpen size={18} />
-        <span>{primaryActionLabel}</span>
-      </Link>
-    </div>
+    <Link
+      ref={(node) => {
+        assignRef(desktopPrimaryActionRef, node);
+        assignRef(mobilePrimaryActionRef, node);
+      }}
+      href={normalizedPrimaryActionHref}
+      onClick={primaryAction || undefined}
+      data-testid="series-primary-action"
+      className={`inline-flex min-h-[52px] w-full sm:w-auto ${primaryButtonClass}`}
+    >
+      <BookOpen size={18} />
+      <span>{primaryActionLabel}</span>
+    </Link>
   ) : primaryAction ? (
-    <div className="grid gap-3">
-      <button
-        ref={(node) => {
-          assignRef(desktopPrimaryActionRef, node);
-          assignRef(mobilePrimaryActionRef, node);
-        }}
-        type="button"
-        onClick={primaryAction}
-        data-testid="series-primary-action"
-        className={`flex ${primaryActionClassName}`}
-      >
-        <BookOpen size={18} />
-        <span>{primaryActionLabel}</span>
-      </button>
-    </div>
+    <button
+      ref={(node) => {
+        assignRef(desktopPrimaryActionRef, node);
+        assignRef(mobilePrimaryActionRef, node);
+      }}
+      type="button"
+      onClick={primaryAction}
+      data-testid="series-primary-action"
+      className={`inline-flex min-h-[52px] w-full sm:w-auto ${primaryButtonClass}`}
+    >
+      <BookOpen size={18} />
+      <span>{primaryActionLabel}</span>
+    </button>
   ) : null;
-  const visibleHighlights = headerHighlights
-    .filter((item) => Boolean(item?.label))
-    .slice(0, 2);
 
   return (
     <header className="py-2 sm:py-6">
-      <section className="relative overflow-hidden rounded-[30px] border-2 border-[#FFE500] bg-black/90 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:rounded-[34px]">
+      <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,rgba(22,18,30,0.98)_0%,rgba(14,12,19,0.98)_46%,rgba(24,19,32,0.98)_100%)] text-white shadow-[0_34px_100px_rgba(8,6,20,0.42)]">
         {coverBackdropUrl ? (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-[0.12]"
             style={{ backgroundImage: `url(${coverBackdropUrl})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,229,255,0.14),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(255,0,122,0.12),transparent_46%)]" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.18),transparent_26%),radial-gradient(circle_at_85%_12%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.12),transparent_28%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_28%,rgba(7,6,12,0.22)_100%)]" />
 
-        <div className="relative grid gap-4 p-4 sm:p-7 lg:grid-cols-[minmax(0,1.08fr)_320px] lg:gap-12 xl:p-10">
+        <div className="relative grid gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1.06fr)_320px] lg:gap-10 xl:p-8">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  {formatSeriesKind(series.type)}
-                </span>
+              <span className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72">
+                {formatSeriesKind(series?.type)}
+              </span>
               {isAdult ? (
-                <span className="rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <span className="rounded-full border border-[rgba(255,189,205,0.28)] bg-[rgba(255,79,154,0.14)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#ffd6e5]">
                   18+
                 </span>
               ) : null}
             </div>
 
-            <h1 className="mt-3 max-w-4xl text-[1.72rem] font-black uppercase leading-[0.94] tracking-[-0.06em] text-white sm:mt-4 sm:text-[3.6rem] lg:text-[4.9rem]">
-              {series.title || "Series"}
+            <h1 className="mt-4 max-w-4xl font-display text-[2.05rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3.5rem] lg:text-[4.6rem]">
+              {series?.title || "Series"}
             </h1>
 
             <div
               data-testid="series-hero-metadata"
-              className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] font-black uppercase tracking-[0.05em] text-white/80 sm:mt-3 sm:text-sm sm:gap-x-2.5 sm:gap-y-2 sm:tracking-[0.06em]"
+              className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white/72 sm:text-xs"
             >
               {creatorLine ? (
                 creatorHref ? (
                   <Link
                     href={creatorHref}
-                    className="font-black uppercase tracking-[0.04em] text-[#00E5FF] transition-colors hover:text-[#00E5FF]/80"
+                    className="text-[var(--gush-cyan)] transition-colors hover:text-white"
                     data-testid="series-creator-link"
                   >
                     {creatorLine}
@@ -249,7 +265,7 @@ export default function SeriesHeader({
               ) : null}
               {creatorLine && latestLine ? (
                 <>
-                  <span className="text-white/45" aria-hidden="true">
+                  <span className="text-white/34" aria-hidden="true">
                     {heroMetadata.separator}
                   </span>
                   <span>{latestLine}</span>
@@ -259,138 +275,97 @@ export default function SeriesHeader({
             </div>
 
             {summaryText ? (
-              <p className="mt-4 max-w-3xl text-sm font-semibold leading-7 text-white/78 sm:text-[15px]">
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/74 sm:text-[15px]">
                 {summaryText}
               </p>
             ) : null}
 
-            {visibleHighlights.length > 0 ? (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {visibleHighlights.map((item) => (
+            {headerHighlights.length > 0 ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {headerHighlights.map((item) => (
                   <span
-                    key={`${item.tone}-${item.label}`}
-                    className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.06em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                    key={`series-highlight-${item}`}
+                    className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white/78"
                   >
-                    {item.label}
+                    {item}
                   </span>
                 ))}
               </div>
             ) : null}
 
-            {primaryActions ? (
-              <div className="mt-5 max-w-none sm:mt-8 sm:max-w-xs">{primaryActions}</div>
-            ) : null}
-
-            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:mt-5 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              {primaryActions}
               {onFollowToggle ? (
                 <button
                   type="button"
                   onClick={onFollowToggle}
-                  className={`group relative inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold tracking-[0.02em] transition-[background-color,border-color,box-shadow,transform] duration-200 sm:min-h-[44px] sm:w-auto ${
+                  className={`inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-all duration-150 sm:w-auto ${
                     isFollowing
-                      ? "border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5"
-                      : "border-2 border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                      ? "border border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[#ffd5e5] shadow-[0_14px_30px_rgba(255,79,154,0.16)] hover:-translate-y-0.5"
+                      : storefrontSecondaryButtonClass
                   }`}
-                  aria-label={
-                    isFollowing ? "Remove from library" : "Save to library"
-                  }
+                  aria-label={isFollowing ? "Remove from library" : "Save to library"}
                 >
-                  <Heart
-                    size={18}
-                    className={
-                      isFollowing ? "fill-current" : "group-hover:scale-110"
-                    }
-                  />
-                  <span>{isFollowing ? "Saved" : "Save"}</span>
+                  <Heart size={18} className={isFollowing ? "fill-current" : ""} />
+                  <span>{isFollowing ? "Saved" : "Add to Library"}</span>
                 </button>
               ) : null}
               <ShareButton
                 url={typeof window !== "undefined" ? window.location.href : ""}
-                title={series.title || "Check out this series"}
-                description={series.description || ""}
-                className="col-span-1 min-h-[48px] w-full rounded-full border-2 border-white/20 bg-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] sm:min-h-[44px] sm:w-auto"
+                title={series?.title || "Check out this series"}
+                description={series?.description || ""}
+                className={`min-h-[48px] w-full sm:w-auto ${storefrontSecondaryButtonClass}`}
               />
             </div>
           </div>
 
-          <div className="order-first space-y-3 lg:order-none lg:space-y-4">
-            <div className="overflow-hidden rounded-[28px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="order-first space-y-4 lg:order-none">
+            <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(9,8,14,0.78)] shadow-[0_28px_74px_rgba(8,6,20,0.36)]">
               <div className="aspect-[4/5] w-full overflow-hidden sm:aspect-[3/4]">
                 <Cover
-                  tone={series.coverTone}
-                  coverUrl={series.coverUrl}
-                  label={series.title}
+                  tone={series?.coverTone}
+                  coverUrl={series?.coverUrl}
+                  label={series?.title}
                   eyebrow={creatorPresentation.eyebrow}
                   badge=""
-                  genres={series.genres}
-                  seriesType={series.type}
+                  genres={genres}
+                  seriesType={series?.type}
                   className="h-full w-full"
                 />
               </div>
             </div>
-            <div className="space-y-3 rounded-[26px] border-2 border-[#FFE500] bg-black/85 p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-5">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/65">
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className={storefrontInfoCardClass}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
                   Creator
                 </p>
-                <p className="mt-2.5 text-[15px] font-black uppercase leading-[1.15] tracking-[0.02em] text-white sm:mt-3 sm:text-base">
+                <p className="mt-3 text-sm leading-6 text-white/76">
                   {creatorPresentation.value}
                 </p>
               </div>
-
-              <div className="grid gap-2.5 border-t border-white/15 pt-3 sm:grid-cols-2 sm:gap-3">
-                <div className="rounded-[22px] border-2 border-white/20 bg-black px-4 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/65">
-                    Reading
-                  </p>
-                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-white">
-                    {isCompleted ? "Finished" : "Ongoing"}
-                  </p>
-                </div>
-                <div className="rounded-[22px] border-2 border-black bg-[#00E5FF] px-4 py-3 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65">
-                    Latest
-                  </p>
-                  <p className="mt-2 text-sm font-black uppercase tracking-[0.04em]">
-                    {latestEpisodeValue}
-                  </p>
-                </div>
+              <div className={storefrontInfoCardClass}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                  Reading pace
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/76">
+                  {isCompleted ? "Finished and ready to binge." : `New ${installmentPluralLabel.toLowerCase()} on deck.`}
+                </p>
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5">
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {heroFacts.map((item) =>
-                  item.href ? (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="xl:border-l-[3px] xl:border-black xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
-                    >
-                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-white">
-                        {item.value}
-                      </p>
-                    </Link>
-                  ) : (
-                    <div
-                      key={item.label}
-                      className="xl:border-l-[3px] xl:border-black xl:pl-4 first:xl:border-l-0 first:xl:pl-0"
-                    >
-                      <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 text-base font-black uppercase tracking-[0.02em] text-white">
-                        {item.value}
-                      </p>
-                    </div>
-                  ),
-                )}
-              </div>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {heroFacts.map((item) => (
+                <HeroFactCard
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  detail={item.detail}
+                  href={item.href}
+                />
+              ))}
             </div>
           </div>
         </div>

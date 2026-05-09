@@ -209,15 +209,15 @@ export default function SeriesFitPanel({
     <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.32em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
             Quick take
           </p>
-          <h2 className="mt-2 text-2xl font-black uppercase tracking-[0.06em] text-white sm:text-3xl">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl">
             Why read this?
           </h2>
         </div>
-        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-left shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Jump in
           </p>
           <p className="mt-3 text-sm font-semibold leading-6 text-white/80">
@@ -230,12 +230,12 @@ export default function SeriesFitPanel({
         {fitCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]"
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
               {card.label}
             </p>
-            <p className="mt-3 text-2xl font-black uppercase tracking-[0.04em] text-white">
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">
               {card.value}
             </p>
             <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
@@ -246,8 +246,8 @@ export default function SeriesFitPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Good fit
           </p>
           <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
@@ -261,8 +261,8 @@ export default function SeriesFitPanel({
             .
           </p>
         </div>
-        <div className="rounded-[26px] border-2 border-white/20 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Also try
           </p>
           <p className="mt-3 text-sm font-semibold leading-7 text-white/80">
@@ -274,8 +274,8 @@ export default function SeriesFitPanel({
       </div>
 
       {fitModel.primaryAction ? (
-        <div className="rounded-[26px] border-2 border-white/15 bg-[#0a0a0a] px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <div className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-white shadow-[0_18px_44px_rgba(8,6,20,0.22)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/58">
             Up next
           </p>
           <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

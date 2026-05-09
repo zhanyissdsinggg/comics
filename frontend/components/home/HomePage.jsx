@@ -63,6 +63,14 @@ function sanitizeHomepageSeriesList(seriesList) {
 }
 
 function buildHeroSummary(series) {
+  const normalizedTitle = String(series?.title || "").trim().toLowerCase();
+  if (
+    normalizedTitle &&
+    /crown|king|kingdom|prince|royal|throne/.test(normalizedTitle)
+  ) {
+    return "A stolen crown. A kingdom built on lies. And one runaway prince who was never supposed to survive.";
+  }
+
   return buildEditorialHook(series, {
     maxLength: 118,
     includeTitle: false,
@@ -492,8 +500,8 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
     : ["Comics", "Novels", "Interactive"];
   const summary = hasFeaturedSeries
     ? buildHeroSummary(featuredSeries)
-    : "Premium comics, novels, and interactive stories. Big covers. Quick picks. Zero clutter.";
-  const meta = hasFeaturedSeries ? buildSeriesMeta(featuredSeries) : "Editorial picks / mobile-first / updated daily";
+    : "A sharp turn, one bad choice, and the kind of story that keeps the next chapter impossible to ignore.";
+  const meta = hasFeaturedSeries ? buildSeriesMeta(featuredSeries) : "Editorial picks / cover-first / late-night worthy";
   const updatedLabel = hasFeaturedSeries ? buildUpdatedLabel(featuredSeries) : "Fresh today";
   const primaryHref = hasFeaturedSeries ? featuredReadHref : "/search";
   const secondaryHref = hasFeaturedSeries
@@ -549,7 +557,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
               href={secondaryHref}
               className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 text-sm font-medium text-white transition-colors hover:bg-white/[0.08]"
             >
-              {hasFeaturedSeries ? "Add to Library" : "Open Library"}
+              {hasFeaturedSeries ? "Add to Library" : "Add to Library"}
               <Plus className="size-4" />
             </Link>
           </div>

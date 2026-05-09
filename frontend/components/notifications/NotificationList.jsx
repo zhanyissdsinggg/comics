@@ -48,12 +48,12 @@ export default function NotificationList({
       return item.ctaLabel;
     }
     if (item.type === "NEW_EPISODE" || item.type === "TTF_READY") {
-      return "Start Reading";
+      return "Start reading";
     }
     if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
       return "See offer";
     }
-    return "Read More";
+    return "View title";
   };
 
   if (!notifications) {

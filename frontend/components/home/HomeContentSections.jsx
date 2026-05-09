@@ -177,7 +177,7 @@ function DiscoveryFallbackCard({
   );
 }
 
-function ShelfComicCard({ item, onClick, actionLabel = "Read More" }) {
+function ShelfComicCard({ item, onClick, actionLabel = "View title" }) {
   const coverUrl = String(item?.coverUrl || "").trim();
   const title = String(item?.title || "Story").trim();
   const author = String(item?.author || item?.eyebrow || "").trim();
@@ -257,7 +257,7 @@ function HomeShelfSection({
   onCtaClick,
   items,
   onItemClick,
-  actionLabel = "Read More",
+  actionLabel = "View title",
   sectionTone = "featured",
 }) {
   if (!Array.isArray(items) || items.length === 0) {
@@ -574,7 +574,7 @@ export default function HomeContentSections({
             ctaLabel="See all"
             onCtaClick={onBrowseAllSeries}
             items={featuredSeriesItems}
-            actionLabel="Read More"
+            actionLabel="View title"
             sectionTone="featured"
             onItemClick={onFeaturedItemClick}
           />
@@ -591,7 +591,7 @@ export default function HomeContentSections({
               title="Comics"
               description=""
               items={comicSpotlightItems}
-              actionLabel="Start Reading"
+              actionLabel="Start reading"
               sectionTone="comics"
               onItemClick={onComicSpotlightItemClick}
             />
@@ -604,7 +604,7 @@ export default function HomeContentSections({
               title="Novels"
               description=""
               items={novelSpotlightItems}
-              actionLabel="Start Reading"
+              actionLabel="Start reading"
               sectionTone="novels"
               onItemClick={onNovelSpotlightItemClick}
             />
@@ -618,7 +618,7 @@ export default function HomeContentSections({
               title="Top Picks"
               description=""
               items={startHereItems}
-              actionLabel="Start Reading"
+              actionLabel="Start reading"
               sectionTone="start"
               onItemClick={onStartHereItemClick}
             />

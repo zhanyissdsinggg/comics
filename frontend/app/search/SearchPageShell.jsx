@@ -17,7 +17,7 @@ const SearchPage = dynamic(() => import("../../components/search/SearchPage"), {
             Find your next obsession
           </h1>
           <p className="relative mt-3 max-w-2xl text-sm leading-6 text-[var(--gush-ink-soft)]">
-            Search stories by mood, genre, format, or creator.
+            Search by mood, genre, format, or creator.
           </p>
           <div className="relative mt-5 flex flex-wrap gap-2 text-xs">
             <a

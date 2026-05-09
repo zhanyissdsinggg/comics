@@ -4,6 +4,10 @@ import { isMatureGenreValue } from "./matureContent";
 const GENERIC_COPY_PATTERNS = [
   /\ban epic tale\b/i,
   /\ba tale of\b/i,
+  /\ba heartwarming story of\b/i,
+  /\ba young hero must save the world\b/i,
+  /\blife gets complicated when\b/i,
+  /\ba crew of misfits uncovers\b/i,
   /\bwarriors? and kingdoms?\b/i,
   /\bfight(?:ing)? for\b/i,
   /\bmust save\b/i,
@@ -82,38 +86,55 @@ function buildGenreProfile(series) {
 function buildGenreFallback(series, { includeTitle = false } = {}) {
   const title = normalizeText(series?.title) || "This story";
   const primaryGenre = buildGenreProfile(series)[0]?.toLowerCase() || "";
+  const titleHint = title.toLowerCase();
 
   const leadIn = includeTitle ? title : "This story";
 
+  if (/(crown|king|kingdom|prince|queen|royal|throne)/.test(titleHint)) {
+    return `${leadIn} starts with a stolen crown, a lie dressed up as loyalty, and someone running for their life before the court can finish the job.`;
+  }
+
+  if (/(ghost|grave|funeral|midnight|mourning)/.test(titleHint)) {
+    return `${leadIn} opens with grief already in the room, then keeps tightening once the dead start asking for something back.`;
+  }
+
+  if (/(school|campus|class|detention|club)/.test(titleHint)) {
+    return `${leadIn} turns one reckless choice into gossip, damage control, and feelings nobody involved knows how to explain cleanly.`;
+  }
+
+  if (/(blood|knife|hunt|hunter|crime|case)/.test(titleHint)) {
+    return `${leadIn} begins after the damage is already done, and every answer only makes the next decision look worse.`;
+  }
+
   if (/(romance|love|bl|gl)/.test(primaryGenre)) {
-    return `${leadIn} opens with messy feelings, bad timing, and a romance that gets harder to walk away from.`;
+    return `${leadIn} starts with terrible timing, one loaded glance too many, and a relationship that gets riskier the longer nobody says the obvious part out loud.`;
   }
 
   if (/(fantasy|magic|isekai|supernatural)/.test(primaryGenre)) {
-    return `${leadIn} throws one impossible choice into a world that gets stranger and more dangerous by the chapter.`;
+    return `${leadIn} drops one bad decision into a world built on rules nobody survives by following for long.`;
   }
 
   if (/(school|slice|comedy)/.test(primaryGenre)) {
-    return `${leadIn} turns everyday chaos into the kind of drama that starts funny and ends way too personal.`;
+    return `${leadIn} starts playful, gets messy fast, and somehow lands exactly where the feelings hurt most.`;
   }
 
   if (/(mystery|thriller|crime|dark|horror)/.test(primaryGenre)) {
-    return `${leadIn} starts with one wrong move and keeps the tension tight long after the first reveal lands.`;
+    return `${leadIn} opens with one wrong move, then keeps tightening the screws until even the quiet scenes feel like a trap.`;
   }
 
   if (/(action|adventure|sports|battle)/.test(primaryGenre)) {
-    return `${leadIn} drops fast, hits hard, and keeps raising the stakes before anyone gets a clean way out.`;
+    return `${leadIn} hits fast, leaves bruises early, and keeps escalating before anybody earns a safe way out.`;
   }
 
   if (/(sci-fi|sci fi|science fiction|cyber)/.test(primaryGenre)) {
-    return `${leadIn} moves like a late-night rush job, with pressure building every time the plan gets one step uglier.`;
+    return `${leadIn} moves like a plan that already went wrong once, with pressure building every time the fix gets uglier.`;
   }
 
   if (String(series?.status || "").trim().toLowerCase() === "completed") {
-    return `${leadIn} is all payoff, sharp turns, and a finish that doesn't make you wait around.`;
+    return `${leadIn} is all sharp turns, emotional fallout, and a finish that lands without making you wait around for it.`;
   }
 
-  return `${leadIn} starts fast, keeps the pressure close, and leaves just enough unresolved to make the next chapter feel dangerous.`;
+  return `${leadIn} opens on a problem already spiraling, keeps the pressure close, and leaves the next chapter feeling like a very bad idea you still want immediately.`;
 }
 
 function extractEditorialSentence(text) {

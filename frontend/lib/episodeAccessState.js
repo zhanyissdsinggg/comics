@@ -259,7 +259,7 @@ export function getEpisodeAccessState({
   if (pricing.appliedDailyFree) {
     return buildEpisodeAccessState("membership", {
       kind: "membership",
-      actionLabel: "Start Reading",
+      actionLabel: "Start reading",
       actionKind: "unlock",
       claimRequired: false,
       pricing,
@@ -279,7 +279,7 @@ export function getEpisodeAccessState({
     const claimRequired = Boolean(hasTtf && isTtfReady);
     return buildEpisodeAccessState("free", {
       kind: "free",
-      actionLabel: "Start Reading",
+      actionLabel: "Start reading",
       actionKind: claimRequired ? "claim" : "read",
       claimRequired,
       pricing,
@@ -298,7 +298,7 @@ export function getEpisodeAccessState({
   if (hasPreview) {
     return buildEpisodeAccessState("preview", {
       kind: "preview",
-      actionLabel: "Start Reading",
+      actionLabel: "Start reading",
       actionKind: "preview",
       claimRequired: false,
       pricing,
@@ -529,7 +529,7 @@ export function getSeriesPrimaryReadAction({
   if (state.primaryState === "membership") {
     return {
       type: "membership",
-      label: "Start Reading",
+      label: "Start reading",
       episodeId: firstEpisode.id,
       actionKind: state.actionKind,
       note: "",

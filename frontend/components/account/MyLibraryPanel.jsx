@@ -161,7 +161,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
       ? "Resume"
       : item.resumeEpisodeId
         ? "Resume"
-        : "Read More";
+        : "View title";
   const metaLine = [item.summary, item.updatedLabel]
     .filter(Boolean)
     .join(" / ");

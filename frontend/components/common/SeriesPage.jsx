@@ -20,16 +20,20 @@ const PAGE_CONFIG = {
     heroDescription: "Big panels, fast chapters, and stories worth staying up for.",
     pathname: "/comics",
     emptyTitle: "No comics found",
-    emptyDescription: "Try a different filter or jump back into the full catalog.",
-    smallDatasetMessage: "",
+    emptyDescription: "Try a different filter or jump back into the stories landing right now.",
+    shelfLead: "Cover-first picks for nights when one more chapter turns into five.",
+    collectionEyebrow: "Explore",
+    collectionTitle: "All comics",
   },
   novel: {
     title: "Novels",
-    heroDescription: "Fast-moving reads, strong hooks, and chapters that know how to pull you one more page in.",
+    heroDescription: "Slow burns, sharp twists, and late-night reads.",
     pathname: "/novels",
     emptyTitle: "No novels found",
-    emptyDescription: "Try a different filter or come back after more titles land.",
-    smallDatasetMessage: "A tighter shelf, picked on purpose.",
+    emptyDescription: "Try a different filter or jump back into the reads readers are passing around.",
+    shelfLead: "Character-first reads, bad decisions, and twists that hit harder after midnight.",
+    collectionEyebrow: "Explore",
+    collectionTitle: "All novels",
   },
 };
 
@@ -310,8 +314,6 @@ export default function SeriesPage({
     [series],
   );
 
-  const smallNovelCatalog = isNovelPage && series.length < 6;
-  const showNovelShelves = !isNovelPage || series.length >= 6;
   const handleGenreChange = useCallback(
     (value) => {
       updateParams({ genre: value });
@@ -341,7 +343,7 @@ export default function SeriesPage({
                 href={`/search?format=${type}`}
                 className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08] hover:text-white"
               >
-                View title search
+                View title
               </Link>
             </div>
           </div>
@@ -364,7 +366,10 @@ export default function SeriesPage({
           </div>
         ) : (
           <>
-            {showNovelShelves ? (
+            <div className="space-y-3">
+              <p className="max-w-[42rem] text-sm leading-6 text-white/60">
+                {config.shelfLead}
+              </p>
               <div className="space-y-10">
                 <CatalogSection
                   title="Hot this week"
@@ -385,24 +390,15 @@ export default function SeriesPage({
                   items={completedItems}
                 />
               </div>
-            ) : smallNovelCatalog ? (
-              <SurfacePanel className="space-y-3" appearance="dark" accent="rose">
-                <h2 className="text-[1.3rem] font-semibold tracking-[-0.03em] text-white">
-                  {config.smallDatasetMessage}
-                </h2>
-                <p className="text-sm leading-6 text-white/64">
-                  Everything on this page is right below, without the filler.
-                </p>
-              </SurfacePanel>
-            ) : null}
+            </div>
 
             <section className="space-y-5 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_18px_46px_rgba(8,6,20,0.22)] sm:p-6">
               <div className="space-y-2">
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
-                  Catalog
+                  {config.collectionEyebrow}
                 </p>
                 <h2 className="text-[1.55rem] font-semibold tracking-[-0.04em] text-white">
-                  All {config.title.toLowerCase()}
+                  {config.collectionTitle}
                 </h2>
               </div>
 

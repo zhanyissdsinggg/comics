@@ -789,8 +789,7 @@ export default function SearchPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const showResultSections = Boolean(query);
   const heroTitle = "Find your next obsession";
-  const heroDescription =
-    "Search stories by mood, genre, format, or creator.";
+  const heroDescription = "Search by mood, genre, format, or creator.";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
   const recoPanelTitle = !query ? "Hot this week" : "What to try next";
   const railCardClass =
@@ -1225,7 +1224,7 @@ export default function SearchPage() {
                 description={
                   query
                     ? "Best matches across stories, formats, and creator shelves."
-                    : "Browse the catalog by format, mood, or release pace."
+                    : "Browse by format, mood, or release pace."
                 }
                 actions={
                   <>

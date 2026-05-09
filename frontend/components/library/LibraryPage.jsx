@@ -1010,7 +1010,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                             }
                             className={secondaryButtonClass}
                           >
-                            Read More
+                            View title
                           </button>
                         ) : (
                           <button

@@ -36,9 +36,9 @@ export default function EpisodeList({
 }) {
   const { getProgress } = useProgressStore();
   const neutralChipClass =
-    "rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.08em] text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    "rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-white/72";
   const filterControlClass =
-    "min-h-[48px] rounded-full border-2 border-black bg-[#080808] px-4 py-2.5 text-sm font-black uppercase tracking-[0.06em] text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 focus:outline-none";
+    "min-h-[48px] rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm font-semibold tracking-[0.01em] text-white outline-none shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c1f5ff]";
   const [sortOrder, setSortOrder] = useState("oldest");
   const [filter, setFilter] = useState("all");
   const unlockedEpisodeIds = useMemo(
@@ -157,17 +157,17 @@ export default function EpisodeList({
       className="mt-5 overflow-hidden p-0 sm:mt-8"
       data-wallet-total={walletTotal}
     >
-      <div className="border-b-2 border-white/10 px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
+      <div className="border-b border-white/10 px-4 pb-4 pt-4 sm:px-6 sm:pb-6 sm:pt-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
               <span>{installmentPlural}</span>
-              <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black tracking-[0.2em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#ffd7e8]">
                 {totalEpisodes.toLocaleString()}
               </span>
             </div>
             <div className="space-y-2">
-              <h2 className="text-[1.7rem] font-black uppercase tracking-[-0.04em] text-white sm:text-[2.15rem]">
+              <h2 className="font-display text-[1.85rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.4rem]">
                 {installmentPlural}
               </h2>
             </div>
@@ -224,8 +224,8 @@ export default function EpisodeList({
 
       <div className="px-4 py-4 sm:px-6 sm:py-6">
         {sortedEpisodes.length === 0 ? (
-          <div className="rounded-[24px] border-2 border-white/15 bg-black/70 p-6 text-sm text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <p className="text-base font-black uppercase tracking-[0.03em] text-white">
+          <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-6 text-sm text-white/80 shadow-[0_18px_44px_rgba(8,6,20,0.24)]">
+            <p className="text-base font-semibold tracking-[-0.02em] text-white">
               No {installmentPluralLower} yet.
             </p>
             <p className="mt-2 text-sm font-semibold text-white/70">

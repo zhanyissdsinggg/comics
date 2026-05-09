@@ -216,7 +216,7 @@ export const US_LABELS = {
   profile: 'Profile',
   settings: 'Settings',
   account: 'Account',
-  readMore: 'Read More',
+  readMore: 'View title',
   showLess: 'Show Less',
   viewAll: 'View All',
   noResults: 'No results found',

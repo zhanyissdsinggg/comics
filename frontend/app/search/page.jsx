@@ -225,7 +225,7 @@ function SearchInput({ q, format, status, genre }) {
         htmlFor="catalog-search-input"
         className="mb-2 block text-sm font-medium text-white/72"
       >
-        Search the catalog
+        Search stories
       </label>
       <div className="flex flex-col gap-3 lg:flex-row">
         <input
@@ -599,7 +599,7 @@ export default async function Page({ searchParams }) {
               Find your next obsession
             </h1>
             <p className="max-w-[40rem] text-sm leading-6 text-white/62">
-              Search stories by mood, genre, format, or creator.
+              Search by mood, genre, format, or creator.
             </p>
           </header>
 

@@ -100,7 +100,7 @@ export function formatInstallmentCount(input, count) {
 }
 
 export function getStartReadingLabel(input, number = 1) {
-  return `Read ${formatInstallmentLabel(input, number)}`;
+  return "Start reading";
 }
 
 export function getContinueReadingNote(input, number) {
