@@ -10,14 +10,14 @@ import EmptyState from "../common/EmptyState";
 import SurfacePanel from "../common/SurfacePanel";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
-import { getPublicGenres, isMatureGenreValue } from "../../lib/matureContent";
+import { getPublicGenres } from "../../lib/matureContent";
 import { getSearchParam, toURLSearchParams } from "../../lib/pageSearchParams";
 import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
 
 const PAGE_CONFIG = {
   comic: {
     title: "Comics",
-    heroDescription: "Browse trending comics, fresh chapter drops, and finished reads in one place.",
+    heroDescription: "Big panels, fast chapters, and stories worth staying up for.",
     pathname: "/comics",
     emptyTitle: "No comics found",
     emptyDescription: "Try a different filter or jump back into the full catalog.",
@@ -25,11 +25,11 @@ const PAGE_CONFIG = {
   },
   novel: {
     title: "Novels",
-    heroDescription: "Browse current novels, recent updates, and finished stories without the extra clutter.",
+    heroDescription: "Fast-moving reads, strong hooks, and chapters that know how to pull you one more page in.",
     pathname: "/novels",
     emptyTitle: "No novels found",
     emptyDescription: "Try a different filter or come back after more titles land.",
-    smallDatasetMessage: "More novels coming soon",
+    smallDatasetMessage: "A tighter shelf, picked on purpose.",
   },
 };
 
@@ -141,7 +141,7 @@ function CatalogSection({
             href={`/series/${encodeURIComponent(item.id)}`}
             density="compact"
             showActionLabel
-            actionLabel="Read more"
+            actionLabel="View title"
             interactionMode="link"
           />
         ))}
@@ -314,20 +314,15 @@ export default function SeriesPage({
   const showNovelShelves = !isNovelPage || series.length >= 6;
   const handleGenreChange = useCallback(
     (value) => {
-      if (isMatureGenreValue(value)) {
-        router.push("/adult-gate?reason=NEED_AGE_CONFIRM&returnTo=%2Fadult");
-        return;
-      }
-
       updateParams({ genre: value });
     },
-    [router, updateParams],
+    [updateParams],
   );
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
       <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
-        <section className="rounded-[28px] border border-white/10 bg-[#0b0b0b] p-5 sm:p-6">
+        <section className="rounded-[32px] border border-[rgba(255,255,255,0.09)] bg-[rgba(17,13,24,0.78)] p-5 shadow-[0_28px_80px_rgba(8,6,20,0.28)] backdrop-blur-xl sm:p-6">
           <div className="space-y-4">
             <div className="space-y-2">
               <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
@@ -344,9 +339,9 @@ export default function SeriesPage({
             <div>
               <Link
                 href={`/search?format=${type}`}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.06] hover:text-white"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-5 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08] hover:text-white"
               >
-                Search {config.title.toLowerCase()}
+                View title search
               </Link>
             </div>
           </div>
@@ -372,36 +367,36 @@ export default function SeriesPage({
             {showNovelShelves ? (
               <div className="space-y-10">
                 <CatalogSection
-                  title="Trending"
+                  title="Hot this week"
                   ctaLabel="See all"
                   href="/rankings"
                   items={trendingItems}
                 />
                 <CatalogSection
-                  title="New updates"
+                  title="Fresh drops"
                   ctaLabel="Latest"
                   href={`${config.pathname}?sort=latest`}
                   items={newUpdateItems}
                 />
                 <CatalogSection
-                  title="Completed"
+                  title="Binge this weekend"
                   ctaLabel="Finished"
                   href={`${config.pathname}?status=completed`}
                   items={completedItems}
                 />
               </div>
             ) : smallNovelCatalog ? (
-              <SurfacePanel className="space-y-3" appearance="dark" accent="cyan">
+              <SurfacePanel className="space-y-3" appearance="dark" accent="rose">
                 <h2 className="text-[1.3rem] font-semibold tracking-[-0.03em] text-white">
                   {config.smallDatasetMessage}
                 </h2>
                 <p className="text-sm leading-6 text-white/64">
-                  The catalog is still small, so everything is right below in one clean list.
+                  Everything on this page is right below, without the filler.
                 </p>
               </SurfacePanel>
             ) : null}
 
-            <section className="space-y-5 rounded-[24px] border border-white/10 bg-[#111111] p-5 sm:p-6">
+            <section className="space-y-5 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_18px_46px_rgba(8,6,20,0.22)] sm:p-6">
               <div className="space-y-2">
                 <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
                   Catalog
@@ -446,7 +441,7 @@ export default function SeriesPage({
                       href={`/series/${encodeURIComponent(item.id)}`}
                       density="compact"
                       showActionLabel
-                      actionLabel="Read more"
+                      actionLabel="View title"
                       interactionMode="link"
                     />
                   ))}

@@ -7,9 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isMatureGenreValue } from "../../lib/matureContent";
 import Chip from "./Chip";
-import MatureFilterChip from "./MatureFilterChip";
 
 export default function FilterBar({
   genres = [],
@@ -65,45 +63,16 @@ export default function FilterBar({
     if (onGenreChange) onGenreChange(genre, options);
   };
 
-  const renderGenreChip = (genre) => {
-    if (!isMatureGenreValue(genre)) {
-      return (
-        <Chip
-          key={genre}
-          label={genre}
-          active={selectedGenre === genre}
-          onClick={() => handleGenreChange(genre)}
-          appearance={appearance}
-          className={chipClassName}
-        />
-      );
-    }
-
-    return (
-      <MatureFilterChip
-        key={genre}
-        href={genreHrefMap?.[genre] || ""}
-        active={selectedGenre === genre}
-        onNavigate={(options) => handleGenreChange(genre, options)}
-        label={genre}
-        className={chipClassName}
-        activeClassName={cn(
-          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
-          isLight
-            ? "border-black bg-[#FFE500] text-black"
-            : "border-[#FFE500] bg-black text-white",
-          chipClassName,
-        )}
-        inactiveClassName={cn(
-          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
-          isLight
-            ? "border-black bg-black text-white hover:bg-[#00E5FF] hover:text-black"
-            : "border-white/20 bg-black text-white hover:border-[#00E5FF] hover:bg-[#111111]",
-          chipClassName,
-        )}
-      />
-    );
-  };
+  const renderGenreChip = (genre) => (
+    <Chip
+      key={genre}
+      label={genre}
+      active={selectedGenre === genre}
+      onClick={() => handleGenreChange(genre)}
+      appearance={appearance}
+      className={chipClassName}
+    />
+  );
 
   useEffect(() => {
     if (!showGenrePicker) {
@@ -141,13 +110,13 @@ export default function FilterBar({
 
   const filterShellClass = isLight
     ? isQuiet
-      ? "rounded-[22px] border-2 border-black bg-[#080808] px-3 py-2.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-      : "rounded-[26px] border-2 border-black bg-[#080808] px-4 py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-    : "rounded-[24px] border-2 border-white/20 bg-black/30 px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+      ? "rounded-[24px] border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.95)] px-3 py-2.5 shadow-[0_14px_34px_rgba(58,44,86,0.12)]"
+      : "rounded-[28px] border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.95)] px-4 py-3.5 shadow-[0_16px_38px_rgba(58,44,86,0.12)]"
+    : "rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_18px_46px_rgba(8,6,20,0.22)]";
   const labelClass = isLight ? "text-white/70" : "text-white/70";
   const subtleButtonClass = isLight
-    ? "rounded-full border-2 border-black bg-[#080808] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
-    : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111]";
+    ? "rounded-full border border-[rgba(29,29,31,0.12)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(58,44,86,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[rgba(29,29,31,0.18)] hover:bg-[rgba(29,29,31,0.04)]"
+    : "border border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
   const sectionLabelClass = cn(
     "font-semibold uppercase",
     isQuiet ? "text-[10px] tracking-[0.18em]" : "text-[11px] tracking-[0.24em]",
@@ -176,8 +145,8 @@ export default function FilterBar({
                   className={cn(
                     "border px-2.5 py-1 text-[11px] font-semibold",
                     isLight
-                      ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                      : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                      ? "rounded-full border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900 shadow-[0_10px_24px_rgba(58,44,86,0.1)]"
+                      : "rounded-full border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
                   )}
                 >
                   {activeFilterCount} active
@@ -189,8 +158,8 @@ export default function FilterBar({
               className={cn(
                 "border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
                 isLight
-                  ? "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                  ? "rounded-full border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900 shadow-[0_10px_24px_rgba(58,44,86,0.1)]"
+                  : "rounded-full border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
               )}
             >
               {activeFilterCount} active
@@ -209,8 +178,8 @@ export default function FilterBar({
                   : "px-4 py-2 text-xs uppercase tracking-[0.16em]"
               } font-semibold transition-colors ${
                 isLight
-                  ? "rounded-full border-2 border-black bg-[#080808] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
-                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]"
+                  ? "rounded-full border border-[rgba(29,29,31,0.12)] bg-white text-slate-700 shadow-[0_10px_24px_rgba(58,44,86,0.1)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[rgba(29,29,31,0.18)] hover:bg-[rgba(29,29,31,0.04)]"
+                  : "rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_10px_24px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]"
               }`}
             >
               <RotateCcw size={14} />
@@ -293,8 +262,8 @@ export default function FilterBar({
                       subtleButtonClass,
                         (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
-                          ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                          : "border-2 border-[#FFE500] bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"),
+                          ? "border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900"
+                          : "border-[rgba(255,79,154,0.28)] bg-[rgba(255,79,154,0.16)] text-white"),
                     )}
                   >
                     <span>Genres</span>
@@ -308,16 +277,12 @@ export default function FilterBar({
                   </button>
 
                   {selectedGenre !== "all" ? (
-                    isMatureGenreValue(selectedGenre) ? (
-                      renderGenreChip(selectedGenre)
-                    ) : (
-                      <Chip
-                        label={selectedGenre}
-                        active
-                        appearance={appearance}
-                        className={chipClassName}
-                      />
-                    )
+                    <Chip
+                      label={selectedGenre}
+                      active
+                      appearance={appearance}
+                      className={chipClassName}
+                    />
                   ) : null}
                 </div>
 
@@ -326,8 +291,8 @@ export default function FilterBar({
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
                         isLight
-                          ? "rounded-[22px] border-2 border-black bg-[#080808] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                          : "rounded-[22px] border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+                          ? "rounded-[22px] border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.98)]"
+                          : "rounded-[22px] border-white/10 bg-[rgba(17,13,24,0.98)]",
                     )}
                   >
                     <div className="flex flex-wrap gap-2">

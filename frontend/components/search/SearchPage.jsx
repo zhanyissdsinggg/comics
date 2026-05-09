@@ -9,6 +9,11 @@ import Cover from "../common/Cover";
 import { SkeletonCard } from "../common/Skeleton";
 import SearchBar from "../common/SearchBar";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontInfoCardClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -27,7 +32,6 @@ import {
 } from "../../lib/commerceSuccess";
 import {
   formatInstallmentCount,
-  getInstallmentLabel,
 } from "../../lib/seriesFormatLabels";
 import {
   readSearchHistory,
@@ -39,6 +43,8 @@ import {
   filterBlockedPublicSeries,
   filterBlockedPublicTextList,
 } from "../../lib/publicCatalogVisibility";
+import { buildEditorialCardHook } from "../../lib/editorialHooks";
+import { isMatureGenreValue, isMatureTitle } from "../../lib/matureContent";
 
 const SearchHistoryPanel = dynamic(() => import("./SearchHistoryPanel"));
 const AdvancedFilterPanel = dynamic(() => import("./AdvancedFilterPanel"), {
@@ -56,9 +62,6 @@ const SearchCreatorMatchesPanel = dynamic(
 const PortraitCard = dynamic(() => import("../home/PortraitCard"));
 const CommerceSuccessBanner = dynamic(
   () => import("../common/CommerceSuccessBanner"),
-);
-const StorefrontEventHub = dynamic(
-  () => import("../common/StorefrontEventHub"),
 );
 const StorefrontPathwaysGrid = dynamic(
   () => import("../common/StorefrontPathwaysGrid"),
@@ -98,7 +101,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded border border-black/10 bg-[rgba(49,87,214,0.14)] px-1 text-black">
+      <mark className="rounded border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.16)] px-1 text-white">
         {match}
       </mark>
       {after}
@@ -165,15 +168,41 @@ function normalizeKeywordList(items) {
 
   return filterBlockedPublicKeywordItems(items)
     .map((item, index) => normalizeKeywordItem(item, index))
+    .filter(
+      (item) =>
+        item &&
+        ![
+          item.label,
+          item.value,
+          item.hint,
+          item.badge,
+          item.title,
+        ].some((value) => isPublicSearchBlockedLabel(value)),
+    )
     .filter(Boolean);
 }
 
+function isPublicSearchBlockedLabel(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    isMatureGenreValue(normalized) ||
+    normalized === "adult" ||
+    normalized === "18+" ||
+    normalized === "18 plus"
+  );
+}
+
 function sanitizeSeriesList(items) {
-  return filterBlockedPublicSeries(items);
+  return filterBlockedPublicSeries(items).filter((item) => !isMatureTitle(item));
 }
 
 function sanitizeSuggestionList(items) {
-  return filterBlockedPublicTextList(items);
+  return filterBlockedPublicTextList(items).filter(
+    (item) => !isPublicSearchBlockedLabel(item),
+  );
 }
 
 function formatSearchSeriesMeta(series) {
@@ -183,13 +212,9 @@ function formatSearchSeriesMeta(series) {
 }
 
 function summarizeSearchDescription(series) {
-  const description = String(series?.description || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (description) {
-    return description.length > 96
-      ? `${description.slice(0, 93).trimEnd()}...`
-      : description;
+  const editorialHook = buildEditorialCardHook(series, { maxLength: 96 });
+  if (editorialHook) {
+    return editorialHook;
   }
 
   if (String(series?.status || "").toLowerCase() === "completed") {
@@ -238,15 +263,15 @@ function SearchSectionHeader({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-[42rem]">
         {eyebrow ? (
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/54">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 text-[2.15rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
+        <h2 className="mt-2 font-display text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.8rem]">
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-[34rem] text-sm font-semibold leading-7 text-white/80">
+          <p className="mt-3 max-w-[34rem] text-sm leading-7 text-white/68">
             {description}
           </p>
         ) : null}
@@ -254,7 +279,7 @@ function SearchSectionHeader({
 
       <div className="flex flex-wrap items-center gap-2.5">
         {meta ? (
-          <span className="rounded-full border-2 border-black bg-[#FFE500] px-3.5 py-2 text-xs font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <span className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/74 shadow-[0_12px_28px_rgba(8,6,20,0.18)]">
             {meta}
           </span>
         ) : null}
@@ -279,7 +304,7 @@ export default function SearchPage() {
   const [total, setTotal] = useState(0);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [commerceNotice, setCommerceNotice] = useState(null);
-  const { isAdultMode, forceDisableAdultMode } = useAdultGateStore();
+  const { forceDisableAdultMode } = useAdultGateStore();
   const { behavior } = useBehaviorStore();
   const { bySeriesId: progressMap } = useProgressStore();
   const { isSignedIn } = useAuthStore();
@@ -304,7 +329,7 @@ export default function SearchPage() {
   const genre = searchParams.get("genre") || "";
   const sort = normalizeSortParam(searchParams.get("sort") || "relevance");
   const page = Math.max(1, Number(searchParams.get("page") || 1));
-  const adultFlag = isAdultMode ? "1" : "0";
+  const adultFlag = "0";
   const searchPath = useMemo(() => {
     const params = searchParams.toString();
     return params ? `/search?${params}` : "/search";
@@ -649,8 +674,8 @@ export default function SearchPage() {
   }, []);
 
   const reco = useMemo(
-    () => recommendRails(catalog, behavior, progressMap, { isAdultMode }),
-    [catalog, behavior, progressMap, isAdultMode],
+    () => recommendRails(catalog, behavior, progressMap, { isAdultMode: false }),
+    [catalog, behavior, progressMap],
   );
   const editorialSnapshot = useMemo(
     () => getHomeEditorialSnapshot(catalog, { homepageSlots }),
@@ -762,33 +787,20 @@ export default function SearchPage() {
     sort !== "relevance" ? sort : "",
   ].filter(Boolean).length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasSparseResults =
-    Boolean(query) && !loading && results.length > 0 && results.length < 4;
   const showResultSections = Boolean(query);
-  const heroTitle = query ? `Results for "${query}"` : "Search";
-  const heroDescription = query
-    ? loading
-      ? "Updating."
-      : `${total.toLocaleString()} match${total === 1 ? "" : "es"}.`
-    : "";
-  const heroSecondary = "";
-  const loadingResultLabel = "Updating";
+  const heroTitle = "Find your next obsession";
+  const heroDescription =
+    "Search stories by mood, genre, format, or creator.";
   const mastheadLeadKeyword = hotKeywords[0] || keywords[0] || null;
-  const recoPanelTitle = !query
-    ? "Trending"
-    : results.length === 0
-      ? "Next"
-      : "Next";
-  const lightCardAccentClass =
-    "border-2 border-white/20 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
-  const lightFeatureAccentClass =
-    "border-2 border-black bg-[#FFE500] text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
-  const secondaryButtonClass =
-    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
-  const accentButtonClass =
-    "rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5";
+  const recoPanelTitle = !query ? "Hot this week" : "What to try next";
+  const railCardClass =
+    "border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] shadow-[0_20px_50px_rgba(8,6,20,0.28)]";
+  const featuredRailCardClass =
+    "border border-[rgba(255,79,154,0.18)] bg-[linear-gradient(180deg,rgba(48,23,41,0.96)_0%,rgba(22,14,28,0.98)_100%)] shadow-[0_22px_54px_rgba(8,6,20,0.3)]";
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
+  const accentButtonClass = storefrontPrimaryButtonClass;
   const filterSelectClass =
-    "rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform focus:ring-0 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
+    "h-11 rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 text-sm font-semibold tracking-[0.01em] text-white outline-none shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] focus:border-white/20 focus:bg-[rgba(255,255,255,0.08)]";
   const editorialBrowsePaths = useMemo(() => {
     const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
     const leadHotLabel = leadHotKeyword?.label || "Romance";
@@ -797,53 +809,53 @@ export default function SearchPage() {
 
     return [
       freeStartPick
-          ? {
-              id: "free-unlock-slot",
-            eyebrow: "Top Picks",
-              title: `Start with ${freeStartPick.title}.`,
+        ? {
+            id: "free-unlock-slot",
+            eyebrow: "Start here",
+            title: `Start with ${freeStartPick.title}.`,
             description:
               startHereEpisodeCount > 0
-                ? `${formatInstallmentCount(freeStartPick, startHereEpisodeCount)} live.`
-                : "",
-            ctaLabel: "Start Reading",
+                ? `${formatInstallmentCount(freeStartPick, startHereEpisodeCount)} ready from chapter one.`
+                : "A strong first pick when you want something easy to jump into.",
+            ctaLabel: "Start reading",
             onClick: () =>
               handleSeriesClick(
                 freeStartPick.id,
                 "SEARCH_PATH_FREE_START",
                 "search_path_free_start",
               ),
-            accentClass: lightFeatureAccentClass,
+            accentClass: featuredRailCardClass,
           }
-          : {
-              id: "free-unlock",
-            eyebrow: "Top Picks",
-              title: "Pick one",
-            description: "",
-            ctaLabel: "Top Picks",
+        : {
+            id: "free-unlock",
+            eyebrow: "Start here",
+            title: "Jump into a crowd favorite.",
+            description: "A quick way to land on a title with a clean entry point.",
+            ctaLabel: "View title",
             onClick: () => router.push("/rankings?view=start-here"),
-            accentClass: lightFeatureAccentClass,
+            accentClass: featuredRailCardClass,
           },
       completedPick
-          ? {
-              id: "completed-binge-slot",
-            eyebrow: "Finished",
-              title: `${completedPick.title}.`,
-            description: "",
-            ctaLabel: "Start Reading",
+        ? {
+            id: "completed-binge-slot",
+            eyebrow: "Binge this weekend",
+            title: `${completedPick.title}.`,
+            description: "Completed and ready when you want the full ride without waiting.",
+            ctaLabel: "Start reading",
             onClick: () =>
               handleSeriesClick(
                 completedPick.id,
                 "SEARCH_PATH_BINGE",
                 "search_path_binge",
               ),
-            accentClass: lightCardAccentClass,
+            accentClass: railCardClass,
           }
-          : {
-              id: "completed-binge",
-            eyebrow: "Finished",
-            title: "Finished.",
-              description: "",
-            ctaLabel: "Finished",
+        : {
+            id: "completed-binge",
+            eyebrow: "Binge this weekend",
+            title: "Completed stories, no waiting.",
+            description: "Open the finished shelf when you want payoff tonight.",
+            ctaLabel: "View title",
             onClick: () =>
               updateParams(
                 {
@@ -855,31 +867,31 @@ export default function SearchPage() {
                 },
                 { resetPage: true },
               ),
-            accentClass: lightCardAccentClass,
+            accentClass: railCardClass,
           },
       breakoutPick
         ? {
             id: "breakout-watch-slot",
-            eyebrow: "Trending",
+            eyebrow: "Hot this week",
             title: `${breakoutPick.title}.`,
             description: leadHotKeyword?.label
-              ? `Near "${leadHotLabel}".`
-              : "",
-            ctaLabel: "Start Reading",
+              ? `If ${leadHotLabel.toLowerCase()} is your mood, this is the one readers are chasing right now.`
+              : "A fast-rising pick that is pulling attention this week.",
+            ctaLabel: "View title",
             onClick: () =>
               handleSeriesClick(
                 breakoutPick.id,
                 "SEARCH_PATH_BREAKOUT",
                 "search_path_breakout",
               ),
-            accentClass: lightCardAccentClass,
+            accentClass: railCardClass,
           }
         : {
             id: "breakout-watch",
-            eyebrow: "Trending",
-            title: `Search "${leadHotLabel}".`,
-            description: "",
-            ctaLabel: `Search ${leadHotLabel}`,
+            eyebrow: "Hot this week",
+            title: `Try ${leadHotLabel}.`,
+            description: "A good next move when you want a mood-led search instead of starting from scratch.",
+            ctaLabel: "View title",
             onClick: () =>
               updateParams(
                 {
@@ -891,19 +903,8 @@ export default function SearchPage() {
                 },
                 { resetPage: true },
               ),
-            accentClass: lightCardAccentClass,
-          },
-      isAdultMode
-        ? {
-            id: "adult-desk",
-            eyebrow: "18+",
-            title: "18+ Picks.",
-            description: "",
-            ctaLabel: "18+",
-            onClick: () => router.push("/adult"),
-            accentClass: lightCardAccentClass,
+            accentClass: railCardClass,
           }
-        : null,
     ];
   }, [
     breakoutPick,
@@ -911,10 +912,9 @@ export default function SearchPage() {
     freeStartPick,
     handleSeriesClick,
     hotKeywords,
-    isAdultMode,
     keywords,
-    lightCardAccentClass,
-    lightFeatureAccentClass,
+    railCardClass,
+    featuredRailCardClass,
     router,
     updateParams,
   ]);
@@ -922,7 +922,6 @@ export default function SearchPage() {
     <StorefrontPathwaysGrid
       cards={editorialBrowsePaths.filter(Boolean)}
       columnsClassName="md:grid-cols-2 xl:grid-cols-3"
-      appearance="light"
     />
   );
   const leadSearchResult =
@@ -938,219 +937,10 @@ export default function SearchPage() {
   }));
   const shouldShowReco =
     visibleRecoRails.length > 0 && (!query || results.length === 0);
-  const shouldShowEventHub = false;
-  const searchEventCards = useMemo(() => {
-    const leadHotKeyword = hotKeywords[0] || keywords[0] || null;
-    const leadHotLabel = leadHotKeyword?.label || "Romance";
-    const leadHotValue = leadHotKeyword?.value || leadHotLabel;
-    const sortLabel =
-      SORT_OPTIONS.find((option) => option.id === sort)?.label || "Relevance";
-    const hasDirectMatch = Boolean(query) && results.length > 0;
-    const hasEditorialLead =
-      Boolean(leadSearchResult) && (!query || results.length === 0);
-    const startHereEpisodeCount = Number(freeStartPick?.episodeCount || 0);
-
-    return [
-      leadSearchResult && (hasDirectMatch || hasEditorialLead)
-        ? {
-            id: hasDirectMatch
-              ? "lead-match"
-              : query
-                ? "lead-editorial-rescue"
-                : "lead-editorial-push",
-            eyebrow: hasDirectMatch
-              ? "Top match"
-              : query
-                ? "Next"
-                : "Trending",
-            title: hasDirectMatch
-              ? `${leadSearchResult.title}.`
-              : query
-                ? `${leadSearchResult.title}.`
-                : `${leadSearchResult.title}.`,
-            description: hasDirectMatch
-              ? hasSparseResults
-                ? ""
-                : ""
-              : query
-                ? ""
-                : "",
-            signalLabel: hasDirectMatch ? "Results" : "Trending",
-            signalValue: hasDirectMatch
-              ? loading
-                ? loadingResultLabel
-                : total.toLocaleString()
-              : breakoutPick
-                  ? "Trending"
-                : "Top Picks",
-            signalHint: hasDirectMatch
-              ? `Sorted by ${sortLabel}`
-              : leadHotKeyword?.hint || "",
-            ctaLabel: "Start Reading",
-            onClick: () =>
-              handleSeriesClick(
-                leadSearchResult.id,
-                "SEARCH_EVENT_HUB",
-                hasDirectMatch
-                  ? "search_lead_match"
-                  : "search_editorial_rescue",
-              ),
-            accentClass: lightCardAccentClass,
-          }
-        : {
-            id: "lead-trend",
-            eyebrow: "Trending",
-            title: `${leadHotLabel}.`,
-            description: "",
-            signalLabel: "Hot keyword",
-            signalValue: leadHotLabel,
-            signalHint:
-              leadHotKeyword?.hint ||
-              (hotWindow === "week"
-                ? "This week"
-                : "Today"),
-            ctaLabel: `Search ${leadHotLabel}`,
-            onClick: () =>
-              updateParams(
-                {
-                  q: leadHotValue,
-                  type: "",
-                  genre: "",
-                  status: "",
-                  sort: "popular",
-                },
-                { resetPage: true },
-              ),
-            accentClass: lightCardAccentClass,
-          },
-      freeStartPick
-          ? {
-              id: "free-start-desk-slot",
-            eyebrow: "Top Picks",
-              title: `Start with ${freeStartPick.title}.`,
-            description:
-              startHereEpisodeCount > 0
-                ? `${formatInstallmentCount(freeStartPick, startHereEpisodeCount)} listed.`
-                : "",
-            signalLabel: getInstallmentLabel(freeStartPick, { plural: true }),
-            signalValue:
-              startHereEpisodeCount > 0
-                ? String(startHereEpisodeCount)
-                : "Live",
-            signalHint: "",
-            ctaLabel: "Start Reading",
-            onClick: () =>
-              handleSeriesClick(
-                freeStartPick.id,
-                "SEARCH_EVENT_FREE_START",
-                "search_event_free_start",
-              ),
-            accentClass: lightFeatureAccentClass,
-          }
-          : {
-              id: "free-start-desk",
-            eyebrow: "Top Picks",
-              title: "Pick one",
-              description: "",
-              signalLabel: "List",
-            signalValue: "Top Picks",
-            signalHint: "",
-            ctaLabel: "Top Picks",
-            onClick: () => router.push("/rankings?view=start-here"),
-            accentClass: lightFeatureAccentClass,
-          },
-      completedPick
-          ? {
-              id: "binge-desk-slot",
-            eyebrow: "Finished",
-              title: `${completedPick.title}.`,
-            description: "",
-            signalLabel: "Status",
-            signalValue: "Finished",
-            signalHint: completedPick?.episodeCount
-              ? `${formatInstallmentCount(completedPick, completedPick.episodeCount)} ready`
-              : "",
-            ctaLabel: "Start Reading",
-            onClick: () =>
-              handleSeriesClick(
-                completedPick.id,
-                "SEARCH_EVENT_BINGE",
-                "search_event_binge",
-              ),
-            accentClass: lightCardAccentClass,
-          }
-          : {
-              id: isAdultMode ? "protected-desk" : "binge-desk",
-            eyebrow: isAdultMode ? "18+ Picks" : "Finished",
-              title: isAdultMode ? "18+ Picks." : "Finished.",
-            description: isAdultMode
-              ? ""
-              : "",
-            signalLabel: isAdultMode ? "Mode" : "Finished",
-            signalValue: isAdultMode ? "18+" : "Runs",
-            signalHint: isAdultMode
-              ? ""
-              : "",
-            ctaLabel: isAdultMode ? "18+" : "Finished",
-            onClick: () =>
-              isAdultMode
-                ? router.push("/adult")
-                : updateParams(
-                    {
-                      q: "",
-                      type: "",
-                      genre: "",
-                      status: "Completed",
-                      sort: "popular",
-                    },
-                    { resetPage: true },
-                  ),
-            accentClass: lightCardAccentClass,
-          },
-    ];
-  }, [
-    breakoutPick,
-    completedPick,
-    freeStartPick,
-    handleSeriesClick,
-    hasSparseResults,
-    hotKeywords,
-    hotWindow,
-    isAdultMode,
-    keywords,
-    leadSearchResult,
-    loading,
-    lightCardAccentClass,
-    lightFeatureAccentClass,
-    query,
-    results.length,
-    router,
-    sort,
-    total,
-    loadingResultLabel,
-    updateParams,
-  ]);
-  const heroStatCards = [
-    {
-      label: query ? "Matches" : "Titles",
-      value: query ? total.toLocaleString() : catalog.length.toLocaleString(),
-      tone: "bg-[#f6f7f9]",
-    },
-    {
-      label: "Hot terms",
-      value: hotKeywords.length.toLocaleString(),
-      tone: "bg-black",
-    },
-    {
-      label: "Page",
-      value: String(page),
-      tone: "bg-[#f6f7f9]",
-    },
-  ];
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
+    <main className="min-h-screen overflow-hidden bg-[var(--gush-bg)] text-white">
       <div className="space-y-0">
-        <section className="grid border-b-2 border-white/15 bg-black xl:grid-cols-[minmax(0,1fr)_380px]">
+        <section className="grid border-b border-white/10 bg-transparent xl:grid-cols-[minmax(0,1fr)_380px]">
           <SurfacePanel
             className="space-y-6 border-0 bg-transparent px-5 py-10 shadow-none sm:px-8 sm:py-14 lg:px-12 xl:px-16"
             tone="highlight"
@@ -1159,22 +949,19 @@ export default function SearchPage() {
           >
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2.5">
-                <p className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.28em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <p className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/60 shadow-[0_12px_28px_rgba(8,6,20,0.18)]">
                   Search
                 </p>
               </div>
-              <h1 className="mt-5 max-w-4xl text-[2.75rem] font-black uppercase leading-[0.92] tracking-[-0.06em] text-white sm:text-[3.5rem] xl:text-[4.4rem]">
+              <h1 className="mt-5 max-w-4xl font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3.5rem] xl:text-[4.4rem]">
                 {heroTitle}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-white/80 sm:text-[0.98rem]">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/68 sm:text-[0.98rem]">
                 {heroDescription}
               </p>
-              {heroSecondary ? (
-                <p className="mt-2 text-sm font-semibold text-white/65">{heroSecondary}</p>
-              ) : null}
             </div>
 
-            <div className="rounded-[28px] border-2 border-white/20 bg-black/80 p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-5">
+            <div className="rounded-[28px] border border-white/10 bg-[rgba(8,7,14,0.42)] p-4 shadow-[0_20px_50px_rgba(8,6,20,0.28)] backdrop-blur-xl sm:p-5">
               <SearchBar
                 variant="home"
                 placeholder="Search titles, creators, or genres"
@@ -1188,7 +975,7 @@ export default function SearchPage() {
                       key={item}
                       type="button"
                       onClick={() => updateParam("q", item)}
-                      className="rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                      className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                     >
                       {item}
                     </button>
@@ -1206,7 +993,7 @@ export default function SearchPage() {
                         key={item.id}
                         type="button"
                         onClick={() => updateParam("q", item.value)}
-                        className="rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                        className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                       >
                         {item.label}
                       </button>
@@ -1223,11 +1010,11 @@ export default function SearchPage() {
             appearance="dark"
           >
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/65">
-                Search
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/52">
+                {query ? "Best match" : "Now trending"}
               </p>
-              <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                {query ? "Best Match" : "Trending"}
+              <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
+                {query ? "Closest to what you searched." : "Start with what readers are opening now."}
               </h2>
             </div>
 
@@ -1243,10 +1030,10 @@ export default function SearchPage() {
                       : "search_masthead_featured",
                   )
                 }
-                className="group w-full rounded-[28px] border-2 border-white/20 bg-black p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5"
+                className="group w-full rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-4 text-left text-white shadow-[0_20px_50px_rgba(8,6,20,0.28)] transition-all hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_26px_58px_rgba(8,6,20,0.34)]"
               >
                 <div className="grid gap-4 grid-cols-[88px_minmax(0,1fr)]">
-                  <div className="overflow-hidden rounded-[24px] border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(8,7,14,0.8)] shadow-[0_16px_38px_rgba(8,6,20,0.24)]">
                     <Cover
                       tone={leadSearchResult.coverTone}
                       coverUrl={leadSearchResult.coverUrl}
@@ -1262,46 +1049,63 @@ export default function SearchPage() {
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/45">
-                      {query ? "Best Match" : "Trending"}
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/44">
+                      {query ? "Best match" : "Hot this week"}
                     </p>
-                    <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-white">
+                    <h3 className="mt-2 font-display text-[1.35rem] font-semibold leading-[0.94] tracking-[-0.04em] text-white">
                       {leadSearchResult.title}
                     </h3>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/58">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-white/52">
                       {formatSearchSeriesMeta(leadSearchResult)}
                     </p>
-                    <p className="mt-3 line-clamp-2 text-sm font-semibold leading-6 text-white/70">
+                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-white/66">
                       {summarizeSearchDescription(leadSearchResult)}
                     </p>
+                    <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+                        View title
+                      </span>
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] text-white shadow-[0_8px_20px_rgba(8,6,20,0.18)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(255,79,154,0.14)]">
+                        <ArrowRight className="size-4" />
+                      </span>
+                    </div>
                   </div>
                 </div>
               </button>
             ) : (
-              <div className="rounded-[28px] border-2 border-white/20 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/65">
-                  Search
+              <div className={`${storefrontInfoCardClass} space-y-2`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                  Mood shortcut
                 </p>
-                <h3 className="mt-2 text-[1.35rem] font-black uppercase leading-[0.94] tracking-[-0.04em] text-white">
-                  {mastheadLeadKeyword ? mastheadLeadKeyword.label : "Trending"}
+                <h3 className="font-display text-[1.35rem] font-semibold leading-[0.94] tracking-[-0.04em] text-white">
+                  {mastheadLeadKeyword ? `Try ${mastheadLeadKeyword.label}.` : "Search by feeling first."}
                 </h3>
+                <p className="text-sm leading-6 text-white/66">
+                  {mastheadLeadKeyword?.hint ||
+                    "Start with a mood, then narrow by creator or format once something catches."}
+                </p>
               </div>
             )}
 
-            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              {heroStatCards.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border-2 border-white/20 bg-black px-4 py-3 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                >
-                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/65">
-                    {item.label}
+            <div className="space-y-3">
+              <div className={`${storefrontInfoCardClass} space-y-2`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                  Search tip
+                </p>
+                <p className="text-sm leading-6 text-white/68">
+                  Try a vibe like <span className="text-white">dark mystery</span>, <span className="text-white">soft romance</span>, or <span className="text-white">weekend binge</span>.
+                </p>
+              </div>
+              {!query && history.length > 0 ? (
+                <div className={`${storefrontInfoCardClass} space-y-2`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                    Pick up where you left off
                   </p>
-                  <p className="mt-2 text-[1.4rem] font-black uppercase tracking-[-0.04em]">
-                    {item.value}
+                  <p className="text-sm leading-6 text-white/68">
+                    Your recent searches stay close so it is easier to jump back into a mood or creator.
                   </p>
                 </div>
-              ))}
+              ) : null}
             </div>
           </SurfacePanel>
         </section>
@@ -1325,19 +1129,9 @@ export default function SearchPage() {
         ) : null}
 
         {resultsStale || catalogStale || homepageSlotsStale ? (
-          <div className="rounded-[24px] border-2 border-[#FFE500] bg-black/85 px-4 py-3 text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="rounded-[24px] border border-[rgba(244,201,93,0.24)] bg-[rgba(27,22,14,0.88)] px-4 py-3 text-sm text-white/84 shadow-[0_16px_38px_rgba(8,6,20,0.24)]">
             Saved results loaded. Reconnect to refresh.
           </div>
-        ) : null}
-
-        {shouldShowEventHub ? (
-          <StorefrontEventHub
-            eyebrow={query ? "Search" : "Trending"}
-            title={query ? "Best Match" : "Trending"}
-            description=""
-            events={searchEventCards}
-            appearance="dark"
-          />
         ) : null}
 
         <SearchCreatorMatchesPanel
@@ -1350,23 +1144,23 @@ export default function SearchPage() {
 
         {shouldShowReco ? (
           <SurfacePanel
-              className="space-y-8"
-              appearance="dark"
-              accent="cyan"
-            >
+            className="space-y-8"
+            appearance="dark"
+            accent="cyan"
+          >
             <SearchSectionHeader
-              eyebrow="Next"
+              eyebrow="Next up"
               title={recoPanelTitle}
-              description=""
+              description="A tighter shelf of titles that still fit the mood."
               actions={
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setHotWindow("day")}
-                    className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.03em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] shadow-[0_10px_24px_rgba(8,6,20,0.16)] transition-all ${
                       hotWindow === "day"
-                        ? "bg-[#FFE500] text-black"
-                        : "border-white/20 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                        ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd7e8]"
+                        : "border-white/12 bg-[rgba(255,255,255,0.05)] text-white/78 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                     }`}
                   >
                     Today
@@ -1374,10 +1168,10 @@ export default function SearchPage() {
                   <button
                     type="button"
                     onClick={() => setHotWindow("week")}
-                    className={`rounded-full border-2 border-black px-3 py-1.5 text-xs font-black uppercase tracking-[0.03em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform ${
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] shadow-[0_10px_24px_rgba(8,6,20,0.16)] transition-all ${
                       hotWindow === "week"
-                        ? "bg-[#FFE500] text-black"
-                        : "border-white/20 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                        ? "border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] text-[#ffd7e8]"
+                        : "border-white/12 bg-[rgba(255,255,255,0.05)] text-white/78 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                     }`}
                   >
                     Week
@@ -1393,7 +1187,7 @@ export default function SearchPage() {
                   className="space-y-4"
                   data-testid={`search-rail-${rail.id}`}
                 >
-                  <h3 className="text-lg font-black uppercase tracking-[0.03em] text-white">
+                  <h3 className="font-display text-lg font-semibold tracking-[-0.03em] text-white">
                     {rail.title}
                   </h3>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1428,19 +1222,22 @@ export default function SearchPage() {
               <SearchSectionHeader
                 eyebrow="Results"
                 title={query ? `"${query}"` : "Browse"}
-                description=""
-                meta={`${total.toLocaleString()} match${total === 1 ? "" : "es"}`}
+                description={
+                  query
+                    ? "Best matches across stories, formats, and creator shelves."
+                    : "Browse the catalog by format, mood, or release pace."
+                }
                 actions={
                   <>
                     <button
                       type="button"
                       onClick={() => setShowAdvancedFilters(true)}
-                      className="inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                      className="inline-flex h-11 items-center gap-2 rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                     >
                       <SlidersHorizontal size={16} />
                       <span>Filters</span>
                       {activeFilterCount > 0 ? (
-                        <span className="rounded-full border-2 border-black bg-[#FFE500] px-2 py-0.5 text-[11px] font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        <span className="rounded-full border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.14)] px-2 py-0.5 text-[11px] font-semibold text-[#ffd7e8]">
                           {activeFilterCount}
                         </span>
                       ) : null}
@@ -1508,11 +1305,11 @@ export default function SearchPage() {
                 accent="cyan"
               >
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/52">
                     No results
                   </p>
-                  <h2 className="mt-2 text-[2.2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white">
-                    No results
+                  <h2 className="mt-2 font-display text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
+                    Nothing landed this time.
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -1547,7 +1344,7 @@ export default function SearchPage() {
                       }
                       className={secondaryButtonClass}
                     >
-                      Read More
+                      View title
                     </button>
                   ) : (
                     <button
@@ -1555,7 +1352,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=featured")}
                       className={secondaryButtonClass}
                     >
-                      Trending
+                      Hot this week
                     </button>
                   )}
                   {completedPick ? (
@@ -1604,7 +1401,7 @@ export default function SearchPage() {
                       }
                       className={accentButtonClass}
                     >
-                      {freeStartPick.title}
+                      Start reading
                     </button>
                   ) : (
                     <button
@@ -1612,7 +1409,7 @@ export default function SearchPage() {
                       onClick={() => router.push("/rankings?view=start-here")}
                       className={accentButtonClass}
                     >
-                      Top Picks
+                      Start reading
                     </button>
                   )}
                 </div>
@@ -1643,11 +1440,11 @@ export default function SearchPage() {
                           query: query || undefined,
                         })
                       }
-                      className="group block overflow-hidden rounded-[30px] border-2 border-white/20 bg-black p-5 text-left shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
+                      className="group block overflow-hidden rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-5 text-left shadow-[0_20px_50px_rgba(8,6,20,0.28)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_26px_58px_rgba(8,6,20,0.34)]"
                       aria-label={`View ${series.title}`}
                     >
                       <div className="grid gap-5 sm:grid-cols-[132px_minmax(0,1fr)]">
-                        <div className="overflow-hidden rounded-[22px] border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="overflow-hidden rounded-[22px] border border-white/10 bg-[rgba(8,7,14,0.8)] shadow-[0_16px_38px_rgba(8,6,20,0.24)]">
                           <Cover
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
@@ -1661,23 +1458,23 @@ export default function SearchPage() {
                           />
                         </div>
                         <div className="min-w-0 space-y-3.5">
-                          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/55">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/48">
                             {series.type || "Series"}
                           </p>
-                          <h3 className="text-[1.32rem] font-black uppercase leading-tight tracking-[-0.04em] text-white">
+                          <h3 className="font-display text-[1.32rem] font-semibold leading-tight tracking-[-0.04em] text-white">
                             {highlight(series.title, query)}
                           </h3>
-                          <p className="text-sm font-semibold text-white/65">
+                          <p className="text-sm text-white/62">
                             {formatSearchSeriesMeta(series)}
                           </p>
-                          <p className="line-clamp-2 text-sm font-medium leading-6 text-white/68">
+                          <p className="line-clamp-2 text-sm leading-6 text-white/66">
                             {summarizeSearchDescription(series)}
                           </p>
                           <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-white/55">
-                              Read More
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">
+                              View title
                             </span>
-                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 group-hover:translate-x-0.5">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] text-white shadow-[0_8px_20px_rgba(8,6,20,0.18)] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:bg-[rgba(255,79,154,0.14)]">
                               <ArrowRight className="size-4" />
                             </span>
                           </div>
@@ -1688,7 +1485,7 @@ export default function SearchPage() {
                 </div>
 
                 {total > PAGE_SIZE ? (
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm text-white shadow-[0_16px_38px_rgba(8,6,20,0.22)]">
                     <span>
                       Page {page} of {totalPages}
                     </span>
@@ -1698,7 +1495,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page - 1))}
                         disabled={page <= 1}
                         aria-label="Previous page"
-                        className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                        className={`${storefrontSecondaryButtonClass} h-10 px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50`}
                       >
                         Previous
                       </button>
@@ -1707,7 +1504,7 @@ export default function SearchPage() {
                         onClick={() => updateParam("page", String(page + 1))}
                         disabled={page >= totalPages}
                         aria-label="Next page"
-                        className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 text-sm font-black uppercase tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+                        className={`${storefrontSecondaryButtonClass} h-10 px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50`}
                       >
                         Next page
                       </button>

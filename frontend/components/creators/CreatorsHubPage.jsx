@@ -7,6 +7,7 @@ import EmptyState from "../common/EmptyState";
 import Cover from "../common/Cover";
 import { apiGet } from "../../lib/apiClient";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
+import { buildCreatorEditorialHook } from "../../lib/editorialHooks";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 
 function formatCreditTypeLabel(creditType) {
@@ -42,16 +43,14 @@ function buildGenreOptions(creators) {
   const counts = new Map();
 
   (Array.isArray(creators) ? creators : []).forEach((creator) => {
-    (Array.isArray(creator?.genres) ? creator.genres : []).forEach(
-      (genre) => {
-        const key = String(genre || "").trim();
-        if (!key) {
-          return;
-        }
+    (Array.isArray(creator?.genres) ? creator.genres : []).forEach((genre) => {
+      const key = String(genre || "").trim();
+      if (!key) {
+        return;
+      }
 
-        counts.set(key, (counts.get(key) || 0) + 1);
-      },
-    );
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
   });
 
   return [...counts.entries()]
@@ -81,11 +80,6 @@ function normalizeCreatorRole(creator) {
   }
 
   return "creator";
-}
-
-function formatTitleCountLabel(count) {
-  const total = Math.max(0, Number(count || 0));
-  return `${total} title${total === 1 ? "" : "s"}`;
 }
 
 function buildCreatorSearchText(creator) {
@@ -135,15 +129,16 @@ function CreatorCard({ creator }) {
     ? creator.topGenres.slice(0, 3)
     : [];
   const updatedLabel = formatDateLabel(creator?.latestUpdatedAt);
+  const creatorHook = buildCreatorEditorialHook(creator, { maxLength: 96 });
 
   return (
     <Link
       href={creator.path || "/creators"}
-      className="group block rounded-[28px] border-2 border-white/15 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25"
+      className="group block rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,21,35,0.98)_0%,rgba(15,13,22,0.98)_100%)] p-4 text-white shadow-[0_20px_48px_rgba(8,6,20,0.24)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_28px_64px_rgba(8,6,20,0.3)]"
       aria-label={`View ${creator.name}`}
     >
       <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
-        <div className="overflow-hidden rounded-[22px] border-2 border-white/15 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-2 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
           <Cover
             tone={latestSeries?.coverTone}
             coverUrl={latestSeries?.coverUrl}
@@ -151,22 +146,22 @@ function CreatorCard({ creator }) {
             eyebrow={creator.name}
             badge=""
             fallbackVariant="minimal-card"
-            className="h-40 rounded-[18px]"
+            className="h-40 rounded-[20px]"
           />
         </div>
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/55">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
                 {formatCreditTypeLabel(role)}
               </p>
-              <h2 className="mt-2 line-clamp-2 text-xl font-black uppercase tracking-[0.01em] text-white">
+              <h2 className="mt-2 line-clamp-2 font-display text-xl font-semibold tracking-[-0.04em] text-white">
                 {creator.name}
               </h2>
             </div>
-            <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              {formatTitleCountLabel(creator.titleCount)}
+            <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/70 shadow-[0_10px_24px_rgba(8,6,20,0.18)]">
+              View creator
             </span>
           </div>
 
@@ -175,7 +170,7 @@ function CreatorCard({ creator }) {
               {topGenres.map((genre) => (
                 <span
                   key={`${creator.slug}-${genre}`}
-                  className="rounded-full border-2 border-white/15 bg-[#111111] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/75"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.16)]"
                 >
                   {genre}
                 </span>
@@ -183,10 +178,14 @@ function CreatorCard({ creator }) {
             </div>
           ) : null}
 
+          <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/68">
+            {creatorHook}
+          </p>
+
           <div className="mt-4 space-y-2 text-sm text-white/72">
             {latestTitle ? (
               <p className="line-clamp-1">
-                <span className="font-black uppercase tracking-[0.08em] text-white/48">
+                <span className="font-semibold uppercase tracking-[0.14em] text-white/44">
                   Latest
                 </span>{" "}
                 <span className="font-semibold text-white">{latestTitle}</span>
@@ -194,7 +193,7 @@ function CreatorCard({ creator }) {
             ) : null}
             {updatedLabel ? (
               <p className="line-clamp-1">
-                <span className="font-black uppercase tracking-[0.08em] text-white/48">
+                <span className="font-semibold uppercase tracking-[0.14em] text-white/44">
                   Updated
                 </span>{" "}
                 <span>{updatedLabel}</span>
@@ -208,7 +207,7 @@ function CreatorCard({ creator }) {
 }
 
 const creatorFilterChipClass =
-  "rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[transform,border-color,background-color,color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#00E5FF]/20";
+  "rounded-full border px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-[transform,border-color,background-color,color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(255,79,154,0.16)]";
 
 function normalizeRoleFilter(value) {
   const normalized = String(value || "")
@@ -257,18 +256,16 @@ function creatorMatchesGenre(creator, genre) {
 }
 
 function getCreatorResultsLabel(role, genre) {
-  const hasGenre = Boolean(genre && genre !== "All");
-
-  if (hasGenre) {
+  if (genre && genre !== "All") {
     if (role === "creator") {
       return `${genre} creators`;
     }
 
     if (role === "studio-team") {
-      return `${genre} studios + teams`;
+      return `${genre} studios and teams`;
     }
 
-    return `${genre} profiles`;
+    return `${genre} voices`;
   }
 
   if (role === "creator") {
@@ -276,15 +273,34 @@ function getCreatorResultsLabel(role, genre) {
   }
 
   if (role === "studio-team") {
-    return "Studios + Teams";
+    return "Studios and teams";
   }
 
-  return "All Profiles";
+  return "All creators";
 }
 
 function getCreatorResultsTitle(role, genre) {
-  const label = getCreatorResultsLabel(role, genre);
-  return label === "All Profiles" ? "Browse Creators" : label;
+  if (genre && genre !== "All") {
+    if (role === "creator") {
+      return `${genre} creators`;
+    }
+
+    if (role === "studio-team") {
+      return `${genre} studios and teams`;
+    }
+
+    return `${genre} voices`;
+  }
+
+  if (role === "creator") {
+    return "Creator voices";
+  }
+
+  if (role === "studio-team") {
+    return "Studios and teams";
+  }
+
+  return "Browse creators";
 }
 
 function buildCreatorsFilterHref({ role, genre }) {
@@ -302,7 +318,7 @@ function buildCreatorsFilterHref({ role, genre }) {
 
 function CreatorsHubSkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
+    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -317,7 +333,7 @@ function CreatorsHubSkeleton() {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={`creator-chip-${index}`}
-                  className="h-12 w-24 animate-pulse rounded-full bg-[#111111]"
+                  className="h-12 w-24 animate-pulse rounded-full border border-white/10 bg-[rgba(255,255,255,0.04)]"
                 />
               ))}
             </div>
@@ -328,7 +344,7 @@ function CreatorsHubSkeleton() {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={`creator-card-${index}`}
-              className="h-[260px] animate-pulse rounded-[28px] border-2 border-white/15 bg-[#111111]"
+              className="h-[260px] animate-pulse rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)]"
             />
           ))}
         </div>
@@ -349,7 +365,9 @@ export default function CreatorsHubPage({
   const [loading, setLoading] = useState(!hasInitialCatalog);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [activeRole, setActiveRole] = useState(normalizeRoleFilter(initialTypeFilter));
+  const [activeRole, setActiveRole] = useState(
+    normalizeRoleFilter(initialTypeFilter),
+  );
   const [activeGenre, setActiveGenre] = useState(
     normalizeGenreFilter(initialGenreFilter, []),
   );
@@ -361,28 +379,26 @@ export default function CreatorsHubPage({
     setError("");
     const currentRequest = requestRef.current;
 
-    apiGet("/api/series?adult=0", { cacheMs: 30000 }).then(
-      (response) => {
-        if (currentRequest !== requestRef.current) {
-          return;
-        }
+    apiGet("/api/series?adult=0", { cacheMs: 30000 }).then((response) => {
+      if (currentRequest !== requestRef.current) {
+        return;
+      }
 
-        if (!response.ok) {
-          setCatalog([]);
-          setError(response.error || "Unable to load creators.");
-          setLoading(false);
-          return;
-        }
-
-        setCatalog(
-          filterBlockedPublicSeries(
-            Array.isArray(response.data?.series) ? response.data.series : [],
-          ),
-        );
-        setError("");
+      if (!response.ok) {
+        setCatalog([]);
+        setError(response.error || "Unable to load creators.");
         setLoading(false);
-      },
-    );
+        return;
+      }
+
+      setCatalog(
+        filterBlockedPublicSeries(
+          Array.isArray(response.data?.series) ? response.data.series : [],
+        ),
+      );
+      setError("");
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -427,14 +443,6 @@ export default function CreatorsHubPage({
       return matchesRole && matchesGenre && matchesQuery;
     });
   }, [activeGenre, activeRole, creators, query]);
-  const totalTitles = useMemo(
-    () =>
-      creators.reduce(
-        (sum, creator) => sum + Math.max(0, Number(creator?.titleCount || 0)),
-        0,
-      ),
-    [creators],
-  );
 
   const roleFilters = [
     { id: "all", label: "All" },
@@ -444,8 +452,8 @@ export default function CreatorsHubPage({
 
   const filterButtonClass = (active) =>
     active
-      ? `${creatorFilterChipClass} border-black bg-[#FFE500] text-black`
-      : `${creatorFilterChipClass} border-white/15 bg-black text-white hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-white/[0.03]`;
+      ? `${creatorFilterChipClass} border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-white`
+      : `${creatorFilterChipClass} border-white/10 bg-[rgba(255,255,255,0.03)] text-white/78 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.06)] hover:text-white`;
   const normalizedQuery = String(query || "").trim().toLowerCase();
   const showFeaturedCreators =
     !normalizedQuery && activeRole === "all" && activeGenre === "All";
@@ -457,48 +465,29 @@ export default function CreatorsHubPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
-
+    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/55">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
                 Creator Directory
               </p>
-              <h1 className="text-[2.35rem] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:text-[3rem]">
+              <h1 className="font-display text-[2.45rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[3rem]">
                 Creators
               </h1>
-              <p className="max-w-2xl text-sm font-semibold leading-7 text-white/70 sm:text-base">
-                Browse the people, studios, and teams behind the stories on Gush.
+              <p className="max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
+                Artists, writers, studios, and teams with shelves worth following.
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
-                  Profiles
-                </p>
-                <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
-                  {creators.length}
-                </p>
-              </div>
-              <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
-                  Titles
-                </p>
-                <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
-                  {totalTitles}
-                </p>
-              </div>
-              <div className="rounded-[22px] border-2 border-white/15 bg-[#111111] px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
-                  Genres
-                </p>
-                <p className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">
-                  {genreOptions.length || 0}
-                </p>
-              </div>
+            <div className="max-w-md rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                Why browse here
+              </p>
+              <p className="mt-2 text-sm leading-6 text-white/72">
+                Find the shelves behind your favorite stories, then follow the creators whose pacing, drama, or art style keeps hitting.
+              </p>
             </div>
           </div>
         </SurfacePanel>
@@ -512,11 +501,11 @@ export default function CreatorsHubPage({
           >
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
                   Spotlight
                 </p>
-                <h2 className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white">
-                  Top Creators
+                <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
+                  Editors' picks
                 </h2>
               </div>
             </div>
@@ -537,7 +526,7 @@ export default function CreatorsHubPage({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search creators, studios, or genres"
-                className="w-full rounded-full border-2 border-white/15 bg-black px-4 py-3 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] outline-none placeholder:text-white/35 focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/12"
+                className="w-full rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm font-medium text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] outline-none placeholder:text-white/38 focus:border-[rgba(255,79,154,0.3)] focus:ring-4 focus:ring-[rgba(255,79,154,0.12)]"
               />
             </label>
 
@@ -656,20 +645,19 @@ export default function CreatorsHubPage({
               <div>
                 <p
                   data-testid="creator-results-label"
-                  className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55"
+                  className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56"
                 >
                   {creatorResultsLabel}
                 </p>
                 <h2
                   data-testid="creator-results-heading"
-                  className="mt-2 text-[2rem] font-black uppercase leading-[0.95] tracking-[-0.05em] text-white"
+                  className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white"
                 >
                   {creatorResultsTitle}
                 </h2>
               </div>
-              <p className="text-sm font-bold uppercase tracking-[0.08em] text-white/55">
-                {filteredCreators.length}{" "}
-                {filteredCreators.length === 1 ? "match" : "matches"}
+              <p className="text-sm leading-6 text-white/56">
+                Follow the voice that feels closest to your mood.
               </p>
             </div>
 

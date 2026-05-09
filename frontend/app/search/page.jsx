@@ -3,11 +3,14 @@ import Image from "next/image";
 import { createPageMetadata } from "../../lib/seo";
 import {
   getPublicGenres,
-  isMatureTitle,
 } from "../../lib/matureContent";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 import { buildCreatorDirectory } from "../../lib/creatorDirectory";
 import { normalizeGenreList } from "../../lib/coverPresentation";
+import {
+  buildCreatorEditorialHook,
+  buildEditorialHook,
+} from "../../lib/editorialHooks";
 import {
   filterBlockedPublicCreators,
   filterBlockedPublicGenres,
@@ -216,7 +219,7 @@ function SearchInput({ q, format, status, genre }) {
     <form
       action="/search"
       method="get"
-      className="rounded-[24px] border border-white/10 bg-[#111111] p-4 sm:p-5"
+      className="rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.2)] sm:p-5"
     >
       <label
         htmlFor="catalog-search-input"
@@ -231,14 +234,14 @@ function SearchInput({ q, format, status, genre }) {
           type="search"
           defaultValue={q}
           placeholder="Search titles, creators, or genres"
-          className="min-h-[50px] w-full rounded-full border border-white/12 bg-black px-4 text-sm text-white outline-none placeholder:text-white/32 focus:border-white/25"
+          className="min-h-[52px] w-full rounded-full border border-white/12 bg-[rgba(15,13,19,0.9)] px-4 text-sm text-white outline-none placeholder:text-white/32 focus:border-[rgba(255,79,154,0.26)]"
         />
         <input type="hidden" name="format" value={format} />
         <input type="hidden" name="status" value={status} />
         <input type="hidden" name="genre" value={genre} />
         <button
           type="submit"
-          className="inline-flex min-h-[50px] items-center justify-center rounded-full bg-white px-6 text-sm font-semibold text-black transition-transform duration-150 hover:scale-[1.01]"
+          className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-6 text-sm font-semibold text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.22)] transition-transform duration-150 hover:-translate-y-0.5"
         >
           Search
         </button>
@@ -262,7 +265,7 @@ function FilterGroup({ title, options, currentValue, buildHref }) {
               href={buildHref(option.value)}
               className={`rounded-full px-3 py-2 text-sm transition-colors ${
                 active
-                  ? "bg-white text-black"
+                  ? "border border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.16)] text-white"
                   : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
               }`}
             >
@@ -290,7 +293,7 @@ function GenreFilters({ genres, currentGenre, buildHref }) {
           href={buildHref("")}
           className={`rounded-full px-3 py-2 text-sm transition-colors ${
             !currentGenre
-              ? "bg-white text-black"
+              ? "border border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.16)] text-white"
               : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
           }`}
         >
@@ -300,7 +303,7 @@ function GenreFilters({ genres, currentGenre, buildHref }) {
           const active = currentGenre === genre;
           const commonClassName = `rounded-full px-3 py-2 text-sm transition-colors ${
             active
-              ? "bg-white text-black"
+              ? "border border-[rgba(255,79,154,0.26)] bg-[rgba(255,79,154,0.16)] text-white"
               : "border border-white/12 bg-white/[0.03] text-white/72 hover:bg-white/[0.06] hover:text-white"
           }`;
           return (
@@ -319,7 +322,7 @@ function GenreFilters({ genres, currentGenre, buildHref }) {
 }
 
 function ResultSeriesCard({ series }) {
-  const description = summarizeText(series?.description || "", 108);
+  const description = summarizeText(buildEditorialHook(series, { maxLength: 108 }), 108);
   const formatStatusLine = formatTitleCardFormatStatus(
     series?.type || "",
     series?.status || "",
@@ -328,25 +331,24 @@ function ResultSeriesCard({ series }) {
   const creatorLine = formatTitleCardCreator(
     series?.creatorCredits?.[0]?.name || series?.creator?.label || series?.author || "",
   );
-  const matureBadgeVisible = isMatureTitle(series);
 
   return (
     <Link
       href={`/series/${series.id}`}
-      className="group grid gap-4 rounded-[24px] border border-white/10 bg-[#111111] p-4 transition-colors hover:border-white/18 hover:bg-[#171717] sm:grid-cols-[120px_minmax(0,1fr)]"
+      className="group grid gap-4 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[linear-gradient(180deg,rgba(30,25,38,0.94)_0%,rgba(17,13,24,0.96)_100%)] p-4 shadow-[0_20px_56px_rgba(8,6,20,0.24)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_28px_72px_rgba(8,6,20,0.3)] sm:grid-cols-[132px_minmax(0,1fr)]"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] bg-[#0b0b0b]">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-[#0f0d13]">
         {series?.coverUrl ? (
           <Image
             src={series.coverUrl}
             alt=""
             aria-hidden="true"
             fill
-            sizes="120px"
+            sizes="132px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="h-full w-full bg-[linear-gradient(180deg,#181818,#0b0b0b)]" />
+          <div className="h-full w-full bg-[linear-gradient(180deg,#251f2f,#17131d)]" />
         )}
       </div>
 
@@ -356,21 +358,12 @@ function ResultSeriesCard({ series }) {
             {series?.title || "Story"}
           </h2>
           {formatStatusLine ? (
-            <p className="text-xs uppercase tracking-[0.12em] text-white/42">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-white/44">
               {formatStatusLine}
             </p>
           ) : null}
-          {genreLine || matureBadgeVisible ? (
-            <div className="flex flex-wrap gap-1.5">
-              {matureBadgeVisible ? (
-                <span className="rounded-full border border-[#ff7aa8]/30 bg-[#ff4d8d]/18 px-2.5 py-1 text-[11px] text-[#ffd6e7]">
-                  18+
-                </span>
-              ) : null}
-              {genreLine ? (
-                <p className="text-sm leading-6 text-white/64">{genreLine}</p>
-              ) : null}
-            </div>
+          {genreLine ? (
+            <p className="text-sm leading-6 text-white/64">{genreLine}</p>
           ) : null}
           {creatorLine ? (
             <p className="text-xs text-white/48">{creatorLine}</p>
@@ -391,24 +384,24 @@ function ResultSeriesCard({ series }) {
 
 function ResultCreatorCard({ creator }) {
   const topGenres = Array.isArray(creator?.topGenres) ? creator.topGenres.slice(0, 3) : [];
-  const description = summarizeText(creator?.leadSummary || "", 108);
+  const description = summarizeText(buildCreatorEditorialHook(creator, { maxLength: 108 }), 108);
 
   return (
     <Link
       href={creator?.path || "/creators"}
-      className="group grid gap-4 rounded-[24px] border border-white/10 bg-[#111111] p-4 transition-colors hover:border-white/18 hover:bg-[#171717] sm:grid-cols-[120px_minmax(0,1fr)]"
+      className="group grid gap-4 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[linear-gradient(180deg,rgba(30,25,38,0.94)_0%,rgba(17,13,24,0.96)_100%)] p-4 shadow-[0_20px_56px_rgba(8,6,20,0.24)] transition-all duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_28px_72px_rgba(8,6,20,0.3)] sm:grid-cols-[132px_minmax(0,1fr)]"
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] bg-[#0b0b0b]">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-[22px] border border-white/10 bg-[#0f0d13]">
         {creator?.spotlightSeries?.coverUrl ? (
           <Image
             src={creator.spotlightSeries.coverUrl}
             alt={getCoverAltText(creator?.spotlightSeries?.title, creator?.spotlightSeries?.type)}
             fill
-            sizes="120px"
+            sizes="132px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="h-full w-full bg-[linear-gradient(180deg,#181818,#0b0b0b)]" />
+          <div className="h-full w-full bg-[linear-gradient(180deg,#251f2f,#17131d)]" />
         )}
       </div>
 
@@ -561,7 +554,6 @@ export default async function Page({ searchParams }) {
     hasActiveQuery || hasActiveFormat || hasActiveStatus || hasActiveGenre,
   );
   const showDefaultShelves = !hasExplicitFilters;
-  const hasActiveFilters = hasExplicitFilters;
   const resultCount = filteredSeries.length + filteredCreators.length;
   const emptyTrending = takeUniqueSeries(sortSeries(catalog), 6);
   const emptyTrendingIds = new Set(emptyTrending.map((series) => series.id));
@@ -596,24 +588,24 @@ export default async function Page({ searchParams }) {
     buildQueryPath({ q, format, status, genre: nextGenre });
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
       <main className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
-        <div className="space-y-6 rounded-[28px] border border-white/10 bg-[#0b0b0b] p-4 sm:p-6">
+        <div className="space-y-6 rounded-[32px] border border-[rgba(255,255,255,0.09)] bg-[rgba(17,13,24,0.78)] p-4 shadow-[0_28px_80px_rgba(8,6,20,0.28)] backdrop-blur-xl sm:p-6">
           <header className="space-y-3">
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/45">
               Search
             </p>
             <h1 className="text-[2rem] font-semibold tracking-[-0.05em] text-white sm:text-[2.5rem]">
-              Titles
+              Find your next obsession
             </h1>
             <p className="max-w-[40rem] text-sm leading-6 text-white/62">
-              Search comics, novels, and creators from one catalog page.
+              Search stories by mood, genre, format, or creator.
             </p>
           </header>
 
           <SearchInput q={q} format={format} status={status} genre={genre} />
 
-          <div className="space-y-5 rounded-[24px] border border-white/10 bg-[#111111] p-4 sm:p-5">
+          <div className="space-y-5 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_44px_rgba(8,6,20,0.2)] sm:p-5">
             <FilterGroup
               title="Format"
               options={FORMAT_OPTIONS}
@@ -633,19 +625,11 @@ export default async function Page({ searchParams }) {
             />
           </div>
 
-          <p className="text-sm text-white/58">
-            {hasActiveFilters
-              ? normalizedQuery
-                ? `${resultCount} result${resultCount === 1 ? "" : "s"} for "${q}".`
-                : `${resultCount} result${resultCount === 1 ? " matches" : "s match"} your filters.`
-              : `${catalog.length} titles and ${creators.length} creators in the catalog.`}
-          </p>
-
           {showDefaultShelves ? (
             <div className="space-y-10">
               <div data-testid="search-default-trending">
                 <ShelfSection
-                  title="Trending titles"
+                  title="Hot this week"
                   ctaHref="/rankings"
                   ctaLabel="See all"
                   items={emptyTrending}
@@ -653,7 +637,7 @@ export default async function Page({ searchParams }) {
               </div>
               <div data-testid="search-default-updates">
                 <ShelfSection
-                  title="New updates"
+                  title="Fresh drops"
                   ctaHref="/search?status=ongoing"
                   ctaLabel="Browse all"
                   items={emptyUpdates}
@@ -661,7 +645,7 @@ export default async function Page({ searchParams }) {
               </div>
               <div data-testid="search-default-completed">
                 <ShelfSection
-                  title="Completed reads"
+                  title="Binge this weekend"
                   ctaHref="/search?status=completed"
                   ctaLabel="More finished series"
                   items={emptyCompleted}
@@ -669,7 +653,7 @@ export default async function Page({ searchParams }) {
               </div>
             </div>
           ) : resultCount === 0 ? (
-            <section className="space-y-6 rounded-[24px] border border-white/10 bg-[#111111] p-5 sm:p-6">
+            <section className="space-y-6 rounded-[28px] border border-[rgba(255,255,255,0.09)] bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_18px_44px_rgba(8,6,20,0.2)] sm:p-6">
               <div className="space-y-2">
                 <h2 className="text-[1.35rem] font-semibold tracking-[-0.03em] text-white">
                   No exact match

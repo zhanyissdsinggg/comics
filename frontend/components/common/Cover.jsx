@@ -114,7 +114,7 @@ function CoverFallback({
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
-            <span className="inline-flex whitespace-nowrap rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <span className="inline-flex whitespace-nowrap rounded-full border border-white/14 bg-[rgba(15,13,19,0.76)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl">
               {minimalChipLabel}
             </span>
           ) : null}
@@ -122,18 +122,18 @@ function CoverFallback({
       ) : (
         <div className="absolute left-3 right-4 top-3 flex flex-wrap items-start gap-2">
           {artDirection.badgeLabel ? (
-            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border-2 border-black bg-[#FFE500] py-1 pl-2.5 pr-3 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <span className="order-1 ml-auto inline-flex shrink-0 whitespace-nowrap rounded-full border border-white/14 bg-[rgba(15,13,19,0.76)] py-1 pl-2.5 pr-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl">
               {artDirection.badgeLabel}
             </span>
           ) : null}
           <div className="order-2 flex w-full flex-wrap gap-2">
             {shouldShowTypeLabel ? (
-              <span className="rounded-full border-2 border-black bg-[#00E5FF] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <span className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
                 {artDirection.typeLabel}
               </span>
             ) : null}
             {artDirection.primaryGenre ? (
-              <span className="rounded-full border-2 border-black bg-[#FF007A] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <span className="rounded-full border border-[rgba(255,79,154,0.2)] bg-[rgba(255,79,154,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
                 {artDirection.primaryGenre}
               </span>
             ) : null}

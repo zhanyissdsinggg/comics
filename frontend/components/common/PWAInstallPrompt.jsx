@@ -119,18 +119,19 @@ const PWAInstallPrompt = React.memo(() => {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 px-4">
-      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden rounded-[30px] border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <div className="pointer-events-auto mx-auto max-w-4xl overflow-hidden rounded-[30px] border border-white/12 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(16,13,24,0.98)_100%)] shadow-[0_24px_60px_rgba(8,6,20,0.34)] backdrop-blur-xl">
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
-          <div className="flex items-start gap-3">
-            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.14),transparent_24%),radial-gradient(circle_at_top_right,rgba(103,232,249,0.1),transparent_20%)]" />
+          <div className="relative flex items-start gap-3">
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-[rgba(103,232,249,0.18)] bg-[rgba(103,232,249,0.12)] text-[var(--gush-cyan)] shadow-[0_14px_30px_rgba(8,6,20,0.2)]">
               {isIOS ? <Smartphone size={20} /> : <Download size={20} />}
             </div>
-            <div className="relative">
-              <h3 className="font-display text-sm font-semibold tracking-[0.01em] text-white sm:text-base">
+            <div>
+              <h3 className="font-display text-sm font-semibold tracking-[-0.02em] text-white sm:text-base">
                 Install Gush
               </h3>
               {isIOS ? (
-                <p className="mt-1 text-xs leading-6 text-white/70 sm:text-sm">
+                <p className="mt-1 text-xs leading-6 text-white/66 sm:text-sm">
                   On iPhone, open{" "}
                   <span className="font-semibold text-white">Share</span>,
                   then choose{" "}
@@ -140,8 +141,8 @@ const PWAInstallPrompt = React.memo(() => {
                   .
                 </p>
               ) : (
-                <p className="mt-1 text-xs leading-6 text-white/70 sm:text-sm">
-                  Add Gush for faster launch and cleaner reading.
+                <p className="mt-1 text-xs leading-6 text-white/66 sm:text-sm">
+                  Add Gush for faster launch and a cleaner reading flow.
                 </p>
               )}
             </div>
@@ -152,7 +153,7 @@ const PWAInstallPrompt = React.memo(() => {
               <button
                 type="button"
                 onClick={handleInstall}
-                className="min-h-[44px] rounded-full border-2 border-black bg-[#00E5FF] px-4 py-2 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5"
+                className="min-h-[44px] rounded-full border border-[rgba(255,79,154,0.35)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-[#1a0e16] shadow-[0_16px_34px_rgba(255,79,154,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(255,79,154,0.3)]"
               >
                 Install
               </button>
@@ -160,14 +161,14 @@ const PWAInstallPrompt = React.memo(() => {
             <button
               type="button"
               onClick={handleDismiss}
-              className="min-h-[44px] rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30"
+              className="min-h-[44px] rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-semibold tracking-[0.01em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
             >
               Not now
             </button>
             <button
               type="button"
               onClick={handleDismiss}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:text-white"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/66 shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
               aria-label="Close"
             >
               <X size={16} />

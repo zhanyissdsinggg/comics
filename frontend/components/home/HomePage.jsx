@@ -5,7 +5,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Flame, Plus, Sparkles } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import PortraitCard from "./PortraitCard";
 import { apiGet } from "../../lib/apiClient";
@@ -13,6 +13,7 @@ import { trackEvent } from "../../lib/trackEvent";
 import { buildHomeHeroItems, getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
+import { buildEditorialCardHook, buildEditorialHook } from "../../lib/editorialHooks";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
@@ -62,20 +63,10 @@ function sanitizeHomepageSeriesList(seriesList) {
 }
 
 function buildHeroSummary(series) {
-  const raw =
-    series?.shortDescription ||
-    series?.summary ||
-    series?.synopsis ||
-    series?.description ||
-    "";
-  const normalized = String(raw).replace(/\s+/g, " ").trim();
-
-  if (!normalized) {
-    return "One standout story for right now.";
-  }
-
-  const sentence = normalized.match(/[^.!?]+[.!?]?/u)?.[0]?.trim() || normalized;
-  return sentence.length > 108 ? `${sentence.slice(0, 105).trimEnd()}...` : sentence;
+  return buildEditorialHook(series, {
+    maxLength: 118,
+    includeTitle: false,
+  });
 }
 
 function getPrimaryGenres(genres, limit = 3) {
@@ -132,11 +123,7 @@ function buildSeriesSignal(series, section) {
 }
 
 function buildShortHook(series) {
-  const summary = buildHeroSummary(series);
-  if (!summary) {
-    return "One more story worth opening tonight.";
-  }
-  return summary.length > 76 ? `${summary.slice(0, 73).trimEnd()}...` : summary;
+  return buildEditorialCardHook(series, { maxLength: 78 });
 }
 
 function buildEpisodeSignal(series) {
@@ -469,7 +456,7 @@ function HomeSection({
                   tone={series.coverTone}
                   href={`/series/${encodeURIComponent(series.id)}`}
                   density="compact"
-                  actionLabel={section === "completed" ? "Binge now" : "Read now"}
+                  actionLabel="View title"
                 />
                 <div className="mt-2 space-y-1 px-1">
                   {formatStatusLine ? (
@@ -706,10 +693,6 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
   }, [canonicalHomeView.featuredSeries, featuredReadHref]);
 
   const { featuredSeries, trendingItems, newUpdateItems, completedItems } = canonicalHomeView;
-  const editorialSnapshot = useMemo(
-    () => getHomeEditorialSnapshot(seriesList, { homepageSlots }),
-    [homepageSlots, seriesList],
-  );
 
   const handleVibeSelect = (vibe) => {
     const normalized = String(vibe || "").trim().toLowerCase();
@@ -760,46 +743,10 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             />
           )}
 
-          <section className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-ink-faint)]">
-                Live now
-              </p>
-              <p className="mt-2 font-display text-[1.7rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
-                {editorialSnapshot.seriesCount.toLocaleString()}
-              </p>
-              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
-                Comics, novels, and interactive stories in one scroll.
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-ink-faint)]">
-                Fresh drops
-              </p>
-              <p className="mt-2 font-display text-[1.7rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
-                {editorialSnapshot.newCount.toLocaleString()}
-              </p>
-              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
-                New chapters landing fast this week.
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-white/8 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[var(--gush-shadow-soft)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--gush-ink-faint)]">
-                Story moods
-              </p>
-              <p className="mt-2 font-display text-[1.7rem] font-semibold tracking-[-0.04em] text-[var(--gush-ink-strong)]">
-                {editorialSnapshot.genreCount.toLocaleString()}
-              </p>
-              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
-                Soft romance, dark mystery, power fantasy, and more.
-              </p>
-            </div>
-          </section>
-
           <VibeChips items={VIBE_OPTIONS} onSelect={handleVibeSelect} />
 
           <HomeSection
-            title="Hot right now"
+            title="Hot this week"
             description="Cover-first picks readers keep opening first."
             ctaLabel="See rankings"
             ctaHref="/rankings"

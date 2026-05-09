@@ -5,13 +5,12 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-function EventCard({ event, priority = "secondary", appearance = "default" }) {
+function EventCard({ event, priority = "secondary" }) {
   return (
     <div
       className={cn(
-        "h-full rounded-[28px] border-2 py-0 transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
-        event.accentClass ||
-          "border-2 border-black bg-[#080808] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-[#101010]",
+        "h-full rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(31,25,40,0.96)_0%,rgba(18,14,26,0.98)_100%)] text-white shadow-[0_20px_50px_rgba(8,6,20,0.28)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_26px_58px_rgba(8,6,20,0.34)]",
+        event.accentClass,
       )}
     >
       <div className="flex h-full flex-col p-5">
@@ -19,17 +18,13 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           <div className="max-w-3xl">
             <Badge
               variant="outline"
-              className={cn(
-                "rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-current",
-                "border-2 border-black bg-[#FFE500] text-black",
-              )}
+              className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70"
             >
               {event.eyebrow}
             </Badge>
             <h3
               className={cn(
-                "mt-4 font-display font-black uppercase tracking-[-0.05em]",
-                "text-white",
+                "mt-4 font-display font-semibold tracking-[-0.05em] text-white",
                 priority === "lead"
                   ? "text-2xl leading-tight sm:text-[2rem]"
                   : "text-xl leading-tight",
@@ -37,41 +32,26 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
             >
               {event.title}
             </h3>
-            {priority === "lead" ? (
-              <p
-                className={cn(
-                  "mt-3 max-w-3xl text-sm leading-6",
-                  "text-neutral-200/90",
-                )}
-              >
+            {event.description ? (
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-white/68">
                 {event.description}
               </p>
             ) : null}
           </div>
 
           {event.signalValue ? (
-            <div
-              className={cn(
-                "min-w-[120px] rounded-[18px] border px-3 py-2.5 text-left shadow-[0_12px_28px_rgba(15,23,42,0.08)]",
-                "border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
-              )}
-            >
-              <p
-                className={cn(
-                  "text-[10px] font-semibold uppercase tracking-[0.22em]",
-                  "text-black/70",
-                )}
-              >
+            <div className="min-w-[120px] rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.04)] px-3 py-2.5 text-left shadow-[0_14px_34px_rgba(8,6,20,0.18)]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/48">
                 {event.signalLabel || "Signal"}
               </p>
-              <p
-                className={cn(
-                  "mt-1.5 font-display text-xl font-semibold tracking-tight",
-                  "text-black",
-                )}
-              >
+              <p className="mt-1.5 font-display text-xl font-semibold tracking-tight text-white">
                 {event.signalValue}
               </p>
+              {event.signalHint ? (
+                <p className="mt-1 text-[11px] leading-5 text-white/48">
+                  {event.signalHint}
+                </p>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -80,10 +60,7 @@ function EventCard({ event, priority = "secondary", appearance = "default" }) {
           type="button"
           variant="ghost"
           onClick={event.onClick}
-          className={cn(
-            "mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold uppercase tracking-[0.12em] hover:bg-transparent",
-            "text-white/80 hover:text-[#FFE500]",
-          )}
+          className="mt-auto h-10 justify-start gap-2 px-0 text-sm font-semibold tracking-[0.02em] text-white/78 hover:bg-transparent hover:text-[var(--gush-accent)]"
         >
           {event.ctaLabel}
           <ArrowUpRight className="size-4" />
@@ -99,7 +76,6 @@ export default function StorefrontEventHub({
   description,
   events = [],
   className = "",
-  appearance = "default",
 }) {
   if (!Array.isArray(events) || events.length === 0) {
     return null;
@@ -108,39 +84,27 @@ export default function StorefrontEventHub({
   const [leadEvent, ...secondaryEvents] = events;
   return (
     <section className={className}>
-      <div
-        className={cn(
-          "relative overflow-hidden rounded-[32px] border-2 py-0",
-          "border-2 border-black bg-[#050505] text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]",
-        )}
-      >
-        <div
-          className={cn(
-            "absolute inset-0",
-            "bg-[radial-gradient(circle_at_top_left,rgba(255,229,0,0.18),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(0,229,255,0.12),transparent_22%)]",
-          )}
-        />
+      <div className="relative overflow-hidden rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(25,21,33,0.98)_0%,rgba(15,13,19,0.99)_100%)] text-white shadow-[0_28px_72px_rgba(8,6,20,0.34)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.14),transparent_28%),radial-gradient(circle_at_88%_18%,rgba(103,232,249,0.1),transparent_22%)]" />
         <div className="relative p-5 pb-0 sm:p-6 sm:pb-0">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--gush-accent)]/85">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/56">
               {eyebrow}
             </p>
-            <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white sm:text-3xl">
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.05em] text-white sm:text-3xl">
               {title}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-neutral-300">
-              {description}
-            </p>
+            {description ? (
+              <p className="mt-2 text-sm leading-6 text-white/66">
+                {description}
+              </p>
+            ) : null}
           </div>
         </div>
 
         <div className="relative p-5 pt-5 sm:p-6 sm:pt-5">
           <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-            <EventCard
-              event={leadEvent}
-              priority="lead"
-              appearance={appearance}
-            />
+            <EventCard event={leadEvent} priority="lead" />
             {secondaryEvents.length > 0 ? (
               <div
                 className={cn(
@@ -151,14 +115,10 @@ export default function StorefrontEventHub({
                 )}
               >
                 {secondaryEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    appearance={appearance}
-                  />
+                  <EventCard key={event.id} event={event} />
                 ))}
               </div>
-              ) : null}
+            ) : null}
           </div>
         </div>
       </div>

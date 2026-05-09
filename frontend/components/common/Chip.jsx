@@ -20,14 +20,14 @@ export default function Chip({
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+          "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-medium uppercase tracking-[0.16em] shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
           active
             ? isLight
-              ? "border-black bg-[#FFE500] text-black"
-              : "border-emerald-400/30 bg-emerald-400/12 text-emerald-100"
+              ? "border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900"
+              : "border-[rgba(255,79,154,0.28)] bg-[rgba(255,79,154,0.16)] text-white"
             : isLight
-              ? "border-black bg-black text-white"
-              : "border-white/20 bg-black text-neutral-200",
+              ? "border-[rgba(29,29,31,0.12)] bg-white text-slate-700"
+              : "border-white/10 bg-[rgba(255,255,255,0.04)] text-white/74",
           className,
         )}
       >
@@ -41,14 +41,14 @@ export default function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center rounded-full border-2 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.14em] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+        "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-medium uppercase tracking-[0.16em] shadow-[0_10px_24px_rgba(8,6,20,0.18)] transition-all duration-150 hover:-translate-y-0.5 active:-translate-y-0.5",
         active
           ? isLight
-            ? "border-black bg-[#FFE500] text-black"
-            : "border-[#FFE500] bg-black text-white"
+            ? "border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900"
+            : "border-[rgba(255,79,154,0.28)] bg-[rgba(255,79,154,0.16)] text-white"
           : isLight
-            ? "border-black bg-black text-white hover:bg-[#00E5FF] hover:text-black"
-            : "border-white/20 bg-black text-white hover:border-[#00E5FF] hover:bg-[#111111]",
+            ? "border-[rgba(29,29,31,0.12)] bg-white text-slate-700 hover:border-[rgba(29,29,31,0.18)] hover:bg-[rgba(29,29,31,0.04)]"
+            : "border-white/10 bg-[rgba(255,255,255,0.04)] text-white/78 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)] hover:text-white",
         className,
       )}
     >

@@ -12,7 +12,6 @@ import {
   getToastLabel,
   normalizeToastMessage,
 } from "../../lib/toastPresentation";
-import { storefrontPrimaryButtonClass } from "./StorefrontPagePrimitives";
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
@@ -45,30 +44,30 @@ function ToastItem({ toast, onClose }) {
   const styles = {
     success: {
       panel:
-        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "border border-white/12 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(16,13,24,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.34)]",
       iconWrap:
-        "border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+        "border border-emerald-300/18 bg-emerald-300/12 text-emerald-100",
       icon: <CheckCircle2 size={18} />,
     },
     error: {
       panel:
-        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "border border-white/12 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(16,13,24,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.34)]",
       iconWrap:
-        "border-2 border-black bg-[#FF007A] text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+        "border border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[var(--gush-danger)]",
       icon: <AlertCircle size={18} />,
     },
     warning: {
       panel:
-        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "border border-white/12 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(16,13,24,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.34)]",
       iconWrap:
-        "border-2 border-black bg-[#FFE500] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+        "border border-[rgba(244,201,93,0.22)] bg-[rgba(244,201,93,0.14)] text-[var(--gush-gold)]",
       icon: <TriangleAlert size={18} />,
     },
     info: {
       panel:
-        "border-2 border-black bg-[#0b0b0b] text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+        "border border-white/12 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(16,13,24,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.34)]",
       iconWrap:
-        "border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+        "border border-[rgba(103,232,249,0.22)] bg-[rgba(103,232,249,0.12)] text-[var(--gush-cyan)]",
       icon: <Info size={18} />,
     },
   };
@@ -79,25 +78,25 @@ function ToastItem({ toast, onClose }) {
     <div
       role="status"
       aria-live={type === "error" ? "assertive" : "polite"}
-      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 rounded-[22px] border px-4 py-3.5 duration-300`}
+      className={`${style.panel} animate-in slide-in-from-right-3 fade-in-0 flex items-start gap-3 rounded-[24px] px-4 py-3.5 duration-300 backdrop-blur-xl`}
     >
       <div
-        className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl border ${style.iconWrap}`}
+        className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl ${style.iconWrap}`}
       >
         {style.icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/70">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/48">
           {resolvedLabel}
         </p>
-        <p className="mt-1 text-sm font-bold leading-6 text-white">
+        <p className="mt-1 text-sm leading-6 text-white/88">
           {resolvedMessage}
         </p>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-px"
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/62 shadow-[0_12px_26px_rgba(8,6,20,0.18)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] hover:text-white active:translate-y-px"
         aria-label={isAdminUi ? "关闭" : "Close"}
       >
         <X size={16} />

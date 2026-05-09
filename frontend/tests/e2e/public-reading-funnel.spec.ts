@@ -823,7 +823,7 @@ const CANONICAL_ROUTE_SPECS = [
   { path: "/comics", title: /Comics/i, heading: /^Comics$/i },
   { path: "/novels", title: /Novels/i, heading: /^Novels$/i },
   { path: "/creators", title: /Creators/i, heading: /^Creators$/i },
-  { path: "/search", title: /Search Comics & Novels/i, heading: /^Titles$/i },
+  { path: "/search", title: /Search Comics & Novels|Search:|Find your next obsession/i, heading: /^Find your next obsession$/i },
   { path: "/rankings", title: /Trending Stories/i, heading: /Trending/i },
   { path: "/series/series-001", title: /The Last Kingdom|Story/i, heading: /The Last Kingdom/i },
   { path: "/series/series-011", title: /Solar Wind|Story/i, heading: /Solar Wind/i },
@@ -1398,7 +1398,7 @@ test.describe("Public reading funnel", () => {
       page.waitForURL(/\/search(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
       mobileSearchLink.click({ force: true }),
     ]);
-    await expect(page.getByRole("heading", { name: "Titles" }).first()).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Find your next obsession" }).first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
@@ -2070,7 +2070,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Crimson Tide");
     await expect(page.locator("main")).toContainText("Comic / Ongoing");
     await expect(page.locator("main")).toContainText("By Rook Hollow Studio");
-    await expect(page.locator("main")).toContainText("Open series");
+    await expect(page.locator("main")).toContainText("View title");
 
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });
@@ -2201,9 +2201,9 @@ test.describe("Public reading funnel", () => {
     const updatesShelf = page.getByTestId("search-default-updates");
     const completedShelf = page.getByTestId("search-default-completed");
 
-    await expect(trendingShelf).toContainText("Trending titles");
-    await expect(updatesShelf).toContainText("New updates");
-    await expect(completedShelf).toContainText("Completed reads");
+    await expect(trendingShelf).toContainText("Hot this week");
+    await expect(updatesShelf).toContainText("Fresh drops");
+    await expect(completedShelf).toContainText("Binge this weekend");
 
     const trendingTitles = await trendingShelf
       .getByRole("heading", { level: 2 })
@@ -2214,10 +2214,10 @@ test.describe("Public reading funnel", () => {
 
     const normalizedTrendingTitles = trendingTitles
       .map((item) => item.trim())
-      .filter((item) => item && item !== "Trending titles");
+      .filter((item) => item && item !== "Hot this week");
     const normalizedUpdateTitles = updateTitles
       .map((item) => item.trim())
-      .filter((item) => item && item !== "New updates");
+      .filter((item) => item && item !== "Fresh drops");
 
     expect(normalizedUpdateTitles.length).toBeLessThanOrEqual(4);
     const repeatedTitles = normalizedUpdateTitles.filter((title) =>

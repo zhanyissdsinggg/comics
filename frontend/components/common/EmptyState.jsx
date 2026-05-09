@@ -72,14 +72,14 @@ export const EmptyState = memo(function EmptyState({
             label: secondaryAction.label || "",
           }
         : null;
-  const accentClass =
-    icon === "alert"
-      ? isLight
-        ? "border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-600"
-        : "border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-      : isLight
-        ? "border border-black/10 bg-[#f6f7f9] text-black"
-        : "border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
+
+  const accentClass = isLight
+    ? icon === "alert"
+      ? "border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] text-rose-600 shadow-[0_12px_28px_rgba(244,63,94,0.08)]"
+      : "border border-black/10 bg-[#f6f7f9] text-black shadow-[0_12px_28px_rgba(15,23,42,0.08)]"
+    : icon === "alert"
+      ? "border border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[var(--gush-danger)] shadow-[0_14px_30px_rgba(255,79,154,0.16)]"
+      : "border border-[rgba(103,232,249,0.2)] bg-[rgba(103,232,249,0.12)] text-[var(--gush-cyan)] shadow-[0_14px_30px_rgba(8,6,20,0.22)]";
 
   return (
     <div
@@ -87,7 +87,7 @@ export const EmptyState = memo(function EmptyState({
         "relative overflow-hidden rounded-[30px] px-4 py-10 text-center",
         isLight
           ? "border border-black/10 bg-[linear-gradient(180deg,#ffffff_0%,#fafbfc_100%)] shadow-[0_20px_46px_rgba(15,23,42,0.08)]"
-          : "border-2 border-black bg-[#0b0b0b] text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]",
+          : "border border-white/12 bg-[linear-gradient(180deg,rgba(29,24,37,0.98)_0%,rgba(16,13,24,0.98)_100%)] text-white shadow-[0_24px_58px_rgba(8,6,20,0.32)]",
         className,
       )}
     >
@@ -95,13 +95,13 @@ export const EmptyState = memo(function EmptyState({
         className={`pointer-events-none absolute inset-0 ${
           isLight
             ? "bg-transparent"
-            : "bg-[radial-gradient(circle_at_top_left,rgba(255,229,0,0.16),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(0,229,255,0.12),transparent_24%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.12),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(103,232,249,0.1),transparent_24%)]"
         }`}
       />
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div
           className={cn(
-            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-[0_12px_28px_rgba(15,23,42,0.08)]",
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-[20px]",
             accentClass,
           )}
         >
@@ -109,7 +109,7 @@ export const EmptyState = memo(function EmptyState({
         </div>
 
         <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isLight ? "text-black/55" : "text-neutral-500"}`}
+          className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isLight ? "text-black/55" : "text-white/48"}`}
         >
           {eyebrow}
         </p>
@@ -122,7 +122,7 @@ export const EmptyState = memo(function EmptyState({
 
         {description ? (
           <p
-            className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-black/68" : "text-neutral-400"}`}
+            className={`mt-3 max-w-md text-sm leading-6 ${isLight ? "text-black/68" : "text-white/66"}`}
           >
             {description}
           </p>
@@ -134,13 +134,7 @@ export const EmptyState = memo(function EmptyState({
               resolvedAction.href ? (
                 <Link
                   href={resolvedAction.href}
-                  className={`${
-                    isLight
-                      ? icon === "alert"
-                        ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
-                        : `${storefrontPrimaryButtonClass} gap-2`
-                      : `${storefrontPrimaryButtonClass} gap-2`
-                  }`}
+                  className={`${storefrontPrimaryButtonClass} gap-2`}
                 >
                   <span>{resolvedAction.label}</span>
                   <ArrowRight size={16} />
@@ -149,13 +143,7 @@ export const EmptyState = memo(function EmptyState({
                 <button
                   type="button"
                   onClick={resolvedAction.onClick}
-                  className={`${
-                    isLight
-                      ? icon === "alert"
-                        ? "inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-[linear-gradient(180deg,#fff6f8_0%,#fff1f3_100%)] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[linear-gradient(180deg,#fff0f4_0%,#ffe7ee_100%)] hover:shadow-[0_12px_24px_rgba(244,63,94,0.1)] active:translate-y-px"
-                        : `${storefrontPrimaryButtonClass} gap-2`
-                      : `${storefrontPrimaryButtonClass} gap-2`
-                  }`}
+                  className={`${storefrontPrimaryButtonClass} gap-2`}
                 >
                   <span>{resolvedAction.label}</span>
                   <ArrowRight size={16} />
@@ -170,7 +158,7 @@ export const EmptyState = memo(function EmptyState({
                   className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
                     isLight
                       ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
-                      : "border-white/18 bg-transparent text-white/88 hover:border-white/35 hover:bg-white/5"
+                      : "border-white/18 bg-[rgba(255,255,255,0.04)] text-white/88 hover:border-white/35 hover:bg-white/5"
                   }`}
                 >
                   <span>{resolvedSecondaryAction.label}</span>
@@ -182,7 +170,7 @@ export const EmptyState = memo(function EmptyState({
                   className={`inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] active:translate-y-px ${
                     isLight
                       ? "border-black/15 bg-white text-black hover:border-black/25 hover:bg-black/[0.03]"
-                      : "border-white/18 bg-transparent text-white/88 hover:border-white/35 hover:bg-white/5"
+                      : "border-white/18 bg-[rgba(255,255,255,0.04)] text-white/88 hover:border-white/35 hover:bg-white/5"
                   }`}
                 >
                   <span>{resolvedSecondaryAction.label}</span>
@@ -201,9 +189,9 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
     <EmptyState
       icon="book"
       title="Library is empty"
-      description=""
+      description="Save a few titles and they'll wait here when you're ready."
       action={onBrowse}
-      actionText="Top Picks"
+      actionText="Add to Library"
       eyebrow="Library"
     />
   );
@@ -214,7 +202,11 @@ export const EmptySearch = memo(function EmptySearch({ query }) {
     <EmptyState
       icon="search"
       title="No results"
-      description={query ? `"${query}" didn't match anything.` : ""}
+      description={
+        query
+          ? `Nothing matched "${query}" yet. Try a mood, genre, or creator instead.`
+          : ""
+      }
       eyebrow="Search"
     />
   );
@@ -224,10 +216,10 @@ export const EmptyFavorites = memo(function EmptyFavorites({ onBrowse }) {
   return (
     <EmptyState
       icon="heart"
-      title="No favorites"
-      description=""
+      title="No favorites yet"
+      description="When a title sticks with you, save it here for later."
       action={onBrowse}
-      actionText="Top Picks"
+      actionText="View title"
       eyebrow="Favorites"
     />
   );
@@ -237,10 +229,10 @@ export const EmptyOrders = memo(function EmptyOrders({ onShop }) {
   return (
     <EmptyState
       icon="cart"
-      title="No orders"
-      description=""
+      title="No orders yet"
+      description="Top-ups, passes, and unlocks will show up here once you make a purchase."
       action={onShop}
-      actionText="Store"
+      actionText="View title"
       eyebrow="Orders"
     />
   );
@@ -251,7 +243,7 @@ export const EmptyNotifications = memo(function EmptyNotifications() {
     <EmptyState
       icon="bell"
       title="No notifications"
-      description=""
+      description="New updates, replies, and account alerts will land here."
       eyebrow="Notifications"
     />
   );
@@ -261,10 +253,10 @@ export const EmptyHistory = memo(function EmptyHistory({ onBrowse }) {
   return (
     <EmptyState
       icon="file"
-      title="No history"
-      description=""
+      title="No reading history yet"
+      description="Your latest chapters will show up here as soon as you start reading."
       action={onBrowse}
-      actionText="Start Reading"
+      actionText="Start reading"
       eyebrow="History"
     />
   );

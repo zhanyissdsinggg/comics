@@ -17,8 +17,9 @@ export default function EditorialHero({
   const hasStats = Array.isArray(stats) && stats.length > 0;
   const resolvedAppearance = appearance === "default" ? "dark" : appearance;
   const isLight = resolvedAppearance === "light";
-  const statClass =
-    "border-2 border-black bg-[#111111] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
+  const statClass = isLight
+    ? "border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.94)] shadow-[0_14px_34px_rgba(58,44,86,0.1)]"
+    : "border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_14px_34px_rgba(8,6,20,0.2)]";
 
   return (
     <SurfacePanel
@@ -43,7 +44,7 @@ export default function EditorialHero({
           <h1
               className={cn(
                 "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
-                "text-white font-black uppercase tracking-[-0.05em]",
+                isLight ? "text-slate-950" : "text-white",
               )}
             >
               {title}

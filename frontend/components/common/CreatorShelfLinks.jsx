@@ -20,6 +20,14 @@ function getSeriesId(item) {
   return "";
 }
 
+function getSeriesTitle(item) {
+  if (typeof item?.title === "string" && item.title.trim()) {
+    return item.title.trim();
+  }
+
+  return "";
+}
+
 function collectCreators(items, maxCreators) {
   const creatorMap = new Map();
 
@@ -33,11 +41,13 @@ function collectCreators(items, maxCreators) {
       slug: creatorIdentity.slug,
       href: creatorIdentity.href,
       name: getCreatorDisplayName(creatorIdentity.displayName),
-      titles: 0,
+      spotlightTitle: getSeriesTitle(item),
       sourceSeriesId: getSeriesId(item),
     };
 
-    current.titles += 1;
+    if (!current.spotlightTitle) {
+      current.spotlightTitle = getSeriesTitle(item);
+    }
     if (!current.sourceSeriesId) {
       current.sourceSeriesId = getSeriesId(item);
     }
@@ -47,18 +57,13 @@ function collectCreators(items, maxCreators) {
 
   return Array.from(creatorMap.values())
     .sort((left, right) => {
-      if (right.titles !== left.titles) {
-        return right.titles - left.titles;
+      if (Boolean(right.spotlightTitle) !== Boolean(left.spotlightTitle)) {
+        return Number(Boolean(right.spotlightTitle)) - Number(Boolean(left.spotlightTitle));
       }
 
       return left.name.localeCompare(right.name);
     })
     .slice(0, Math.max(1, Number(maxCreators) || 6));
-}
-
-function formatTitleCount(value) {
-  const count = Number(value) || 0;
-  return `${count} ${count === 1 ? "title" : "titles"}`;
 }
 
 export default function CreatorShelfLinks({
@@ -86,12 +91,8 @@ export default function CreatorShelfLinks({
   }
 
   const baseClassName = compact
-      ? isLight
-        ? "rounded-[24px] border-2 border-black bg-[#080808] px-3 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-        : "rounded-[24px] border-2 border-black bg-[#080808] px-3 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-      : isLight
-        ? "rounded-[24px] border-2 border-black bg-[#080808] px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5"
-        : "rounded-[24px] border-2 border-black bg-[#080808] px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:px-5";
+    ? "rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,20,33,0.96)_0%,rgba(14,12,20,0.96)_100%)] px-3 py-3 shadow-[0_18px_40px_rgba(8,6,20,0.22)]"
+    : "rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,20,33,0.96)_0%,rgba(14,12,20,0.96)_100%)] px-4 py-4 shadow-[0_20px_46px_rgba(8,6,20,0.24)] sm:px-5";
 
   const handleClick = (creator) => {
     const targetPath = creator.href || "/creators";
@@ -124,27 +125,27 @@ export default function CreatorShelfLinks({
           }
         >
           <p
-            className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${isLight ? "text-[#FFE500]" : "text-[var(--gush-accent)]/80"}`}
+            className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isLight ? "text-slate-600" : "text-white/56"}`}
           >
             {label}
           </p>
           {title ? (
             <h3
-              className={`font-display text-lg font-black uppercase tracking-[-0.04em] sm:text-xl ${isLight ? "text-white" : "text-white"}`}
+              className="font-display text-lg font-semibold tracking-[-0.04em] text-white sm:text-xl"
             >
               {title}
             </h3>
           ) : null}
           {description ? (
             <p
-              className={`max-w-3xl text-sm leading-6 ${isLight ? "text-white/70" : "text-neutral-400"}`}
+              className={`max-w-3xl text-sm leading-6 ${isLight ? "text-slate-600" : "text-white/66"}`}
             >
               {description}
             </p>
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-3">
           {creators.map((creator) => (
             <Link
               key={creator.slug}
@@ -153,26 +154,26 @@ export default function CreatorShelfLinks({
                 event.preventDefault();
                 handleClick(creator);
               }}
-              className={`group rounded-full px-3.5 py-2 text-left transition ${
-                isLight
-                  ? "border-2 border-white/20 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111] active:translate-y-px"
-                  : "border-2 border-white/10 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/20 hover:bg-[#111111]"
-              }`}
+              className={`
+                group min-w-[12rem] max-w-full flex-1 rounded-[20px] border border-white/10
+                bg-[rgba(255,255,255,0.03)] px-4 py-3 text-left shadow-[0_14px_32px_rgba(8,6,20,0.18)]
+                transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)]
+              `}
             >
-              <span className="flex items-center gap-2">
-                <span
-                  className={`text-sm font-semibold ${isLight ? "text-white" : "text-white"}`}
-                >
-                  {creator.name}
-                </span>
-                <span
-                  className={`text-[11px] uppercase tracking-[0.18em] transition ${isLight ? "text-white/45 group-hover:text-white/70" : "text-neutral-500 group-hover:text-neutral-400"}`}
-                >
-                  {formatTitleCount(creator.titles)}
+              <span className="flex items-center justify-between gap-3">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-white">
+                    {creator.name}
+                  </span>
+                  <span className="mt-1 block truncate text-[11px] uppercase tracking-[0.16em] text-white/45 transition group-hover:text-white/62">
+                    {creator.spotlightTitle
+                      ? `From ${creator.spotlightTitle}`
+                      : "View creator shelf"}
+                  </span>
                 </span>
                 <span
                   aria-hidden="true"
-                  className={`text-sm transition group-hover:translate-x-0.5 ${isLight ? "text-white/45 group-hover:text-[#FFE500]" : "text-neutral-500 group-hover:text-neutral-300"}`}
+                  className="text-sm text-white/38 transition group-hover:translate-x-0.5 group-hover:text-white/72"
                 >
                   &rarr;
                 </span>

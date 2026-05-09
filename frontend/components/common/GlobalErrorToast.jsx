@@ -56,27 +56,27 @@ export default function GlobalErrorToast() {
       <div
         role="alert"
         aria-live="assertive"
-        className={`pointer-events-auto flex w-full items-start rounded-[24px] border-2 border-white/15 text-white ${
+        className={`pointer-events-auto flex w-full items-start rounded-[24px] border border-white/12 text-white backdrop-blur-xl ${
           isNetworkMessage
-            ? "max-w-sm gap-2.5 bg-black px-3.5 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-            : "max-w-md gap-3 bg-black px-4 py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            ? "max-w-sm gap-2.5 bg-[linear-gradient(180deg,rgba(29,24,37,0.97)_0%,rgba(16,13,24,0.98)_100%)] px-3.5 py-3 shadow-[0_20px_48px_rgba(8,6,20,0.34)]"
+            : "max-w-md gap-3 bg-[linear-gradient(180deg,rgba(31,25,39,0.97)_0%,rgba(16,13,24,0.98)_100%)] px-4 py-3.5 shadow-[0_22px_54px_rgba(8,6,20,0.36)]"
         }`}
       >
         <div
-          className={`mt-0.5 flex flex-shrink-0 items-center justify-center rounded-2xl border-2 border-white/15 ${
-            isNetworkMessage ? "bg-[#FFE500] text-black" : "bg-[#FF007A] text-white"
-          } ${
-            isNetworkMessage ? "h-8 w-8" : "h-9 w-9"
-          }`}
+          className={`mt-0.5 flex flex-shrink-0 items-center justify-center rounded-2xl border ${
+            isNetworkMessage
+              ? "border-[rgba(244,201,93,0.22)] bg-[rgba(244,201,93,0.14)] text-[var(--gush-gold)]"
+              : "border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[var(--gush-danger)]"
+          } ${isNetworkMessage ? "h-8 w-8" : "h-9 w-9"}`}
         >
           <AlertCircle size={isNetworkMessage ? 16 : 18} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/48">
             {label}
           </p>
           <p
-            className={`mt-1 font-black text-white ${
+            className={`mt-1 text-white/88 ${
               isNetworkMessage ? "text-[13px] leading-5" : "text-sm leading-6"
             }`}
           >

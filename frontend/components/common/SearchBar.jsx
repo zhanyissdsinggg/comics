@@ -18,13 +18,13 @@ const MAX_HISTORY_ITEMS = 5;
 const HOME_DISCOVERY_LANES = [
   {
     id: "featured-series",
-    label: "Trending",
+    label: "Hot this week",
     hint: "",
     href: "/search",
   },
   {
     id: "completed-series",
-    label: "Finished",
+    label: "Binge this weekend",
     hint: "",
     href: "/search?status=Completed&sort=popular",
   },
@@ -68,16 +68,16 @@ const SearchBar = memo(function SearchBar({
   const discoveryHeading = "Browse";
   const shellClass = isFocused
     ? isDark
-      ? "border-2 border-[#FFE500] bg-black text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
-      : "border-2 border-white/20 bg-black text-white shadow-[0_0_0_4px_rgba(255,229,0,0.18)]"
+      ? "border border-[rgba(255,79,154,0.34)] bg-[rgba(255,255,255,0.06)] text-white shadow-[0_0_0_4px_rgba(255,79,154,0.14),0_16px_36px_rgba(8,6,20,0.24)]"
+      : "border border-[rgba(255,79,154,0.34)] bg-[rgba(255,255,255,0.06)] text-white shadow-[0_0_0_4px_rgba(255,79,154,0.14),0_16px_36px_rgba(8,6,20,0.24)]"
     : isDark
-      ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#FFE500] hover:bg-[#111111]"
+      ? "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.07)]"
       : isHome
-        ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-[#00E5FF] hover:bg-[#111111]"
-        : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111]";
+        ? "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.07)]"
+        : "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white shadow-[0_14px_32px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.07)]";
   const searchIconClass = isFocused
     ? isDark
-      ? "text-[#FFE500]"
+      ? "text-[var(--gush-accent)]"
       : "text-white"
     : isDark
       ? "text-white/60"
@@ -224,7 +224,7 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <div ref={containerRef} className="relative w-full">
-        <div
+      <div
           className={cn(
           "relative flex items-center gap-2 rounded-full px-4 py-2.5 transition-all duration-150 touch-manipulation",
           shellClass,
@@ -313,10 +313,10 @@ const SearchBar = memo(function SearchBar({
             className={cn(
               "hidden rounded-full px-2.5 py-1 text-[10px] font-medium md:block",
               isHome
-                ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                ? "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.18)]"
                 : isDark
-                  ? "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]",
+                  ? "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.18)]"
+                  : "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white/72 shadow-[0_10px_24px_rgba(8,6,20,0.18)]",
             )}
           >
             {shortcutLabel}
@@ -328,10 +328,10 @@ const SearchBar = memo(function SearchBar({
         <div
           id={listboxId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[22px] border-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] backdrop-blur-md",
+            "absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[24px] border shadow-[0_20px_48px_rgba(0,0,0,0.32)] backdrop-blur-md",
             isDark
-              ? "border-white/20 bg-black"
-              : "border-white/20 bg-black",
+              ? "border-white/12 bg-[rgba(18,16,27,0.96)]"
+              : "border-white/12 bg-[rgba(18,16,27,0.96)]",
           )}
         >
           <div className="p-2">
@@ -377,7 +377,7 @@ const SearchBar = memo(function SearchBar({
                     <div
                       key={`${query}-${index}`}
                       className={cn(
-                        "flex items-center gap-2 rounded-[16px] px-2 py-1 hover:bg-[#111111]",
+                        "flex items-center gap-2 rounded-[16px] px-2 py-1 hover:bg-white/[0.05]",
                       )}
                     >
                       <Button
@@ -458,7 +458,7 @@ const SearchBar = memo(function SearchBar({
                     variant="ghost"
                     onClick={() => handleLaneClick(lane)}
                     className={cn(
-                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left hover:bg-[#111111]",
+                      "h-auto w-full justify-between rounded-[16px] px-3 py-3 text-left hover:bg-white/[0.05]",
                     )}
                   >
                     <span className="min-w-0">
@@ -493,7 +493,7 @@ const SearchBar = memo(function SearchBar({
                           : "text-white/45",
                       )}
                     >
-                      Open
+                      Explore
                       <ArrowUpRight className="size-3" />
                     </span>
                   </Button>

@@ -29,9 +29,10 @@ function PortraitCard({
   density = "default",
   href = "",
   showActionLabel = true,
-  actionLabel = "Read More",
+  actionLabel = "View title",
   coverFallbackVariant = "minimal-card",
   interactionMode = "link",
+  showMatureBadge = false,
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
   const formatStatusLine = formatTitleCardFormatStatus(
@@ -62,7 +63,7 @@ function PortraitCard({
   );
   const visiblePills = [];
 
-  if (coverMeta.badgeLabel === "18+") {
+  if (showMatureBadge && coverMeta.badgeLabel === "18+") {
     visiblePills.push({
       key: `${item?.id || item?.title || "series"}-badge-${coverMeta.badgeLabel}`,
       label: coverMeta.badgeLabel,

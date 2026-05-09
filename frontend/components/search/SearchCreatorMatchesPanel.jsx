@@ -42,7 +42,7 @@ function highlight(text, query) {
   return (
     <>
       {before}
-      <mark className="rounded bg-[rgba(255,255,255,0.98)] px-1 text-slate-950">
+      <mark className="rounded border border-[rgba(255,79,154,0.22)] bg-[rgba(255,79,154,0.16)] px-1 text-white">
         {match}
       </mark>
       {after}
@@ -224,7 +224,7 @@ export default function SearchCreatorMatchesPanel({
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">
             Creators
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em] text-white">
             {creatorPanelTitle}
           </h2>
         </div>
@@ -232,9 +232,9 @@ export default function SearchCreatorMatchesPanel({
           <Link
             href={getCreatorHref(leadCreatorMatch)}
             onClick={() => handleCreatorClick(leadCreatorMatch)}
-            className="rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+            className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
           >
-            Creator
+            View creator
           </Link>
         ) : null}
       </div>
@@ -245,19 +245,19 @@ export default function SearchCreatorMatchesPanel({
         {matchedCreators.map((creator) => (
           <article
             key={creator.slug}
-            className="rounded-[30px] border-2 border-white/20 bg-black p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-4 shadow-[0_20px_50px_rgba(8,6,20,0.28)]"
           >
             <Cover
               tone={creator.spotlightSeries?.coverTone}
               coverUrl={creator.spotlightSeries?.coverUrl}
-              className="h-48 rounded-[22px] border-2 border-white/20"
+              className="h-48 rounded-[22px] border border-white/10"
             />
             <div className="mt-4 space-y-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
                   {creator.matchLabel}
                 </p>
-                <h3 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                <h3 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em] text-white">
                   {highlight(creator.name, query)}
                 </h3>
               </div>
@@ -275,12 +275,8 @@ export default function SearchCreatorMatchesPanel({
               )}
 
               <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-white/55">
-                <span>
-                  {creator.titleCount} title
-                  {creator.titleCount === 1 ? "" : "s"}
-                </span>
-                {creator.completedCount > 0 ? (
-                  <span>{creator.completedCount} completed</span>
+                {creator.matchDescription ? (
+                  <span>{creator.matchDescription}</span>
                 ) : null}
                 {creator.matchedGenres?.[0] ? (
                   <span>{creator.matchedGenres[0]}</span>
@@ -291,9 +287,9 @@ export default function SearchCreatorMatchesPanel({
                 <Link
                   href={getCreatorHref(creator)}
                   onClick={() => handleCreatorClick(creator)}
-                  className="rounded-full border-2 border-white/20 bg-black px-3.5 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]"
+                  className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3.5 py-2 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
                 >
-                  Creator
+                  View creator
                 </Link>
               </div>
             </div>

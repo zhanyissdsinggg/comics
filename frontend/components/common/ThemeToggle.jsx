@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function ThemeToggle({ variant = "default" }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const isLight = true;
+  const isLightVariant = variant === "light";
 
   useEffect(() => {
     setMounted(true);
@@ -21,9 +21,9 @@ export default function ThemeToggle({ variant = "default" }) {
         aria-hidden="true"
         className={cn(
           "h-10 w-10 animate-pulse rounded-full border",
-          isLight
-            ? "border-white/20 bg-black"
-            : "border-white/20 bg-black",
+          isLightVariant
+            ? "border-[rgba(31,24,41,0.1)] bg-white/70"
+            : "border-white/12 bg-[rgba(255,255,255,0.05)]",
         )}
       />
     );
@@ -38,10 +38,10 @@ export default function ThemeToggle({ variant = "default" }) {
       variant="outline"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "relative h-10 w-10 rounded-full border",
-        isLight
-          ? "border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] hover:text-white dark:border-white/10 dark:bg-black dark:text-neutral-200 dark:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:hover:border-white/20 dark:hover:bg-[#111111] dark:hover:text-white"
-          : "border-white/20 bg-black text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] hover:text-white",
+        "relative h-10 w-10 rounded-full border transition-all duration-200",
+        isLightVariant
+          ? "border-[rgba(31,24,41,0.1)] bg-white/88 text-[#6b6178] shadow-[0_12px_26px_rgba(58,44,86,0.1)] hover:-translate-y-0.5 hover:border-[rgba(31,24,41,0.18)] hover:bg-white hover:text-[#1c1624]"
+          : "border-white/12 bg-[rgba(255,255,255,0.05)] text-white/66 shadow-[0_14px_30px_rgba(8,6,20,0.24)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)] hover:text-white",
       )}
       aria-label={`Switch to ${isDark ? "day" : "night"} mode`}
       title={`Switch to ${isDark ? "day" : "night"} mode`}
@@ -51,13 +51,13 @@ export default function ThemeToggle({ variant = "default" }) {
         className={`absolute size-4 transition-all duration-300 ${
           isDark
             ? "rotate-90 scale-0 opacity-0"
-            : "rotate-0 scale-100 opacity-100 text-amber-500"
+            : "rotate-0 scale-100 opacity-100 text-[var(--gush-gold)]"
         }`}
       />
       <Moon
         className={`absolute size-4 transition-all duration-300 ${
           isDark
-            ? "rotate-0 scale-100 opacity-100 text-sky-500"
+            ? "rotate-0 scale-100 opacity-100 text-[var(--gush-cyan)]"
             : "-rotate-90 scale-0 opacity-0"
         }`}
       />

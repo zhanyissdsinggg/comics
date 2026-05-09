@@ -202,44 +202,39 @@ test.describe("Homepage merchandising sync", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: /Start with a story worth opening|Pick up your story/i,
+        name: /Velvet Voltage|Rocket Choir/i,
       }),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("link", { name: /Start Reading/i }),
+      page.getByRole("link", { name: /Start reading/i }),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Comics", exact: true }).first(),
+      homepageMain.getByRole("button", { name: "Heartbreak", exact: true }).first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Novels", exact: true }).first(),
+      homepageMain.getByRole("button", { name: "Magic school", exact: true }).first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(
-      page.getByRole("button", { name: "Creators", exact: true }).first(),
-    ).toBeVisible({
+    await expect(homepageMain).toContainText("TODAY'S OBSESSION", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Featured", {
+    await expect(homepageMain).toContainText("What are you in the mood for?", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("The stories getting the most attention right now.", {
+    await expect(homepageMain).toContainText("Hot this week", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Find your lane fast", {
+    await expect(homepageMain).toContainText("Fresh drops", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(homepageMain).toContainText("Creators", {
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(homepageMain).toContainText("Open creators", {
+    await expect(homepageMain).toContainText("Binge this weekend", {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(homepageMain).not.toContainText("Top Series");
@@ -319,34 +314,40 @@ test.describe("Homepage merchandising sync", () => {
     expect(response?.ok()).toBeTruthy();
 
     const startReadingLink = page.getByRole("link", {
-      name: /Start Reading/i,
+      name: /Start reading/i,
     });
-    const browseAllButton = page.getByRole("button", {
+    const addToLibraryLink = page.getByRole("link", {
+      name: /Add to Library/i,
+    });
+    const heartbreakButton = page
+      .getByRole("button", { name: "Heartbreak", exact: true })
+      .first();
+    const magicSchoolButton = page
+      .getByRole("button", { name: "Magic school", exact: true })
+      .first();
+    const enemiesButton = page
+      .getByRole("button", { name: "Enemies to lovers", exact: true })
+      .first();
+    const browseAllButton = page.getByRole("link", {
       name: /Browse all/i,
     });
-    const comicsButton = page
-      .getByRole("button", { name: "Comics", exact: true })
-      .first();
-    const novelsButton = page
-      .getByRole("button", { name: "Novels", exact: true })
-      .first();
-    const creatorsButton = page
-      .getByRole("button", { name: "Creators", exact: true })
-      .first();
 
     await expect(startReadingLink).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
+    await expect(addToLibraryLink).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(heartbreakButton).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(magicSchoolButton).toBeVisible({
+      timeout: HOME_UI_TIMEOUT_MS,
+    });
+    await expect(enemiesButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
     await expect(browseAllButton).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(comicsButton).toBeVisible({
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(novelsButton).toBeVisible({
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(creatorsButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
 
     await tabToAndExpectVisibleFocus(page, startReadingLink, {
       label: "Homepage Start Reading link",
@@ -357,31 +358,31 @@ test.describe("Homepage merchandising sync", () => {
     );
 
     await startReadingLink.press("Tab");
-    await expect(browseAllButton).toBeFocused();
+    await expect(addToLibraryLink).toBeFocused();
     await expectVisibleFocusIndicator(
-      browseAllButton,
-      "Homepage Browse all button",
+      addToLibraryLink,
+      "Homepage Add to Library link",
     );
 
-    await browseAllButton.press("Tab");
-    await expect(comicsButton).toBeFocused();
+    await addToLibraryLink.press("Tab");
+    await expect(heartbreakButton).toBeFocused();
     await expectVisibleFocusIndicator(
-      comicsButton,
-      "Homepage Comics button",
+      heartbreakButton,
+      "Homepage Heartbreak button",
     );
 
-    await comicsButton.press("Tab");
-    await expect(novelsButton).toBeFocused();
+    await heartbreakButton.press("Tab");
+    await expect(magicSchoolButton).toBeFocused();
     await expectVisibleFocusIndicator(
-      novelsButton,
-      "Homepage Novels button",
+      magicSchoolButton,
+      "Homepage Magic school button",
     );
 
-    await novelsButton.press("Tab");
-    await expect(creatorsButton).toBeFocused();
+    await magicSchoolButton.press("Tab");
+    await expect(enemiesButton).toBeFocused();
     await expectVisibleFocusIndicator(
-      creatorsButton,
-      "Homepage Creators button",
+      enemiesButton,
+      "Homepage Enemies to lovers button",
     );
 
     await expectNoRuntimeIssues("/", runtimeIssues);
