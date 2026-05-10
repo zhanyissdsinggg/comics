@@ -318,6 +318,15 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const readHref = interactive
     ? interactiveHref
     : buildReadHref(seriesId, latestEpisodeId);
+  const latestInstallmentLabel = formatInstallmentLabel(
+    series?.type || series,
+    latestEpisodeNumber,
+  );
+  const continueLabel = interactive
+    ? "Start Playing"
+    : latestEpisodeNumber > 1
+      ? `Continue ${latestInstallmentLabel}`
+      : getStartReadingLabel(series?.type || series, 1);
 
   return {
     id: seriesId,
@@ -342,6 +351,7 @@ export function buildFigmaSeriesItem(series, options = {}) {
     chapter: latestEpisodeNumber,
     episodeCount: Math.max(1, Number(series?.episodeCount || latestEpisodeNumber || 1)),
     latestEpisodeId,
+    latestInstallmentLabel,
     kind: contentKind,
     readHref,
     detailHref,
@@ -349,7 +359,7 @@ export function buildFigmaSeriesItem(series, options = {}) {
     chapterLabel: formatInstallmentLabel(series?.type || series, latestEpisodeNumber),
     readLabel:
       options.readLabel ||
-      (interactive ? "Start Playing" : getStartReadingLabel(series?.type || series, 1)),
+      continueLabel,
     createdAt: series?.createdAt || null,
     updatedAt: series?.updatedAt || null,
     raw: series,
@@ -434,7 +444,19 @@ export function filterByGenre(items = [], genre = "All") {
 export function buildChapterItems(series, episodes = []) {
   const normalizedEpisodes = Array.isArray(episodes) ? episodes : [];
   if (normalizedEpisodes.length > 0) {
-    return normalizedEpisodes.map((episode) => ({
+    return [...normalizedEpisodes]
+      .sort((left, right) => {
+        const rightNumber = Number(right?.number || 0);
+        const leftNumber = Number(left?.number || 0);
+        if (rightNumber !== leftNumber) {
+          return rightNumber - leftNumber;
+        }
+
+        const rightTime = new Date(right?.releasedAt || 0).getTime() || 0;
+        const leftTime = new Date(left?.releasedAt || 0).getTime() || 0;
+        return rightTime - leftTime;
+      })
+      .map((episode) => ({
       id: String(episode?.id || "").trim(),
       title:
         String(episode?.title || "").trim() ||

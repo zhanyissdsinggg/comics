@@ -321,6 +321,29 @@ export const loadHomepageSeoPayload = cache(async () => {
   };
 });
 
+export const loadSearchSeoPayload = cache(async (query = "") => {
+  const normalizedQuery = String(query || "").trim();
+  const params = new URLSearchParams({
+    pageSize: "48",
+    adult: "0",
+  });
+
+  if (normalizedQuery) {
+    params.set("q", normalizedQuery);
+  }
+
+  const [searchPayload, hotPayload] = await Promise.all([
+    fetchSeoApiJson(`/api/search?${params.toString()}`, "search-page"),
+    fetchSeoApiJson("/api/search/hot?adult=0&window=day", "search-hot-keywords"),
+  ]);
+
+  return {
+    results: Array.isArray(searchPayload?.results) ? searchPayload.results : [],
+    hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
+    ready: Boolean(searchPayload),
+  };
+});
+
 export const loadRankingsSeoPayload = cache(async (type = "popular", window = "all") => {
   const payload = await fetchSeoApiJson(
     `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=0`,

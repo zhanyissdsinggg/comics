@@ -11,6 +11,7 @@ const FIGMA_EXACT_ROUTES = new Set([
   "/settings",
   "/signin",
   "/store",
+  "/subscribe",
 ]);
 
 export function isFigmaRoute(pathname) {

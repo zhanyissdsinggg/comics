@@ -208,7 +208,7 @@ test.describe("Homepage merchandising sync", () => {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("link", { name: /Start reading/i }),
+      page.getByRole("link", { name: /Continue Reading|Continue Chapter|Start reading/i }),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
@@ -314,7 +314,7 @@ test.describe("Homepage merchandising sync", () => {
     expect(response?.ok()).toBeTruthy();
 
     const startReadingLink = page.getByRole("link", {
-      name: /Start reading/i,
+      name: /Continue Reading|Continue Chapter|Start reading/i,
     });
     const addToLibraryLink = page.getByRole("link", {
       name: /Add to Library/i,

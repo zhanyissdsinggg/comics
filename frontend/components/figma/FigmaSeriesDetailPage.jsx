@@ -51,9 +51,7 @@ function SeriesDetailContent({ series, episodes }) {
       : "Chapters";
   const readLabel = isInteractive
     ? "Start Playing"
-    : isNovel
-      ? "Start Reading"
-      : "Read Chapter 1";
+    : detailItem.readLabel || (isNovel ? "Start Reading" : "Continue Reading");
 
   if (!detailItem) {
     return (
@@ -119,7 +117,7 @@ function SeriesDetailContent({ series, episodes }) {
   return (
     <div className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="relative h-[400px] w-full bg-black md:h-[500px]">
+        <div className="relative h-[330px] w-full bg-black sm:h-[390px] md:h-[520px]">
           <div className="absolute inset-0">
             <img
               src={detailItem.coverUrl}
@@ -134,21 +132,21 @@ function SeriesDetailContent({ series, episodes }) {
             />
           </div>
 
-          <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-8 md:px-8">
-            <div className="flex flex-col items-end gap-8 md:flex-row md:items-start">
+          <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-6 md:px-8 md:pb-10">
+            <div className="flex w-full flex-col items-start gap-4 md:flex-row md:items-start md:gap-8">
               <img
                 src={detailItem.coverUrl}
                 alt={detailItem.title}
-                className="w-48 shrink-0 translate-y-12 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 md:w-64 md:translate-y-24"
+                className="w-36 shrink-0 self-end translate-y-7 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 md:w-64 md:self-auto md:translate-y-24"
               />
 
-              <div className="flex-1 pb-4 md:pb-0">
-                <div className="mb-3 flex gap-2">
+              <div className="w-full flex-1 rounded-[26px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-md md:border-0 md:bg-transparent md:px-0 md:py-0">
+                <div className="mb-2 flex flex-wrap gap-2 md:mb-3">
                   {detailItem.tags.map((tag) => (
                     <span
                       key={tag}
                       className={cn(
-                        "rounded-md border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] backdrop-blur-sm",
+                        "rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm md:px-3 md:text-xs",
                         palette.primarySoft,
                       )}
                     >
@@ -156,14 +154,14 @@ function SeriesDetailContent({ series, episodes }) {
                     </span>
                   ))}
                 </div>
-                <h1 className="mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-4xl font-black tracking-tight text-transparent drop-shadow-sm md:text-5xl">
+                <h1 className="mb-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2rem] font-black tracking-tight text-transparent drop-shadow-sm md:mb-2 md:text-5xl">
                   {detailItem.title}
                 </h1>
-                <p className="mb-4 text-lg font-medium text-gray-300">
+                <p className="mb-3 text-base font-medium text-gray-300 md:mb-4 md:text-lg">
                   {detailItem.author}
                 </p>
 
-                <div className="mb-6 flex flex-wrap items-center gap-6 text-sm font-bold text-gray-400">
+                <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-gray-400 md:mb-6 md:gap-6 md:text-sm">
                   <span className="flex items-center gap-1 text-yellow-500">
                     <Star className="h-4 w-4 fill-current" />
                     {detailItem.rating} Rating
@@ -178,11 +176,11 @@ function SeriesDetailContent({ series, episodes }) {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 md:gap-4">
                   <Link
                     href={detailItem.readHref}
                     className={cn(
-                      "flex items-center gap-2 rounded-xl px-8 py-3.5 font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95",
+                      "flex min-h-[48px] items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
                       palette.primaryBg,
                     )}
                   >
@@ -192,7 +190,7 @@ function SeriesDetailContent({ series, episodes }) {
                   <button
                     type="button"
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95",
+                      "flex h-11 w-11 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
                       palette.surface,
                       palette.border,
                     )}
@@ -202,7 +200,7 @@ function SeriesDetailContent({ series, episodes }) {
                   <button
                     type="button"
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95",
+                      "flex h-11 w-11 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
                       palette.surface,
                       palette.border,
                     )}
@@ -215,69 +213,103 @@ function SeriesDetailContent({ series, episodes }) {
           </div>
         </div>
 
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-12 px-4 py-12 md:flex-row md:px-8 md:py-20">
-          <div className="w-full shrink-0 pt-8 md:w-64 md:pt-0">
-            <h3 className="mb-4 font-bold text-white">Synopsis</h3>
-            <p className="text-sm leading-relaxed text-gray-400">
-              {detailItem.description}
-            </p>
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-10 md:flex-row md:gap-12 md:px-8 md:py-20">
+          <div className="w-full shrink-0 pt-2 md:w-72 md:pt-0">
+            <div className={cn("rounded-[28px] border p-5 shadow-xl md:p-6", palette.surface, palette.border)}>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                Story Brief
+              </p>
+              <h3 className="mt-3 text-lg font-black text-white md:text-xl">Synopsis</h3>
+              <p className="mt-3 text-sm leading-6 text-gray-400 md:leading-relaxed">
+                {detailItem.description}
+              </p>
+              <div className="mt-5 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Format
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    {isInteractive ? "Interactive story" : isNovel ? "Novel serial" : "Comic series"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Shelf State
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    {detailItem.status || "Ongoing"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex-1">
-            <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4">
-              <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
-                <List className={cn("h-5 w-5", palette.primaryText)} />
-                {chapterPrefix} ({chapterItems.length})
-              </h2>
-              <button
-                type="button"
-                className="text-sm font-semibold text-gray-400 transition-colors hover:text-white"
-              >
-                Sort: Newest
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {chapterItems.map((chapter, index) => (
-                <Link
-                  key={chapter.id || `${detailItem.id}-${index}`}
-                  href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
-                  className={cn(
-                    "group flex items-center justify-between rounded-xl border border-transparent p-4 transition-all hover:border-gray-700 active:scale-[0.98]",
-                    palette.surface,
-                  )}
+            <div className={cn("rounded-[30px] border p-4 shadow-xl md:p-6", palette.surface, palette.border)}>
+              <div className="mb-5 flex items-center justify-between border-b border-gray-800 pb-3 md:mb-6 md:pb-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                    Reading Queue
+                  </p>
+                  <h2 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-white md:text-xl">
+                    <List className={cn("h-5 w-5", palette.primaryText)} />
+                    {chapterPrefix} ({chapterItems.length})
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  className="text-sm font-semibold text-gray-400 transition-colors hover:text-white"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30">
-                      <img
-                        src={detailItem.coverUrl}
-                        alt={detailItem.title}
-                        className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <PlayCircle
-                          className={cn(
-                            "h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100",
-                            palette.primaryText,
-                          )}
+                  Sort: Newest
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {chapterItems.map((chapter, index) => (
+                  <Link
+                    key={chapter.id || `${detailItem.id}-${index}`}
+                    href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
+                    className={cn(
+                      "group flex items-center justify-between rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] md:p-4",
+                    )}
+                  >
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
+                        {String(index + 1).padStart(2, "0")}
+                      </div>
+                      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
+                        <img
+                          src={detailItem.coverUrl}
+                          alt={detailItem.title}
+                          className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
                         />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <PlayCircle
+                            className={cn(
+                              "h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 md:h-5 md:w-5",
+                              palette.primaryText,
+                            )}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
+                          {chapter.title}
+                        </h4>
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
+                          {chapter.date}
+                        </p>
                       </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white transition-colors group-hover:text-gray-200">
-                        {chapter.title}
-                      </h4>
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
-                        {chapter.date}
-                      </p>
+                    <div className="text-right text-xs font-semibold text-gray-400 transition-colors group-hover:text-white md:text-sm">
+                      <div>{chapter.views}</div>
+                      <div className="mt-1 hidden text-[10px] uppercase tracking-[0.18em] text-gray-500 sm:block">
+                        Reads
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-sm font-semibold text-gray-400 transition-colors group-hover:text-white">
-                    {chapter.views}
-                    <span className="hidden sm:inline"> Views</span>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <FigmaCommentsSection seriesTitle={detailItem.title} />

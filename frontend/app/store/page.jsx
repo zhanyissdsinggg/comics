@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { CouponProvider } from "../../store/useCouponStore";
 import { WalletProvider } from "../../store/useWalletStore";
 import FigmaStorePage from "../../components/figma/FigmaStorePage";
@@ -8,10 +9,25 @@ import {
 } from "../../lib/storefrontSeo";
 import { siteConfig } from "../../lib/siteConfig";
 
-export async function generateMetadata() {
-  const prelaunchStore =
+const loadStorePagePayload = cache(async () => {
+  const [topupPayload, subscriptionPayload] = await Promise.all([
+    loadTopupCatalogSeoPayload(),
+    loadSubscriptionPlansSeoPayload(),
+  ]);
+  const prelaunchStoreByConfig =
     !siteConfig.monetization.checkoutEnabled ||
     !siteConfig.monetization.pointPacksEnabled;
+  const prelaunchStoreByBilling = topupPayload?.billing?.purchaseActionsEnabled !== true;
+
+  return {
+    topupPayload,
+    subscriptionPayload,
+    prelaunchStore: prelaunchStoreByConfig || prelaunchStoreByBilling,
+  };
+});
+
+export async function generateMetadata() {
+  const { prelaunchStore } = await loadStorePagePayload();
 
   return createPageMetadata({
     title: prelaunchStore ? "Points are coming soon" : "Store",
@@ -29,10 +45,8 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  const [topupPayload, subscriptionPayload] = await Promise.all([
-    loadTopupCatalogSeoPayload(),
-    loadSubscriptionPlansSeoPayload(),
-  ]);
+  const { topupPayload, subscriptionPayload, prelaunchStore } =
+    await loadStorePagePayload();
 
   return (
     <WalletProvider>
@@ -41,6 +55,7 @@ export default async function Page() {
           packages={topupPayload?.packages || []}
           billingAvailability={topupPayload?.billing || null}
           planCatalog={subscriptionPayload?.planCatalog || null}
+          prelaunchStore={prelaunchStore}
         />
       </CouponProvider>
     </WalletProvider>

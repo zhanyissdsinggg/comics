@@ -312,7 +312,7 @@ test.describe("Storefront CTA flows", () => {
     });
 
     const readChapterButton = page
-      .getByRole("button", { name: "Read Chapter 1", exact: true })
+      .getByRole("link", { name: /Continue Chapter 1|Start reading/i })
       .first();
     await expect(readChapterButton).toBeVisible({ timeout: UI_TIMEOUT_MS });
 

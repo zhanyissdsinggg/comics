@@ -48,7 +48,7 @@ function getReadLabel(contentType) {
   if (contentType === FIGMA_CONTENT_TYPES.NOVELS) {
     return "Start Reading";
   }
-  return "Read First Chapter";
+  return "Continue Reading";
 }
 
 function getContinueLabel(contentType) {
@@ -118,7 +118,6 @@ function HomeContent({ seriesList = [] }) {
   const genreOptions = buildGenreOptions(currentItems);
 
   const ActionIcon = getActionIcon(contentType);
-  const readLabel = getReadLabel(contentType);
   const continueLabel = getContinueLabel(contentType);
   const updatesLabel = getUpdateLabel(contentType);
   const rankingLabel = getRankingLabel(contentType);
@@ -167,15 +166,15 @@ function HomeContent({ seriesList = [] }) {
             />
           </div>
 
-          <div className="relative mx-auto flex max-w-[1600px] justify-center px-4 py-12 md:px-8 md:py-20 lg:py-24">
-            <div className="flex w-full max-w-6xl flex-col items-center justify-center gap-8 md:flex-row lg:gap-24">
+          <div className="relative mx-auto flex max-w-[1600px] justify-center px-4 py-8 md:px-8 md:py-18 lg:py-22">
+            <div className="flex w-full max-w-6xl flex-col items-center justify-center gap-5 md:flex-row md:gap-10 lg:gap-24">
               <div className="order-2 max-w-2xl flex-1 md:order-1">
-                <div className="mb-6 flex flex-wrap gap-2">
+                <div className="mb-3 flex flex-wrap gap-2 md:mb-6">
                   {heroItem.tags.map((tag) => (
                     <span
                       key={tag}
                       className={cn(
-                        "rounded-md border px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-sm",
+                        "rounded-md border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-sm md:px-3 md:text-xs",
                         palette.primarySoft,
                       )}
                     >
@@ -188,29 +187,29 @@ function HomeContent({ seriesList = [] }) {
                   </span>
                 </div>
 
-                <h1 className="mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-4xl font-black leading-[1.1] tracking-tight text-transparent drop-shadow-sm md:text-6xl lg:text-7xl">
+                <h1 className="mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2.25rem] font-black leading-[1.06] tracking-tight text-transparent drop-shadow-sm md:mb-6 md:text-6xl lg:text-7xl">
                   {heroItem.title}
                 </h1>
 
-                <p className="mb-8 max-w-xl text-base leading-relaxed text-gray-300 md:text-lg">
+                <p className="mb-5 max-w-xl text-sm leading-6 text-gray-300 md:mb-8 md:text-lg md:leading-relaxed">
                   {heroItem.description}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-stretch gap-3 sm:items-center sm:gap-4">
                   <Link
                     href={heroItem.readHref}
                     className={cn(
-                      "flex items-center gap-2 rounded-xl px-8 py-4 font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95",
+                      "flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 sm:w-auto md:px-8 md:py-4 md:text-base",
                       palette.primaryBg,
                     )}
                   >
                     <ActionIcon className="h-6 w-6" />
-                    {readLabel}
+                    {heroItem.readLabel || getReadLabel(contentType)}
                   </Link>
                   <Link
                     href={heroItem.detailHref}
                     className={cn(
-                      "flex items-center gap-2 rounded-xl border px-8 py-4 font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95",
+                      "flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95 sm:w-auto md:px-8 md:py-4 md:text-base",
                       palette.surface,
                       palette.border,
                     )}
@@ -221,7 +220,7 @@ function HomeContent({ seriesList = [] }) {
                 </div>
               </div>
 
-              <div className="order-1 w-2/3 max-w-sm md:order-2 md:w-1/3">
+              <div className="order-1 w-[58%] max-w-[230px] md:order-2 md:w-[32%] md:max-w-sm">
                 <Link href={heroItem.detailHref}>
                   <div
                     className={cn(
@@ -235,9 +234,9 @@ function HomeContent({ seriesList = [] }) {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                    <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between md:bottom-4 md:left-4 md:right-4">
                       <div>
-                        <p className="max-w-[150px] truncate text-lg font-bold text-white">
+                        <p className="max-w-[140px] truncate text-base font-bold text-white md:max-w-[150px] md:text-lg">
                           {heroItem.title}
                         </p>
                         <p className="text-sm text-gray-300">{heroItem.author}</p>
@@ -253,29 +252,29 @@ function HomeContent({ seriesList = [] }) {
           </div>
         </div>
 
-        <div className="mx-auto max-w-[1600px] px-4 py-8 md:px-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <div className="mx-auto max-w-[1600px] px-4 py-5 md:px-8 md:py-8">
+          <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-4">
             <div
               className={cn(
-                "rounded-3xl border p-6 shadow-xl lg:col-span-3",
+                "rounded-3xl border p-4 shadow-xl md:p-6 lg:col-span-3",
                 palette.surface,
                 palette.border,
               )}
             >
-              <div className="mb-4 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 md:mb-4">
                 <Filter className="h-5 w-5 text-gray-400" />
                 <h3 className="text-sm font-bold uppercase tracking-[0.22em] text-white">
                   Genres
                 </h3>
               </div>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap gap-2">
                 {genreOptions.map((genre) => (
                   <button
                     key={genre}
                     type="button"
                     onClick={() => setActiveGenre(genre)}
                     className={cn(
-                      "rounded-xl px-4 py-2 text-sm font-bold transition-all active:scale-95",
+                      "rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-95 md:px-4 md:text-sm",
                       activeGenre === genre
                         ? cn(palette.primaryBg, "text-white shadow-lg")
                         : "border border-white/5 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white",
@@ -289,13 +288,13 @@ function HomeContent({ seriesList = [] }) {
 
             <div
               className={cn(
-                "flex flex-col justify-between rounded-3xl border p-6 shadow-xl",
+                "flex flex-col justify-between rounded-3xl border p-4 shadow-xl md:p-6",
                 palette.surface,
                 palette.border,
               )}
             >
               <div>
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.22em] text-white">
+                <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.22em] text-white md:mb-4">
                   Sort By
                 </h3>
                 <div className="space-y-2">
@@ -305,7 +304,7 @@ function HomeContent({ seriesList = [] }) {
                       type="button"
                       onClick={() => setActiveSort(sort)}
                       className={cn(
-                        "flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-left text-sm font-bold transition-all",
+                        "flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-left text-xs font-bold transition-all md:text-sm",
                         activeSort === sort
                           ? "border border-white/10 bg-white/10 text-white"
                           : "text-gray-500 hover:bg-white/5 hover:text-gray-300",
@@ -323,11 +322,11 @@ function HomeContent({ seriesList = [] }) {
           </div>
         </div>
 
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-12 px-4 pb-12 md:px-8 xl:flex-row">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 pb-10 md:gap-12 md:px-8 md:pb-12 xl:flex-row">
           <div className="min-w-0 flex-1">
-            <section className="mb-16">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
+            <section className="mb-10 md:mb-16">
+              <div className="mb-4 flex items-center justify-between md:mb-6">
+                <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white md:text-2xl">
                   {contentType === FIGMA_CONTENT_TYPES.INTERACTIVE ? (
                     <Swords className={cn("h-6 w-6", palette.primaryText)} />
                   ) : (
@@ -344,18 +343,18 @@ function HomeContent({ seriesList = [] }) {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                 {sortedItems.slice(0, 2).map((item) => (
                   <Link
                     key={`continue-${item.id}`}
                     href={item.readHref}
                     className={cn(
-                      "group flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-all hover:shadow-md active:scale-[0.98]",
+                      "group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-all hover:shadow-md active:scale-[0.98] md:gap-4 md:p-4",
                       palette.surface,
                       palette.border,
                     )}
                   >
-                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-md">
+                    <div className="relative h-[72px] w-14 shrink-0 overflow-hidden rounded-md md:h-20 md:w-16">
                       <img
                         src={item.coverUrl}
                         alt={item.title}
@@ -366,7 +365,7 @@ function HomeContent({ seriesList = [] }) {
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="truncate text-base font-bold text-white transition-colors group-hover:text-gray-200">
+                      <h4 className="truncate text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
                         {item.title}
                       </h4>
                       <p className="mb-2 text-sm text-gray-400">
@@ -381,7 +380,7 @@ function HomeContent({ seriesList = [] }) {
                     </div>
                     <div
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform group-hover:scale-110",
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:scale-110 md:h-10 md:w-10",
                         palette.primarySoft,
                       )}
                     >
@@ -392,19 +391,34 @@ function HomeContent({ seriesList = [] }) {
               </div>
             </section>
 
-            <section className="mb-16">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
+            <section className="mb-10 md:mb-16">
+              <div className="mb-4 flex items-center justify-between md:mb-6">
+                <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white md:text-2xl">
                   <Sparkles className={cn("h-6 w-6", palette.primaryText)} />
                   Editor&apos;s Choice
                 </h2>
               </div>
 
-              <div className="grid h-auto grid-cols-1 gap-4 md:h-[500px] md:grid-cols-4">
+              <div className={cn("overflow-hidden rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4", palette.surface, palette.border)}>
+                <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                      Curated Grid
+                    </p>
+                    <p className="mt-1 text-sm text-gray-400 md:text-base">
+                      Hand-picked picks with stronger shelf presence.
+                    </p>
+                  </div>
+                  <div className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300 md:block">
+                    Updated hourly
+                  </div>
+                </div>
+
+                <div className="grid h-auto grid-cols-1 gap-3 md:h-[500px] md:grid-cols-4 md:gap-4">
                 {gridItems[0] ? (
                   <Link
                     href={gridItems[0].detailHref}
-                    className="group relative block h-[300px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
+                    className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
                   >
                     <img
                       src={gridItems[0].coverUrl}
@@ -412,7 +426,7 @@ function HomeContent({ seriesList = [] }) {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full p-6">
+                    <div className="absolute bottom-0 left-0 w-full p-5 md:p-6">
                       <span
                         className={cn(
                           "mb-3 inline-block rounded-md px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white",
@@ -421,7 +435,7 @@ function HomeContent({ seriesList = [] }) {
                       >
                         Masterpiece
                       </span>
-                      <h3 className="mb-2 text-2xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
+                      <h3 className="mb-2 text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
                         {gridItems[0].title}
                       </h3>
                       <p className="line-clamp-2 text-sm text-gray-300 md:max-w-[80%]">
@@ -434,7 +448,7 @@ function HomeContent({ seriesList = [] }) {
                 {gridItems[1] ? (
                   <Link
                     href={gridItems[1].detailHref}
-                    className="group relative block h-[200px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
+                    className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
                   >
                     <img
                       src={gridItems[1].coverUrl}
@@ -442,11 +456,11 @@ function HomeContent({ seriesList = [] }) {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full p-5">
+                    <div className="absolute bottom-0 left-0 w-full p-4 md:p-5">
                       <span className="mb-2 inline-block rounded-md bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
                         Trending
                       </span>
-                      <h3 className="truncate text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200">
+                      <h3 className="truncate text-lg font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-xl">
                         {gridItems[1].title}
                       </h3>
                     </div>
@@ -457,7 +471,7 @@ function HomeContent({ seriesList = [] }) {
                   <Link
                     key={item.id}
                     href={item.detailHref}
-                    className="group relative block h-[200px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
+                    className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
                   >
                     <img
                       src={item.coverUrl}
@@ -476,12 +490,13 @@ function HomeContent({ seriesList = [] }) {
                     </div>
                   </Link>
                 ))}
+                </div>
               </div>
             </section>
 
-            <section className="mb-16">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
+            <section className="mb-10 md:mb-16">
+              <div className="mb-4 flex items-center justify-between md:mb-6">
+                <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white md:text-2xl">
                   <Calendar className={cn("h-6 w-6", palette.primaryText)} />
                   {activeGenre === "All" && activeSort === "Trending"
                     ? updatesLabel
@@ -496,14 +511,14 @@ function HomeContent({ seriesList = [] }) {
               </div>
 
               {activeGenre === "All" && activeSort === "Trending" ? (
-                <div className="mb-6 flex gap-2 overflow-x-auto border-b border-gray-800 pb-px">
+                <div className="mb-4 flex gap-2 overflow-x-auto border-b border-gray-800 pb-px md:mb-6">
                   {DAYS.map((day) => (
                     <button
                       key={day}
                       type="button"
                       onClick={() => setActiveDay(day)}
                       className={cn(
-                        "whitespace-nowrap border-b-2 px-6 py-3 text-sm font-bold transition-all",
+                        "whitespace-nowrap border-b-2 px-4 py-2.5 text-xs font-bold transition-all md:px-6 md:py-3 md:text-sm",
                         activeDay === day
                           ? cn(palette.primaryText, "border-current")
                           : "border-transparent text-gray-500 hover:text-gray-300",
@@ -515,7 +530,22 @@ function HomeContent({ seriesList = [] }) {
                 </div>
               ) : null}
 
-              <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 md:gap-6">
+              <div className={cn("rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4", palette.surface, palette.border)}>
+                <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                      Discovery Shelf
+                    </p>
+                    <p className="mt-1 text-sm text-gray-400 md:text-base">
+                      Browse the active rotation without leaving the home feed.
+                    </p>
+                  </div>
+                  <div className="hidden text-xs font-bold uppercase tracking-[0.18em] text-gray-500 md:block">
+                    {activeGenre} / {activeSort}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 md:gap-5 lg:grid-cols-6">
                 {(activeGenre === "All" && activeSort === "Trending"
                   ? gridItems
                   : exploreGridItems
@@ -558,20 +588,21 @@ function HomeContent({ seriesList = [] }) {
                     </p>
                   </Link>
                 ))}
+                </div>
               </div>
             </section>
           </div>
 
-          <div className="w-full shrink-0 space-y-12 xl:w-[350px]">
+          <div className="w-full shrink-0 space-y-6 md:space-y-12 xl:w-[350px]">
             <div
               className={cn(
-                "rounded-2xl border p-6",
+                "rounded-2xl border p-5 md:p-6",
                 palette.surface,
                 palette.border,
               )}
             >
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-xl font-bold text-white">
+              <div className="mb-5 flex items-center justify-between md:mb-6">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-white md:text-xl">
                   <Trophy className={cn("h-5 w-5", palette.primaryText)} />
                   {rankingLabel}
                 </h3>
@@ -595,12 +626,12 @@ function HomeContent({ seriesList = [] }) {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {rankItems.map((item, index) => (
                   <Link
                     key={`rank-${item.id}`}
                     href={item.detailHref}
-                    className="group flex items-center gap-4 rounded-xl p-2 transition-colors hover:bg-white/5 active:scale-95"
+                    className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-white/5 active:scale-95 md:gap-4 md:p-2"
                   >
                     <span
                       className={cn(
@@ -635,7 +666,7 @@ function HomeContent({ seriesList = [] }) {
 
               <Link
                 href="/rankings"
-                className="mt-6 block w-full rounded-xl border border-white/10 py-3 text-center text-sm font-bold text-gray-300 transition-colors hover:bg-white/5"
+                className="mt-5 block w-full rounded-xl border border-white/10 py-2.5 text-center text-sm font-bold text-gray-300 transition-colors hover:bg-white/5 md:mt-6 md:py-3"
               >
                 View Full Ranking
               </Link>

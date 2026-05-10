@@ -339,6 +339,54 @@ function FigmaHeaderInner() {
     [bonusPts, paidPts, user],
   );
 
+  const contentSwitcher = (
+    <div className="flex shrink-0 rounded-[1rem] border border-white/5 bg-black/40 p-1.5 shadow-inner">
+      {FIGMA_CONTENT_OPTIONS.map((option) => {
+        const active = contentType === option.key;
+        const icon =
+          option.key === FIGMA_CONTENT_TYPES.NOVELS
+            ? BookOpen
+            : option.key === FIGMA_CONTENT_TYPES.INTERACTIVE
+              ? Gamepad2
+              : Sparkles;
+        const Icon = icon;
+
+        return (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => setContentType(option.key)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] transition-all md:px-5 md:text-xs",
+              active
+                ? cn(palette.primaryBg, "text-white shadow-lg")
+                : "text-gray-500 hover:bg-white/5 hover:text-gray-300",
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const searchButton = (
+    <button
+      type="button"
+      onClick={() => setSearchOverlayOpen(true)}
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-gray-400 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+      aria-label="Search catalog"
+    >
+      <Search className="h-5 w-5 md:h-6 md:w-6" />
+    </button>
+  );
+
+  const adultToggleDesktopLabel = isAdultMode
+    ? `${legalAge}+ ON`
+    : `${legalAge}+ OFF`;
+  const adultToggleMobileLabel = `${legalAge}+`;
+
   return (
     <nav
       data-site-header="1"
@@ -348,7 +396,79 @@ function FigmaHeaderInner() {
       )}
     >
       <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-20">
+        <div className="py-3 md:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              href="/"
+              className="group flex min-w-0 items-center gap-2 transition-transform active:scale-95"
+            >
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-lg transition-all group-hover:rotate-12",
+                  isAdultMode ? "from-red-600 via-rose-800 to-black" : "from-indigo-500 via-purple-800 to-black",
+                )}
+              >
+                <Flame className="h-5 w-5" />
+              </div>
+              <span className="truncate text-lg font-black tracking-tight text-white">
+                {siteConfig.siteName.toUpperCase()}
+                <span className={cn("ml-1", palette.primaryText)}>READS</span>
+              </span>
+            </Link>
+
+            <div className="flex shrink-0 items-center gap-2">
+              {searchButton}
+              <button
+                type="button"
+                onClick={handleAdultToggle}
+                className={cn(
+                  "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3 transition-all",
+                  isAdultMode
+                    ? "border-red-500 bg-red-500/10 text-red-500"
+                    : "border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-500 hover:text-white",
+                )}
+                aria-label={adultToggleDesktopLabel}
+              >
+                {isAdultMode ? (
+                  <Lock className="h-4 w-4" />
+                ) : (
+                  <ShieldAlert className="h-4 w-4" />
+                )}
+                <span className="text-xs font-bold tracking-wide">
+                  {adultToggleMobileLabel}
+                </span>
+              </button>
+
+              {isSignedIn ? (
+                <Link href="/account" className="relative shrink-0">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="h-10 w-10 rounded-full border-2 border-transparent object-cover transition-colors hover:border-gray-400"
+                  />
+                  <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#0a0c10] bg-green-500" />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openLogin("login")}
+                  className={cn(
+                    "inline-flex h-10 items-center rounded-xl px-4 text-sm font-bold text-white transition-all active:scale-95",
+                    palette.primaryBg,
+                  )}
+                >
+                  Sign In
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 overflow-x-auto pb-1">
+            <div className="w-max min-w-full">{contentSwitcher}</div>
+          </div>
+        </div>
+
+        <div className="hidden h-20 items-center justify-between gap-4 md:flex">
           <div className="flex items-center">
             <Link
               href="/"
@@ -370,45 +490,11 @@ function FigmaHeaderInner() {
           </div>
 
           <div className="flex flex-1 justify-center overflow-x-auto">
-            <div className="flex shrink-0 rounded-[1rem] border border-white/5 bg-black/40 p-1.5 shadow-inner">
-              {FIGMA_CONTENT_OPTIONS.map((option) => {
-                const active = contentType === option.key;
-                const icon =
-                  option.key === FIGMA_CONTENT_TYPES.NOVELS
-                    ? BookOpen
-                    : option.key === FIGMA_CONTENT_TYPES.INTERACTIVE
-                      ? Gamepad2
-                      : Sparkles;
-                const Icon = icon;
-
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => setContentType(option.key)}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] transition-all md:px-5 md:text-xs",
-                      active
-                        ? cn(palette.primaryBg, "text-white shadow-lg")
-                        : "text-gray-500 hover:bg-white/5 hover:text-gray-300",
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
+            {contentSwitcher}
           </div>
 
           <div className="flex items-center gap-4 md:gap-6">
-            <button
-              type="button"
-              onClick={() => setSearchOverlayOpen(true)}
-              className="hidden text-gray-400 transition-colors hover:text-white md:block"
-            >
-              <Search className="h-6 w-6" />
-            </button>
+            {searchButton}
 
             {isSignedIn ? (
               <div className="relative hidden md:block">
@@ -496,7 +582,7 @@ function FigmaHeaderInner() {
 
             <Link
               href="/store"
-              className="group relative hidden items-center gap-2 overflow-hidden rounded-full border border-yellow-500/50 bg-yellow-500/10 px-4 py-1.5 text-xs font-black tracking-[0.2em] text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] transition-all hover:bg-yellow-500/20 hover:shadow-[0_0_25px_rgba(234,179,8,0.4)] active:scale-95 lg:flex"
+              className="group relative hidden h-10 items-center gap-2 overflow-hidden rounded-xl border border-yellow-500/50 bg-yellow-500/10 px-4 text-xs font-black tracking-[0.2em] text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] transition-all hover:bg-yellow-500/20 hover:shadow-[0_0_25px_rgba(234,179,8,0.4)] active:scale-95 lg:inline-flex"
             >
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
               <Crown className="h-4 w-4" />
@@ -507,19 +593,19 @@ function FigmaHeaderInner() {
               type="button"
               onClick={handleAdultToggle}
               className={cn(
-                "flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-all md:px-4 md:py-2",
+                "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-4 transition-all",
                 isAdultMode
                   ? "border-red-500 bg-red-500/10 text-red-500"
                   : "border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-500 hover:text-white",
               )}
             >
-              <span className="flex items-center gap-1.5 text-xs font-bold tracking-wide md:text-sm">
+              <span className="flex items-center gap-1.5 text-sm font-bold tracking-wide">
                 {isAdultMode ? (
                   <Lock className="h-4 w-4" />
                 ) : (
                   <ShieldAlert className="h-4 w-4" />
                 )}
-                {isAdultMode ? `${legalAge}+ ON` : `${legalAge}+ OFF`}
+                {adultToggleDesktopLabel}
               </span>
             </button>
 
@@ -553,7 +639,7 @@ function FigmaHeaderInner() {
                 type="button"
                 onClick={() => openLogin("login")}
                 className={cn(
-                  "rounded-xl px-4 py-2 text-sm font-bold text-white transition-all active:scale-95",
+                  "inline-flex h-10 items-center rounded-xl px-4 text-sm font-bold text-white transition-all active:scale-95",
                   palette.primaryBg,
                 )}
               >

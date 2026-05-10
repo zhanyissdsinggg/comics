@@ -67,13 +67,13 @@ function NotificationCard({ card, workingId, onOpen }) {
       type="button"
       onClick={() => onOpen(card)}
       className={cn(
-        "group flex w-full items-start gap-4 rounded-[26px] border p-5 text-left shadow-xl transition-all hover:-translate-y-0.5 active:scale-[0.99]",
+        "group flex w-full items-start gap-3 rounded-[24px] border p-4 text-left shadow-xl transition-all hover:-translate-y-0.5 hover:bg-white/[0.03] active:scale-[0.99] md:gap-4 md:rounded-[26px] md:p-5",
         card.read ? cn(palette.surface, palette.border) : "border-indigo-500/25 bg-indigo-500/8",
       )}
     >
       <div
         className={cn(
-          "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl md:h-12 md:w-12 md:rounded-2xl",
           card.kind === "PROMO" || card.kind === "SUB_VOUCHER"
             ? "bg-yellow-500/12 text-yellow-400"
             : card.kind === "TTF_READY"
@@ -81,22 +81,28 @@ function NotificationCard({ card, workingId, onOpen }) {
               : "bg-indigo-500/12 text-indigo-400",
         )}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-5 w-5 md:h-6 md:w-6" />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-black text-white">{card.title}</h3>
+          <h3 className="text-base font-black text-white md:text-lg">{card.title}</h3>
           {!card.read ? (
             <span className="rounded-full bg-red-500/12 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-400">
               New
             </span>
           ) : null}
         </div>
-        <p className="mt-2 text-sm leading-6 text-gray-400">{card.body}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+            {card.kind.replaceAll("_", " ")}
+          </span>
+          <span>{card.dateLabel || "Recent"}</span>
+        </div>
+        <p className="mt-1.5 text-sm leading-6 text-gray-400">{card.body}</p>
       </div>
 
-      <div className="shrink-0 text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+      <div className="max-w-[76px] shrink-0 text-right text-[11px] font-black uppercase leading-4 tracking-[0.16em] text-gray-500 md:text-xs md:tracking-[0.18em]">
         {isBusy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : card.cta}
       </div>
     </button>
@@ -160,34 +166,34 @@ function NotificationsContent() {
   };
 
   return (
-    <div className={cn("min-h-screen pt-24 pb-20", palette.rootBg)}>
+    <div className={cn("min-h-screen pb-20", palette.rootBg)}>
       <FigmaChrome>
         <div className="mx-auto max-w-5xl px-4 md:px-8">
           <section
             className={cn(
-              "mb-8 overflow-hidden rounded-[32px] border p-8 shadow-2xl",
+              "mb-6 overflow-hidden rounded-[28px] border p-5 shadow-2xl md:rounded-[32px] md:p-8",
               palette.surface,
               palette.border,
             )}
           >
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
                   Inbox
                 </p>
-                <h1 className="mt-2 text-4xl font-black tracking-tight text-white">
+                <h1 className="mt-2 text-3xl font-black tracking-tight text-white md:text-4xl">
                   Everything worth opening lives here.
                 </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400">
+                <p className="mt-3 max-w-xl text-sm leading-6 text-gray-400 md:mt-4 md:max-w-2xl md:leading-7">
                   Episode drops, promo pushes, and time-to-free unlocks are all wired to the same notification feed.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5 md:gap-3">
                 <button
                   type="button"
                   onClick={() => void refreshInbox()}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-white/10 md:rounded-2xl md:px-5 md:py-3"
                 >
                   Refresh
                 </button>
@@ -196,7 +202,7 @@ function NotificationsContent() {
                   onClick={() => void handleMarkAll()}
                   disabled={workingId === "__all__" || unreadCount === 0}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
+                    "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 md:rounded-2xl md:px-5 md:py-3 md:text-sm",
                     palette.primaryBg,
                   )}
                 >
@@ -210,25 +216,108 @@ function NotificationsContent() {
               </div>
             </div>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
-                  Unread
-                </p>
-                <div className="mt-3 text-3xl font-black text-white">{unreadCount}</div>
+          </section>
+
+          <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+            <div className="rounded-[24px] border border-white/10 bg-black/20 p-4 md:p-5">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+                Unread
+              </p>
+              <div className="mt-2 text-2xl font-black text-white md:mt-3 md:text-3xl">
+                {unreadCount}
               </div>
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
-                  Total
-                </p>
-                <div className="mt-3 text-3xl font-black text-white">{notifications.length}</div>
+            </div>
+            <div className="rounded-[24px] border border-white/10 bg-black/20 p-4 md:p-5">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+                Total
+              </p>
+              <div className="mt-2 text-2xl font-black text-white md:mt-3 md:text-3xl">
+                {notifications.length}
               </div>
-              <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
-                  State
-                </p>
-                <div className="mt-3 text-lg font-black text-white">
-                  {isAdultMode ? "Mature mode on" : "Core mode"}
+            </div>
+            <div className="rounded-[24px] border border-white/10 bg-black/20 p-4 md:p-5">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">
+                State
+              </p>
+              <div className="mt-2 text-base font-black text-white md:mt-3 md:text-lg">
+                {isAdultMode ? "Mature mode on" : "Core mode"}
+              </div>
+            </div>
+          </div>
+
+          <section className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div
+              className={cn(
+                "rounded-[28px] border p-4 shadow-xl md:p-5",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                    Feed Status
+                  </p>
+                  <h2 className="mt-2 text-lg font-black text-white md:text-xl">
+                    Notifications are grouped into one reading lane.
+                  </h2>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300">
+                  Live
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Episode drops
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">Chapter and route alerts</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Store prompts
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">Promo and voucher notices</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Return path
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">One tap back into reading</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                "rounded-[28px] border p-4 shadow-xl md:p-5",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                Queue Health
+              </p>
+              <div className="mt-3 text-3xl font-black text-white">{notifications.length}</div>
+              <p className="mt-2 text-sm leading-6 text-gray-400">
+                Alerts are balanced between release drops, promotional nudges, and entitlement updates.
+              </p>
+              <div className="mt-4 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Priority
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    {unreadCount > 0 ? "Unread items waiting" : "Inbox under control"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Current tab
+                  </p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    {isAdultMode ? "Mature feed context" : "Core feed context"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -240,7 +329,7 @@ function NotificationsContent() {
                 <div
                   key={`notification-skeleton-${index}`}
                   className={cn(
-                    "h-32 animate-pulse rounded-[26px] border shadow-xl",
+                    "h-28 animate-pulse rounded-[24px] border shadow-xl md:h-32 md:rounded-[26px]",
                     palette.surface,
                     palette.border,
                   )}
@@ -250,7 +339,7 @@ function NotificationsContent() {
           ) : error ? (
             <div
               className={cn(
-                "rounded-[26px] border p-6 text-white shadow-xl",
+                "rounded-[24px] border p-5 text-white shadow-xl md:rounded-[26px] md:p-6",
                 palette.surface,
                 palette.border,
               )}
@@ -274,7 +363,7 @@ function NotificationsContent() {
           ) : (
             <div
               className={cn(
-                "rounded-[26px] border p-10 text-center shadow-xl",
+                "rounded-[24px] border p-8 text-center shadow-xl md:rounded-[26px] md:p-10",
                 palette.surface,
                 palette.border,
               )}

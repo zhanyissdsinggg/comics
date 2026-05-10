@@ -224,7 +224,7 @@ function buildRouteChecks(seriesCatalog) {
       titleIncludes: String(series.title || "Series"),
       h1: String(series.title || "Series"),
       required: [hasPublicCreatorCredit(series) ? String(series?.creator?.label || "").trim() : CREATOR_FALLBACK_LABEL],
-      requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading"]],
+      requiredAny: [["Read Chapter 1", "Start Reading", "Continue Reading", "Continue Chapter"]],
       forbidden: hasPublicCreatorCredit(series)
         ? [...LEGACY_FORBIDDEN, CREATOR_FALLBACK_LABEL, CREATOR_FALLBACK_DETAIL]
         : LEGACY_FORBIDDEN,

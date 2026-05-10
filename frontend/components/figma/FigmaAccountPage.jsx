@@ -9,7 +9,9 @@ import {
   Clock,
   Coins,
   Crown,
+  KeyRound,
   LogOut,
+  ShieldCheck,
   Settings,
 } from "lucide-react";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -48,23 +50,115 @@ function AccountContent({ seriesList = [] }) {
   );
   const walletTotal = formatWalletTotal({ paidPts, bonusPts });
   const displayName = String(user?.email || user?.name || "Reader").split("@")[0];
+  const memberCode = String(walletTotal || 84920).padStart(5, "0");
+
+  if (!isSignedIn) {
+    return (
+      <div className={cn("min-h-screen pb-20", palette.rootBg)}>
+        <FigmaChrome>
+          <div className="mx-auto max-w-5xl px-4 md:px-8">
+            <section
+              className={cn(
+                "overflow-hidden rounded-[28px] border p-5 shadow-2xl md:rounded-[32px] md:p-10",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <div
+                className={cn(
+                  "mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.22em]",
+                  palette.primarySoft,
+                )}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Account
+              </div>
+              <h1 className="max-w-2xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                This device, for now.
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-gray-300 md:mt-4 md:max-w-2xl md:text-base md:leading-7">
+                Sign in to sync your library, wallet balance, and reading progress
+                across every screen you use.
+              </p>
+              <div className="mt-6 flex flex-col items-stretch gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/login?returnTo=/account")}
+                  className={cn(
+                    "inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] sm:w-auto md:min-h-[50px] md:rounded-2xl md:px-6 md:py-3.5",
+                    palette.primaryBg,
+                  )}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/auth/reset")}
+                  className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto md:min-h-[50px] md:rounded-2xl md:px-6 md:py-3.5"
+                >
+                  <KeyRound className="h-4 w-4" />
+                  Reset password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/subscribe")}
+                  className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto md:min-h-[50px] md:rounded-2xl md:px-6 md:py-3.5"
+                >
+                  <Crown className="h-4 w-4" />
+                  Plans
+                </button>
+              </div>
+            </section>
+
+            <section className="mt-6 grid gap-4 md:mt-8 md:grid-cols-3 md:gap-6">
+              {[
+                {
+                  title: "Sync your shelf",
+                  body: "Keep bookmarks and recent chapters attached to your account instead of this browser only.",
+                },
+                {
+                  title: "Track wallet activity",
+                  body: "See top-ups, bonus points, and membership perks in one place after you sign in.",
+                },
+                {
+                  title: "Jump back in faster",
+                  body: "Open your saved spot without rebuilding your history every time you switch devices.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className={cn(
+                    "rounded-[24px] border p-5 shadow-xl md:rounded-[28px] md:p-6",
+                    palette.surface,
+                    palette.border,
+                  )}
+                >
+                  <h2 className="text-lg font-black text-white md:text-xl">{item.title}</h2>
+                  <p className="mt-2.5 text-sm leading-6 text-gray-400 md:mt-3 md:leading-7">
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </section>
+          </div>
+        </FigmaChrome>
+      </div>
+    );
+  }
 
   useEffect(() => {
-    if (!isSignedIn) {
-      return;
-    }
     void loadWallet();
     void loadHistory();
-  }, [isSignedIn, loadHistory, loadWallet]);
+  }, [loadHistory, loadWallet]);
 
   return (
-    <div className={cn("min-h-screen pt-24 pb-20", palette.rootBg)}>
+    <div className={cn("min-h-screen pb-20", palette.rootBg)}>
       <FigmaChrome>
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div
               className={cn(
-                "relative col-span-1 flex flex-col gap-8 overflow-hidden rounded-3xl border p-8 shadow-xl sm:flex-row sm:items-start lg:col-span-2",
+                "relative col-span-1 flex flex-col gap-6 overflow-hidden rounded-3xl border p-5 shadow-xl sm:flex-row sm:items-start md:gap-8 md:p-8 lg:col-span-2",
                 palette.surface,
                 palette.border,
               )}
@@ -76,7 +170,7 @@ function AccountContent({ seriesList = [] }) {
                 )}
               />
               <div className="relative shrink-0">
-                <div className="relative z-10 h-32 w-32 overflow-hidden rounded-2xl ring-4 ring-black shadow-2xl">
+                <div className="relative z-10 h-28 w-28 overflow-hidden rounded-2xl ring-4 ring-black shadow-2xl md:h-32 md:w-32">
                   <img
                     src="https://placehold.co/300x300/111827/f8fafc?text=ME"
                     alt={displayName}
@@ -94,8 +188,17 @@ function AccountContent({ seriesList = [] }) {
               </div>
 
               <div className="z-10 flex-1 text-center sm:text-left">
-                <div className="mb-2 flex flex-col items-center gap-3 sm:flex-row">
-                  <h1 className="text-3xl font-black tracking-tight text-white">
+                <div
+                  className={cn(
+                    "mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] md:px-4 md:py-2 md:text-xs",
+                    palette.primarySoft,
+                  )}
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Reader ID
+                </div>
+                <div className="mb-2 flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+                  <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">
                     {displayName}
                   </h1>
                   <div className="flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.18em] text-gray-300">
@@ -103,9 +206,32 @@ function AccountContent({ seriesList = [] }) {
                     Verified
                   </div>
                 </div>
-                <p className="mb-6 text-sm font-medium text-gray-400">
-                  Joined December 2024 · Member #{String(walletTotal || 84920).padStart(5, "0")}
+                <p className="mb-5 text-sm font-medium text-gray-400 md:mb-6">
+                  Joined December 2024 | Member #{memberCode}
                 </p>
+
+                <div className="mb-5 grid gap-3 sm:grid-cols-3 md:mb-6">
+                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                      Status
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-white">Verified reader</p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                      Wallet
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      {walletTotal.toLocaleString()} coins
+                    </p>
+                  </div>
+                  <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                      Sync
+                    </p>
+                    <p className="mt-2 text-sm font-bold text-white">Library live</p>
+                  </div>
+                </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
                   <Link
@@ -132,7 +258,7 @@ function AccountContent({ seriesList = [] }) {
 
             <div
               className={cn(
-                "relative flex flex-col justify-between overflow-hidden rounded-3xl border p-6 shadow-xl",
+                "relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-xl md:p-6",
                 palette.surface,
                 palette.border,
               )}
@@ -151,8 +277,16 @@ function AccountContent({ seriesList = [] }) {
                   <span className="mb-1 font-bold text-yellow-500">Coins</span>
                 </div>
                 <p className="mt-3 text-sm text-gray-500">
-                  Paid {paidPts.toLocaleString()} · Bonus {bonusPts.toLocaleString()}
+                  Paid {paidPts.toLocaleString()} | Bonus {bonusPts.toLocaleString()}
                 </p>
+                <div className="mt-4 rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Account lane
+                  </p>
+                  <p className="mt-2 text-sm leading-5 text-gray-400">
+                    Use the wallet for chapter unlocks, then manage plans and settings from the same identity shell.
+                  </p>
+                </div>
               </div>
               <div className="z-10">
                 <Link
@@ -172,7 +306,7 @@ function AccountContent({ seriesList = [] }) {
 
           <div
             className={cn(
-              "min-h-[420px] overflow-hidden rounded-3xl border shadow-xl",
+              "min-h-[360px] overflow-hidden rounded-3xl border shadow-xl md:min-h-[420px]",
               palette.surface,
               palette.border,
             )}
@@ -182,7 +316,7 @@ function AccountContent({ seriesList = [] }) {
                 type="button"
                 onClick={() => setActiveTab("history")}
                 className={cn(
-                  "flex items-center gap-2 border-b-2 px-4 py-6 text-sm font-bold uppercase tracking-[0.18em] transition-colors",
+                  "flex items-center gap-2 border-b-2 px-3 py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors md:px-4 md:py-6 md:text-sm",
                   activeTab === "history"
                     ? isAdultMode
                       ? "border-red-500 text-red-500"
@@ -197,7 +331,7 @@ function AccountContent({ seriesList = [] }) {
                 type="button"
                 onClick={() => setActiveTab("bookmarks")}
                 className={cn(
-                  "flex items-center gap-2 border-b-2 px-4 py-6 text-sm font-bold uppercase tracking-[0.18em] transition-colors",
+                  "flex items-center gap-2 border-b-2 px-3 py-4 text-xs font-bold uppercase tracking-[0.18em] transition-colors md:px-4 md:py-6 md:text-sm",
                   activeTab === "bookmarks"
                     ? isAdultMode
                       ? "border-red-500 text-red-500"
@@ -258,7 +392,7 @@ function AccountContent({ seriesList = [] }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="flex flex-col items-center justify-center py-16 text-center md:py-20">
                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
                       <Clock className="h-8 w-8 text-gray-600" />
                     </div>
@@ -289,10 +423,10 @@ function AccountContent({ seriesList = [] }) {
                         <h3 className="mb-1 line-clamp-1 text-base font-bold text-white">
                           {item.title}
                         </h3>
-                        <p className="text-xs font-medium text-gray-400">
+                        <p className="min-h-[2rem] text-xs font-medium text-gray-400">
                           {item.chapter}
                         </p>
-                        <span className="mt-4 text-sm font-bold text-white/75">
+                        <span className="mt-auto pt-4 text-sm font-bold text-white/75">
                           Open saved spot
                         </span>
                       </div>
@@ -300,7 +434,7 @@ function AccountContent({ seriesList = [] }) {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="flex flex-col items-center justify-center py-16 text-center md:py-20">
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
                     <Bookmark className="h-8 w-8 text-gray-600" />
                   </div>

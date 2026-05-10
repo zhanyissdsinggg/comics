@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -56,6 +56,13 @@ const FALLBACK_KEYWORDS = [
   "School Life",
 ];
 
+function normalizeHotKeywords(keywords = []) {
+  return (Array.isArray(keywords) ? keywords : [])
+    .map((item) => String(item || "").trim())
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
 function normalizeInitialFormat(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (normalized === "novel" || normalized === "novels") {
@@ -109,20 +116,20 @@ function SearchResultCard({ item }) {
   return (
     <article
       className={cn(
-        "group overflow-hidden rounded-[28px] border shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl",
+        "group flex h-full overflow-hidden rounded-[28px] border shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl sm:flex-col",
         palette.surface,
         palette.border,
       )}
     >
-      <Link href={item.detailHref} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden">
+      <Link href={item.detailHref} className="block w-[132px] shrink-0 sm:w-auto">
+        <div className="relative h-full min-h-[200px] overflow-hidden sm:min-h-0 sm:aspect-[3/4]">
           <img
             src={item.coverUrl}
             alt={item.title}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-          <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
             {item.status ? (
               <span
                 className={cn(
@@ -141,26 +148,26 @@ function SearchResultCard({ item }) {
               </span>
             ) : null}
           </div>
-          <div className="absolute bottom-0 left-0 right-0 p-5">
+          <div className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-4 md:p-5">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-gray-200">
               <Star className="h-3.5 w-3.5 fill-current text-yellow-400" />
               {item.rating}
               <span className="text-gray-500">/</span>
               {item.viewsText} views
             </div>
-            <h3 className="mt-3 line-clamp-2 text-xl font-black leading-tight text-white">
+            <h3 className="mt-2 line-clamp-2 text-base font-black leading-tight text-white sm:mt-2.5 sm:text-lg md:mt-3 md:text-xl">
               {item.title}
             </h3>
-            <p className="mt-2 text-sm font-semibold text-gray-300">{item.author}</p>
+            <p className="mt-1.5 text-sm font-semibold text-gray-300 md:mt-2">{item.author}</p>
           </div>
         </div>
       </Link>
 
-      <div className="p-5">
-        <p className="line-clamp-3 text-sm leading-6 text-gray-400">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-4 md:p-5">
+        <p className="min-h-0 line-clamp-2 text-sm leading-5 text-gray-400 sm:min-h-[4.5rem] sm:line-clamp-3 md:leading-6">
           {item.description}
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-2.5 flex min-h-[2.25rem] flex-wrap content-start gap-2 sm:mt-4 sm:min-h-[3.75rem]">
           {(Array.isArray(item.genres) ? item.genres : []).slice(0, 3).map((genre) => (
             <span
               key={`${item.id}-${genre}`}
@@ -173,14 +180,14 @@ function SearchResultCard({ item }) {
             </span>
           ))}
         </div>
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between pt-3.5 sm:pt-4 md:pt-5">
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
             {item.chapterLabel}
           </span>
           <Link
             href={item.readHref}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98]",
+              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] sm:px-4 sm:py-2 sm:text-xs",
               palette.primaryBg,
             )}
           >
@@ -196,30 +203,57 @@ function SearchResultCard({ item }) {
 function SearchContent({
   initialQuery = "",
   initialFormat = SEARCH_FORMATS.ALL,
+  initialResults = [],
+  initialHotKeywords = [],
+  initialReady = false,
 }) {
   const { palette, isAdultMode } = useFigmaSite();
+  const normalizedInitialQuery = String(initialQuery || "").trim();
   const [query, setQuery] = useState(initialQuery);
   const [activeFormat, setActiveFormat] = useState(
     normalizeInitialFormat(initialFormat),
   );
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeSort, setActiveSort] = useState("RELEVANCE");
-  const [remoteItems, setRemoteItems] = useState([]);
-  const [hotKeywords, setHotKeywords] = useState(FALLBACK_KEYWORDS);
-  const [loading, setLoading] = useState(true);
+  const [remoteItems, setRemoteItems] = useState(() => mapRemoteResults(initialResults));
+  const [hotKeywords, setHotKeywords] = useState(() => {
+    const keywords = normalizeHotKeywords(initialHotKeywords);
+    return keywords.length > 0 ? keywords : FALLBACK_KEYWORDS;
+  });
+  const [loading, setLoading] = useState(!initialReady);
   const [error, setError] = useState("");
+  const [resolvedQuery, setResolvedQuery] = useState(normalizedInitialQuery);
   const deferredQuery = useDeferredValue(query);
+  const hydratedRequestHandledRef = useRef(false);
+  const initialRequestKey = useMemo(
+    () => JSON.stringify({ q: normalizedInitialQuery, adult: "0" }),
+    [normalizedInitialQuery],
+  );
 
   useEffect(() => {
     let active = true;
 
     async function loadSearchResults() {
-      setLoading(true);
+      const normalizedQuery = deferredQuery.trim();
+      const requestKey = JSON.stringify({
+        q: normalizedQuery,
+        adult: isAdultMode ? "1" : "0",
+      });
+      const reuseInitialPayload =
+        !hydratedRequestHandledRef.current &&
+        initialReady &&
+        requestKey === initialRequestKey;
+
+      hydratedRequestHandledRef.current = true;
+
+      if (!reuseInitialPayload) {
+        setLoading(true);
+      }
       setError("");
 
       const params = new URLSearchParams();
-      if (deferredQuery.trim()) {
-        params.set("q", deferredQuery.trim());
+      if (normalizedQuery) {
+        params.set("q", normalizedQuery);
       }
       params.set("pageSize", "48");
       params.set("adult", isAdultMode ? "1" : "0");
@@ -235,11 +269,13 @@ function SearchContent({
       if (!response.ok) {
         setRemoteItems([]);
         setError("Search failed to load.");
+        setResolvedQuery(normalizedQuery);
         setLoading(false);
         return;
       }
 
       setRemoteItems(mapRemoteResults(response.data?.results));
+      setResolvedQuery(normalizedQuery);
       setLoading(false);
     }
 
@@ -260,10 +296,7 @@ function SearchContent({
         if (!active || !response.ok || !Array.isArray(response.data?.keywords)) {
           return;
         }
-        const keywords = response.data.keywords
-          .map((item) => String(item || "").trim())
-          .filter(Boolean)
-          .slice(0, 8);
+        const keywords = normalizeHotKeywords(response.data.keywords);
         if (keywords.length > 0) {
           setHotKeywords(keywords);
         }
@@ -283,10 +316,12 @@ function SearchContent({
     [isAdultMode],
   );
 
+  const effectiveCatalogQuery = loading ? resolvedQuery : deferredQuery.trim();
+
   const interactiveQueryItems = useMemo(() => {
-    const normalizedQuery = deferredQuery.trim().toLowerCase();
+    const normalizedQuery = effectiveCatalogQuery.toLowerCase();
     return interactiveItems.filter((item) => matchesQuery(item, normalizedQuery));
-  }, [deferredQuery, interactiveItems]);
+  }, [effectiveCatalogQuery, interactiveItems]);
 
   const formatCounts = useMemo(
     () => ({
@@ -351,12 +386,12 @@ function SearchContent({
   const suggestions = sortedItems.slice(0, 6);
 
   return (
-    <div className={cn("min-h-screen pt-24 pb-20", palette.rootBg)}>
+    <div className={cn("min-h-screen pb-20", palette.rootBg)}>
       <FigmaChrome searchSuggestions={suggestions}>
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <section
             className={cn(
-              "relative mb-8 overflow-hidden rounded-[32px] border px-6 py-8 shadow-2xl md:px-10 md:py-10",
+              "relative mb-6 overflow-hidden rounded-[32px] border px-4 py-4 shadow-2xl md:mb-8 md:px-10 md:py-10",
               palette.surface,
               palette.border,
             )}
@@ -368,24 +403,24 @@ function SearchContent({
               )}
             />
             <div className="relative z-10">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-gray-300">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300 md:mb-4 md:px-4 md:py-2 md:text-xs">
                 <Flame className={cn("h-4 w-4", palette.primaryText)} />
                 Search
               </div>
-              <h1 className="max-w-3xl text-4xl font-black tracking-tight text-white md:text-5xl">
+              <h1 className="max-w-xl text-2xl font-black tracking-tight text-white md:max-w-3xl md:text-5xl">
                 Find something worth ruining your sleep schedule for.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400 md:text-base">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:mt-4 md:text-base md:leading-7">
                 Real catalog search for comics and novels, plus the interactive picks
                 from your new Figma shell in one place.
               </p>
 
               <form
                 onSubmit={(event) => event.preventDefault()}
-                className="mt-8 rounded-[28px] border border-white/10 bg-black/30 p-3 shadow-inner backdrop-blur"
+                className="mt-4 rounded-[28px] border border-white/10 bg-black/30 p-2.5 shadow-inner backdrop-blur md:mt-8 md:p-3"
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] bg-white/5 px-4 py-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] bg-white/5 px-3.5 py-2.5 md:px-4 md:py-3">
                     <Search className={cn("h-5 w-5 shrink-0", palette.primaryText)} />
                     <input
                       type="text"
@@ -395,7 +430,7 @@ function SearchContent({
                       className="min-w-0 flex-1 bg-transparent text-base font-bold text-white outline-none placeholder:text-gray-600"
                     />
                   </div>
-                  <div className="flex items-center gap-2 rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-gray-300">
+                  <div className="flex items-center gap-2 rounded-[20px] border border-white/10 bg-white/5 px-3.5 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-gray-300 md:px-4 md:py-3 md:text-xs">
                     <SlidersHorizontal className="h-4 w-4" />
                     {activeFormat === SEARCH_FORMATS.ALL
                       ? "All formats"
@@ -404,8 +439,8 @@ function SearchContent({
                 </div>
               </form>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
-                {hotKeywords.map((keyword) => (
+              <div className="mt-4 flex flex-wrap gap-2 md:mt-6">
+                {hotKeywords.map((keyword, index) => (
                   <button
                     key={keyword}
                     type="button"
@@ -413,14 +448,17 @@ function SearchContent({
                       setQuery(keyword);
                       setActiveGenre("All");
                     }}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-gray-300 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
+                    className={cn(
+                      "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-gray-300 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white md:px-4 md:py-2 md:text-xs",
+                      index > 3 ? "hidden md:inline-flex" : "",
+                    )}
                   >
                     {keyword}
                   </button>
                 ))}
               </div>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 hidden gap-4 xl:grid xl:grid-cols-4">
                 {FORMAT_OPTIONS.map((option) => {
                   const Icon = option.icon;
                   const count =
@@ -438,7 +476,7 @@ function SearchContent({
                       type="button"
                       onClick={() => setActiveFormat(option.key)}
                       className={cn(
-                        "rounded-[24px] border p-4 text-left transition-all",
+                        "rounded-[24px] border p-3.5 text-left transition-all md:p-4",
                         activeFormat === option.key
                           ? cn(palette.primaryBg, "border-transparent text-white shadow-xl")
                           : "border-white/10 bg-black/20 text-gray-300 hover:bg-white/5",
@@ -450,7 +488,7 @@ function SearchContent({
                           {count}
                         </span>
                       </div>
-                      <div className="mt-5 text-lg font-black">{option.label}</div>
+                      <div className="mt-3 text-sm font-black md:mt-5 md:text-lg">{option.label}</div>
                     </button>
                   );
                 })}
@@ -458,11 +496,11 @@ function SearchContent({
             </div>
           </section>
 
-          <div className="grid gap-8 xl:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className="space-y-6">
+          <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)] xl:gap-8">
+            <aside className="order-2 grid items-start gap-4 min-[390px]:grid-cols-2 xl:order-1 xl:block xl:space-y-6">
               <section
                 className={cn(
-                  "rounded-[28px] border p-6 shadow-xl",
+                  "rounded-[28px] border p-5 shadow-xl md:p-6",
                   palette.surface,
                   palette.border,
                 )}
@@ -470,15 +508,15 @@ function SearchContent({
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
                   Filters
                 </p>
-                <h2 className="mt-2 text-2xl font-black text-white">Genres</h2>
-                <div className="mt-5 flex flex-wrap gap-2">
+                <h2 className="mt-2 text-xl font-black text-white md:text-2xl">Genres</h2>
+                <div className="mt-4 flex flex-wrap gap-2 md:mt-5">
                   {genreOptions.map((genre) => (
                     <button
                       key={genre}
                       type="button"
                       onClick={() => setActiveGenre(genre)}
                       className={cn(
-                        "rounded-full px-3 py-2 text-xs font-black uppercase tracking-[0.16em] transition-all",
+                        "rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] transition-all md:py-2 md:text-xs",
                         activeGenre === genre
                           ? cn(palette.primaryBg, "text-white shadow-lg")
                           : "border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white",
@@ -492,7 +530,7 @@ function SearchContent({
 
               <section
                 className={cn(
-                  "rounded-[28px] border p-6 shadow-xl",
+                  "rounded-[28px] border p-5 shadow-xl md:p-6",
                   palette.surface,
                   palette.border,
                 )}
@@ -500,14 +538,14 @@ function SearchContent({
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
                   Ranking
                 </p>
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-1.5 md:space-y-2">
                   {SORT_OPTIONS.map((option) => (
                     <button
                       key={option.key}
                       type="button"
                       onClick={() => setActiveSort(option.key)}
                       className={cn(
-                        "flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-bold transition-all",
+                        "flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-left text-sm font-bold transition-all md:px-4 md:py-3",
                         activeSort === option.key
                           ? "border border-white/10 bg-white/10 text-white"
                           : "text-gray-500 hover:bg-white/5 hover:text-gray-300",
@@ -525,7 +563,7 @@ function SearchContent({
               {featuredItem ? (
                 <section
                   className={cn(
-                    "overflow-hidden rounded-[28px] border shadow-xl",
+                    "hidden overflow-hidden rounded-[28px] border shadow-xl xl:block",
                     palette.surface,
                     palette.border,
                   )}
@@ -563,19 +601,57 @@ function SearchContent({
               ) : null}
             </aside>
 
-            <section>
-              <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <section className="order-1 xl:order-2">
+              <div className="mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
                     Results
                   </p>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-white">
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
                     {deferredQuery.trim() ? `Matches for "${deferredQuery.trim()}"` : "Browse the catalog"}
                   </h2>
                 </div>
                 <div className="text-sm font-bold text-gray-400">
                   {loading ? "Loading..." : `${sortedItems.length} results live`}
                 </div>
+              </div>
+
+              <div className="mb-3 flex gap-2 overflow-x-auto pb-1 xl:hidden">
+                {FORMAT_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  const count =
+                    option.key === SEARCH_FORMATS.ALL
+                      ? formatCounts.all
+                      : option.key === SEARCH_FORMATS.COMICS
+                        ? formatCounts.comics
+                        : option.key === SEARCH_FORMATS.NOVELS
+                          ? formatCounts.novels
+                          : formatCounts.interactive;
+
+                  return (
+                    <button
+                      key={`results-${option.key}`}
+                      type="button"
+                      onClick={() => setActiveFormat(option.key)}
+                      className={cn(
+                        "min-w-[142px] shrink-0 rounded-[22px] border px-3 py-3 text-left transition-all",
+                        activeFormat === option.key
+                          ? cn(palette.primaryBg, "border-transparent text-white shadow-xl")
+                          : "border-white/10 bg-black/20 text-gray-300 hover:bg-white/5",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          <span className="text-xs font-black">{option.label}</span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.18em]">
+                          {count}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
               {error ? (
@@ -592,12 +668,12 @@ function SearchContent({
                   </p>
                 </div>
               ) : loading ? (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5">
                   {Array.from({ length: 6 }).map((_, index) => (
                     <div
                       key={`search-skeleton-${index}`}
                       className={cn(
-                        "h-[420px] animate-pulse rounded-[28px] border shadow-xl",
+                        "h-[360px] animate-pulse rounded-[28px] border shadow-xl md:h-[420px]",
                         palette.surface,
                         palette.border,
                       )}
@@ -605,7 +681,7 @@ function SearchContent({
                   ))}
                 </div>
               ) : sortedItems.length > 0 ? (
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5">
                   {sortedItems.map((item) => (
                     <SearchResultCard key={item.id} item={item} />
                   ))}
@@ -636,6 +712,9 @@ function SearchContent({
 export default function FigmaSearchPage({
   initialQuery = "",
   initialFormat = SEARCH_FORMATS.ALL,
+  initialResults = [],
+  initialHotKeywords = [],
+  initialReady = false,
 }) {
   const normalizedFormat = normalizeInitialFormat(initialFormat);
 
@@ -646,6 +725,9 @@ export default function FigmaSearchPage({
       <SearchContent
         initialQuery={initialQuery}
         initialFormat={normalizedFormat}
+        initialResults={initialResults}
+        initialHotKeywords={initialHotKeywords}
+        initialReady={initialReady}
       />
     </FigmaSiteProvider>
   );

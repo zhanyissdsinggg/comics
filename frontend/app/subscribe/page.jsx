@@ -1,8 +1,8 @@
-import SubscribePage from "../../components/subscribe/SubscribePage";
 import { createPageMetadata } from "../../lib/seo";
 import { siteConfig } from "../../lib/siteConfig";
 import { loadSubscriptionPlansSeoPayload } from "../../lib/storefrontSeo";
 import { WalletProvider } from "../../store/useWalletStore";
+import FigmaSubscribePage from "../../components/figma/FigmaSubscribePage";
 
 export const metadata = createPageMetadata({
   title: siteConfig.monetization.membershipEnabled
@@ -26,9 +26,12 @@ export const metadata = createPageMetadata({
 
 export default async function Page({ searchParams }) {
   const initialSearchParams = (await searchParams) || {};
-  const payload = siteConfig.monetization.membershipEnabled
-    ? await loadSubscriptionPlansSeoPayload()
-    : null;
+  if (!siteConfig.monetization.membershipEnabled) {
+    return <FigmaSubscribePage />;
+  }
+
+  const payload = await loadSubscriptionPlansSeoPayload();
+  const SubscribePage = (await import("../../components/subscribe/SubscribePage")).default;
 
   return (
     <WalletProvider>

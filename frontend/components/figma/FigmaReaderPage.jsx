@@ -1,45 +1,164 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
+  ChevronRight,
   Heart,
   List,
   Lock,
   MessageCircle,
+  Moon,
   MoreVertical,
-  Settings,
+  Settings2,
   Share2,
+  SunMedium,
+  Wallet,
+  X,
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
-import { useEntitlementStore } from "../../store/useEntitlementStore";
-import { useAuthStore } from "../../store/useAuthStore";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
+import {
+  formatInstallmentLabel,
+  getInstallmentLabel,
+  isDefaultInstallmentTitle,
+} from "../../lib/seriesFormatLabels";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
+import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
+import { useWalletStore } from "../../store/useWalletStore";
 import PageStream from "../reader/PageStream";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
 import { cn } from "./figma-utils";
 
-function ReaderContent({ seriesId, episodeId }) {
+function createIdempotencyKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `reader_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function formatMetaDate(value) {
+  if (!value) {
+    return "Today";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Today";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(parsed);
+}
+
+function formatPriceLabel(value) {
+  const numeric = Number(value || 0);
+  return numeric > 0 ? `${numeric} pts` : "Free";
+}
+
+function resolveEpisodeDisplayTitle(title, fallbackLabel, seriesType) {
+  const normalizedTitle = String(title || "").trim();
+  if (!normalizedTitle || isDefaultInstallmentTitle(normalizedTitle, seriesType)) {
+    return fallbackLabel;
+  }
+
+  return normalizedTitle;
+}
+
+function scrollToNode(node, offset = 88) {
+  if (typeof window === "undefined" || !node) {
+    return;
+  }
+
+  const top = node.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+function Pill({ className = "", children }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em]",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Metric({ label, value, hint }) {
+  return (
+    <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">{label}</p>
+      <p className="mt-2 text-base font-black text-white">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-gray-400">{hint}</p> : null}
+    </div>
+  );
+}
+
+function QueueCard({
+  eyebrow,
+  title,
+  description,
+  ctaLabel,
+  onClick,
+  buttonClassName = "",
+}) {
+  return (
+    <div className="rounded-[26px] border border-white/10 bg-black/20 p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">{eyebrow}</p>
+      <p className="mt-2 text-sm font-black text-white">{title}</p>
+      <p className="mt-2 min-h-[44px] text-sm leading-6 text-gray-400">{description}</p>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-black transition-all active:scale-[0.98]",
+          buttonClassName ||
+            "border border-white/10 bg-white/5 text-white hover:bg-white/10",
+        )}
+      >
+        {ctaLabel}
+      </button>
+    </div>
+  );
+}
+
+function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const router = useRouter();
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
+  const commentsRef = useRef(null);
   const historyLoggedRef = useRef(false);
   const { palette, handleAdultToggle, openLogin } = useFigmaSite();
-  const { loadEntitlement, bySeriesId } = useEntitlementStore();
+  const { loadEntitlement, unlockEpisode, bySeriesId } = useEntitlementStore();
   const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { addHistory } = useHistoryStore();
+  const { loadWallet, paidPts, bonusPts } = useWalletStore();
+  const { nightMode, toggleNightMode, layoutMode, setLayoutMode, brightness, setBrightness } =
+    useReaderSettingsStore();
   const [seriesData, setSeriesData] = useState(null);
   const [episodeData, setEpisodeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showNav, setShowNav] = useState(true);
   const [liked, setLiked] = useState(false);
-
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [overflowOpen, setOverflowOpen] = useState(false);
+  const [unlockBusy, setUnlockBusy] = useState(false);
+  const [toast, setToast] = useState("");
+  const [hasReachedPreviewEnd, setHasReachedPreviewEnd] = useState(false);
+  const [hasReachedChapterEnd, setHasReachedChapterEnd] = useState(false);
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
 
   useEffect(() => {
@@ -48,12 +167,9 @@ function ReaderContent({ seriesId, episodeId }) {
     async function load() {
       setLoading(true);
       setError("");
-
       const adultFlag = isAdultMode ? "1" : "0";
       const [seriesResponse, episodeResponse] = await Promise.all([
-        apiGet(`/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`, {
-          cacheMs: 0,
-        }),
+        apiGet(`/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`, { cacheMs: 0 }),
         apiGet(
           `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
           { cacheMs: 0 },
@@ -83,7 +199,6 @@ function ReaderContent({ seriesId, episodeId }) {
     }
 
     void load();
-
     return () => {
       active = false;
     };
@@ -92,26 +207,17 @@ function ReaderContent({ seriesId, episodeId }) {
   useEffect(() => {
     if (isSignedIn) {
       void loadEntitlement(seriesId);
+      void loadWallet();
     }
-  }, [isSignedIn, loadEntitlement, seriesId]);
+  }, [isSignedIn, loadEntitlement, loadWallet, seriesId]);
 
   useEffect(() => {
-    if (
-      !isSignedIn ||
-      historyLoggedRef.current ||
-      !seriesData?.series ||
-      !episodeData?.id
-    ) {
+    if (!isSignedIn || historyLoggedRef.current || !seriesData?.series || !episodeData?.id) {
       return;
     }
 
     historyLoggedRef.current = true;
-    void addHistory({
-      seriesId,
-      episodeId,
-      title: seriesData.series.title,
-      percent: 0.08,
-    });
+    void addHistory({ seriesId, episodeId, title: seriesData.series.title, percent: 0.08 });
   }, [addHistory, episodeData?.id, episodeId, isSignedIn, seriesData?.series, seriesId]);
 
   useEffect(() => {
@@ -133,51 +239,208 @@ function ReaderContent({ seriesId, episodeId }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setToast(""), 1800);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
   const episodes = useMemo(
     () => (Array.isArray(seriesData?.episodes) ? seriesData.episodes : []),
     [seriesData],
   );
   const currentEpisode = useMemo(
-    () =>
-      episodes.find((item) => String(item?.id || "").trim() === String(episodeId || "").trim()) ||
-      null,
+    () => episodes.find((item) => String(item?.id || "") === String(episodeId || "")) || null,
     [episodeId, episodes],
   );
   const currentIndex = useMemo(
-    () =>
-      episodes.findIndex((item) => String(item?.id || "").trim() === String(episodeId || "").trim()),
+    () => episodes.findIndex((item) => String(item?.id || "") === String(episodeId || "")),
     [episodeId, episodes],
   );
   const prevEpisode = currentIndex > 0 ? episodes[currentIndex - 1] : null;
   const nextEpisode =
-    currentIndex >= 0 && currentIndex < episodes.length - 1
-      ? episodes[currentIndex + 1]
-      : null;
-
-  const isAdultSeries = Boolean(seriesData?.series?.adult);
+    currentIndex >= 0 && currentIndex < episodes.length - 1 ? episodes[currentIndex + 1] : null;
+  const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
+  const installmentLabel = getInstallmentLabel(seriesType);
+  const installmentPlural = getInstallmentLabel(seriesType, { plural: true });
+  const currentNumber = currentEpisode?.number || episodeData?.number || 1;
+  const currentInstallmentLabel = formatInstallmentLabel(seriesType, currentNumber);
+  const rawEpisodeTitle = String(
+    currentEpisode?.title || episodeData?.title || fallbackData?.episodeTitle || "",
+  ).trim();
+  const currentEpisodeTitle =
+    rawEpisodeTitle && !isDefaultInstallmentTitle(rawEpisodeTitle, seriesType)
+      ? rawEpisodeTitle
+      : currentInstallmentLabel;
+  const currentPricePts = Number(
+    currentEpisode?.access?.pricePts ?? currentEpisode?.pricePts ?? episodeData?.pricePts ?? 0,
+  );
   const unlocked =
-    Number(currentEpisode?.pricePts || 0) <= 0 ||
-    entitlement.unlockedEpisodeIds.includes(String(episodeId));
-  const isComic = episodeData?.type === "comic";
+    currentPricePts <= 0 || entitlement.unlockedEpisodeIds.includes(String(episodeId));
+  const isComic = (episodeData?.type || seriesType) === "comic";
   const previewCount = !unlocked && isComic ? episodeData?.previewFreePages ?? 3 : null;
-  const previewParagraphs =
-    !unlocked && !isComic ? episodeData?.previewParagraphs ?? 3 : null;
+  const previewParagraphs = !unlocked && !isComic ? episodeData?.previewParagraphs ?? 3 : null;
   const pages = Array.isArray(episodeData?.pages) ? episodeData.pages : [];
   const paragraphs = Array.isArray(episodeData?.paragraphs) ? episodeData.paragraphs : [];
-  const progressWidth =
-    episodes.length > 1 && currentIndex >= 0
-      ? `${Math.round(((currentIndex + 1) / episodes.length) * 100)}%`
-      : "45%";
+  const visibleUnits = isComic
+    ? typeof previewCount === "number"
+      ? Math.min(previewCount, pages.length)
+      : pages.length
+    : typeof previewParagraphs === "number"
+      ? Math.min(previewParagraphs, paragraphs.length)
+      : paragraphs.length;
+  const safeVisibleUnits = Math.max(visibleUnits, 1);
+  const progressPercent = visibleUnits
+    ? hasReachedChapterEnd || (!unlocked && hasReachedPreviewEnd)
+      ? 100
+      : Math.max(
+          1,
+          Math.min(
+            100,
+            Math.round(
+              ((Math.min(activeIndex, safeVisibleUnits - 1) + 1) / safeVisibleUnits) * 100,
+            ),
+          ),
+        )
+    : 0;
+  const queuePercent =
+    episodes.length > 1 && currentIndex >= 0 ? Math.round(((currentIndex + 1) / episodes.length) * 100) : 100;
+  const creatorName =
+    resolveSeriesCreatorName(seriesData?.series) || String(seriesData?.series?.author || "").trim() || "Editorial Crew";
+  const walletBalance = Number(paidPts || 0) + Number(bonusPts || 0);
+  const shortfallPts = Math.max(0, currentPricePts - walletBalance);
+  const backToSeriesHref =
+    fallbackData?.backToSeriesHref || `/series/${encodeURIComponent(seriesId)}`;
+  const layoutModeForView = isComic ? layoutMode : "vertical";
+  const isAdultSeries = Boolean(seriesData?.series?.adult);
+  const shareUrl = typeof window !== "undefined" ? window.location.href : backToSeriesHref;
+  const previousQueueLabel = prevEpisode
+    ? formatInstallmentLabel(seriesType, prevEpisode?.number || Math.max(currentNumber - 1, 1))
+    : "Series overview";
+  const previousQueueDescription = prevEpisode
+    ? resolveEpisodeDisplayTitle(
+        prevEpisode?.title,
+        previousQueueLabel,
+        seriesType,
+      )
+    : "No earlier installment is listed here, so the series page becomes the safe reset point.";
+  const currentQueueDescription = unlocked
+    ? `${currentInstallmentLabel} is fully open and synced in this reader shell.`
+    : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} are open before unlock.`;
+  const nextQueueLabel = nextEpisode
+    ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
+    : "Series overview";
+  const nextQueueDescription = nextEpisode
+    ? `${resolveEpisodeDisplayTitle(nextEpisode?.title, nextQueueLabel, seriesType)} is ready next${
+        Number(nextEpisode?.pricePts || 0) > 0
+          ? ` at ${formatPriceLabel(nextEpisode?.pricePts)} if still locked.`
+          : "."
+      }`
+    : "No next installment is listed yet, so the overview page is the cleanest next stop.";
+
+  const handleShare = useCallback(async () => {
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share({ title: seriesData?.series?.title, text: currentEpisodeTitle, url: shareUrl });
+      } else if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+      setToast("Reader link ready");
+    } catch {
+      setToast("Share cancelled");
+    }
+  }, [currentEpisodeTitle, seriesData?.series?.title, shareUrl]);
+
+  const handleUnlockCurrent = useCallback(async () => {
+    if (!isSignedIn) {
+      openLogin("login", `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`);
+      return;
+    }
+
+    if (shortfallPts > 0) {
+      router.push("/store");
+      return;
+    }
+
+    setUnlockBusy(true);
+    const response = await unlockEpisode(seriesId, episodeId, createIdempotencyKey());
+    setUnlockBusy(false);
+    if (response.ok) {
+      setToast(`${currentInstallmentLabel} unlocked`);
+      return;
+    }
+    setToast(response.status === 402 ? "Not enough points" : "Unlock failed");
+    if (response.status === 402) {
+      router.push("/store");
+    }
+  }, [currentInstallmentLabel, episodeId, isSignedIn, openLogin, router, seriesId, shortfallPts, unlockEpisode]);
+
+  const handleOpenComments = useCallback(() => {
+    scrollToNode(commentsRef.current);
+    setOverflowOpen(false);
+  }, []);
+
+  const handleJumpToCheckpoint = useCallback(() => {
+    scrollToNode(unlocked ? endRef.current : previewEndRef.current);
+    setOverflowOpen(false);
+  }, [unlocked]);
+
+  useEffect(() => {
+    setHasReachedPreviewEnd(false);
+    setHasReachedChapterEnd(false);
+  }, [episodeId, unlocked]);
+
+  useEffect(() => {
+    if (loading || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const updateCompletionState = () => {
+      const viewportBottom = window.scrollY + window.innerHeight;
+      const previewCheckpoint =
+        previewEndRef.current?.getBoundingClientRect().top + window.scrollY;
+      const chapterCheckpoint =
+        endRef.current?.getBoundingClientRect().top + window.scrollY;
+
+      if (typeof previewCheckpoint === "number") {
+        setHasReachedPreviewEnd(viewportBottom >= previewCheckpoint - 96);
+      }
+
+      if (typeof chapterCheckpoint === "number") {
+        setHasReachedChapterEnd(viewportBottom >= chapterCheckpoint - 96);
+      }
+    };
+
+    updateCompletionState();
+    window.addEventListener("scroll", updateCompletionState, { passive: true });
+    window.addEventListener("resize", updateCompletionState);
+
+    return () => {
+      window.removeEventListener("scroll", updateCompletionState);
+      window.removeEventListener("resize", updateCompletionState);
+    };
+  }, [loading, pages.length, paragraphs.length, previewCount, previewParagraphs]);
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#050505] px-4 py-20 text-white">
-        <div className="mx-auto max-w-3xl space-y-4">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-40 animate-pulse rounded-2xl bg-white/5"
-            />
+      <main className={cn("min-h-screen px-4 py-20 text-white", palette.rootBg)}>
+        <div className="mx-auto max-w-5xl space-y-4">
+          <div className="rounded-[30px] border border-white/10 bg-white/5 p-6">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
+              Loading reader
+            </p>
+            <h1 className="mt-3 text-3xl font-black text-white">
+              {String(fallbackData?.seriesTitle || "Reader").trim() || "Reader"}
+            </h1>
+            <p className="mt-2 text-sm text-gray-400">
+              {String(fallbackData?.episodeTitle || "Preparing installment").trim() ||
+                "Preparing installment"}
+            </p>
+          </div>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="h-32 animate-pulse rounded-[26px] bg-white/5" />
           ))}
         </div>
       </main>
@@ -186,35 +449,46 @@ function ReaderContent({ seriesId, episodeId }) {
 
   if (error || !seriesData?.series || !episodeData) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#050505] px-4 py-20 text-white">
+      <main
+        className={cn(
+          "flex min-h-screen items-center justify-center px-4 py-20 text-white",
+          palette.rootBg,
+        )}
+      >
         <div
           className={cn(
-            "w-full max-w-xl rounded-3xl border p-8 text-center",
+            "w-full max-w-xl rounded-[32px] border p-8 text-center shadow-2xl",
             palette.surface,
             palette.border,
           )}
         >
-          <h1 className="mb-3 text-3xl font-black">Reader unavailable</h1>
-          <p className="mb-6 text-gray-400">
-            This episode failed to load. Try again or bounce back to the series.
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
+            Reader unavailable
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <h1 className="mt-3 text-3xl font-black text-white">
+            This installment failed to load
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-gray-400">
+            Try again or bounce back to the series queue to reopen the reader cleanly.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               type="button"
               onClick={() => router.refresh()}
               className={cn(
-                "rounded-xl px-6 py-3 font-bold text-white",
+                "rounded-2xl px-6 py-3 font-black text-white transition-transform active:scale-[0.98]",
                 palette.primaryBg,
               )}
             >
-              Retry
+              Retry reader
             </button>
-            <Link
-              href={`/series/${encodeURIComponent(seriesId)}`}
-              className="rounded-xl border border-white/10 px-6 py-3 font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+            <button
+              type="button"
+              onClick={() => router.push(backToSeriesHref)}
+              className="rounded-2xl border border-white/10 px-6 py-3 font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
             >
               Back to series
-            </Link>
+            </button>
           </div>
         </div>
       </main>
@@ -227,8 +501,7 @@ function ReaderContent({ seriesId, episodeId }) {
         <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
         <h1 className="mb-4 text-3xl font-black">Age Restricted Content</h1>
         <p className="mb-8 max-w-md text-gray-400">
-          This episode belongs to a mature title. Enable adult mode before
-          opening it.
+          This title is marked mature. Enable adult mode before opening the reader.
         </p>
         <button
           type="button"
@@ -245,251 +518,693 @@ function ReaderContent({ seriesId, episodeId }) {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#050505] pb-24 text-white">
+    <main className={cn("relative min-h-screen overflow-x-hidden pb-28 text-white", palette.rootBg)}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className={cn(
+            "absolute left-[-12%] top-24 h-72 w-72 rounded-full blur-3xl",
+            palette.heroGlow,
+          )}
+        />
+        <div className="absolute right-[-8%] top-[30rem] h-80 w-80 rounded-full bg-cyan-500/8 blur-3xl" />
+      </div>
+
       <div
         className={cn(
-          "fixed top-0 z-50 flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#121212]/90 px-4 backdrop-blur-md transition-transform duration-300",
+          "fixed top-0 z-50 w-full border-b border-white/5 bg-[#0b0f16]/88 backdrop-blur-xl transition-transform duration-300",
           showNav ? "translate-y-0" : "-translate-y-full",
         )}
       >
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="rounded-full p-2 transition-colors hover:bg-white/10"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="max-w-[220px] truncate text-sm font-bold md:max-w-md md:text-base">
-              {seriesData.series.title}
-            </h1>
-            <p className="text-xs text-gray-400">
-              {currentEpisode?.title || `Episode ${currentEpisode?.number || 1}`}
-            </p>
+        <div className="mx-auto flex min-h-[78px] w-full max-w-[1320px] items-center justify-between gap-4 px-4 py-3 md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-all hover:border-white/20 hover:bg-white/10 active:scale-[0.97]"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="min-w-0">
+              <div className="mb-2 flex flex-wrap gap-2">
+                <Pill className="border-white/10 bg-white/5 text-gray-300">Reader deck</Pill>
+                <Pill className={cn("border-white/10", palette.primarySoft)}>
+                  {currentInstallmentLabel}
+                </Pill>
+                {!unlocked ? (
+                  <Pill className="border-amber-500/25 bg-amber-500/10 text-amber-200">
+                    Preview mode
+                  </Pill>
+                ) : null}
+              </div>
+              <h1 className="truncate text-sm font-black text-white md:text-base">
+                {seriesData.series.title}
+              </h1>
+              <p className="truncate text-xs text-gray-400 md:text-sm">{currentEpisodeTitle}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <MessageCircle className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            className="rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            className="rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <MoreVertical className="h-5 w-5" />
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleOpenComments}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]"
+            >
+              <MessageCircle className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSettingsOpen((value) => !value);
+                setOverflowOpen(false);
+              }}
+              className={cn(
+                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
+                settingsOpen && "border-white/20 bg-white/10 text-white",
+              )}
+            >
+              <Settings2 className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOverflowOpen((value) => !value);
+                setSettingsOpen(false);
+              }}
+              className={cn(
+                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
+                overflowOpen && "border-white/20 bg-white/10 text-white",
+              )}
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="pt-16" onClick={() => setShowNav((value) => !value)}>
-        <PageStream
-          pages={pages}
-          paragraphs={paragraphs}
-          previewCount={previewCount}
-          previewParagraphs={previewParagraphs}
-          layoutMode="vertical"
-          isNightMode
-          imageQuality={75}
-          imageSizes="(max-width: 768px) 100vw, 768px"
-          seriesType={seriesData.series?.type || episodeData.type}
-          onPreviewEndRef={(node) => {
-            previewEndRef.current = node;
-          }}
-          onEndRef={(node) => {
-            endRef.current = node;
-          }}
-        />
+      {overflowOpen ? (
+        <div className="fixed right-4 top-[92px] z-50 w-[min(22rem,calc(100vw-2rem))] rounded-[28px] border border-white/10 bg-[#0d121a]/95 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:right-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                Reader actions
+              </p>
+              <h2 className="mt-1 text-base font-black text-white">Quick jumps</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOverflowOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-        {!unlocked ? (
-          <div className="mx-auto mt-6 max-w-3xl px-4" onClick={(event) => event.stopPropagation()}>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => router.push(backToSeriesHref)}
+              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+            >
+              <span>
+                <span className="block text-sm font-bold text-white">Back to series</span>
+                <span className="mt-1 block text-xs text-gray-400">Open the full queue</span>
+              </span>
+              <ChevronRight className="h-4 w-4 text-white/70" />
+            </button>
+            <button
+              type="button"
+              onClick={handleJumpToCheckpoint}
+              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+            >
+              <span>
+                <span className="block text-sm font-bold text-white">
+                  {unlocked ? "Jump to end console" : "Jump to unlock card"}
+                </span>
+                <span className="mt-1 block text-xs text-gray-400">
+                  Skip to the next decision point
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 text-white/70" />
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {settingsOpen ? (
+        <div className="fixed bottom-[92px] right-4 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-[30px] border border-white/10 bg-[#0d121a]/95 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:right-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                Reader settings
+              </p>
+              <h2 className="mt-1 text-base font-black text-white">Live controls</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={toggleNightMode}
+              className={cn(
+                "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
+                nightMode
+                  ? "border-white/20 bg-white/12 text-white"
+                  : "border-white/10 bg-black/20 text-gray-300 hover:border-white/20 hover:bg-white/[0.06]",
+              )}
+            >
+              {nightMode ? "Night mode on" : "Night mode off"}
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                isComic
+                  ? setLayoutMode(layoutModeForView === "horizontal" ? "vertical" : "horizontal")
+                  : null
+              }
+              className={cn(
+                "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
+                isComic
+                  ? layoutModeForView === "horizontal"
+                    ? "border-white/20 bg-white/12 text-white"
+                    : "border-white/10 bg-black/20 text-gray-300 hover:border-white/20 hover:bg-white/[0.06]"
+                  : "border-white/10 bg-black/20 text-gray-500",
+              )}
+            >
+              {isComic
+                ? layoutModeForView === "horizontal"
+                  ? "Horizontal pages"
+                  : "Vertical scroll"
+                : "Novel mode stays vertical"}
+            </button>
+          </div>
+
+          <div className="mt-4 rounded-[24px] border border-white/10 bg-black/20 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-white">Brightness</p>
+                <p className="mt-1 text-xs text-gray-400">Tune the reader without leaving the page.</p>
+              </div>
+              <span className="text-sm font-black text-white">{brightness}%</span>
+            </div>
+            <input
+              type="range"
+              min="50"
+              max="150"
+              step="5"
+              value={brightness}
+              onChange={(event) => setBrightness(Number(event.target.value))}
+              className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <section className="relative px-4 pb-6 pt-24 md:px-6 md:pt-28">
+        <div className="mx-auto grid w-full max-w-[1320px] gap-4 lg:grid-cols-[minmax(0,1.18fr)_340px]">
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-[34px] border p-6 shadow-[0_28px_90px_rgba(0,0,0,0.32)] md:p-7",
+              palette.surface,
+              palette.border,
+            )}
+          >
+            <div className="relative">
+              <div className="flex flex-wrap items-center gap-2">
+                <Pill className={cn("border-white/10", palette.primarySoft)}>Active reader</Pill>
+                <Pill className="border-white/10 bg-white/5 text-gray-300">
+                  {`${currentIndex >= 0 ? currentIndex + 1 : 1}/${Math.max(episodes.length, 1)} queue`}
+                </Pill>
+                <Pill className="border-white/10 bg-black/20 text-gray-300">
+                  {unlocked ? "Full access" : formatPriceLabel(currentPricePts)}
+                </Pill>
+              </div>
+
+              <h2 className="mt-4 text-[clamp(2rem,3.4vw,3.6rem)] font-black leading-[0.96] tracking-[-0.04em] text-white">
+                {seriesData.series.title}
+              </h2>
+              <p className="mt-2 max-w-3xl text-base font-semibold text-gray-200 md:text-lg">
+                {currentEpisodeTitle}
+              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-400">
+                {creatorName} · Released{" "}
+                {formatMetaDate(
+                  currentEpisode?.releasedAt || episodeData?.releasedAt || seriesData.series.updatedAt,
+                )}{" "}
+                ·{" "}
+                {unlocked
+                  ? `Full ${installmentLabel.toLowerCase()} is live.`
+                  : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <Metric label="Installment" value={currentInstallmentLabel} hint="Current reader label" />
+                <Metric
+                  label="Reading mode"
+                  value={isComic ? (layoutModeForView === "horizontal" ? "Horizontal pages" : "Vertical scroll") : "Story text"}
+                  hint={nightMode ? "Night mode enabled" : "Core palette enabled"}
+                />
+                <Metric
+                  label="Access state"
+                  value={unlocked ? "Full chapter open" : `${formatPriceLabel(currentPricePts)} to unlock`}
+                  hint={unlocked ? "No preview cap is active" : "Preview gate is still active"}
+                />
+                <Metric
+                  label="Wallet"
+                  value={`${walletBalance} pts`}
+                  hint={isSignedIn ? `${paidPts} paid · ${bonusPts} bonus` : "Sign in to sync points"}
+                />
+              </div>
+            </div>
+          </div>
+
+          <aside
+            className={cn(
+              "overflow-hidden rounded-[34px] border p-5 shadow-[0_28px_90px_rgba(0,0,0,0.28)] md:p-6",
+              palette.surface,
+              palette.border,
+            )}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                  Reading queue
+                </p>
+                <h2 className="mt-2 text-xl font-black text-white">What&apos;s around this read</h2>
+                <p className="mt-2 text-sm leading-6 text-gray-400">
+                  Keep the previous and next move visible without breaking the flow.
+                </p>
+              </div>
+              <div className={cn("rounded-2xl border px-3 py-2 text-xs font-black", palette.primarySoft)}>
+                {queuePercent}%
+              </div>
+            </div>
+
+            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
+              <div className={cn("h-full transition-[width] duration-300", palette.primaryBg)} style={{ width: `${queuePercent}%` }} />
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              <QueueCard
+                eyebrow="Previous"
+                title={previousQueueLabel}
+                description={previousQueueDescription}
+                ctaLabel={prevEpisode ? "Open previous" : "Back to series"}
+                onClick={
+                  prevEpisode
+                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(prevEpisode.id)}`)
+                    : () => router.push(backToSeriesHref)
+                }
+              />
+              <QueueCard
+                eyebrow="Current"
+                title={currentInstallmentLabel}
+                description={currentQueueDescription}
+                ctaLabel={unlocked ? "Continue reading" : "Jump to checkpoint"}
+                buttonClassName={cn("text-white", palette.primaryBg)}
+                onClick={unlocked ? () => scrollToNode(endRef.current) : handleJumpToCheckpoint}
+              />
+              <QueueCard
+                eyebrow="Next"
+                title={nextQueueLabel}
+                description={nextQueueDescription}
+                ctaLabel={nextEpisode ? "Open next" : "Back to series"}
+                buttonClassName={cn(
+                  nextEpisode ? `text-white ${palette.primaryBg}` : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
+                )}
+                onClick={
+                  nextEpisode
+                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(nextEpisode.id)}`)
+                    : () => router.push(backToSeriesHref)
+                }
+              />
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="relative">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <div
+            className="relative"
+            style={{ filter: `brightness(${brightness}%)` }}
+            onClick={() => setShowNav((value) => !value)}
+          >
+            <PageStream
+              pages={pages}
+              paragraphs={paragraphs}
+              previewCount={previewCount}
+              previewParagraphs={previewParagraphs}
+              layoutMode={layoutModeForView}
+              isNightMode={nightMode || isAdultMode}
+              imageQuality={75}
+              imageSizes="(max-width: 768px) 100vw, 768px"
+              seriesType={seriesType}
+              onActiveIndexChange={setActiveIndex}
+              onPreviewEndRef={(node) => {
+                previewEndRef.current = node;
+              }}
+              onEndRef={(node) => {
+                endRef.current = node;
+              }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {!unlocked ? (
+        <section className="px-4 py-2 md:px-6">
+          <div className="mx-auto max-w-5xl">
             <div
               className={cn(
-                "rounded-3xl border p-6 shadow-2xl",
+                "relative overflow-hidden rounded-[34px] border p-6 shadow-[0_28px_90px_rgba(0,0,0,0.32)] md:p-7",
                 palette.surface,
                 palette.border,
               )}
             >
-              <p className="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-gray-400">
-                Preview ends here
-              </p>
-              <h2 className="mb-3 text-2xl font-black text-white">
-                Unlock the rest of this episode
-              </h2>
-              <p className="mb-6 text-sm leading-6 text-gray-400">
-                The chapter is locked right now. Jump to the store for points or
-                sign in if you already own access.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                {isSignedIn ? (
-                  <Link
-                    href="/store"
-                    className={cn(
-                      "rounded-xl px-6 py-3 text-center font-bold text-white",
-                      palette.primaryBg,
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Pill className="border-amber-500/25 bg-amber-500/10 text-amber-200">
+                      Preview ends here
+                    </Pill>
+                    <Pill className="border-white/10 bg-white/5 text-gray-300">
+                      {formatPriceLabel(currentPricePts)}
+                    </Pill>
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black tracking-tight text-white md:text-4xl">
+                    Unlock the rest of this {installmentLabel.toLowerCase()}.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
+                    The preview stops at the hand-off point. Open the rest now, keep your place
+                    synced, and roll straight into the next beat without leaving the reader.
+                  </p>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    <Metric
+                      label="Unlock price"
+                      value={formatPriceLabel(currentPricePts)}
+                      hint={`${safeVisibleUnits} preview unit${safeVisibleUnits === 1 ? "" : "s"} already open`}
+                    />
+                    <Metric
+                      label="Wallet total"
+                      value={`${walletBalance} pts`}
+                      hint={isSignedIn ? `${paidPts} paid · ${bonusPts} bonus` : "Sign in to check balance"}
+                    />
+                    <Metric
+                      label="Shortfall"
+                      value={shortfallPts > 0 ? `${shortfallPts} pts` : "Ready now"}
+                      hint={shortfallPts > 0 ? "Top up to continue instantly" : "Enough points to open now"}
+                    />
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    {!isSignedIn ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openLogin("login", `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`)
+                        }
+                        className={cn(
+                          "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-6 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
+                          palette.primaryBg,
+                        )}
+                      >
+                        Sign in to unlock
+                      </button>
+                    ) : shortfallPts > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => router.push("/store")}
+                        className={cn(
+                          "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-6 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
+                          palette.primaryBg,
+                        )}
+                      >
+                        Get more points
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleUnlockCurrent}
+                        disabled={unlockBusy}
+                        className={cn(
+                          "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-6 py-3 text-sm font-black text-white transition-transform active:scale-[0.98] disabled:cursor-wait disabled:opacity-70",
+                          palette.primaryBg,
+                        )}
+                      >
+                        {unlockBusy ? "Unlocking..." : `Unlock with ${currentPricePts} pts`}
+                      </button>
                     )}
-                  >
-                    Get Points
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openLogin(
-                        "login",
-                        `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`,
-                      )
-                    }
-                    className={cn(
-                      "rounded-xl px-6 py-3 text-center font-bold text-white",
-                      palette.primaryBg,
-                    )}
-                  >
-                    Sign In
-                  </button>
-                )}
-                <Link
-                  href={`/series/${encodeURIComponent(seriesId)}`}
-                  className="rounded-xl border border-white/10 px-6 py-3 text-center font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
-                >
-                  Back to series
-                </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push(backToSeriesHref)}
+                      className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/10 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/5"
+                    >
+                      Back to series
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                    Unlock adds
+                  </p>
+                  <div className="mt-4 space-y-3">
+                    <Metric label="Continue instantly" value="No route break" hint="Stay in the same reader shell after access flips live." />
+                    <Metric label="Queue context" value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more ahead`} hint={`You are reading ${currentInstallmentLabel.toLowerCase()} of ${Math.max(episodes.length, 1)}.`} />
+                    <Metric label="Reading state" value="Synced progress" hint="Signed-in readers keep placement and unlock state together." />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        ) : null}
+        </section>
+      ) : null}
 
-        <div
-          className="mx-auto mt-8 max-w-3xl border-t border-white/10 p-8 text-center"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <h3 className="mb-6 text-xl font-bold text-white">To be continued...</h3>
-          <div className="mb-10 flex justify-center gap-6">
-            <button
-              type="button"
-              onClick={() => setLiked((value) => !value)}
-              className={cn(
-                "group flex flex-col items-center gap-2 transition-colors active:scale-95",
-                liked ? palette.primaryText : "text-gray-400 hover:text-red-500",
-              )}
-            >
-              <div
+      <section className="px-4 pb-4 pt-8 md:px-6">
+        <div className="mx-auto max-w-5xl">
+          <div className="grid gap-4 lg:grid-cols-[1fr_minmax(0,1.35fr)_1fr]">
+            <div className={cn("flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]", palette.surface, palette.border)}>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Previous move</p>
+              <h3 className="mt-3 text-lg font-black text-white">
+                {prevEpisode ? formatInstallmentLabel(seriesType, prevEpisode?.number || 1) : "Return to the series"}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-400">
+                {prevEpisode
+                  ? resolveEpisodeDisplayTitle(
+                      prevEpisode?.title,
+                      formatInstallmentLabel(seriesType, prevEpisode?.number || 1),
+                      seriesType,
+                    )
+                  : "No prior installment here, so the series page becomes the safe landing point."}
+              </p>
+              <button
+                type="button"
+                onClick={
+                  prevEpisode
+                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(prevEpisode.id)}`)
+                    : () => router.push(backToSeriesHref)
+                }
+                className="mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+              >
+                {prevEpisode ? "Open previous" : "Back to series"}
+              </button>
+            </div>
+
+            <div className={cn("flex h-full flex-col rounded-[32px] border p-6 text-center shadow-[0_28px_90px_rgba(0,0,0,0.32)]", palette.surface, palette.border)}>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Reader console</p>
+              <h3 className="mt-3 text-3xl font-black tracking-tight text-white">
+                {unlocked ? "Installment complete." : "Preview checkpoint."}
+              </h3>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-400">
+                {unlocked
+                  ? `You reached the end of this ${installmentLabel.toLowerCase()}. Keep the pace going, react to the ending beat, or jump into discussion.`
+                  : `The free sample ends here. You can still react, share, and line up the next step before you unlock the rest.`}
+              </p>
+
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setLiked((value) => !value)}
+                  className={cn(
+                    "flex min-h-[108px] w-full max-w-[168px] flex-col items-center justify-center gap-2 rounded-[26px] border px-4 py-4 transition-all active:scale-[0.98]",
+                    liked
+                      ? "border-red-500/30 bg-red-500/10 text-red-300"
+                      : "border-white/10 bg-white/5 text-gray-300 hover:border-red-500/25 hover:bg-red-500/10 hover:text-white",
+                  )}
+                >
+                  <Heart className={cn("h-7 w-7", liked ? "fill-current" : "")} />
+                  <span className="text-xs font-black uppercase tracking-[0.18em]">Like</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex min-h-[108px] w-full max-w-[168px] flex-col items-center justify-center gap-2 rounded-[26px] border border-white/10 bg-white/5 px-4 py-4 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.98]"
+                >
+                  <Share2 className="h-7 w-7" />
+                  <span className="text-xs font-black uppercase tracking-[0.18em]">Share</span>
+                </button>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={handleOpenComments}
+                  className={cn(
+                    "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
+                    palette.primaryBg,
+                  )}
+                >
+                  Open comments
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(backToSeriesHref)}
+                  className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
+                >
+                  Series queue
+                </button>
+              </div>
+            </div>
+
+            <div className={cn("flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]", palette.surface, palette.border)}>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Next move</p>
+              <h3 className="mt-3 text-lg font-black text-white">
+                {nextEpisode ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1) : "Series overview"}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-400">
+                {nextEpisode
+                  ? `${resolveEpisodeDisplayTitle(
+                      nextEpisode?.title,
+                      formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1),
+                      seriesType,
+                    )} is queued next. ${
+                      Number(nextEpisode?.pricePts || 0) > 0 ? `${formatPriceLabel(nextEpisode?.pricePts)} if still locked.` : "It starts free."
+                    }`
+                  : "No next installment is listed yet, so the best next stop is the series overview."}
+              </p>
+              <button
+                type="button"
+                onClick={
+                  nextEpisode
+                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(nextEpisode.id)}`)
+                    : () => router.push(backToSeriesHref)
+                }
                 className={cn(
-                  "flex h-14 w-14 items-center justify-center rounded-full border transition-all",
-                  liked
-                    ? "border-red-500/50 bg-red-500/20"
-                    : "border-transparent bg-white/5 group-hover:border-red-500/30 group-hover:bg-red-500/10",
+                  "mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
+                  nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
                 )}
               >
-                <Heart className={cn("h-7 w-7", liked ? "fill-current" : "")} />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-[0.18em]">
-                Like
-              </span>
-            </button>
-
-            <button
-              type="button"
-              className="group flex flex-col items-center gap-2 text-gray-400 transition-colors hover:text-blue-500 active:scale-95"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-transparent bg-white/5 transition-all group-hover:border-blue-500/30 group-hover:bg-blue-500/10">
-                <Share2 className="h-7 w-7" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-[0.18em]">
-                Share
-              </span>
-            </button>
-          </div>
-
-          <div className="flex justify-between gap-3">
-            <button
-              type="button"
-              disabled={!prevEpisode}
-              onClick={() => prevEpisode && router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(prevEpisode.id)}`)}
-              className="rounded-xl bg-white/5 px-6 py-3 font-bold transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
-            >
-              Prev
-            </button>
-            <button
-              type="button"
-              disabled={!nextEpisode}
-              onClick={() => nextEpisode && router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(nextEpisode.id)}`)}
-              className={cn(
-                "rounded-xl px-8 py-3 font-bold text-white shadow-lg transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50",
-                palette.primaryBg,
-              )}
-            >
-              Next Episode
-            </button>
+                {nextEpisode ? "Open next" : "Back to series"}
+              </button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div
-          className="mx-auto mt-12 w-full max-w-4xl px-4 md:px-8"
-          onClick={(event) => event.stopPropagation()}
-        >
+      <section ref={commentsRef} className="px-4 pb-20 pt-6 md:px-6">
+        <div className="mx-auto w-full max-w-5xl">
           <FigmaCommentsSection seriesTitle={seriesData.series.title} />
         </div>
-      </div>
+      </section>
 
       <div
         className={cn(
-          "fixed bottom-0 left-0 z-50 flex h-[72px] w-full flex-col justify-center border-t border-white/5 bg-[#121212]/90 px-4 backdrop-blur-md transition-transform duration-300",
+          "fixed bottom-0 left-0 z-50 w-full border-t border-white/5 bg-[#0b0f16]/88 backdrop-blur-xl transition-transform duration-300",
           showNav ? "translate-y-0" : "translate-y-full",
         )}
       >
         <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
-          <div className={cn("h-full", palette.primaryBg)} style={{ width: progressWidth }} />
+          <div
+            className={cn("h-full transition-[width] duration-300", palette.primaryBg)}
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
-        <div className="mx-auto mt-1 flex w-full max-w-2xl items-center justify-between">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="p-2 text-gray-400 transition-colors hover:text-white"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-500">
-              {currentIndex >= 0 && episodes.length > 0
-                ? `${currentIndex + 1}/${episodes.length}`
-                : "1/1"}
-            </span>
-            <Link
-              href={`/series/${encodeURIComponent(seriesId)}`}
-              className="flex items-center gap-2 rounded-full bg-white/10 px-6 py-2 text-sm font-bold transition-colors hover:bg-white/20 active:scale-95"
+        <div className="mx-auto flex min-h-[82px] w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3 md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10"
             >
-              <List className="h-4 w-4" />
-              Episodes
-            </Link>
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="hidden min-w-0 sm:block">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+                Reader progress
+              </p>
+              <p className="truncate text-sm font-bold text-white">
+                {progressPercent === 100
+                  ? `Finished this ${installmentLabel.toLowerCase()}`
+                  : `${progressPercent}% through this ${installmentLabel.toLowerCase()}`}
+              </p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className="p-2 text-gray-400 transition-colors hover:text-white"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
+            <span className="inline-flex min-h-[40px] items-center rounded-full border border-white/10 bg-white/5 px-4 text-xs font-black uppercase tracking-[0.16em] text-gray-300">
+              {`${currentIndex >= 0 ? currentIndex + 1 : 1}/${Math.max(episodes.length, 1)} queue`}
+            </span>
+            <button
+              type="button"
+              onClick={() => router.push(backToSeriesHref)}
+              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 text-sm font-bold text-white transition-colors hover:bg-white/15"
+            >
+              <List className="h-4 w-4" />
+              {installmentPlural}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/store")}
+              className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white sm:flex"
+            >
+              <Wallet className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSettingsOpen((value) => !value);
+                setOverflowOpen(false);
+              }}
+              className={cn(
+                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white",
+                settingsOpen && "border-white/20 bg-white/10 text-white",
+              )}
+            >
+              <Settings2 className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {toast ? (
+        <div className="fixed bottom-24 right-4 z-[60] rounded-full border border-white/10 bg-[#0d121a]/95 px-4 py-2 text-xs font-bold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6">
+          {toast}
+        </div>
+      ) : null}
     </main>
   );
 }
 
-export default function FigmaReaderPage({ seriesId, episodeId }) {
+export default function FigmaReaderPage({ seriesId, episodeId, fallbackData = null }) {
   return (
     <FigmaSiteProvider>
-      <ReaderContent seriesId={seriesId} episodeId={episodeId} />
+      <ReaderContent
+        seriesId={seriesId}
+        episodeId={episodeId}
+        fallbackData={fallbackData}
+      />
     </FigmaSiteProvider>
   );
 }
