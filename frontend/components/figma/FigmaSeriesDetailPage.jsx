@@ -51,7 +51,7 @@ function SeriesDetailContent({ series, episodes }) {
       : "Chapters";
   const readLabel = isInteractive
     ? "Start Playing"
-    : detailItem.readLabel || (isNovel ? "Start Reading" : "Continue Reading");
+    : detailItem.readLabel || "Start reading";
 
   if (!detailItem) {
     return (
@@ -117,7 +117,7 @@ function SeriesDetailContent({ series, episodes }) {
   return (
     <div className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="relative h-[330px] w-full bg-black sm:h-[390px] md:h-[520px]">
+        <div className="relative h-[300px] w-full bg-black min-[420px]:h-[320px] sm:h-[390px] md:h-[520px]">
           <div className="absolute inset-0">
             <img
               src={detailItem.coverUrl}
@@ -132,15 +132,15 @@ function SeriesDetailContent({ series, episodes }) {
             />
           </div>
 
-          <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-6 md:px-8 md:pb-10">
-            <div className="flex w-full flex-col items-start gap-4 md:flex-row md:items-start md:gap-8">
+          <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-5 md:px-8 md:pb-10">
+            <div className="flex w-full flex-col items-start gap-3.5 md:flex-row md:items-start md:gap-8">
               <img
                 src={detailItem.coverUrl}
                 alt={detailItem.title}
-                className="w-36 shrink-0 self-end translate-y-7 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 md:w-64 md:self-auto md:translate-y-24"
+                className="w-28 shrink-0 self-end translate-y-3 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-32 min-[420px]:translate-y-5 md:w-64 md:self-auto md:translate-y-24"
               />
 
-              <div className="w-full flex-1 rounded-[26px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-md md:border-0 md:bg-transparent md:px-0 md:py-0">
+              <div className="w-full flex-1 rounded-[24px] border border-white/10 bg-black/24 px-4 py-3.5 backdrop-blur-md md:rounded-[26px] md:border-0 md:bg-transparent md:px-0 md:py-0">
                 <div className="mb-2 flex flex-wrap gap-2 md:mb-3">
                   {detailItem.tags.map((tag) => (
                     <span
@@ -154,14 +154,14 @@ function SeriesDetailContent({ series, episodes }) {
                     </span>
                   ))}
                 </div>
-                <h1 className="mb-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2rem] font-black tracking-tight text-transparent drop-shadow-sm md:mb-2 md:text-5xl">
+                <h1 className="mb-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[1.75rem] font-black leading-none tracking-tight text-transparent drop-shadow-sm md:mb-2 md:text-5xl">
                   {detailItem.title}
                 </h1>
-                <p className="mb-3 text-base font-medium text-gray-300 md:mb-4 md:text-lg">
+                <p className="mb-3 text-sm font-medium text-gray-300 md:mb-4 md:text-lg">
                   {detailItem.author}
                 </p>
 
-                <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-gray-400 md:mb-6 md:gap-6 md:text-sm">
+                <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:mb-6 md:gap-6 md:text-sm">
                   <span className="flex items-center gap-1 text-yellow-500">
                     <Star className="h-4 w-4 fill-current" />
                     {detailItem.rating} Rating
@@ -176,37 +176,39 @@ function SeriesDetailContent({ series, episodes }) {
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 md:gap-4">
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center md:gap-4">
                   <Link
                     href={detailItem.readHref}
                     className={cn(
-                      "flex min-h-[48px] items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
+                      "flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 sm:min-h-[48px] sm:w-auto sm:justify-start sm:whitespace-nowrap md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
                       palette.primaryBg,
                     )}
                   >
                     <PlayCircle className="h-5 w-5" />
                     {readLabel}
                   </Link>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
-                      palette.surface,
-                      palette.border,
-                    )}
-                  >
-                    <BookmarkPlus className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
-                      palette.surface,
-                      palette.border,
-                    )}
-                  >
-                    <Share2 className="h-5 w-5" />
-                  </button>
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
+                        palette.surface,
+                        palette.border,
+                      )}
+                    >
+                      <BookmarkPlus className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
+                        palette.surface,
+                        palette.border,
+                      )}
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -214,8 +216,8 @@ function SeriesDetailContent({ series, episodes }) {
         </div>
 
         <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-10 md:flex-row md:gap-12 md:px-8 md:py-20">
-          <div className="w-full shrink-0 pt-2 md:w-72 md:pt-0">
-            <div className={cn("rounded-[28px] border p-5 shadow-xl md:p-6", palette.surface, palette.border)}>
+          <div className="order-2 w-full shrink-0 pt-2 md:order-1 md:w-72 md:pt-0">
+            <div className={cn("rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6", palette.surface, palette.border)}>
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                 Story Brief
               </p>
@@ -244,9 +246,9 @@ function SeriesDetailContent({ series, episodes }) {
             </div>
           </div>
 
-          <div className="flex-1">
-            <div className={cn("rounded-[30px] border p-4 shadow-xl md:p-6", palette.surface, palette.border)}>
-              <div className="mb-5 flex items-center justify-between border-b border-gray-800 pb-3 md:mb-6 md:pb-4">
+          <div className="order-1 flex-1 md:order-2">
+            <div className={cn("rounded-[26px] border p-4 shadow-xl md:rounded-[30px] md:p-6", palette.surface, palette.border)}>
+              <div className="mb-5 flex flex-col items-start gap-2.5 border-b border-gray-800 pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-6 md:pb-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                     Reading Queue
@@ -258,7 +260,7 @@ function SeriesDetailContent({ series, episodes }) {
                 </div>
                 <button
                   type="button"
-                  className="text-sm font-semibold text-gray-400 transition-colors hover:text-white"
+                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 transition-colors hover:text-white"
                 >
                   Sort: Newest
                 </button>
@@ -270,14 +272,14 @@ function SeriesDetailContent({ series, episodes }) {
                     key={chapter.id || `${detailItem.id}-${index}`}
                     href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
                     className={cn(
-                      "group flex items-center justify-between rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] md:p-4",
+                      "group flex flex-col items-start gap-3 rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between md:p-4",
                     )}
                   >
-                    <div className="flex items-center gap-3 md:gap-4">
+                    <div className="flex min-w-0 items-center gap-3 md:gap-4">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
                         {String(index + 1).padStart(2, "0")}
                       </div>
-                      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
+                      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
                         <img
                           src={detailItem.coverUrl}
                           alt={detailItem.title}
@@ -286,14 +288,14 @@ function SeriesDetailContent({ series, episodes }) {
                         <div className="absolute inset-0 flex items-center justify-center">
                           <PlayCircle
                             className={cn(
-                              "h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 md:h-5 md:w-5",
+                              "h-4 w-4 opacity-70 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 md:h-5 md:w-5",
                               palette.primaryText,
                             )}
                           />
                         </div>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="line-clamp-2 text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
                           {chapter.title}
                         </h4>
                         <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
@@ -301,9 +303,9 @@ function SeriesDetailContent({ series, episodes }) {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right text-xs font-semibold text-gray-400 transition-colors group-hover:text-white md:text-sm">
+                    <div className="text-left text-xs font-semibold text-gray-400 transition-colors group-hover:text-white sm:text-right md:text-sm">
                       <div>{chapter.views}</div>
-                      <div className="mt-1 hidden text-[10px] uppercase tracking-[0.18em] text-gray-500 sm:block">
+                      <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
                         Reads
                       </div>
                     </div>

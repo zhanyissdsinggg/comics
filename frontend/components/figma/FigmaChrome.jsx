@@ -375,7 +375,7 @@ function FigmaHeaderInner() {
     <button
       type="button"
       onClick={() => setSearchOverlayOpen(true)}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-gray-400 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/[0.025] text-gray-500 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
       aria-label="Search catalog"
     >
       <Search className="h-5 w-5 md:h-6 md:w-6" />
@@ -582,24 +582,24 @@ function FigmaHeaderInner() {
 
             <Link
               href="/store"
-              className="group relative hidden h-10 items-center gap-2 overflow-hidden rounded-xl border border-yellow-500/50 bg-yellow-500/10 px-4 text-xs font-black tracking-[0.2em] text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] transition-all hover:bg-yellow-500/20 hover:shadow-[0_0_25px_rgba(234,179,8,0.4)] active:scale-95 lg:inline-flex"
+              className="group relative hidden h-10 items-center gap-2 overflow-hidden rounded-xl border border-yellow-500/35 bg-yellow-500/8 px-3.5 text-[11px] font-black tracking-[0.18em] text-yellow-400 transition-all hover:border-yellow-400/60 hover:bg-yellow-500/14 hover:text-yellow-300 active:scale-95 lg:inline-flex"
             >
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
               <Crown className="h-4 w-4" />
-              VIP
+              <span>VIP Shop</span>
             </Link>
 
             <button
               type="button"
               onClick={handleAdultToggle}
               className={cn(
-                "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-4 transition-all",
+                "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 transition-all",
                 isAdultMode
-                  ? "border-red-500 bg-red-500/10 text-red-500"
-                  : "border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-500 hover:text-white",
+                  ? "border-red-500/70 bg-red-500/10 text-red-400"
+                  : "border-white/8 bg-white/[0.025] text-gray-500 hover:border-white/15 hover:text-white",
               )}
             >
-              <span className="flex items-center gap-1.5 text-sm font-bold tracking-wide">
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em]">
                 {isAdultMode ? (
                   <Lock className="h-4 w-4" />
                 ) : (
@@ -609,7 +609,7 @@ function FigmaHeaderInner() {
               </span>
             </button>
 
-            <div className="hidden h-6 w-px bg-gray-800 md:block" />
+            <div className="hidden h-6 w-px bg-white/8 md:block" />
 
             {isSignedIn ? (
               <div className="flex items-center gap-3">
@@ -639,7 +639,7 @@ function FigmaHeaderInner() {
                 type="button"
                 onClick={() => openLogin("login")}
                 className={cn(
-                  "inline-flex h-10 items-center rounded-xl px-4 text-sm font-bold text-white transition-all active:scale-95",
+                  "inline-flex h-10 items-center rounded-xl px-4 text-sm font-bold text-white shadow-[0_10px_30px_rgba(79,70,229,0.22)] transition-all active:scale-95",
                   palette.primaryBg,
                 )}
               >

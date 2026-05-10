@@ -45,10 +45,7 @@ function getReadLabel(contentType) {
   if (contentType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
     return "Start Playing";
   }
-  if (contentType === FIGMA_CONTENT_TYPES.NOVELS) {
-    return "Start Reading";
-  }
-  return "Continue Reading";
+  return "Start Reading";
 }
 
 function getContinueLabel(contentType) {
@@ -73,9 +70,44 @@ function getRankingLabel(contentType) {
     return "Top Rated Stories";
   }
   if (contentType === FIGMA_CONTENT_TYPES.NOVELS) {
-    return "Bestselling Novels";
+    return "Top Rated Novels";
   }
-  return "Top Ranking";
+  return "Top Rated Picks";
+}
+
+function getRankingMetaLabel(contentType) {
+  if (contentType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
+    return "Ranked by story rating";
+  }
+  if (contentType === FIGMA_CONTENT_TYPES.NOVELS) {
+    return "Ranked by reader rating";
+  }
+  return "Ranked by reader rating";
+}
+
+function getRankingItemNote(item) {
+  if (item?.status === "END") {
+    return "Completed series";
+  }
+  if (item?.latestInstallmentLabel) {
+    return `Latest ${item.latestInstallmentLabel}`;
+  }
+  return "Ready to read";
+}
+
+function getDailyUpdateNote(item) {
+  if (item?.status === "END") {
+    return "Completed";
+  }
+  if (item?.status === "UP") {
+    return item.latestInstallmentLabel
+      ? `Updated with ${item.latestInstallmentLabel}`
+      : "Updated recently";
+  }
+  if (item?.latestInstallmentLabel) {
+    return `Latest ${item.latestInstallmentLabel}`;
+  }
+  return "Start now";
 }
 
 function HomeContent({ seriesList = [] }) {
@@ -116,11 +148,17 @@ function HomeContent({ seriesList = [] }) {
   const exploreGridItems = [...sortedItems, ...sortedItems, ...sortedItems].slice(0, 12);
   const rankItems = sortByRating(sortedItems).slice(0, 5);
   const genreOptions = buildGenreOptions(currentItems);
+  const continueItems = sortedItems.slice(0, 2);
+  const continueSectionHasProgress = continueItems.some((item) => item.hasProgress);
 
   const ActionIcon = getActionIcon(contentType);
   const continueLabel = getContinueLabel(contentType);
   const updatesLabel = getUpdateLabel(contentType);
   const rankingLabel = getRankingLabel(contentType);
+  const rankingMetaLabel = getRankingMetaLabel(contentType);
+  const continueSectionTitle = continueSectionHasProgress
+    ? continueLabel
+    : getReadLabel(contentType);
 
   if (!heroItem) {
     return (
@@ -241,9 +279,14 @@ function HomeContent({ seriesList = [] }) {
                         </p>
                         <p className="text-sm text-gray-300">{heroItem.author}</p>
                       </div>
-                      <span className="rounded bg-white px-2 py-1 text-xs font-black text-black">
-                        {heroItem.chapterLabel}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-[9px] font-black uppercase tracking-[0.18em] text-gray-300">
+                          Latest
+                        </span>
+                        <span className="rounded bg-white px-2 py-1 text-xs font-black text-black">
+                          {heroItem.latestInstallmentLabel || heroItem.chapterLabel}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -332,7 +375,7 @@ function HomeContent({ seriesList = [] }) {
                   ) : (
                     <History className={cn("h-6 w-6", palette.primaryText)} />
                   )}
-                  {continueLabel}
+                  {continueSectionTitle}
                 </h2>
                 <Link
                   href="/account"
@@ -344,7 +387,7 @@ function HomeContent({ seriesList = [] }) {
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
-                {sortedItems.slice(0, 2).map((item) => (
+                {continueItems.map((item) => (
                   <Link
                     key={`continue-${item.id}`}
                     href={item.readHref}
@@ -369,14 +412,22 @@ function HomeContent({ seriesList = [] }) {
                         {item.title}
                       </h4>
                       <p className="mb-2 text-sm text-gray-400">
-                        Continue from {item.chapterLabel}
+                        {item.hasProgress
+                          ? `Continue from ${item.ctaChapterLabel}`
+                          : `Start with ${item.ctaChapterLabel}`}
                       </p>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
-                        <div
-                          className={cn("h-full rounded-full", palette.primaryBg)}
-                          style={{ width: "45%" }}
-                        />
-                      </div>
+                      {item.hasProgress ? (
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+                          <div
+                            className={cn("h-full rounded-full", palette.primaryBg)}
+                            style={{ width: "45%" }}
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                          Ready to start
+                        </p>
+                      )}
                     </div>
                     <div
                       className={cn(
@@ -553,7 +604,7 @@ function HomeContent({ seriesList = [] }) {
                   <Link
                     key={`${item.id}-${index}`}
                     href={item.detailHref}
-                    className="group block"
+                    className="group block rounded-2xl border border-transparent p-2 transition-all hover:border-white/10 hover:bg-white/[0.03]"
                   >
                     <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl ring-1 ring-white/5">
                       <img
@@ -574,18 +625,26 @@ function HomeContent({ seriesList = [] }) {
                           {item.status}
                         </div>
                       ) : null}
+                      {item.latestInstallmentLabel ? (
+                        <div className="absolute bottom-2 right-2 rounded-full border border-white/10 bg-black/60 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                          {item.latestInstallmentLabel}
+                        </div>
+                      ) : null}
                     </div>
 
-                    <h3 className="line-clamp-2 text-sm font-bold leading-tight text-white transition-colors group-hover:text-gray-300 md:text-base">
+                    <h3 className="min-h-[2.5rem] line-clamp-2 text-sm font-bold leading-tight text-white transition-colors group-hover:text-gray-300 md:text-base">
                       {item.title}
                     </h3>
-                    <p className="mt-1 flex items-center justify-between text-xs text-gray-400">
-                      <span>{item.author}</span>
-                      <span className="flex items-center gap-1 text-yellow-500">
+                    <p className="mt-1 truncate text-[11px] font-medium text-gray-500 md:text-xs">
+                      {item.author}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-gray-400 md:text-xs">
+                      <span className="truncate">{getDailyUpdateNote(item)}</span>
+                      <span className="flex shrink-0 items-center gap-1 text-yellow-500">
                         <Star className="h-3 w-3 fill-current" />
                         {item.rating}
                       </span>
-                    </p>
+                    </div>
                   </Link>
                 ))}
                 </div>
@@ -608,22 +667,23 @@ function HomeContent({ seriesList = [] }) {
                 </h3>
               </div>
 
-              <div className="mb-6 flex gap-2 rounded-lg bg-black/40 p-1">
-                <button
-                  type="button"
+              <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                    Panel Logic
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-gray-300">
+                    {rankingMetaLabel}
+                  </p>
+                </div>
+                <span
                   className={cn(
-                    "flex-1 rounded-md py-1.5 text-xs font-bold text-white",
-                    palette.primaryBg,
+                    "rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
+                    palette.primarySoft,
                   )}
                 >
-                  Trending
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 rounded-md py-1.5 text-xs font-bold text-gray-400 transition-colors hover:text-white"
-                >
-                  New
-                </button>
+                  {rankItems.length} picks
+                </span>
               </div>
 
               <div className="space-y-3 md:space-y-4">
@@ -652,12 +712,12 @@ function HomeContent({ seriesList = [] }) {
                       <h4 className="truncate text-sm font-bold text-white transition-colors group-hover:text-gray-200">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-gray-400">
-                        {item.tags[0] || item.author}
+                      <p className="truncate text-xs text-gray-400">
+                        {item.author || item.tags[0] || "Featured pick"}
                       </p>
                       <div className="mt-1 flex items-center gap-1 text-xs font-medium text-gray-500">
                         <History className="h-3 w-3" />
-                        Updated today
+                        {getRankingItemNote(item)}
                       </div>
                     </div>
                   </Link>

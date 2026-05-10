@@ -280,6 +280,39 @@ function buildReadHref(seriesId, episodeId) {
   return `/series/${encodeURIComponent(normalizedSeriesId)}`;
 }
 
+function inferFirstEpisodeId(series, fallbackEpisodeId = "") {
+  const direct =
+    String(series?.firstReadableEpisodeId || "").trim() ||
+    String(series?.firstEpisodeId || "").trim() ||
+    String(fallbackEpisodeId || "").trim();
+  if (direct) {
+    return direct;
+  }
+
+  const latestEpisodeId = String(series?.latestEpisodeId || "").trim();
+  const match = latestEpisodeId.match(/^(.*?)(\d+)$/);
+  if (!match) {
+    return "";
+  }
+
+  const [, prefix, digits] = match;
+  return `${prefix}${String(1).padStart(digits.length, "0")}`;
+}
+
+function inferEpisodeNumberFromId(episodeId) {
+  const normalizedEpisodeId = String(episodeId || "").trim();
+  if (!normalizedEpisodeId) {
+    return 0;
+  }
+
+  const match = normalizedEpisodeId.match(/(\d+)$/);
+  if (!match) {
+    return 0;
+  }
+
+  return Number(match[1] || 0);
+}
+
 function buildTitleSeed(series) {
   return `${series?.id || "series"}:${series?.title || ""}:${series?.episodeCount || 0}`;
 }
@@ -299,8 +332,39 @@ export function buildFigmaSeriesItem(series, options = {}) {
     1,
     Number(series?.latestEpisodeNumber || series?.episodeCount || series?.chapter || 1),
   );
-  const latestEpisodeId =
-    String(series?.latestEpisodeId || series?.firstReadableEpisodeId || options.defaultEpisodeId || "").trim();
+  const latestEpisodeId = String(series?.latestEpisodeId || "").trim();
+  const firstEpisodeId = inferFirstEpisodeId(series, options.defaultEpisodeId);
+  const progressEpisodeId =
+    String(
+      options.progressEpisodeId ||
+        series?.progressEpisodeId ||
+        series?.progress?.lastEpisodeId ||
+        series?.lastEpisodeId ||
+        "",
+    ).trim();
+  const progressPercent = Number(
+    options.progressPercent ??
+      series?.progressPercent ??
+      series?.progress?.percent ??
+      0,
+  );
+  const hasProgress =
+    Boolean(progressEpisodeId) &&
+    (progressPercent > 0 ||
+      Boolean(options.progressEpisodeId) ||
+      Boolean(series?.progress?.updatedAt) ||
+      Boolean(series?.lastReadAt) ||
+      progressEpisodeId !== firstEpisodeId);
+  const progressEpisodeNumber = Math.max(
+    1,
+    Number(
+      options.progressEpisodeNumber ||
+        series?.progressEpisodeNumber ||
+        series?.progress?.lastEpisodeNumber ||
+        inferEpisodeNumberFromId(progressEpisodeId) ||
+        1,
+    ),
+  );
   const author =
     resolveSeriesCreatorName(series) ||
     String(series?.author || series?.creator?.label || "Editorial Crew").trim();
@@ -315,17 +379,28 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const detailHref = interactive
     ? interactiveHref
     : `/series/${encodeURIComponent(seriesId)}`;
+  const readEpisodeId = hasProgress
+    ? progressEpisodeId
+    : firstEpisodeId || latestEpisodeId;
   const readHref = interactive
     ? interactiveHref
-    : buildReadHref(seriesId, latestEpisodeId);
+    : buildReadHref(seriesId, readEpisodeId);
   const latestInstallmentLabel = formatInstallmentLabel(
     series?.type || series,
     latestEpisodeNumber,
   );
-  const continueLabel = interactive
+  const startInstallmentLabel = formatInstallmentLabel(series?.type || series, 1);
+  const progressInstallmentLabel = formatInstallmentLabel(
+    series?.type || series,
+    progressEpisodeNumber,
+  );
+  const ctaChapterLabel = hasProgress
+    ? progressInstallmentLabel
+    : startInstallmentLabel;
+  const readLabel = interactive
     ? "Start Playing"
-    : latestEpisodeNumber > 1
-      ? `Continue ${latestInstallmentLabel}`
+    : hasProgress
+      ? "Continue reading"
       : getStartReadingLabel(series?.type || series, 1);
 
   return {
@@ -350,16 +425,20 @@ export function buildFigmaSeriesItem(series, options = {}) {
     status: buildStatusLabel(series),
     chapter: latestEpisodeNumber,
     episodeCount: Math.max(1, Number(series?.episodeCount || latestEpisodeNumber || 1)),
+    firstEpisodeId,
     latestEpisodeId,
+    progressEpisodeId,
+    hasProgress,
     latestInstallmentLabel,
     kind: contentKind,
     readHref,
     detailHref,
     interactiveHref,
     chapterLabel: formatInstallmentLabel(series?.type || series, latestEpisodeNumber),
+    ctaChapterLabel,
     readLabel:
       options.readLabel ||
-      continueLabel,
+      readLabel,
     createdAt: series?.createdAt || null,
     updatedAt: series?.updatedAt || null,
     raw: series,

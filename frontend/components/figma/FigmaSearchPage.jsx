@@ -112,28 +112,35 @@ function matchesQuery(item, normalizedQuery) {
 
 function SearchResultCard({ item }) {
   const { palette } = useFigmaSite();
+  const chapterMeta = item.hasProgress
+    ? `Continue from ${item.ctaChapterLabel}`
+    : `Start with ${item.ctaChapterLabel}`;
+  const genres = Array.isArray(item.genres) ? item.genres.slice(0, 3) : [];
 
   return (
     <article
       className={cn(
-        "group flex h-full overflow-hidden rounded-[28px] border shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl sm:flex-col",
+        "group flex h-full overflow-hidden rounded-[24px] border shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl sm:rounded-[28px] sm:flex-col",
         palette.surface,
         palette.border,
       )}
     >
-      <Link href={item.detailHref} className="block w-[132px] shrink-0 sm:w-auto">
-        <div className="relative h-full min-h-[200px] overflow-hidden sm:min-h-0 sm:aspect-[3/4]">
+      <Link
+        href={item.detailHref}
+        className="block w-[116px] shrink-0 min-[420px]:w-[128px] sm:w-auto"
+      >
+        <div className="relative h-full min-h-[176px] overflow-hidden min-[420px]:min-h-[194px] sm:min-h-0 sm:aspect-[3/4]">
           <img
             src={item.coverUrl}
             alt={item.title}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2 md:left-4 md:top-4">
+          <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 md:left-4 md:top-4 md:gap-2">
             {item.status ? (
               <span
                 className={cn(
-                  "rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white",
+                  "rounded-full px-2 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white md:px-2.5 md:text-[10px]",
                   item.status === "UP" || item.status === "HOT"
                     ? palette.primaryBg
                     : "bg-emerald-600",
@@ -143,36 +150,39 @@ function SearchResultCard({ item }) {
               </span>
             ) : null}
             {item.isAdult ? (
-              <span className="rounded-full bg-red-500/85 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+              <span className="rounded-full bg-red-500/85 px-2 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-white md:px-2.5 md:text-[10px]">
                 18+
               </span>
             ) : null}
           </div>
-          <div className="absolute bottom-0 left-0 right-0 p-3.5 sm:p-4 md:p-5">
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-gray-200">
-              <Star className="h-3.5 w-3.5 fill-current text-yellow-400" />
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-5">
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.16em] text-gray-200 sm:text-xs">
+              <Star className="h-3 w-3 fill-current text-yellow-400 sm:h-3.5 sm:w-3.5" />
               {item.rating}
               <span className="text-gray-500">/</span>
               {item.viewsText} views
             </div>
-            <h3 className="mt-2 line-clamp-2 text-base font-black leading-tight text-white sm:mt-2.5 sm:text-lg md:mt-3 md:text-xl">
+            <h3 className="mt-1.5 line-clamp-2 text-[15px] font-black leading-tight text-white sm:mt-2.5 sm:text-lg md:mt-3 md:text-xl">
               {item.title}
             </h3>
-            <p className="mt-1.5 text-sm font-semibold text-gray-300 md:mt-2">{item.author}</p>
+            <p className="mt-1 text-[13px] font-semibold text-gray-300 md:mt-2 md:text-sm">
+              {item.author}
+            </p>
           </div>
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-3.5 sm:p-4 md:p-5">
-        <p className="min-h-0 line-clamp-2 text-sm leading-5 text-gray-400 sm:min-h-[4.5rem] sm:line-clamp-3 md:leading-6">
+      <div className="flex flex-1 flex-col p-3 sm:p-4 md:p-5">
+        <p className="min-h-0 line-clamp-2 text-[13px] leading-5 text-gray-400 sm:min-h-[4.5rem] sm:text-sm sm:line-clamp-3 md:leading-6">
           {item.description}
         </p>
-        <div className="mt-2.5 flex min-h-[2.25rem] flex-wrap content-start gap-2 sm:mt-4 sm:min-h-[3.75rem]">
-          {(Array.isArray(item.genres) ? item.genres : []).slice(0, 3).map((genre) => (
+        <div className="mt-2 flex min-h-[2rem] flex-wrap content-start gap-1.5 sm:mt-4 sm:min-h-[3.75rem] sm:gap-2">
+          {genres.map((genre, index) => (
             <span
               key={`${item.id}-${genre}`}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em]",
+                "rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] sm:px-2.5 sm:text-[11px]",
+                index === 2 ? "hidden sm:inline-flex" : "inline-flex",
                 palette.primarySoft,
               )}
             >
@@ -180,19 +190,19 @@ function SearchResultCard({ item }) {
             </span>
           ))}
         </div>
-        <div className="mt-auto flex items-center justify-between pt-3.5 sm:pt-4 md:pt-5">
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
-            {item.chapterLabel}
+        <div className="mt-auto flex flex-col items-start gap-2.5 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3.5 sm:pt-4 md:pt-5">
+          <span className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-gray-500 sm:pr-3 sm:text-xs">
+            {chapterMeta}
           </span>
           <Link
             href={item.readHref}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] sm:px-4 sm:py-2 sm:text-xs",
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white transition-transform active:scale-[0.98] sm:px-3.5 sm:py-1.5 sm:text-[11px]",
               palette.primaryBg,
             )}
           >
             {item.readLabel}
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </Link>
         </div>
       </div>
@@ -391,7 +401,7 @@ function SearchContent({
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <section
             className={cn(
-              "relative mb-6 overflow-hidden rounded-[32px] border px-4 py-4 shadow-2xl md:mb-8 md:px-10 md:py-10",
+              "relative mb-6 overflow-hidden rounded-[28px] border px-4 py-4 shadow-2xl md:mb-8 md:rounded-[32px] md:px-10 md:py-10",
               palette.surface,
               palette.border,
             )}
@@ -417,17 +427,17 @@ function SearchContent({
 
               <form
                 onSubmit={(event) => event.preventDefault()}
-                className="mt-4 rounded-[28px] border border-white/10 bg-black/30 p-2.5 shadow-inner backdrop-blur md:mt-8 md:p-3"
+                className="mt-4 rounded-[24px] border border-white/10 bg-black/30 p-2 shadow-inner backdrop-blur md:mt-8 md:rounded-[28px] md:p-3"
               >
-                <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] bg-white/5 px-3.5 py-2.5 md:px-4 md:py-3">
+                <div className="flex flex-col gap-2.5 md:flex-row md:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[18px] bg-white/5 px-3 py-2.5 md:gap-3 md:rounded-[20px] md:px-4 md:py-3">
                     <Search className={cn("h-5 w-5 shrink-0", palette.primaryText)} />
                     <input
                       type="text"
                       value={query}
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="Search titles, creators, or genres..."
-                      className="min-w-0 flex-1 bg-transparent text-base font-bold text-white outline-none placeholder:text-gray-600"
+                      className="min-w-0 flex-1 bg-transparent text-[15px] font-bold text-white outline-none placeholder:text-gray-600 md:text-base"
                     />
                   </div>
                   <div className="flex items-center gap-2 rounded-[20px] border border-white/10 bg-white/5 px-3.5 py-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-gray-300 md:px-4 md:py-3 md:text-xs">
@@ -450,7 +460,7 @@ function SearchContent({
                     }}
                     className={cn(
                       "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-gray-300 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white md:px-4 md:py-2 md:text-xs",
-                      index > 3 ? "hidden md:inline-flex" : "",
+                      index > 2 ? "hidden sm:inline-flex" : "",
                     )}
                   >
                     {keyword}
@@ -500,7 +510,7 @@ function SearchContent({
             <aside className="order-2 grid items-start gap-4 min-[390px]:grid-cols-2 xl:order-1 xl:block xl:space-y-6">
               <section
                 className={cn(
-                  "rounded-[28px] border p-5 shadow-xl md:p-6",
+                  "rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6",
                   palette.surface,
                   palette.border,
                 )}
@@ -530,7 +540,7 @@ function SearchContent({
 
               <section
                 className={cn(
-                  "rounded-[28px] border p-5 shadow-xl md:p-6",
+                  "rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6",
                   palette.surface,
                   palette.border,
                 )}
@@ -634,7 +644,7 @@ function SearchContent({
                       type="button"
                       onClick={() => setActiveFormat(option.key)}
                       className={cn(
-                        "min-w-[142px] shrink-0 rounded-[22px] border px-3 py-3 text-left transition-all",
+                        "min-w-[128px] shrink-0 rounded-[20px] border px-3 py-2.5 text-left transition-all",
                         activeFormat === option.key
                           ? cn(palette.primaryBg, "border-transparent text-white shadow-xl")
                           : "border-white/10 bg-black/20 text-gray-300 hover:bg-white/5",
@@ -673,7 +683,7 @@ function SearchContent({
                     <div
                       key={`search-skeleton-${index}`}
                       className={cn(
-                        "h-[360px] animate-pulse rounded-[28px] border shadow-xl md:h-[420px]",
+                        "h-[280px] animate-pulse rounded-[24px] border shadow-xl sm:h-[360px] md:h-[420px] md:rounded-[28px]",
                         palette.surface,
                         palette.border,
                       )}
