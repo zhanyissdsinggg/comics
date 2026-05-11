@@ -16,6 +16,10 @@ import {
   storefrontSecondaryButtonClass,
 } from "../common/StorefrontPagePrimitives";
 import { apiGet } from "../../lib/apiClient";
+import {
+  filterContentByMode,
+  getContentModeQueryParam,
+} from "../../lib/contentFilters";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -262,7 +266,7 @@ function PanelSkeleton() {
 
 export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   const router = useRouter();
-  const { isAdultMode } = useAdultGateStore();
+  const { contentMode } = useAdultGateStore();
   const { bySeriesId: progressMap, loadProgress } = useProgressStore();
   const { items: historyItems, loadHistory } = useHistoryStore();
   const { bookmarksBySeries } = useBookmarkStore();
@@ -287,7 +291,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       loadProgress(),
       loadHistory(),
       loadFollowed(),
-      apiGet(`/api/series?adult=${isAdultMode ? "1" : "0"}`, {
+      apiGet(`/api/series?adult=${getContentModeQueryParam(contentMode)}`, {
         cacheMs: 30000,
         suppressAuthModal: true,
       }),
@@ -299,7 +303,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         }
 
         setSeriesList(
-          seriesResponse.ok ? seriesResponse.data?.series || [] : [],
+          seriesResponse.ok
+            ? filterContentByMode(seriesResponse.data?.series || [], contentMode)
+            : [],
         );
         setEntitlements(
           entitlementsResponse.ok &&
@@ -317,7 +323,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     return () => {
       cancelled = true;
     };
-  }, [isAdultMode, loadFollowed, loadHistory, loadProgress, viewerSignedIn]);
+  }, [contentMode, loadFollowed, loadHistory, loadProgress, viewerSignedIn]);
 
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),

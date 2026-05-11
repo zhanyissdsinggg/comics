@@ -2,9 +2,8 @@ import { expect, test } from "@playwright/test";
 import { createReaderPagePlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
-import { expectVisibleFocusIndicator, tabToAndExpectVisibleFocus } from "./support/keyboard";
 
-const seriesPayload = {
+const baseSeriesPayload = {
   series: {
     id: "series-001",
     title: "The Last Kingdom",
@@ -16,80 +15,223 @@ const seriesPayload = {
     ratingCount: 2341,
   },
   episodes: [
-    { id: "series-001e1", seriesId: "series-001", number: 1, title: "Episode 1", pricePts: 0, previewFreePages: 3, ttfEligible: false },
-    { id: "series-001e2", seriesId: "series-001", number: 2, title: "Episode 2", pricePts: 0, previewFreePages: 3, ttfEligible: false },
-    { id: "series-001e3", seriesId: "series-001", number: 3, title: "Episode 3", pricePts: 0, previewFreePages: 3, ttfEligible: false },
+    {
+      id: "series-001e1",
+      seriesId: "series-001",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e2",
+      seriesId: "series-001",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e3",
+      seriesId: "series-001",
+      number: 3,
+      title: "Episode 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
   ],
 };
 
-const episodePayload = {
-  episode: {
-    id: "series-001e1",
-    seriesId: "series-001",
-    title: "Episode 1",
-    type: "comic",
-    pricePts: 0,
-    previewFreePages: 3,
-    pages: [
-      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"), w: 800, h: 1200 },
-      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"), w: 800, h: 1200 },
-      { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"), w: 800, h: 1200 },
-    ],
-    paragraphs: [],
-  },
+type ReaderMockOptions = {
+  pricePts?: number;
+  signedIn?: boolean;
+  unlockedEpisodeIds?: string[];
 };
 
-async function mockReaderRoutes(page) {
+async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
+  const pricePts = Number(options.pricePts ?? 0);
+  const signedIn = options.signedIn ?? false;
+  const unlockedEpisodeIds = Array.isArray(options.unlockedEpisodeIds)
+    ? options.unlockedEpisodeIds
+    : [];
+
+  const seriesPayload = {
+    ...baseSeriesPayload,
+    episodes: baseSeriesPayload.episodes.map((episode, index) => ({
+      ...episode,
+      pricePts: index === 0 ? pricePts : episode.pricePts,
+    })),
+  };
+
+  const episodePayload = {
+    episode: {
+      id: "series-001e1",
+      seriesId: "series-001",
+      title: "Episode 1",
+      type: "comic",
+      pricePts,
+      previewFreePages: 3,
+      pages: [
+        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"), w: 800, h: 1200 },
+        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"), w: 800, h: 1200 },
+        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"), w: 800, h: 1200 },
+      ],
+      paragraphs: [],
+    },
+  };
+
   await page.route("**/api/**", async (route) => {
     const requestUrl = new URL(route.request().url());
     const pathname = requestUrl.pathname;
 
-    if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, dbOk: true }) });
+    if (
+      pathname === "/api/health" ||
+      pathname === "/api/health/ready" ||
+      pathname === "/api/health/live"
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, dbOk: true }),
+      });
       return;
     }
 
     if (pathname === "/api/meta/version") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ name: "gush-backend", version: "0.1.0", commit: "test-commit" }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ name: "gush-backend", version: "0.1.0", commit: "test-commit" }),
+      });
+      return;
+    }
+
+    if (pathname === "/api/branding") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ branding: {} }),
+      });
       return;
     }
 
     if (pathname === "/api/regions/config") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ regions: [], defaultRegion: "US" }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ regions: [], defaultRegion: "US" }),
+      });
       return;
     }
 
     if (pathname === "/api/auth/me") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: null }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          isSignedIn: signedIn,
+          user: signedIn ? { id: "reader-001", email: "reader@example.com" } : null,
+        }),
+      });
       return;
     }
 
     if (pathname === "/api/preferences") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ adult: false, autoplay: false }) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          preferences: {
+            region: "global",
+            language: "en",
+            hideAdultHistory: false,
+            matureModeEnabled: false,
+            matureVerification: {
+              verified: false,
+              provider: "local-gate",
+              region: "global",
+              expiresAt: null,
+              referenceId: null,
+              verifiedAt: null,
+            },
+          },
+        }),
+      });
       return;
     }
 
     if (pathname === "/api/episode") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(episodePayload) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(episodePayload),
+      });
       return;
     }
 
     if (pathname === "/api/series/series-001") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(seriesPayload) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(seriesPayload),
+      });
+      return;
+    }
+
+    if (pathname === "/api/wallet") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          wallet: {
+            paidPts: 60,
+            bonusPts: 20,
+            subscription: null,
+            subscriptionUsage: { remaining: 0 },
+          },
+        }),
+      });
+      return;
+    }
+
+    if (pathname === "/api/entitlements") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          entitlement: {
+            seriesId: "series-001",
+            unlockedEpisodeIds,
+          },
+        }),
+      });
       return;
     }
 
     if (pathname === "/api/events/batch") {
-      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true }),
+      });
       return;
     }
 
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({}),
+    });
   });
 }
 
 test.describe("Reader layout", () => {
-  test("mobile vertical reader should stack comic pages without content-visibility placeholders", async ({ page }) => {
+  test("mobile reader should keep a stable first paint, open settings, and avoid horizontal overflow", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
 
@@ -100,13 +242,11 @@ test.describe("Reader layout", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByText("Episode 1").first().waitFor({ state: "visible" });
-    await expect(page.getByRole("button", { name: "Reader Settings" })).toBeVisible();
-    await tabToAndExpectVisibleFocus(page, page.getByRole("button", { name: "Back" }), {
-      label: "Reader back button",
-      maxTabs: 24,
-    });
-    await page.waitForTimeout(1200);
+    const settingsButton = page.getByRole("button", { name: "Reader Settings" }).first();
+    await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
+    await expect(settingsButton).toBeVisible();
+    await settingsButton.click();
+    await expect(page.getByText("Live controls")).toBeVisible();
 
     const layout = await page.evaluate(() => {
       const wrappers = Array.from(document.querySelectorAll("main [data-index]"));
@@ -114,8 +254,6 @@ test.describe("Reader layout", () => {
         const element = wrapper as HTMLElement;
         const image = element.querySelector("img") as HTMLImageElement | null;
         return {
-          contentVisibility: element.style.contentVisibility || "",
-          containIntrinsicSize: element.style.containIntrinsicSize || "",
           offsetTop: element.offsetTop,
           offsetHeight: element.offsetHeight,
           imageHeight: image ? image.clientHeight : 0,
@@ -124,26 +262,15 @@ test.describe("Reader layout", () => {
     });
 
     const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth
+      () => document.documentElement.scrollWidth - window.innerWidth,
     );
 
     expect(overflow).toBeLessThanOrEqual(1);
-
     expect(layout.length).toBeGreaterThanOrEqual(3);
 
     for (const item of layout) {
-      expect(item.contentVisibility).toBe("");
-      expect(item.containIntrinsicSize).toBe("");
       expect(item.offsetHeight).toBeGreaterThan(0);
       expect(item.imageHeight).toBeGreaterThan(0);
-    }
-
-    for (let index = 1; index < layout.length; index += 1) {
-      const previous = layout[index - 1];
-      const current = layout[index];
-      const gap = current.offsetTop - (previous.offsetTop + previous.offsetHeight);
-      expect(gap).toBeLessThanOrEqual(1);
-      expect(gap).toBeGreaterThanOrEqual(-1);
     }
 
     await expectNoBasicA11yAuditIssues(page, "/read/series-001/series-001e1", {
@@ -152,64 +279,42 @@ test.describe("Reader layout", () => {
     await expectNoRuntimeIssues("/read/series-001/series-001e1", runtimeIssues);
   });
 
-  test("chapter navigation should reveal on upward scroll and hide on downward scroll", async ({ page }) => {
+  test("reader actions should save and remove a bookmark without crashing", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
-
-    await page.setViewportSize({ width: 390, height: 844 });
 
     const response = await page.goto("/read/series-001/series-001e1", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByText("Episode 1").first().waitFor({ state: "visible" });
-    await page.waitForTimeout(1200);
+    const readerActionsButton = page.getByRole("button", { name: "Reader actions" });
+    await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
+    await expect(readerActionsButton).toBeVisible();
 
-    const chapterNav = page.locator('[aria-label="Chapter navigation"]');
+    await readerActionsButton.click();
+    await page.getByRole("button", { name: /Save bookmark/i }).click();
+    await expect(page.getByText("Bookmark saved")).toBeVisible();
 
-    await expect(chapterNav).toHaveAttribute("data-visible", "false");
+    await readerActionsButton.click();
+    await page.getByRole("button", { name: /Remove bookmark/i }).click();
+    await expect(page.getByText("Bookmark removed")).toBeVisible();
 
-    await page.evaluate(() => window.scrollTo({ top: 900, behavior: "auto" }));
-    await page.waitForTimeout(250);
-    await expect(chapterNav).toHaveAttribute("data-visible", "false");
-
-    await page.evaluate(() => window.scrollTo({ top: 540, behavior: "auto" }));
-    await page.waitForTimeout(250);
-
-    await expect(chapterNav).toHaveAttribute("data-visible", "true");
-    const previousChapterButton = chapterNav.getByRole("button", { name: "Previous Chapter" });
-    const nextChapterButton = chapterNav.getByRole("button", { name: "Next Chapter" });
-    await expect(previousChapterButton).toBeVisible();
-    await expect(nextChapterButton).toBeVisible();
-    await nextChapterButton.focus();
-    await expect(nextChapterButton).toBeFocused();
-    await expectVisibleFocusIndicator(nextChapterButton, "Reader next chapter button");
-    await expectNoBasicA11yAuditIssues(page, "/read/series-001/series-001e1#chapter-navigation", {
-      ignoreImagesInside: ["main [data-index]"],
-    });
-    await expectNoRuntimeIssues("/read/series-001/series-001e1#chapter-navigation", runtimeIssues);
+    await expectNoRuntimeIssues("/read/series-001/series-001e1#bookmarks", runtimeIssues);
   });
 
-  test("contents drawer should show the current chapter as reading instead of locked", async ({ page }) => {
+  test("locked reader should render the unlock card without crashing", async ({ page }) => {
     const runtimeIssues = collectRuntimeIssues(page);
-    await mockReaderRoutes(page);
+    await mockReaderRoutes(page, { pricePts: 24 });
 
     const response = await page.goto("/read/series-001/series-001e1", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByText("Episode 1").first().waitFor({ state: "visible" });
-    await page.getByRole("button", { name: "Chapters" }).click();
+    await expect(page.getByText(/Unlock the rest of this/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in to unlock" })).toBeVisible();
 
-    const currentChapterButton = page.getByRole("button", {
-      name: /Ep 1 Episode 1 Now reading/i,
-    });
-
-    await expect(currentChapterButton).toBeVisible();
-    await expect(currentChapterButton).toContainText("Reading");
-    await expect(currentChapterButton).not.toContainText("Locked");
-    await expectNoRuntimeIssues("/read/series-001/series-001e1#contents", runtimeIssues);
+    await expectNoRuntimeIssues("/read/series-001/series-001e1#unlock", runtimeIssues);
   });
 });

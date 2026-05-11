@@ -1,16 +1,13 @@
 import { redirect } from "next/navigation";
 import AdultHubPage from "../../components/adult/AdultHubPage";
-import { createPageMetadata } from "../../lib/seo";
+import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { resolveServerAdultGate } from "../../lib/serverAdultGate";
 
 export const metadata = createPageMetadata({
   title: "Mature Catalog",
   description: "18+ mature catalog access.",
   path: "/adult",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  robots: buildNoIndexRobots({ follow: false }),
 });
 
 export default async function Page() {

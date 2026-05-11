@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiGet } from "../lib/apiClient";
+import {
+  filterContentByMode,
+  getContentModeQueryParam,
+} from "../lib/contentFilters";
+import { CONTENT_MODE_NORMAL } from "../lib/contentMode";
 
 function extractList(payload, key) {
   if (!payload || typeof payload !== "object") {
@@ -17,6 +22,7 @@ function useRecommendationQuery({
   cacheMs,
   resultKey,
   fallbackError,
+  transformData = (items) => items,
 }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(Boolean(enabled && path));
@@ -54,7 +60,7 @@ function useRecommendationQuery({
       }
 
       if (response.ok && response.data) {
-        setData(extractList(response.data, resultKey));
+        setData(transformData(extractList(response.data, resultKey)));
         if (showLoading) {
           setLoading(false);
         }
@@ -68,7 +74,7 @@ function useRecommendationQuery({
             if (requestRef.current !== requestId || !freshResponse.ok || !freshResponse.data) {
               return;
             }
-            setData(extractList(freshResponse.data, resultKey));
+            setData(transformData(extractList(freshResponse.data, resultKey)));
             setError(null);
           });
         }
@@ -83,7 +89,7 @@ function useRecommendationQuery({
       }
       return response;
     },
-    [cacheMs, enabled, fallbackError, path, resultKey]
+    [cacheMs, enabled, fallbackError, path, resultKey, transformData]
   );
 
   useEffect(() => {
@@ -103,31 +109,49 @@ function useRecommendationQuery({
   return { data, loading, error, refetch };
 }
 
-export function usePopularRecommendations(limit = 10) {
+export function usePopularRecommendations(
+  limit = 10,
+  contentMode = CONTENT_MODE_NORMAL,
+) {
   return useRecommendationQuery({
-    path: `/api/recommendations/popular?limit=${limit}`,
+    path: `/api/recommendations/popular?limit=${limit}&adult=${getContentModeQueryParam(contentMode)}`,
     cacheMs: 60_000,
     resultKey: "series",
     fallbackError: "Failed to load popular recommendations",
+    transformData: (items) => filterContentByMode(items, contentMode),
   });
 }
 
-export function usePersonalizedRecommendations(userId, limit = 10) {
+export function usePersonalizedRecommendations(
+  userId,
+  limit = 10,
+  contentMode = CONTENT_MODE_NORMAL,
+) {
   return useRecommendationQuery({
     enabled: Boolean(userId),
-    path: userId ? `/api/recommendations/personalized?limit=${limit}` : "",
+    path: userId
+      ? `/api/recommendations/personalized?limit=${limit}&adult=${getContentModeQueryParam(contentMode)}`
+      : "",
     cacheMs: 30_000,
     resultKey: "recommendations",
     fallbackError: "Failed to load personalized recommendations",
+    transformData: (items) => filterContentByMode(items, contentMode),
   });
 }
 
-export function useSimilarRecommendations(seriesId, limit = 10) {
+export function useSimilarRecommendations(
+  seriesId,
+  limit = 10,
+  contentMode = CONTENT_MODE_NORMAL,
+) {
   return useRecommendationQuery({
     enabled: Boolean(seriesId),
-    path: seriesId ? `/api/recommendations/similar/${seriesId}?limit=${limit}` : "",
+    path: seriesId
+      ? `/api/recommendations/similar/${seriesId}?limit=${limit}&adult=${getContentModeQueryParam(contentMode)}`
+      : "",
     cacheMs: 120_000,
     resultKey: "recommendations",
     fallbackError: "Failed to load similar recommendations",
+    transformData: (items) => filterContentByMode(items, contentMode),
   });
 }

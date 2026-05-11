@@ -274,9 +274,9 @@ function SubscribeContent() {
                 <Crown className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Figma-aligned shell</h3>
+                <h3 className="text-base font-black text-white">Consistent account path</h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  This preview page now matches the same visual system used across the updated storefront screens.
+                  This preview page keeps the same navigation and account entry points used across the storefront.
                 </p>
               </div>
             </div>

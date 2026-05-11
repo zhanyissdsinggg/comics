@@ -13,6 +13,11 @@ import {
   Star,
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
+import {
+  filterContentByMode,
+  getContentModeQueryParam,
+} from "../../lib/contentFilters";
+import { trackEvent } from "../../lib/trackEvent";
 import FigmaChrome from "./FigmaChrome";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import {
@@ -110,7 +115,7 @@ function matchesQuery(item, normalizedQuery) {
   return haystack.includes(normalizedQuery);
 }
 
-function SearchResultCard({ item }) {
+function SearchResultCard({ item, onDetailClick, onReadClick }) {
   const { palette } = useFigmaSite();
   const chapterMeta = item.hasProgress
     ? `Continue from ${item.ctaChapterLabel}`
@@ -127,6 +132,7 @@ function SearchResultCard({ item }) {
     >
       <Link
         href={item.detailHref}
+        onClick={onDetailClick}
         className="block w-[116px] shrink-0 min-[420px]:w-[128px] sm:w-auto"
       >
         <div className="relative h-full min-h-[176px] overflow-hidden min-[420px]:min-h-[194px] sm:min-h-0 sm:aspect-[3/4]">
@@ -196,6 +202,7 @@ function SearchResultCard({ item }) {
           </span>
           <Link
             href={item.readHref}
+            onClick={onReadClick}
             className={cn(
               "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white transition-transform active:scale-[0.98] sm:px-3.5 sm:py-1.5 sm:text-[11px]",
               palette.primaryBg,
@@ -217,7 +224,7 @@ function SearchContent({
   initialHotKeywords = [],
   initialReady = false,
 }) {
-  const { palette, isAdultMode } = useFigmaSite();
+  const { palette, isAdultMode, contentMode } = useFigmaSite();
   const normalizedInitialQuery = String(initialQuery || "").trim();
   const [query, setQuery] = useState(initialQuery);
   const [activeFormat, setActiveFormat] = useState(
@@ -235,19 +242,40 @@ function SearchContent({
   const [resolvedQuery, setResolvedQuery] = useState(normalizedInitialQuery);
   const deferredQuery = useDeferredValue(query);
   const hydratedRequestHandledRef = useRef(false);
+  const searchOpenTrackedRef = useRef(false);
+  const lastSearchSubmitKeyRef = useRef("");
+  const lastZeroResultKeyRef = useRef("");
+  const impressionKeysRef = useRef(new Set());
   const initialRequestKey = useMemo(
-    () => JSON.stringify({ q: normalizedInitialQuery, adult: "0" }),
-    [normalizedInitialQuery],
+    () =>
+      JSON.stringify({
+        q: normalizedInitialQuery,
+        adult: getContentModeQueryParam(contentMode),
+      }),
+    [contentMode, normalizedInitialQuery],
   );
+
+  useEffect(() => {
+    if (searchOpenTrackedRef.current) {
+      return;
+    }
+
+    searchOpenTrackedRef.current = true;
+    trackEvent("search_open", {
+      contentMode,
+      sourceSection: "search_page",
+    });
+  }, [contentMode]);
 
   useEffect(() => {
     let active = true;
 
     async function loadSearchResults() {
       const normalizedQuery = deferredQuery.trim();
+      const adultFlag = getContentModeQueryParam(contentMode);
       const requestKey = JSON.stringify({
         q: normalizedQuery,
-        adult: isAdultMode ? "1" : "0",
+        adult: adultFlag,
       });
       const reuseInitialPayload =
         !hydratedRequestHandledRef.current &&
@@ -266,7 +294,7 @@ function SearchContent({
         params.set("q", normalizedQuery);
       }
       params.set("pageSize", "48");
-      params.set("adult", isAdultMode ? "1" : "0");
+      params.set("adult", adultFlag);
 
       const response = await apiGet(`/api/search?${params.toString()}`, {
         cacheMs: 3000,
@@ -294,14 +322,17 @@ function SearchContent({
     return () => {
       active = false;
     };
-  }, [deferredQuery, isAdultMode]);
+  }, [contentMode, deferredQuery, initialReady, initialRequestKey]);
 
   useEffect(() => {
     let active = true;
 
-    apiGet(`/api/search/hot?adult=${isAdultMode ? "1" : "0"}&window=day`, {
-      cacheMs: 30_000,
-    })
+    apiGet(
+      `/api/search/hot?adult=${getContentModeQueryParam(contentMode)}&window=day`,
+      {
+        cacheMs: 30_000,
+      },
+    )
       .then((response) => {
         if (!active || !response.ok || !Array.isArray(response.data?.keywords)) {
           return;
@@ -316,14 +347,16 @@ function SearchContent({
     return () => {
       active = false;
     };
-  }, [isAdultMode]);
+  }, [contentMode]);
+
+  const visibleRemoteItems = useMemo(
+    () => filterContentByMode(remoteItems, contentMode),
+    [contentMode, remoteItems],
+  );
 
   const interactiveItems = useMemo(
-    () =>
-      buildInteractiveFallbackCatalog().filter(
-        (item) => isAdultMode || !item.isAdult,
-      ),
-    [isAdultMode],
+    () => filterContentByMode(buildInteractiveFallbackCatalog(), contentMode),
+    [contentMode],
   );
 
   const effectiveCatalogQuery = loading ? resolvedQuery : deferredQuery.trim();
@@ -335,14 +368,16 @@ function SearchContent({
 
   const formatCounts = useMemo(
     () => ({
-      all: remoteItems.length + interactiveQueryItems.length,
-      comics: remoteItems.filter((item) => item.kind === FIGMA_CONTENT_TYPES.COMICS)
-        .length,
-      novels: remoteItems.filter((item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS)
-        .length,
+      all: visibleRemoteItems.length + interactiveQueryItems.length,
+      comics: visibleRemoteItems.filter(
+        (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
+      ).length,
+      novels: visibleRemoteItems.filter(
+        (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
+      ).length,
       interactive: interactiveQueryItems.length,
     }),
-    [interactiveQueryItems, remoteItems],
+    [interactiveQueryItems, visibleRemoteItems],
   );
 
   const formatFilteredItems = useMemo(() => {
@@ -351,15 +386,19 @@ function SearchContent({
     }
 
     if (activeFormat === SEARCH_FORMATS.COMICS) {
-      return remoteItems.filter((item) => item.kind === FIGMA_CONTENT_TYPES.COMICS);
+      return visibleRemoteItems.filter(
+        (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
+      );
     }
 
     if (activeFormat === SEARCH_FORMATS.NOVELS) {
-      return remoteItems.filter((item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS);
+      return visibleRemoteItems.filter(
+        (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
+      );
     }
 
-    return [...remoteItems, ...interactiveQueryItems];
-  }, [activeFormat, interactiveQueryItems, remoteItems]);
+    return [...visibleRemoteItems, ...interactiveQueryItems];
+  }, [activeFormat, interactiveQueryItems, visibleRemoteItems]);
 
   const genreOptions = useMemo(
     () => buildGenreOptions(formatFilteredItems),
@@ -394,6 +433,158 @@ function SearchContent({
 
   const featuredItem = sortedItems[0] || formatFilteredItems[0] || null;
   const suggestions = sortedItems.slice(0, 6);
+  const normalizedQuery = deferredQuery.trim();
+  const hasSearchIntent =
+    Boolean(normalizedQuery) ||
+    activeFormat !== SEARCH_FORMATS.ALL ||
+    activeGenre !== "All" ||
+    activeSort !== "RELEVANCE";
+
+  useEffect(() => {
+    if (!hasSearchIntent) {
+      return;
+    }
+
+    const eventName = contentMode === "adult" ? "adult_search_submit" : "search_submit";
+    const submitKey = JSON.stringify({
+      eventName,
+      query: normalizedQuery,
+      contentMode,
+      format: activeFormat,
+      genre: activeGenre,
+      sort: activeSort,
+    });
+
+    if (lastSearchSubmitKeyRef.current === submitKey) {
+      return;
+    }
+
+    lastSearchSubmitKeyRef.current = submitKey;
+    trackEvent(eventName, {
+      query: normalizedQuery || undefined,
+      contentMode,
+      contentType:
+        activeFormat === SEARCH_FORMATS.ALL
+          ? undefined
+          : activeFormat.toLowerCase(),
+      genre: activeGenre !== "All" ? activeGenre : undefined,
+      sort: activeSort,
+      sourceSection: "search_page",
+    });
+  }, [activeFormat, activeGenre, activeSort, contentMode, hasSearchIntent, normalizedQuery]);
+
+  useEffect(() => {
+    if (loading || error || !hasSearchIntent || sortedItems.length > 0) {
+      return;
+    }
+
+    const zeroResultKey = JSON.stringify({
+      query: normalizedQuery,
+      contentMode,
+      format: activeFormat,
+      genre: activeGenre,
+      sort: activeSort,
+    });
+
+    if (lastZeroResultKeyRef.current === zeroResultKey) {
+      return;
+    }
+
+    lastZeroResultKeyRef.current = zeroResultKey;
+    trackEvent("search_zero_result", {
+      query: normalizedQuery || undefined,
+      contentMode,
+      contentType:
+        activeFormat === SEARCH_FORMATS.ALL
+          ? undefined
+          : activeFormat.toLowerCase(),
+      genre: activeGenre !== "All" ? activeGenre : undefined,
+      sort: activeSort,
+      sourceSection: "search_results",
+      resultCount: 0,
+    });
+  }, [
+    activeFormat,
+    activeGenre,
+    activeSort,
+    contentMode,
+    error,
+    hasSearchIntent,
+    loading,
+    normalizedQuery,
+    sortedItems.length,
+  ]);
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    sortedItems.slice(0, 12).forEach((item, index) => {
+      const impressionKey = `${contentMode}:search:${item.id}:${index}`;
+      if (impressionKeysRef.current.has(impressionKey)) {
+        return;
+      }
+
+      impressionKeysRef.current.add(impressionKey);
+      trackEvent("story_impression", {
+        seriesId: item.id,
+        contentMode,
+        contentType: item.kind,
+        isAdult: item.isAdult,
+        sourceSection: "search_results",
+        position: index + 1,
+      });
+    });
+  }, [contentMode, loading, sortedItems]);
+
+  const handleFormatSelect = (nextFormat) => {
+    setActiveFormat(nextFormat);
+  };
+
+  const handleGenreSelect = (nextGenre) => {
+    trackEvent("genre_filter_click", {
+      contentMode,
+      contentType:
+        activeFormat === SEARCH_FORMATS.ALL
+          ? undefined
+          : activeFormat.toLowerCase(),
+      genre: nextGenre,
+      sourceSection: "search_filters",
+    });
+    setActiveGenre(nextGenre);
+  };
+
+  const handleResultDetailClick = (item, index) => {
+    trackEvent("search_result_click", {
+      seriesId: item.id,
+      query: normalizedQuery || undefined,
+      contentMode,
+      contentType: item.kind,
+      isAdult: item.isAdult,
+      sourceSection: "search_results",
+      position: index + 1,
+    });
+    trackEvent("story_click", {
+      seriesId: item.id,
+      contentMode,
+      contentType: item.kind,
+      isAdult: item.isAdult,
+      sourceSection: "search_results",
+      position: index + 1,
+    });
+  };
+
+  const handleResultReadClick = (item, index) => {
+    trackEvent("story_click", {
+      seriesId: item.id,
+      contentMode,
+      contentType: item.kind,
+      isAdult: item.isAdult,
+      sourceSection: "search_read_cta",
+      position: index + 1,
+    });
+  };
 
   return (
     <div className={cn("min-h-screen pb-20", palette.rootBg)}>
@@ -421,8 +612,8 @@ function SearchContent({
                 Find something worth ruining your sleep schedule for.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:mt-4 md:text-base md:leading-7">
-                Real catalog search for comics and novels, plus the interactive picks
-                from your new Figma shell in one place.
+                Real catalog search for comics and novels, plus interactive picks
+                in one place.
               </p>
 
               <form
@@ -484,7 +675,7 @@ function SearchContent({
                     <button
                       key={option.key}
                       type="button"
-                      onClick={() => setActiveFormat(option.key)}
+                      onClick={() => handleFormatSelect(option.key)}
                       className={cn(
                         "rounded-[24px] border p-3.5 text-left transition-all md:p-4",
                         activeFormat === option.key
@@ -524,7 +715,7 @@ function SearchContent({
                     <button
                       key={genre}
                       type="button"
-                      onClick={() => setActiveGenre(genre)}
+                      onClick={() => handleGenreSelect(genre)}
                       className={cn(
                         "rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.16em] transition-all md:py-2 md:text-xs",
                         activeGenre === genre
@@ -642,7 +833,7 @@ function SearchContent({
                     <button
                       key={`results-${option.key}`}
                       type="button"
-                      onClick={() => setActiveFormat(option.key)}
+                      onClick={() => handleFormatSelect(option.key)}
                       className={cn(
                         "min-w-[128px] shrink-0 rounded-[20px] border px-3 py-2.5 text-left transition-all",
                         activeFormat === option.key
@@ -692,8 +883,13 @@ function SearchContent({
                 </div>
               ) : sortedItems.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-5">
-                  {sortedItems.map((item) => (
-                    <SearchResultCard key={item.id} item={item} />
+                  {sortedItems.map((item, index) => (
+                    <SearchResultCard
+                      key={item.id}
+                      item={item}
+                      onDetailClick={() => handleResultDetailClick(item, index)}
+                      onReadClick={() => handleResultReadClick(item, index)}
+                    />
                   ))}
                 </div>
               ) : (
@@ -707,7 +903,7 @@ function SearchContent({
                   <h3 className="text-2xl font-black text-white">No matches yet</h3>
                   <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-gray-400">
                     Try a broader keyword, switch formats, or drop the genre filter.
-                    The shell is working; the current combo just came up empty.
+                    The current combo just came up empty.
                   </p>
                 </div>
               )}

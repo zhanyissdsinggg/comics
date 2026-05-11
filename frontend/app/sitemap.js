@@ -1,5 +1,11 @@
-import { absoluteUrl, siteConfig } from "../lib/siteConfig";
 import { resolveSeriesCreatorIdentity } from "../lib/creatorIdentity";
+import { CONTENT_MODE_NORMAL } from "../lib/contentMode";
+import { filterContentByMode } from "../lib/contentFilters";
+import { absoluteUrl, siteConfig } from "../lib/siteConfig";
+import {
+  loadSeriesCatalogSeoPayload,
+  loadTopupCatalogSeoPayload,
+} from "../lib/storefrontSeo";
 
 const STATIC_SITEMAP_PATHS = [
   "/",
@@ -7,17 +13,13 @@ const STATIC_SITEMAP_PATHS = [
   "/comics",
   "/novels",
   "/creators",
-  "/store",
   "/rankings",
-  "/subscribe",
   "/support",
   "/faq",
   "/how-it-works",
   "/privacy-policy",
   "/terms-of-service",
-].filter((path) =>
-  path === "/subscribe" ? siteConfig.monetization.membershipEnabled : true,
-);
+].filter(Boolean);
 
 const ROUTE_PRIORITIES = {
   "/": 1.0,
@@ -29,76 +31,102 @@ const ROUTE_PRIORITIES = {
   "/support": 0.8,
   "/faq": 0.8,
   "/how-it-works": 0.8,
-  "/subscribe": 0.7,
+  "/about": 0.75,
   "/privacy-policy": 0.5,
   "/terms-of-service": 0.5,
 };
 
 const ROUTE_CHANGE_FREQUENCIES = {
   "/": "daily",
+  "/comics": "daily",
+  "/novels": "daily",
   "/rankings": "daily",
   "/creators": "weekly",
   "/store": "weekly",
-  "/subscribe": "weekly",
-  "/how-it-works": "monthly",
   "/support": "monthly",
   "/faq": "monthly",
+  "/how-it-works": "monthly",
   "/about": "monthly",
   "/privacy-policy": "yearly",
   "/terms-of-service": "yearly",
 };
 
-const CREATOR_SITEMAP_REVALIDATE_SECONDS = 60 * 60;
-
-function buildSitemapEntry(path, currentDate) {
+function buildSitemapEntry(path, lastModified, options = {}) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return {
-    url: absoluteUrl(path),
-    lastModified: currentDate,
-    changeFrequency: path.startsWith("/creators/")
-      ? "weekly"
-      : ROUTE_CHANGE_FREQUENCIES[path] || "monthly",
-    priority: path.startsWith("/creators/") ? 0.7 : ROUTE_PRIORITIES[path] || 0.7,
+    url: absoluteUrl(normalizedPath),
+    lastModified,
+    changeFrequency:
+      options.changeFrequency ||
+      (normalizedPath.startsWith("/creators/")
+        ? "weekly"
+        : ROUTE_CHANGE_FREQUENCIES[normalizedPath] || "weekly"),
+    priority:
+      options.priority ??
+      (normalizedPath.startsWith("/creators/") ? 0.7 : ROUTE_PRIORITIES[normalizedPath] || 0.7),
   };
 }
 
-async function loadCreatorPaths() {
-  try {
-    const response = await fetch(absoluteUrl("/api/series?adult=0"), {
-      next: { revalidate: CREATOR_SITEMAP_REVALIDATE_SECONDS },
-    });
+function resolveLastModified(value, fallbackDate) {
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return fallbackDate;
+  }
 
-    if (!response.ok) {
-      return [];
+  return new Date(parsed).toISOString();
+}
+
+function shouldIncludeStorePath(topupPayload) {
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
+  const pointPacksEnabled = siteConfig.monetization.pointPacksEnabled === true;
+  if (!checkoutEnabled || !pointPacksEnabled) {
+    return false;
+  }
+
+  return topupPayload?.billing?.purchaseActionsEnabled !== false;
+}
+
+function buildSeriesEntries(seriesList, currentDate) {
+  return seriesList
+    .filter((series) => series?.id)
+    .map((series) =>
+      buildSitemapEntry(`/series/${encodeURIComponent(series.id)}`, resolveLastModified(series?.updatedAt, currentDate), {
+        changeFrequency: String(series?.status || "").toLowerCase() === "ongoing" ? "daily" : "weekly",
+        priority: 0.8,
+      }),
+    );
+}
+
+function buildCreatorEntries(seriesList, currentDate) {
+  const creatorPaths = new Set();
+
+  seriesList.forEach((series) => {
+    const creatorIdentity = resolveSeriesCreatorIdentity(series);
+    if (!creatorIdentity?.hasPublicCredit || !creatorIdentity?.href) {
+      return;
     }
 
-    const payload = await response.json();
-    const seriesList = Array.isArray(payload?.series)
-      ? payload.series
-      : Array.isArray(payload?.data?.series)
-        ? payload.data.series
-        : [];
+    creatorPaths.add(creatorIdentity.href);
+  });
 
-    const creatorPaths = new Set();
-
-    seriesList.forEach((series) => {
-      const creatorIdentity = resolveSeriesCreatorIdentity(series);
-      if (!creatorIdentity.hasPublicCredit || !creatorIdentity.href) {
-        return;
-      }
-
-      creatorPaths.add(creatorIdentity.href);
-    });
-
-    return Array.from(creatorPaths);
-  } catch {
-    return [];
-  }
+  return Array.from(creatorPaths).map((path) => buildSitemapEntry(path, currentDate));
 }
 
 export default async function sitemap() {
   const currentDate = new Date().toISOString();
-  const creatorPaths = await loadCreatorPaths();
-  const allPaths = [...new Set([...STATIC_SITEMAP_PATHS, ...creatorPaths])];
+  const [catalogPayload, topupPayload] = await Promise.all([
+    loadSeriesCatalogSeoPayload(),
+    loadTopupCatalogSeoPayload(),
+  ]);
 
-  return allPaths.map((path) => buildSitemapEntry(path, currentDate));
+  const normalSeries = filterContentByMode(catalogPayload?.series || [], CONTENT_MODE_NORMAL);
+  const staticPaths = shouldIncludeStorePath(topupPayload)
+    ? [...STATIC_SITEMAP_PATHS, "/store"]
+    : STATIC_SITEMAP_PATHS;
+
+  return [
+    ...staticPaths.map((path) => buildSitemapEntry(path, currentDate)),
+    ...buildSeriesEntries(normalSeries, currentDate),
+    ...buildCreatorEntries(normalSeries, currentDate),
+  ];
 }

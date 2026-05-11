@@ -28,10 +28,11 @@ import {
   cn,
   formatWalletTotal,
 } from "./figma-utils";
+import { filterContentByMode } from "../../lib/contentFilters";
 
 function AccountContent({ seriesList = [] }) {
   const router = useRouter();
-  const { palette, isAdultMode } = useFigmaSite();
+  const { palette, contentMode, isAdultMode } = useFigmaSite();
   const { paidPts, bonusPts, loadWallet } = useWalletStore();
   const { user, isSignedIn, signOut } = useAuthStore();
   const { items: historyItems, loadHistory } = useHistoryStore();
@@ -39,7 +40,10 @@ function AccountContent({ seriesList = [] }) {
   const [activeTab, setActiveTab] = useState("history");
 
   const catalog = useMemo(() => buildFigmaCatalog(seriesList), [seriesList]);
-  const catalogItems = useMemo(() => catalog.items, [catalog]);
+  const catalogItems = useMemo(
+    () => filterContentByMode(catalog.items, contentMode),
+    [catalog.items, contentMode],
+  );
   const history = useMemo(
     () => buildProfileHistoryItems(historyItems, catalogItems),
     [catalogItems, historyItems],
@@ -284,7 +288,7 @@ function AccountContent({ seriesList = [] }) {
                     Account lane
                   </p>
                   <p className="mt-2 text-sm leading-5 text-gray-400">
-                    Use the wallet for chapter unlocks, then manage plans and settings from the same identity shell.
+                    Use the wallet for chapter unlocks, then manage plans and settings from the same account area.
                   </p>
                 </div>
               </div>

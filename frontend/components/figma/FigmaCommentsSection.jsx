@@ -114,6 +114,7 @@ function CommentItem({ comment }) {
             <button
               type="button"
               onClick={() => setLiked(!liked)}
+              aria-label={`Like comment from ${comment.user}`}
               className={cn(
                 "flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95",
                 liked ? palette.primaryText : "text-gray-500 hover:text-gray-300",

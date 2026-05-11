@@ -1,10 +1,14 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { trackEvent } from "../../lib/trackEvent";
+import {
+  CONTENT_MODE_ADULT,
+  CONTENT_MODE_NORMAL,
+} from "../../lib/contentMode";
 import {
   FIGMA_CONTENT_TYPES,
   getFigmaPalette,
@@ -33,8 +37,9 @@ export function FigmaSiteProvider({
   const {
     hydrated: adultHydrated,
     isAdultMode,
+    contentMode,
     legalAge,
-    requestAdultToggle,
+    setContentMode,
     confirmAge,
   } = useAdultGateStore();
   const { hydrated: authHydrated, isSignedIn, user } = useAuthStore();
@@ -81,7 +86,10 @@ export function FigmaSiteProvider({
 
   const handleAdultToggle = () => {
     const signedIn = authHydrated ? isSignedIn : false;
-    const status = requestAdultToggle(signedIn);
+    const status = setContentMode(
+      isAdultMode ? CONTENT_MODE_NORMAL : CONTENT_MODE_ADULT,
+      { isSignedIn: signedIn },
+    );
 
     trackEvent("figma_adult_toggle_attempt", {
       pathname,
@@ -89,6 +97,7 @@ export function FigmaSiteProvider({
       adultHydrated,
       authHydrated,
       isAdultMode,
+      contentMode,
     });
 
     if (status === "NEED_LOGIN") {
@@ -109,10 +118,23 @@ export function FigmaSiteProvider({
     setShowAgeGate(false);
   };
 
+  useEffect(() => {
+    if (!showAgeGate) {
+      return;
+    }
+
+    trackEvent("adult_gate_view", {
+      pagePath: pathname,
+      contentMode,
+      sourceSection: "figma_shell",
+    });
+  }, [contentMode, pathname, showAgeGate]);
+
   const value = useMemo(
     () => ({
       pathname,
       palette,
+      contentMode,
       isAdultMode,
       legalAge,
       contentType,
@@ -132,6 +154,7 @@ export function FigmaSiteProvider({
     [
       pathname,
       palette,
+      contentMode,
       isAdultMode,
       legalAge,
       contentType,

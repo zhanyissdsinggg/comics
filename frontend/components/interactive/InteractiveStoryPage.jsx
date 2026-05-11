@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import { trackEvent } from "../../lib/trackEvent";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 import SurfacePanel from "../common/SurfacePanel";
 import {
   storefrontPrimaryButtonClass,
@@ -43,6 +45,7 @@ export default function InteractiveStoryPage({ seriesId }) {
   const [authRequired, setAuthRequired] = useState(false);
   const [degradedNotice, setDegradedNotice] = useState("");
   const { hydrated, isSignedIn } = useAuthStore();
+  const { contentMode } = useAdultGateStore();
 
   const loadProgress = useCallback(async (storyId) => {
     const response = await apiGet(`/api/interactive-stories/${encodeURIComponent(storyId)}/progress`, {
@@ -104,12 +107,32 @@ export default function InteractiveStoryPage({ seriesId }) {
     void bootstrap();
   }, [bootstrap, hydrated, isSignedIn]);
 
+  useEffect(() => {
+    if (!story?.id) {
+      return;
+    }
+
+    trackEvent("interactive_story_start", {
+      seriesId,
+      contentMode,
+      contentType: "interactive",
+      sourceSection: "interactive_story",
+    });
+  }, [contentMode, seriesId, story?.id]);
+
   const handleChoose = useCallback(
     async (choiceId) => {
       if (!story?.id || !choiceId) {
         return;
       }
 
+      trackEvent("interactive_choice_select", {
+        seriesId,
+        contentMode,
+        contentType: "interactive",
+        episodeId: progress?.node?.id,
+        sourceSection: "interactive_story",
+      });
       setSubmittingChoiceId(choiceId);
       setError("");
       const response = await apiPost(
@@ -141,13 +164,36 @@ export default function InteractiveStoryPage({ seriesId }) {
 
       setError("Couldn't continue right now. Try again.");
     },
-    [loadProgress, story?.id],
+    [contentMode, loadProgress, progress?.node?.id, seriesId, story?.id],
   );
 
   const storyStateRows = useMemo(() => toStateRows(progress?.state), [progress?.state]);
   const node = progress?.node || null;
   const storyTitle = normalizeText(story?.title || "Interactive");
   const storyDescription = normalizeText(story?.description);
+
+  useEffect(() => {
+    if (!story?.id || !node?.id) {
+      return;
+    }
+
+    trackEvent("interactive_choice_view", {
+      seriesId,
+      contentMode,
+      contentType: "interactive",
+      sourceSection: "interactive_story",
+      position: Array.isArray(node.choices) ? node.choices.length : 0,
+    });
+
+    if (Array.isArray(node.choices) && node.choices.length === 0) {
+      trackEvent("interactive_story_complete", {
+        seriesId,
+        contentMode,
+        contentType: "interactive",
+        sourceSection: "interactive_story",
+      });
+    }
+  }, [contentMode, node?.choices, node?.id, seriesId, story?.id]);
 
   if (loading) {
     return (

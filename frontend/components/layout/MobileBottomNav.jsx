@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bookmark, Compass, House, Trophy, User } from "lucide-react";
+import {
+  Bookmark,
+  Compass,
+  House,
+  RotateCcw,
+  ShieldAlert,
+  Trophy,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   navigateWithDocument,
@@ -64,7 +72,12 @@ const TAB_ITEMS = [
   },
 ];
 
-export default function MobileBottomNav() {
+export default function MobileBottomNav({
+  isAdultMode = false,
+  legalAge = 18,
+  onAdultToggleClick,
+  showAdultToggle = true,
+}) {
   const pathname = usePathname() || "/";
   const [isMobileViewport, setIsMobileViewport] = useState(false);
 
@@ -112,7 +125,12 @@ export default function MobileBottomNav() {
       data-mobile-bottom-nav="1"
       className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom,0px))] md:hidden"
     >
-      <div className="mx-auto grid max-w-[720px] grid-cols-5 gap-1 rounded-[28px] border border-white/10 bg-[rgba(20,16,27,0.94)] px-1.5 py-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.38)] backdrop-blur-2xl">
+      <div
+        className={cn(
+          "mx-auto grid max-w-[720px] gap-1 rounded-[28px] border border-white/10 bg-[rgba(20,16,27,0.94)] px-1.5 py-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.38)] backdrop-blur-2xl",
+          showAdultToggle ? "grid-cols-6" : "grid-cols-5",
+        )}
+      >
         {TAB_ITEMS.map((item) => {
           const isActive = item.isActive(pathname);
           const Icon = item.icon;
@@ -161,6 +179,44 @@ export default function MobileBottomNav() {
             </NavItem>
           );
         })}
+
+        {showAdultToggle ? (
+          <button
+            type="button"
+            onClick={onAdultToggleClick}
+            aria-pressed={isAdultMode}
+            aria-label={isAdultMode ? "Back to normal mode" : `Enter ${legalAge}+ mode`}
+            data-testid="mobile-content-mode-toggle"
+            className={cn(
+              "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
+              isAdultMode
+                ? "border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(180deg,rgba(255,79,154,0.18)_0%,rgba(120,54,84,0.16)_100%)] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_14px_26px_rgba(0,0,0,0.24)]"
+                : "border border-transparent text-white/58 hover:border-white/10 hover:bg-white/[0.04] hover:text-white",
+            )}
+          >
+            <span
+              className={cn(
+                "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
+                isAdultMode ? "bg-[#ffd6e8] opacity-100" : "bg-transparent opacity-0",
+              )}
+            />
+            {isAdultMode ? (
+              <RotateCcw className="size-5" strokeWidth={2.2} />
+            ) : (
+              <ShieldAlert className="size-5" strokeWidth={1.95} />
+            )}
+            <span
+              className={cn(
+                "text-[10px] leading-none",
+                isAdultMode
+                  ? "font-semibold uppercase tracking-[0.1em]"
+                  : "font-medium uppercase tracking-[0.08em]",
+              )}
+            >
+              {isAdultMode ? "Normal" : `${legalAge}+`}
+            </span>
+          </button>
+        ) : null}
       </div>
     </nav>
   );

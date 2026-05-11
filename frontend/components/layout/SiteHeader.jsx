@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { HomeProvider } from "../../store/useHomeStore";
@@ -31,7 +31,6 @@ export default function SiteHeader({
   variant = "default",
   showAdultToggle = true,
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const { isAdultMode, legalAge, requestAdultToggle } = useAdultGateStore();
   const { isSignedIn, hydrated } = useAuthStore();
@@ -129,14 +128,8 @@ export default function SiteHeader({
       return;
     }
 
-    if (!wasAdultMode) {
-      trackEvent("adult_gate_enabled", { source: "header" });
-      router.push("/adult");
-    } else {
-      trackEvent("adult_gate_disabled", { source: "header" });
-      if (pathname?.startsWith("/adult")) {
-        navigateWithDocument("/");
-      }
+    if (wasAdultMode && pathname?.startsWith("/adult")) {
+      navigateWithDocument("/");
     }
 
     setActiveModal(null);
@@ -215,7 +208,12 @@ export default function SiteHeader({
         />
       ) : null}
 
-      <MobileBottomNav />
+      <MobileBottomNav
+        isAdultMode={isAdultMode}
+        legalAge={legalAge}
+        onAdultToggleClick={handleAdultToggle}
+        showAdultToggle={showAdultToggle}
+      />
     </>
   );
 }

@@ -2,6 +2,14 @@
 
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
+  CONTENT_MODE_NORMAL,
+  deriveContentModeFromAdultFlag,
+} from "../../lib/contentMode";
+import {
+  filterContentByMode,
+  isAdultContent,
+} from "../../lib/contentFilters";
+import {
   formatInstallmentLabel,
   getStartReadingLabel,
 } from "../../lib/seriesFormatLabels";
@@ -327,7 +335,7 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const contentKind = normalizeSeriesKind(series?.type, interactive);
   const title = String(series?.title || "Untitled").trim();
   const genres = normalizeGenres(series?.genres);
-  const adult = Boolean(series?.adult || series?.isAdult);
+  const adult = isAdultContent(series);
   const latestEpisodeNumber = Math.max(
     1,
     Number(series?.latestEpisodeNumber || series?.episodeCount || series?.chapter || 1),
@@ -478,6 +486,10 @@ export function buildFigmaCatalog(seriesList = [], options = {}) {
 }
 
 export function buildDisplayItems(contentType, catalog, isAdultMode = false) {
+  const contentMode =
+    typeof isAdultMode === "string"
+      ? isAdultMode
+      : deriveContentModeFromAdultFlag(Boolean(isAdultMode));
   const source =
     contentType === FIGMA_CONTENT_TYPES.NOVELS
       ? catalog.novels
@@ -485,7 +497,7 @@ export function buildDisplayItems(contentType, catalog, isAdultMode = false) {
         ? catalog.interactive
         : catalog.comics;
 
-  return source.filter((item) => Boolean(item?.isAdult) === Boolean(isAdultMode));
+  return filterContentByMode(source, contentMode || CONTENT_MODE_NORMAL);
 }
 
 export function sortByRating(items = []) {
@@ -624,25 +636,39 @@ export function buildProfileHistoryItems(historyItems = [], catalogItems = []) {
     (Array.isArray(catalogItems) ? catalogItems : []).map((item) => [item.id, item]),
   );
 
-  return (Array.isArray(historyItems) ? historyItems : []).map((entry, index) => {
-    const matched = lookup.get(String(entry?.seriesId || "").trim());
-    const percent = Math.max(1, Math.min(100, Math.round(Number(entry?.percent || 0) * 100) || 0));
-    return {
-      id: entry?.id || `${entry?.seriesId || "history"}-${index}`,
-      title: matched?.title || "Recently opened title",
-      chapter:
-        matched?.chapterLabel ||
-        formatInstallmentLabel(matched?.raw?.type || matched?.kind || "comic", entry?.episodeId || index + 1),
-      coverUrl:
-        matched?.coverUrl ||
-        "https://placehold.co/300x400/0f172a/f8fafc?text=Recent+Read",
-      progress: percent,
-      href: matched?.detailHref || "/library",
-      readHref:
-        matched?.readHref ||
-        buildReadHref(entry?.seriesId || matched?.id, entry?.episodeId || matched?.latestEpisodeId),
-    };
-  });
+  return (Array.isArray(historyItems) ? historyItems : [])
+    .map((entry, index) => {
+      const matched = lookup.get(String(entry?.seriesId || "").trim());
+      if (!matched) {
+        return null;
+      }
+
+      const percent = Math.max(
+        1,
+        Math.min(100, Math.round(Number(entry?.percent || 0) * 100) || 0),
+      );
+
+      return {
+        id: entry?.id || `${entry?.seriesId || "history"}-${index}`,
+        title: matched.title,
+        chapter:
+          matched.chapterLabel ||
+          formatInstallmentLabel(
+            matched?.raw?.type || matched?.kind || "comic",
+            entry?.episodeId || index + 1,
+          ),
+        coverUrl: matched.coverUrl,
+        progress: percent,
+        href: matched.detailHref || "/library",
+        readHref:
+          matched.readHref ||
+          buildReadHref(
+            entry?.seriesId || matched?.id,
+            entry?.episodeId || matched?.latestEpisodeId,
+          ),
+      };
+    })
+    .filter(Boolean);
 }
 
 export function buildBookmarksView(bookmarksBySeries = {}, catalogItems = []) {
@@ -654,23 +680,29 @@ export function buildBookmarksView(bookmarksBySeries = {}, catalogItems = []) {
     .flatMap(([seriesId, entries]) =>
       (Array.isArray(entries) ? entries : []).map((entry) => {
         const matched = lookup.get(String(seriesId || "").trim());
+        if (!matched) {
+          return null;
+        }
+
         return {
           id: entry?.id || `${seriesId}-${entry?.episodeId || "bookmark"}`,
-          title: matched?.title || "Saved title",
+          title: matched.title,
           chapter:
             entry?.label ||
-            matched?.chapterLabel ||
-            formatInstallmentLabel(matched?.raw?.type || matched?.kind || "comic", entry?.episodeId || 1),
-          coverUrl:
-            matched?.coverUrl ||
-            "https://placehold.co/300x400/1e293b/f8fafc?text=Saved",
-          href: matched?.detailHref || "/library",
+            matched.chapterLabel ||
+            formatInstallmentLabel(
+              matched?.raw?.type || matched?.kind || "comic",
+              entry?.episodeId || 1,
+            ),
+          coverUrl: matched.coverUrl,
+          href: matched.detailHref || "/library",
           readHref:
-            matched?.readHref ||
+            matched.readHref ||
             buildReadHref(seriesId, entry?.episodeId || matched?.latestEpisodeId),
         };
       }),
     )
+    .filter(Boolean)
     .slice(0, 12);
 }
 

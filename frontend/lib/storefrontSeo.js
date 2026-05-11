@@ -14,8 +14,22 @@ import {
   isBlockedPublicSeriesIdentifier,
   shouldBlockDemoContentInProduction,
 } from "./publicCatalogVisibility";
+import {
+  CONTENT_MODE_ADULT,
+  CONTENT_MODE_NORMAL,
+  deriveContentModeFromAdultFlag,
+} from "./contentMode";
+import {
+  filterContentByMode,
+  getContentModeQueryParam,
+  matchesContentMode,
+} from "./contentFilters";
 
 export const SEO_REVALIDATE_SECONDS = 300;
+
+function resolveSeoContentMode(options = {}) {
+  return deriveContentModeFromAdultFlag(options?.includeAdult === true);
+}
 
 function normalizeBaseUrl(value) {
   return String(value || "").trim().replace(/\/$/, "");
@@ -88,7 +102,7 @@ export const loadSeriesSeoPayload = cache(async (seriesId) => {
   return routePayload?.payload || null;
 });
 
-export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
+export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = {}) => {
   if (!seriesId || !episodeId) {
     return {
       series: null,
@@ -109,13 +123,22 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
     };
   }
 
-  const [seriesRoutePayload, episodePayload] = await Promise.all([
-    loadSeriesRoutePayload(seriesId),
-    fetchSeoApiJson(
-      `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
-      "reader-metadata",
-    ),
-  ]);
+  const seriesRoutePayload = await loadSeriesRoutePayload(seriesId, options);
+
+  if (seriesRoutePayload?.state && seriesRoutePayload.state !== "ready") {
+    return {
+      series: null,
+      episode: null,
+      episodes: [],
+      state: seriesRoutePayload.state,
+      gateReason: seriesRoutePayload.gateReason || null,
+    };
+  }
+
+  const episodePayload = await fetchSeoApiJson(
+    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
+    "reader-metadata",
+  );
 
   if (
     shouldBlockDemoContentInProduction() &&
@@ -139,10 +162,12 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId) => {
     episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
       ? seriesRoutePayload.payload.episodes
       : [],
+    state: seriesRoutePayload?.state || "ready",
+    gateReason: seriesRoutePayload?.gateReason || null,
   };
 });
 
-export const loadSeriesRoutePayload = cache(async (seriesId) => {
+export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
   if (!seriesId) {
     return {
       payload: null,
@@ -152,6 +177,7 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
   }
 
   try {
+    const contentMode = resolveSeoContentMode(options);
     const normalizedSeriesId = String(seriesId || "").trim().toLowerCase();
     if (
       shouldBlockDemoContentInProduction() &&
@@ -165,7 +191,7 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
     }
 
     const response = await fetch(
-      `${getSeoApiBaseUrl()}/api/series/${encodeURIComponent(seriesId)}`,
+      `${getSeoApiBaseUrl()}/api/series/${encodeURIComponent(seriesId)}?adult=${getContentModeQueryParam(contentMode)}`,
       {
         next: { revalidate: SEO_REVALIDATE_SECONDS },
         headers: {
@@ -210,6 +236,20 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
         };
       }
 
+      if (!matchesContentMode(safeSeries, contentMode)) {
+        return {
+          payload: null,
+          state:
+            contentMode === CONTENT_MODE_ADULT
+              ? "mode-mismatch"
+              : "adult-gated",
+          gateReason:
+            contentMode === CONTENT_MODE_ADULT
+              ? "NORMAL_MODE_REQUIRED"
+              : "NEED_AGE_CONFIRM",
+        };
+      }
+
       if (
         shouldBlockDemoContentInProduction() &&
         (isBlockedPublicSeriesIdentifier(safeSeries?.id) ||
@@ -249,28 +289,38 @@ export const loadSeriesRoutePayload = cache(async (seriesId) => {
 });
 
 export const loadSeriesCatalogSeoPayload = cache(async (options = {}) => {
-  const includeAdult = options?.includeAdult === true;
+  const contentMode = resolveSeoContentMode(options);
   const payload = await fetchSeoApiJson(
-    `/api/series?adult=${includeAdult ? "1" : "0"}`,
+    `/api/series?adult=${getContentModeQueryParam(contentMode)}`,
     "series-catalog",
   );
   return {
-    series: filterBlockedPublicSeries(
-      Array.isArray(payload?.series) ? payload.series : [],
+    series: filterContentByMode(
+      filterBlockedPublicSeries(Array.isArray(payload?.series) ? payload.series : []),
+      contentMode,
     ),
     ready: Boolean(payload),
   };
 });
 
-export const loadHomepageSeoPayload = cache(async () => {
+export const loadHomepageSeoPayload = cache(async (options = {}) => {
+  const contentMode = resolveSeoContentMode(options);
+  const adultFlag = getContentModeQueryParam(contentMode);
   const [seriesPayload, hotPayload, recommendationsPayload] = await Promise.all([
-    fetchSeoApiJson("/api/series?adult=0", "home-series"),
-    fetchSeoApiJson("/api/search/hot?adult=0&window=day", "home-hot-keywords"),
-    fetchSeoApiJson("/api/recommendations/homepage?adult=0", "home-recommendations"),
+    fetchSeoApiJson(`/api/series?adult=${adultFlag}`, "home-series"),
+    fetchSeoApiJson(
+      `/api/search/hot?adult=${adultFlag}&window=day`,
+      "home-hot-keywords",
+    ),
+    fetchSeoApiJson(
+      `/api/recommendations/homepage?adult=${adultFlag}`,
+      "home-recommendations",
+    ),
   ]);
 
-  const seriesList = filterBlockedPublicSeries(
-    Array.isArray(seriesPayload?.series) ? seriesPayload.series : [],
+  const seriesList = filterContentByMode(
+    filterBlockedPublicSeries(Array.isArray(seriesPayload?.series) ? seriesPayload.series : []),
+    contentMode,
   );
   const homepageSlots = Array.isArray(recommendationsPayload?.slots)
     ? recommendationsPayload.slots
@@ -294,7 +344,7 @@ export const loadHomepageSeoPayload = cache(async () => {
 
   if (canonicalHeroSeriesId) {
     const detailPayload = await fetchSeoApiJson(
-      `/api/series/${encodeURIComponent(canonicalHeroSeriesId)}?adult=0`,
+      `/api/series/${encodeURIComponent(canonicalHeroSeriesId)}?adult=${adultFlag}`,
       "home-canonical-hero",
     );
     const firstEpisode = Array.isArray(detailPayload?.episodes)
@@ -317,15 +367,16 @@ export const loadHomepageSeoPayload = cache(async () => {
             : `/series/${canonicalHeroSeriesId}`,
         }
       : null,
-    ready: true,
+    ready: Boolean(seriesPayload || hotPayload || recommendationsPayload),
   };
 });
 
-export const loadSearchSeoPayload = cache(async (query = "") => {
+export const loadSearchSeoPayload = cache(async (query = "", options = {}) => {
   const normalizedQuery = String(query || "").trim();
+  const contentMode = resolveSeoContentMode(options);
   const params = new URLSearchParams({
     pageSize: "48",
-    adult: "0",
+    adult: getContentModeQueryParam(contentMode),
   });
 
   if (normalizedQuery) {
@@ -334,24 +385,34 @@ export const loadSearchSeoPayload = cache(async (query = "") => {
 
   const [searchPayload, hotPayload] = await Promise.all([
     fetchSeoApiJson(`/api/search?${params.toString()}`, "search-page"),
-    fetchSeoApiJson("/api/search/hot?adult=0&window=day", "search-hot-keywords"),
+    fetchSeoApiJson(
+      `/api/search/hot?adult=${getContentModeQueryParam(contentMode)}&window=day`,
+      "search-hot-keywords",
+    ),
   ]);
 
   return {
-    results: Array.isArray(searchPayload?.results) ? searchPayload.results : [],
+    results: filterContentByMode(
+      Array.isArray(searchPayload?.results) ? searchPayload.results : [],
+      contentMode,
+    ),
     hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
     ready: Boolean(searchPayload),
   };
 });
 
-export const loadRankingsSeoPayload = cache(async (type = "popular", window = "all") => {
+export const loadRankingsSeoPayload = cache(async (type = "popular", window = "all", options = {}) => {
+  const contentMode = resolveSeoContentMode(options);
   const payload = await fetchSeoApiJson(
-    `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=0`,
+    `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=${getContentModeQueryParam(contentMode)}`,
     "rankings-page",
   );
 
   return {
-    rankings: Array.isArray(payload?.rankings) ? payload.rankings : [],
+    rankings: filterContentByMode(
+      Array.isArray(payload?.rankings) ? payload.rankings : [],
+      contentMode,
+    ),
     ready: Boolean(payload),
   };
 });
@@ -419,8 +480,11 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
     }
 
     const payload = await response.json();
-    const seriesList = filterBlockedPublicSeries(
-      Array.isArray(payload?.series) ? payload.series : [],
+    const seriesList = filterContentByMode(
+      filterBlockedPublicSeries(
+        Array.isArray(payload?.series) ? payload.series : [],
+      ),
+      CONTENT_MODE_NORMAL,
     );
     const creatorItems = sortCreatorSeries(
       seriesList.filter((item) => seriesMatchesCreatorSlug(item, creatorSlug)),
@@ -456,8 +520,11 @@ export const loadCreatorsDirectorySeoPayload = cache(async () => {
     }
 
     const payload = await response.json();
-    const seriesList = filterBlockedPublicSeries(
-      Array.isArray(payload?.series) ? payload.series : [],
+    const seriesList = filterContentByMode(
+      filterBlockedPublicSeries(
+        Array.isArray(payload?.series) ? payload.series : [],
+      ),
+      CONTENT_MODE_NORMAL,
     );
 
     return {

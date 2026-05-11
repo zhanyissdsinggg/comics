@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { canReadMatureFromCookieStore } from "./matureContent";
 
 function normalizeBaseUrl(value) {
   return String(value || "").trim().replace(/\/$/, "");
@@ -130,4 +131,42 @@ export async function resolveServerAdultGate() {
   }
 
   return { reason: "OK" };
+}
+
+export async function isServerAdultModeEnabled() {
+  const cookieStore = await cookies();
+  return canReadMatureFromCookieStore(cookieStore);
+}
+
+export async function readServerAdultGateState() {
+  const cookieStore = await cookies();
+  const statusCookie = String(
+    cookieStore.get("mn_mature_status")?.value || "",
+  ).trim();
+  const ageRuleKey = String(cookieStore.get("mn_age_rule")?.value || "global")
+    .trim()
+    .toLowerCase() || "global";
+
+  if (statusCookie) {
+    try {
+      const parsed = JSON.parse(statusCookie);
+      const adultConfirmed = isVerifiedMatureStatus(parsed);
+      const isAdultMode =
+        adultConfirmed && parsed?.matureModeEnabled === true;
+      return {
+        adultConfirmed,
+        isAdultMode,
+        ageRuleKey,
+      };
+    } catch {
+      // Fall through to legacy cookies.
+    }
+  }
+
+  return {
+    adultConfirmed:
+      String(cookieStore.get("mn_adult_confirmed")?.value || "").trim() === "1",
+    isAdultMode: canReadMatureFromCookieStore(cookieStore),
+    ageRuleKey,
+  };
 }

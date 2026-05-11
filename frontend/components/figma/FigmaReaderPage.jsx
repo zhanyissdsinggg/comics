@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bookmark,
+  BookmarkCheck,
   ChevronLeft,
   ChevronRight,
   Heart,
@@ -26,13 +28,20 @@ import {
 } from "../../lib/seriesFormatLabels";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useWalletStore } from "../../store/useWalletStore";
+import { trackEvent } from "../../lib/trackEvent";
 import PageStream from "../reader/PageStream";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
+import {
+  getContentModeQueryParam,
+  isAdultContent,
+  matchesContentMode,
+} from "../../lib/contentFilters";
 import { cn } from "./figma-utils";
 
 function createIdempotencyKey() {
@@ -79,6 +88,59 @@ function scrollToNode(node, offset = 88) {
 
   const top = node.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+function scheduleIdleTask(callback, timeout = 180) {
+  if (typeof window === "undefined" || typeof callback !== "function") {
+    return () => undefined;
+  }
+
+  if (typeof window.requestIdleCallback === "function") {
+    const idleId = window.requestIdleCallback(() => callback(), { timeout });
+    return () => window.cancelIdleCallback(idleId);
+  }
+
+  const timer = window.setTimeout(() => callback(), timeout);
+  return () => window.clearTimeout(timer);
+}
+
+function withFallbackAdultFlag(item, fallbackAdult = false) {
+  if (!item || typeof item !== "object") {
+    return item;
+  }
+
+  const hasModeSignal = [
+    "adult",
+    "isAdult",
+    "mature",
+    "isMature",
+    "nsfw",
+    "rating",
+    "ageRating",
+    "contentRating",
+    "category",
+    "tags",
+    "genres",
+    "mode",
+  ].some((field) => Object.prototype.hasOwnProperty.call(item, field));
+
+  return hasModeSignal ? item : { ...item, adult: fallbackAdult };
+}
+
+function resolveModeBlockFromError(response) {
+  if (!response || response.ok) {
+    return "";
+  }
+
+  if (response.reason === "NORMAL_MODE_REQUIRED") {
+    return "normal";
+  }
+
+  if (response.error === "ADULT_GATED" || response.reason === "NEED_AGE_CONFIRM") {
+    return "adult";
+  }
+
+  return "";
 }
 
 function Pill({ className = "", children }) {
@@ -138,7 +200,13 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const endRef = useRef(null);
   const commentsRef = useRef(null);
   const historyLoggedRef = useRef(false);
-  const { palette, handleAdultToggle, openLogin } = useFigmaSite();
+  const gateReportedRef = useRef("");
+  const episodeStartRef = useRef("");
+  const episodeCompleteRef = useRef("");
+  const adultReaderEnterRef = useRef("");
+  const progressMilestonesRef = useRef([]);
+  const { palette, contentMode, handleAdultToggle, confirmAdultMode, openLogin } = useFigmaSite();
+  const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const { loadEntitlement, unlockEpisode, bySeriesId } = useEntitlementStore();
   const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
@@ -150,6 +218,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const [episodeData, setEpisodeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [modeBlock, setModeBlock] = useState("");
   const [showNav, setShowNav] = useState(true);
   const [liked, setLiked] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -167,34 +236,88 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     async function load() {
       setLoading(true);
       setError("");
-      const adultFlag = isAdultMode ? "1" : "0";
-      const [seriesResponse, episodeResponse] = await Promise.all([
-        apiGet(`/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`, { cacheMs: 0 }),
-        apiGet(
-          `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
-          { cacheMs: 0 },
-        ),
-      ]);
+      setModeBlock("");
+      gateReportedRef.current = "";
+      episodeStartRef.current = "";
+      episodeCompleteRef.current = "";
+      adultReaderEnterRef.current = "";
+      progressMilestonesRef.current = [];
+      const adultFlag = getContentModeQueryParam(contentMode);
+      const seriesResponse = await apiGet(
+        `/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`,
+        { cacheMs: 0 },
+      );
 
       if (!active) {
         return;
       }
 
+      const seriesModeBlock = resolveModeBlockFromError(seriesResponse);
+      if (seriesModeBlock) {
+        setSeriesData(null);
+        setEpisodeData(null);
+        setModeBlock(seriesModeBlock);
+        setLoading(false);
+        return;
+      }
+
       if (!seriesResponse.ok || !seriesResponse.data?.series) {
+        setSeriesData(null);
+        setEpisodeData(null);
         setError(seriesResponse.error || "SERIES_LOAD_FAILED");
         setLoading(false);
         return;
       }
 
+      const nextSeriesData = seriesResponse.data;
+      const nextIsAdultSeries = isAdultContent(nextSeriesData?.series);
+      setSeriesData(nextSeriesData);
+
+      if (!matchesContentMode(nextSeriesData?.series, contentMode)) {
+        setEpisodeData(null);
+        setModeBlock(nextIsAdultSeries ? "adult" : "normal");
+        setLoading(false);
+        return;
+      }
+
+      const episodeResponse = await apiGet(
+        `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
+        { cacheMs: 0 },
+      );
+
+      if (!active) {
+        return;
+      }
+
+      const episodeModeBlock = resolveModeBlockFromError(episodeResponse);
+      if (episodeModeBlock) {
+        setEpisodeData(null);
+        setModeBlock(episodeModeBlock);
+        setLoading(false);
+        return;
+      }
+
       if (!episodeResponse.ok || !episodeResponse.data?.episode) {
+        setEpisodeData(null);
         setError(episodeResponse.error || "EPISODE_LOAD_FAILED");
         setLoading(false);
         return;
       }
 
+      const nextEpisode = withFallbackAdultFlag(
+        episodeResponse.data.episode,
+        nextIsAdultSeries,
+      );
+
+      if (!matchesContentMode(nextEpisode, contentMode)) {
+        setEpisodeData(null);
+        setModeBlock(nextIsAdultSeries ? "adult" : "normal");
+        setLoading(false);
+        return;
+      }
+
       historyLoggedRef.current = false;
-      setSeriesData(seriesResponse.data);
-      setEpisodeData(episodeResponse.data.episode);
+      setEpisodeData(nextEpisode);
       setLoading(false);
     }
 
@@ -202,14 +325,31 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     return () => {
       active = false;
     };
-  }, [episodeId, isAdultMode, seriesId]);
+  }, [contentMode, episodeId, isAdultMode, seriesId]);
 
   useEffect(() => {
-    if (isSignedIn) {
-      void loadEntitlement(seriesId);
-      void loadWallet();
+    if (
+      !isSignedIn ||
+      !seriesId ||
+      modeBlock ||
+      !seriesData?.series ||
+      !matchesContentMode(seriesData.series, contentMode)
+    ) {
+      return;
     }
-  }, [isSignedIn, loadEntitlement, loadWallet, seriesId]);
+
+    void loadEntitlement(seriesId);
+  }, [contentMode, isSignedIn, loadEntitlement, modeBlock, seriesData?.series, seriesId]);
+
+  useEffect(() => {
+    if (!isSignedIn || !episodeData?.id || modeBlock) {
+      return undefined;
+    }
+
+    return scheduleIdleTask(() => {
+      void loadWallet();
+    });
+  }, [episodeData?.id, isSignedIn, loadWallet, modeBlock]);
 
   useEffect(() => {
     if (!isSignedIn || historyLoggedRef.current || !seriesData?.series || !episodeData?.id) {
@@ -247,10 +387,16 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const episodes = useMemo(
-    () => (Array.isArray(seriesData?.episodes) ? seriesData.episodes : []),
-    [seriesData],
+  const seriesIsAdult = useMemo(
+    () => isAdultContent(seriesData?.series),
+    [seriesData?.series],
   );
+  const episodes = useMemo(() => {
+    const list = Array.isArray(seriesData?.episodes) ? seriesData.episodes : [];
+    return list.filter((item) =>
+      matchesContentMode(withFallbackAdultFlag(item, seriesIsAdult), contentMode),
+    );
+  }, [contentMode, seriesData, seriesIsAdult]);
   const currentEpisode = useMemo(
     () => episodes.find((item) => String(item?.id || "") === String(episodeId || "")) || null,
     [episodeId, episodes],
@@ -279,6 +425,17 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   );
   const unlocked =
     currentPricePts <= 0 || entitlement.unlockedEpisodeIds.includes(String(episodeId));
+  const seriesBookmarks = useMemo(
+    () => (Array.isArray(bookmarksBySeries?.[seriesId]) ? bookmarksBySeries[seriesId] : []),
+    [bookmarksBySeries, seriesId],
+  );
+  const currentBookmark = useMemo(
+    () =>
+      seriesBookmarks.find(
+        (item) => String(item?.episodeId || "") === String(episodeId || ""),
+      ) || null,
+    [episodeId, seriesBookmarks],
+  );
   const isComic = (episodeData?.type || seriesType) === "comic";
   const previewCount = !unlocked && isComic ? episodeData?.previewFreePages ?? 3 : null;
   const previewParagraphs = !unlocked && !isComic ? episodeData?.previewParagraphs ?? 3 : null;
@@ -292,6 +449,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       ? Math.min(previewParagraphs, paragraphs.length)
       : paragraphs.length;
   const safeVisibleUnits = Math.max(visibleUnits, 1);
+  const readingPercent = safeVisibleUnits
+    ? Math.max(
+        0.01,
+        Math.min(1, (Math.min(activeIndex, safeVisibleUnits - 1) + 1) / safeVisibleUnits),
+      )
+    : 0;
   const progressPercent = visibleUnits
     ? hasReachedChapterEnd || (!unlocked && hasReachedPreviewEnd)
       ? 100
@@ -305,6 +468,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           ),
         )
     : 0;
+  const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
   const queuePercent =
     episodes.length > 1 && currentIndex >= 0 ? Math.round(((currentIndex + 1) / episodes.length) * 100) : 100;
   const creatorName =
@@ -313,9 +477,20 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const shortfallPts = Math.max(0, currentPricePts - walletBalance);
   const backToSeriesHref =
     fallbackData?.backToSeriesHref || `/series/${encodeURIComponent(seriesId)}`;
+  const readerPath = `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`;
   const layoutModeForView = isComic ? layoutMode : "vertical";
-  const isAdultSeries = Boolean(seriesData?.series?.adult);
   const shareUrl = typeof window !== "undefined" ? window.location.href : backToSeriesHref;
+  const readerAnalyticsPayload = useMemo(
+    () => ({
+      seriesId,
+      episodeId,
+      contentMode,
+      seriesType,
+      isAdult: seriesIsAdult,
+      unlocked,
+    }),
+    [contentMode, episodeId, seriesId, seriesIsAdult, seriesType, unlocked],
+  );
   const previousQueueLabel = prevEpisode
     ? formatInstallmentLabel(seriesType, prevEpisode?.number || Math.max(currentNumber - 1, 1))
     : "Series overview";
@@ -327,7 +502,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       )
     : "No earlier installment is listed here, so the series page becomes the safe reset point.";
   const currentQueueDescription = unlocked
-    ? `${currentInstallmentLabel} is fully open and synced in this reader shell.`
+    ? `${currentInstallmentLabel} is fully open and synced in this reading session.`
     : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} are open before unlock.`;
   const nextQueueLabel = nextEpisode
     ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
@@ -339,6 +514,127 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           : "."
       }`
     : "No next installment is listed yet, so the overview page is the cleanest next stop.";
+
+  const handleEnterAdultReader = useCallback(async () => {
+    trackEvent("adult_gate_confirm", {
+      ...readerAnalyticsPayload,
+      source: "reader",
+    });
+
+    if (!isSignedIn) {
+      openLogin("login", readerPath);
+      return;
+    }
+
+    await confirmAdultMode();
+  }, [confirmAdultMode, isSignedIn, openLogin, readerAnalyticsPayload, readerPath]);
+
+  const handleAdultGateExit = useCallback(() => {
+    trackEvent("adult_gate_exit", {
+      ...readerAnalyticsPayload,
+      source: "reader",
+    });
+    router.push(backToSeriesHref);
+  }, [backToSeriesHref, readerAnalyticsPayload, router]);
+
+  const handleNavigateEpisode = useCallback(
+    (targetEpisode, direction, source = "reader") => {
+      if (!targetEpisode?.id) {
+        router.push(backToSeriesHref);
+        return;
+      }
+
+      const safeTarget = withFallbackAdultFlag(targetEpisode, seriesIsAdult);
+      if (!matchesContentMode(safeTarget, contentMode)) {
+        setToast(
+          contentMode === "adult"
+            ? "Switch back to normal mode to open this chapter."
+            : "Enable adult mode to open this chapter.",
+        );
+        return;
+      }
+
+      trackEvent(direction === "previous" ? "previous_chapter_click" : "next_chapter_click", {
+        ...readerAnalyticsPayload,
+        source,
+        targetEpisodeId: targetEpisode.id,
+      });
+      router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`);
+    },
+    [
+      backToSeriesHref,
+      contentMode,
+      readerAnalyticsPayload,
+      router,
+      seriesId,
+      seriesIsAdult,
+    ],
+  );
+
+  const handleBookmarkToggle = useCallback(() => {
+    if (currentBookmark?.id) {
+      removeBookmark(seriesId, currentBookmark.id);
+      trackEvent("bookmark_remove", {
+        ...readerAnalyticsPayload,
+        bookmarkId: currentBookmark.id,
+      });
+      setToast("Bookmark removed");
+      setOverflowOpen(false);
+      return;
+    }
+
+    const percent = isEpisodeComplete ? 1 : readingPercent;
+    const bookmark = addBookmark(seriesId, {
+      episodeId,
+      percent,
+      pageIndex: activeIndex,
+      label: `${currentInstallmentLabel} - ${Math.round(percent * 100)}%`,
+    });
+
+    trackEvent("bookmark_add", {
+      ...readerAnalyticsPayload,
+      bookmarkId: bookmark?.id,
+      percent: Math.round(percent * 100),
+      pageIndex: activeIndex,
+    });
+    setToast("Bookmark saved");
+    setOverflowOpen(false);
+  }, [
+    activeIndex,
+    addBookmark,
+    currentBookmark,
+    currentInstallmentLabel,
+    episodeId,
+    isEpisodeComplete,
+    readingPercent,
+    readerAnalyticsPayload,
+    removeBookmark,
+    seriesId,
+  ]);
+
+  const handleToggleNight = useCallback(() => {
+    trackEvent("reader_theme_change", {
+      ...readerAnalyticsPayload,
+      theme: nightMode ? "day" : "night",
+      sourceSection: "reader_settings",
+    });
+    toggleNightMode();
+  }, [nightMode, readerAnalyticsPayload, toggleNightMode]);
+
+  const handleToggleLayout = useCallback(() => {
+    if (!isComic) {
+      return;
+    }
+
+    const nextLayout =
+      layoutModeForView === "horizontal" ? "vertical" : "horizontal";
+    trackEvent("reader_theme_change", {
+      ...readerAnalyticsPayload,
+      layoutMode: nextLayout,
+      sourceSection: "reader_settings",
+    });
+    setLayoutMode(nextLayout);
+  }, [isComic, layoutModeForView, readerAnalyticsPayload, setLayoutMode]);
 
   const handleShare = useCallback(async () => {
     try {
@@ -364,18 +660,48 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       return;
     }
 
+    trackEvent("paywall_unlock_click", {
+      ...readerAnalyticsPayload,
+      pricePts: currentPricePts,
+    });
     setUnlockBusy(true);
     const response = await unlockEpisode(seriesId, episodeId, createIdempotencyKey());
     setUnlockBusy(false);
     if (response.ok) {
+      trackEvent("unlock_success", {
+        ...readerAnalyticsPayload,
+        pricePts: currentPricePts,
+      });
+      trackEvent("purchase_success", {
+        ...readerAnalyticsPayload,
+        purchaseType: "episode_unlock",
+        pricePts: currentPricePts,
+      });
       setToast(`${currentInstallmentLabel} unlocked`);
       return;
     }
+    trackEvent("unlock_fail", {
+      ...readerAnalyticsPayload,
+      status: response.status,
+      errorCode: response.error,
+      pricePts: currentPricePts,
+    });
     setToast(response.status === 402 ? "Not enough points" : "Unlock failed");
     if (response.status === 402) {
       router.push("/store");
     }
-  }, [currentInstallmentLabel, episodeId, isSignedIn, openLogin, router, seriesId, shortfallPts, unlockEpisode]);
+  }, [
+    currentInstallmentLabel,
+    currentPricePts,
+    episodeId,
+    isSignedIn,
+    openLogin,
+    readerAnalyticsPayload,
+    router,
+    seriesId,
+    shortfallPts,
+    unlockEpisode,
+  ]);
 
   const handleOpenComments = useCallback(() => {
     scrollToNode(commentsRef.current);
@@ -423,6 +749,142 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     };
   }, [loading, pages.length, paragraphs.length, previewCount, previewParagraphs]);
 
+  useEffect(() => {
+    if (modeBlock !== "adult") {
+      return;
+    }
+
+    const gateKey = `${seriesId}:${episodeId}:adult`;
+    if (gateReportedRef.current === gateKey) {
+      return;
+    }
+
+    gateReportedRef.current = gateKey;
+    trackEvent("adult_gate_view", {
+      ...readerAnalyticsPayload,
+      source: "reader",
+    });
+    trackEvent("adult_reader_blocked", {
+      ...readerAnalyticsPayload,
+      source: "reader",
+    });
+  }, [episodeId, modeBlock, readerAnalyticsPayload, seriesId]);
+
+  useEffect(() => {
+    if (loading || modeBlock || !seriesData?.series || !episodeData?.id) {
+      return;
+    }
+
+    const episodeKey = `${seriesId}:${episodeId}:${contentMode}`;
+    if (episodeStartRef.current === episodeKey) {
+      return;
+    }
+
+    episodeStartRef.current = episodeKey;
+    progressMilestonesRef.current = [];
+    episodeCompleteRef.current = "";
+
+    trackEvent("view_reader", {
+      ...readerAnalyticsPayload,
+    });
+    trackEvent(seriesIsAdult ? "adult_content_view" : "normal_content_view", {
+      ...readerAnalyticsPayload,
+      surface: "reader",
+    });
+    trackEvent("episode_start", {
+      ...readerAnalyticsPayload,
+      title: currentEpisodeTitle,
+    });
+
+    if (seriesIsAdult && contentMode === "adult" && adultReaderEnterRef.current !== episodeKey) {
+      adultReaderEnterRef.current = episodeKey;
+      trackEvent("adult_reader_enter", {
+        ...readerAnalyticsPayload,
+        source: "reader",
+      });
+    }
+  }, [
+    contentMode,
+    currentEpisodeTitle,
+    episodeData?.id,
+    episodeId,
+    loading,
+    modeBlock,
+    readerAnalyticsPayload,
+    seriesData?.series,
+    seriesId,
+    seriesIsAdult,
+  ]);
+
+  useEffect(() => {
+    if (loading || modeBlock || !episodeData?.id) {
+      return;
+    }
+
+    const milestones = progressMilestonesRef.current;
+    [25, 50, 75].forEach((milestone) => {
+      if (progressPercent < milestone || milestones.includes(milestone)) {
+        return;
+      }
+
+      milestones.push(milestone);
+      trackEvent("episode_progress", {
+        ...readerAnalyticsPayload,
+        milestone,
+        progressPercent,
+      });
+    });
+  }, [
+    episodeData?.id,
+    loading,
+    modeBlock,
+    progressPercent,
+    readerAnalyticsPayload,
+  ]);
+
+  useEffect(() => {
+    if (!settingsOpen) {
+      return;
+    }
+
+    trackEvent("reader_settings_open", {
+      ...readerAnalyticsPayload,
+      layoutMode: layoutModeForView,
+      nightMode: nightMode || isAdultMode,
+    });
+  }, [
+    isAdultMode,
+    layoutModeForView,
+    nightMode,
+    readerAnalyticsPayload,
+    settingsOpen,
+  ]);
+
+  useEffect(() => {
+    if (loading || modeBlock || !episodeData?.id || !isEpisodeComplete) {
+      return;
+    }
+
+    const completeKey = `${seriesId}:${episodeId}`;
+    if (episodeCompleteRef.current === completeKey) {
+      return;
+    }
+
+    episodeCompleteRef.current = completeKey;
+    trackEvent("episode_complete", {
+      ...readerAnalyticsPayload,
+      progressPercent: 100,
+    });
+  }, [
+    episodeData?.id,
+    episodeId,
+    isEpisodeComplete,
+    loading,
+    modeBlock,
+    readerAnalyticsPayload,
+    seriesId,
+  ]);
+
   if (loading) {
     return (
       <main className={cn("min-h-screen px-4 py-20 text-white", palette.rootBg)}>
@@ -443,6 +905,64 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <div key={index} className="h-32 animate-pulse rounded-[26px] bg-white/5" />
           ))}
         </div>
+      </main>
+    );
+  }
+
+  if (modeBlock === "adult") {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
+        <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
+        <h1 className="mb-4 text-3xl font-black">Age Restricted Content</h1>
+        <p className="mb-8 max-w-md text-gray-400">
+          This title is marked mature. Enable adult mode before opening the reader.
+        </p>
+        <button
+          type="button"
+          onClick={handleEnterAdultReader}
+          className={cn(
+            "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]",
+            palette.primaryBg,
+          )}
+        >
+          Verify Age Now
+        </button>
+        <button
+          type="button"
+          onClick={handleAdultGateExit}
+          className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
+        >
+          Back to series
+        </button>
+      </main>
+    );
+  }
+
+  if (modeBlock === "normal") {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
+        <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
+        <h1 className="mb-4 text-3xl font-black">Normal Mode Required</h1>
+        <p className="mb-8 max-w-md text-gray-400">
+          This title belongs to the normal catalog. Switch back to normal mode to keep reading.
+        </p>
+        <button
+          type="button"
+          onClick={handleAdultToggle}
+          className={cn(
+            "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]",
+            palette.primaryBg,
+          )}
+        >
+          Normal
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push(backToSeriesHref)}
+          className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
+        >
+          Back to series
+        </button>
       </main>
     );
   }
@@ -495,28 +1015,6 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     );
   }
 
-  if (isAdultSeries && !isAdultMode) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
-        <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-        <h1 className="mb-4 text-3xl font-black">Age Restricted Content</h1>
-        <p className="mb-8 max-w-md text-gray-400">
-          This title is marked mature. Enable adult mode before opening the reader.
-        </p>
-        <button
-          type="button"
-          onClick={handleAdultToggle}
-          className={cn(
-            "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)]",
-            palette.primaryBg,
-          )}
-        >
-          Verify Age Now
-        </button>
-      </main>
-    );
-  }
-
   return (
     <main className={cn("relative min-h-screen overflow-x-hidden pb-28 text-white", palette.rootBg)}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -540,6 +1038,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={() => router.back()}
+              aria-label="Back"
               className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-all hover:border-white/20 hover:bg-white/10 active:scale-[0.97]"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -567,6 +1066,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={handleOpenComments}
+              aria-label="Open comments"
               className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]"
             >
               <MessageCircle className="h-5 w-5" />
@@ -577,6 +1077,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 setSettingsOpen((value) => !value);
                 setOverflowOpen(false);
               }}
+              aria-label="Reader Settings"
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
                 settingsOpen && "border-white/20 bg-white/10 text-white",
@@ -590,6 +1091,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 setOverflowOpen((value) => !value);
                 setSettingsOpen(false);
               }}
+              aria-label="Reader actions"
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
                 overflowOpen && "border-white/20 bg-white/10 text-white",
@@ -613,6 +1115,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={() => setOverflowOpen(false)}
+              aria-label="Close reader actions"
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X className="h-4 w-4" />
@@ -646,6 +1149,27 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               </span>
               <ChevronRight className="h-4 w-4 text-white/70" />
             </button>
+            <button
+              type="button"
+              onClick={handleBookmarkToggle}
+              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
+            >
+              <span>
+                <span className="block text-sm font-bold text-white">
+                  {currentBookmark ? "Remove bookmark" : "Save bookmark"}
+                </span>
+                <span className="mt-1 block text-xs text-gray-400">
+                  {currentBookmark
+                    ? `Saved at ${Math.max(1, Math.round((currentBookmark.percent || 0) * 100))}% in this chapter.`
+                    : "Keep this reading position in your library."}
+                </span>
+              </span>
+              {currentBookmark ? (
+                <BookmarkCheck className="h-4 w-4 text-white/70" />
+              ) : (
+                <Bookmark className="h-4 w-4 text-white/70" />
+              )}
+            </button>
           </div>
         </div>
       ) : null}
@@ -662,6 +1186,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={() => setSettingsOpen(false)}
+              aria-label="Close reader settings"
               className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X className="h-4 w-4" />
@@ -671,7 +1196,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-              onClick={toggleNightMode}
+                      onClick={handleToggleNight}
               className={cn(
                 "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
                 nightMode
@@ -683,11 +1208,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             </button>
             <button
               type="button"
-              onClick={() =>
-                isComic
-                  ? setLayoutMode(layoutModeForView === "horizontal" ? "vertical" : "horizontal")
-                  : null
-              }
+                      onClick={handleToggleLayout}
               className={cn(
                 "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
                 isComic
@@ -818,7 +1339,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 ctaLabel={prevEpisode ? "Open previous" : "Back to series"}
                 onClick={
                   prevEpisode
-                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(prevEpisode.id)}`)
+                    ? () => handleNavigateEpisode(prevEpisode, "previous", "queue-card")
                     : () => router.push(backToSeriesHref)
                 }
               />
@@ -840,7 +1361,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 )}
                 onClick={
                   nextEpisode
-                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(nextEpisode.id)}`)
+                    ? () => handleNavigateEpisode(nextEpisode, "next", "queue-card")
                     : () => router.push(backToSeriesHref)
                 }
               />
@@ -978,7 +1499,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                     Unlock adds
                   </p>
                   <div className="mt-4 space-y-3">
-                    <Metric label="Continue instantly" value="No route break" hint="Stay in the same reader shell after access flips live." />
+                    <Metric label="Continue instantly" value="No route break" hint="Stay in the same reading flow after access flips live." />
                     <Metric label="Queue context" value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more ahead`} hint={`You are reading ${currentInstallmentLabel.toLowerCase()} of ${Math.max(episodes.length, 1)}.`} />
                     <Metric label="Reading state" value="Synced progress" hint="Signed-in readers keep placement and unlock state together." />
                   </div>
@@ -1010,7 +1531,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 type="button"
                 onClick={
                   prevEpisode
-                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(prevEpisode.id)}`)
+                    ? () => handleNavigateEpisode(prevEpisode, "previous", "endcap-card")
                     : () => router.push(backToSeriesHref)
                 }
                 className="mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
@@ -1095,7 +1616,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 type="button"
                 onClick={
                   nextEpisode
-                    ? () => router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(nextEpisode.id)}`)
+                    ? () => handleNavigateEpisode(nextEpisode, "next", "endcap-card")
                     : () => router.push(backToSeriesHref)
                 }
                 className={cn(
@@ -1117,6 +1638,8 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       </section>
 
       <div
+        aria-label="Chapter navigation"
+        data-visible={showNav ? "true" : "false"}
         className={cn(
           "fixed bottom-0 left-0 z-50 w-full border-t border-white/5 bg-[#0b0f16]/88 backdrop-blur-xl transition-transform duration-300",
           showNav ? "translate-y-0" : "translate-y-full",
@@ -1133,6 +1656,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={() => router.back()}
+              aria-label="Back"
               className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -1167,6 +1691,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <button
               type="button"
               onClick={() => router.push("/store")}
+              aria-label="View your wallet"
               className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white sm:flex"
             >
               <Wallet className="h-5 w-5" />
@@ -1177,6 +1702,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 setSettingsOpen((value) => !value);
                 setOverflowOpen(false);
               }}
+              aria-label="Reader Settings"
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white",
                 settingsOpen && "border-white/20 bg-white/10 text-white",

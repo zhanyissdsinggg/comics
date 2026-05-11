@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Calendar,
   ChevronRight,
@@ -14,6 +14,9 @@ import {
   Swords,
   Trophy,
 } from "lucide-react";
+import { apiGet } from "../../lib/apiClient";
+import { getContentModeQueryParam } from "../../lib/contentFilters";
+import { trackEvent } from "../../lib/trackEvent";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
 import {
@@ -30,6 +33,16 @@ import {
 
 const SORTS = ["Trending", "Newest", "Highest Rated", "Most Views"];
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const FIGMA_CATALOG_SOURCES = {
+  SERIES: "series",
+  RANKINGS: "rankings",
+};
+
+function normalizeCatalogSource(value) {
+  return value === FIGMA_CATALOG_SOURCES.RANKINGS
+    ? FIGMA_CATALOG_SOURCES.RANKINGS
+    : FIGMA_CATALOG_SOURCES.SERIES;
+}
 
 function getActionIcon(contentType) {
   if (contentType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
@@ -110,16 +123,107 @@ function getDailyUpdateNote(item) {
   return "Start now";
 }
 
-function HomeContent({ seriesList = [] }) {
-  const { palette, isAdultMode, contentType } = useFigmaSite();
+function HomeContent({
+  seriesList = [],
+  initialReady = false,
+  catalogSource = FIGMA_CATALOG_SOURCES.SERIES,
+}) {
+  const { palette, contentMode, contentType } = useFigmaSite();
   const [activeDay, setActiveDay] = useState("WED");
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeSort, setActiveSort] = useState("Trending");
+  const normalizedCatalogSource = useMemo(
+    () => normalizeCatalogSource(catalogSource),
+    [catalogSource],
+  );
+  const [catalogSeed, setCatalogSeed] = useState(() =>
+    Array.isArray(seriesList) ? seriesList : [],
+  );
+  const [catalogLoading, setCatalogLoading] = useState(!initialReady);
+  const requestRef = useRef(0);
+  const initialRequestHandledRef = useRef(false);
+  const homeViewTrackedRef = useRef(false);
+  const impressionKeysRef = useRef(new Set());
+  const initialRequestKey = useMemo(
+    () =>
+      JSON.stringify({
+        source: normalizedCatalogSource,
+        adult: getContentModeQueryParam(contentMode),
+      }),
+    [contentMode, normalizedCatalogSource],
+  );
 
-  const catalog = useMemo(() => buildFigmaCatalog(seriesList), [seriesList]);
+  useEffect(() => {
+    setCatalogSeed(Array.isArray(seriesList) ? seriesList : []);
+  }, [seriesList]);
+
+  useEffect(() => {
+    let active = true;
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
+    const adultFlag = getContentModeQueryParam(contentMode);
+    const requestKey = JSON.stringify({
+      source: normalizedCatalogSource,
+      adult: adultFlag,
+    });
+    const reuseInitialPayload =
+      !initialRequestHandledRef.current &&
+      initialReady &&
+      requestKey === initialRequestKey;
+
+    initialRequestHandledRef.current = true;
+
+    if (reuseInitialPayload) {
+      setCatalogLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setCatalogLoading(true);
+
+    const endpoint =
+      normalizedCatalogSource === FIGMA_CATALOG_SOURCES.RANKINGS
+        ? `/api/rankings?type=popular&window=all&adult=${adultFlag}`
+        : `/api/series?adult=${adultFlag}`;
+
+    apiGet(endpoint, { cacheMs: 30_000 })
+      .then((response) => {
+        if (!active || requestRef.current !== requestId) {
+          return;
+        }
+
+        if (!response.ok) {
+          setCatalogSeed([]);
+          setCatalogLoading(false);
+          return;
+        }
+
+        const nextItems =
+          normalizedCatalogSource === FIGMA_CATALOG_SOURCES.RANKINGS
+            ? response.data?.rankings
+            : response.data?.series;
+
+        setCatalogSeed(Array.isArray(nextItems) ? nextItems : []);
+        setCatalogLoading(false);
+      })
+      .catch(() => {
+        if (!active || requestRef.current !== requestId) {
+          return;
+        }
+        setCatalogSeed([]);
+        setCatalogLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [contentMode, initialReady, initialRequestKey, normalizedCatalogSource]);
+
+  const catalog = useMemo(() => buildFigmaCatalog(catalogSeed), [catalogSeed]);
   const currentItems = useMemo(
-    () => buildDisplayItems(contentType, catalog, isAdultMode),
-    [catalog, contentType, isAdultMode],
+    () => buildDisplayItems(contentType, catalog, contentMode),
+    [catalog, contentMode, contentType],
   );
 
   const filteredByGenre = useMemo(
@@ -142,7 +246,7 @@ function HomeContent({ seriesList = [] }) {
     return sortByRating(filteredByGenre);
   }, [activeSort, filteredByGenre]);
 
-  const fallbackItems = currentItems.length > 0 ? currentItems : catalog.comics;
+  const fallbackItems = currentItems;
   const heroItem = inferCatalogHero(sortedItems) || inferCatalogHero(fallbackItems);
   const gridItems = [...sortedItems, ...sortedItems].slice(0, 6);
   const exploreGridItems = [...sortedItems, ...sortedItems, ...sortedItems].slice(0, 12);
@@ -160,6 +264,95 @@ function HomeContent({ seriesList = [] }) {
     ? continueLabel
     : getReadLabel(contentType);
 
+  useEffect(() => {
+    if (normalizedCatalogSource !== FIGMA_CATALOG_SOURCES.SERIES) {
+      return;
+    }
+    if (homeViewTrackedRef.current) {
+      return;
+    }
+
+    homeViewTrackedRef.current = true;
+    trackEvent("home_view", {
+      contentMode,
+      contentType,
+      sourceSection: "home_page",
+    });
+  }, [contentMode, contentType, normalizedCatalogSource]);
+
+  useEffect(() => {
+    if (catalogLoading) {
+      return;
+    }
+
+    [
+      heroItem ? { item: heroItem, sourceSection: "home_hero", position: 1 } : null,
+      ...continueItems.map((item, index) => ({
+        item,
+        sourceSection: "continue_reading",
+        position: index + 1,
+      })),
+      ...rankItems.map((item, index) => ({
+        item,
+        sourceSection: "top_rated_picks",
+        position: index + 1,
+      })),
+    ]
+      .filter(Boolean)
+      .forEach(({ item, sourceSection, position }) => {
+        const impressionKey = `${normalizedCatalogSource}:${contentMode}:${sourceSection}:${item.id}`;
+        if (impressionKeysRef.current.has(impressionKey)) {
+          return;
+        }
+
+        impressionKeysRef.current.add(impressionKey);
+        trackEvent("story_impression", {
+          seriesId: item.id,
+          contentMode,
+          contentType: item.kind,
+          isAdult: item.isAdult,
+          sourceSection,
+          position,
+        });
+      });
+  }, [catalogLoading, contentMode, continueItems, heroItem, normalizedCatalogSource, rankItems]);
+
+  const handleGenreSelect = (nextGenre) => {
+    trackEvent("genre_filter_click", {
+      contentMode,
+      contentType,
+      genre: nextGenre,
+      sourceSection:
+        normalizedCatalogSource === FIGMA_CATALOG_SOURCES.RANKINGS
+          ? "rankings_filters"
+          : "home_filters",
+    });
+    setActiveGenre(nextGenre);
+  };
+
+  const handleSortSelect = (nextSort) => {
+    if (normalizedCatalogSource === FIGMA_CATALOG_SOURCES.RANKINGS) {
+      trackEvent("ranking_filter_click", {
+        contentMode,
+        contentType,
+        view: nextSort,
+        sourceSection: "rankings_filters",
+      });
+    }
+    setActiveSort(nextSort);
+  };
+
+  const handleStoryClick = (item, sourceSection, position = 1) => {
+    trackEvent("story_click", {
+      seriesId: item?.id,
+      contentMode,
+      contentType: item?.kind || contentType,
+      isAdult: item?.isAdult,
+      sourceSection,
+      position,
+    });
+  };
+
   if (!heroItem) {
     return (
       <div className={cn("min-h-screen", palette.rootBg)}>
@@ -173,11 +366,12 @@ function HomeContent({ seriesList = [] }) {
               )}
             >
               <h1 className="mb-3 text-3xl font-black tracking-tight text-white">
-                No titles live yet
+                {catalogLoading ? "Loading titles" : "No titles live yet"}
               </h1>
               <p className="mx-auto max-w-lg text-gray-400">
-                The catalog is empty right now. Once stories land, this new front
-                page will show them here.
+                {catalogLoading
+                  ? "Refreshing the active catalog for this mode."
+                  : "The catalog is empty right now. Once stories land, this front page will show them here."}
               </p>
             </div>
           </main>
@@ -236,6 +430,7 @@ function HomeContent({ seriesList = [] }) {
                 <div className="flex flex-wrap items-stretch gap-3 sm:items-center sm:gap-4">
                   <Link
                     href={heroItem.readHref}
+                    onClick={() => handleStoryClick(heroItem, "home_hero", 1)}
                     className={cn(
                       "flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 sm:w-auto md:px-8 md:py-4 md:text-base",
                       palette.primaryBg,
@@ -246,6 +441,7 @@ function HomeContent({ seriesList = [] }) {
                   </Link>
                   <Link
                     href={heroItem.detailHref}
+                    onClick={() => handleStoryClick(heroItem, "home_hero_detail", 1)}
                     className={cn(
                       "flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95 sm:w-auto md:px-8 md:py-4 md:text-base",
                       palette.surface,
@@ -315,7 +511,7 @@ function HomeContent({ seriesList = [] }) {
                   <button
                     key={genre}
                     type="button"
-                    onClick={() => setActiveGenre(genre)}
+                    onClick={() => handleGenreSelect(genre)}
                     className={cn(
                       "rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-95 md:px-4 md:text-sm",
                       activeGenre === genre
@@ -345,7 +541,7 @@ function HomeContent({ seriesList = [] }) {
                     <button
                       key={sort}
                       type="button"
-                      onClick={() => setActiveSort(sort)}
+                      onClick={() => handleSortSelect(sort)}
                       className={cn(
                         "flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-left text-xs font-bold transition-all md:text-sm",
                         activeSort === sort
@@ -387,10 +583,11 @@ function HomeContent({ seriesList = [] }) {
               </div>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
-                {continueItems.map((item) => (
+                {continueItems.map((item, index) => (
                   <Link
                     key={`continue-${item.id}`}
                     href={item.readHref}
+                    onClick={() => handleStoryClick(item, "continue_reading", index + 1)}
                     className={cn(
                       "group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-all hover:shadow-md active:scale-[0.98] md:gap-4 md:p-4",
                       palette.surface,
@@ -691,6 +888,7 @@ function HomeContent({ seriesList = [] }) {
                   <Link
                     key={`rank-${item.id}`}
                     href={item.detailHref}
+                    onClick={() => handleStoryClick(item, "top_rated_picks", index + 1)}
                     className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-white/5 active:scale-95 md:gap-4 md:p-2"
                   >
                     <span
@@ -741,10 +939,16 @@ function HomeContent({ seriesList = [] }) {
 export default function FigmaHomePage({
   seriesList = [],
   initialContentType = FIGMA_CONTENT_TYPES.COMICS,
+  initialReady = false,
+  catalogSource = FIGMA_CATALOG_SOURCES.SERIES,
 }) {
   return (
     <FigmaSiteProvider initialContentType={initialContentType}>
-      <HomeContent seriesList={seriesList} />
+      <HomeContent
+        seriesList={seriesList}
+        initialReady={initialReady}
+        catalogSource={catalogSource}
+      />
     </FigmaSiteProvider>
   );
 }

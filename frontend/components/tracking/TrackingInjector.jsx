@@ -2,8 +2,13 @@
 
 import { useEffect } from "react";
 import { apiGet } from "../../lib/apiClient";
+import { primeAnalyticsProviders } from "../../lib/trackEvent";
+import {
+  TRACKING_SETTINGS_STORAGE_KEY,
+  parseTrackingSettingsSnapshot,
+  writeTrackingSettingsToWindow,
+} from "../../lib/trackingSettings";
 
-const STORAGE_KEY = "mn_tracking_settings_v1";
 const DATA_ATTR = "data-tracking-slot";
 
 function clearInjected() {
@@ -97,10 +102,12 @@ function buildSnippets(values) {
 
 function applySnapshot(raw) {
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = parseTrackingSettingsSnapshot(raw);
     const { headSnippets, bodySnippets } = buildSnippets(parsed?.values || {});
 
     clearInjected();
+    writeTrackingSettingsToWindow(parsed?.values || {});
+    primeAnalyticsProviders();
     headSnippets.forEach((snippet, index) => {
       appendSnippet(document.head, snippet, `head-${index}`);
     });
@@ -118,7 +125,7 @@ async function injectFromStorage() {
     return;
   }
 
-  const cachedRaw = window.localStorage.getItem(STORAGE_KEY);
+  const cachedRaw = window.localStorage.getItem(TRACKING_SETTINGS_STORAGE_KEY);
   const hasLocalSnapshot = cachedRaw ? applySnapshot(cachedRaw) : false;
 
   try {
@@ -130,7 +137,7 @@ async function injectFromStorage() {
     if (response.ok && response.data?.config?.values) {
       const nextRaw = JSON.stringify({ values: response.data.config.values });
       if (nextRaw !== cachedRaw) {
-        window.localStorage.setItem(STORAGE_KEY, nextRaw);
+        window.localStorage.setItem(TRACKING_SETTINGS_STORAGE_KEY, nextRaw);
         applySnapshot(nextRaw);
       }
       return;
@@ -141,6 +148,7 @@ async function injectFromStorage() {
 
   if (!hasLocalSnapshot) {
     clearInjected();
+    writeTrackingSettingsToWindow({});
   }
 }
 
@@ -149,7 +157,7 @@ export default function TrackingInjector() {
     injectFromStorage();
 
     const handler = (event) => {
-      if (event.key === STORAGE_KEY) {
+      if (event.key === TRACKING_SETTINGS_STORAGE_KEY) {
         injectFromStorage();
       }
     };

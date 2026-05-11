@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
+import { useContentMode } from "../../hooks/useContentMode";
+import { filterContentByMode } from "../../lib/contentFilters";
 import { useSimilarRecommendations } from "../../hooks/useAIRecommendations";
 import Skeleton from "../common/Skeleton";
 import Cover from "../common/Cover";
@@ -29,11 +32,16 @@ function getSeriesBadge(item) {
 }
 
 export default function SimilarSeriesSection({ seriesId }) {
+  const { contentMode } = useContentMode();
   const {
     data: similarSeries,
     loading,
     error,
-  } = useSimilarRecommendations(seriesId, 6);
+  } = useSimilarRecommendations(seriesId, 6, contentMode);
+  const visibleSeries = useMemo(
+    () => filterContentByMode(similarSeries, contentMode),
+    [contentMode, similarSeries],
+  );
   const cardClass =
     "group overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(30,25,38,0.98)_0%,rgba(17,13,24,0.98)_100%)] text-left shadow-[0_24px_64px_rgba(8,6,20,0.3)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_30px_72px_rgba(8,6,20,0.36)]";
   const chipClass =
@@ -62,7 +70,7 @@ export default function SimilarSeriesSection({ seriesId }) {
     );
   }
 
-  if (error || !similarSeries || similarSeries.length === 0) {
+  if (error || !visibleSeries || visibleSeries.length === 0) {
     return null;
   }
 
@@ -80,7 +88,7 @@ export default function SimilarSeriesSection({ seriesId }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-12">
-        {similarSeries.map((item, index) => {
+        {visibleSeries.map((item, index) => {
           const creatorName = resolveSeriesCreatorName(item);
           const isLeadCard = index === 0;
 

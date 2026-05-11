@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AGE_RULES } from "../lib/ageRules";
@@ -17,10 +18,17 @@ import {
   readStoredMatureVerification,
 } from "../lib/preferencesClient";
 import {
+  CONTENT_MODE_ADULT,
+  CONTENT_MODE_NORMAL,
+  deriveContentModeFromAdultFlag,
+  normalizeContentMode,
+} from "../lib/contentMode";
+import {
   isMatureVerificationActive,
   localGateAgeProvider,
   normalizeMatureVerificationStatus,
 } from "../lib/verifyAgeProvider";
+import { trackEvent } from "../lib/trackEvent";
 
 const AdultGateContext = createContext(null);
 const CONFIRMED_KEY = "mn_adult_confirmed";
@@ -28,6 +36,7 @@ const RULE_KEY = "mn_age_rule";
 const MODE_KEY = "mn_adult_mode";
 const REGION_KEY = "mn_region";
 const HIDE_ADULT_KEY = "mn_hide_adult_history";
+const ADULT_STATE_UPDATED_AT_KEY = "mn_adult_state_updated_at";
 
 const requireLoginForAdult = true;
 
@@ -61,25 +70,29 @@ function createOptimisticVerification(ruleKey) {
   };
 }
 
-export function AdultGateProvider({ children }) {
+export function AdultGateProvider({ children, initialAdultState = null }) {
   const { hydrated: authHydrated, isSignedIn } = useAuthStore();
-  const [adultConfirmed, setAdultConfirmed] = useState(false);
-  const [ageRuleKey, setAgeRuleKey] = useState("global");
-  const [isAdultMode, setIsAdultMode] = useState(false);
+  const [adultConfirmed, setAdultConfirmed] = useState(
+    initialAdultState?.adultConfirmed === true,
+  );
+  const [ageRuleKey, setAgeRuleKey] = useState(
+    normalizeRuleKey(initialAdultState?.ageRuleKey || "global"),
+  );
+  const [isAdultMode, setIsAdultMode] = useState(
+    initialAdultState?.isAdultMode === true,
+  );
   const [matureVerification, setMatureVerification] = useState(
     readStoredMatureVerification("global"),
   );
   const [hydrated, setHydrated] = useState(false);
+  const restoredModeRef = useRef("");
 
-  const clearAdultCatalogCache = useCallback(() => {
-    invalidateApiCacheByPrefix("/api/series?adult=1");
-    invalidateApiCacheByPrefix("/api/search?adult=1");
-    invalidateApiCacheByPrefix("/api/search/hot?adult=1");
-    invalidateApiCacheByPrefix("/api/search/keywords?adult=1");
-    invalidateApiCacheByPrefix("/api/search/suggest");
+  const clearCatalogModeCache = useCallback(() => {
+    invalidateApiCacheByPrefix("/api/series");
+    invalidateApiCacheByPrefix("/api/search");
     invalidateApiCacheByPrefix("/api/recommendations");
-    invalidateApiCacheByPrefix("/api/rankings?adult=1");
-    invalidateApiCacheByPrefix("/api/notifications?adult=1");
+    invalidateApiCacheByPrefix("/api/rankings");
+    invalidateApiCacheByPrefix("/api/notifications");
   }, []);
 
   const syncAdultPreferences = useCallback(
@@ -109,6 +122,7 @@ export function AdultGateProvider({ children }) {
       mode,
       verification,
       sync = false,
+      markUpdated = false,
     }) => {
       const normalizedRule = normalizeRuleKey(ruleKey || verification?.region || "global");
       const normalizedVerification = normalizeMatureVerificationStatus(
@@ -125,6 +139,14 @@ export function AdultGateProvider({ children }) {
         window.localStorage.setItem(CONFIRMED_KEY, confirmed ? "1" : "0");
         window.localStorage.setItem(RULE_KEY, normalizedRule);
         window.localStorage.setItem(MODE_KEY, mode ? "1" : "0");
+        if (markUpdated) {
+          const updatedAt = Date.now();
+          window.localStorage.setItem(
+            ADULT_STATE_UPDATED_AT_KEY,
+            String(updatedAt),
+          );
+          window.__mnAdultStateUpdatedAt = updatedAt;
+        }
       }
 
       applyPreferencesToStorage({
@@ -152,6 +174,7 @@ export function AdultGateProvider({ children }) {
     const mode = readStorageValue(MODE_KEY, "0") === "1";
     const verification = readStoredMatureVerification(rule);
     const verificationActive = isMatureVerificationActive(verification, rule);
+    const restoredMode = mode && verificationActive ? CONTENT_MODE_ADULT : CONTENT_MODE_NORMAL;
     applyAdultState({
       confirmed: confirmed && verificationActive,
       ruleKey: rule,
@@ -159,6 +182,13 @@ export function AdultGateProvider({ children }) {
       verification,
       sync: false,
     });
+    if (restoredModeRef.current !== restoredMode) {
+      restoredModeRef.current = restoredMode;
+      trackEvent("content_mode_restore", {
+        contentMode: restoredMode,
+        ruleKey: rule,
+      });
+    }
     setHydrated(true);
   }, [applyAdultState]);
 
@@ -226,7 +256,7 @@ export function AdultGateProvider({ children }) {
         },
         sync: true,
       });
-      clearAdultCatalogCache();
+      clearCatalogModeCache();
     };
 
     const handleRegionEvent = (event) => {
@@ -251,25 +281,55 @@ export function AdultGateProvider({ children }) {
   }, [
     ageRuleKey,
     applyAdultState,
-    clearAdultCatalogCache,
+    clearCatalogModeCache,
     hydrated,
     matureVerification,
   ]);
 
-  const requestAdultToggle = useCallback(
-    (isSignedIn) => {
-      if (isAdultMode) {
-        applyAdultState({
-          confirmed: adultConfirmed,
-          ruleKey: ageRuleKey,
-          mode: false,
-          verification: matureVerification,
-          sync: true,
-        });
-        clearAdultCatalogCache();
-        return "OK";
+  const contentMode = deriveContentModeFromAdultFlag(isAdultMode);
+  const isNormalMode = contentMode === CONTENT_MODE_NORMAL;
+
+  const resolveSignedInState = useCallback(
+    (signedInOverride) => {
+      if (typeof signedInOverride === "boolean") {
+        return signedInOverride;
       }
-      if (requireLoginForAdult && !isSignedIn) {
+      return isSignedIn;
+    },
+    [isSignedIn],
+  );
+
+  const exitAdultMode = useCallback(() => {
+    const wasAdultMode = isAdultMode;
+      applyAdultState({
+        confirmed: adultConfirmed,
+        ruleKey: ageRuleKey,
+        mode: false,
+        verification: matureVerification,
+        sync: true,
+        markUpdated: true,
+      });
+    clearCatalogModeCache();
+    if (wasAdultMode) {
+      trackEvent("content_mode_exit_adult", {
+        contentMode: CONTENT_MODE_NORMAL,
+        ruleKey: ageRuleKey,
+      });
+    }
+    return "OK";
+  }, [
+    adultConfirmed,
+    ageRuleKey,
+    applyAdultState,
+    clearCatalogModeCache,
+    isAdultMode,
+    matureVerification,
+  ]);
+
+  const enterAdultMode = useCallback(
+    (signedInOverride) => {
+      const signedInForAdult = resolveSignedInState(signedInOverride);
+      if (requireLoginForAdult && !signedInForAdult) {
         return "NEED_LOGIN";
       }
       if (!isMatureVerificationActive(matureVerification, ageRuleKey)) {
@@ -281,37 +341,67 @@ export function AdultGateProvider({ children }) {
         mode: true,
         verification: matureVerification,
         sync: true,
+        markUpdated: true,
       });
+      clearCatalogModeCache();
+      if (!isAdultMode) {
+        trackEvent("content_mode_enter_adult", {
+          contentMode: CONTENT_MODE_ADULT,
+          ruleKey: ageRuleKey,
+        });
+      }
       return "OK";
     },
     [
-      adultConfirmed,
       ageRuleKey,
       applyAdultState,
-      clearAdultCatalogCache,
+      clearCatalogModeCache,
       isAdultMode,
       matureVerification,
-    ]
+      resolveSignedInState,
+    ],
   );
 
-  const enableAdultMode = useCallback(() => {
-    if (!isMatureVerificationActive(matureVerification, ageRuleKey)) {
-      return "NEED_AGE_CONFIRM";
-    }
-    applyAdultState({
-      confirmed: true,
-      ruleKey: ageRuleKey,
-      mode: true,
-      verification: matureVerification,
-      sync: true,
-    });
-    return "OK";
-  }, [ageRuleKey, applyAdultState, matureVerification]);
+  const setContentMode = useCallback(
+    (nextMode, options = {}) => {
+      if (
+        nextMode !== CONTENT_MODE_NORMAL &&
+        nextMode !== CONTENT_MODE_ADULT
+      ) {
+        trackEvent("content_mode_invalid_state", {
+          requestedMode: String(nextMode || ""),
+          fallbackMode: CONTENT_MODE_NORMAL,
+        });
+      }
+
+      const normalizedMode = normalizeContentMode(nextMode);
+      if (normalizedMode === CONTENT_MODE_ADULT) {
+        return enterAdultMode(options.isSignedIn);
+      }
+      return exitAdultMode();
+    },
+    [enterAdultMode, exitAdultMode],
+  );
+
+  const requestAdultToggle = useCallback(
+    (signedInOverride) =>
+      setContentMode(
+        isAdultMode ? CONTENT_MODE_NORMAL : CONTENT_MODE_ADULT,
+        { isSignedIn: signedInOverride },
+      ),
+    [isAdultMode, setContentMode],
+  );
+
+  const enableAdultMode = useCallback(
+    () => enterAdultMode(true),
+    [enterAdultMode],
+  );
 
   const confirmAge = useCallback(
     async (ruleKey) => {
       const normalized = normalizeRuleKey(ruleKey || readRegionRule());
       const optimisticVerification = createOptimisticVerification(normalized);
+      const wasAdultMode = isAdultMode;
 
       applyAdultState({
         confirmed: true,
@@ -319,7 +409,14 @@ export function AdultGateProvider({ children }) {
         mode: true,
         verification: optimisticVerification,
         sync: true,
+        markUpdated: true,
       });
+      if (!wasAdultMode) {
+        trackEvent("content_mode_enter_adult", {
+          contentMode: CONTENT_MODE_ADULT,
+          ruleKey: normalized,
+        });
+      }
 
       try {
         const verification = await localGateAgeProvider.verify({
@@ -333,6 +430,7 @@ export function AdultGateProvider({ children }) {
           mode: true,
           verification,
           sync: true,
+          markUpdated: true,
         });
       } catch {
         applyAdultState({
@@ -341,41 +439,34 @@ export function AdultGateProvider({ children }) {
           mode: true,
           verification: optimisticVerification,
           sync: true,
+          markUpdated: true,
         });
       }
 
       return "OK";
     },
-    [applyAdultState]
+    [applyAdultState, isAdultMode]
   );
 
   const forceDisableAdultMode = useCallback(() => {
-    applyAdultState({
-      confirmed: adultConfirmed,
-      ruleKey: ageRuleKey,
-      mode: false,
-      verification: matureVerification,
-      sync: true,
-    });
-    clearAdultCatalogCache();
-  }, [
-    adultConfirmed,
-    ageRuleKey,
-    applyAdultState,
-    clearAdultCatalogCache,
-    matureVerification,
-  ]);
+    exitAdultMode();
+  }, [exitAdultMode]);
 
   const value = useMemo(
     () => ({
       requireLoginForAdult,
       hydrated,
+      contentMode,
       adultConfirmed,
       ageRuleKey,
       legalAge,
       isAdultMode,
+      isNormalMode,
       matureVerification,
       setAgeRuleKey,
+      setContentMode,
+      enterAdultMode,
+      exitAdultMode,
       requestAdultToggle,
       confirmAge,
       enableAdultMode,
@@ -384,14 +475,19 @@ export function AdultGateProvider({ children }) {
     [
       adultConfirmed,
       ageRuleKey,
+      contentMode,
+      enterAdultMode,
+      exitAdultMode,
+      forceDisableAdultMode,
       hydrated,
+      isNormalMode,
       legalAge,
       isAdultMode,
       matureVerification,
+      setContentMode,
       requestAdultToggle,
       confirmAge,
       enableAdultMode,
-      forceDisableAdultMode,
     ]
   );
 

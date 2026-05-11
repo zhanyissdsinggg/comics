@@ -114,7 +114,7 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
-const footerLegalStatement = `Gush Comics is operated by ${siteConfig.companyName}.`;
+const footerLegalStatement = `${siteConfig.siteName} is operated by ${siteConfig.companyName}.`;
 
 function normalizeFooterPath(href) {
   return String(href || "").split("?")[0];
@@ -240,7 +240,7 @@ export default function SiteFooter({
               ) : null}
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
-              <p>© {currentYear} {siteConfig.companyName}</p>
+              <p>Copyright {currentYear} {siteConfig.companyName}</p>
               <p className="text-white/40">{footerLegalStatement}</p>
             </div>
           </div>
@@ -258,9 +258,7 @@ export default function SiteFooter({
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
-              <p
-                className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]"
-              >
+              <p className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]">
                 Read
               </p>
               <FooterHomeLink
@@ -300,9 +298,7 @@ export default function SiteFooter({
           <div className="grid gap-6 sm:grid-cols-3">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
-                <h4
-                  className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]"
-                >
+                <h4 className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]">
                   {section.title}
                 </h4>
                 <ul className="space-y-2.5">
@@ -346,7 +342,7 @@ export default function SiteFooter({
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span>© {currentYear} {siteConfig.companyName}</span>
+              <span>Copyright {currentYear} {siteConfig.companyName}</span>
               {siteConfig.companyAddress ? (
                 <span>{siteConfig.companyAddress}</span>
               ) : null}

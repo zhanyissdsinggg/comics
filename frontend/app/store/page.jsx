@@ -2,7 +2,7 @@ import { cache } from "react";
 import { CouponProvider } from "../../store/useCouponStore";
 import { WalletProvider } from "../../store/useWalletStore";
 import FigmaStorePage from "../../components/figma/FigmaStorePage";
-import { createPageMetadata } from "../../lib/seo";
+import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import {
   loadSubscriptionPlansSeoPayload,
   loadTopupCatalogSeoPayload,
@@ -35,12 +35,7 @@ export async function generateMetadata() {
       ? "Point packs are not available yet. You can read free chapters now."
       : "Get points, use codes, and check current plan savings.",
     path: "/store",
-    robots: prelaunchStore
-      ? {
-          index: false,
-          follow: false,
-        }
-      : undefined,
+    robots: prelaunchStore ? buildNoIndexRobots({ follow: false }) : undefined,
   });
 }
 

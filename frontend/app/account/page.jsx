@@ -2,6 +2,7 @@ import { BookmarkProvider } from "../../store/useBookmarkStore";
 import { WalletProvider } from "../../store/useWalletStore";
 import FigmaAccountPage from "../../components/figma/FigmaAccountPage";
 import { createPageMetadata } from "../../lib/seo";
+import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
@@ -15,7 +16,8 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
+  const includeAdult = await isServerAdultModeEnabled();
+  const payload = await loadSeriesCatalogSeoPayload({ includeAdult });
 
   return (
     <WalletProvider>

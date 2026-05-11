@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { siteConfig } from "../../lib/siteConfig";
 import { useAuthStore } from "../../store/useAuthStore";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import { cn } from "./figma-utils";
@@ -148,8 +149,7 @@ function LoginContent() {
                 href="/"
                 className="inline-flex items-center gap-2 text-2xl font-black tracking-tight text-white transition-transform hover:scale-[1.02] md:text-3xl"
               >
-                GUSH
-                <span className={cn(palette.primaryText)}>READS</span>
+                {siteConfig.siteName.toUpperCase()}
               </Link>
 
               <h1 className="mt-5 max-w-xl text-3xl font-black tracking-tight text-white md:mt-6 md:text-5xl">

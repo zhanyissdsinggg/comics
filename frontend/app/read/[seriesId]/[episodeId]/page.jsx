@@ -11,18 +11,24 @@ import {
   isBlockedPublicSeriesRecord,
   shouldBlockDemoContentInProduction,
 } from "../../../../lib/publicCatalogVisibility";
-import { createPageMetadata } from "../../../../lib/seo";
+import {
+  buildIndexRobots,
+  buildNoIndexRobots,
+  createPageMetadata,
+} from "../../../../lib/seo";
 import {
   formatInstallmentLabel,
   getInstallmentLabel,
   isDefaultInstallmentTitle,
 } from "../../../../lib/seriesFormatLabels";
 import { siteConfig } from "../../../../lib/siteConfig";
+import { isAdultContent } from "../../../../lib/contentFilters";
 import { buildPublicSeriesStaticParams } from "../../../../lib/publicSeriesCatalog";
 import {
   logSeriesInvariant,
   validateReaderPayload,
 } from "../../../../lib/publicSeriesRouteValidation";
+import { isServerAdultModeEnabled } from "../../../../lib/serverAdultGate";
 import { loadReaderSeoPayload } from "../../../../lib/storefrontSeo";
 import ReaderPageShell from "./ReaderPageShell";
 
@@ -45,17 +51,17 @@ export async function generateMetadata({ params }) {
   ) {
     notFound();
   }
-  const { series, episode } = await loadReaderSeoPayload(seriesId, episodeId);
+  const includeAdult = await isServerAdultModeEnabled();
+  const { series, episode, state } = await loadReaderSeoPayload(seriesId, episodeId, {
+    includeAdult,
+  });
 
-  if (!series || !episode) {
+  if (!series || !episode || state !== "ready") {
     return createPageMetadata({
       title: "Read story",
       description: `Read stories on ${siteConfig.siteName}.`,
       path: `/read/${seriesId}/${episodeId}`,
-      robots: {
-        index: false,
-        follow: true,
-      },
+      robots: buildNoIndexRobots({ follow: false }),
     });
   }
 
@@ -77,6 +83,14 @@ export async function generateMetadata({ params }) {
   ]
     .filter(Boolean)
     .join(" ");
+  const isMatureReader = isAdultContent(series) || isAdultContent(episode);
+  const isPaidEpisode =
+    Number(episode?.access?.pricePts ?? episode?.pricePts ?? 0) > 0;
+  const robots = isMatureReader
+    ? buildNoIndexRobots({ follow: false })
+    : isPaidEpisode
+      ? buildNoIndexRobots({ follow: true })
+      : buildIndexRobots({ follow: true });
 
   return createPageMetadata({
     title: `${episodeTitle} | ${seriesTitle}`,
@@ -84,10 +98,7 @@ export async function generateMetadata({ params }) {
     path: `/read/${seriesId}/${episodeId}`,
     image: series?.coverUrl || null,
     openGraphType: "article",
-    robots: {
-      index: false,
-      follow: true,
-    },
+    robots,
   });
 }
 
@@ -105,11 +116,16 @@ export default async function Page({ params }) {
   if (isBlockedPublicSeriesRecord({ id: seriesId })) {
     notFound();
   }
-  const { series, episode, episodes } = await loadReaderSeoPayload(
-    seriesId,
-    episodeId,
-  );
-  if (!validateReaderPayload(seriesId, episodeId, { series, episode, episodes })) {
+  const includeAdult = await isServerAdultModeEnabled();
+  const { series, episode, episodes, state } = await loadReaderSeoPayload(seriesId, episodeId, {
+    includeAdult,
+  });
+  const isModeBlocked = state === "adult-gated" || state === "mode-mismatch";
+  const isRecoverableShellState = isModeBlocked || state === "unavailable";
+  if (
+    !isRecoverableShellState &&
+    !validateReaderPayload(seriesId, episodeId, { series, episode, episodes })
+  ) {
     logSeriesInvariant("Reader route payload failed validation", {
       seriesId,
       episodeId,

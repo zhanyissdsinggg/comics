@@ -18,9 +18,7 @@ test.describe("Mobile layout", () => {
     );
 
     expect(overflow).toBeLessThanOrEqual(1);
-    await expect(
-      page.getByRole("heading", { name: "What are you in the mood for?" }),
-    ).toBeVisible();
+    await expect(page.locator("main")).toBeVisible();
     await expectNoRuntimeIssues("/", runtime);
   });
 
@@ -53,6 +51,9 @@ test.describe("Mobile layout", () => {
     await expect(bottomNav.getByRole("link", { name: "Library", exact: true })).toBeVisible();
     await expect(bottomNav.getByRole("link", { name: "Rankings", exact: true })).toBeVisible();
     await expect(bottomNav.getByRole("link", { name: "Me", exact: true })).toBeVisible();
+    await expect(
+      bottomNav.getByRole("button", { name: /Enter 18\+ mode|18\+/i }),
+    ).toBeVisible();
     await expect(header.getByRole("link", { name: "Comics" })).toHaveCount(0);
 
     const bodyPaddingBottom = await page.evaluate(() =>

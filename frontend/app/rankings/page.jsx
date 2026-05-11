@@ -1,15 +1,28 @@
 import FigmaHomePage from "../../components/figma/FigmaHomePage";
-import { createPageMetadata } from "../../lib/seo";
-import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
+import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
+import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
+import { loadRankingsSeoPayload } from "../../lib/storefrontSeo";
 
-export const metadata = createPageMetadata({
-  title: "Trending Stories",
-  description: "Trending titles, top picks, and finished series on Gush.",
-  path: "/rankings",
-});
+export async function generateMetadata() {
+  const includeAdult = await isServerAdultModeEnabled();
+
+  return createPageMetadata({
+    title: "Trending Stories",
+    description: "Trending titles, top picks, and finished series on Gush.",
+    path: "/rankings",
+    robots: includeAdult ? buildNoIndexRobots({ follow: false }) : undefined,
+  });
+}
 
 export default async function Page() {
-  const payload = await loadSeriesCatalogSeoPayload({ includeAdult: false });
+  const includeAdult = await isServerAdultModeEnabled();
+  const payload = await loadRankingsSeoPayload("popular", "all", { includeAdult });
 
-  return <FigmaHomePage seriesList={payload?.series || []} />;
+  return (
+    <FigmaHomePage
+      seriesList={payload?.rankings || []}
+      initialReady={payload?.ready}
+      catalogSource="rankings"
+    />
+  );
 }

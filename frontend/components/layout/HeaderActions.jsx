@@ -34,6 +34,10 @@ export default function HeaderActions({
   const { hydrated, isSignedIn } = useAuthStore();
   const { paidPts, bonusPts } = useWalletStore();
   const { unreadCount } = useNotificationsStore();
+  const adultToggleLabel = isAdultMode ? "Normal" : `${legalAge}+`;
+  const adultToggleAriaLabel = isAdultMode
+    ? "Back to normal mode"
+    : `Enter ${legalAge}+ mode`;
   const walletTotal = paidPts + bonusPts;
   const showWallet =
     hydrated &&
@@ -89,9 +93,9 @@ export default function HeaderActions({
               ? "border-[rgba(255,79,154,0.34)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(120,54,84,0.3)_100%)] text-white shadow-[0_16px_32px_rgba(255,79,154,0.18)]"
               : "border-white/10 bg-white/[0.04] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_28px_rgba(0,0,0,0.24)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/[0.07]",
           )}
-          aria-label={`Switch ${isAdultMode ? "to standard mode" : `to ${legalAge}+ mode`}`}
+          aria-label={adultToggleAriaLabel}
           aria-pressed={isAdultMode}
-          title={`Switch between standard mode and ${legalAge}+ mode. Current: ${isAdultMode ? `${legalAge}+ on` : "standard"}`}
+          title={adultToggleAriaLabel}
           data-testid="adult-toggle-button"
         >
           <span className="flex items-center gap-1.5 whitespace-nowrap">
@@ -103,15 +107,7 @@ export default function HeaderActions({
                   : "bg-[var(--gush-cyan)] shadow-[0_0_0_6px_rgba(103,232,249,0.14)]",
               )}
             />
-            <span className="text-white">{legalAge}+</span>
-          </span>
-          <span
-            className={cn(
-              "text-[10px] font-medium uppercase tracking-[0.16em] text-white",
-              isAdultMode ? "opacity-85" : "opacity-55",
-            )}
-          >
-            {isAdultMode ? "On" : "Off"}
+            <span className="text-white">{adultToggleLabel}</span>
           </span>
         </button>
       ) : null}

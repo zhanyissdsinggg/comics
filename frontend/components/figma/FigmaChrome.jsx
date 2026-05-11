@@ -22,6 +22,7 @@ import {
 import { siteConfig } from "../../lib/siteConfig";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { WalletProvider, useWalletStore } from "../../store/useWalletStore";
+import MobileBottomNav from "../layout/MobileBottomNav";
 import { useFigmaSite } from "./FigmaSiteContext";
 import {
   FIGMA_CONTENT_OPTIONS,
@@ -382,20 +383,21 @@ function FigmaHeaderInner() {
     </button>
   );
 
-  const adultToggleDesktopLabel = isAdultMode
-    ? `${legalAge}+ ON`
-    : `${legalAge}+ OFF`;
-  const adultToggleMobileLabel = `${legalAge}+`;
+  const adultToggleDesktopLabel = isAdultMode ? "Normal" : `${legalAge}+`;
+  const adultToggleMobileLabel = isAdultMode ? "Normal" : `${legalAge}+`;
+  const adultToggleAriaLabel = isAdultMode
+    ? "Back to normal mode"
+    : `Enter ${legalAge}+ mode`;
 
   return (
-    <nav
+    <header
       data-site-header="1"
       className={cn(
         "sticky top-0 z-40 w-full border-b bg-[#0a0c10]/90 backdrop-blur-xl",
         palette.border,
       )}
     >
-      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+      <nav className="mx-auto max-w-[1600px] px-4 md:px-8" aria-label="Primary">
         <div className="py-3 md:hidden">
           <div className="flex items-center justify-between gap-3">
             <Link
@@ -412,7 +414,6 @@ function FigmaHeaderInner() {
               </div>
               <span className="truncate text-lg font-black tracking-tight text-white">
                 {siteConfig.siteName.toUpperCase()}
-                <span className={cn("ml-1", palette.primaryText)}>READS</span>
               </span>
             </Link>
 
@@ -427,7 +428,7 @@ function FigmaHeaderInner() {
                     ? "border-red-500 bg-red-500/10 text-red-500"
                     : "border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-500 hover:text-white",
                 )}
-                aria-label={adultToggleDesktopLabel}
+                aria-label={adultToggleAriaLabel}
               >
                 {isAdultMode ? (
                   <Lock className="h-4 w-4" />
@@ -484,7 +485,6 @@ function FigmaHeaderInner() {
               </div>
               <span className="text-xl font-black tracking-tight text-white md:text-2xl">
                 {siteConfig.siteName.toUpperCase()}
-                <span className={cn("ml-1", palette.primaryText)}>READS</span>
               </span>
             </Link>
           </div>
@@ -598,6 +598,7 @@ function FigmaHeaderInner() {
                   ? "border-red-500/70 bg-red-500/10 text-red-400"
                   : "border-white/8 bg-white/[0.025] text-gray-500 hover:border-white/15 hover:text-white",
               )}
+              aria-label={adultToggleAriaLabel}
             >
               <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.16em]">
                 {isAdultMode ? (
@@ -648,8 +649,8 @@ function FigmaHeaderInner() {
             )}
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 
@@ -664,7 +665,10 @@ function FigmaHeader() {
 function FigmaFooter() {
   const { palette } = useFigmaSite();
   return (
-    <footer className="border-t border-gray-800 bg-[#06080a] pt-16 pb-8">
+    <footer
+      data-site-footer="1"
+      className="border-t border-gray-800 bg-[#06080a] pt-16 pb-8"
+    >
       <div className="mx-auto max-w-[1600px] px-4 md:px-8">
         <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
           <div className="col-span-2 lg:col-span-2">
@@ -672,7 +676,6 @@ function FigmaFooter() {
               <Flame className={cn("h-6 w-6", palette.primaryText)} />
               <span className="text-2xl font-black tracking-tight text-white">
                 {siteConfig.siteName.toUpperCase()}
-                <span className={cn("ml-1", palette.primaryText)}>READS</span>
               </span>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-gray-400">
@@ -770,6 +773,19 @@ function FigmaFooter() {
   );
 }
 
+function FigmaBottomNav() {
+  const { isAdultMode, legalAge, handleAdultToggle } = useFigmaSite();
+
+  return (
+    <MobileBottomNav
+      isAdultMode={isAdultMode}
+      legalAge={legalAge}
+      onAdultToggleClick={handleAdultToggle}
+      showAdultToggle
+    />
+  );
+}
+
 export default function FigmaChrome({
   children,
   hideNav = false,
@@ -782,6 +798,7 @@ export default function FigmaChrome({
       <FigmaAgeGateModal />
       <FigmaSearchOverlay searchSuggestions={searchSuggestions} />
       {children}
+      {!hideNav ? <FigmaBottomNav /> : null}
       {!hideFooter ? <FigmaFooter /> : null}
     </>
   );

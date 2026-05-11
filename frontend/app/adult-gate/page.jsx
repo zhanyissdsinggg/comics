@@ -1,16 +1,13 @@
 import { Suspense } from "react";
 import AdultGatePage from "../../components/adult/AdultGatePage";
 import Skeleton from "../../components/common/Skeleton";
-import { createPageMetadata } from "../../lib/seo";
+import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "18+ Access",
   description: "Sign in for 18+ titles.",
   path: "/adult-gate",
-  robots: {
-    index: false,
-    follow: false,
-  },
+  robots: buildNoIndexRobots({ follow: false }),
 });
 
 export default function Page() {

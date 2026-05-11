@@ -1,9 +1,19 @@
 User-agent: *
 Allow: /
 
+Disallow: /adult/
+Disallow: /adult-gate/
+Disallow: /mature-content/
 Disallow: /api/
 Disallow: /admin/
 Disallow: /account/
 Disallow: /orders/
+Disallow: /library/
+Disallow: /notifications/
+Disallow: /login/
+Disallow: /signin/
+Disallow: /profile/
+Disallow: /auth/reset/
+Disallow: /auth/verify/
 
 Sitemap: https://www.gushcomics.com/sitemap.xml

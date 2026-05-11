@@ -4,6 +4,7 @@ import "./globals.css";
 import AppProviders from "../components/layout/AppProviders";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
+import { readServerAdultGateState } from "../lib/serverAdultGate";
 import { siteConfig } from "../lib/siteConfig";
 
 const CookieConsent = dynamic(
@@ -70,7 +71,9 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const initialAdultState = await readServerAdultGateState();
+
   return (
     <html lang="en" suppressHydrationWarning className="font-sans dark">
       <body className="min-h-screen font-sans antialiased">
@@ -81,7 +84,9 @@ export default function RootLayout({ children }) {
           />
         ) : null}
         <ErrorBoundary name="RootBoundary">
-          <AppProviders>{children}</AppProviders>
+          <AppProviders initialAdultState={initialAdultState}>
+            {children}
+          </AppProviders>
           <CookieConsent />
         </ErrorBoundary>
       </body>

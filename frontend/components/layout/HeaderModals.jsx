@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useWalletStore } from "../../store/useWalletStore";
@@ -22,7 +22,6 @@ export default function HeaderModals({
   onPendingAdultToggleChange,
   variant = "default",
 }) {
-  const router = useRouter();
   const { signIn } = useAuthStore();
   const {
     requestAdultToggle,
@@ -31,6 +30,17 @@ export default function HeaderModals({
     legalAge,
   } = useAdultGateStore();
   const { paidPts, bonusPts } = useWalletStore();
+
+  useEffect(() => {
+    if (activeModal !== "age") {
+      return;
+    }
+
+    trackEvent("adult_gate_view", {
+      source: "header",
+      ruleKey: ageRuleKey,
+    });
+  }, [activeModal, ageRuleKey]);
 
   const handleLogin = async ({ email, password, mode }) => {
     const response = await signIn(email, password, mode);
@@ -72,8 +82,6 @@ export default function HeaderModals({
     trackEvent("adult_gate_confirm", { source: "header", ruleKey: resolvedRuleKey });
     confirmAge(resolvedRuleKey);
     onModalClose("age");
-    trackEvent("adult_gate_enabled", { source: "header" });
-    router.push("/adult");
   };
 
   const handleTopUp = (pkg) => {
@@ -131,7 +139,13 @@ export default function HeaderModals({
 
       <AgeGateModal
         open={activeModal === "age"}
-        onClose={() => onModalClose("age")}
+        onClose={() => {
+          trackEvent("adult_gate_exit", {
+            source: "header",
+            ruleKey: ageRuleKey,
+          });
+          onModalClose("age");
+        }}
         onConfirm={handleAgeConfirm}
         ageRuleKey={ageRuleKey}
         legalAge={legalAge}

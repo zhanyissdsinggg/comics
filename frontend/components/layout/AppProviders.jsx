@@ -44,6 +44,9 @@ const OfflineNotice = dynamic(() => import("../common/OfflineNotice"), {
 const TrackingInjector = dynamic(() => import("../tracking/TrackingInjector"), {
   ssr: false,
 });
+const PageViewTracker = dynamic(() => import("../tracking/PageViewTracker"), {
+  ssr: false,
+});
 
 function BrandingHeadSync() {
   const { branding } = useBrandingStore();
@@ -75,7 +78,7 @@ function BrandingHeadSync() {
   return null;
 }
 
-export default function AppProviders({ children }) {
+export default function AppProviders({ children, initialAdultState = null }) {
   useAuthOpenListener();
 
   const pathname = usePathname();
@@ -93,7 +96,7 @@ export default function AppProviders({ children }) {
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <AdultGateProvider>
+            <AdultGateProvider initialAdultState={initialAdultState}>
               <BrandingProvider>
                 <RegionProvider>
                   <OfflineNotice />
@@ -101,6 +104,7 @@ export default function AppProviders({ children }) {
                   <BackendMetaBadge />
                   <PerfMonitorBadge />
                   <TrackingInjector />
+                  <PageViewTracker />
                   <BrandingHeadSync />
                   <ToastContainer />
                   {!isAdminRoute ? <AuthRequiredModal /> : null}

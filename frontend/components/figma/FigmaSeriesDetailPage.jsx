@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BookmarkPlus,
@@ -13,6 +13,11 @@ import {
   Share2,
   Star,
 } from "lucide-react";
+import { apiGet } from "../../lib/apiClient";
+import {
+  getContentModeQueryParam,
+  isAdultContent,
+} from "../../lib/contentFilters";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
 import FigmaCommentsSection from "./FigmaCommentsSection";
@@ -24,22 +29,148 @@ import {
   cn,
 } from "./figma-utils";
 
-function SeriesDetailContent({ series, episodes }) {
+function ModeBlockedState({
+  palette,
+  title,
+  description,
+  ctaLabel,
+  onCta,
+  onBack,
+}) {
+  return (
+    <div className={cn("min-h-screen", palette.rootBg)}>
+      <FigmaChrome>
+        <main className="flex min-h-[78vh] flex-col items-center justify-center px-4 py-20 text-center">
+          <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
+          <h1 className="mb-4 text-3xl font-black text-white">{title}</h1>
+          <p className="mb-8 max-w-md text-gray-400">{description}</p>
+          <button
+            type="button"
+            onClick={onCta}
+            className={cn(
+              "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all active:scale-95",
+              palette.primaryBg,
+            )}
+          >
+            {ctaLabel}
+          </button>
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
+          >
+            Go Back
+          </button>
+        </main>
+      </FigmaChrome>
+    </div>
+  );
+}
+
+function SeriesDetailContent({
+  seriesId,
+  initialSeries,
+  initialEpisodes,
+  initialState = "ready",
+}) {
   const router = useRouter();
-  const { palette, isAdultMode, handleAdultToggle } = useFigmaSite();
+  const { palette, contentMode, isAdultMode, handleAdultToggle } = useFigmaSite();
+  const [payload, setPayload] = useState(() =>
+    initialSeries
+      ? {
+          series: initialSeries,
+          episodes: Array.isArray(initialEpisodes) ? initialEpisodes : [],
+        }
+      : null,
+  );
+  const [loading, setLoading] = useState(
+    !initialSeries && initialState === "ready",
+  );
+  const [error, setError] = useState(() => {
+    if (initialState === "adult-gated") {
+      return "ADULT_GATED";
+    }
+    if (initialState === "mode-mismatch") {
+      return "MODE_MISMATCH";
+    }
+    if (initialState === "not-found") {
+      return "NOT_FOUND";
+    }
+    if (initialState === "unavailable") {
+      return "UNAVAILABLE";
+    }
+    return null;
+  });
+  const requestRef = useRef(0);
+
+  useEffect(() => {
+    let active = true;
+    const requestId = requestRef.current + 1;
+    requestRef.current = requestId;
+    const adultFlag = getContentModeQueryParam(contentMode);
+
+    if (!payload?.series || isAdultContent(payload.series) !== Boolean(isAdultMode)) {
+      setLoading(true);
+    }
+
+    apiGet(`/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`, {
+      cacheMs: 0,
+    })
+      .then((response) => {
+        if (!active || requestRef.current !== requestId) {
+          return;
+        }
+
+        if (!response.ok || !response.data?.series) {
+          setPayload(null);
+          if (response.status === 403 || response.error === "ADULT_GATED") {
+            setError("ADULT_GATED");
+          } else if (response.status === 404 || response.error === "NOT_FOUND") {
+            setError("NOT_FOUND");
+          } else {
+            setError("UNAVAILABLE");
+          }
+          setLoading(false);
+          return;
+        }
+
+        setPayload({
+          series: response.data.series,
+          episodes: Array.isArray(response.data?.episodes)
+            ? response.data.episodes
+            : [],
+        });
+        setError(null);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active || requestRef.current !== requestId) {
+          return;
+        }
+        setPayload(null);
+        setError("UNAVAILABLE");
+        setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [contentMode, isAdultMode, seriesId]);
 
   const detailItem = useMemo(() => {
-    const mapped = buildFigmaSeriesItem(series, {
+    const mapped = buildFigmaSeriesItem(payload?.series, {
       interactive: false,
       defaultEpisodeId:
-        String(episodes?.[0]?.id || series?.latestEpisodeId || "").trim(),
+        String(
+          payload?.episodes?.[0]?.id || payload?.series?.latestEpisodeId || "",
+        ).trim(),
     });
     return mapped;
-  }, [episodes, series]);
+  }, [payload?.episodes, payload?.series]);
 
   const chapterItems = useMemo(
-    () => buildChapterItems(series, episodes),
-    [episodes, series],
+    () => buildChapterItems(payload?.series, payload?.episodes),
+    [payload?.episodes, payload?.series],
   );
 
   const isInteractive = detailItem?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE;
@@ -52,6 +183,57 @@ function SeriesDetailContent({ series, episodes }) {
   const readLabel = isInteractive
     ? "Start Playing"
     : detailItem.readLabel || "Start reading";
+
+  if (loading && !detailItem) {
+    return (
+      <div className={cn("min-h-screen", palette.rootBg)}>
+        <FigmaChrome>
+          <main className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
+            <div
+              className={cn(
+                "w-full rounded-3xl border p-10 text-center shadow-2xl",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <h1 className="mb-3 text-3xl font-black text-white">
+                Loading story
+              </h1>
+              <p className="mx-auto max-w-lg text-gray-400">
+                Refreshing the correct catalog for this mode.
+              </p>
+            </div>
+          </main>
+        </FigmaChrome>
+      </div>
+    );
+  }
+
+  if (error === "ADULT_GATED") {
+    return (
+      <ModeBlockedState
+        palette={palette}
+        title="Age Restricted Content"
+        description="This title is marked 18+ and needs mature mode enabled before we show it."
+        ctaLabel="Verify Age Now"
+        onCta={handleAdultToggle}
+        onBack={() => router.back()}
+      />
+    );
+  }
+
+  if (error === "MODE_MISMATCH" && isAdultMode) {
+    return (
+      <ModeBlockedState
+        palette={palette}
+        title="Normal Mode Required"
+        description="This title belongs to the normal catalog. Switch back to normal mode to continue."
+        ctaLabel="Normal"
+        onCta={handleAdultToggle}
+        onBack={() => router.back()}
+      />
+    );
+  }
 
   if (!detailItem) {
     return (
@@ -66,10 +248,12 @@ function SeriesDetailContent({ series, episodes }) {
               )}
             >
               <h1 className="mb-3 text-3xl font-black text-white">
-                Story not found
+                {error === "UNAVAILABLE" ? "Story unavailable" : "Story not found"}
               </h1>
               <p className="mx-auto max-w-lg text-gray-400">
-                This title is missing or not ready for public view yet.
+                {error === "UNAVAILABLE"
+                  ? "This title could not be loaded right now."
+                  : "This title is missing or not ready for public view yet."}
               </p>
             </div>
           </main>
@@ -78,39 +262,29 @@ function SeriesDetailContent({ series, episodes }) {
     );
   }
 
-  if (detailItem.isAdult && !isAdultMode) {
+  if (isAdultContent(detailItem) && !isAdultMode) {
     return (
-      <div className={cn("min-h-screen", palette.rootBg)}>
-        <FigmaChrome>
-          <main className="flex min-h-[78vh] flex-col items-center justify-center px-4 py-20 text-center">
-            <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-            <h1 className="mb-4 text-3xl font-black text-white">
-              Age Restricted Content
-            </h1>
-            <p className="mb-8 max-w-md text-gray-400">
-              This title is marked 18+ and needs mature mode enabled before we
-              show it.
-            </p>
-            <button
-              type="button"
-              onClick={handleAdultToggle}
-              className={cn(
-                "rounded-xl px-8 py-3.5 font-black text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all active:scale-95",
-                palette.primaryBg,
-              )}
-            >
-              Verify Age Now
-            </button>
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
-            >
-              Go Back
-            </button>
-          </main>
-        </FigmaChrome>
-      </div>
+      <ModeBlockedState
+        palette={palette}
+        title="Age Restricted Content"
+        description="This title is marked 18+ and needs mature mode enabled before we show it."
+        ctaLabel="Verify Age Now"
+        onCta={handleAdultToggle}
+        onBack={() => router.back()}
+      />
+    );
+  }
+
+  if (!isAdultContent(detailItem) && isAdultMode) {
+    return (
+      <ModeBlockedState
+        palette={palette}
+        title="Normal Mode Required"
+        description="This title belongs to the normal catalog. Switch back to normal mode to continue."
+        ctaLabel="Normal"
+        onCta={handleAdultToggle}
+        onBack={() => router.back()}
+      />
     );
   }
 
@@ -323,9 +497,11 @@ function SeriesDetailContent({ series, episodes }) {
 }
 
 export default function FigmaSeriesDetailPage({
+  seriesId,
   series,
   episodes = [],
   initialContentType = FIGMA_CONTENT_TYPES.COMICS,
+  initialState = "ready",
 }) {
   const catalog = buildFigmaCatalog(series ? [series] : []);
   const detailKind =
@@ -335,7 +511,12 @@ export default function FigmaSeriesDetailPage({
 
   return (
     <FigmaSiteProvider initialContentType={detailKind}>
-      <SeriesDetailContent series={series} episodes={episodes} />
+      <SeriesDetailContent
+        seriesId={seriesId}
+        initialSeries={series}
+        initialEpisodes={episodes}
+        initialState={initialState}
+      />
     </FigmaSiteProvider>
   );
 }

@@ -30,6 +30,28 @@ function resolveSocialImage(image) {
   return defaultSocialImage;
 }
 
+export function buildIndexRobots({ follow = true } = {}) {
+  return {
+    index: true,
+    follow,
+    googleBot: {
+      index: true,
+      follow,
+    },
+  };
+}
+
+export function buildNoIndexRobots({ follow = false } = {}) {
+  return {
+    index: false,
+    follow,
+    googleBot: {
+      index: false,
+      follow,
+    },
+  };
+}
+
 export function createPageMetadata({
   title,
   description,

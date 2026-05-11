@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Header adult toggle", () => {
-  test("mature access entry should stay outside the mobile bottom navigation", async ({ page }) => {
+  test("mobile bottom navigation should expose the same 18+ mode entry", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
 
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -12,7 +12,9 @@ test.describe("Header adult toggle", () => {
 
     const bottomNav = page.getByRole("navigation", { name: "Mobile bottom navigation" });
     await expect(bottomNav).toBeVisible();
-    await expect(bottomNav.getByRole("link", { name: /Mature|18\+/i })).toHaveCount(0);
+    await expect(
+      bottomNav.getByRole("button", { name: /Enter 18\+ mode|18\+/i }),
+    ).toBeVisible();
   });
 
   test("adult route should redirect signed-out readers to the mature gate", async ({ page }) => {
