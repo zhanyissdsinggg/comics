@@ -1,6 +1,7 @@
 import { absoluteUrl, siteConfig } from "./siteConfig";
 import { normalizeCreatorName } from "./creators";
 import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
+import { isAdultContent } from "./contentFilters";
 import { getSeriesFaqItems } from "./storefrontFaq";
 
 function normalizeText(value) {
@@ -246,7 +247,7 @@ export function buildSeriesStructuredData({ series, episodes }) {
     return [];
   }
 
-  const shelfCrumb = series?.adult
+  const shelfCrumb = isAdultContent(series)
     ? { name: "Adult", path: "/adult" }
     : String(series?.type || "").toLowerCase() === "novel"
       ? { name: "Novels", path: "/novels" }

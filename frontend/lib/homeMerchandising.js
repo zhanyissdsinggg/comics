@@ -1,3 +1,5 @@
+import { isAdultContent } from "./contentFilters";
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function toNumber(value) {
@@ -358,13 +360,13 @@ export function buildHomeHeroItems(seriesList, options = {}) {
 
 export function getHomeEditorialSnapshot(seriesList, options = {}) {
   const visibleCatalog = getVisibleCatalog(seriesList);
-  const safeCatalog = visibleCatalog.filter((series) => !series?.adult);
+  const safeCatalog = visibleCatalog.filter((series) => !isAdultContent(series));
   const genres = new Set();
   let newCount = 0;
   let adultCount = 0;
 
   visibleCatalog.forEach((series) => {
-    if (series?.adult) {
+    if (isAdultContent(series)) {
       adultCount += 1;
     }
 
@@ -475,7 +477,7 @@ export function getHomeEditorialStats(seriesList, options = {}) {
 export function getHomeHeroCandidates(seriesList, options = {}) {
   const limit = Math.max(1, Number(options.limit || 8));
   const visibleCatalog = getVisibleCatalog(seriesList).filter(
-    (series) => !series?.adult,
+    (series) => !isAdultContent(series),
   );
 
   return visibleCatalog

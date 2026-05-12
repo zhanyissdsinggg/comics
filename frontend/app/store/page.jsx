@@ -1,13 +1,11 @@
 import { cache } from "react";
-import { CouponProvider } from "../../store/useCouponStore";
-import { WalletProvider } from "../../store/useWalletStore";
-import FigmaStorePage from "../../components/figma/FigmaStorePage";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import {
   loadSubscriptionPlansSeoPayload,
   loadTopupCatalogSeoPayload,
 } from "../../lib/storefrontSeo";
 import { siteConfig } from "../../lib/siteConfig";
+import StorePageShell from "./StorePageShell";
 
 const loadStorePagePayload = cache(async () => {
   const [topupPayload, subscriptionPayload] = await Promise.all([
@@ -44,15 +42,11 @@ export default async function Page() {
     await loadStorePagePayload();
 
   return (
-    <WalletProvider>
-      <CouponProvider>
-        <FigmaStorePage
-          packages={topupPayload?.packages || []}
-          billingAvailability={topupPayload?.billing || null}
-          planCatalog={subscriptionPayload?.planCatalog || null}
-          prelaunchStore={prelaunchStore}
-        />
-      </CouponProvider>
-    </WalletProvider>
+    <StorePageShell
+      packages={topupPayload?.packages || []}
+      billingAvailability={topupPayload?.billing || null}
+      planCatalog={subscriptionPayload?.planCatalog || null}
+      prelaunchStore={prelaunchStore}
+    />
   );
 }

@@ -1,9 +1,3 @@
-import { BookmarkProvider } from "../../../../store/useBookmarkStore";
-import { CouponProvider } from "../../../../store/useCouponStore";
-import { EntitlementProvider } from "../../../../store/useEntitlementStore";
-import { ReaderSettingsProvider } from "../../../../store/useReaderSettingsStore";
-import { RewardsProvider } from "../../../../store/useRewardsStore";
-import { WalletProvider } from "../../../../store/useWalletStore";
 import { notFound } from "next/navigation";
 import { resolveSeriesCreatorName } from "../../../../lib/creatorIdentity";
 import {
@@ -189,22 +183,10 @@ export default async function Page({ params }) {
   };
 
   return (
-    <WalletProvider>
-      <RewardsProvider>
-        <EntitlementProvider>
-          <CouponProvider>
-            <ReaderSettingsProvider>
-              <BookmarkProvider>
-                <ReaderPageShell
-                  seriesId={seriesId}
-                  episodeId={episodeId}
-                  fallbackData={fallbackData}
-                />
-              </BookmarkProvider>
-            </ReaderSettingsProvider>
-          </CouponProvider>
-        </EntitlementProvider>
-      </RewardsProvider>
-    </WalletProvider>
+    <ReaderPageShell
+      seriesId={seriesId}
+      episodeId={episodeId}
+      fallbackData={fallbackData}
+    />
   );
 }

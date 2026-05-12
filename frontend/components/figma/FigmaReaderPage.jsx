@@ -119,6 +119,8 @@ function withFallbackAdultFlag(item, fallbackAdult = false) {
     "ageRating",
     "contentRating",
     "category",
+    "badge",
+    "badges",
     "tags",
     "genres",
     "mode",

@@ -33,6 +33,8 @@ const ADULT_SIGNAL_FIELDS = [
   "contentRating",
   "category",
   "mode",
+  "badge",
+  "badges",
   "tags",
   "genres",
 ];

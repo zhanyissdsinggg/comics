@@ -1,4 +1,5 @@
 import { resolveSeriesCreatorName } from "../creatorIdentity";
+import { isAdultContent } from "../contentFilters";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -62,7 +63,7 @@ function mapSeriesCard(series, subtitle, badgeOverride = "", extra = {}) {
     coverTone: series.coverTone,
     coverUrl: series.coverUrl,
     badge: getSeriesBadge(series, badgeOverride),
-    adult: Boolean(series.adult),
+    adult: isAdultContent(series),
     ...extra,
   };
 }
@@ -106,7 +107,7 @@ export function recommendRails(catalog, behavior, progressMap, options = {}) {
   const events = behavior?.events || [];
   const isAdultMode = Boolean(options.isAdultMode);
   const safeCatalog = (catalog || []).filter((series) =>
-    isAdultMode ? series.adult : !series.adult,
+    isAdultMode ? isAdultContent(series) : !isAdultContent(series),
   );
 
   const continueRail = Object.entries(progressMap || {})

@@ -1,3 +1,5 @@
+import { isAdultContent } from "./contentFilters";
+
 const LOOP_GUARD_HEADER = "x-gush-api-proxy-hop";
 
 function isSafeRetryMethod(method) {
@@ -146,10 +148,10 @@ function normalizeSeriesSearchPayload(payload, requestUrl) {
     if (status && status !== "all" && String(item.status || "") !== status) {
       return false;
     }
-    if (adult === "true" && !item.adult) {
+    if (adult === "true" && !isAdultContent(item)) {
       return false;
     }
-    if (adult === "false" && item.adult) {
+    if (adult === "false" && isAdultContent(item)) {
       return false;
     }
     return true;

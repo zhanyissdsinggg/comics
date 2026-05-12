@@ -166,6 +166,8 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
     "ageRating",
     "contentRating",
     "category",
+    "badge",
+    "badges",
     "tags",
     "genres",
     "mode",

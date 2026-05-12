@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,24 +10,24 @@ const nextDir = path.join(frontendRoot, ".next");
 const manifestPath = path.join(nextDir, "app-build-manifest.json");
 
 const ROUTE_BUDGETS_KB = {
-  "/page": 435,
-  "/search/page": 435,
-  "/store/page": 420,
-  "/read/[seriesId]/[episodeId]/page": 460,
-  "/admin/page": 460,
+  "/page": 130,
+  "/search/page": 130,
+  "/store/page": 110,
+  "/read/[seriesId]/[episodeId]/page": 110,
+  "/admin/page": 125,
 };
 
-const MAX_SINGLE_CHUNK_KB = 200;
+const MAX_SINGLE_CHUNK_KB = 60;
 const BUDGET_TOLERANCE_KB = 0.5;
 
 function toKB(bytes) {
   return bytes / 1024;
 }
 
-async function getFileSizeSafe(absPath) {
+async function getGzipSizeSafe(absPath) {
   try {
-    const stat = await fs.stat(absPath);
-    return stat.size;
+    const file = await fs.readFile(absPath);
+    return zlib.gzipSync(file, { level: 9 }).length;
   } catch {
     return 0;
   }
@@ -38,7 +39,7 @@ async function checkRouteBudgets(manifest) {
   for (const [route, budgetKB] of Object.entries(ROUTE_BUDGETS_KB)) {
     const files = (manifest.pages[route] || []).filter((f) => f.endsWith(".js"));
     const sizes = await Promise.all(
-      files.map((rel) => getFileSizeSafe(path.join(nextDir, rel)))
+      files.map((rel) => getGzipSizeSafe(path.join(nextDir, rel)))
     );
     const totalBytes = sizes.reduce((sum, s) => sum + s, 0);
     const totalKB = toKB(totalBytes);
@@ -65,7 +66,7 @@ async function checkChunkBudget() {
   let maxSize = 0;
 
   for (const file of files) {
-    const size = await getFileSizeSafe(path.join(chunksDir, file));
+    const size = await getGzipSizeSafe(path.join(chunksDir, file));
     if (size > maxSize) {
       maxSize = size;
       maxFile = file;
