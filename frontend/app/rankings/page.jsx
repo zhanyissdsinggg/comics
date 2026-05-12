@@ -1,4 +1,4 @@
-import FigmaHomePage from "../../components/figma/FigmaHomePage";
+import RankingsPage from "../../components/rankings/RankingsPage";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 import { loadRankingsSeoPayload } from "../../lib/storefrontSeo";
@@ -14,15 +14,16 @@ export async function generateMetadata() {
   });
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }) {
+  const params = (await searchParams) || {};
   const includeAdult = await isServerAdultModeEnabled();
   const payload = await loadRankingsSeoPayload("popular", "all", { includeAdult });
 
   return (
-    <FigmaHomePage
-      seriesList={payload?.rankings || []}
-      initialReady={payload?.ready}
-      catalogSource="rankings"
+    <RankingsPage
+      initialSearchParams={params}
+      initialSeries={payload?.rankings || []}
+      hasInitialSeries={payload?.ready}
     />
   );
 }

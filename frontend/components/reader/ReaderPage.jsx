@@ -602,7 +602,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
       setError(null);
 
       const adultFlag = isAdultMode ? "1" : "0";
-      const episodePath = `/api/episode?seriesId=${seriesId}&episodeId=${episodeId}`;
+      const episodePath = `/api/episode?seriesId=${seriesId}&episodeId=${episodeId}&adult=${adultFlag}`;
       const seriesPath = `/api/series/${seriesId}?adult=${adultFlag}`;
       const isCurrentRequest = () => requestRef.current === requestId;
       const applyFailure = (response, fallbackError) => {
@@ -640,25 +640,17 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return true;
       };
 
-      const [episodeResponse, seriesResponse] = await Promise.all([
-        apiGet(episodePath, bustSeries ? { dedupeMs: 0 } : undefined),
-        apiGet(
-          seriesPath,
-          bustSeries
-            ? {
-                bust: true,
-                dedupeMs: 0,
-              }
-            : undefined,
-        ),
-      ]);
+      const seriesResponse = await apiGet(
+        seriesPath,
+        bustSeries
+          ? {
+              bust: true,
+              dedupeMs: 0,
+            }
+          : undefined,
+      );
 
       if (!isCurrentRequest()) {
-        return;
-      }
-
-      if (!episodeResponse.ok) {
-        applyFailure(episodeResponse, "EPISODE_ERROR");
         return;
       }
 
@@ -682,8 +674,23 @@ export default function ReaderPage({ seriesId, episodeId }) {
         return;
       }
 
-      setEpisodeData(episodeResponse.data?.episode || null);
       setSeriesData(seriesResponse.data);
+
+      const episodeResponse = await apiGet(
+        episodePath,
+        bustSeries ? { dedupeMs: 0 } : undefined,
+      );
+
+      if (!isCurrentRequest()) {
+        return;
+      }
+
+      if (!episodeResponse.ok) {
+        applyFailure(episodeResponse, "EPISODE_ERROR");
+        return;
+      }
+
+      setEpisodeData(episodeResponse.data?.episode || null);
       setGateStatus("OK");
       if (showLoading) {
         setLoading(false);

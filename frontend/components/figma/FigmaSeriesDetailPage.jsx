@@ -17,6 +17,7 @@ import { apiGet } from "../../lib/apiClient";
 import {
   getContentModeQueryParam,
   isAdultContent,
+  matchesContentMode,
 } from "../../lib/contentFilters";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
@@ -109,7 +110,7 @@ function SeriesDetailContent({
     requestRef.current = requestId;
     const adultFlag = getContentModeQueryParam(contentMode);
 
-    if (!payload?.series || isAdultContent(payload.series) !== Boolean(isAdultMode)) {
+    if (!payload?.series || !matchesContentMode(payload.series, contentMode)) {
       setLoading(true);
     }
 
@@ -130,6 +131,13 @@ function SeriesDetailContent({
           } else {
             setError("UNAVAILABLE");
           }
+          setLoading(false);
+          return;
+        }
+
+        if (!matchesContentMode(response.data.series, contentMode)) {
+          setPayload(null);
+          setError(isAdultContent(response.data.series) ? "ADULT_GATED" : "MODE_MISMATCH");
           setLoading(false);
           return;
         }
@@ -262,7 +270,7 @@ function SeriesDetailContent({
     );
   }
 
-  if (isAdultContent(detailItem) && !isAdultMode) {
+  if (detailItem && !matchesContentMode(detailItem, contentMode) && isAdultContent(detailItem)) {
     return (
       <ModeBlockedState
         palette={palette}
@@ -275,7 +283,7 @@ function SeriesDetailContent({
     );
   }
 
-  if (!isAdultContent(detailItem) && isAdultMode) {
+  if (detailItem && !matchesContentMode(detailItem, contentMode) && !isAdultContent(detailItem)) {
     return (
       <ModeBlockedState
         palette={palette}

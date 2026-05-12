@@ -17,6 +17,11 @@ import {
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
 import { getSearchParam } from "../../lib/pageSearchParams";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
+import {
+  filterContentByMode,
+  getContentModeQueryParam,
+} from "../../lib/contentFilters";
 import {
   formatTitleCardCreator,
   formatTitleCardFormatStatus,
@@ -239,8 +244,9 @@ export default function RankingsPage({
   hasInitialSeries = false,
 }) {
   const router = useRouter();
+  const { contentMode, isAdultMode } = useAdultGateStore();
   const [seriesList, setSeriesList] = useState(
-    Array.isArray(initialSeries) ? initialSeries : [],
+    filterContentByMode(Array.isArray(initialSeries) ? initialSeries : [], contentMode),
   );
   const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
@@ -252,13 +258,16 @@ export default function RankingsPage({
     if (!hasInitialSeries) {
       setLoading(true);
     }
-    const adultFlag = "0";
-    apiGet(`/api/rankings?adult=${adultFlag}&view=${activeView.id}`).then(
+    const adultFlag = getContentModeQueryParam(contentMode);
+    apiGet(`/api/rankings?adult=${adultFlag}&type=popular`).then(
       (response) => {
         if (response.ok) {
-          const rankings = Array.isArray(response.data?.rankings)
-            ? response.data.rankings
-            : [];
+          const rankings = filterContentByMode(
+            Array.isArray(response.data?.rankings)
+              ? response.data.rankings
+              : [],
+            contentMode,
+          );
           if (rankings.length > 0) {
             setSeriesList(rankings);
             setLoading(false);
@@ -269,9 +278,12 @@ export default function RankingsPage({
         apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
           if (fallbackResponse.ok) {
             setSeriesList(
-              Array.isArray(fallbackResponse.data?.series)
-                ? fallbackResponse.data.series
-                : [],
+              filterContentByMode(
+                Array.isArray(fallbackResponse.data?.series)
+                  ? fallbackResponse.data.series
+                  : [],
+                contentMode,
+              ),
             );
           } else {
             setSeriesList([]);
@@ -280,7 +292,7 @@ export default function RankingsPage({
         });
       },
     );
-  }, [activeView.id, hasInitialSeries]);
+  }, [activeView.id, contentMode, hasInitialSeries]);
 
   useEffect(() => {
     setCommerceNotice(
@@ -335,7 +347,10 @@ export default function RankingsPage({
     "rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2.5 text-sm font-semibold text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.2)] transition-transform hover:-translate-y-0.5";
   const secondaryButtonClass =
     "rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-transform hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
-  const heroTitle = "Hot this week";
+  const heroTitle = "Trending Stories";
+  const heroDescription = isAdultMode
+    ? "Adult-only stories readers are opening most right now."
+    : "The stories readers are opening most this week.";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
@@ -344,7 +359,7 @@ export default function RankingsPage({
           <EditorialHero
             eyebrow=""
             title={heroTitle}
-            description="The stories readers are opening most this week."
+            description={heroDescription}
             secondary=""
             className="min-h-full"
             appearance="dark"

@@ -281,7 +281,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       }
 
       const episodeResponse = await apiGet(
-        `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
+        `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${adultFlag}`,
         { cacheMs: 0 },
       );
 

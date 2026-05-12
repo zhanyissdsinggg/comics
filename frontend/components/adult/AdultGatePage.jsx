@@ -152,7 +152,7 @@ export default function AdultGatePage() {
               </div>
 
               <p className="mt-4 text-sm text-white/54">
-                Mature titles are hidden from public search, homepage shelves, and public recommendations until access is complete.
+                Normal mode shows normal content only. After access is complete, adult mode switches home, search, and rankings to adult-only content.
               </p>
             </div>
           </SurfacePanel>
@@ -172,7 +172,7 @@ export default function AdultGatePage() {
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
                   <p className="text-sm font-medium text-white">Separate mode</p>
                   <p className="mt-2 text-sm leading-6 text-white/66">
-                    Mature Mode stays separate from the public homepage, search, rankings, and mobile bottom navigation.
+                    Adult mode is isolated and mutually exclusive. It never mixes normal and adult catalogs on the same surfaces.
                   </p>
                 </div>
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">

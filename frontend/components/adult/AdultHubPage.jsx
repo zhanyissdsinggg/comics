@@ -273,7 +273,7 @@ export default function AdultHubPage() {
               </div>
 
               <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
-                Mature titles stay isolated here. Public shelves, search, rankings, library views, and mobile navigation remain standard-content only.
+                Normal mode shows normal content only. Adult mode switches home, search, and rankings to adult-only content. Adult mode stays isolated and mutually exclusive.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -315,7 +315,7 @@ export default function AdultHubPage() {
                     Hidden from public surfaces
                   </div>
                   <p className="mt-2 text-sm leading-6 text-white/64">
-                    Mature titles are not mixed into public search, recommendations, or the public library experience.
+                    Adult titles never mix with normal shelves, normal search results, or the normal library experience.
                   </p>
                 </div>
               </div>

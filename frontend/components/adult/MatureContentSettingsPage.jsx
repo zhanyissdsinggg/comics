@@ -224,7 +224,7 @@ export default function MatureContentSettingsPage() {
                 </Link>
               </div>
               <p className="text-sm leading-6 text-white/62">
-                Mature content is never recommended to minors and stays out of the public homepage, public search, and public library views.
+                Normal mode shows normal content only. Adult mode switches home, search, and rankings to adult-only content, and the two modes stay mutually exclusive.
               </p>
             </div>
           </SurfacePanel>

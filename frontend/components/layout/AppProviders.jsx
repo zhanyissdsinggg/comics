@@ -16,7 +16,6 @@ import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
-import { isFigmaRoute } from "../../lib/figmaRoutes";
 import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
 
@@ -84,8 +83,7 @@ export default function AppProviders({ children, initialAdultState = null }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
   const isReaderRoute = pathname?.startsWith("/read");
-  const useFigmaChrome = isFigmaRoute(pathname);
-  const shouldShowPublicChrome = !isAdminRoute && !isReaderRoute && !useFigmaChrome;
+  const shouldShowPublicChrome = !isAdminRoute && !isReaderRoute;
 
   return (
     <ErrorBoundary

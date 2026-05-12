@@ -124,6 +124,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
   }
 
   const seriesRoutePayload = await loadSeriesRoutePayload(seriesId, options);
+  const contentMode = resolveSeoContentMode(options);
 
   if (seriesRoutePayload?.state && seriesRoutePayload.state !== "ready") {
     return {
@@ -136,7 +137,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
   }
 
   const episodePayload = await fetchSeoApiJson(
-    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}`,
+    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}`,
     "reader-metadata",
   );
 
@@ -291,7 +292,7 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
 export const loadSeriesCatalogSeoPayload = cache(async (options = {}) => {
   const contentMode = resolveSeoContentMode(options);
   const payload = await fetchSeoApiJson(
-    `/api/series?adult=${getContentModeQueryParam(contentMode)}`,
+    `/api/series?adult=${getContentModeQueryParam(contentMode)}&pageSize=100`,
     "series-catalog",
   );
   return {
@@ -307,7 +308,7 @@ export const loadHomepageSeoPayload = cache(async (options = {}) => {
   const contentMode = resolveSeoContentMode(options);
   const adultFlag = getContentModeQueryParam(contentMode);
   const [seriesPayload, hotPayload, recommendationsPayload] = await Promise.all([
-    fetchSeoApiJson(`/api/series?adult=${adultFlag}`, "home-series"),
+    fetchSeoApiJson(`/api/series?adult=${adultFlag}&pageSize=100`, "home-series"),
     fetchSeoApiJson(
       `/api/search/hot?adult=${adultFlag}&window=day`,
       "home-hot-keywords",
@@ -465,7 +466,7 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
   }
 
   try {
-    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0`, {
+    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
       headers: {
         "x-gush-seo": "creator-metadata",
@@ -506,7 +507,7 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
 
 export const loadCreatorsDirectorySeoPayload = cache(async () => {
   try {
-    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0`, {
+    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
       headers: {
         "x-gush-seo": "creators-directory",

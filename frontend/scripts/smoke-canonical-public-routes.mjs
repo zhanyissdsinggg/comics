@@ -16,7 +16,7 @@ const ROUTE_SPECS = [
   { path: "/novels", expectedTitle: "Novels", expectedHeading: "Solar Wind" },
   { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
   { path: "/search", expectedTitle: "Search Stories", expectedHeading: "Find something worth ruining your sleep schedule for." },
-  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Crimson Tide" },
+  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending Stories" },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
   { path: "/series/series-004", expectedTitle: "Cherry Blossom High", expectedHeading: "Cherry Blossom High" },
   { path: "/series/series-005", expectedTitle: "Dragon's Oath", expectedHeading: "Dragon's Oath" },

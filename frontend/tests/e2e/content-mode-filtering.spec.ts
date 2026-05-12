@@ -212,6 +212,12 @@ async function seedAdultState(
   ]);
 }
 
+async function expectNoShellPlaceholderCopy(page: Page): Promise<void> {
+  await expect(page.locator("body")).not.toContainText(
+    /new Figma shell|The shell is working|old shell|placeholder/i,
+  );
+}
+
 async function installContentModeRoutes(
   page: Page,
   options: {
@@ -494,6 +500,7 @@ test.describe("Content mode filtering", () => {
     await expect
       .poll(() => page.evaluate(() => window.localStorage.getItem("mn_adult_mode") || "0"))
       .toBe("0");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("home should only render the normal catalog by default", async ({ page }) => {
@@ -512,6 +519,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("home should only render the adult catalog after adult mode is enabled", async ({
@@ -537,6 +545,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("search should query and render only the normal catalog by default", async ({
@@ -559,6 +568,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("search should query and render only the adult catalog in adult mode", async ({
@@ -586,6 +596,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("rankings should stay on the normal catalog by default", async ({ page }) => {
@@ -606,6 +617,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("rankings should switch to the adult catalog in adult mode", async ({ page }) => {
@@ -631,6 +643,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectNoShellPlaceholderCopy(page);
   });
 
   test("adult mode comics should not render normal comics", async ({ page }) => {
