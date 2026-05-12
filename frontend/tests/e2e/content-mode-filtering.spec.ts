@@ -95,6 +95,30 @@ const ADULT_SERIES_DETAIL = {
   ],
 };
 
+const NORMAL_SERIES_DETAIL = {
+  series: NORMAL_SERIES,
+  episodes: [
+    {
+      id: "series-001e1",
+      seriesId: "series-001",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e2",
+      seriesId: "series-001",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+  ],
+};
+
 const ADULT_EPISODE_PAYLOADS = {
   "series-012e1": {
     episode: {
@@ -216,6 +240,11 @@ async function expectNoShellPlaceholderCopy(page: Page): Promise<void> {
   await expect(page.locator("body")).not.toContainText(
     /new Figma shell|The shell is working|old shell|placeholder/i,
   );
+}
+
+async function expectSinglePublicChrome(page: Page): Promise<void> {
+  await expect(page.locator('header[data-site-header="1"]')).toHaveCount(1);
+  await expect(page.locator('footer[data-site-footer="1"]')).toHaveCount(1);
 }
 
 async function installContentModeRoutes(
@@ -353,6 +382,11 @@ async function installContentModeRoutes(
       }
 
       await fulfillJson(route, ADULT_SERIES_DETAIL);
+      return;
+    }
+
+    if (pathname === "/api/series/series-001") {
+      await fulfillJson(route, NORMAL_SERIES_DETAIL);
       return;
     }
 
@@ -599,6 +633,53 @@ test.describe("Content mode filtering", () => {
     await expectNoShellPlaceholderCopy(page);
   });
 
+  test("interactive search fallback should stay normal-only by default", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/search?format=interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: /Neon Heir/i }).first()).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("Vampire Oath");
+  });
+
+  test("interactive search fallback should stay adult-only in adult mode", async ({
+    page,
+  }) => {
+    await seedAdultState(page, {
+      signedIn: true,
+      adultConfirmed: true,
+      adultMode: true,
+    });
+    await installContentModeRoutes(page, {
+      adultMode: true,
+      adultConfirmed: true,
+      signedIn: true,
+    });
+
+    const response = await page.goto("/search?format=interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(
+      page.getByRole("heading", { name: /Vampire Oath/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("Neon Heir");
+  });
+
   test("rankings should stay on the normal catalog by default", async ({ page }) => {
     await installContentModeRoutes(page, {
       adultMode: false,
@@ -714,6 +795,9 @@ test.describe("Content mode filtering", () => {
       .first();
     await expect(desktopToggle).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await desktopToggle.click();
+    await expect
+      .poll(() => page.evaluate(() => window.localStorage.getItem("mn_adult_mode") || "0"))
+      .toBe("1");
 
     await expect(
       page.getByRole("heading", { name: /Midnight Heat/i }).first(),
@@ -765,6 +849,37 @@ test.describe("Content mode filtering", () => {
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(mobileToggle).toContainText("Normal");
+  });
+
+  test("public catalog pages should keep exactly one header and one footer", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    for (const routePath of [
+      "/",
+      "/search",
+      "/comics",
+      "/novels",
+      "/rankings",
+    ]) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+      await expectSinglePublicChrome(page);
+    }
+
+    await page.goto("/", {
+      waitUntil: "domcontentloaded",
+    });
+    await page.getByRole("link", { name: /The Last Kingdom/i }).first().click();
+    await expect(page).toHaveURL(/\/series\/series-001$/);
+    await expectSinglePublicChrome(page);
   });
 
   test("search zero-result state should render without crashing", async ({ page }) => {

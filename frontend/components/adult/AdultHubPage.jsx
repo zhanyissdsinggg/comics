@@ -21,6 +21,7 @@ import {
   LOGIN_GATE_DESCRIPTION,
   LOGIN_GATE_TITLE,
 } from "../../lib/adultGateCopy";
+import { filterContentByMode } from "../../lib/contentFilters";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -163,8 +164,9 @@ export default function AdultHubPage() {
     const applyResponse = (response) => {
       setSeriesResponse(response);
       if (response.ok) {
-        const adultSeries = (response.data?.series || []).filter(
-          (series) => series.adult,
+        const adultSeries = filterContentByMode(
+          response.data?.series || [],
+          "adult",
         );
         setSeriesList(adultSeries);
         return true;
@@ -273,7 +275,9 @@ export default function AdultHubPage() {
               </div>
 
               <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
-                Normal mode shows normal content only. Adult mode switches home, search, and rankings to adult-only content. Adult mode stays isolated and mutually exclusive.
+                Normal mode shows normal content only. Adult mode switches home,
+                search, rankings, library, and reader to adult-only content.
+                The two modes never mix.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -315,7 +319,9 @@ export default function AdultHubPage() {
                     Hidden from public surfaces
                   </div>
                   <p className="mt-2 text-sm leading-6 text-white/64">
-                    Adult titles never mix with normal shelves, normal search results, or the normal library experience.
+                    Adult titles never mix with the normal home feed, normal
+                    search results, normal rankings, normal library, or the
+                    normal reader flow.
                   </p>
                 </div>
               </div>

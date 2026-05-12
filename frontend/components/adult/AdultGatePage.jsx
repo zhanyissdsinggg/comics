@@ -152,7 +152,9 @@ export default function AdultGatePage() {
               </div>
 
               <p className="mt-4 text-sm text-white/54">
-                Normal mode shows normal content only. After access is complete, adult mode switches home, search, and rankings to adult-only content.
+                Normal mode shows normal content only. After access is
+                complete, adult mode switches home, search, rankings, library,
+                and reader to adult-only content.
               </p>
             </div>
           </SurfacePanel>
@@ -172,7 +174,8 @@ export default function AdultGatePage() {
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
                   <p className="text-sm font-medium text-white">Separate mode</p>
                   <p className="mt-2 text-sm leading-6 text-white/66">
-                    Adult mode is isolated and mutually exclusive. It never mixes normal and adult catalogs on the same surfaces.
+                    Adult mode is isolated and mutually exclusive. The two
+                    modes never mix on the same surfaces.
                   </p>
                 </div>
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">

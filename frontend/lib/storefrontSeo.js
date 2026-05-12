@@ -22,6 +22,7 @@ import {
 import {
   filterContentByMode,
   getContentModeQueryParam,
+  isAdultContent,
   matchesContentMode,
 } from "./contentFilters";
 
@@ -136,19 +137,70 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
     };
   }
 
+  const series = seriesRoutePayload?.payload?.series || null;
   const episodePayload = await fetchSeoApiJson(
     `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}`,
     "reader-metadata",
   );
 
+  if (!episodePayload?.episode) {
+    return {
+      series,
+      episode: null,
+      episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
+        ? seriesRoutePayload.payload.episodes
+        : [],
+      state: "unavailable",
+      gateReason: null,
+    };
+  }
+
+  const rawEpisode = episodePayload.episode;
+  const episodeHasModeSignal = [
+    "adult",
+    "isAdult",
+    "mature",
+    "isMature",
+    "nsfw",
+    "rating",
+    "ageRating",
+    "contentRating",
+    "category",
+    "tags",
+    "genres",
+    "mode",
+  ].some((field) => Object.prototype.hasOwnProperty.call(rawEpisode, field));
+  const safeEpisode = episodeHasModeSignal
+    ? rawEpisode
+    : {
+        ...rawEpisode,
+        adult: isAdultContent(series),
+      };
+
+  if (!matchesContentMode(safeEpisode, contentMode)) {
+    return {
+      series,
+      episode: null,
+      episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
+        ? seriesRoutePayload.payload.episodes
+        : [],
+      state:
+        contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
+      gateReason:
+        contentMode === CONTENT_MODE_ADULT
+          ? "NORMAL_MODE_REQUIRED"
+          : "NEED_AGE_CONFIRM",
+    };
+  }
+
   if (
     shouldBlockDemoContentInProduction() &&
-    (isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.id) ||
-      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.slug) ||
-      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.handle) ||
-      isBlockedPublicSeriesIdentifier(seriesRoutePayload?.payload?.series?.fixtureKey) ||
-      isBlockedPublicSeriesIdentifier(episodePayload?.episode?.seriesId) ||
-      isBlockedPublicSeriesIdentifier(episodePayload?.episode?.id))
+    (isBlockedPublicSeriesIdentifier(series?.id) ||
+      isBlockedPublicSeriesIdentifier(series?.slug) ||
+      isBlockedPublicSeriesIdentifier(series?.handle) ||
+      isBlockedPublicSeriesIdentifier(series?.fixtureKey) ||
+      isBlockedPublicSeriesIdentifier(safeEpisode?.seriesId) ||
+      isBlockedPublicSeriesIdentifier(safeEpisode?.id))
   ) {
     return {
       series: null,
@@ -158,8 +210,8 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
   }
 
   return {
-    series: seriesRoutePayload?.payload?.series || null,
-    episode: episodePayload?.episode || null,
+    series,
+    episode: safeEpisode,
     episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
       ? seriesRoutePayload.payload.episodes
       : [],
