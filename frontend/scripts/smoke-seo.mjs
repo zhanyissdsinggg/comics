@@ -9,6 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendRoot = path.resolve(__dirname, "..");
 const buildIdPath = path.join(frontendRoot, ".next", "BUILD_ID");
+const seoSmokeDistDir = ".next-seo-smoke";
+const seoSmokeBuildIdPath = path.join(frontendRoot, seoSmokeDistDir, "BUILD_ID");
 
 const NORMAL_SERIES = {
   id: "series-001",
@@ -463,12 +465,6 @@ async function fetchText(baseUrl, pathname, { cookieHeader = "" } = {}) {
 }
 
 async function run() {
-  if (!fs.existsSync(buildIdPath)) {
-    throw new Error(
-      `Missing production build artifact at ${buildIdPath}. Run "npm run build" first.`,
-    );
-  }
-
   const port = await getFreePort();
   const backendPort = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -490,12 +486,81 @@ async function run() {
 
   let stdoutLog = "";
   let stderrLog = "";
+  let buildStdoutLog = "";
+  let buildStderrLog = "";
 
   const mockBackend = createMockBackendServer();
   await new Promise((resolve, reject) => {
     mockBackend.once("error", reject);
     mockBackend.listen(backendPort, "127.0.0.1", () => resolve());
   });
+
+  if (fs.existsSync(path.join(frontendRoot, seoSmokeDistDir))) {
+    fs.rmSync(path.join(frontendRoot, seoSmokeDistDir), {
+      recursive: true,
+      force: true,
+      maxRetries: 8,
+      retryDelay: 200,
+    });
+  }
+
+  const buildChild = spawn(
+    process.execPath,
+    [nextBin, "build"],
+    {
+      cwd: frontendRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        NODE_ENV: "production",
+        NEXT_DIST_DIR: seoSmokeDistDir,
+        API_BASE_URL: backendBaseUrl,
+        NEXT_PUBLIC_API_BASE_URL: backendBaseUrl,
+        NEXT_PUBLIC_BASE_URL: baseUrl,
+        NEXT_PUBLIC_SITE_URL: baseUrl,
+        NEXT_PUBLIC_ENABLE_CHECKOUT: "1",
+        NEXT_PUBLIC_ENABLE_POINT_PACKS: "1",
+      },
+    },
+  );
+
+  buildChild.stdout.on("data", (chunk) => {
+    buildStdoutLog += chunk.toString();
+  });
+
+  buildChild.stderr.on("data", (chunk) => {
+    buildStderrLog += chunk.toString();
+  });
+
+  await new Promise((resolve, reject) => {
+    buildChild.once("error", (error) => {
+      reject(new Error(`Failed to build Next.js SEO smoke bundle: ${error.message}`));
+    });
+    buildChild.once("exit", (code, signal) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(
+        new Error(
+          [
+            `Next.js SEO smoke build failed (code=${code ?? "null"}, signal=${signal ?? "null"}).`,
+            buildStdoutLog ? `stdout:\n${buildStdoutLog.trim()}` : "",
+            buildStderrLog ? `stderr:\n${buildStderrLog.trim()}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+        ),
+      );
+    });
+  });
+
+  if (!fs.existsSync(seoSmokeBuildIdPath)) {
+    throw new Error(
+      `Missing SEO smoke build artifact at ${seoSmokeBuildIdPath}.`,
+    );
+  }
 
   const child = spawn(
     process.execPath,
@@ -506,6 +571,7 @@ async function run() {
       env: {
         ...process.env,
         NODE_ENV: "production",
+        NEXT_DIST_DIR: seoSmokeDistDir,
         API_BASE_URL: backendBaseUrl,
         NEXT_PUBLIC_API_BASE_URL: backendBaseUrl,
         NEXT_PUBLIC_BASE_URL: baseUrl,
@@ -852,6 +918,15 @@ async function run() {
 
     if (!child.killed && child.exitCode === null) {
       child.kill("SIGTERM");
+    }
+
+    if (fs.existsSync(path.join(frontendRoot, seoSmokeDistDir))) {
+      fs.rmSync(path.join(frontendRoot, seoSmokeDistDir), {
+        recursive: true,
+        force: true,
+        maxRetries: 8,
+        retryDelay: 200,
+      });
     }
   }
 }

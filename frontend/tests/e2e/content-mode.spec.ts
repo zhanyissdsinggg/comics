@@ -197,15 +197,19 @@ async function seedAdultState(
           verifiedAt: null,
         };
 
-    window.localStorage.setItem("mn_region", "global");
-    window.localStorage.setItem("mn_age_rule", "global");
-    window.localStorage.setItem("mn_adult_confirmed", nextConfirmed ? "1" : "0");
-    window.localStorage.setItem("mn_adult_mode", nextMode ? "1" : "0");
-    window.localStorage.setItem("mn_mature_hidden", nextMode ? "0" : "1");
-    window.localStorage.setItem(
-      "mn_mature_verification",
-      JSON.stringify(verification),
-    );
+    const seedIfMissing = (key: string, value: string) => {
+      if (window.localStorage.getItem(key) === null) {
+        window.localStorage.setItem(key, value);
+      }
+    };
+
+    // Seed only once so a user-triggered toggle can survive reloads inside the same test.
+    seedIfMissing("mn_region", "global");
+    seedIfMissing("mn_age_rule", "global");
+    seedIfMissing("mn_adult_confirmed", nextConfirmed ? "1" : "0");
+    seedIfMissing("mn_adult_mode", nextMode ? "1" : "0");
+    seedIfMissing("mn_mature_hidden", nextMode ? "0" : "1");
+    seedIfMissing("mn_mature_verification", JSON.stringify(verification));
   }, {
     adultConfirmed,
     adultMode,
