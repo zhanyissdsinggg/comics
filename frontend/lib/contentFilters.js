@@ -25,6 +25,18 @@ const SAFE_NORMAL_PHRASES = [
   "coming of age",
 ];
 
+const ADULT_REGEX_PATTERNS = [
+  /\b18\s*\+\b/,
+  /\b18\s*plus\b/,
+  /\bexplicit\b/,
+  /\bmature\b/,
+  /\bnsfw\b/,
+  /\br\s*-\s*18\b/,
+  /\br18\b/,
+  /\bx\s*-\s*rated\b/,
+  /\bsmut\b/,
+];
+
 const ADULT_FLAG_FIELDS = ["adult", "isAdult", "mature", "isMature", "nsfw"];
 
 const ADULT_SIGNAL_FIELDS = [
@@ -83,13 +95,6 @@ function hasAdultKeyword(value) {
     return false;
   }
 
-  const hasExplicitAdultKeyword = ADULT_KEYWORDS.some((keyword) =>
-    normalized.includes(keyword),
-  );
-  if (hasExplicitAdultKeyword) {
-    return true;
-  }
-
   const hasSafeNormalPhrase = SAFE_NORMAL_PHRASES.some((phrase) => {
     if (phrase === "ya") {
       return /\bya\b/.test(normalized);
@@ -98,6 +103,13 @@ function hasAdultKeyword(value) {
   });
   if (hasSafeNormalPhrase) {
     return false;
+  }
+
+  const hasExplicitAdultKeyword =
+    ADULT_KEYWORDS.some((keyword) => normalized === keyword) ||
+    ADULT_REGEX_PATTERNS.some((pattern) => pattern.test(normalized));
+  if (hasExplicitAdultKeyword) {
+    return true;
   }
 
   return (

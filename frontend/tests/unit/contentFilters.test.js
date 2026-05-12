@@ -25,6 +25,10 @@ test("Teen Romance => normal", () => {
   expectMode({ category: "Teen Romance" }, "normal");
 });
 
+test("Coming of Age => normal", () => {
+  expectMode({ genres: ["Coming of Age"] }, "normal");
+});
+
 test("Adults Only => adult", () => {
   expectMode({ badges: ["Adults Only"] }, "adult");
 });
@@ -39,4 +43,12 @@ test("Mature => adult", () => {
 
 test("NSFW => adult", () => {
   expectMode({ tags: ["NSFW"] }, "adult");
+});
+
+test("Explicit => adult", () => {
+  expectMode({ badge: "Explicit" }, "adult");
+});
+
+test("R18 / R-18 => adult", () => {
+  expectMode({ tags: ["R18", "R-18"] }, "adult");
 });
