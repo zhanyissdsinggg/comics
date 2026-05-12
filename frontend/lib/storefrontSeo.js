@@ -27,6 +27,7 @@ import {
 } from "./contentFilters";
 
 export const SEO_REVALIDATE_SECONDS = 300;
+const SEO_FETCH_TIMEOUT_MS = 15000;
 
 function resolveSeoContentMode(options = {}) {
   return deriveContentModeFromAdultFlag(options?.includeAdult === true);
@@ -46,9 +47,13 @@ function getSeoApiBaseUrl() {
 }
 
 async function fetchSeoApiJson(path, requestId) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), SEO_FETCH_TIMEOUT_MS);
+
   try {
     const response = await fetch(`${getSeoApiBaseUrl()}${path}`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
+      signal: controller.signal,
       headers: requestId
         ? {
             "x-gush-seo": requestId,
@@ -63,6 +68,8 @@ async function fetchSeoApiJson(path, requestId) {
     return await response.json();
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -271,6 +278,7 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
       `${getSeoApiBaseUrl()}/api/series/${encodeURIComponent(seriesId)}?adult=${getContentModeQueryParam(contentMode)}`,
       {
         next: { revalidate: SEO_REVALIDATE_SECONDS },
+        signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
         headers: {
           "x-gush-seo": "series-metadata",
         },
@@ -544,6 +552,7 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
   try {
     const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
       headers: {
         "x-gush-seo": "creator-metadata",
       },
@@ -585,6 +594,7 @@ export const loadCreatorsDirectorySeoPayload = cache(async () => {
   try {
     const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
       next: { revalidate: SEO_REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
       headers: {
         "x-gush-seo": "creators-directory",
       },

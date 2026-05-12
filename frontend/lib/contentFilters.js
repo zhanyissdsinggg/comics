@@ -2,14 +2,12 @@ import {
   CONTENT_MODE_ADULT,
   CONTENT_MODE_NORMAL,
   normalizeContentMode,
-} from "./contentMode";
+} from "./contentMode.js";
 
 const ADULT_KEYWORDS = [
   "18+",
   "18 plus",
   "18plus",
-  "adult",
-  "adults only",
   "explicit",
   "mature",
   "nsfw",
@@ -19,13 +17,15 @@ const ADULT_KEYWORDS = [
   "x-rated",
 ];
 
-const ADULT_FLAG_FIELDS = [
-  "adult",
-  "isAdult",
-  "mature",
-  "isMature",
-  "nsfw",
+const SAFE_NORMAL_PHRASES = [
+  "young adult",
+  "young adults",
+  "ya",
+  "teen",
+  "coming of age",
 ];
+
+const ADULT_FLAG_FIELDS = ["adult", "isAdult", "mature", "isMature", "nsfw"];
 
 const ADULT_SIGNAL_FIELDS = [
   "rating",
@@ -83,7 +83,26 @@ function hasAdultKeyword(value) {
     return false;
   }
 
-  return ADULT_KEYWORDS.some((keyword) => normalized.includes(keyword));
+  const hasExplicitAdultKeyword = ADULT_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword),
+  );
+  if (hasExplicitAdultKeyword) {
+    return true;
+  }
+
+  const hasSafeNormalPhrase = SAFE_NORMAL_PHRASES.some((phrase) => {
+    if (phrase === "ya") {
+      return /\bya\b/.test(normalized);
+    }
+    return normalized.includes(phrase);
+  });
+  if (hasSafeNormalPhrase) {
+    return false;
+  }
+
+  return (
+    /\badults?\s+only\b/.test(normalized) || /\badults?\b/.test(normalized)
+  );
 }
 
 function isTruthyAdultFlag(value) {

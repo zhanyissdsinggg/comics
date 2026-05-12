@@ -1,11 +1,9 @@
 import { resolveSeriesCreatorIdentity } from "../lib/creatorIdentity";
 import { CONTENT_MODE_NORMAL } from "../lib/contentMode";
 import { filterContentByMode } from "../lib/contentFilters";
-import { PUBLIC_SERIES_IDS } from "../lib/publicSeriesCatalog";
 import { absoluteUrl, siteConfig } from "../lib/siteConfig";
 import {
   loadSeriesCatalogSeoPayload,
-  loadSeriesRoutePayload,
   loadTopupCatalogSeoPayload,
 } from "../lib/storefrontSeo";
 
@@ -121,30 +119,6 @@ function buildCreatorEntries(seriesList, currentDate) {
   return Array.from(creatorPaths).map((path) => buildSitemapEntry(path, currentDate));
 }
 
-function mergeNormalSeries(primarySeries, fallbackSeries) {
-  const merged = new Map();
-
-  for (const series of Array.isArray(primarySeries) ? primarySeries : []) {
-    const id = String(series?.id || "").trim();
-    if (!id) {
-      continue;
-    }
-
-    merged.set(id, series);
-  }
-
-  for (const series of Array.isArray(fallbackSeries) ? fallbackSeries : []) {
-    const normalizedId = String(series?.id || "").trim();
-    if (!normalizedId || merged.has(normalizedId)) {
-      continue;
-    }
-
-    merged.set(normalizedId, series);
-  }
-
-  return Array.from(merged.values());
-}
-
 export default async function sitemap() {
   const currentDate = new Date().toISOString();
   const [catalogPayload, topupPayload] = await Promise.all([
@@ -152,31 +126,10 @@ export default async function sitemap() {
     loadTopupCatalogSeoPayload(),
   ]);
 
-  const catalogNormalSeries = filterContentByMode(
+  const sitemapSeries = filterContentByMode(
     catalogPayload?.series || [],
     CONTENT_MODE_NORMAL,
   );
-  const knownNormalSeriesIds = new Set(
-    catalogNormalSeries.map((series) => String(series?.id || "").trim()).filter(Boolean),
-  );
-  const fallbackSeriesPayloads = await Promise.all(
-    PUBLIC_SERIES_IDS.filter((seriesId) => !knownNormalSeriesIds.has(seriesId)).map((seriesId) =>
-      loadSeriesRoutePayload(seriesId, { includeAdult: false }),
-    ),
-  );
-  const fallbackNormalSeries = filterContentByMode(
-    fallbackSeriesPayloads
-      .map((payload) =>
-        payload?.state === "ready" ? payload?.payload?.series || null : null,
-      )
-      .filter(Boolean),
-    CONTENT_MODE_NORMAL,
-  );
-  const normalSeries = mergeNormalSeries(
-    catalogNormalSeries,
-    fallbackNormalSeries,
-  );
-  const sitemapSeries = filterContentByMode(normalSeries, CONTENT_MODE_NORMAL);
   const staticPaths = shouldIncludeStorePath(topupPayload)
     ? [...STATIC_SITEMAP_PATHS, "/store"]
     : STATIC_SITEMAP_PATHS;
