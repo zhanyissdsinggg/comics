@@ -52,3 +52,15 @@ test("Explicit => adult", () => {
 test("R18 / R-18 => adult", () => {
   expectMode({ tags: ["R18", "R-18"] }, "adult");
 });
+
+test("R 18 => adult", () => {
+  expectMode({ tags: ["R 18"] }, "adult");
+});
+
+test("R-rated / X rated => adult", () => {
+  expectMode({ badges: ["R-rated", "X rated"] }, "adult");
+});
+
+test("Adulting Comedy => normal", () => {
+  expectMode({ genres: ["Adulting Comedy"] }, "normal");
+});

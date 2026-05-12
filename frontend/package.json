@@ -11,6 +11,7 @@
     "init-db": "npm --prefix ../backend run seed",
     "health-check": "npm run lint && npm run build",
     "check:all": "npm run lint && npm run test:unit && npm run guard:static && npm run build && npm run smoke:routes && npm run smoke:seo && npm run smoke:canonical-routes && npm run perf:budget",
+    "check:release": "npm run check:all && npm run test:e2e:core",
     "guard:static": "node ../scripts/frontend-static-guard.mjs",
     "lint": "eslint . --cache --cache-location .next/cache/eslint/.eslintcache --max-warnings=0",
     "perf:budget": "node scripts/check-performance-budget.mjs",

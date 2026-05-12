@@ -32,7 +32,10 @@ const ADULT_REGEX_PATTERNS = [
   /\bmature\b/,
   /\bnsfw\b/,
   /\br\s*-\s*18\b/,
+  /\br\s+18\b/,
   /\br18\b/,
+  /\br\s*-\s*rated\b/,
+  /\bx\s+rated\b/,
   /\bx\s*-\s*rated\b/,
   /\bsmut\b/,
 ];

@@ -115,6 +115,17 @@ function parsePositiveInt(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function normalizeAdultFilter(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "1" || normalized === "true") {
+    return "adult";
+  }
+  if (normalized === "0" || normalized === "false") {
+    return "normal";
+  }
+  return "";
+}
+
 function normalizeSeriesSearchPayload(payload, requestUrl) {
   const url = new URL(requestUrl);
   const params = url.searchParams;
@@ -127,7 +138,7 @@ function normalizeSeriesSearchPayload(payload, requestUrl) {
   const search = String(params.get("search") || "").trim().toLowerCase();
   const type = String(params.get("type") || "").trim();
   const status = String(params.get("status") || "").trim();
-  const adult = String(params.get("adult") || "").trim();
+  const adultFilter = normalizeAdultFilter(params.get("adult"));
   const sortBy = String(params.get("sortBy") || "createdAt_desc").trim();
   const page = parsePositiveInt(params.get("page"), 1);
   const limit = Math.min(100, parsePositiveInt(params.get("limit"), 20));
@@ -148,10 +159,10 @@ function normalizeSeriesSearchPayload(payload, requestUrl) {
     if (status && status !== "all" && String(item.status || "") !== status) {
       return false;
     }
-    if (adult === "true" && !isAdultContent(item)) {
+    if (adultFilter === "adult" && !isAdultContent(item)) {
       return false;
     }
-    if (adult === "false" && isAdultContent(item)) {
+    if (adultFilter === "normal" && isAdultContent(item)) {
       return false;
     }
     return true;
