@@ -18,7 +18,7 @@
     "smoke:routes": "node scripts/smoke-routes.mjs",
     "smoke:canonical-routes": "node scripts/smoke-canonical-public-routes.mjs",
     "test:e2e:browser": "playwright test",
-    "test:e2e:core": "cross-env PLAYWRIGHT_WORKERS=1 playwright test tests/e2e/adult-toggle.spec.ts tests/e2e/content-mode-filtering.spec.ts tests/e2e/reader-layout.spec.ts tests/e2e/mobile-layout.spec.ts tests/e2e/analytics-tracking.spec.ts",
+    "test:e2e:core": "cross-env PLAYWRIGHT_WORKERS=1 playwright test tests/e2e/adult-toggle.spec.ts tests/e2e/content-mode.spec.ts tests/e2e/reader-layout.spec.ts tests/e2e/mobile-layout.spec.ts tests/e2e/analytics-tracking.spec.ts",
     "test:e2e:funnel": "playwright test tests/e2e/public-reading-funnel.spec.ts",
     "test:e2e:browser:headed": "playwright test --headed",
     "test:e2e:library": "playwright test tests/e2e/library-reading-state-smoke.spec.ts tests/e2e/library-reading-state-regression.spec.ts",

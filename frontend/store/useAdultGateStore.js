@@ -139,6 +139,9 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
         window.localStorage.setItem(CONFIRMED_KEY, confirmed ? "1" : "0");
         window.localStorage.setItem(RULE_KEY, normalizedRule);
         window.localStorage.setItem(MODE_KEY, mode ? "1" : "0");
+        setCookie("mn_adult_confirmed", confirmed ? "1" : "0");
+        setCookie("mn_age_rule", normalizedRule);
+        setCookie("mn_adult_mode", mode ? "1" : "0");
         if (markUpdated) {
           const updatedAt = Date.now();
           window.localStorage.setItem(

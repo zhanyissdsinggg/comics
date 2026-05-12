@@ -25,12 +25,12 @@ import {
   buildFigmaCatalog,
   buildGenreOptions,
   cn,
+  filterContentByMode,
   inferCatalogHero,
   sortByRating,
   sortByUpdated,
   filterByGenre,
 } from "./figma-utils";
-import { filterContentByMode } from "../../lib/contentFilters";
 
 const SORTS = ["Trending", "Newest", "Highest Rated", "Most Views"];
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -247,8 +247,8 @@ function HomeContent({
     return sortByRating(filteredByGenre);
   }, [activeSort, filteredByGenre]);
 
-  const fallbackItems = filterContentByMode(currentItems, contentMode);
-  const heroItem = inferCatalogHero(sortedItems) || inferCatalogHero(fallbackItems);
+  const modeScopedItems = filterContentByMode(currentItems, contentMode);
+  const heroItem = inferCatalogHero(sortedItems) || inferCatalogHero(modeScopedItems);
   const gridItems = [...sortedItems, ...sortedItems].slice(0, 6);
   const exploreGridItems = [...sortedItems, ...sortedItems, ...sortedItems].slice(0, 12);
   const rankItems = sortByRating(sortedItems).slice(0, 5);

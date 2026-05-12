@@ -84,6 +84,8 @@ export function cn(...values) {
   return values.filter(Boolean).join(" ");
 }
 
+export { filterContentByMode, isAdultContent };
+
 function hashString(value) {
   const input = String(value || "");
   let hash = 0;

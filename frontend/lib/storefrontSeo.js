@@ -138,8 +138,36 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
   }
 
   const series = seriesRoutePayload?.payload?.series || null;
+  const seriesEpisodes = Array.isArray(seriesRoutePayload?.payload?.episodes)
+    ? seriesRoutePayload.payload.episodes
+    : [];
+
+  if (!series) {
+    return {
+      series: null,
+      episode: null,
+      episodes: seriesEpisodes,
+      state: "unavailable",
+      gateReason: null,
+    };
+  }
+
+  if (!matchesContentMode(series, contentMode)) {
+    return {
+      series,
+      episode: null,
+      episodes: seriesEpisodes,
+      state:
+        contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
+      gateReason:
+        contentMode === CONTENT_MODE_ADULT
+          ? "NORMAL_MODE_REQUIRED"
+          : "NEED_AGE_CONFIRM",
+    };
+  }
+
   const episodePayload = await fetchSeoApiJson(
-    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}`,
+    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}&mode=${encodeURIComponent(contentMode)}`,
     "reader-metadata",
   );
 
@@ -147,9 +175,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
     return {
       series,
       episode: null,
-      episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
-        ? seriesRoutePayload.payload.episodes
-        : [],
+      episodes: seriesEpisodes,
       state: "unavailable",
       gateReason: null,
     };
@@ -183,9 +209,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
     return {
       series,
       episode: null,
-      episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
-        ? seriesRoutePayload.payload.episodes
-        : [],
+      episodes: seriesEpisodes,
       state:
         contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
       gateReason:
@@ -214,9 +238,7 @@ export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = 
   return {
     series,
     episode: safeEpisode,
-    episodes: Array.isArray(seriesRoutePayload?.payload?.episodes)
-      ? seriesRoutePayload.payload.episodes
-      : [],
+    episodes: seriesEpisodes,
     state: seriesRoutePayload?.state || "ready",
     gateReason: seriesRoutePayload?.gateReason || null,
   };

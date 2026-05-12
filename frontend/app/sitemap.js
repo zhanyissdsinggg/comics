@@ -92,10 +92,17 @@ function buildSeriesEntries(seriesList, currentDate) {
   return seriesList
     .filter((series) => series?.id)
     .map((series) =>
-      buildSitemapEntry(`/series/${encodeURIComponent(series.id)}`, resolveLastModified(series?.updatedAt, currentDate), {
-        changeFrequency: String(series?.status || "").toLowerCase() === "ongoing" ? "daily" : "weekly",
-        priority: 0.8,
-      }),
+      buildSitemapEntry(
+        `/series/${encodeURIComponent(series.id)}`,
+        resolveLastModified(series?.updatedAt, currentDate),
+        {
+          changeFrequency:
+            String(series?.status || "").toLowerCase() === "ongoing"
+              ? "daily"
+              : "weekly",
+          priority: 0.8,
+        },
+      ),
     );
 }
 
@@ -169,13 +176,14 @@ export default async function sitemap() {
     catalogNormalSeries,
     fallbackNormalSeries,
   );
+  const sitemapSeries = filterContentByMode(normalSeries, CONTENT_MODE_NORMAL);
   const staticPaths = shouldIncludeStorePath(topupPayload)
     ? [...STATIC_SITEMAP_PATHS, "/store"]
     : STATIC_SITEMAP_PATHS;
 
   return [
     ...staticPaths.map((path) => buildSitemapEntry(path, currentDate)),
-    ...buildSeriesEntries(normalSeries, currentDate),
-    ...buildCreatorEntries(normalSeries, currentDate),
+    ...buildSeriesEntries(sitemapSeries, currentDate),
+    ...buildCreatorEntries(sitemapSeries, currentDate),
   ];
 }

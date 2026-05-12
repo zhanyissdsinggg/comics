@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import {
-  filterContentByMode,
   getContentModeQueryParam,
 } from "../../lib/contentFilters";
 import { trackEvent } from "../../lib/trackEvent";
@@ -26,6 +25,7 @@ import {
   buildGenreOptions,
   buildInteractiveFallbackCatalog,
   cn,
+  filterContentByMode,
   filterByGenre,
   sortByRating,
   sortByUpdated,

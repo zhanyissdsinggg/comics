@@ -17,7 +17,9 @@ export async function generateMetadata() {
 export default async function Page({ searchParams }) {
   const params = (await searchParams) || {};
   const includeAdult = await isServerAdultModeEnabled();
-  const payload = await loadRankingsSeoPayload("popular", "all", { includeAdult });
+  const payload = await loadRankingsSeoPayload("popular", "all", {
+    includeAdult,
+  });
 
   return (
     <RankingsPage

@@ -39,10 +39,9 @@ import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
 import {
   getContentModeQueryParam,
-  isAdultContent,
   matchesContentMode,
 } from "../../lib/contentFilters";
-import { cn } from "./figma-utils";
+import { cn, isAdultContent } from "./figma-utils";
 
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -275,6 +274,13 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       const nextIsAdultSeries = isAdultContent(nextSeriesData?.series);
       setSeriesData(nextSeriesData);
 
+      if (nextIsAdultSeries && (!isAdultMode || contentMode !== "adult")) {
+        setEpisodeData(null);
+        setModeBlock("adult");
+        setLoading(false);
+        return;
+      }
+
       if (!matchesContentMode(nextSeriesData?.series, contentMode)) {
         setEpisodeData(null);
         setModeBlock(nextIsAdultSeries ? "adult" : "normal");
@@ -283,7 +289,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       }
 
       const episodeResponse = await apiGet(
-        `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${adultFlag}`,
+        `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${adultFlag}&mode=${encodeURIComponent(contentMode)}`,
         { cacheMs: 0 },
       );
 
