@@ -6,30 +6,30 @@ const ReaderPageRuntime = lazy(() => import("./ReaderPageRuntime"));
 
 function ReaderLoadingShell({ fallbackData }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
-        <section className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 shadow-[0_20px_48px_rgba(8,6,20,0.24)] sm:p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
-            Reader
-          </p>
-          <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-4xl">
-            {fallbackData?.seriesTitle || "Loading reader"}
-          </h1>
-          <p className="mt-2 text-sm font-semibold text-white/68">
-            {fallbackData?.episodeTitle || "Preparing chapter"}
-          </p>
-          <div className="mt-5 h-2.5 w-40 rounded-full bg-white/10" />
-        </section>
-        <section className="space-y-4">
-          <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="h-10 w-28 rounded-full bg-white/10" />
-              <div className="h-10 w-36 rounded-full bg-white/10" />
-            </div>
-            <div className="mt-4 h-3 w-48 rounded-full bg-white/10" />
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_22%),linear-gradient(180deg,#050608_0%,#0a0d12_34%,#060709_100%)] text-white">
+      <div className="mx-auto flex max-w-[1040px] flex-col gap-8 px-4 pb-16 pt-8 sm:px-6 sm:pt-10">
+        <section className="border-b border-white/8 pb-6">
+          <div className="h-3 w-24 rounded-full bg-white/10" />
+          <div className="mt-5 h-10 w-3/4 max-w-xl rounded-full bg-white/10 sm:h-12" />
+          <div className="mt-3 h-4 w-52 max-w-[65%] rounded-full bg-white/10" />
+          <div className="mt-5 flex flex-wrap gap-2">
+            <div className="h-8 w-24 rounded-full bg-white/8" />
+            <div className="h-8 w-32 rounded-full bg-white/8" />
           </div>
-          <div className="h-[45vh] rounded-[28px] border border-white/10 bg-white/[0.03]" />
-          <div className="h-[45vh] rounded-[28px] border border-white/10 bg-white/[0.03]" />
+        </section>
+
+        <section className="mx-auto w-full max-w-[760px] space-y-5">
+          <div className="h-[28vh] animate-pulse rounded-[28px] border border-white/8 bg-white/[0.04]" />
+          <div className="h-[42vh] animate-pulse rounded-[28px] border border-white/8 bg-white/[0.04]" />
+          <div className="h-[42vh] animate-pulse rounded-[28px] border border-white/8 bg-white/[0.04]" />
+        </section>
+
+        <section className="mx-auto flex w-full max-w-[760px] items-center justify-between rounded-[24px] border border-white/8 bg-white/[0.03] px-4 py-4">
+          <div className="space-y-2">
+            <div className="h-3 w-20 rounded-full bg-white/10" />
+            <div className="h-4 w-32 rounded-full bg-white/10" />
+          </div>
+          <div className="h-11 w-11 rounded-2xl bg-white/10" />
         </section>
       </div>
     </main>

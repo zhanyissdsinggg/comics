@@ -7,6 +7,7 @@ import {
   isLegacyPlaceholderUrl,
   readLegacyPlaceholderText,
 } from "../../lib/fallbackImage";
+import { cn } from "../../lib/utils";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import { trackEvent } from "../../lib/trackEvent";
 
@@ -90,7 +91,7 @@ function ReaderEditorialFallback({
     <div
       className={`relative overflow-hidden ${
         isHorizontal ? "rounded-xl" : "rounded-none"
-      } bg-[#060a14]`}
+      } bg-[#050505]`}
       style={{ aspectRatio }}
       aria-hidden="true"
     >
@@ -163,6 +164,9 @@ export default function PageStream({
   imageQuality,
   imageSizes,
   seriesType,
+  textTheme = "light",
+  fontSize = 18,
+  lineHeight = 1.75,
 }) {
   const [errorPages, setErrorPages] = useState({});
   const [loadingPages, setLoadingPages] = useState({});
@@ -196,6 +200,18 @@ export default function PageStream({
 
   const isHorizontal = layoutMode === "horizontal";
   const isVerticalComicFlow = !isHorizontal && visiblePages.length > 0;
+  const proseThemeClass =
+    textTheme === "sepia"
+      ? "bg-[#fbf7ef] text-[#2f261f]"
+      : textTheme === "dark"
+        ? "bg-[#0f1115] text-[#e5e7eb]"
+        : "bg-[#fafafa] text-[#1f2933]";
+  const proseMutedClass =
+    textTheme === "sepia"
+      ? "text-[#6d5b48]"
+      : textTheme === "dark"
+        ? "text-[#9ca3af]"
+        : "text-[#667085]";
   const initialReadyCount = useMemo(
     () => Math.max(1, Math.min(visiblePages.length, prefetchCount || 1)),
     [prefetchCount, visiblePages.length],
@@ -391,12 +407,15 @@ export default function PageStream({
   return (
     <div
       ref={containerRef}
-      className={`mx-auto w-full max-w-3xl ${
+      className={`mx-auto w-full ${
         isHorizontal
-          ? "flex gap-4 overflow-x-auto scroll-snap-x no-scrollbar px-3 pb-24 pt-5 sm:px-4 sm:pt-6"
+          ? "max-w-[1400px] flex gap-4 overflow-x-auto scroll-snap-x no-scrollbar px-3 pb-28 pt-5 sm:px-4 sm:pt-6"
           : isVerticalComicFlow
-            ? "flex flex-col gap-0 px-0 pb-28 pt-0 leading-none"
-            : "flex flex-col gap-4 px-3 pb-24 pt-5 sm:px-4 sm:pt-6"
+            ? "max-w-[960px] flex flex-col gap-1 bg-[#050505] px-0 pb-36 pt-0 leading-none sm:gap-1.5"
+            : cn(
+                "max-w-[760px] flex flex-col px-5 pb-28 pt-6 sm:px-6 sm:pt-8",
+                proseThemeClass,
+              )
       }`}
       style={isVerticalComicFlow ? { lineHeight: 0 } : undefined}
     >
@@ -471,7 +490,7 @@ export default function PageStream({
                   className={
                     isHorizontal
                       ? "relative overflow-hidden rounded-xl"
-                      : "relative m-0 block overflow-hidden p-0 leading-none"
+                      : "relative m-0 block overflow-hidden bg-[#050505] p-0 leading-none"
                   }
                   style={
                     isHorizontal
@@ -510,6 +529,9 @@ export default function PageStream({
                     style={{
                       display: "block",
                       margin: 0,
+                      maxWidth: isHorizontal ? undefined : "min(100vw, 960px)",
+                      width: "100%",
+                      height: "auto",
                       padding: 0,
                       lineHeight: 0,
                     }}
@@ -520,7 +542,12 @@ export default function PageStream({
                       index < Math.min(initialReadyCount, 2) ? "eager" : "lazy"
                     }
                     quality={qualityOverrides[index] || imageQuality}
-                    sizes={imageSizes || "(max-width: 768px) 100vw, 768px"}
+                    sizes={
+                      imageSizes ||
+                      (isHorizontal
+                        ? "(max-width: 768px) 100vw, 90vw"
+                        : "(max-width: 768px) 100vw, (max-width: 1200px) 82vw, 960px")
+                    }
                   />
                 </div>
               )}
@@ -528,19 +555,42 @@ export default function PageStream({
           );
         })
       ) : (
-        visibleParagraphs.map((paragraph, index) => (
-          <div
-            key={`paragraph-${index}`}
-            className="rounded-2xl border border-neutral-900 bg-neutral-900/50 p-4 text-sm text-neutral-200"
-            style={{
-              contentVisibility: "auto",
-              containIntrinsicSize: "200px 600px",
-            }}
-            data-index={index}
-          >
-            {paragraph}
-          </div>
-        ))
+        <article
+          className="mx-auto w-full max-w-[42.5rem] pb-8"
+          style={{
+            fontSize: `${fontSize}px`,
+            lineHeight,
+          }}
+        >
+          {visibleParagraphs.map((paragraph, index) => (
+            <div
+              key={`paragraph-${index}`}
+              className="w-full"
+              style={{
+                contentVisibility: "auto",
+                containIntrinsicSize: "180px 560px",
+              }}
+              data-index={index}
+            >
+              {index === 0 ? (
+                <div
+                  className={`mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] ${proseMutedClass}`}
+                >
+                  Continue reading
+                </div>
+              ) : null}
+              <p
+                className="whitespace-pre-wrap break-words text-[1em] leading-[inherit]"
+                style={{
+                  marginBottom:
+                    index === visibleParagraphs.length - 1 ? "0" : "1.18em",
+                }}
+              >
+                {paragraph}
+              </p>
+            </div>
+          ))}
+        </article>
       )}
       {typeof previewCount === "number" ||
       typeof previewParagraphs === "number" ? (

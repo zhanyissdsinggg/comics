@@ -6,6 +6,9 @@ import {
 } from "./support/placeholders";
 
 const UI_TIMEOUT_MS = 15_000;
+const ADULT_READER_SERIES_ID = "series-013";
+const ADULT_READER_EPISODE_ONE = `${ADULT_READER_SERIES_ID}e1`;
+const ADULT_READER_EPISODE_TWO = `${ADULT_READER_SERIES_ID}e2`;
 
 const NORMAL_SERIES = {
   id: "series-001",
@@ -24,7 +27,7 @@ const NORMAL_SERIES = {
 };
 
 const ADULT_SERIES = {
-  id: "series-012",
+  id: ADULT_READER_SERIES_ID,
   title: "Midnight Heat",
   author: "Vale After Dark",
   type: "comic",
@@ -37,7 +40,7 @@ const ADULT_SERIES = {
   badges: ["Adults Only"],
   tags: ["Mature"],
   episodeCount: 2,
-  latestEpisodeId: "series-012e2",
+  latestEpisodeId: ADULT_READER_EPISODE_TWO,
   updatedAt: "2026-04-19T08:00:00.000Z",
 };
 
@@ -79,8 +82,8 @@ const ADULT_SERIES_DETAIL = {
   series: ADULT_SERIES,
   episodes: [
     {
-      id: "series-012e1",
-      seriesId: "series-012",
+      id: ADULT_READER_EPISODE_ONE,
+      seriesId: ADULT_READER_SERIES_ID,
       number: 1,
       title: "Episode 1",
       pricePts: 0,
@@ -88,8 +91,8 @@ const ADULT_SERIES_DETAIL = {
       ttfEligible: false,
     },
     {
-      id: "series-012e2",
-      seriesId: "series-012",
+      id: ADULT_READER_EPISODE_TWO,
+      seriesId: ADULT_READER_SERIES_ID,
       number: 2,
       title: "Episode 2",
       pricePts: 0,
@@ -124,10 +127,10 @@ const NORMAL_SERIES_DETAIL = {
 };
 
 const ADULT_EPISODE_PAYLOADS = {
-  "series-012e1": {
+  [ADULT_READER_EPISODE_ONE]: {
     episode: {
-      id: "series-012e1",
-      seriesId: "series-012",
+      id: ADULT_READER_EPISODE_ONE,
+      seriesId: ADULT_READER_SERIES_ID,
       title: "Episode 1",
       type: "comic",
       pricePts: 0,
@@ -152,10 +155,10 @@ const ADULT_EPISODE_PAYLOADS = {
       paragraphs: [],
     },
   },
-  "series-012e2": {
+  [ADULT_READER_EPISODE_TWO]: {
     episode: {
-      id: "series-012e2",
-      seriesId: "series-012",
+      id: ADULT_READER_EPISODE_TWO,
+      seriesId: ADULT_READER_SERIES_ID,
       title: "Episode 2",
       type: "comic",
       pricePts: 0,
@@ -205,6 +208,18 @@ async function seedAdultState(
   const signedIn = options.signedIn ?? false;
   const adultConfirmed = options.adultConfirmed ?? false;
   const adultMode = options.adultMode ?? false;
+  const matureStatus = encodeURIComponent(
+    JSON.stringify({
+      verified: adultConfirmed,
+      provider: "local-gate",
+      region: "global",
+      expiresAt: null,
+      referenceId: null,
+      verifiedAt: adultConfirmed ? "2026-05-10T12:00:00.000Z" : null,
+      matureModeEnabled: adultMode,
+      hideAdultHistory: !adultMode,
+    }),
+  );
 
   await page.addInitScript(
     ({ adultConfirmed: nextConfirmed, adultMode: nextMode }) => {
@@ -260,6 +275,11 @@ async function seedAdultState(
     {
       name: "mn_adult_mode",
       value: adultMode ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_mature_status",
+      value: matureStatus,
       url: "http://127.0.0.1:4173",
     },
     {
@@ -411,7 +431,7 @@ async function installContentModeRoutes(
       return;
     }
 
-    if (pathname === "/api/series/series-012") {
+    if (pathname === `/api/series/${ADULT_READER_SERIES_ID}`) {
       if (!adultFlag) {
         await fulfillJson(
           route,
@@ -520,8 +540,11 @@ async function installContentModeRoutes(
       await fulfillJson(route, {
         entitlements: [
           {
-            seriesId: "series-012",
-            unlockedEpisodeIds: ["series-012e1", "series-012e2"],
+            seriesId: ADULT_READER_SERIES_ID,
+            unlockedEpisodeIds: [
+              ADULT_READER_EPISODE_ONE,
+              ADULT_READER_EPISODE_TWO,
+            ],
           },
         ],
       });
@@ -530,7 +553,7 @@ async function installContentModeRoutes(
 
     if (
       pathname === "/api/episode" &&
-      requestUrl.searchParams.get("seriesId") === "series-012"
+      requestUrl.searchParams.get("seriesId") === ADULT_READER_SERIES_ID
     ) {
       const requestedEpisodeId = String(
         requestUrl.searchParams.get("episodeId") || "",
@@ -540,7 +563,7 @@ async function installContentModeRoutes(
         route,
         ADULT_EPISODE_PAYLOADS[
           requestedEpisodeId as keyof typeof ADULT_EPISODE_PAYLOADS
-        ] || ADULT_EPISODE_PAYLOADS["series-012e1"],
+        ] || ADULT_EPISODE_PAYLOADS[ADULT_READER_EPISODE_ONE],
       );
       return;
     }
@@ -994,9 +1017,12 @@ test.describe("Content mode filtering", () => {
       signedIn: false,
     });
 
-    const response = await page.goto("/read/series-012/series-012e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      `/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_ONE}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await expect(
@@ -1022,16 +1048,19 @@ test.describe("Content mode filtering", () => {
       signedIn: true,
     });
 
-    const response = await page.goto("/read/series-012/series-012e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      `/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_ONE}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByText("Midnight Heat").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Reader actions" }),
+      page.getByRole("button", { name: "Reader Settings" }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1052,26 +1081,34 @@ test.describe("Content mode filtering", () => {
       signedIn: true,
     });
 
-    const response = await page.goto("/read/series-012/series-012e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      `/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_ONE}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("button", { name: "Reader actions" }),
+      page.getByRole("button", { name: "Next" }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Open next" }).first().click();
+    await page.getByRole("button", { name: "Next" }).first().click();
 
-    await expect(page).toHaveURL(/\/read\/series-012\/series-012e2$/);
+    await expect(
+      page,
+    ).toHaveURL(new RegExp(`/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_TWO}$`));
     await expect(page.getByText("Midnight Heat").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     expect(routes.getAdultEpisodeRequests()).toEqual(
-      expect.arrayContaining(["series-012e1", "series-012e2"]),
+      expect.arrayContaining([
+        ADULT_READER_EPISODE_ONE,
+        ADULT_READER_EPISODE_TWO,
+      ]),
     );
   });
 

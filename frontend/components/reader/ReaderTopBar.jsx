@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { Bookmark, BookmarkCheck, ChevronLeft, Ellipsis, Settings2 } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 const ShareButton = dynamic(() => import("../common/ShareButton"), {
   ssr: false,
@@ -10,6 +12,7 @@ const ShareButton = dynamic(() => import("../common/ShareButton"), {
 export default function ReaderTopBar({
   title,
   episodeLabel,
+  subtitle,
   seriesId,
   episodeId,
   onBack,
@@ -30,7 +33,127 @@ export default function ReaderTopBar({
   hasPrev = true,
   hasNext = true,
   seriesType = "comic",
+  variant = "legacy",
+  isComic = false,
+  rightSlot = null,
+  bookmarkActive = false,
 }) {
+  if (variant === "minimal") {
+    return (
+      <header
+        className={cn(
+          "fixed top-0 z-50 w-full backdrop-blur-xl transition-transform duration-300",
+          isComic
+            ? "border-b border-white/5 bg-[#0b0f16]/88 text-white"
+            : "border-b border-black/8 bg-[rgba(250,250,250,0.94)] text-[#1f2933]",
+        )}
+      >
+        <div
+          className={cn(
+            "mx-auto flex min-h-[72px] w-full items-center justify-between gap-3 px-4 py-3 md:px-6",
+            isComic ? "max-w-[1120px]" : "max-w-[760px]",
+          )}
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back"
+              className={cn(
+                "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
+                isComic
+                  ? "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
+              )}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="min-w-0">
+              {subtitle ? (
+                <p
+                  className={cn(
+                    "mb-1 truncate text-[10px] font-semibold uppercase tracking-[0.22em]",
+                    isComic ? "text-white/58" : "text-[#667085]",
+                  )}
+                >
+                  {subtitle}
+                </p>
+              ) : null}
+              <h1
+                className={cn(
+                  "truncate text-sm font-black md:text-[15px]",
+                  isComic ? "text-white" : "text-current",
+                )}
+              >
+                {title}
+              </h1>
+              <p
+                className={cn(
+                  "truncate text-xs md:text-sm",
+                  isComic ? "text-white/58" : "text-[#667085]",
+                )}
+              >
+                {episodeLabel}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {typeof onAddBookmark === "function" ? (
+              <button
+                type="button"
+                onClick={onAddBookmark}
+                aria-label={bookmarkActive ? "Remove bookmark" : "Save bookmark"}
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
+                  isComic
+                    ? "border-white/10 bg-white/5 text-gray-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
+                )}
+              >
+                {bookmarkActive ? (
+                  <BookmarkCheck className="h-5 w-5" />
+                ) : (
+                  <Bookmark className="h-5 w-5" />
+                )}
+              </button>
+            ) : null}
+            {typeof onOpenSettings === "function" ? (
+              <button
+                type="button"
+                onClick={onOpenSettings}
+                aria-label="Reader Settings"
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
+                  isComic
+                    ? "border-white/10 bg-white/5 text-gray-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
+                )}
+              >
+                <Settings2 className="h-5 w-5" />
+              </button>
+            ) : null}
+            {rightSlot}
+            {!rightSlot ? (
+              <button
+                type="button"
+                aria-label="More"
+                className={cn(
+                  "hidden h-11 w-11 items-center justify-center rounded-2xl border transition-all md:flex",
+                  isComic
+                    ? "border-white/10 bg-white/5 text-gray-300"
+                    : "border-[#d8dde6] bg-white/90 text-[#1f2933]",
+                )}
+              >
+                <Ellipsis className="h-5 w-5" />
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   const shareUrl =
     typeof window !== "undefined" && seriesId && episodeId
       ? `${window.location.origin}/read/${seriesId}/${episodeId}`

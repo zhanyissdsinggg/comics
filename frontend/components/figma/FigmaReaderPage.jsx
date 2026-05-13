@@ -2,23 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Bookmark,
-  BookmarkCheck,
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  List,
-  Lock,
-  MessageCircle,
-  Moon,
-  MoreVertical,
-  Settings2,
-  Share2,
-  SunMedium,
-  Wallet,
-  X,
-} from "lucide-react";
+import { Lock } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import {
@@ -34,7 +18,15 @@ import { useHistoryStore } from "../../store/useHistoryStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { trackEvent } from "../../lib/trackEvent";
-import PageStream from "../reader/PageStream";
+import ReaderShell from "../reader/ReaderShell";
+import ReaderTopBar from "../reader/ReaderTopBar";
+import ReaderBottomBar from "../reader/ReaderBottomBar";
+import ReaderSettingsSheet from "../reader/ReaderSettingsSheet";
+import ComicReaderContent from "../reader/ComicReaderContent";
+import NovelReaderContent from "../reader/NovelReaderContent";
+import ReaderEndPanel from "../reader/ReaderEndPanel";
+import ReaderSkeleton from "../reader/ReaderSkeleton";
+import ReaderErrorState from "../reader/ReaderErrorState";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
 import {
@@ -134,6 +126,104 @@ function withFallbackAdultFlag(item, fallbackAdult = false) {
   return hasModeSignal ? item : { ...item, adult: fallbackAdult };
 }
 
+function detectComicReaderContent(episode, seriesType, pages, paragraphs) {
+  const normalizedType = String(episode?.type || seriesType || "")
+    .trim()
+    .toLowerCase();
+  const hasImagePages = Array.isArray(pages) && pages.length > 0;
+  const hasParagraphs = Array.isArray(paragraphs) && paragraphs.length > 0;
+  const comicSignals = new Set([
+    "comic",
+    "manga",
+    "webcomic",
+    "image",
+    "image_episode",
+    "image-episode",
+  ]);
+
+  if (comicSignals.has(normalizedType)) {
+    return true;
+  }
+
+  if (
+    normalizedType.includes("comic") ||
+    normalizedType.includes("manga") ||
+    normalizedType.includes("webcomic")
+  ) {
+    return true;
+  }
+
+  if (hasImagePages && !hasParagraphs) {
+    return true;
+  }
+
+  return false;
+}
+
+function extractNarrativeParagraphs(episode, paragraphs) {
+  if (Array.isArray(paragraphs) && paragraphs.length > 0) {
+    return paragraphs
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+  }
+
+  const contentBlocks = Array.isArray(episode?.contentBlocks)
+    ? episode.contentBlocks
+    : Array.isArray(episode?.blocks)
+      ? episode.blocks
+      : [];
+
+  return contentBlocks
+    .map((block) => {
+      if (!block) {
+        return "";
+      }
+
+      if (typeof block === "string") {
+        return block.trim();
+      }
+
+      return String(
+        block?.text ||
+          block?.content ||
+          block?.body ||
+          block?.value ||
+          block?.paragraph ||
+          "",
+      ).trim();
+    })
+    .filter(Boolean);
+}
+
+function detectNovelReaderContent(episode, seriesType, paragraphs) {
+  const normalizedType = String(episode?.type || seriesType || "")
+    .trim()
+    .toLowerCase();
+  const hasParagraphs = Array.isArray(paragraphs) && paragraphs.length > 0;
+  const novelSignals = new Set([
+    "novel",
+    "fiction",
+    "text",
+    "text_episode",
+    "text-episode",
+  ]);
+
+  if (novelSignals.has(normalizedType)) {
+    return true;
+  }
+
+  if (
+    normalizedType.includes("novel") ||
+    normalizedType.includes("fiction") ||
+    normalizedType.includes("text episode") ||
+    normalizedType.includes("text-episode")
+  ) {
+    return true;
+  }
+
+  return hasParagraphs;
+}
+
 function resolveModeBlockFromError(response) {
   if (!response || response.ok) {
     return "";
@@ -178,35 +268,16 @@ function Metric({ label, value, hint }) {
   );
 }
 
-function QueueCard({
-  eyebrow,
-  title,
-  description,
-  ctaLabel,
-  onClick,
-  buttonClassName = "",
-}) {
+function ReaderMetaPill({ children, className = "" }) {
   return (
-    <div className="rounded-[26px] border border-white/10 bg-black/20 p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-        {eyebrow}
-      </p>
-      <p className="mt-2 text-sm font-black text-white">{title}</p>
-      <p className="mt-2 min-h-[44px] text-sm leading-6 text-gray-400">
-        {description}
-      </p>
-      <button
-        type="button"
-        onClick={onClick}
-        className={cn(
-          "mt-4 inline-flex min-h-[44px] w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-black transition-all active:scale-[0.98]",
-          buttonClassName ||
-            "border border-white/10 bg-white/5 text-white hover:bg-white/10",
-        )}
-      >
-        {ctaLabel}
-      </button>
-    </div>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em]",
+        className,
+      )}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -244,6 +315,12 @@ function ReaderContent({
     toggleNightMode,
     layoutMode,
     setLayoutMode,
+    theme,
+    setTheme,
+    fontSize,
+    setFontSize,
+    lineHeight,
+    setLineHeight,
     brightness,
     setBrightness,
   } = useReaderSettingsStore();
@@ -287,7 +364,6 @@ function ReaderContent({
   const [liked, setLiked] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [overflowOpen, setOverflowOpen] = useState(false);
   const [unlockBusy, setUnlockBusy] = useState(false);
   const [toast, setToast] = useState("");
   const [hasReachedPreviewEnd, setHasReachedPreviewEnd] = useState(false);
@@ -578,15 +654,22 @@ function ReaderContent({
       ) || null,
     [episodeId, seriesBookmarks],
   );
-  const isComic = (episodeData?.type || seriesType) === "comic";
+  const pages = Array.isArray(episodeData?.pages) ? episodeData.pages : [];
+  const paragraphs = extractNarrativeParagraphs(
+    episodeData,
+    episodeData?.paragraphs,
+  );
+  const isNovel = detectNovelReaderContent(episodeData, seriesType, paragraphs);
+  const isComic = detectComicReaderContent(
+    episodeData,
+    seriesType,
+    pages,
+    paragraphs,
+  ) && !isNovel;
   const previewCount =
     !unlocked && isComic ? (episodeData?.previewFreePages ?? 3) : null;
   const previewParagraphs =
     !unlocked && !isComic ? (episodeData?.previewParagraphs ?? 3) : null;
-  const pages = Array.isArray(episodeData?.pages) ? episodeData.pages : [];
-  const paragraphs = Array.isArray(episodeData?.paragraphs)
-    ? episodeData.paragraphs
-    : [];
   const visibleUnits = isComic
     ? typeof previewCount === "number"
       ? Math.min(previewCount, pages.length)
@@ -620,10 +703,6 @@ function ReaderContent({
         )
     : 0;
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
-  const queuePercent =
-    episodes.length > 1 && currentIndex >= 0
-      ? Math.round(((currentIndex + 1) / episodes.length) * 100)
-      : 100;
   const creatorName =
     resolveSeriesCreatorName(seriesData?.series) ||
     String(seriesData?.series?.author || "").trim() ||
@@ -636,6 +715,78 @@ function ReaderContent({
   const layoutModeForView = isComic ? layoutMode : "vertical";
   const shareUrl =
     typeof window !== "undefined" ? window.location.href : backToSeriesHref;
+  const fallbackSeriesTitle =
+    String(fallbackData?.seriesTitle || "Reader").trim() || "Reader";
+  const fallbackEpisodeTitle =
+    String(fallbackData?.episodeTitle || "Preparing chapter").trim() ||
+    "Preparing chapter";
+  const novelTheme = nightMode ? "dark" : theme || "light";
+  const novelShellClass =
+    novelTheme === "sepia"
+      ? "bg-[#fbf7ef] text-[#2f261f]"
+      : novelTheme === "dark"
+        ? "bg-[#0f1115] text-[#e5e7eb]"
+        : "bg-[#fafafa] text-[#1f2933]";
+  const novelMutedClass =
+    novelTheme === "sepia"
+      ? "text-[#6d5b48]"
+      : novelTheme === "dark"
+        ? "text-[#9ca3af]"
+        : "text-[#667085]";
+  const novelBorderClass =
+    novelTheme === "sepia"
+      ? "border-[#d8cbb5]"
+      : novelTheme === "dark"
+        ? "border-white/10"
+        : "border-[#e5e7eb]";
+  const novelTopBarClass =
+    novelTheme === "sepia"
+      ? "border-[#d8cbb5]/85 bg-[rgba(251,247,239,0.92)] text-[#2f261f]"
+      : novelTheme === "dark"
+        ? "border-white/10 bg-[rgba(15,17,21,0.9)] text-[#e5e7eb]"
+        : "border-[#e5e7eb] bg-[rgba(250,250,250,0.94)] text-[#1f2933]";
+  const novelTopButtonClass =
+    novelTheme === "sepia"
+      ? "border-[#d8cbb5] bg-[#f8efdf]/90 text-[#2f261f] hover:bg-[#f1e3c8]"
+      : novelTheme === "dark"
+        ? "border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
+        : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white";
+  const novelHeroClass =
+    novelTheme === "sepia"
+      ? "rounded-[30px] border border-[#d8cbb5] bg-[#fbf3e4] px-5 py-6 shadow-[0_24px_60px_rgba(88,63,39,0.08)] md:px-7 md:py-7"
+      : novelTheme === "dark"
+        ? "rounded-[30px] border border-white/10 bg-[#11161d] px-5 py-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] md:px-7 md:py-7"
+        : "rounded-[30px] border border-[#e5e7eb] bg-white px-5 py-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:px-7 md:py-7";
+  const novelReaderFrameClass =
+    novelTheme === "sepia"
+      ? "rounded-[28px] border border-[#d8cbb5] bg-[#fbf7ef]"
+      : novelTheme === "dark"
+        ? "rounded-[28px] border border-white/10 bg-[#0f1115]"
+        : "rounded-[28px] border border-[#e5e7eb] bg-white";
+  const readerMutedClass = isComic
+    ? "text-white/58"
+    : novelMutedClass;
+  const readerPanelClass = isComic
+    ? "border-white/10 bg-white/[0.04]"
+    : novelReaderFrameClass;
+  const fallbackSeriesType =
+    String(
+      initialReaderPayload?.series?.series?.type ||
+        initialReaderPayload?.episode?.type ||
+        "",
+    )
+      .trim()
+      .toLowerCase() || "comic";
+  const loadingIsNovel =
+    fallbackSeriesType.includes("novel") ||
+    fallbackSeriesType.includes("fiction") ||
+    fallbackSeriesType.includes("text");
+  const loadingIsComic = !loadingIsNovel;
+  const loadingRootClass = loadingIsComic ? palette.rootBg : novelShellClass;
+  const loadingMutedClass = loadingIsComic ? "text-white/55" : novelMutedClass;
+  const loadingBorderClass = loadingIsComic
+    ? "border-white/10 bg-white/[0.04]"
+    : `${novelBorderClass} bg-black/[0.03]`;
   const readerAnalyticsPayload = useMemo(
     () => ({
       seriesId,
@@ -647,35 +798,6 @@ function ReaderContent({
     }),
     [contentMode, episodeId, seriesId, seriesIsAdult, seriesType, unlocked],
   );
-  const previousQueueLabel = prevEpisode
-    ? formatInstallmentLabel(
-        seriesType,
-        prevEpisode?.number || Math.max(currentNumber - 1, 1),
-      )
-    : "Series overview";
-  const previousQueueDescription = prevEpisode
-    ? resolveEpisodeDisplayTitle(
-        prevEpisode?.title,
-        previousQueueLabel,
-        seriesType,
-      )
-    : "No earlier installment is listed here, so the series page becomes the safe reset point.";
-  const currentQueueDescription = unlocked
-    ? `${currentInstallmentLabel} is fully open and synced in this reading session.`
-    : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} are open before unlock.`;
-  const nextQueueLabel = nextEpisode
-    ? formatInstallmentLabel(
-        seriesType,
-        nextEpisode?.number || currentNumber + 1,
-      )
-    : "Series overview";
-  const nextQueueDescription = nextEpisode
-    ? `${resolveEpisodeDisplayTitle(nextEpisode?.title, nextQueueLabel, seriesType)} is ready next${
-        Number(nextEpisode?.pricePts || 0) > 0
-          ? ` at ${formatPriceLabel(nextEpisode?.pricePts)} if still locked.`
-          : "."
-      }`
-    : "No next installment is listed yet, so the overview page is the cleanest next stop.";
 
   const handleEnterAdultReader = useCallback(async () => {
     trackEvent("adult_gate_confirm", {
@@ -754,7 +876,6 @@ function ReaderContent({
         bookmarkId: currentBookmark.id,
       });
       setToast("Bookmark removed");
-      setOverflowOpen(false);
       return;
     }
 
@@ -773,7 +894,6 @@ function ReaderContent({
       pageIndex: activeIndex,
     });
     setToast("Bookmark saved");
-    setOverflowOpen(false);
   }, [
     activeIndex,
     addBookmark,
@@ -897,13 +1017,7 @@ function ReaderContent({
 
   const handleOpenComments = useCallback(() => {
     scrollToNode(commentsRef.current);
-    setOverflowOpen(false);
   }, []);
-
-  const handleJumpToCheckpoint = useCallback(() => {
-    scrollToNode(unlocked ? endRef.current : previewEndRef.current);
-    setOverflowOpen(false);
-  }, [unlocked]);
 
   useEffect(() => {
     setHasReachedPreviewEnd(false);
@@ -1089,31 +1203,17 @@ function ReaderContent({
 
   if (loading) {
     return (
-      <main
-        className={cn("min-h-screen px-4 py-20 text-white", palette.rootBg)}
-      >
-        <div className="mx-auto max-w-5xl space-y-4">
-          <div className="rounded-[30px] border border-white/10 bg-white/5 p-6">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
-              Loading reader
-            </p>
-            <h1 className="mt-3 text-3xl font-black text-white">
-              {String(fallbackData?.seriesTitle || "Reader").trim() || "Reader"}
-            </h1>
-            <p className="mt-2 text-sm text-gray-400">
-              {String(
-                fallbackData?.episodeTitle || "Preparing installment",
-              ).trim() || "Preparing installment"}
-            </p>
-          </div>
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-32 animate-pulse rounded-[26px] bg-white/5"
-            />
-          ))}
-        </div>
-      </main>
+      <ReaderSkeleton
+        isComic={loadingIsComic}
+        rootClassName={loadingRootClass}
+        mutedClassName={loadingMutedClass}
+        borderClassName={loadingBorderClass}
+        heroClassName={novelHeroClass}
+        fallbackSeriesTitle={fallbackSeriesTitle}
+        fallbackEpisodeTitle={fallbackEpisodeTitle}
+        backToSeriesHref={backToSeriesHref}
+        onBack={() => router.push(backToSeriesHref)}
+      />
     );
   }
 
@@ -1179,348 +1279,180 @@ function ReaderContent({
 
   if (error || !seriesData?.series || !episodeData) {
     return (
-      <main
-        className={cn(
-          "flex min-h-screen items-center justify-center px-4 py-20 text-white",
-          palette.rootBg,
+      <ReaderErrorState
+        isComic={loadingIsComic}
+        rootClassName={loadingRootClass}
+        heroClassName={
+          loadingIsComic ? cn(palette.surface, palette.border) : novelHeroClass
+        }
+        mutedClassName={loadingMutedClass}
+        primaryButtonClassName={cn(
+          "rounded-2xl px-6 py-3 font-black text-white transition-transform active:scale-[0.98]",
+          palette.primaryBg,
         )}
-      >
-        <div
-          className={cn(
-            "w-full max-w-xl rounded-[32px] border p-8 text-center shadow-2xl",
-            palette.surface,
-            palette.border,
-          )}
-        >
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
-            Reader unavailable
-          </p>
-          <h1 className="mt-3 text-3xl font-black text-white">
-            This installment failed to load
-          </h1>
-          <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-gray-400">
-            Try again or bounce back to the series queue to reopen the reader
-            cleanly.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button
-              type="button"
-              onClick={() => router.refresh()}
-              className={cn(
-                "rounded-2xl px-6 py-3 font-black text-white transition-transform active:scale-[0.98]",
-                palette.primaryBg,
-              )}
-            >
-              Retry reader
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push(backToSeriesHref)}
-              className="rounded-2xl border border-white/10 px-6 py-3 font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              Back to series
-            </button>
-          </div>
-        </div>
-      </main>
+        secondaryButtonClassName={cn(
+          "rounded-2xl border px-6 py-3 font-bold transition-colors",
+          loadingIsComic
+            ? "border-white/10 text-gray-300 hover:bg-white/5 hover:text-white"
+            : `${novelBorderClass} text-current hover:bg-black/[0.05]`,
+        )}
+        onRetry={() => router.refresh()}
+        onBack={() => router.push(backToSeriesHref)}
+      />
     );
   }
 
   return (
-    <main
-      className={cn(
-        "relative min-h-screen overflow-x-hidden pb-28 text-white",
-        palette.rootBg,
-      )}
+    <ReaderShell
+      isComic={isComic}
+      className={isComic ? palette.rootBg : novelShellClass}
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className={cn(
-            "absolute left-[-12%] top-24 h-72 w-72 rounded-full blur-3xl",
-            palette.heroGlow,
-          )}
-        />
-        <div className="absolute right-[-8%] top-[30rem] h-80 w-80 rounded-full bg-cyan-500/8 blur-3xl" />
-      </div>
+      {!isComic ? (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className={cn(
+              "absolute left-[-12%] top-24 h-72 w-72 rounded-full blur-3xl",
+              palette.heroGlow,
+            )}
+          />
+          <div className="absolute right-[-8%] top-[30rem] h-80 w-80 rounded-full bg-cyan-500/8 blur-3xl" />
+        </div>
+      ) : null}
 
       <div
         className={cn(
-          "fixed top-0 z-50 w-full border-b border-white/5 bg-[#0b0f16]/88 backdrop-blur-xl transition-transform duration-300",
+          "fixed top-0 z-50 w-full transition-transform duration-300",
           showNav ? "translate-y-0" : "-translate-y-full",
         )}
       >
-        <div className="mx-auto flex min-h-[78px] w-full max-w-[1320px] items-center justify-between gap-4 px-4 py-3 md:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label="Back"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-all hover:border-white/20 hover:bg-white/10 active:scale-[0.97]"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <div className="min-w-0">
-              <div className="mb-2 flex flex-wrap gap-2">
-                <Pill className="border-white/10 bg-white/5 text-gray-300">
-                  Reader deck
-                </Pill>
-                <Pill className={cn("border-white/10", palette.primarySoft)}>
-                  {currentInstallmentLabel}
-                </Pill>
-                {!unlocked ? (
-                  <Pill className="border-amber-500/25 bg-amber-500/10 text-amber-200">
-                    Preview mode
-                  </Pill>
-                ) : null}
-              </div>
-              <h1 className="truncate text-sm font-black text-white md:text-base">
-                {seriesData.series.title}
-              </h1>
-              <p className="truncate text-xs text-gray-400 md:text-sm">
-                {currentEpisodeTitle}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleOpenComments}
-              aria-label="Open comments"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]"
-            >
-              <MessageCircle className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSettingsOpen((value) => !value);
-                setOverflowOpen(false);
-              }}
-              aria-label="Reader Settings"
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
-                settingsOpen && "border-white/20 bg-white/10 text-white",
-              )}
-            >
-              <Settings2 className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setOverflowOpen((value) => !value);
-                setSettingsOpen(false);
-              }}
-              aria-label="Reader actions"
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.97]",
-                overflowOpen && "border-white/20 bg-white/10 text-white",
-              )}
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+        <ReaderTopBar
+          variant="minimal"
+          isComic={isComic}
+          title={seriesData.series.title}
+          subtitle={currentInstallmentLabel}
+          episodeLabel={currentEpisodeTitle}
+          onBack={() => router.back()}
+          onAddBookmark={handleBookmarkToggle}
+          onOpenSettings={() => setSettingsOpen((value) => !value)}
+          bookmarkActive={Boolean(currentBookmark)}
+        />
       </div>
 
-      {overflowOpen ? (
-        <div className="fixed right-4 top-[92px] z-50 w-[min(22rem,calc(100vw-2rem))] rounded-[28px] border border-white/10 bg-[#0d121a]/95 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:right-6">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                Reader actions
-              </p>
-              <h2 className="mt-1 text-base font-black text-white">
-                Quick jumps
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOverflowOpen(false)}
-              aria-label="Close reader actions"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+      <ReaderSettingsSheet
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        nightMode={nightMode}
+        onToggleNight={handleToggleNight}
+        layoutMode={layoutModeForView}
+        onToggleLayout={handleToggleLayout}
+        disableLayoutToggle={!isComic}
+        theme={novelTheme}
+        onThemeChange={setTheme}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        lineHeight={lineHeight}
+        onLineHeightChange={setLineHeight}
+        brightness={brightness}
+        onBrightnessChange={setBrightness}
+        showLayoutControls={isComic}
+        showTextControls={!isComic}
+        onSaveProgress={handleBookmarkToggle}
+      />
 
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => router.push(backToSeriesHref)}
-              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
-            >
-              <span>
-                <span className="block text-sm font-bold text-white">
-                  Back to series
-                </span>
-                <span className="mt-1 block text-xs text-gray-400">
-                  Open the full queue
-                </span>
-              </span>
-              <ChevronRight className="h-4 w-4 text-white/70" />
-            </button>
-            <button
-              type="button"
-              onClick={handleJumpToCheckpoint}
-              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
-            >
-              <span>
-                <span className="block text-sm font-bold text-white">
-                  {unlocked ? "Jump to end console" : "Jump to unlock card"}
-                </span>
-                <span className="mt-1 block text-xs text-gray-400">
-                  Skip to the next decision point
-                </span>
-              </span>
-              <ChevronRight className="h-4 w-4 text-white/70" />
-            </button>
-            <button
-              type="button"
-              onClick={handleBookmarkToggle}
-              className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
-            >
-              <span>
-                <span className="block text-sm font-bold text-white">
-                  {currentBookmark ? "Remove bookmark" : "Save bookmark"}
-                </span>
-                <span className="mt-1 block text-xs text-gray-400">
-                  {currentBookmark
-                    ? `Saved at ${Math.max(1, Math.round((currentBookmark.percent || 0) * 100))}% in this chapter.`
-                    : "Keep this reading position in your library."}
-                </span>
-              </span>
-              {currentBookmark ? (
-                <BookmarkCheck className="h-4 w-4 text-white/70" />
-              ) : (
-                <Bookmark className="h-4 w-4 text-white/70" />
-              )}
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {settingsOpen ? (
-        <div className="fixed bottom-[92px] right-4 z-50 w-[min(24rem,calc(100vw-2rem))] rounded-[30px] border border-white/10 bg-[#0d121a]/95 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl md:right-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                Reader settings
-              </p>
-              <h2 className="mt-1 text-base font-black text-white">
-                Live controls
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(false)}
-              aria-label="Close reader settings"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={handleToggleNight}
-              className={cn(
-                "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
-                nightMode
-                  ? "border-white/20 bg-white/12 text-white"
-                  : "border-white/10 bg-black/20 text-gray-300 hover:border-white/20 hover:bg-white/[0.06]",
-              )}
-            >
-              {nightMode ? "Night mode on" : "Night mode off"}
-            </button>
-            <button
-              type="button"
-              onClick={handleToggleLayout}
-              className={cn(
-                "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
-                isComic
-                  ? layoutModeForView === "horizontal"
-                    ? "border-white/20 bg-white/12 text-white"
-                    : "border-white/10 bg-black/20 text-gray-300 hover:border-white/20 hover:bg-white/[0.06]"
-                  : "border-white/10 bg-black/20 text-gray-500",
-              )}
-            >
-              {isComic
-                ? layoutModeForView === "horizontal"
-                  ? "Horizontal pages"
-                  : "Vertical scroll"
-                : "Novel mode stays vertical"}
-            </button>
-          </div>
-
-          <div className="mt-4 rounded-[24px] border border-white/10 bg-black/20 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-bold text-white">Brightness</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  Tune the reader without leaving the page.
-                </p>
-              </div>
-              <span className="text-sm font-black text-white">
-                {brightness}%
-              </span>
-            </div>
-            <input
-              type="range"
-              min="50"
-              max="150"
-              step="5"
-              value={brightness}
-              onChange={(event) => setBrightness(Number(event.target.value))}
-              className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/10"
-            />
-          </div>
-        </div>
-      ) : null}
-
-      <section className="relative px-4 pb-6 pt-24 md:px-6 md:pt-28">
-        <div className="mx-auto grid w-full max-w-[1320px] gap-4 lg:grid-cols-[minmax(0,1.18fr)_340px]">
+      <section className="relative px-4 pb-4 pt-24 md:px-6 md:pt-28">
+        <div
+          className={cn(
+            "mx-auto w-full",
+            isComic ? "max-w-[960px]" : "max-w-[760px]",
+          )}
+        >
           <div
             className={cn(
-              "relative overflow-hidden rounded-[34px] border p-6 shadow-[0_28px_90px_rgba(0,0,0,0.32)] md:p-7",
-              palette.surface,
-              palette.border,
+              "relative overflow-hidden border",
+              isComic
+                ? "rounded-[26px] border-white/8 bg-[linear-gradient(180deg,rgba(10,10,10,0.96)_0%,rgba(6,6,6,0.92)_100%)] px-5 py-5 md:px-6 md:py-6"
+                : novelHeroClass,
             )}
           >
             <div className="relative">
               <div className="flex flex-wrap items-center gap-2">
-                <Pill className={cn("border-white/10", palette.primarySoft)}>
-                  Active reader
-                </Pill>
-                <Pill className="border-white/10 bg-white/5 text-gray-300">
-                  {`${currentIndex >= 0 ? currentIndex + 1 : 1}/${Math.max(episodes.length, 1)} queue`}
-                </Pill>
-                <Pill className="border-white/10 bg-black/20 text-gray-300">
+                <ReaderMetaPill
+                  className={cn(
+                    isComic
+                      ? cn("border-white/10", palette.primarySoft)
+                      : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
+                  )}
+                >
+                  Reader
+                </ReaderMetaPill>
+                <ReaderMetaPill
+                  className={cn(
+                    isComic
+                      ? "border-white/10"
+                      : `${novelBorderClass} bg-transparent`,
+                    readerMutedClass,
+                  )}
+                >
+                  {isComic ? "Comic" : isNovel ? "Novel" : "Reader"}
+                </ReaderMetaPill>
+                <Pill
+                  className={
+                    isComic
+                      ? "border-white/10 bg-black/20 text-gray-300"
+                      : `${novelBorderClass} bg-transparent ${readerMutedClass}`
+                  }
+                >
                   {unlocked ? "Full access" : formatPriceLabel(currentPricePts)}
                 </Pill>
               </div>
 
-              <h2 className="mt-4 text-[clamp(2rem,3.4vw,3.6rem)] font-black leading-[0.96] tracking-[-0.04em] text-white">
-                {seriesData.series.title}
-              </h2>
-              <p className="mt-2 max-w-3xl text-base font-semibold text-gray-200 md:text-lg">
+              <h2
+                className={cn(
+                  "mt-4 font-black leading-[1.08] tracking-[-0.04em]",
+                  isComic
+                    ? "text-[clamp(1.5rem,2.4vw,2.4rem)] text-white"
+                    : "text-[clamp(1.85rem,3vw,2.7rem)] text-current",
+                )}
+              >
                 {currentEpisodeTitle}
+              </h2>
+              <p
+                className={cn(
+                  "mt-2 max-w-3xl font-semibold",
+                  isComic
+                    ? "text-sm text-gray-200 md:text-base"
+                    : "text-base text-current/80 md:text-lg",
+                )}
+              >
+                {seriesData.series.title}
               </p>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-400">
-                {creatorName} · Released{" "}
+              <p
+                className={cn(
+                  "mt-3 max-w-3xl text-sm",
+                  isComic ? "leading-5" : "leading-6",
+                  readerMutedClass,
+                )}
+              >
+                {creatorName} -{" "}
                 {formatMetaDate(
                   currentEpisode?.releasedAt ||
                     episodeData?.releasedAt ||
                     seriesData.series.updatedAt,
-                )}{" "}
-                ·{" "}
+                )} {" "}
+                -{" "}
                 {unlocked
-                  ? `Full ${installmentLabel.toLowerCase()} is live.`
-                  : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
+                  ? `Full ${installmentLabel.toLowerCase()} is ready.`
+                  : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
               </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div
+                className={cn(
+                  "mt-5 hidden gap-3",
+                  isComic
+                    ? "hidden"
+                    : "hidden",
+                )}
+              >
                 <Metric
                   label="Installment"
                   value={currentInstallmentLabel}
@@ -1564,126 +1496,57 @@ function ReaderContent({
               </div>
             </div>
           </div>
-
-          <aside
-            className={cn(
-              "overflow-hidden rounded-[34px] border p-5 shadow-[0_28px_90px_rgba(0,0,0,0.28)] md:p-6",
-              palette.surface,
-              palette.border,
-            )}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                  Reading queue
-                </p>
-                <h2 className="mt-2 text-xl font-black text-white">
-                  What&apos;s around this read
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Keep the previous and next move visible without breaking the
-                  flow.
-                </p>
-              </div>
-              <div
-                className={cn(
-                  "rounded-2xl border px-3 py-2 text-xs font-black",
-                  palette.primarySoft,
-                )}
-              >
-                {queuePercent}%
-              </div>
-            </div>
-
-            <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className={cn(
-                  "h-full transition-[width] duration-300",
-                  palette.primaryBg,
-                )}
-                style={{ width: `${queuePercent}%` }}
-              />
-            </div>
-
-            <div className="mt-5 grid gap-3">
-              <QueueCard
-                eyebrow="Previous"
-                title={previousQueueLabel}
-                description={previousQueueDescription}
-                ctaLabel={prevEpisode ? "Open previous" : "Back to series"}
-                onClick={
-                  prevEpisode
-                    ? () =>
-                        handleNavigateEpisode(
-                          prevEpisode,
-                          "previous",
-                          "queue-card",
-                        )
-                    : () => router.push(backToSeriesHref)
-                }
-              />
-              <QueueCard
-                eyebrow="Current"
-                title={currentInstallmentLabel}
-                description={currentQueueDescription}
-                ctaLabel={unlocked ? "Continue reading" : "Jump to checkpoint"}
-                buttonClassName={cn("text-white", palette.primaryBg)}
-                onClick={
-                  unlocked
-                    ? () => scrollToNode(endRef.current)
-                    : handleJumpToCheckpoint
-                }
-              />
-              <QueueCard
-                eyebrow="Next"
-                title={nextQueueLabel}
-                description={nextQueueDescription}
-                ctaLabel={nextEpisode ? "Open next" : "Back to series"}
-                buttonClassName={cn(
-                  nextEpisode
-                    ? `text-white ${palette.primaryBg}`
-                    : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
-                )}
-                onClick={
-                  nextEpisode
-                    ? () =>
-                        handleNavigateEpisode(nextEpisode, "next", "queue-card")
-                    : () => router.push(backToSeriesHref)
-                }
-              />
-            </div>
-          </aside>
         </div>
+
       </section>
 
-      <section className="relative">
-        <div className="mx-auto w-full max-w-[1200px]">
-          <div
-            className="relative"
-            style={{ filter: `brightness(${brightness}%)` }}
-            onClick={() => setShowNav((value) => !value)}
-          >
-            <PageStream
-              pages={pages}
-              paragraphs={paragraphs}
-              previewCount={previewCount}
-              previewParagraphs={previewParagraphs}
-              layoutMode={layoutModeForView}
-              isNightMode={nightMode || isAdultMode}
-              imageQuality={75}
-              imageSizes="(max-width: 768px) 100vw, 768px"
-              seriesType={seriesType}
-              onActiveIndexChange={setActiveIndex}
-              onPreviewEndRef={(node) => {
-                previewEndRef.current = node;
-              }}
-              onEndRef={(node) => {
-                endRef.current = node;
-              }}
-            />
-          </div>
-        </div>
-      </section>
+      {isComic ? (
+        <ComicReaderContent
+          pages={pages}
+          paragraphs={paragraphs}
+          previewCount={previewCount}
+          previewParagraphs={previewParagraphs}
+          layoutMode={layoutModeForView}
+          isNightMode={nightMode || isAdultMode}
+          imageQuality={75}
+          imageSizes="(max-width: 768px) 100vw, 768px"
+          seriesType={seriesType}
+          brightness={brightness}
+          onActiveIndexChange={setActiveIndex}
+          onPreviewEndRef={(node) => {
+            previewEndRef.current = node;
+          }}
+          onEndRef={(node) => {
+            endRef.current = node;
+          }}
+          onToggleChrome={() => setShowNav((value) => !value)}
+        />
+      ) : (
+        <NovelReaderContent
+          pages={pages}
+          paragraphs={paragraphs}
+          previewCount={previewCount}
+          previewParagraphs={previewParagraphs}
+          layoutMode={layoutModeForView}
+          isNightMode={nightMode || isAdultMode}
+          imageQuality={75}
+          imageSizes="(max-width: 768px) 100vw, 768px"
+          seriesType={seriesType}
+          textTheme={novelTheme}
+          fontSize={fontSize}
+          lineHeight={lineHeight}
+          brightness={brightness}
+          shellClassName={readerPanelClass}
+          onActiveIndexChange={setActiveIndex}
+          onPreviewEndRef={(node) => {
+            previewEndRef.current = node;
+          }}
+          onEndRef={(node) => {
+            endRef.current = node;
+          }}
+          onToggleChrome={() => setShowNav((value) => !value)}
+        />
+      )}
 
       {!unlocked ? (
         <section className="px-4 py-2 md:px-6">
@@ -1824,276 +1687,183 @@ function ReaderContent({
         </section>
       ) : null}
 
-      <section className="px-4 pb-4 pt-8 md:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-4 lg:grid-cols-[1fr_minmax(0,1.35fr)_1fr]">
-            <div
-              className={cn(
-                "flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]",
-                palette.surface,
-                palette.border,
-              )}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                Previous move
-              </p>
-              <h3 className="mt-3 text-lg font-black text-white">
-                {prevEpisode
-                  ? formatInstallmentLabel(seriesType, prevEpisode?.number || 1)
-                  : "Return to the series"}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-gray-400">
-                {prevEpisode
-                  ? resolveEpisodeDisplayTitle(
-                      prevEpisode?.title,
-                      formatInstallmentLabel(
-                        seriesType,
-                        prevEpisode?.number || 1,
-                      ),
-                      seriesType,
-                    )
-                  : "No prior installment here, so the series page becomes the safe landing point."}
-              </p>
-              <button
-                type="button"
-                onClick={
-                  prevEpisode
-                    ? () =>
-                        handleNavigateEpisode(
-                          prevEpisode,
-                          "previous",
-                          "endcap-card",
-                        )
-                    : () => router.push(backToSeriesHref)
-                }
-                className="mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
-              >
-                {prevEpisode ? "Open previous" : "Back to series"}
-              </button>
-            </div>
-
-            <div
-              className={cn(
-                "flex h-full flex-col rounded-[32px] border p-6 text-center shadow-[0_28px_90px_rgba(0,0,0,0.32)]",
-                palette.surface,
-                palette.border,
-              )}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                Reader console
-              </p>
-              <h3 className="mt-3 text-3xl font-black tracking-tight text-white">
-                {unlocked ? "Installment complete." : "Preview checkpoint."}
-              </h3>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-                {unlocked
-                  ? `You reached the end of this ${installmentLabel.toLowerCase()}. Keep the pace going, react to the ending beat, or jump into discussion.`
-                  : `The free sample ends here. You can still react, share, and line up the next step before you unlock the rest.`}
-              </p>
-
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setLiked((value) => !value)}
-                  className={cn(
-                    "flex min-h-[108px] w-full max-w-[168px] flex-col items-center justify-center gap-2 rounded-[26px] border px-4 py-4 transition-all active:scale-[0.98]",
-                    liked
-                      ? "border-red-500/30 bg-red-500/10 text-red-300"
-                      : "border-white/10 bg-white/5 text-gray-300 hover:border-red-500/25 hover:bg-red-500/10 hover:text-white",
-                  )}
-                >
-                  <Heart
-                    className={cn("h-7 w-7", liked ? "fill-current" : "")}
-                  />
-                  <span className="text-xs font-black uppercase tracking-[0.18em]">
-                    Like
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="flex min-h-[108px] w-full max-w-[168px] flex-col items-center justify-center gap-2 rounded-[26px] border border-white/10 bg-white/5 px-4 py-4 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.98]"
-                >
-                  <Share2 className="h-7 w-7" />
-                  <span className="text-xs font-black uppercase tracking-[0.18em]">
-                    Share
-                  </span>
-                </button>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={handleOpenComments}
-                  className={cn(
-                    "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
-                    palette.primaryBg,
-                  )}
-                >
-                  Open comments
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push(backToSeriesHref)}
-                  className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
-                >
-                  Series queue
-                </button>
-              </div>
-            </div>
-
-            <div
-              className={cn(
-                "flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]",
-                palette.surface,
-                palette.border,
-              )}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                Next move
-              </p>
-              <h3 className="mt-3 text-lg font-black text-white">
-                {nextEpisode
-                  ? formatInstallmentLabel(
-                      seriesType,
-                      nextEpisode?.number || currentNumber + 1,
-                    )
-                  : "Series overview"}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-gray-400">
-                {nextEpisode
-                  ? `${resolveEpisodeDisplayTitle(
-                      nextEpisode?.title,
-                      formatInstallmentLabel(
-                        seriesType,
-                        nextEpisode?.number || currentNumber + 1,
-                      ),
-                      seriesType,
-                    )} is queued next. ${
-                      Number(nextEpisode?.pricePts || 0) > 0
-                        ? `${formatPriceLabel(nextEpisode?.pricePts)} if still locked.`
-                        : "It starts free."
-                    }`
-                  : "No next installment is listed yet, so the best next stop is the series overview."}
-              </p>
-              <button
-                type="button"
-                onClick={
-                  nextEpisode
-                    ? () =>
-                        handleNavigateEpisode(
-                          nextEpisode,
-                          "next",
-                          "endcap-card",
-                        )
-                    : () => router.push(backToSeriesHref)
-                }
-                className={cn(
-                  "mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
-                  nextEpisode
-                    ? palette.primaryBg
-                    : "border border-white/10 bg-white/5",
-                )}
-              >
-                {nextEpisode ? "Open next" : "Back to series"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ReaderEndPanel
+        isComic={isComic}
+        shellClassName={cn(
+          "rounded-[30px] border p-5 md:p-6",
+          isComic ? cn(palette.surface, palette.border) : novelHeroClass,
+        )}
+        mutedClassName={readerMutedClass}
+        borderClassName={
+          isComic
+            ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
+            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`
+        }
+        primaryButtonClassName={cn(
+          "inline-flex min-h-[56px] items-center justify-center rounded-2xl px-5 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
+          unlocked && !nextEpisode && !isComic
+            ? `${novelBorderClass} bg-black/[0.04] text-current`
+            : unlocked && !nextEpisode
+              ? "border border-white/10 bg-white/5"
+              : palette.primaryBg,
+        )}
+        secondaryButtonClassName={cn(
+          "inline-flex min-h-[52px] items-center justify-center rounded-2xl border px-5 py-3 text-sm font-bold transition-colors",
+          isComic
+            ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
+            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+        )}
+        heading={
+          unlocked ? `You finished ${currentInstallmentLabel}` : "Continue the story"
+        }
+        description={
+          unlocked
+            ? `${currentInstallmentLabel} is complete. Continue reading, revisit the previous chapter, or jump into the discussion below.`
+            : `The free preview ends here. Unlock the rest of this ${installmentLabel.toLowerCase()} to keep reading without leaving the reader.`
+        }
+        nextEpisodeTitle={
+          nextEpisode
+            ? resolveEpisodeDisplayTitle(
+                nextEpisode?.title,
+                formatInstallmentLabel(
+                  seriesType,
+                  nextEpisode?.number || currentNumber + 1,
+                ),
+                seriesType,
+              )
+            : ""
+        }
+        nextEpisodeHint={
+          Number(nextEpisode?.pricePts || 0) > 0
+            ? `${formatPriceLabel(nextEpisode?.pricePts)} if this next chapter is still locked.`
+            : "The next chapter is ready to open right away."
+        }
+        hasNextEpisode={Boolean(nextEpisode)}
+        isUnlocked={unlocked}
+        isSignedIn={isSignedIn}
+        shortfallPts={shortfallPts}
+        currentPricePts={currentPricePts}
+        currentBookmark={currentBookmark}
+        liked={liked}
+        onPrimaryAction={
+          nextEpisode
+            ? () =>
+                handleNavigateEpisode(nextEpisode, "next", "end-panel-primary")
+            : () => router.push(backToSeriesHref)
+        }
+        onOpenComments={handleOpenComments}
+        onPrev={
+          prevEpisode
+            ? () =>
+                handleNavigateEpisode(prevEpisode, "previous", "end-panel-secondary")
+            : () => router.push(backToSeriesHref)
+        }
+        onBack={() => router.push(backToSeriesHref)}
+        onBookmark={handleBookmarkToggle}
+        onLike={() => setLiked((value) => !value)}
+        onShare={handleShare}
+        onOpenLogin={() =>
+          openLogin(
+            "login",
+            `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`,
+          )
+        }
+        onOpenStore={() => router.push("/store")}
+        onUnlock={handleUnlockCurrent}
+        unlockBusy={unlockBusy}
+      />
 
       <section ref={commentsRef} className="px-4 pb-20 pt-6 md:px-6">
-        <div className="mx-auto w-full max-w-5xl">
+        <div
+          className={cn(
+            "mx-auto w-full",
+            isComic ? "max-w-5xl" : "max-w-[760px]",
+          )}
+        >
+          <div className="mb-5">
+            <p
+              className={cn(
+                "text-[10px] font-black uppercase tracking-[0.22em]",
+                readerMutedClass,
+              )}
+            >
+              Comments
+            </p>
+            <h3
+              className={cn(
+                "mt-2 text-2xl font-black",
+                isComic ? "text-white" : "text-current",
+              )}
+            >
+              Join the discussion
+            </h3>
+          </div>
           <FigmaCommentsSection seriesTitle={seriesData.series.title} />
         </div>
       </section>
 
-      <div
-        aria-label="Chapter navigation"
-        data-visible={showNav ? "true" : "false"}
-        className={cn(
-          "fixed bottom-0 left-0 z-50 w-full border-t border-white/5 bg-[#0b0f16]/88 backdrop-blur-xl transition-transform duration-300",
-          showNav ? "translate-y-0" : "translate-y-full",
+      <ReaderBottomBar
+        visible={showNav}
+        isComic={isComic}
+        shellClassName={
+          isComic
+            ? "border-t border-white/5 bg-[#0b0f16]/88"
+            : cn("border-t", novelTopBarClass)
+        }
+        progressClassName={palette.primaryBg}
+        navButtonClassName={cn(
+          "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full border px-4 text-sm font-bold transition-colors",
+          isComic
+            ? "border-white/10 bg-white/5 text-white hover:bg-white/10"
+            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
         )}
-      >
-        <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
-          <div
-            className={cn(
-              "h-full transition-[width] duration-300",
-              palette.primaryBg,
-            )}
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <div className="mx-auto flex min-h-[82px] w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3 md:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label="Back"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <div className="hidden min-w-0 sm:block">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-                Reader progress
-              </p>
-              <p className="truncate text-sm font-bold text-white">
-                {progressPercent === 100
-                  ? `Finished this ${installmentLabel.toLowerCase()}`
-                  : `${progressPercent}% through this ${installmentLabel.toLowerCase()}`}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
-            <span className="inline-flex min-h-[40px] items-center rounded-full border border-white/10 bg-white/5 px-4 text-xs font-black uppercase tracking-[0.16em] text-gray-300">
-              {`${currentIndex >= 0 ? currentIndex + 1 : 1}/${Math.max(episodes.length, 1)} queue`}
-            </span>
-            <button
-              type="button"
-              onClick={() => router.push(backToSeriesHref)}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 text-sm font-bold text-white transition-colors hover:bg-white/15"
-            >
-              <List className="h-4 w-4" />
-              {installmentPlural}
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => router.push("/store")}
-              aria-label="View your wallet"
-              className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white sm:flex"
-            >
-              <Wallet className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSettingsOpen((value) => !value);
-                setOverflowOpen(false);
-              }}
-              aria-label="Reader Settings"
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 hover:text-white",
-                settingsOpen && "border-white/20 bg-white/10 text-white",
-              )}
-            >
-              <Settings2 className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      </div>
+        centerButtonClassName={cn(
+          "inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors",
+          isComic
+            ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
+            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+        )}
+        iconButtonClassName={cn(
+          isComic
+            ? "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
+            : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
+        )}
+        activeButtonClassName={
+          isComic
+            ? "border-white/20 bg-white/10 text-white"
+            : "border-current bg-black/[0.06] text-current"
+        }
+        primaryButtonClassName={cn(
+          "inline-flex min-h-[42px] min-w-[108px] items-center justify-center rounded-full px-4 text-sm font-black transition-transform active:scale-[0.98]",
+          nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
+          !nextEpisode &&
+            !isComic &&
+            `${novelBorderClass} bg-black/[0.04] text-current`,
+        )}
+        progressPercent={progressPercent}
+        hasPrev={Boolean(prevEpisode)}
+        hasNext={Boolean(nextEpisode)}
+        onPrev={
+          prevEpisode
+            ? () => handleNavigateEpisode(prevEpisode, "previous", "bottom-bar")
+            : () => router.push(backToSeriesHref)
+        }
+        onNext={
+          nextEpisode
+            ? () => handleNavigateEpisode(nextEpisode, "next", "bottom-bar")
+            : () => router.push(backToSeriesHref)
+        }
+        onOpenSeries={() => router.push(backToSeriesHref)}
+        onOpenSettings={() => setSettingsOpen((value) => !value)}
+        settingsOpen={settingsOpen}
+      />
 
       {toast ? (
         <div className="fixed bottom-24 right-4 z-[60] rounded-full border border-white/10 bg-[#0d121a]/95 px-4 py-2 text-xs font-bold text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl md:right-6">
           {toast}
         </div>
       ) : null}
-    </main>
+    </ReaderShell>
   );
 }
 

@@ -115,13 +115,15 @@ export default async function Page({ params }) {
     notFound();
   }
   const includeAdult = await isServerAdultModeEnabled();
-  const { series, episode, episodes, state } = await loadReaderSeoPayload(
-    seriesId,
-    episodeId,
-    {
-      includeAdult,
-    },
-  );
+  const readerSeoPayload = await loadReaderSeoPayload(seriesId, episodeId, {
+    includeAdult,
+  });
+  const series = readerSeoPayload?.series || null;
+  const episode = readerSeoPayload?.episode || null;
+  const episodes = Array.isArray(readerSeoPayload?.episodes)
+    ? readerSeoPayload.episodes
+    : [];
+  const state = readerSeoPayload?.state || "unavailable";
   const isModeBlocked = state === "adult-gated" || state === "mode-mismatch";
   const isRecoverableShellState = isModeBlocked || state === "unavailable";
   if (

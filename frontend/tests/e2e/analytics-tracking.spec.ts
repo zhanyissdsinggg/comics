@@ -718,13 +718,13 @@ test.describe("Analytics tracking", () => {
   }) => {
     const capturedEvents = await captureAnalyticsBatches(page);
     await mockReaderApiRoutes(page, {
-      seriesId: "adult-001",
-      episodeId: "adult-001e1",
+      seriesId: "series-013",
+      episodeId: "series-013e1",
       signedIn: true,
       adult: true,
     });
 
-    const response = await page.goto("/read/adult-001/adult-001e1", {
+    const response = await page.goto("/read/series-013/series-013e1", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
