@@ -255,6 +255,9 @@ function FigmaSearchOverlay({ searchSuggestions = [] }) {
   );
 }
 
+// This is an overlay host for Figma surfaces, not a second site-wide shell.
+// PublicHeader/PublicFooter still come from AppProviders, while this component
+// only mounts page-level overlays such as the adult gate and search sheet.
 export default function FigmaChrome({
   children,
   searchSuggestions = [],
