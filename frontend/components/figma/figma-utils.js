@@ -1,6 +1,7 @@
 "use client";
 
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
+import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import {
   CONTENT_MODE_NORMAL,
   deriveContentModeFromAdultFlag,
@@ -29,8 +30,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     seriesId: "series-011",
     title: "Solar Wind: First Contact",
     author: "Signal Drift Studio",
-    coverUrl:
-      "https://placehold.co/720x960/111827/f8fafc?text=Solar+Wind%0AInteractive",
+    coverUrl: getFallbackImageUrl({ kind: "cover", adult: false }),
     description:
       "A branching relay-field thriller where every decision pushes the crew closer to rescue or collapse.",
     chapter: 1,
@@ -46,8 +46,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     seriesId: "interactive-neon-heir",
     title: "Neon Heir",
     author: "Metro Ghost Works",
-    coverUrl:
-      "https://placehold.co/720x960/1f1235/fcf4ff?text=Neon+Heir%0AInteractive",
+    coverUrl: getFallbackImageUrl({ kind: "cover", adult: false }),
     description:
       "Pick allies, burn bridges, and decide who owns the city by sunrise.",
     chapter: 1,
@@ -63,8 +62,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     seriesId: "interactive-vampire-oath",
     title: "Vampire Oath",
     author: "Crimson Thread",
-    coverUrl:
-      "https://placehold.co/720x960/24060a/fff1f2?text=Vampire+Oath%0A18%2B",
+    coverUrl: getFallbackImageUrl({ kind: "cover", adult: true }),
     description:
       "Choose who to trust inside a decaying manor where every promise has teeth.",
     chapter: 1,
@@ -429,7 +427,7 @@ export function buildFigmaSeriesItem(series, options = {}) {
     author,
     coverUrl:
       String(series?.coverUrl || series?.cover || "").trim() ||
-      `https://placehold.co/720x960/191420/f8f4ee?text=${encodeURIComponent(title)}`,
+      getFallbackImageUrl({ kind: "cover", adult }),
     description:
       description ||
       "A sharp, bingeable story with enough momentum to ruin your sleep schedule in the best possible way.",
@@ -620,7 +618,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 1,
       user: "NightCrawler99",
-      avatar: "https://placehold.co/96x96/312e81/f8fafc?text=NC",
+      avatar: getFallbackImageUrl({ kind: "avatar", variant: "indigo" }),
       text: `The pacing on ${seriesTitle} is filthy good. One chapter and suddenly it's 2 a.m. again.`,
       likes: 1245,
       date: "2 hours ago",
@@ -631,7 +629,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 2,
       user: "SakuraMochi",
-      avatar: "https://placehold.co/96x96/be185d/fff1f2?text=SM",
+      avatar: getFallbackImageUrl({ kind: "avatar", variant: "rose" }),
       text: "That last turn hits harder if you noticed the setup three chapters back. The author was cooking.",
       likes: 438,
       date: "5 hours ago",
@@ -642,7 +640,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 3,
       user: "AlexZ_Pro",
-      avatar: "https://placehold.co/96x96/0f766e/ecfeff?text=AZ",
+      avatar: getFallbackImageUrl({ kind: "avatar", variant: "teal" }),
       text: "I was ready to complain and then the cliffhanger slapped me quiet. Fine. Take my points.",
       likes: 92,
       date: "1 day ago",

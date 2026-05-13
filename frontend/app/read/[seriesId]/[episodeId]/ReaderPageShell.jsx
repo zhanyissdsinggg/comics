@@ -21,7 +21,13 @@ function ReaderLoadingShell({ fallbackData }) {
           <div className="mt-5 h-2.5 w-40 rounded-full bg-white/10" />
         </section>
         <section className="space-y-4">
-          <div className="h-20 rounded-[24px] border border-white/10 bg-white/[0.03]" />
+          <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="h-10 w-28 rounded-full bg-white/10" />
+              <div className="h-10 w-36 rounded-full bg-white/10" />
+            </div>
+            <div className="mt-4 h-3 w-48 rounded-full bg-white/10" />
+          </div>
           <div className="h-[45vh] rounded-[28px] border border-white/10 bg-white/[0.03]" />
           <div className="h-[45vh] rounded-[28px] border border-white/10 bg-white/[0.03]" />
         </section>
@@ -30,13 +36,19 @@ function ReaderLoadingShell({ fallbackData }) {
   );
 }
 
-export default function ReaderPageShell({ seriesId, episodeId, fallbackData }) {
+export default function ReaderPageShell({
+  seriesId,
+  episodeId,
+  fallbackData,
+  initialReaderPayload,
+}) {
   return (
     <Suspense fallback={<ReaderLoadingShell fallbackData={fallbackData} />}>
       <ReaderPageRuntime
         seriesId={seriesId}
         episodeId={episodeId}
         fallbackData={fallbackData}
+        initialReaderPayload={initialReaderPayload}
       />
     </Suspense>
   );

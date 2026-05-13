@@ -12,6 +12,7 @@ export default function ReaderPageRuntime({
   seriesId,
   episodeId,
   fallbackData,
+  initialReaderPayload,
 }) {
   return (
     <WalletProvider>
@@ -24,6 +25,7 @@ export default function ReaderPageRuntime({
                   seriesId={seriesId}
                   episodeId={episodeId}
                   fallbackData={fallbackData}
+                  initialReaderPayload={initialReaderPayload}
                 />
               </BookmarkProvider>
             </ReaderSettingsProvider>

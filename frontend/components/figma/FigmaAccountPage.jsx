@@ -14,6 +14,10 @@ import {
   ShieldCheck,
   Settings,
 } from "lucide-react";
+import {
+  getFallbackImageUrl,
+  resolveDisplayImageUrl,
+} from "../../lib/fallbackImage";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -180,7 +184,10 @@ function AccountContent({ seriesList = [] }) {
               <div className="relative shrink-0">
                 <div className="relative z-10 h-28 w-28 overflow-hidden rounded-2xl ring-4 ring-black shadow-2xl md:h-32 md:w-32">
                   <img
-                    src="https://placehold.co/300x300/111827/f8fafc?text=ME"
+                    src={getFallbackImageUrl({
+                      kind: "avatar",
+                      variant: "reader",
+                    })}
                     alt={displayName}
                     className="h-full w-full object-cover"
                   />
@@ -372,7 +379,10 @@ function AccountContent({ seriesList = [] }) {
                       >
                         <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-xl">
                           <img
-                            src={item.coverUrl}
+                            src={resolveDisplayImageUrl(item.coverUrl, {
+                              kind: "cover",
+                              adult: item?.adult || item?.isAdult,
+                            })}
                             alt={item.title}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
@@ -430,7 +440,10 @@ function AccountContent({ seriesList = [] }) {
                     >
                       <div className="h-28 w-20 shrink-0 overflow-hidden rounded-xl">
                         <img
-                          src={item.coverUrl}
+                          src={resolveDisplayImageUrl(item.coverUrl, {
+                            kind: "cover",
+                            adult: item?.adult || item?.isAdult,
+                          })}
                           alt={item.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />

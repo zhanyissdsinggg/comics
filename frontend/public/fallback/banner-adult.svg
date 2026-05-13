@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1400" role="img" aria-labelledby="title desc">
+  <title id="title">Gush adult login fallback banner</title>
+  <desc id="desc">Adult-mode login background fallback for Gush.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b0a0d" />
+      <stop offset="50%" stop-color="#35131b" />
+      <stop offset="100%" stop-color="#0d090c" />
+    </linearGradient>
+  </defs>
+  <rect width="1800" height="1400" fill="url(#bg)" />
+  <circle cx="300" cy="280" r="220" fill="#8f2438" fill-opacity="0.24" />
+  <circle cx="1420" cy="330" r="250" fill="#d0a97e" fill-opacity="0.1" />
+  <circle cx="1020" cy="1160" r="300" fill="#8f2438" fill-opacity="0.12" />
+  <text x="180" y="760" fill="#fff1f2" font-family="Arial, sans-serif" font-size="120" font-weight="800">Adult mode</text>
+  <text x="180" y="900" fill="#fff1f2" font-family="Arial, sans-serif" font-size="120" font-weight="800">stays isolated</text>
+  <text x="184" y="1000" fill="#fff1f2" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="40" font-weight="600">Fallback banner for 18+ sign-in and mature access surfaces.</text>
+</svg>

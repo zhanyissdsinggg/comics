@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Reader page fallback</title>
+  <desc id="desc">Default fallback image for reader pages.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1200" fill="url(#bg)" />
+  <rect x="68" y="68" width="664" height="1064" rx="32" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="4" />
+  <text x="110" y="280" fill="#ffffff" font-family="Arial, sans-serif" font-size="74" font-weight="800">Reader page</text>
+  <text x="110" y="366" fill="#ffffff" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="28" font-weight="600">Fallback image while the live asset is unavailable.</text>
+  <rect x="110" y="514" width="240" height="14" rx="7" fill="#ffffff" fill-opacity="0.78" />
+  <rect x="110" y="550" width="410" height="12" rx="6" fill="#ffffff" fill-opacity="0.22" />
+  <rect x="110" y="578" width="360" height="12" rx="6" fill="#ffffff" fill-opacity="0.22" />
+</svg>

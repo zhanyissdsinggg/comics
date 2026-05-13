@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { readLegacyPlaceholderText } from "../../lib/fallbackImage";
 import {
   getCoverArtDirection,
   getCoverOverlayStyle,
@@ -14,14 +15,7 @@ function readPlaceholdLabel(url) {
 
   try {
     const parsed = new URL(url);
-    if (parsed.hostname !== "placehold.co") {
-      return "";
-    }
-
-    return String(parsed.searchParams.get("text") || "")
-      .replace(/\+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    return readLegacyPlaceholderText(parsed.toString());
   } catch {
     return "";
   }

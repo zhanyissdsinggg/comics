@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 960" role="img" aria-labelledby="title desc">
+  <title id="title">Gush fallback cover</title>
+  <desc id="desc">Default fallback cover for stories on Gush.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#17131d" />
+      <stop offset="52%" stop-color="#2a2033" />
+      <stop offset="100%" stop-color="#110f17" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.03" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="960" fill="url(#bg)" />
+  <circle cx="116" cy="132" r="128" fill="#ff4f9a" fill-opacity="0.12" />
+  <circle cx="612" cy="182" r="110" fill="#67e8f9" fill-opacity="0.1" />
+  <rect x="44" y="44" width="632" height="872" rx="34" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="4" />
+  <rect x="84" y="86" width="552" height="788" rx="34" fill="url(#panel)" stroke="#ffffff" stroke-opacity="0.08" stroke-width="3" />
+  <rect x="110" y="122" width="164" height="42" rx="21" fill="#ff4f9a" fill-opacity="0.18" />
+  <text x="192" y="149" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">GUSH PICK</text>
+  <text x="110" y="328" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="800">Story</text>
+  <text x="110" y="404" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="800">cover</text>
+  <text x="110" y="480" fill="#ffffff" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="26" font-weight="600">Fallback art for the current title.</text>
+  <rect x="110" y="612" width="264" height="14" rx="7" fill="#ffffff" fill-opacity="0.78" />
+  <rect x="110" y="646" width="418" height="12" rx="6" fill="#ffffff" fill-opacity="0.22" />
+  <rect x="110" y="674" width="368" height="12" rx="6" fill="#ffffff" fill-opacity="0.22" />
+  <rect x="110" y="748" width="198" height="56" rx="28" fill="#ffe500" />
+  <text x="209" y="785" fill="#111111" font-family="Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle">Gush</text>
+</svg>

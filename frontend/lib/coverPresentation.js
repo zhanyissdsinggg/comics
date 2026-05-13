@@ -106,6 +106,7 @@ const PLACEHOLDER_HOSTS = new Set([
   "placehold.co",
   "via.placeholder.com",
   "dummyimage.com",
+  "img2.baidu.com",
 ]);
 
 const PLACEHOLDER_PATH_FRAGMENTS = [

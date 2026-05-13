@@ -19,6 +19,7 @@ import {
   isAdultContent,
   matchesContentMode,
 } from "../../lib/contentFilters";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
 import FigmaCommentsSection from "./FigmaCommentsSection";
@@ -319,7 +320,10 @@ function SeriesDetailContent({
         <div className="relative h-[300px] w-full bg-black min-[420px]:h-[320px] sm:h-[390px] md:h-[520px]">
           <div className="absolute inset-0">
             <img
-              src={detailItem.coverUrl}
+              src={resolveDisplayImageUrl(detailItem.coverUrl, {
+                kind: "cover",
+                adult: detailItem?.adult || detailItem?.isAdult,
+              })}
               alt={detailItem.title}
               className="h-full w-full scale-110 object-cover opacity-20 blur-xl"
             />
@@ -334,7 +338,10 @@ function SeriesDetailContent({
           <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-5 md:px-8 md:pb-10">
             <div className="flex w-full flex-col items-start gap-3.5 md:flex-row md:items-start md:gap-8">
               <img
-                src={detailItem.coverUrl}
+                src={resolveDisplayImageUrl(detailItem.coverUrl, {
+                  kind: "cover",
+                  adult: detailItem?.adult || detailItem?.isAdult,
+                })}
                 alt={detailItem.title}
                 className="w-28 shrink-0 self-end translate-y-3 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-32 min-[420px]:translate-y-5 md:w-64 md:self-auto md:translate-y-24"
               />
@@ -498,7 +505,10 @@ function SeriesDetailContent({
                       </div>
                       <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
                         <img
-                          src={detailItem.coverUrl}
+                          src={resolveDisplayImageUrl(detailItem.coverUrl, {
+                            kind: "cover",
+                            adult: detailItem?.adult || detailItem?.isAdult,
+                          })}
                           alt={detailItem.title}
                           className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
                         />

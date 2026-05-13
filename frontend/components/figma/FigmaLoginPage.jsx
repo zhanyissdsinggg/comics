@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { siteConfig } from "../../lib/siteConfig";
+import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import { useAuthStore } from "../../store/useAuthStore";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import { cn } from "./figma-utils";
@@ -125,8 +126,8 @@ function LoginContent() {
         <img
           src={
             isAdultMode
-              ? "https://placehold.co/1800x1400/1b0a0d/fff1f2?text=Mature+Night+Shelf"
-              : "https://placehold.co/1800x1400/0b1324/e0f2fe?text=Late+Night+Reading"
+              ? getFallbackImageUrl({ kind: "banner", adult: true })
+              : getFallbackImageUrl({ kind: "banner", adult: false })
           }
           alt="Login background"
           className="h-full w-full scale-105 object-cover opacity-20 blur-md"

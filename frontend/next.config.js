@@ -97,14 +97,6 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "placehold.co",
-      },
-      {
-        protocol: "https",
-        hostname: "img2.baidu.com",
-      },
-      {
         protocol: "http",
         hostname: "localhost",
       },

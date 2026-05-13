@@ -11,6 +11,10 @@ import {
   Pin,
   Send,
 } from "lucide-react";
+import {
+  getFallbackImageUrl,
+  resolveDisplayImageUrl,
+} from "../../lib/fallbackImage";
 import { buildCommentSeed, cn } from "./figma-utils";
 import { useFigmaSite } from "./FigmaSiteContext";
 
@@ -46,7 +50,10 @@ function CommentItem({ comment }) {
       <div className="flex gap-3 md:gap-4">
         <div className="relative shrink-0">
           <img
-            src={comment.avatar}
+            src={resolveDisplayImageUrl(comment.avatar, {
+              kind: "avatar",
+              variant: "indigo",
+            })}
             alt={comment.user}
             className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10 md:h-12 md:w-12"
           />
@@ -171,7 +178,7 @@ export default function FigmaCommentsSection({
       >
         <div className="flex gap-3 md:gap-4">
           <img
-            src="https://placehold.co/96x96/1d4ed8/f8fafc?text=ME"
+            src={getFallbackImageUrl({ kind: "avatar", variant: "reader" })}
             alt="Current user"
             className="hidden h-10 w-10 rounded-full border-2 border-white/10 object-cover sm:block md:h-12 md:w-12"
           />

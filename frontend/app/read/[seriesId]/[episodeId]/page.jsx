@@ -191,11 +191,24 @@ export default async function Page({ params }) {
         : null,
   };
 
+  const initialReaderPayload = {
+    state,
+    series:
+      series && !isModeBlocked
+        ? {
+            series,
+            episodes,
+          }
+        : null,
+    episode: episode && !isModeBlocked ? episode : null,
+  };
+
   return (
     <ReaderPageShell
       seriesId={seriesId}
       episodeId={episodeId}
       fallbackData={fallbackData}
+      initialReaderPayload={initialReaderPayload}
     />
   );
 }

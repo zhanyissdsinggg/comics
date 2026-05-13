@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createReaderPagePlaceholder } from "./support/placeholders";
 
 const seriesPayload = {
   series: {
@@ -34,17 +35,17 @@ const episodePayload = {
     previewFreePages: 3,
     pages: [
       {
-        url: "https://placehold.co/800x1200/1a1a2e/ffffff?text=The+Last+Kingdom+Ep1+P1",
+        url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"),
         w: 800,
         h: 1200,
       },
       {
-        url: "https://placehold.co/800x1200/1a1a2e/ffffff?text=The+Last+Kingdom+Ep1+P2",
+        url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"),
         w: 800,
         h: 1200,
       },
       {
-        url: "https://placehold.co/800x1200/1a1a2e/ffffff?text=The+Last+Kingdom+Ep1+P3",
+        url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"),
         w: 800,
         h: 1200,
       },
@@ -54,7 +55,7 @@ const episodePayload = {
 };
 
 test.describe("Reader fallback assets", () => {
-  test("reader should replace placehold page urls with editorial fallback cards", async ({
+  test("reader should keep fallback reader pages on first paint without third-party image hosts", async ({
     page,
   }) => {
     await page.route("**/api/**", async (route) => {
@@ -163,7 +164,10 @@ test.describe("Reader fallback assets", () => {
     );
 
     expect(
-      pageImageSources.some((value) => value.includes("placehold.co")),
+      pageImageSources.some(
+        (value) =>
+          value.includes("placehold.co") || value.includes("img2.baidu.com"),
+      ),
     ).toBeFalsy();
   });
 });

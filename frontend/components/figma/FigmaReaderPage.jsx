@@ -210,7 +210,12 @@ function QueueCard({
   );
 }
 
-function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
+function ReaderContent({
+  seriesId,
+  episodeId,
+  fallbackData = null,
+  initialReaderPayload = null,
+}) {
   const router = useRouter();
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
@@ -242,11 +247,42 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     brightness,
     setBrightness,
   } = useReaderSettingsStore();
-  const [seriesData, setSeriesData] = useState(null);
-  const [episodeData, setEpisodeData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialSeriesData = useMemo(() => {
+    if (!initialReaderPayload?.series?.series) {
+      return null;
+    }
+    return {
+      series: initialReaderPayload.series.series,
+      episodes: Array.isArray(initialReaderPayload.series.episodes)
+        ? initialReaderPayload.series.episodes
+        : [],
+    };
+  }, [initialReaderPayload]);
+  const initialEpisodeData = useMemo(() => {
+    if (!initialReaderPayload?.episode) {
+      return null;
+    }
+
+    const fallbackAdult = isAdultContent(initialSeriesData?.series);
+    return withFallbackAdultFlag(initialReaderPayload.episode, fallbackAdult);
+  }, [initialReaderPayload, initialSeriesData?.series]);
+  const initialModeBlock = useMemo(() => {
+    if (initialReaderPayload?.state === "adult-gated") {
+      return "adult";
+    }
+    if (initialReaderPayload?.state === "mode-mismatch") {
+      const sourceIsAdult = isAdultContent(initialSeriesData?.series);
+      return sourceIsAdult ? "adult" : "normal";
+    }
+    return "";
+  }, [initialReaderPayload?.state, initialSeriesData?.series]);
+  const [seriesData, setSeriesData] = useState(initialSeriesData);
+  const [episodeData, setEpisodeData] = useState(initialEpisodeData);
+  const [loading, setLoading] = useState(
+    () => !initialEpisodeData && !initialModeBlock,
+  );
   const [error, setError] = useState("");
-  const [modeBlock, setModeBlock] = useState("");
+  const [modeBlock, setModeBlock] = useState(initialModeBlock);
   const [showNav, setShowNav] = useState(true);
   const [liked, setLiked] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -270,6 +306,22 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       episodeCompleteRef.current = "";
       adultReaderEnterRef.current = "";
       progressMilestonesRef.current = [];
+
+      const hasSeededReaderPayload =
+        String(initialSeriesData?.series?.id || "") ===
+          String(seriesId || "") &&
+        String(initialEpisodeData?.id || "") === String(episodeId || "") &&
+        matchesContentMode(initialSeriesData?.series, contentMode) &&
+        matchesContentMode(initialEpisodeData, contentMode);
+
+      if (hasSeededReaderPayload) {
+        historyLoggedRef.current = false;
+        setSeriesData(initialSeriesData);
+        setEpisodeData(initialEpisodeData);
+        setLoading(false);
+        return;
+      }
+
       const adultFlag = getContentModeQueryParam(contentMode);
       const seriesResponse = await apiGet(
         `/api/series/${encodeURIComponent(seriesId)}?adult=${adultFlag}`,
@@ -360,7 +412,14 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     return () => {
       active = false;
     };
-  }, [contentMode, episodeId, isAdultMode, seriesId]);
+  }, [
+    contentMode,
+    episodeId,
+    initialEpisodeData,
+    initialSeriesData,
+    isAdultMode,
+    seriesId,
+  ]);
 
   useEffect(() => {
     if (
@@ -2042,6 +2101,7 @@ export default function FigmaReaderPage({
   seriesId,
   episodeId,
   fallbackData = null,
+  initialReaderPayload = null,
 }) {
   return (
     <FigmaSiteProvider>
@@ -2049,6 +2109,7 @@ export default function FigmaReaderPage({
         seriesId={seriesId}
         episodeId={episodeId}
         fallbackData={fallbackData}
+        initialReaderPayload={initialReaderPayload}
       />
     </FigmaSiteProvider>
   );

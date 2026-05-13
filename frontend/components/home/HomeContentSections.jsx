@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 
 const GUIDE_CARDS = [
   {
@@ -223,7 +224,7 @@ function ShelfComicCard({ item, onClick, actionLabel = "View title" }) {
       <div className="relative aspect-[3/4] overflow-hidden border-[3px] border-black bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
         {coverUrl ? (
           <Image
-            src={coverUrl}
+            src={resolveDisplayImageUrl(coverUrl, { kind: "cover" })}
             alt={coverAlt}
             fill
             sizes="(max-width: 640px) 44vw, (max-width: 1024px) 22vw, 240px"

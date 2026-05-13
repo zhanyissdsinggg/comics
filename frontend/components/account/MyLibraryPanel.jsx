@@ -20,6 +20,7 @@ import {
   filterContentByMode,
   getContentModeQueryParam,
 } from "../../lib/contentFilters";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -132,7 +133,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
     return (
       <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border-2 border-black bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <Image
-          src={coverUrl}
+          src={resolveDisplayImageUrl(coverUrl, { kind: "cover" })}
           alt={`Cover image for ${title}`}
           fill
           sizes="72px"

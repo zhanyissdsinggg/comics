@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { getContentModeQueryParam } from "../../lib/contentFilters";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
@@ -409,7 +410,10 @@ function HomeContent({
         <div className="relative w-full overflow-hidden bg-black transition-all duration-700">
           <div className="absolute inset-0">
             <img
-              src={heroItem.coverUrl}
+              src={resolveDisplayImageUrl(heroItem.coverUrl, {
+                kind: "cover",
+                adult: heroItem?.adult || heroItem?.isAdult,
+              })}
               alt={heroItem.title}
               className="h-full w-full scale-110 object-cover opacity-30 blur-2xl"
             />
@@ -488,7 +492,10 @@ function HomeContent({
                     )}
                   >
                     <img
-                      src={heroItem.coverUrl}
+                      src={resolveDisplayImageUrl(heroItem.coverUrl, {
+                        kind: "cover",
+                        adult: heroItem?.adult || heroItem?.isAdult,
+                      })}
                       alt={heroItem.title}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -631,7 +638,10 @@ function HomeContent({
                   >
                     <div className="relative h-[72px] w-14 shrink-0 overflow-hidden rounded-md md:h-20 md:w-16">
                       <img
-                        src={item.coverUrl}
+                        src={resolveDisplayImageUrl(item.coverUrl, {
+                          kind: "cover",
+                          adult: item?.adult || item?.isAdult,
+                        })}
                         alt={item.title}
                         className="h-full w-full object-cover"
                       />
@@ -715,7 +725,10 @@ function HomeContent({
                       className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
                     >
                       <img
-                        src={gridItems[0].coverUrl}
+                        src={resolveDisplayImageUrl(gridItems[0].coverUrl, {
+                          kind: "cover",
+                          adult: gridItems[0]?.adult || gridItems[0]?.isAdult,
+                        })}
                         alt={gridItems[0].title}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -745,7 +758,10 @@ function HomeContent({
                       className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
                     >
                       <img
-                        src={gridItems[1].coverUrl}
+                        src={resolveDisplayImageUrl(gridItems[1].coverUrl, {
+                          kind: "cover",
+                          adult: gridItems[1]?.adult || gridItems[1]?.isAdult,
+                        })}
                         alt={gridItems[1].title}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -768,7 +784,10 @@ function HomeContent({
                       className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
                     >
                       <img
-                        src={item.coverUrl}
+                        src={resolveDisplayImageUrl(item.coverUrl, {
+                          kind: "cover",
+                          adult: item?.adult || item?.isAdult,
+                        })}
                         alt={item.title}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -862,7 +881,10 @@ function HomeContent({
                     >
                       <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl ring-1 ring-white/5">
                         <img
-                          src={item.coverUrl}
+                          src={resolveDisplayImageUrl(item.coverUrl, {
+                            kind: "cover",
+                            adult: item?.adult || item?.isAdult,
+                          })}
                           alt={item.title}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
@@ -962,7 +984,10 @@ function HomeContent({
                     </span>
                     <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded ring-1 ring-white/10 transition-all group-hover:ring-white/20">
                       <img
-                        src={item.coverUrl}
+                        src={resolveDisplayImageUrl(item.coverUrl, {
+                          kind: "cover",
+                          adult: item?.adult || item?.isAdult,
+                        })}
                         alt={item.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />

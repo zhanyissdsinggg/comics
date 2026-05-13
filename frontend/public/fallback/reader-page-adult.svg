@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Adult reader page fallback</title>
+  <desc id="desc">Adult-mode fallback image for reader pages.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b0a0d" />
+      <stop offset="100%" stop-color="#0d090c" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1200" fill="url(#bg)" />
+  <rect x="68" y="68" width="664" height="1064" rx="32" fill="none" stroke="#d0a97e" stroke-opacity="0.18" stroke-width="4" />
+  <text x="110" y="280" fill="#fff1f2" font-family="Arial, sans-serif" font-size="74" font-weight="800">Adult page</text>
+  <text x="110" y="366" fill="#fff1f2" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="28" font-weight="600">Fallback image for mature reader content.</text>
+  <rect x="110" y="514" width="240" height="14" rx="7" fill="#fff1f2" fill-opacity="0.78" />
+  <rect x="110" y="550" width="410" height="12" rx="6" fill="#fff1f2" fill-opacity="0.18" />
+  <rect x="110" y="578" width="360" height="12" rx="6" fill="#fff1f2" fill-opacity="0.18" />
+</svg>

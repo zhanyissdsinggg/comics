@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { getContentModeQueryParam } from "../../lib/contentFilters";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
 import FigmaChrome from "./FigmaChrome";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
@@ -137,7 +138,10 @@ function SearchResultCard({ item, onDetailClick, onReadClick }) {
       >
         <div className="relative h-full min-h-[176px] overflow-hidden min-[420px]:min-h-[194px] sm:min-h-0 sm:aspect-[3/4]">
           <img
-            src={item.coverUrl}
+            src={resolveDisplayImageUrl(item.coverUrl, {
+              kind: "cover",
+              adult: item?.adult || item?.isAdult,
+            })}
             alt={item.title}
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -803,7 +807,10 @@ function SearchContent({
                 >
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <img
-                      src={featuredItem.coverUrl}
+                      src={resolveDisplayImageUrl(featuredItem.coverUrl, {
+                        kind: "cover",
+                        adult: featuredItem?.adult || featuredItem?.isAdult,
+                      })}
                       alt={featuredItem.title}
                       className="h-full w-full object-cover"
                     />

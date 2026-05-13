@@ -3,6 +3,10 @@
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import {
+  isLegacyPlaceholderUrl,
+  readLegacyPlaceholderText,
+} from "../../lib/fallbackImage";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import { trackEvent } from "../../lib/trackEvent";
 
@@ -35,17 +39,14 @@ function readPlaceholdPageMeta(url) {
 
   try {
     const parsed = new URL(url);
-    if (parsed.hostname !== "placehold.co") {
+    if (!isLegacyPlaceholderUrl(parsed.toString())) {
       return null;
     }
 
-    const rawLabel = String(parsed.searchParams.get("text") || "")
-      .replace(/\+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+    const rawLabel = readLegacyPlaceholderText(parsed.toString());
 
     if (!rawLabel) {
-      return { title: "", episodeNumber: "", pageNumber: "" };
+      return null;
     }
 
     const episodeMatch = rawLabel.match(/\bEp(?:isode)?\s*(\d+)\b/i);

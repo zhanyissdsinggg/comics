@@ -9,6 +9,7 @@ import { ArrowRight, Plus } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import PortraitCard from "./PortraitCard";
 import { apiGet } from "../../lib/apiClient";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
 import {
   buildHomeHeroItems,
@@ -416,7 +417,10 @@ function HomeSection({
                 <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-[var(--gush-card)]">
                   {series?.coverUrl ? (
                     <Image
-                      src={series.coverUrl}
+                      src={resolveDisplayImageUrl(series.coverUrl, {
+                        kind: "cover",
+                        adult: series?.adult || series?.isAdult,
+                      })}
                       alt={buildCoverAltText(series)}
                       fill
                       sizes="64px"
@@ -632,7 +636,10 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
             <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/12 bg-[rgba(255,255,255,0.08)] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
               {featuredSeries?.coverUrl ? (
                 <Image
-                  src={featuredSeries.coverUrl}
+                  src={resolveDisplayImageUrl(featuredSeries.coverUrl, {
+                    kind: "cover",
+                    adult: featuredSeries?.adult || featuredSeries?.isAdult,
+                  })}
                   alt={buildCoverAltText(featuredSeries)}
                   fill
                   sizes="(max-width: 1024px) 260px, 320px"

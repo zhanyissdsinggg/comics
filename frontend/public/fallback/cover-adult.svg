@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 960" role="img" aria-labelledby="title desc">
+  <title id="title">Gush adult fallback cover</title>
+  <desc id="desc">Adult-mode fallback cover for mature stories on Gush.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#110d12" />
+      <stop offset="48%" stop-color="#2b141c" />
+      <stop offset="100%" stop-color="#120d15" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="960" fill="url(#bg)" />
+  <circle cx="142" cy="152" r="132" fill="#8f2438" fill-opacity="0.2" />
+  <circle cx="610" cy="236" r="122" fill="#d0a97e" fill-opacity="0.1" />
+  <rect x="44" y="44" width="632" height="872" rx="34" fill="none" stroke="#d0a97e" stroke-opacity="0.2" stroke-width="4" />
+  <rect x="84" y="86" width="552" height="788" rx="34" fill="url(#panel)" stroke="#ffffff" stroke-opacity="0.06" stroke-width="3" />
+  <rect x="110" y="122" width="178" height="42" rx="21" fill="#8f2438" fill-opacity="0.26" />
+  <text x="199" y="149" fill="#fff1f2" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3">18+ MODE</text>
+  <text x="110" y="328" fill="#fff1f2" font-family="Arial, sans-serif" font-size="72" font-weight="800">Adult</text>
+  <text x="110" y="404" fill="#fff1f2" font-family="Arial, sans-serif" font-size="72" font-weight="800">catalog</text>
+  <text x="110" y="480" fill="#fff1f2" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="26" font-weight="600">Fallback art for mature stories on Gush.</text>
+  <rect x="110" y="612" width="264" height="14" rx="7" fill="#fff1f2" fill-opacity="0.78" />
+  <rect x="110" y="646" width="418" height="12" rx="6" fill="#fff1f2" fill-opacity="0.18" />
+  <rect x="110" y="674" width="368" height="12" rx="6" fill="#fff1f2" fill-opacity="0.18" />
+  <rect x="110" y="748" width="198" height="56" rx="28" fill="#8f2438" />
+  <text x="209" y="785" fill="#fff1f2" font-family="Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle">18+</text>
+</svg>

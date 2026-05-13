@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-labelledby="title">
+  <title id="title">Reader avatar</title>
+  <rect width="300" height="300" rx="150" fill="#111827" />
+  <circle cx="150" cy="112" r="58" fill="#f8fafc" />
+  <path d="M72 266c14-52 48-78 78-78s64 26 78 78" fill="#f8fafc" />
+</svg>
