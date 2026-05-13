@@ -39,7 +39,7 @@ export default function ReaderTopBar({
   hasPrev = true,
   hasNext = true,
   seriesType = "comic",
-  variant = "legacy",
+  variant = "minimal",
   isComic = false,
   rightSlot = null,
   bookmarkActive = false,
