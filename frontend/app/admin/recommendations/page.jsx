@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { AdminTabs } from '@/components/admin/common/AdminWorkspacePrimitives';
-import { Modal } from '@/components/admin/common/Modal';
+import AdminShell from "@/components/admin/AdminShell";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { AdminTabs } from "@/components/admin/common/AdminWorkspacePrimitives";
+import { Modal } from "@/components/admin/common/Modal";
 import {
   CreateRankingModalContent,
   CreateSlotModalContent,
   DeleteRecommendationContent,
-} from '@/components/admin/recommendations-workspace/blocks';
+} from "@/components/admin/recommendations-workspace/blocks";
 import {
   AnalyticsSection,
   RankingsSection,
   RecommendationsStatsSection,
   SlotsSection,
-} from '@/components/admin/recommendations-workspace/sections';
+} from "@/components/admin/recommendations-workspace/sections";
 import {
   ANALYTICS_SLOT_FILTER_OPTIONS,
   buildAnalyticsSummary,
@@ -38,11 +38,11 @@ import {
   STOREFRONT_SLOT_PRESETS,
   TIME_RANGE_OPTIONS,
   VIEW_TABS,
-} from '@/components/admin/recommendations-workspace/utils';
-import { adminFetchJson } from '@/lib/adminApiClient';
+} from "@/components/admin/recommendations-workspace/utils";
+import { adminFetchJson } from "@/lib/adminApiClient";
 
 export default function AdminRecommendationsPage() {
-  const [activeTab, setActiveTab] = useState('slots');
+  const [activeTab, setActiveTab] = useState("slots");
   const [loadedTabs, setLoadedTabs] = useState({
     slots: true,
     rankings: false,
@@ -53,7 +53,7 @@ export default function AdminRecommendationsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [slotForm, setSlotForm] = useState(INITIAL_SLOT_FORM);
   const [rankingForm, setRankingForm] = useState(INITIAL_RANKING_FORM);
-  const [analyticsSlotFilter, setAnalyticsSlotFilter] = useState('all');
+  const [analyticsSlotFilter, setAnalyticsSlotFilter] = useState("all");
 
   const handleTabChange = (nextTab) => {
     setActiveTab(nextTab);
@@ -68,13 +68,15 @@ export default function AdminRecommendationsPage() {
   };
 
   const slotsQuery = useQuery({
-    queryKey: ['admin', 'recommendations', 'slots'],
+    queryKey: ["admin", "recommendations", "slots"],
     staleTime: 60_000,
     queryFn: async () => {
-      const { response, data } = await adminFetchJson('/api/admin/recommendations/slots?limit=100');
+      const { response, data } = await adminFetchJson(
+        "/api/admin/recommendations/slots?limit=100",
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '推荐位加载失败。');
+        throw new Error(data?.message || data?.error || "推荐位加载失败。");
       }
 
       return {
@@ -85,14 +87,16 @@ export default function AdminRecommendationsPage() {
   });
 
   const rankingsQuery = useQuery({
-    queryKey: ['admin', 'recommendations', 'rankings'],
+    queryKey: ["admin", "recommendations", "rankings"],
     enabled: loadedTabs.rankings,
     staleTime: 60_000,
     queryFn: async () => {
-      const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings?limit=100');
+      const { response, data } = await adminFetchJson(
+        "/api/admin/recommendations/rankings?limit=100",
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '榜单规则加载失败。');
+        throw new Error(data?.message || data?.error || "榜单规则加载失败。");
       }
 
       return {
@@ -103,14 +107,14 @@ export default function AdminRecommendationsPage() {
   });
 
   const analyticsQuery = useQuery({
-    queryKey: ['admin', 'recommendations', 'analytics', analyticsSlotFilter],
+    queryKey: ["admin", "recommendations", "analytics", analyticsSlotFilter],
     enabled: loadedTabs.analytics,
     staleTime: 60_000,
     queryFn: async () => {
       const params = new URLSearchParams();
-      params.set('limit', '50');
-      if (analyticsSlotFilter !== 'all') {
-        params.set('slot', analyticsSlotFilter);
+      params.set("limit", "50");
+      if (analyticsSlotFilter !== "all") {
+        params.set("slot", analyticsSlotFilter);
       }
 
       const { response, data } = await adminFetchJson(
@@ -118,7 +122,7 @@ export default function AdminRecommendationsPage() {
       );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '推荐位分析加载失败。');
+        throw new Error(data?.message || data?.error || "推荐位分析加载失败。");
       }
 
       return {
@@ -133,17 +137,20 @@ export default function AdminRecommendationsPage() {
       const payload = buildSlotPayload(slotForm);
 
       if (!payload.slot) {
-        throw new Error('推荐位标识不能为空。');
+        throw new Error("推荐位标识不能为空。");
       }
 
-      const { response, data } = await adminFetchJson('/api/admin/recommendations/slots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const { response, data } = await adminFetchJson(
+        "/api/admin/recommendations/slots",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '创建推荐位失败。');
+        throw new Error(data?.message || data?.error || "创建推荐位失败。");
       }
 
       return data?.slot || null;
@@ -151,11 +158,14 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setSlotForm(INITIAL_SLOT_FORM);
-      setFeedback({ type: 'success', message: '推荐位已创建。' });
+      setFeedback({ type: "success", message: "推荐位已创建。" });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建推荐位失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "创建推荐位失败。"),
+      });
     },
   });
 
@@ -164,21 +174,28 @@ export default function AdminRecommendationsPage() {
       const payload = buildRankingPayload(rankingForm);
 
       if (!payload.name) {
-        throw new Error('榜单名称不能为空。');
+        throw new Error("榜单名称不能为空。");
       }
 
-      if (!Number.isInteger(payload.maxItems) || payload.maxItems < 1 || payload.maxItems > 200) {
-        throw new Error('最大作品数必须在 1 到 200 之间。');
+      if (
+        !Number.isInteger(payload.maxItems) ||
+        payload.maxItems < 1 ||
+        payload.maxItems > 200
+      ) {
+        throw new Error("最大作品数必须在 1 到 200 之间。");
       }
 
-      const { response, data } = await adminFetchJson('/api/admin/recommendations/rankings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const { response, data } = await adminFetchJson(
+        "/api/admin/recommendations/rankings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '创建榜单规则失败。');
+        throw new Error(data?.message || data?.error || "创建榜单规则失败。");
       }
 
       return data?.config || null;
@@ -186,33 +203,42 @@ export default function AdminRecommendationsPage() {
     onSuccess: async () => {
       setCreateTarget(null);
       setRankingForm(INITIAL_RANKING_FORM);
-      setFeedback({ type: 'success', message: '榜单规则已创建。' });
+      setFeedback({ type: "success", message: "榜单规则已创建。" });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建榜单规则失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "创建榜单规则失败。"),
+      });
     },
   });
 
   const deleteSlotMutation = useMutation({
     mutationFn: async (slotId) => {
-      const { response, data } = await adminFetchJson(`/api/admin/recommendations/slots/${slotId}`, {
-        method: 'DELETE',
-      });
+      const { response, data } = await adminFetchJson(
+        `/api/admin/recommendations/slots/${slotId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '删除推荐位失败。');
+        throw new Error(data?.message || data?.error || "删除推荐位失败。");
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: '推荐位已删除。' });
+      setFeedback({ type: "success", message: "推荐位已删除。" });
       await slotsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除推荐位失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "删除推荐位失败。"),
+      });
     },
   });
 
@@ -221,23 +247,26 @@ export default function AdminRecommendationsPage() {
       const { response, data } = await adminFetchJson(
         `/api/admin/recommendations/rankings/${rankingId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
         },
       );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '删除榜单规则失败。');
+        throw new Error(data?.message || data?.error || "删除榜单规则失败。");
       }
 
       return data;
     },
     onSuccess: async () => {
       setDeleteTarget(null);
-      setFeedback({ type: 'success', message: '榜单规则已删除。' });
+      setFeedback({ type: "success", message: "榜单规则已删除。" });
       await rankingsQuery.refetch();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除榜单规则失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "删除榜单规则失败。"),
+      });
     },
   });
 
@@ -247,16 +276,22 @@ export default function AdminRecommendationsPage() {
   const selectedSlotMeta = useMemo(
     () =>
       getStorefrontSlotDisplayMeta(
-        slotForm.preset === 'custom' ? slotForm.slotToken : slotForm.preset,
+        slotForm.preset === "custom" ? slotForm.slotToken : slotForm.preset,
       ),
     [slotForm.preset, slotForm.slotToken],
   );
   const selectedAnalyticsSlotMeta = useMemo(
-    () => (analyticsSlotFilter === 'all' ? null : getStorefrontSlotDisplayMeta(analyticsSlotFilter)),
+    () =>
+      analyticsSlotFilter === "all"
+        ? null
+        : getStorefrontSlotDisplayMeta(analyticsSlotFilter),
     [analyticsSlotFilter],
   );
 
-  const analyticsSummary = useMemo(() => buildAnalyticsSummary(analytics), [analytics]);
+  const analyticsSummary = useMemo(
+    () => buildAnalyticsSummary(analytics),
+    [analytics],
+  );
   const averageCtr =
     analyticsSummary.impressions > 0
       ? (analyticsSummary.clicks / analyticsSummary.impressions) * 100
@@ -266,14 +301,15 @@ export default function AdminRecommendationsPage() {
       ? (analyticsSummary.conversions / analyticsSummary.clicks) * 100
       : 0;
 
-  const deleteBusy = deleteSlotMutation.isPending || deleteRankingMutation.isPending;
+  const deleteBusy =
+    deleteSlotMutation.isPending || deleteRankingMutation.isPending;
 
   const openCreateModal = (target) => {
     setFeedback(EMPTY_FEEDBACK);
-    if (target === 'slot') {
+    if (target === "slot") {
       setSlotForm(INITIAL_SLOT_FORM);
     }
-    if (target === 'ranking') {
+    if (target === "ranking") {
       setRankingForm(INITIAL_RANKING_FORM);
     }
     setCreateTarget(target);
@@ -284,7 +320,8 @@ export default function AdminRecommendationsPage() {
     setSlotForm((current) => ({
       ...current,
       preset: nextPreset,
-      slotToken: preset && preset.token !== 'custom' ? preset.token : current.slotToken,
+      slotToken:
+        preset && preset.token !== "custom" ? preset.token : current.slotToken,
     }));
   };
 
@@ -298,7 +335,7 @@ export default function AdminRecommendationsPage() {
       return;
     }
 
-    if (deleteTarget.kind === 'slot') {
+    if (deleteTarget.kind === "slot") {
       await deleteSlotMutation.mutateAsync(deleteTarget.item.id);
       return;
     }
@@ -325,10 +362,7 @@ export default function AdminRecommendationsPage() {
   );
 
   return (
-    <AdminShell
-      title="搜索与发现"
-      subtitle="管理推荐位、榜单和表现。"
-    >
+    <AdminShell title="搜索与发现" subtitle="管理推荐位、榜单和表现。">
       <div className="space-y-6">
         <RecommendationsStatsSection cards={statCards} />
 
@@ -338,16 +372,20 @@ export default function AdminRecommendationsPage() {
           dismissAriaLabel="关闭提示"
         />
 
-        <AdminTabs items={VIEW_TABS} value={activeTab} onChange={handleTabChange} />
+        <AdminTabs
+          items={VIEW_TABS}
+          value={activeTab}
+          onChange={handleTabChange}
+        />
 
-        {activeTab === 'slots' ? (
+        {activeTab === "slots" ? (
           <SlotsSection
             slotsQuery={{
               isLoading: slotsQuery.isLoading,
               isError: slotsQuery.isError,
               errorMessage: slotsQuery.isError
-                ? getErrorMessage(slotsQuery.error, '推荐位加载失败。')
-                : '',
+                ? getErrorMessage(slotsQuery.error, "推荐位加载失败。")
+                : "",
             }}
             slots={slots}
             onOpenCreateModal={openCreateModal}
@@ -355,14 +393,14 @@ export default function AdminRecommendationsPage() {
           />
         ) : null}
 
-        {activeTab === 'rankings' ? (
+        {activeTab === "rankings" ? (
           <RankingsSection
             rankingsQuery={{
               isLoading: rankingsQuery.isLoading,
               isError: rankingsQuery.isError,
               errorMessage: rankingsQuery.isError
-                ? getErrorMessage(rankingsQuery.error, '榜单规则加载失败。')
-                : '',
+                ? getErrorMessage(rankingsQuery.error, "榜单规则加载失败。")
+                : "",
             }}
             rankings={rankings}
             onOpenCreateModal={openCreateModal}
@@ -370,14 +408,14 @@ export default function AdminRecommendationsPage() {
           />
         ) : null}
 
-        {activeTab === 'analytics' ? (
+        {activeTab === "analytics" ? (
           <AnalyticsSection
             analyticsQuery={{
               isLoading: analyticsQuery.isLoading,
               isError: analyticsQuery.isError,
               errorMessage: analyticsQuery.isError
-                ? getErrorMessage(analyticsQuery.error, '推荐位分析加载失败。')
-                : '',
+                ? getErrorMessage(analyticsQuery.error, "推荐位分析加载失败。")
+                : "",
             }}
             analytics={analytics}
             analyticsSummary={analyticsSummary}
@@ -392,7 +430,7 @@ export default function AdminRecommendationsPage() {
       </div>
 
       <Modal
-        isOpen={createTarget === 'slot'}
+        isOpen={createTarget === "slot"}
         title="新建推荐位"
         subtitle="填写标识和作品组合。"
         onClose={() => {
@@ -413,7 +451,7 @@ export default function AdminRecommendationsPage() {
       </Modal>
 
       <Modal
-        isOpen={createTarget === 'ranking'}
+        isOpen={createTarget === "ranking"}
         title="新建榜单规则"
         subtitle="填写策略、范围和状态。"
         onClose={() => {

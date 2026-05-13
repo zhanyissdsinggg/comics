@@ -23,7 +23,8 @@ export function AdminDataState({
     ) : null;
   }
 
-  const resolvedChildren = typeof children === "function" ? children() : children;
+  const resolvedChildren =
+    typeof children === "function" ? children() : children;
 
   if (!wrap) {
     return resolvedChildren;

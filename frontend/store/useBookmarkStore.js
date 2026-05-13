@@ -82,45 +82,49 @@ export function BookmarkProvider({ children }) {
 
   const addBookmark = useCallback(
     (seriesId, entry) => {
-    const normalizedPercent = normalizeReadingPercent(entry.percent);
-    const bookmark = {
-      id: createBookmarkId(),
-      seriesId,
-      episodeId: entry.episodeId,
-      percent: normalizedPercent,
-      pageIndex: entry.pageIndex || 0,
-      label: entry.label || "Bookmark",
-      createdAt: new Date().toISOString(),
-    };
-    setBookmarksBySeries((prev) => {
-      const list = Array.isArray(prev[seriesId]) ? prev[seriesId] : [];
-      const next = { ...prev, [seriesId]: [bookmark, ...list].slice(0, 50) };
-      writeBookmarks(next);
-      return next;
-    });
-    if (isSignedIn) {
-      apiPost("/api/bookmarks", { seriesId, bookmark });
-    }
-    return bookmark;
-  }, [isSignedIn]);
+      const normalizedPercent = normalizeReadingPercent(entry.percent);
+      const bookmark = {
+        id: createBookmarkId(),
+        seriesId,
+        episodeId: entry.episodeId,
+        percent: normalizedPercent,
+        pageIndex: entry.pageIndex || 0,
+        label: entry.label || "Bookmark",
+        createdAt: new Date().toISOString(),
+      };
+      setBookmarksBySeries((prev) => {
+        const list = Array.isArray(prev[seriesId]) ? prev[seriesId] : [];
+        const next = { ...prev, [seriesId]: [bookmark, ...list].slice(0, 50) };
+        writeBookmarks(next);
+        return next;
+      });
+      if (isSignedIn) {
+        apiPost("/api/bookmarks", { seriesId, bookmark });
+      }
+      return bookmark;
+    },
+    [isSignedIn],
+  );
 
   const removeBookmark = useCallback(
     (seriesId, bookmarkId) => {
-    setBookmarksBySeries((prev) => {
-      const list = Array.isArray(prev[seriesId]) ? prev[seriesId] : [];
-      const nextList = list.filter((item) => item.id !== bookmarkId);
-      const next = { ...prev, [seriesId]: nextList };
-      writeBookmarks(next);
-      return next;
-    });
-    if (isSignedIn) {
-      apiDelete("/api/bookmarks", { seriesId, bookmarkId });
-    }
-  }, [isSignedIn]);
+      setBookmarksBySeries((prev) => {
+        const list = Array.isArray(prev[seriesId]) ? prev[seriesId] : [];
+        const nextList = list.filter((item) => item.id !== bookmarkId);
+        const next = { ...prev, [seriesId]: nextList };
+        writeBookmarks(next);
+        return next;
+      });
+      if (isSignedIn) {
+        apiDelete("/api/bookmarks", { seriesId, bookmarkId });
+      }
+    },
+    [isSignedIn],
+  );
 
   const value = useMemo(
     () => ({ bookmarksBySeries, addBookmark, removeBookmark }),
-    [bookmarksBySeries, addBookmark, removeBookmark]
+    [bookmarksBySeries, addBookmark, removeBookmark],
   );
 
   return (

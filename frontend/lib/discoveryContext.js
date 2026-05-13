@@ -1,9 +1,14 @@
 function normalizeToken(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getBadges(series) {
-  return [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+  return [
+    series?.badge,
+    ...(Array.isArray(series?.badges) ? series.badges : []),
+  ]
     .filter(Boolean)
     .map((badge) => String(badge).trim().toUpperCase());
 }
@@ -72,7 +77,9 @@ function getReturnConfig(sourcePath) {
 function getLaneReason({ entryPoint, campaignId, series }) {
   const status = normalizeToken(series?.status);
   const badges = getBadges(series);
-  const isHotBadge = badges.some((badge) => /^H[O]T$/i.test(String(badge || "")));
+  const isHotBadge = badges.some((badge) =>
+    /^H[O]T$/i.test(String(badge || "")),
+  );
   const isNewOrHot = badges.includes("NEW") || isHotBadge;
 
   if (entryPoint.startsWith("search_")) {

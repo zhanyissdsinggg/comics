@@ -105,7 +105,9 @@ export default function SeriesCard(props) {
     >
       <div
         className={`grid gap-4 ${
-          isList ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center" : ""
+          isList
+            ? "lg:grid-cols-[auto,84px,1.6fr,1fr,auto] lg:items-center"
+            : ""
         }`}
       >
         <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] shadow-[0_10px_22px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
@@ -123,7 +125,11 @@ export default function SeriesCard(props) {
           } overflow-hidden rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(244,244,246,0.96))] shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]`}
         >
           {series.coverUrl ? (
-            <img src={series.coverUrl} alt={`${series.title}封面`} className="h-full w-full object-cover" />
+            <img
+              src={series.coverUrl}
+              alt={`${series.title}封面`}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-slate-400">
               <ImageIcon size={isList ? 24 : 40} />
@@ -139,7 +145,9 @@ export default function SeriesCard(props) {
             <span className="rounded-full border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,245,249,0.92))] px-2.5 py-1 text-slate-950">
               {formatSeriesStatusLabel(series.status)}
             </span>
-            <span className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}>
+            <span
+              className={`rounded-full border px-2.5 py-1 ${getReadinessToneClasses(readiness.tone)}`}
+            >
               {readiness.statusLabel}
             </span>
             {series.adult ? (
@@ -168,7 +176,10 @@ export default function SeriesCard(props) {
                 <select
                   value={editDraft?.status || "Ongoing"}
                   onChange={(event) =>
-                    onEditDraftChange({ ...editDraft, status: event.target.value })
+                    onEditDraftChange({
+                      ...editDraft,
+                      status: event.target.value,
+                    })
                   }
                   className={adminSelectClassName}
                 >
@@ -183,7 +194,10 @@ export default function SeriesCard(props) {
                     type="checkbox"
                     checked={Boolean(editDraft?.adult)}
                     onChange={(event) =>
-                      onEditDraftChange({ ...editDraft, adult: event.target.checked })
+                      onEditDraftChange({
+                        ...editDraft,
+                        adult: event.target.checked,
+                      })
                     }
                     className={adminCheckboxClassName}
                   />
@@ -196,7 +210,9 @@ export default function SeriesCard(props) {
               <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">作品概览</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      作品概览
+                    </p>
                     <button
                       type="button"
                       onClick={() => onOpenDetails(series.id)}
@@ -204,24 +220,40 @@ export default function SeriesCard(props) {
                     >
                       {series.title}
                     </button>
-                    <p className="mt-1 text-xs text-slate-400">作品编号：{series.id}</p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      作品编号：{series.id}
+                    </p>
                   </div>
-                  <div className={`rounded-[18px] border px-3 py-2 text-right ${getReadinessToneClasses(readiness.tone)}`}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">前台准备度</p>
-                    <p className="mt-1 text-lg font-semibold">{readiness.score} 分</p>
+                  <div
+                    className={`rounded-[18px] border px-3 py-2 text-right ${getReadinessToneClasses(readiness.tone)}`}
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]">
+                      前台准备度
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {readiness.score} 分
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">创作者</p>
-                    <p className={`mt-2 text-sm ${series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"}`}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      创作者
+                    </p>
+                    <p
+                      className={`mt-2 text-sm ${series.creatorLabel ? "font-medium text-slate-950" : "text-amber-700"}`}
+                    >
                       {creatorLine}
                     </p>
                   </div>
                   <div className="rounded-[18px] border border-[color:var(--gush-border)] bg-white/80 px-3 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">当前状态</p>
-                    <p className="mt-2 text-sm font-medium text-slate-950">{readinessHint}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      当前状态
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">
+                      {readinessHint}
+                    </p>
                   </div>
                 </div>
 
@@ -243,7 +275,9 @@ export default function SeriesCard(props) {
 
               <div className="flex flex-wrap gap-2 text-[11px] font-medium">
                 <span className="rounded-full border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(245,245,247,0.92))] px-2.5 py-1 text-slate-600">
-                  {series.updatedAt ? `最近更新 ${formatUpdatedAt(series.updatedAt, true)}` : "暂无更新时间"}
+                  {series.updatedAt
+                    ? `最近更新 ${formatUpdatedAt(series.updatedAt, true)}`
+                    : "暂无更新时间"}
                 </span>
                 {!series.creatorLabel ? (
                   <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-700">
@@ -286,19 +320,27 @@ export default function SeriesCard(props) {
         <div className="grid grid-cols-2 gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,246,248,0.92))] p-4 text-sm shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] lg:grid-cols-2">
           <div className={statCellClassName}>
             <p className="text-slate-500">章节数</p>
-            <p className="mt-1 font-semibold text-slate-950">{series.episodeCount || 0}</p>
+            <p className="mt-1 font-semibold text-slate-950">
+              {series.episodeCount || 0}
+            </p>
           </div>
           <div className={statCellClassName}>
             <p className="text-slate-500">最近更新</p>
-            <p className="mt-1 font-semibold text-slate-950">{formatUpdatedAt(series.updatedAt, true)}</p>
+            <p className="mt-1 font-semibold text-slate-950">
+              {formatUpdatedAt(series.updatedAt, true)}
+            </p>
           </div>
           <div className={statCellClassName}>
             <p className="text-slate-500">封面</p>
-            <p className="mt-1 font-semibold text-slate-950">{series.coverUrl ? "已补齐" : "待补齐"}</p>
+            <p className="mt-1 font-semibold text-slate-950">
+              {series.coverUrl ? "已补齐" : "待补齐"}
+            </p>
           </div>
           <div className={statCellClassName}>
             <p className="text-slate-500">发布状态</p>
-            <p className="mt-1 font-semibold text-slate-950">{series.isPublished ? "已发布" : "草稿"}</p>
+            <p className="mt-1 font-semibold text-slate-950">
+              {series.isPublished ? "已发布" : "草稿"}
+            </p>
           </div>
         </div>
 
@@ -330,98 +372,112 @@ export default function SeriesCard(props) {
           ) : (
             <>
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">主操作</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  主操作
+                </p>
                 <div className={primaryActionGroupClassName}>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => onOpenDetails(series.id)}
-                  title="查看详情"
-                  data-testid={`admin-series-card-${series.id}-detail`}
-                >
-                  <Edit className="size-4" />
-                  详情
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onOpenEpisodes(series.id)}
-                  title="管理章节"
-                  data-testid={`admin-series-card-${series.id}-episodes`}
-                >
-                  <BookOpen className="size-4" />
-                  章节
-                </Button>
-                <Button
-                  type="button"
-                  variant={series.isPublished ? "secondary" : "default"}
-                  size="sm"
-                  onClick={() => onTogglePublish(series)}
-                  title={series.isPublished ? "转为草稿" : "立刻发布"}
-                  data-testid={`admin-series-card-${series.id}-publish-toggle`}
-                >
-                  {series.isPublished ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  {series.isPublished ? "转草稿" : "发布"}
-                </Button>
-              </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => onOpenDetails(series.id)}
+                    title="查看详情"
+                    data-testid={`admin-series-card-${series.id}-detail`}
+                  >
+                    <Edit className="size-4" />
+                    详情
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onOpenEpisodes(series.id)}
+                    title="管理章节"
+                    data-testid={`admin-series-card-${series.id}-episodes`}
+                  >
+                    <BookOpen className="size-4" />
+                    章节
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={series.isPublished ? "secondary" : "default"}
+                    size="sm"
+                    onClick={() => onTogglePublish(series)}
+                    title={series.isPublished ? "转为草稿" : "立刻发布"}
+                    data-testid={`admin-series-card-${series.id}-publish-toggle`}
+                  >
+                    {series.isPublished ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                    {series.isPublished ? "转草稿" : "发布"}
+                  </Button>
+                </div>
               </div>
 
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">辅助操作</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  辅助操作
+                </p>
                 <div className={secondaryActionGroupClassName}>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onStartEdit(series)}
-                  title="快速编辑"
-                  data-testid={`admin-series-card-${series.id}-quick-edit`}
-                >
-                  <Edit className="size-4" />
-                  快速编辑
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onOpenFrontend(series.id)}
-                  disabled={!series.isPublished}
-                  title={series.isPublished ? "查看前台作品页" : "草稿状态下不能直接打开前台页"}
-                  data-testid={`admin-series-card-${series.id}-storefront`}
-                >
-                  <ExternalLink className="size-4" />
-                  前台页
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDuplicate(series)}
-                  title="复制作品"
-                  data-testid={`admin-series-card-${series.id}-duplicate`}
-                >
-                  <Copy className="size-4" />
-                  复制
-                </Button>
-              </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onStartEdit(series)}
+                    title="快速编辑"
+                    data-testid={`admin-series-card-${series.id}-quick-edit`}
+                  >
+                    <Edit className="size-4" />
+                    快速编辑
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onOpenFrontend(series.id)}
+                    disabled={!series.isPublished}
+                    title={
+                      series.isPublished
+                        ? "查看前台作品页"
+                        : "草稿状态下不能直接打开前台页"
+                    }
+                    data-testid={`admin-series-card-${series.id}-storefront`}
+                  >
+                    <ExternalLink className="size-4" />
+                    前台页
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDuplicate(series)}
+                    title="复制作品"
+                    data-testid={`admin-series-card-${series.id}-duplicate`}
+                  >
+                    <Copy className="size-4" />
+                    复制
+                  </Button>
+                </div>
               </div>
 
               <div className="rounded-[22px] border border-rose-200 bg-rose-50/55 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">危险操作</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">
+                  危险操作
+                </p>
                 <div className={quietDangerActionGroupClassName}>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDelete(series)}
-                  title="删除作品"
-                  data-testid={`admin-series-card-${series.id}-delete`}
-                >
-                  <Trash2 className="size-4" />
-                  删除
-                </Button>
-              </div>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onDelete(series)}
+                    title="删除作品"
+                    data-testid={`admin-series-card-${series.id}-delete`}
+                  >
+                    <Trash2 className="size-4" />
+                    删除
+                  </Button>
+                </div>
               </div>
             </>
           )}

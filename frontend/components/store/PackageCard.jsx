@@ -44,7 +44,9 @@ export default function PackageCard({
     <div
       className={[
         "group rounded-[26px] border-2 border-black bg-[#0b0b0b] p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
-        highlighted ? "outline outline-2 outline-offset-2 outline-[#00E5FF]" : "",
+        highlighted
+          ? "outline outline-2 outline-offset-2 outline-[#00E5FF]"
+          : "",
       ].join(" ")}
       style={{ willChange: "transform" }}
     >

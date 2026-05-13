@@ -32,12 +32,16 @@ export const STOREFRONT_SLOT_PRESETS = [
 ];
 
 export function normalizeStorefrontSlotToken(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 export function getStorefrontSlotPreset(token) {
   const normalized = normalizeStorefrontSlotToken(token);
-  return STOREFRONT_SLOT_PRESETS.find((item) => item.token === normalized) || null;
+  return (
+    STOREFRONT_SLOT_PRESETS.find((item) => item.token === normalized) || null
+  );
 }
 
 export function getStorefrontSlotDisplayMeta(value) {

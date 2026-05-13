@@ -1,27 +1,31 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
-import { LogsFiltersSection, LogsSummaryCards, LogsTableSection } from '@/components/admin/logs-workspace/sections';
-import { getAdminIdentity } from '@/components/admin/logs-workspace/utils';
-import { adminGet } from '@/lib/adminApiClient';
+import AdminShell from "@/components/admin/AdminShell";
+import {
+  LogsFiltersSection,
+  LogsSummaryCards,
+  LogsTableSection,
+} from "@/components/admin/logs-workspace/sections";
+import { getAdminIdentity } from "@/components/admin/logs-workspace/utils";
+import { adminGet } from "@/lib/adminApiClient";
 
 export default function AdminLogsPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState('');
-  const [adminFilter, setAdminFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [actionFilter, setActionFilter] = useState("");
+  const [adminFilter, setAdminFilter] = useState("");
 
   const logsQuery = useQuery({
-    queryKey: ['admin', 'logs', 'readonly'],
+    queryKey: ["admin", "logs", "readonly"],
     queryFn: async () => {
-      const response = await adminGet('/api/admin/logs?page=1&pageSize=200');
+      const response = await adminGet("/api/admin/logs?page=1&pageSize=200");
 
       if (!response.ok) {
-        throw new Error(response.error || '审计日志加载失败。');
+        throw new Error(response.error || "审计日志加载失败。");
       }
 
       return response.data || {};
@@ -37,12 +41,19 @@ export default function AdminLogsPage() {
     return logs.filter((log) => {
       const matchesSearch =
         !term ||
-        [log.id, log.action, log.resource, getAdminIdentity(log), log.resourceId]
+        [
+          log.id,
+          log.action,
+          log.resource,
+          getAdminIdentity(log),
+          log.resourceId,
+        ]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(term));
 
       const matchesAction = !actionFilter || log.action === actionFilter;
-      const matchesAdmin = !adminFilter || getAdminIdentity(log) === adminFilter;
+      const matchesAdmin =
+        !adminFilter || getAdminIdentity(log) === adminFilter;
 
       return matchesSearch && matchesAction && matchesAdmin;
     });
@@ -53,15 +64,15 @@ export default function AdminLogsPage() {
     [logs],
   );
   const adminOptions = useMemo(
-    () => [...new Set(logs.map((log) => getAdminIdentity(log)).filter(Boolean))].sort(),
+    () =>
+      [
+        ...new Set(logs.map((log) => getAdminIdentity(log)).filter(Boolean)),
+      ].sort(),
     [logs],
   );
 
   return (
-    <AdminShell
-      title="审计日志"
-      subtitle="查看后台动作，确认是谁改了什么。"
-    >
+    <AdminShell title="审计日志" subtitle="查看后台动作，确认是谁改了什么。">
       <div className="space-y-6">
         <LogsSummaryCards
           total={filteredLogs.length}

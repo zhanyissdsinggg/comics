@@ -24,17 +24,20 @@ const GATE_STEPS = {
   NEED_LOGIN: {
     icon: UserRound,
     eyebrow: "Account check",
-    support: "Sign in first. Mature titles stay hidden for signed-out visitors.",
+    support:
+      "Sign in first. Mature titles stay hidden for signed-out visitors.",
   },
   NEED_AGE_CONFIRM: {
     icon: ShieldCheck,
     eyebrow: "Age check",
-    support: "Confirm once for this region and this device before opening mature titles.",
+    support:
+      "Confirm once for this region and this device before opening mature titles.",
   },
   NEED_ADULT_MODE: {
     icon: LockKeyhole,
     eyebrow: "Visibility check",
-    support: "You already meet access requirements. Turn Mature Mode on to continue.",
+    support:
+      "You already meet access requirements. Turn Mature Mode on to continue.",
   },
 };
 
@@ -118,7 +121,12 @@ export default function AdultGatePage() {
     <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#120f1c_0%,#0d0b14_100%)] text-white">
       <main className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
-          <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-0">
+          <SurfacePanel
+            appearance="dark"
+            tone="highlight"
+            accent="rose"
+            className="p-0"
+          >
             <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -152,9 +160,9 @@ export default function AdultGatePage() {
               </div>
 
               <p className="mt-4 text-sm text-white/54">
-                Normal mode shows normal content only. After access is
-                complete, adult mode switches home, search, rankings, library,
-                and reader to adult-only content.
+                Normal mode shows normal content only. After access is complete,
+                adult mode switches home, search, rankings, library, and reader
+                to adult-only content.
               </p>
             </div>
           </SurfacePanel>
@@ -172,10 +180,12 @@ export default function AdultGatePage() {
                   </p>
                 </div>
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm font-medium text-white">Separate mode</p>
+                  <p className="text-sm font-medium text-white">
+                    Separate mode
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-white/66">
-                    Adult mode is isolated and mutually exclusive. The two
-                    modes never mix on the same surfaces.
+                    Adult mode is isolated and mutually exclusive. The two modes
+                    never mix on the same surfaces.
                   </p>
                 </div>
                 <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">

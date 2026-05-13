@@ -1,5 +1,8 @@
 import { expect, test, type Route } from "@playwright/test";
-import { createBannerPlaceholder, createPosterPlaceholder } from "./support/placeholders";
+import {
+  createBannerPlaceholder,
+  createPosterPlaceholder,
+} from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const SEARCH_UI_TIMEOUT_MS = 15000;
@@ -12,7 +15,8 @@ const SEARCH_SERIES_BODY = {
       type: "comic",
       status: "Completed",
       adult: false,
-      description: "The default chart monster that would win without homepage overrides.",
+      description:
+        "The default chart monster that would win without homepage overrides.",
       coverUrl: createPosterPlaceholder("Atlas Prime"),
       bannerUrl: createBannerPlaceholder("Atlas Prime"),
       badge: "HOT",
@@ -59,7 +63,8 @@ const SEARCH_SERIES_BODY = {
       type: "comic",
       status: "Completed",
       adult: false,
-      description: "Manual binge-ready pick that should replace the default chart leader.",
+      description:
+        "Manual binge-ready pick that should replace the default chart leader.",
       coverUrl: createPosterPlaceholder("Last Ember Files"),
       badge: "",
       badges: [],
@@ -110,7 +115,9 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Search merchandising sync", () => {
-  test("search should honor admin-managed homepage slots when results miss", async ({ page }) => {
+  test("search should honor admin-managed homepage slots when results miss", async ({
+    page,
+  }) => {
     await page.route("**/api/health", async (route) => {
       await fulfillJson(route, { ok: true });
     });
@@ -128,7 +135,9 @@ test.describe("Search merchandising sync", () => {
     });
     await page.route("**/api/search/hot**", async (route) => {
       await fulfillJson(route, {
-        keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Trending now" }],
+        keywords: [
+          { keyword: "rocket choir", count: 920, growthLabel: "Trending now" },
+        ],
       });
     });
     await page.route("**/api/recommendations/homepage**", async (route) => {
@@ -154,20 +163,30 @@ test.describe("Search merchandising sync", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/search?q=void", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/search?q=void", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Try a wider search." })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Try a wider search." }),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
 
-    await expect(page.getByRole("button", { name: /Open Rocket Choir/i }).first()).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /Open Rocket Choir/i }).first(),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: /Open Last Ember Files/i }).first()).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /Open Last Ember Files/i }).first(),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: /Open Soft Launch Kiss/i }).first()).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /Open Soft Launch Kiss/i }).first(),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
 

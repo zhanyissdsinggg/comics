@@ -36,7 +36,12 @@ import { normalizeReadingPercent } from "../../lib/readingPercent";
 
 function PanelLoadingSkeleton({ rows = 3 }) {
   return (
-    <SurfacePanel className="space-y-3" appearance="dark" accent="blue" tone="muted">
+    <SurfacePanel
+      className="space-y-3"
+      appearance="dark"
+      accent="blue"
+      tone="muted"
+    >
       {Array.from({ length: rows }).map((_, index) => (
         <Skeleton
           key={`panel-loading-${rows}-${index}`}
@@ -803,10 +808,10 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const primaryButtonClass = storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const signedInHeroDescription = viewerSignedIn
-      ? hasLibrarySignals
-        ? resumeSpotlightReadHref
-          ? "Jump back in."
-          : "Saved titles and recent reads."
+    ? hasLibrarySignals
+      ? resumeSpotlightReadHref
+        ? "Jump back in."
+        : "Saved titles and recent reads."
       : "Save a few titles to get started."
     : "Sign in to save progress and favorites.";
   const signedOutHeroSecondary =
@@ -879,11 +884,11 @@ export default function LibraryPage({ initialSignedIn = false }) {
                 ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
                   <button
                     type="button"
-                      onClick={() => scrollToSection("saved-series")}
-                      className={primaryButtonClass}
-                    >
-                      Library
-                    </button>
+                    onClick={() => scrollToSection("saved-series")}
+                    className={primaryButtonClass}
+                  >
+                    Library
+                  </button>
                 ) : (
                   <Link
                     href="/account"
@@ -1115,7 +1120,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         {item.title}
                       </h3>
                       <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-                        {item.subtitle || "Open the series page and start reading."}
+                        {item.subtitle ||
+                          "Open the series page and start reading."}
                       </p>
                       <span className="mt-4 inline-flex rounded-full border-2 border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
                         Start reading
@@ -1132,9 +1138,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                   <Rail
                     eyebrow={viewerSignedIn ? "Continue Reading" : "On Device"}
                     title={
-                      viewerSignedIn
-                        ? "Continue Reading"
-                        : "On This Device"
+                      viewerSignedIn ? "Continue Reading" : "On This Device"
                     }
                     railName="continue"
                     items={continueRailItems}
@@ -1329,8 +1333,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     setMakeupModal({
                       type: "ERROR",
                       title: "Couldn't top up",
-                      description:
-                        "Couldn't restore today's streak.",
+                      description: "Couldn't restore today's streak.",
                     });
                   },
                   variant: "primary",

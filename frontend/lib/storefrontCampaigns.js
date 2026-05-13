@@ -1,15 +1,22 @@
 import { STOREFRONT_TERMS } from "./storefrontCopy";
 
 function getSeriesBadges(series) {
-  return [series?.badge, ...(Array.isArray(series?.badges) ? series.badges : [])]
+  return [
+    series?.badge,
+    ...(Array.isArray(series?.badges) ? series.badges : []),
+  ]
     .filter(Boolean)
     .map((badge) => String(badge).trim().toUpperCase());
 }
 
 export function getStorefrontCampaign(series) {
   const freeEpisodeCount = Number(series?.freeEpisodeCount || 0);
-  const hasFreeEpisodes = freeEpisodeCount > 0 || Boolean(series?.hasFreeEpisodes);
-  const isCompleted = String(series?.status || "").trim().toLowerCase() === "completed";
+  const hasFreeEpisodes =
+    freeEpisodeCount > 0 || Boolean(series?.hasFreeEpisodes);
+  const isCompleted =
+    String(series?.status || "")
+      .trim()
+      .toLowerCase() === "completed";
   const badges = getSeriesBadges(series);
   const isHot = badges.includes("HOT");
   const isNew = badges.includes("NEW");
@@ -25,9 +32,7 @@ export function getStorefrontCampaign(series) {
               freeEpisodeCount === 1 ? "" : "s"
             } let you try the story before you spend points.`
           : "This title is easy to sample first.",
-      heroNote: isHot
-        ? "Hot title with a free start."
-        : "Good first pick.",
+      heroNote: isHot ? "Hot title with a free start." : "Good first pick.",
       reasonLabel: "Why read",
       reason: isHot
         ? "Free chapters plus buzz make it easy to jump in."
@@ -55,11 +60,9 @@ export function getStorefrontCampaign(series) {
         ? "Popular completed series built for a binge."
         : "Finished run ready to read straight through.",
       reasonLabel: "Why read",
-      reason:
-        "The ending is already there, so you can read straight through.",
+      reason: "The ending is already there, so you can read straight through.",
       nextMoveLabel: "Try next",
-      nextMove:
-        "Browse other finished series if you want another full read.",
+      nextMove: "Browse other finished series if you want another full read.",
       discoveryCta: "Browse completed series",
       discoveryHref: "/search?status=Completed&sort=popular",
       valueLabel: "Best pick",
@@ -72,9 +75,7 @@ export function getStorefrontCampaign(series) {
   return {
     id: "return-weekly",
     eyebrow: STOREFRONT_TERMS.returnWeekly,
-    title: isNew
-      ? "Catch this one early."
-      : "Easy to follow week after week.",
+    title: isNew ? "Catch this one early." : "Easy to follow week after week.",
     description: isNew
       ? "Jump in early and follow new updates as they land."
       : "Ongoing series work best when they're worth checking back on every week.",
@@ -85,8 +86,7 @@ export function getStorefrontCampaign(series) {
     reason:
       "A good weekly read gives you a reason to come back for the next chapter.",
     nextMoveLabel: "Try next",
-    nextMove:
-      "Use charts and new releases to keep up between updates.",
+    nextMove: "Use charts and new releases to keep up between updates.",
     discoveryCta: "See this week's chart",
     discoveryHref: "/rankings?type=popular&window=week",
     valueLabel: "Best fit",

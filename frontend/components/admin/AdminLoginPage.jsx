@@ -47,8 +47,12 @@ export default function AdminLoginPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
             <ShieldCheck className="size-8" />
           </div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">后台</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">登录内容管理后台</h1>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            后台
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+            登录内容管理后台
+          </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             使用后台邮箱和密码进入运营面板。成员身份、角色和两步验证设置会从后台成员目录里读取。
           </p>
@@ -99,7 +103,9 @@ export default function AdminLoginPage() {
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">6 位验证码</span>
+            <span className="text-sm font-medium text-slate-700">
+              6 位验证码
+            </span>
             <input
               id="totpCode"
               type="text"
@@ -130,7 +136,8 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,247,0.92))] px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-          后台会话会通过安全 Cookie 保存。如当前成员启用了两步验证，请继续输入最新的 6 位验证码。
+          后台会话会通过安全 Cookie
+          保存。如当前成员启用了两步验证，请继续输入最新的 6 位验证码。
         </div>
       </div>
     </div>

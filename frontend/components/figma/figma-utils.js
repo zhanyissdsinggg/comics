@@ -5,10 +5,7 @@ import {
   CONTENT_MODE_NORMAL,
   deriveContentModeFromAdultFlag,
 } from "../../lib/contentMode";
-import {
-  filterContentByMode,
-  isAdultContent,
-} from "../../lib/contentFilters";
+import { filterContentByMode, isAdultContent } from "../../lib/contentFilters";
 import {
   formatInstallmentLabel,
   getStartReadingLabel,
@@ -149,9 +146,7 @@ function normalizeGenres(value) {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value
-    .map((item) => String(item || "").trim())
-    .filter(Boolean);
+  return value.map((item) => String(item || "").trim()).filter(Boolean);
 }
 
 export function getFigmaPalette(isAdultMode = false) {
@@ -167,7 +162,8 @@ export function getFigmaPalette(isAdultMode = false) {
       border: "border-red-900/40",
       borderSoft: "border-white/8",
       primaryText: "text-red-500",
-      primaryGlowText: "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.45)]",
+      primaryGlowText:
+        "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.45)]",
       primaryBg:
         "bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600",
       primarySoft: "bg-red-500/10 text-red-400 border-red-500/25",
@@ -218,7 +214,9 @@ export function normalizeSeriesKind(value, interactive = false) {
     return FIGMA_CONTENT_TYPES.INTERACTIVE;
   }
 
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (normalized === "novel") {
     return FIGMA_CONTENT_TYPES.NOVELS;
   }
@@ -226,7 +224,9 @@ export function normalizeSeriesKind(value, interactive = false) {
 }
 
 function buildStatusLabel(series) {
-  const normalizedStatus = String(series?.status || "").trim().toLowerCase();
+  const normalizedStatus = String(series?.status || "")
+    .trim()
+    .toLowerCase();
   if (normalizedStatus === "completed") {
     return "END";
   }
@@ -340,18 +340,22 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const adult = isAdultContent(series);
   const latestEpisodeNumber = Math.max(
     1,
-    Number(series?.latestEpisodeNumber || series?.episodeCount || series?.chapter || 1),
+    Number(
+      series?.latestEpisodeNumber ||
+        series?.episodeCount ||
+        series?.chapter ||
+        1,
+    ),
   );
   const latestEpisodeId = String(series?.latestEpisodeId || "").trim();
   const firstEpisodeId = inferFirstEpisodeId(series, options.defaultEpisodeId);
-  const progressEpisodeId =
-    String(
-      options.progressEpisodeId ||
-        series?.progressEpisodeId ||
-        series?.progress?.lastEpisodeId ||
-        series?.lastEpisodeId ||
-        "",
-    ).trim();
+  const progressEpisodeId = String(
+    options.progressEpisodeId ||
+      series?.progressEpisodeId ||
+      series?.progress?.lastEpisodeId ||
+      series?.lastEpisodeId ||
+      "",
+  ).trim();
   const progressPercent = Number(
     options.progressPercent ??
       series?.progressPercent ??
@@ -378,8 +382,10 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const author =
     resolveSeriesCreatorName(series) ||
     String(series?.author || series?.creator?.label || "Editorial Crew").trim();
-  const rating = Number(series?.rating) || buildFallbackRating(series, interactive);
-  const viewsValue = Number(series?.views) || buildFallbackViews(series, interactive);
+  const rating =
+    Number(series?.rating) || buildFallbackRating(series, interactive);
+  const viewsValue =
+    Number(series?.views) || buildFallbackViews(series, interactive);
   const likesValue = Number(series?.likes) || buildFallbackLikes(series);
   const description = String(series?.description || "").trim();
   const interactiveHref = interactive
@@ -399,7 +405,10 @@ export function buildFigmaSeriesItem(series, options = {}) {
     series?.type || series,
     latestEpisodeNumber,
   );
-  const startInstallmentLabel = formatInstallmentLabel(series?.type || series, 1);
+  const startInstallmentLabel = formatInstallmentLabel(
+    series?.type || series,
+    1,
+  );
   const progressInstallmentLabel = formatInstallmentLabel(
     series?.type || series,
     progressEpisodeNumber,
@@ -434,7 +443,10 @@ export function buildFigmaSeriesItem(series, options = {}) {
     likesText: compactNumber(likesValue),
     status: buildStatusLabel(series),
     chapter: latestEpisodeNumber,
-    episodeCount: Math.max(1, Number(series?.episodeCount || latestEpisodeNumber || 1)),
+    episodeCount: Math.max(
+      1,
+      Number(series?.episodeCount || latestEpisodeNumber || 1),
+    ),
     firstEpisodeId,
     latestEpisodeId,
     progressEpisodeId,
@@ -444,11 +456,12 @@ export function buildFigmaSeriesItem(series, options = {}) {
     readHref,
     detailHref,
     interactiveHref,
-    chapterLabel: formatInstallmentLabel(series?.type || series, latestEpisodeNumber),
+    chapterLabel: formatInstallmentLabel(
+      series?.type || series,
+      latestEpisodeNumber,
+    ),
     ctaChapterLabel,
-    readLabel:
-      options.readLabel ||
-      readLabel,
+    readLabel: options.readLabel || readLabel,
     createdAt: series?.createdAt || null,
     updatedAt: series?.updatedAt || null,
     raw: series,
@@ -550,26 +563,36 @@ export function buildChapterItems(series, episodes = []) {
         return rightTime - leftTime;
       })
       .map((episode) => ({
-      id: String(episode?.id || "").trim(),
-      title:
-        String(episode?.title || "").trim() ||
-        formatInstallmentLabel(series?.type || series, episode?.number || 1),
-      date: toIsoDateLabel(episode?.releasedAt),
-      views: compactNumber(
-        seededNumber(`${series?.id || "series"}:${episode?.id || episode?.number}`, 45_000, 280_000, 0),
-      ),
-      number: Number(episode?.number || 0) || 1,
-    }));
+        id: String(episode?.id || "").trim(),
+        title:
+          String(episode?.title || "").trim() ||
+          formatInstallmentLabel(series?.type || series, episode?.number || 1),
+        date: toIsoDateLabel(episode?.releasedAt),
+        views: compactNumber(
+          seededNumber(
+            `${series?.id || "series"}:${episode?.id || episode?.number}`,
+            45_000,
+            280_000,
+            0,
+          ),
+        ),
+        number: Number(episode?.number || 0) || 1,
+      }));
   }
 
-  const fallbackCount = Math.max(6, Number(series?.episodeCount || series?.chapter || 0));
+  const fallbackCount = Math.max(
+    6,
+    Number(series?.episodeCount || series?.chapter || 0),
+  );
   return Array.from({ length: Math.min(fallbackCount, 18) }, (_, index) => {
     const number = fallbackCount - index;
     return {
       id: `${series?.id || "series"}e${number}`,
       title: formatInstallmentLabel(series?.type || series, number),
       date: index === 0 ? "Today" : `${index + 1} days ago`,
-      views: compactNumber(seededNumber(`${series?.id || "series"}:${number}`, 45_000, 240_000, 0)),
+      views: compactNumber(
+        seededNumber(`${series?.id || "series"}:${number}`, 45_000, 240_000, 0),
+      ),
       number,
     };
   });
@@ -597,8 +620,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 1,
       user: "NightCrawler99",
-      avatar:
-        "https://placehold.co/96x96/312e81/f8fafc?text=NC",
+      avatar: "https://placehold.co/96x96/312e81/f8fafc?text=NC",
       text: `The pacing on ${seriesTitle} is filthy good. One chapter and suddenly it's 2 a.m. again.`,
       likes: 1245,
       date: "2 hours ago",
@@ -609,8 +631,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 2,
       user: "SakuraMochi",
-      avatar:
-        "https://placehold.co/96x96/be185d/fff1f2?text=SM",
+      avatar: "https://placehold.co/96x96/be185d/fff1f2?text=SM",
       text: "That last turn hits harder if you noticed the setup three chapters back. The author was cooking.",
       likes: 438,
       date: "5 hours ago",
@@ -621,8 +642,7 @@ export function buildCommentSeed(seriesTitle = "Story") {
     {
       id: 3,
       user: "AlexZ_Pro",
-      avatar:
-        "https://placehold.co/96x96/0f766e/ecfeff?text=AZ",
+      avatar: "https://placehold.co/96x96/0f766e/ecfeff?text=AZ",
       text: "I was ready to complain and then the cliffhanger slapped me quiet. Fine. Take my points.",
       likes: 92,
       date: "1 day ago",
@@ -635,7 +655,10 @@ export function buildCommentSeed(seriesTitle = "Story") {
 
 export function buildProfileHistoryItems(historyItems = [], catalogItems = []) {
   const lookup = new Map(
-    (Array.isArray(catalogItems) ? catalogItems : []).map((item) => [item.id, item]),
+    (Array.isArray(catalogItems) ? catalogItems : []).map((item) => [
+      item.id,
+      item,
+    ]),
   );
 
   return (Array.isArray(historyItems) ? historyItems : [])
@@ -675,7 +698,10 @@ export function buildProfileHistoryItems(historyItems = [], catalogItems = []) {
 
 export function buildBookmarksView(bookmarksBySeries = {}, catalogItems = []) {
   const lookup = new Map(
-    (Array.isArray(catalogItems) ? catalogItems : []).map((item) => [item.id, item]),
+    (Array.isArray(catalogItems) ? catalogItems : []).map((item) => [
+      item.id,
+      item,
+    ]),
   );
 
   return Object.entries(bookmarksBySeries || {})
@@ -700,7 +726,10 @@ export function buildBookmarksView(bookmarksBySeries = {}, catalogItems = []) {
           href: matched.detailHref || "/library",
           readHref:
             matched.readHref ||
-            buildReadHref(seriesId, entry?.episodeId || matched?.latestEpisodeId),
+            buildReadHref(
+              seriesId,
+              entry?.episodeId || matched?.latestEpisodeId,
+            ),
         };
       }),
     )
@@ -709,33 +738,35 @@ export function buildBookmarksView(bookmarksBySeries = {}, catalogItems = []) {
 }
 
 export function buildNotificationCards(notifications = []) {
-  return (Array.isArray(notifications) ? notifications : []).map((item, index) => {
-    const title =
-      item?.title ||
-      (item?.type === "PROMO"
-        ? "Limited-time offer"
-        : item?.type === "TTF_READY"
-          ? "Time-to-free unlocked"
-          : "New update");
-    const body =
-      item?.body ||
-      item?.message ||
-      (item?.type === "PROMO"
-        ? "A points pack or member offer is ready."
-        : item?.type === "TTF_READY"
-          ? "A locked chapter can be opened now."
-          : "A followed title has something new waiting.");
+  return (Array.isArray(notifications) ? notifications : []).map(
+    (item, index) => {
+      const title =
+        item?.title ||
+        (item?.type === "PROMO"
+          ? "Limited-time offer"
+          : item?.type === "TTF_READY"
+            ? "Time-to-free unlocked"
+            : "New update");
+      const body =
+        item?.body ||
+        item?.message ||
+        (item?.type === "PROMO"
+          ? "A points pack or member offer is ready."
+          : item?.type === "TTF_READY"
+            ? "A locked chapter can be opened now."
+            : "A followed title has something new waiting.");
 
-    return {
-      id: item?.id || `notification-${index}`,
-      title,
-      body,
-      cta: item?.read ? "Viewed" : "Open",
-      read: Boolean(item?.read),
-      kind: item?.type || "UPDATE",
-      item,
-    };
-  });
+      return {
+        id: item?.id || `notification-${index}`,
+        title,
+        body,
+        cta: item?.read ? "Viewed" : "Open",
+        read: Boolean(item?.read),
+        kind: item?.type || "UPDATE",
+        item,
+      };
+    },
+  );
 }
 
 export function inferCatalogHero(items = []) {
@@ -745,7 +776,9 @@ export function inferCatalogHero(items = []) {
 export function buildGenreOptions(items = []) {
   const genres = new Set(["All"]);
   (Array.isArray(items) ? items : []).forEach((item) => {
-    normalizeGenres(item?.genres).slice(0, 3).forEach((genre) => genres.add(toTitleCase(genre)));
+    normalizeGenres(item?.genres)
+      .slice(0, 3)
+      .forEach((genre) => genres.add(toTitleCase(genre)));
   });
   return Array.from(genres).slice(0, 10);
 }

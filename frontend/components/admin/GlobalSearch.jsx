@@ -33,7 +33,10 @@ const RECENT_SEARCH_STORAGE_KEY = "admin_recent_searches";
 
 function isAdminTestToolsEnabled() {
   // Keep test tools hidden in production unless explicitly enabled.
-  return process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_ADMIN_TOOLS_ENABLED === "1";
+  return (
+    process.env.NODE_ENV !== "production" ||
+    process.env.NEXT_PUBLIC_ADMIN_TOOLS_ENABLED === "1"
+  );
 }
 
 const SEARCH_ITEMS = [
@@ -42,42 +45,96 @@ const SEARCH_ITEMS = [
     label: "仪表盘",
     href: "/admin",
     icon: BookOpen,
-    keywords: ["dashboard", "overview", "workspace", "home", "仪表盘", "总览", "工作台"],
+    keywords: [
+      "dashboard",
+      "overview",
+      "workspace",
+      "home",
+      "仪表盘",
+      "总览",
+      "工作台",
+    ],
   },
   {
     id: "analytics",
     label: "数据分析",
     href: "/admin/analytics",
     icon: BarChart3,
-    keywords: ["analytics", "insights", "report", "数据分析", "分析", "报表", "数据"],
+    keywords: [
+      "analytics",
+      "insights",
+      "report",
+      "数据分析",
+      "分析",
+      "报表",
+      "数据",
+    ],
   },
   {
     id: "series",
     label: "作品",
     href: "/admin/series",
     icon: BookOpen,
-    keywords: ["series", "story", "comic", "novel", "catalog", "作品", "漫画", "小说", "目录"],
+    keywords: [
+      "series",
+      "story",
+      "comic",
+      "novel",
+      "catalog",
+      "作品",
+      "漫画",
+      "小说",
+      "目录",
+    ],
   },
   {
     id: "storefront",
     label: "前台巡检",
     href: "/admin/storefront",
     icon: Search,
-    keywords: ["storefront", "audit", "readiness", "public page", "前台", "巡检", "上线", "读者页面"],
+    keywords: [
+      "storefront",
+      "audit",
+      "readiness",
+      "public page",
+      "前台",
+      "巡检",
+      "上线",
+      "读者页面",
+    ],
   },
   {
     id: "merchandising",
     label: "首页编排",
     href: "/admin/merchandising",
     icon: Sparkles,
-    keywords: ["collections", "home", "curation", "featured", "首页编排", "编排", "推荐", "合集", "首页"],
+    keywords: [
+      "collections",
+      "home",
+      "curation",
+      "featured",
+      "首页编排",
+      "编排",
+      "推荐",
+      "合集",
+      "首页",
+    ],
   },
   {
     id: "recommendations",
     label: "推荐位",
     href: "/admin/recommendations",
     icon: Sparkles,
-    keywords: ["recommendation", "slot", "placement", "featured", "推荐位", "推荐", "排位", "卡槽"],
+    keywords: [
+      "recommendation",
+      "slot",
+      "placement",
+      "featured",
+      "推荐位",
+      "推荐",
+      "排位",
+      "卡槽",
+    ],
   },
   ...(isAdminTestToolsEnabled()
     ? [
@@ -86,7 +143,16 @@ const SEARCH_ITEMS = [
           label: "内容生成器（测试工具）",
           href: "/admin/content-generator",
           icon: Sparkles,
-          keywords: ["generator", "seed", "fixture", "test content", "内容生成器", "测试工具", "生成", "种子"],
+          keywords: [
+            "generator",
+            "seed",
+            "fixture",
+            "test content",
+            "内容生成器",
+            "测试工具",
+            "生成",
+            "种子",
+          ],
         },
       ]
     : []),
@@ -95,14 +161,33 @@ const SEARCH_ITEMS = [
     label: "创作者",
     href: "/admin/creators",
     icon: PenSquare,
-    keywords: ["creators", "author", "artist", "studio", "credits", "创作者", "作者", "画师", "团队", "署名"],
+    keywords: [
+      "creators",
+      "author",
+      "artist",
+      "studio",
+      "credits",
+      "创作者",
+      "作者",
+      "画师",
+      "团队",
+      "署名",
+    ],
   },
   {
     id: "interactive-stories",
     label: "互动小说",
     href: "/admin/interactive-stories",
     icon: BookOpen,
-    keywords: ["interactive story", "branching", "node", "choice", "剧情节点", "互动小说", "选项分支"],
+    keywords: [
+      "interactive story",
+      "branching",
+      "node",
+      "choice",
+      "剧情节点",
+      "互动小说",
+      "选项分支",
+    ],
   },
   {
     id: "comments",
@@ -116,14 +201,31 @@ const SEARCH_ITEMS = [
     label: "用户",
     href: "/admin/users",
     icon: Users,
-    keywords: ["users", "accounts", "reader", "customer", "用户", "账号", "读者"],
+    keywords: [
+      "users",
+      "accounts",
+      "reader",
+      "customer",
+      "用户",
+      "账号",
+      "读者",
+    ],
   },
   {
     id: "members",
     label: "后台成员",
     href: "/admin/members",
     icon: ShieldCheck,
-    keywords: ["admin members", "staff", "rbac", "2fa", "后台成员", "管理员", "角色权限", "二次验证"],
+    keywords: [
+      "admin members",
+      "staff",
+      "rbac",
+      "2fa",
+      "后台成员",
+      "管理员",
+      "角色权限",
+      "二次验证",
+    ],
   },
   {
     id: "support",
@@ -151,14 +253,31 @@ const SEARCH_ITEMS = [
     label: "计费",
     href: "/admin/billing",
     icon: CreditCard,
-    keywords: ["billing", "pricing", "wallet", "commercial", "计费", "钱包", "商业"],
+    keywords: [
+      "billing",
+      "pricing",
+      "wallet",
+      "commercial",
+      "计费",
+      "钱包",
+      "商业",
+    ],
   },
   {
     id: "revenue",
     label: "收入",
     href: "/admin/revenue",
     icon: CreditCard,
-    keywords: ["revenue", "gross", "income", "finance", "收入", "营收", "流水", "财务"],
+    keywords: [
+      "revenue",
+      "gross",
+      "income",
+      "finance",
+      "收入",
+      "营收",
+      "流水",
+      "财务",
+    ],
   },
   {
     id: "promotions",
@@ -172,21 +291,48 @@ const SEARCH_ITEMS = [
     label: "营销",
     href: "/admin/marketing",
     icon: Megaphone,
-    keywords: ["marketing", "campaigns", "segment", "渠道", "营销", "活动", "投放", "细分"],
+    keywords: [
+      "marketing",
+      "campaigns",
+      "segment",
+      "渠道",
+      "营销",
+      "活动",
+      "投放",
+      "细分",
+    ],
   },
   {
     id: "logs",
     label: "审计日志",
     href: "/admin/logs",
     icon: ScrollText,
-    keywords: ["logs", "audit", "history", "trace", "日志", "审计", "记录", "操作历史"],
+    keywords: [
+      "logs",
+      "audit",
+      "history",
+      "trace",
+      "日志",
+      "审计",
+      "记录",
+      "操作历史",
+    ],
   },
   {
     id: "branding",
     label: "品牌素材",
     href: "/admin/branding",
     icon: Image,
-    keywords: ["branding", "logo", "banner", "assets", "品牌", "标识", "横幅", "素材"],
+    keywords: [
+      "branding",
+      "logo",
+      "banner",
+      "assets",
+      "品牌",
+      "标识",
+      "横幅",
+      "素材",
+    ],
   },
   {
     id: "email-settings",
@@ -237,7 +383,9 @@ function readRecentSearchIds() {
   try {
     const raw = window.localStorage.getItem(RECENT_SEARCH_STORAGE_KEY);
     const ids = JSON.parse(raw || "[]");
-    return Array.isArray(ids) ? ids.filter((value) => typeof value === "string") : [];
+    return Array.isArray(ids)
+      ? ids.filter((value) => typeof value === "string")
+      : [];
   } catch {
     return [];
   }
@@ -251,7 +399,12 @@ function writeRecentSearchIds(ids) {
   window.localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(ids));
 }
 
-export default function GlobalSearch({ isOpen, onClose, routePatterns = [], homePath = "/admin" }) {
+export default function GlobalSearch({
+  isOpen,
+  onClose,
+  routePatterns = [],
+  homePath = "/admin",
+}) {
   const router = useRouter();
   const inputRef = useRef(null);
   const [query, setQuery] = useState("");
@@ -272,7 +425,9 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
         return true;
       }
 
-      return item.keywords.some((keyword) => keyword.toLowerCase().includes(trimmedQuery));
+      return item.keywords.some((keyword) =>
+        keyword.toLowerCase().includes(trimmedQuery),
+      );
     });
   }, [query, routePatterns]);
 
@@ -280,7 +435,9 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
     () =>
       recentSearchIds
         .map((id) => getSearchItemById(id))
-        .filter((item) => item && canAccessAdminRoute(item.href, routePatterns)),
+        .filter(
+          (item) => item && canAccessAdminRoute(item.href, routePatterns),
+        ),
     [recentSearchIds, routePatterns],
   );
 
@@ -310,7 +467,10 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
       return;
     }
 
-    const nextRecentIds = [item.id, ...recentSearchIds.filter((id) => id !== item.id)].slice(0, 5);
+    const nextRecentIds = [
+      item.id,
+      ...recentSearchIds.filter((id) => id !== item.id),
+    ].slice(0, 5);
     setRecentSearchIds(nextRecentIds);
     writeRecentSearchIds(nextRecentIds);
     setQuery("");
@@ -342,7 +502,9 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setSelectedIndex((current) => (current - 1 + results.length) % results.length);
+      setSelectedIndex(
+        (current) => (current - 1 + results.length) % results.length,
+      );
       return;
     }
 
@@ -413,8 +575,12 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold">{item.label}</div>
-                      <div className="truncate text-xs text-slate-500">{item.href}</div>
+                      <div className="truncate text-sm font-semibold">
+                        {item.label}
+                      </div>
+                      <div className="truncate text-xs text-slate-500">
+                        {item.href}
+                      </div>
                     </div>
                     <ArrowRight
                       size={16}
@@ -431,7 +597,9 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">没有找到匹配页面</p>
+              <p className="text-sm font-semibold text-slate-900">
+                没有找到匹配页面
+              </p>
               <p className="mt-1 text-xs text-slate-500">换个关键词再试试。</p>
             </div>
           ) : recentItems.length > 0 ? (
@@ -440,7 +608,12 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   最近访问
                 </div>
-                <Button type="button" variant="ghost" size="xs" onClick={handleClearRecent}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={handleClearRecent}
+                >
                   清空
                 </Button>
               </div>
@@ -455,8 +628,12 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                     <Clock size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold">{item.label}</div>
-                    <div className="truncate text-xs text-slate-500">{item.href}</div>
+                    <div className="truncate text-sm font-semibold">
+                      {item.label}
+                    </div>
+                    <div className="truncate text-xs text-slate-500">
+                      {item.href}
+                    </div>
                   </div>
                   <ArrowRight
                     size={16}
@@ -472,8 +649,12 @@ export default function GlobalSearch({ isOpen, onClose, routePatterns = [], home
                   <Search size={28} />
                 </div>
               </div>
-              <p className="text-sm font-semibold text-slate-900">输入内容即可搜索后台</p>
-              <p className="mt-1 text-xs text-slate-500">按页面名或对象类型查找。</p>
+              <p className="text-sm font-semibold text-slate-900">
+                输入内容即可搜索后台
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                按页面名或对象类型查找。
+              </p>
             </div>
           )}
         </div>

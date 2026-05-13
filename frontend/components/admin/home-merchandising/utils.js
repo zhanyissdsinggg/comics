@@ -13,7 +13,9 @@ export function normalizeSeries(entry, index) {
     id: String(source.id || `series-${index + 1}`),
     title: String(source.title || "未命名作品"),
     author: String(source.author || ""),
-    creatorCredits: Array.isArray(source.creatorCredits) ? source.creatorCredits.filter(Boolean) : [],
+    creatorCredits: Array.isArray(source.creatorCredits)
+      ? source.creatorCredits.filter(Boolean)
+      : [],
     type: source.type === "novel" ? "novel" : "comic",
     status: String(source.status || "Ongoing"),
     adult: Boolean(source.adult),
@@ -22,11 +24,16 @@ export function normalizeSeries(entry, index) {
     coverTone: String(source.coverTone || "default"),
     bannerUrl: String(source.bannerUrl || ""),
     genres: Array.isArray(source.genres) ? source.genres.filter(Boolean) : [],
-    episodeCount: toNumber(source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes),
+    episodeCount: toNumber(
+      source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes,
+    ),
     latestEpisodeId: String(source.latestEpisodeId || ""),
     freeEpisodeCount: toNumber(source.freeEpisodeCount),
-    hasFreeEpisodes: Boolean(source.hasFreeEpisodes || toNumber(source.freeEpisodeCount) > 0),
-    isPublished: source.isPublished !== undefined ? Boolean(source.isPublished) : true,
+    hasFreeEpisodes: Boolean(
+      source.hasFreeEpisodes || toNumber(source.freeEpisodeCount) > 0,
+    ),
+    isPublished:
+      source.isPublished !== undefined ? Boolean(source.isPublished) : true,
     updatedAt: source.updatedAt || source.createdAt || null,
   };
 }
@@ -35,10 +42,16 @@ export function normalizeSlot(entry, index) {
   const source = entry && typeof entry === "object" ? entry : {};
   return {
     id: String(source.id || `slot-${index + 1}`),
-    slot: String(source.slot || source.name || source.id || `slot-${index + 1}`),
-    name: String(source.name || source.slot || source.id || `slot-${index + 1}`),
+    slot: String(
+      source.slot || source.name || source.id || `slot-${index + 1}`,
+    ),
+    name: String(
+      source.name || source.slot || source.id || `slot-${index + 1}`,
+    ),
     seriesIds: Array.isArray(source.seriesIds)
-      ? source.seriesIds.map((item) => String(item || "").trim()).filter(Boolean)
+      ? source.seriesIds
+          .map((item) => String(item || "").trim())
+          .filter(Boolean)
       : [],
   };
 }
@@ -72,7 +85,9 @@ export function formatPercentValue(value) {
 }
 
 export function formatSeriesStatusLabel(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (normalized === "completed") return "已完结";
   if (normalized === "ongoing") return "连载中";
   if (normalized === "hiatus") return "暂停中";
@@ -144,16 +159,22 @@ export function dedupeSeriesPool(seriesPool) {
 }
 
 export function getSlotReplacementCandidates(slot, heroCandidates) {
-  const currentIds = new Set(Array.isArray(slot?.currentIds) ? slot.currentIds : []);
+  const currentIds = new Set(
+    Array.isArray(slot?.currentIds) ? slot.currentIds : [],
+  );
   const heroSeriesPool = (Array.isArray(heroCandidates) ? heroCandidates : [])
     .map((entry) => entry.series)
     .filter(Boolean);
-  const slotRecommended = Array.isArray(slot?.recommendedSeries) ? slot.recommendedSeries : [];
+  const slotRecommended = Array.isArray(slot?.recommendedSeries)
+    ? slot.recommendedSeries
+    : [];
 
   let specializedPool = [];
   if (slot?.id === "home-free-start") {
     specializedPool = heroSeriesPool.filter(
-      (series) => Boolean(series?.hasFreeEpisodes) || toNumber(series?.freeEpisodeCount) > 0,
+      (series) =>
+        Boolean(series?.hasFreeEpisodes) ||
+        toNumber(series?.freeEpisodeCount) > 0,
     );
   } else if (slot?.id === "home-binge-ready") {
     specializedPool = heroSeriesPool.filter(
@@ -162,7 +183,9 @@ export function getSlotReplacementCandidates(slot, heroCandidates) {
   } else if (slot?.id === "home-breakout") {
     specializedPool = heroSeriesPool.filter((series) => {
       const updatedAt = Date.parse(series?.updatedAt || "");
-      const isRecent = !Number.isNaN(updatedAt) && updatedAt >= Date.now() - 21 * 24 * 60 * 60 * 1000;
+      const isRecent =
+        !Number.isNaN(updatedAt) &&
+        updatedAt >= Date.now() - 21 * 24 * 60 * 60 * 1000;
       const episodeCount = toNumber(series?.episodeCount);
       return isRecent || (episodeCount > 0 && episodeCount <= 24);
     });
@@ -176,15 +199,22 @@ export function getSlotReplacementCandidates(slot, heroCandidates) {
 }
 
 export function buildSlotOptimizationPlan(slot, replacementCandidates) {
-  const replacementIds = replacementCandidates.map((series) => series.id).filter(Boolean);
-  const readinessEntries = (Array.isArray(slot?.currentSeries) ? slot.currentSeries : []).map((series) => ({
+  const replacementIds = replacementCandidates
+    .map((series) => series.id)
+    .filter(Boolean);
+  const readinessEntries = (
+    Array.isArray(slot?.currentSeries) ? slot.currentSeries : []
+  ).map((series) => ({
     series,
     readiness: getAdminSeriesReadiness(series),
   }));
   const weakestEntry =
-    [...readinessEntries].sort((left, right) => left.readiness.score - right.readiness.score)[0] || null;
+    [...readinessEntries].sort(
+      (left, right) => left.readiness.score - right.readiness.score,
+    )[0] || null;
   const hasReplacementCandidates = replacementCandidates.length > 0;
-  const performanceLoaded = !slot?.current?.id || Boolean(slot?.performanceLoaded);
+  const performanceLoaded =
+    !slot?.current?.id || Boolean(slot?.performanceLoaded);
   const impressions = toNumber(slot?.performance?.totalImpressions);
   const ctr = toNumber(slot?.performance?.avgCtr);
   const conversionRate = toNumber(slot?.performance?.avgConversionRate);
@@ -252,7 +282,9 @@ export function buildSlotOptimizationPlan(slot, replacementCandidates) {
       title: "当前没有拿到曝光",
       detail: "先确认这个推荐位是否真的在前台生效，以及埋点是否正常回传。",
       actionType: hasReplacementCandidates ? "copy" : "review",
-      actionLabel: hasReplacementCandidates ? "复制备选作品编号" : "检查推荐位状态",
+      actionLabel: hasReplacementCandidates
+        ? "复制备选作品编号"
+        : "检查推荐位状态",
       actionIds: replacementIds,
       replacementCandidates,
       replacementIds,

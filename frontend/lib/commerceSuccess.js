@@ -50,7 +50,11 @@ function createTargetAction(targetPath) {
 }
 
 export function persistCommerceSuccess(payload) {
-  if (typeof window === "undefined" || !payload || typeof payload !== "object") {
+  if (
+    typeof window === "undefined" ||
+    !payload ||
+    typeof payload !== "object"
+  ) {
     return;
   }
 
@@ -106,17 +110,20 @@ export function getCommerceSuccessPresentation(payload) {
     return null;
   }
 
-  const targetPath = normalizePath(payload.targetPath || payload.returnTo || "/");
+  const targetPath = normalizePath(
+    payload.targetPath || payload.returnTo || "/",
+  );
   const targetAction = createTargetAction(targetPath);
 
   if (payload.kind === "subscribe") {
-    const planId = String(payload.planId || "").trim().toLowerCase();
+    const planId = String(payload.planId || "")
+      .trim()
+      .toLowerCase();
     const guide = getCommerceJourneyGuide(planId);
     return {
       eyebrow: "Plan active",
       title: `${payload.planTitle || guide.title || "Plan"} is active`,
-      description:
-        "Your plan is active. Jump back in.",
+      description: "Your plan is active. Jump back in.",
       metaItems: [
         payload.planTitle || "Plan",
         "Discounts + free reads",
@@ -138,8 +145,7 @@ export function getCommerceSuccessPresentation(payload) {
   return {
     eyebrow: guide.eyebrow || STOREFRONT_TERMS.freeStart,
     title: `${totalPts.toLocaleString()} points added to your wallet`,
-    description:
-      "Your points are ready. Jump back in.",
+    description: "Your points are ready. Jump back in.",
     metaItems: [
       `${paidPts.toLocaleString()} base pts`,
       `${bonusPts.toLocaleString()} extra pts`,

@@ -22,9 +22,33 @@ const seriesPayload = {
     genres: ["Fantasy", "Action"],
   },
   episodes: [
-    { id: "series-001e1", seriesId: "series-001", number: 1, title: "Episode 1", pricePts: 0, previewFreePages: 3, ttfEligible: false },
-    { id: "series-001e2", seriesId: "series-001", number: 2, title: "Episode 2", pricePts: 0, previewFreePages: 3, ttfEligible: false },
-    { id: "series-001e3", seriesId: "series-001", number: 3, title: "Episode 3", pricePts: 0, previewFreePages: 3, ttfEligible: false },
+    {
+      id: "series-001e1",
+      seriesId: "series-001",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e2",
+      seriesId: "series-001",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e3",
+      seriesId: "series-001",
+      number: 3,
+      title: "Episode 3",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
   ],
 };
 
@@ -54,7 +78,9 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Reader discovery context", () => {
-  test("reader should preserve discovery attribution while moving to the next episode", async ({ page }) => {
+  test("reader should preserve discovery attribution while moving to the next episode", async ({
+    page,
+  }) => {
     test.setTimeout(60000);
 
     await page.route("**/api/**", async (route) => {
@@ -62,13 +88,21 @@ test.describe("Reader discovery context", () => {
       const pathname = requestUrl.pathname;
       const searchParams = requestUrl.searchParams;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -78,7 +112,9 @@ test.describe("Reader discovery context", () => {
       }
 
       if (pathname === "/api/auth/me") {
-        await fulfillJson(route, { user: { id: "user-001", email: "reader@example.com" } });
+        await fulfillJson(route, {
+          user: { id: "user-001", email: "reader@example.com" },
+        });
         return;
       }
 
@@ -88,11 +124,18 @@ test.describe("Reader discovery context", () => {
       }
 
       if (pathname === "/api/entitlements") {
-        if (route.request().method() === "GET" && searchParams.get("seriesId") === "series-001") {
+        if (
+          route.request().method() === "GET" &&
+          searchParams.get("seriesId") === "series-001"
+        ) {
           await fulfillJson(route, {
             entitlement: {
               seriesId: "series-001",
-              unlockedEpisodeIds: ["series-001e1", "series-001e2", "series-001e3"],
+              unlockedEpisodeIds: [
+                "series-001e1",
+                "series-001e2",
+                "series-001e3",
+              ],
             },
           });
           return;
@@ -101,7 +144,11 @@ test.describe("Reader discovery context", () => {
         await fulfillJson(route, {
           entitlement: {
             seriesId: "series-001",
-            unlockedEpisodeIds: ["series-001e1", "series-001e2", "series-001e3"],
+            unlockedEpisodeIds: [
+              "series-001e1",
+              "series-001e2",
+              "series-001e3",
+            ],
           },
         });
         return;
@@ -128,7 +175,10 @@ test.describe("Reader discovery context", () => {
       }
 
       if (pathname === "/api/episode") {
-        await fulfillJson(route, episodePayload(searchParams.get("episodeId") || "series-001e1"));
+        await fulfillJson(
+          route,
+          episodePayload(searchParams.get("episodeId") || "series-001e1"),
+        );
         return;
       }
 
@@ -155,7 +205,9 @@ test.describe("Reader discovery context", () => {
     await expect(page.getByText("Search | Trending pick")).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Back to search" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Back to search" }),
+    ).toBeVisible({
       timeout: READER_UI_TIMEOUT_MS,
     });
 

@@ -24,10 +24,7 @@ import {
   MissingCreditsSection,
   NamingRiskSection,
 } from "./creators-audit/sections";
-import {
-  EMPTY_AUDIT,
-  getErrorMessage,
-} from "./creators-audit/utils";
+import { EMPTY_AUDIT, getErrorMessage } from "./creators-audit/utils";
 
 export default function AdminCreatorsPage() {
   const router = useRouter();
@@ -38,7 +35,11 @@ export default function AdminCreatorsPage() {
   const [query, setQuery] = useState("");
   const [quickFilter, setQuickFilter] = useState("all");
   const [expandedCreators, setExpandedCreators] = useState([]);
-  const [copyFeedback, setCopyFeedback] = useState({ slug: "", type: "", message: "" });
+  const [copyFeedback, setCopyFeedback] = useState({
+    slug: "",
+    type: "",
+    message: "",
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -55,9 +56,12 @@ export default function AdminCreatorsPage() {
         setLoading(true);
         setError("");
 
-        const { response, data } = await adminFetchJson("/api/admin/creators/audit", {
-          cache: "no-store",
-        });
+        const { response, data } = await adminFetchJson(
+          "/api/admin/creators/audit",
+          {
+            cache: "no-store",
+          },
+        );
 
         if (cancelled) {
           return;
@@ -70,7 +74,11 @@ export default function AdminCreatorsPage() {
           return;
         }
 
-        setAudit(data?.audit && typeof data.audit === "object" ? data.audit : EMPTY_AUDIT);
+        setAudit(
+          data?.audit && typeof data.audit === "object"
+            ? data.audit
+            : EMPTY_AUDIT,
+        );
         setLoading(false);
       } catch (loadError) {
         if (cancelled) {
@@ -78,7 +86,11 @@ export default function AdminCreatorsPage() {
         }
 
         setAudit(EMPTY_AUDIT);
-        setError(loadError instanceof Error ? loadError.message : "创作者巡检数据加载失败。");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "创作者巡检数据加载失败。",
+        );
         setLoading(false);
       }
     }
@@ -106,11 +118,15 @@ export default function AdminCreatorsPage() {
       return 0;
     }
 
-    return Math.round((audit.stats.attributedSeriesCount / audit.stats.totalSeries) * 100);
+    return Math.round(
+      (audit.stats.attributedSeriesCount / audit.stats.totalSeries) * 100,
+    );
   }, [audit.stats.attributedSeriesCount, audit.stats.totalSeries]);
 
   const filteredCreators = useMemo(() => {
-    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const normalizedQuery = String(query || "")
+      .trim()
+      .toLowerCase();
 
     return audit.creators.filter((creator) => {
       if (quickFilter === "naming-risk" && !creator.hasNamingRisk) {
@@ -119,7 +135,10 @@ export default function AdminCreatorsPage() {
       if (quickFilter === "with-unpublished" && creator.unpublishedCount <= 0) {
         return false;
       }
-      if (quickFilter === "published-clean" && (creator.unpublishedCount > 0 || creator.hasNamingRisk)) {
+      if (
+        quickFilter === "published-clean" &&
+        (creator.unpublishedCount > 0 || creator.hasNamingRisk)
+      ) {
         return false;
       }
 
@@ -150,7 +169,10 @@ export default function AdminCreatorsPage() {
     [audit.missingAuthorSeries],
   );
   const legacyAuthorPreview = useMemo(
-    () => (Array.isArray(audit.legacyAuthorOnlySeries) ? audit.legacyAuthorOnlySeries.slice(0, 8) : []),
+    () =>
+      Array.isArray(audit.legacyAuthorOnlySeries)
+        ? audit.legacyAuthorOnlySeries.slice(0, 8)
+        : [],
     [audit.legacyAuthorOnlySeries],
   );
 
@@ -278,7 +300,12 @@ export default function AdminCreatorsPage() {
           </div>
         ) : null}
 
-        <SurfacePanel appearance="light" tone="highlight" accent="blue" className="p-0">
+        <SurfacePanel
+          appearance="light"
+          tone="highlight"
+          accent="blue"
+          className="p-0"
+        >
           <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_280px]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -292,21 +319,38 @@ export default function AdminCreatorsPage() {
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">内容优先后台</StatusPill>
-                <StatusPill tone="amber">缺署名 {audit.stats.missingAuthorSeriesCount}</StatusPill>
-                <StatusPill tone={audit.stats.legacyAuthorOnlySeriesCount > 0 ? "amber" : "emerald"}>
+                <StatusPill tone="amber">
+                  缺署名 {audit.stats.missingAuthorSeriesCount}
+                </StatusPill>
+                <StatusPill
+                  tone={
+                    audit.stats.legacyAuthorOnlySeriesCount > 0
+                      ? "amber"
+                      : "emerald"
+                  }
+                >
                   旧 author {audit.stats.legacyAuthorOnlySeriesCount}
                 </StatusPill>
-                <StatusPill tone={audit.stats.namingRiskCreatorCount > 0 ? "rose" : "emerald"}>
+                <StatusPill
+                  tone={
+                    audit.stats.namingRiskCreatorCount > 0 ? "rose" : "emerald"
+                  }
+                >
                   命名风险 {audit.stats.namingRiskCreatorCount}
                 </StatusPill>
               </div>
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">覆盖率</p>
-              <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">{coverageRate}%</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                覆盖率
+              </p>
+              <p className="mt-3 text-[2.4rem] font-semibold tracking-tight text-slate-950">
+                {coverageRate}%
+              </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries} 部作品已经接入真实 credits。
+                {audit.stats.attributedSeriesCount} / {audit.stats.totalSeries}{" "}
+                部作品已经接入真实 credits。
               </p>
             </div>
           </div>
@@ -342,7 +386,9 @@ export default function AdminCreatorsPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">筛选创作者目录</h2>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                筛选创作者目录
+              </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 按名字、作品或题材快速定位要处理的创作者条目。
               </p>

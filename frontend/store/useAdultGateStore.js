@@ -124,7 +124,9 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       sync = false,
       markUpdated = false,
     }) => {
-      const normalizedRule = normalizeRuleKey(ruleKey || verification?.region || "global");
+      const normalizedRule = normalizeRuleKey(
+        ruleKey || verification?.region || "global",
+      );
       const normalizedVerification = normalizeMatureVerificationStatus(
         verification,
         normalizedRule,
@@ -177,7 +179,8 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
     const mode = readStorageValue(MODE_KEY, "0") === "1";
     const verification = readStoredMatureVerification(rule);
     const verificationActive = isMatureVerificationActive(verification, rule);
-    const restoredMode = mode && verificationActive ? CONTENT_MODE_ADULT : CONTENT_MODE_NORMAL;
+    const restoredMode =
+      mode && verificationActive ? CONTENT_MODE_ADULT : CONTENT_MODE_NORMAL;
     applyAdultState({
       confirmed: confirmed && verificationActive,
       ruleKey: rule,
@@ -202,8 +205,12 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
     const regionRule = readRegionRule();
     const verification = readStoredMatureVerification(regionRule);
-    const verificationActive = isMatureVerificationActive(verification, regionRule);
-    const confirmed = readStorageValue(CONFIRMED_KEY, "0") === "1" && verificationActive;
+    const verificationActive = isMatureVerificationActive(
+      verification,
+      regionRule,
+    );
+    const confirmed =
+      readStorageValue(CONFIRMED_KEY, "0") === "1" && verificationActive;
     const mode = readStorageValue(MODE_KEY, "0") === "1" && verificationActive;
 
     setAdultConfirmed(confirmed);
@@ -263,9 +270,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
     };
 
     const handleRegionEvent = (event) => {
-      const nextRule =
-        event?.detail?.region ||
-        readRegionRule();
+      const nextRule = event?.detail?.region || readRegionRule();
       syncRegionRule(nextRule);
     };
 
@@ -304,14 +309,14 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
   const exitAdultMode = useCallback(() => {
     const wasAdultMode = isAdultMode;
-      applyAdultState({
-        confirmed: adultConfirmed,
-        ruleKey: ageRuleKey,
-        mode: false,
-        verification: matureVerification,
-        sync: true,
-        markUpdated: true,
-      });
+    applyAdultState({
+      confirmed: adultConfirmed,
+      ruleKey: ageRuleKey,
+      mode: false,
+      verification: matureVerification,
+      sync: true,
+      markUpdated: true,
+    });
     clearCatalogModeCache();
     if (wasAdultMode) {
       trackEvent("content_mode_exit_adult", {
@@ -367,10 +372,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
   const setContentMode = useCallback(
     (nextMode, options = {}) => {
-      if (
-        nextMode !== CONTENT_MODE_NORMAL &&
-        nextMode !== CONTENT_MODE_ADULT
-      ) {
+      if (nextMode !== CONTENT_MODE_NORMAL && nextMode !== CONTENT_MODE_ADULT) {
         trackEvent("content_mode_invalid_state", {
           requestedMode: String(nextMode || ""),
           fallbackMode: CONTENT_MODE_NORMAL,
@@ -388,10 +390,9 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
   const requestAdultToggle = useCallback(
     (signedInOverride) =>
-      setContentMode(
-        isAdultMode ? CONTENT_MODE_NORMAL : CONTENT_MODE_ADULT,
-        { isSignedIn: signedInOverride },
-      ),
+      setContentMode(isAdultMode ? CONTENT_MODE_NORMAL : CONTENT_MODE_ADULT, {
+        isSignedIn: signedInOverride,
+      }),
     [isAdultMode, setContentMode],
   );
 
@@ -424,7 +425,8 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       try {
         const verification = await localGateAgeProvider.verify({
           region: normalized,
-          legalAge: AGE_RULES[normalized]?.legalAge || AGE_RULES.global.legalAge,
+          legalAge:
+            AGE_RULES[normalized]?.legalAge || AGE_RULES.global.legalAge,
         });
 
         applyAdultState({
@@ -448,7 +450,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
       return "OK";
     },
-    [applyAdultState, isAdultMode]
+    [applyAdultState, isAdultMode],
   );
 
   const forceDisableAdultMode = useCallback(() => {
@@ -491,7 +493,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       requestAdultToggle,
       confirmAge,
       enableAdultMode,
-    ]
+    ],
   );
 
   return (

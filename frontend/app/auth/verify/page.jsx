@@ -26,9 +26,7 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div
-      className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
-    >
+    <div className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
       {title ? (
         <p className="text-sm font-black uppercase tracking-[0.14em]">
           {title}
@@ -78,7 +76,8 @@ function VerifyPageContent() {
       setStatus({
         tone: "success",
         title: "Verification email sent",
-        message: "If that address can receive account mail, a fresh link is on the way.",
+        message:
+          "If that address can receive account mail, a fresh link is on the way.",
       });
     } else {
       setStatus({
@@ -150,9 +149,7 @@ function VerifyPageContent() {
       title="Confirm your email"
       description=""
       asideTitle="Next"
-      asideBody={
-        hasToken ? "Check the link." : "Send a new link."
-      }
+      asideBody={hasToken ? "Check the link." : "Send a new link."}
     >
       <div className="space-y-6">
         <div>
@@ -160,9 +157,7 @@ function VerifyPageContent() {
             Account confirmation
           </p>
           <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-            {hasToken
-              ? "Verifying your email link"
-              : "Send another email?"}
+            {hasToken ? "Verifying your email link" : "Send another email?"}
           </h2>
           <p className="mt-3 text-sm leading-6 text-white/68">
             {hasToken ? "Checking your account." : "Enter your email."}

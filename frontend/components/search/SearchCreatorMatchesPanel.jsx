@@ -269,9 +269,7 @@ export default function SearchCreatorMatchesPanel({
                   </span>
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-white/68">
-                  Creator
-                </p>
+                <p className="text-sm leading-6 text-white/68">Creator</p>
               )}
 
               <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.12em] text-white/55">

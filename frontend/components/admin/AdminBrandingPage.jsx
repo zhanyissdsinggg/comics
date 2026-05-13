@@ -16,7 +16,12 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { useAdminAuth } from "./AuthContext";
 import { useBrandingStore } from "../../store/useBrandingStore";
-import { adminGet, adminPost, adminUpload, normalizeAdminErrorMessage } from "../../lib/adminApiClient";
+import {
+  adminGet,
+  adminPost,
+  adminUpload,
+  normalizeAdminErrorMessage,
+} from "../../lib/adminApiClient";
 
 const defaultDraft = {
   siteLogoUrl: "",
@@ -73,7 +78,9 @@ function PreviewSurface({ value, alt, emptyText, className }) {
       {value ? (
         <img src={value} alt={alt} className={className} />
       ) : (
-        <span className="max-w-[18rem] text-center text-sm leading-6 text-slate-400">{emptyText}</span>
+        <span className="max-w-[18rem] text-center text-sm leading-6 text-slate-400">
+          {emptyText}
+        </span>
       )}
     </div>
   );
@@ -105,7 +112,9 @@ export default function AdminBrandingPage() {
     queryFn: async () => {
       const response = await adminGet("/api/admin/branding");
       if (!response.ok) {
-        throw new Error(response.error || response.message || "品牌配置加载失败。");
+        throw new Error(
+          response.error || response.message || "品牌配置加载失败。",
+        );
       }
       return toDraft(response.data?.branding);
     },
@@ -139,7 +148,9 @@ export default function AdminBrandingPage() {
     },
     onSuccess: (data) => {
       setDraft((current) => ({ ...current, [data.field]: data.url }));
-      const label = ASSET_FIELDS.find((asset) => asset.keyName === data.keyName)?.label || "素材";
+      const label =
+        ASSET_FIELDS.find((asset) => asset.keyName === data.keyName)?.label ||
+        "素材";
       setFeedback({ type: "success", message: `${label}已上传。` });
     },
     onError: (error) => {
@@ -154,7 +165,9 @@ export default function AdminBrandingPage() {
     mutationFn: async (payload) => {
       const response = await adminPost("/api/admin/branding", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || "品牌配置保存失败。");
+        throw new Error(
+          response.error || response.message || "品牌配置保存失败。",
+        );
       }
       return toDraft(response.data?.branding);
     },
@@ -200,12 +213,22 @@ export default function AdminBrandingPage() {
   };
 
   const activeUploadField = uploadMutation.variables?.field || "";
-  const configuredAssetCount = useMemo(() => Object.values(draft).filter(Boolean).length, [draft]);
-  const formBusy = !hasHydratedDraft || brandingQuery.isLoading || uploadMutation.isPending || saveMutation.isPending;
+  const configuredAssetCount = useMemo(
+    () => Object.values(draft).filter(Boolean).length,
+    [draft],
+  );
+  const formBusy =
+    !hasHydratedDraft ||
+    brandingQuery.isLoading ||
+    uploadMutation.isPending ||
+    saveMutation.isPending;
 
   if (isLoading || !isAuthenticated) {
     return (
-      <AdminPageSection title="品牌素材" description="确认权限后再编辑线上品牌素材。">
+      <AdminPageSection
+        title="品牌素材"
+        description="确认权限后再编辑线上品牌素材。"
+      >
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -213,7 +236,10 @@ export default function AdminBrandingPage() {
 
   if (!hasHydratedDraft && brandingQuery.isLoading) {
     return (
-      <AdminPageSection title="品牌素材" description="正在读取已保存的素材配置。">
+      <AdminPageSection
+        title="品牌素材"
+        description="正在读取已保存的素材配置。"
+      >
         <p className="text-sm text-slate-500">正在加载品牌配置...</p>
       </AdminPageSection>
     );
@@ -225,7 +251,11 @@ export default function AdminBrandingPage() {
         title="品牌素材"
         description="已保存的品牌配置暂时无法读取。"
         action={
-          <Button type="button" variant="outline" onClick={() => brandingQuery.refetch()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => brandingQuery.refetch()}
+          >
             <RefreshCw className="size-4" />
             重试
           </Button>
@@ -236,7 +266,10 @@ export default function AdminBrandingPage() {
             type: "error",
             message:
               brandingQuery.error instanceof Error
-                ? normalizeAdminErrorMessage(brandingQuery.error, "品牌配置加载失败。")
+                ? normalizeAdminErrorMessage(
+                    brandingQuery.error,
+                    "品牌配置加载失败。",
+                  )
                 : "品牌配置加载失败。",
           }}
           onDismiss={() => undefined}
@@ -255,21 +288,39 @@ export default function AdminBrandingPage() {
           detail="标识、图标和首页横幅。"
           tone="accent"
         />
-        <AdminMetricCard label="上传上限" value="10 MB" detail="兼顾清晰和加载速度。" />
-        <AdminMetricCard label="影响范围" value="前台观感" detail="会影响头部、图标和首页视觉。" />
+        <AdminMetricCard
+          label="上传上限"
+          value="10 MB"
+          detail="兼顾清晰和加载速度。"
+        />
+        <AdminMetricCard
+          label="影响范围"
+          value="前台观感"
+          detail="会影响头部、图标和首页视觉。"
+        />
       </div>
 
-      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: "", message: "" })}
+      />
 
       <AdminPageSection
         title="品牌素材"
         description="统一维护站点标识、图标和首页横幅。"
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <AdminBadge tone={configuredAssetCount === 3 ? "success" : "accent"}>
+            <AdminBadge
+              tone={configuredAssetCount === 3 ? "success" : "accent"}
+            >
               {configuredAssetCount === 3 ? "素材完整" : "待补素材"}
             </AdminBadge>
-            <Button type="button" onClick={handleSave} disabled={formBusy} data-testid="admin-branding-save">
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={formBusy}
+              data-testid="admin-branding-save"
+            >
               {saveMutation.isPending ? "保存中..." : "保存品牌配置"}
             </Button>
           </div>
@@ -283,7 +334,8 @@ export default function AdminBrandingPage() {
                 : asset.field === "faviconUrl"
                   ? faviconFileRef
                   : bannerFileRef;
-            const isUploadingThisAsset = uploadMutation.isPending && activeUploadField === asset.field;
+            const isUploadingThisAsset =
+              uploadMutation.isPending && activeUploadField === asset.field;
             const value = draft[asset.field];
 
             return (
@@ -293,16 +345,24 @@ export default function AdminBrandingPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-semibold text-slate-950">{asset.label}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{asset.helperText}</p>
+                    <h3 className="text-base font-semibold text-slate-950">
+                      {asset.label}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {asset.helperText}
+                    </p>
                   </div>
-                  <AdminBadge tone={value ? "success" : "default"}>{value ? "已配置" : "待补"}</AdminBadge>
+                  <AdminBadge tone={value ? "success" : "default"}>
+                    {value ? "已配置" : "待补"}
+                  </AdminBadge>
                 </div>
 
                 <div className="mt-5 space-y-3">
                   <input
                     value={value}
-                    onChange={(event) => handleChange(asset.field, event.target.value)}
+                    onChange={(event) =>
+                      handleChange(asset.field, event.target.value)
+                    }
                     disabled={formBusy}
                     className={adminInputClassName}
                     placeholder={asset.placeholder}
@@ -334,14 +394,23 @@ export default function AdminBrandingPage() {
                       ref={inputRef}
                       type="file"
                       accept="image/*"
-                      onChange={handleImageUpload(asset.field, inputRef, asset.keyName)}
+                      onChange={handleImageUpload(
+                        asset.field,
+                        inputRef,
+                        asset.keyName,
+                      )}
                       disabled={formBusy}
                       className="hidden"
                     />
                   </div>
                 </div>
 
-                <PreviewSurface value={value} alt={asset.label} emptyText={asset.emptyText} className={asset.previewClassName} />
+                <PreviewSurface
+                  value={value}
+                  alt={asset.label}
+                  emptyText={asset.emptyText}
+                  className={asset.previewClassName}
+                />
               </article>
             );
           })}

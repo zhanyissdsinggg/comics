@@ -40,7 +40,9 @@ export function isMatureTitle(value) {
 }
 
 export function hasMatureTitles(items) {
-  return (Array.isArray(items) ? items : []).some((item) => isMatureTitle(item));
+  return (Array.isArray(items) ? items : []).some((item) =>
+    isMatureTitle(item),
+  );
 }
 
 export function shouldShowMatureFilter(items, flags = {}) {
@@ -104,8 +106,11 @@ export function canReadMatureFromCookieStore(cookieStore) {
     }
   }
 
-  const confirmed = String(cookieStore?.get?.("mn_adult_confirmed")?.value || "").trim() === "1";
-  const enabled = String(cookieStore?.get?.("mn_adult_mode")?.value || "").trim() === "1";
+  const confirmed =
+    String(cookieStore?.get?.("mn_adult_confirmed")?.value || "").trim() ===
+    "1";
+  const enabled =
+    String(cookieStore?.get?.("mn_adult_mode")?.value || "").trim() === "1";
   return confirmed && enabled;
 }
 

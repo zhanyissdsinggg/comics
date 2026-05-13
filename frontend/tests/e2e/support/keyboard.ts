@@ -8,7 +8,9 @@ type FocusAssertionOptions = {
 };
 
 async function isFocused(locator: Locator): Promise<boolean> {
-  return locator.evaluate((element) => element === element.ownerDocument.activeElement);
+  return locator.evaluate(
+    (element) => element === element.ownerDocument.activeElement,
+  );
 }
 
 export async function resetKeyboardFocus(page: Page): Promise<void> {
@@ -19,7 +21,11 @@ export async function resetKeyboardFocus(page: Page): Promise<void> {
   });
 }
 
-export async function tabUntilFocused(page: Page, locator: Locator, maxTabs = 40): Promise<void> {
+export async function tabUntilFocused(
+  page: Page,
+  locator: Locator,
+  maxTabs = 40,
+): Promise<void> {
   for (let index = 0; index < maxTabs; index += 1) {
     if (await isFocused(locator)) {
       return;
@@ -48,7 +54,9 @@ export async function expectVisibleFocusIndicator(
 
   const outlineWidth = Number.parseFloat(styles.outlineWidth || "0");
   const hasOutline = styles.outlineStyle !== "none" && outlineWidth > 0;
-  const hasBoxShadow = Boolean(styles.boxShadow && styles.boxShadow !== "none" && styles.boxShadow !== "");
+  const hasBoxShadow = Boolean(
+    styles.boxShadow && styles.boxShadow !== "none" && styles.boxShadow !== "",
+  );
 
   expect(
     hasOutline || hasBoxShadow,
@@ -61,7 +69,12 @@ export async function tabToAndExpectVisibleFocus(
   locator: Locator,
   options: FocusAssertionOptions = {},
 ): Promise<void> {
-  const { maxTabs = 40, label, focusRingTarget, resetBeforeTab = true } = options;
+  const {
+    maxTabs = 40,
+    label,
+    focusRingTarget,
+    resetBeforeTab = true,
+  } = options;
 
   if (resetBeforeTab) {
     await resetKeyboardFocus(page);

@@ -24,7 +24,12 @@ const SOCIAL_ACTIONS = [
     id: "google",
     label: "Continue with Google",
     icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
         <path
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
           fill="#4285F4"
@@ -85,12 +90,15 @@ function LoginContent() {
     [searchParams],
   );
 
-  const title = mode === "register" ? "Create your reader pass" : "Welcome back";
+  const title =
+    mode === "register" ? "Create your reader pass" : "Welcome back";
   const subtitle =
     mode === "register"
       ? "Create an account to keep your reading history, bookmarks, and wallet synced across devices."
       : `Sign in to continue reading your favorite ${isAdultMode ? "mature stories" : "stories"} without losing your place.`;
-  const accentTone = isAdultMode ? "bg-red-500/10 text-red-300" : "bg-cyan-400/10 text-cyan-300";
+  const accentTone = isAdultMode
+    ? "bg-red-500/10 text-red-300"
+    : "bg-cyan-400/10 text-cyan-300";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -110,7 +118,9 @@ function LoginContent() {
   };
 
   return (
-    <div className={cn("relative min-h-screen overflow-hidden", palette.rootBg)}>
+    <div
+      className={cn("relative min-h-screen overflow-hidden", palette.rootBg)}
+    >
       <div className="absolute inset-0 z-0">
         <img
           src={
@@ -121,7 +131,12 @@ function LoginContent() {
           alt="Login background"
           className="h-full w-full scale-105 object-cover opacity-20 blur-md"
         />
-        <div className={cn("absolute inset-0 bg-gradient-to-b from-transparent via-black/45 to-black/85", palette.heroOverlay)} />
+        <div
+          className={cn(
+            "absolute inset-0 bg-gradient-to-b from-transparent via-black/45 to-black/85",
+            palette.heroOverlay,
+          )}
+        />
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-10 sm:py-12 md:px-8 md:py-16">
@@ -140,7 +155,12 @@ function LoginContent() {
               )}
             />
             <div className="relative z-10">
-              <div className={cn("mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] md:mb-4 md:px-4 md:py-2 md:text-xs", accentTone)}>
+              <div
+                className={cn(
+                  "mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] md:mb-4 md:px-4 md:py-2 md:text-xs",
+                  accentTone,
+                )}
+              >
                 <Sparkles className="h-4 w-4" />
                 {mode === "register" ? "Reader Access" : "Account Return"}
               </div>
@@ -184,20 +204,22 @@ function LoginContent() {
             </div>
           </section>
 
-            <section
-              className={cn(
-                "rounded-[32px] border p-4 shadow-2xl backdrop-blur-xl md:p-8",
-                palette.surfaceGlass,
-                palette.border,
-              )}
-            >
+          <section
+            className={cn(
+              "rounded-[32px] border p-4 shadow-2xl backdrop-blur-xl md:p-8",
+              palette.surfaceGlass,
+              palette.border,
+            )}
+          >
             <div className="mb-5 flex items-start justify-between gap-4 md:mb-6">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                   {mode === "register" ? "Create account" : "Sign in"}
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                  {mode === "register" ? "Start your library" : "Open your shelf"}
+                  {mode === "register"
+                    ? "Start your library"
+                    : "Open your shelf"}
                 </h2>
               </div>
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-white">
@@ -257,7 +279,10 @@ function LoginContent() {
                   </label>
                   <Link
                     href="/auth/reset"
-                    className={cn("text-sm font-semibold transition-colors hover:underline", palette.primaryText)}
+                    className={cn(
+                      "text-sm font-semibold transition-colors hover:underline",
+                      palette.primaryText,
+                    )}
                   >
                     Forgot?
                   </Link>
@@ -329,11 +354,18 @@ function LoginContent() {
             </div>
 
             <p className="mt-5 text-center text-sm font-medium text-gray-400 md:mt-6">
-              {mode === "register" ? "Already have an account?" : "Don't have an account?"}{" "}
+              {mode === "register"
+                ? "Already have an account?"
+                : "Don't have an account?"}{" "}
               <button
                 type="button"
-                onClick={() => setMode(mode === "register" ? "login" : "register")}
-                className={cn("font-bold transition-colors hover:underline", palette.primaryText)}
+                onClick={() =>
+                  setMode(mode === "register" ? "login" : "register")
+                }
+                className={cn(
+                  "font-bold transition-colors hover:underline",
+                  palette.primaryText,
+                )}
               >
                 {mode === "register" ? "Sign in" : "Sign up"}
               </button>
@@ -351,7 +383,13 @@ function LoginFallback() {
   return (
     <div className={cn("min-h-screen", palette.rootBg)}>
       <div className="flex min-h-screen items-center justify-center px-4 text-white">
-        <div className={cn("rounded-3xl border px-6 py-5", palette.surface, palette.border)}>
+        <div
+          className={cn(
+            "rounded-3xl border px-6 py-5",
+            palette.surface,
+            palette.border,
+          )}
+        >
           Loading sign-in...
         </div>
       </div>

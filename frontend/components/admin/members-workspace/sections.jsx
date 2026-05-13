@@ -100,8 +100,12 @@ export function MembersDirectorySection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">先按成员、邮箱或角色缩小范围，再按时间顺序复核后台团队状态。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先按成员、邮箱或角色缩小范围，再按时间顺序复核后台团队状态。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -118,10 +122,19 @@ export function MembersDirectorySection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">成员动作</p>
-          <p className="mt-2 text-sm text-slate-600">先同步环境槽位，再补齐成员资料；新建入口单独放在这里更稳。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            成员动作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先同步环境槽位，再补齐成员资料；新建入口单独放在这里更稳。
+          </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={onSync} disabled={syncPending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onSync}
+              disabled={syncPending}
+            >
               <RefreshCcw className="size-4" />
               {syncPending ? "同步中..." : "同步槽位"}
             </Button>
@@ -164,18 +177,26 @@ export function MembersDirectorySection(props) {
                 <AdminTableRow key={member.id}>
                   <td className="px-4 py-4">
                     <div className="space-y-1">
-                      <p className="font-semibold text-slate-950">{member.name}</p>
-                      <p className="text-xs text-slate-500">{member.email || "未填写邮箱"}</p>
+                      <p className="font-semibold text-slate-950">
+                        {member.name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {member.email || "未填写邮箱"}
+                      </p>
                       <p className="text-xs text-slate-500">
                         {getSourceLabel(member.source)} · {member.id}
                       </p>
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <AdminBadge tone="accent">{formatRole(member.role)}</AdminBadge>
+                    <AdminBadge tone="accent">
+                      {formatRole(member.role)}
+                    </AdminBadge>
                   </td>
                   <td className="px-4 py-4">
-                    <AdminBadge tone={member.status === "active" ? "success" : "default"}>
+                    <AdminBadge
+                      tone={member.status === "active" ? "success" : "default"}
+                    >
                       {STATUS_LABELS[member.status] || member.status}
                     </AdminBadge>
                   </td>
@@ -197,7 +218,9 @@ export function MembersDirectorySection(props) {
                   </td>
                   <td className="px-4 py-4">
                     <div className="space-y-1">
-                      <AdminBadge tone={member.totpEnabled ? "success" : "default"}>
+                      <AdminBadge
+                        tone={member.totpEnabled ? "success" : "default"}
+                      >
                         {member.totpEnabled ? "已启用" : "未启用"}
                       </AdminBadge>
                       <p className="text-xs text-slate-500">
@@ -205,20 +228,32 @@ export function MembersDirectorySection(props) {
                       </p>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDate(member.lastLoginAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDate(member.lastLoginAt)}
+                  </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => onOpenEdit(member)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onOpenEdit(member)}
+                      >
                         编辑
                       </Button>
                       <Button
                         type="button"
-                        variant={member.status === "active" ? "secondary" : "outline"}
+                        variant={
+                          member.status === "active" ? "secondary" : "outline"
+                        }
                         size="sm"
                         onClick={() =>
                           onToggleStatus({
                             id: member.id,
-                            status: member.status === "active" ? "disabled" : "active",
+                            status:
+                              member.status === "active"
+                                ? "disabled"
+                                : "active",
                           })
                         }
                         disabled={statusPending}
@@ -299,7 +334,9 @@ export function MembersGuideSection() {
             className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
           >
             <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {item.description}
+            </p>
           </div>
         ))}
       </div>
@@ -307,7 +344,13 @@ export function MembersGuideSection() {
   );
 }
 
-export function MembersSortDialog({ isOpen, onClose, sortBy, onSortByChange, options }) {
+export function MembersSortDialog({
+  isOpen,
+  onClose,
+  sortBy,
+  onSortByChange,
+  options,
+}) {
   return (
     <AdminSortModal
       isOpen={isOpen}
@@ -335,30 +378,48 @@ export function MemberEditorModalContent({
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminFormField label="成员名称" helperText="用于后台显示、日志和会话卡片。">
+        <AdminFormField
+          label="成员名称"
+          helperText="用于后台显示、日志和会话卡片。"
+        >
           <input
             className={adminInputClassName}
             value={form.name}
-            onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, name: event.target.value }))
+            }
             placeholder="例如：内容主编"
           />
         </AdminFormField>
 
-        <AdminFormField label="邮箱" helperText="建议填写真实邮箱，方便识别成员。">
+        <AdminFormField
+          label="邮箱"
+          helperText="建议填写真实邮箱，方便识别成员。"
+        >
           <input
             className={adminInputClassName}
             value={form.email}
-            onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, email: event.target.value }))
+            }
             placeholder="editor@example.com"
           />
         </AdminFormField>
 
-        <AdminFormField label="登录密码" helperText="创建成员或调整密码时填写，留空则保留旧密码。">
+        <AdminFormField
+          label="登录密码"
+          helperText="创建成员或调整密码时填写，留空则保留旧密码。"
+        >
           <input
             className={adminInputClassName}
             type="password"
             value={form.password}
-            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                password: event.target.value,
+              }))
+            }
             placeholder="至少 8 位"
           />
         </AdminFormField>
@@ -369,41 +430,61 @@ export function MemberEditorModalContent({
           <select
             className={adminSelectClassName}
             value={form.role}
-            onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, role: event.target.value }))
+            }
           >
-            {(metaQueryData?.roleOptions || Object.keys(ROLE_LABELS)).map((role) => (
-              <option key={role} value={role}>
-                {formatRole(role)}
-              </option>
-            ))}
+            {(metaQueryData?.roleOptions || Object.keys(ROLE_LABELS)).map(
+              (role) => (
+                <option key={role} value={role}>
+                  {formatRole(role)}
+                </option>
+              ),
+            )}
           </select>
         </AdminFormField>
 
-        <AdminFormField label="状态" helperText="停用后会在下一次验权时失去后台访问能力。">
+        <AdminFormField
+          label="状态"
+          helperText="停用后会在下一次验权时失去后台访问能力。"
+        >
           <select
             className={adminSelectClassName}
             value={form.status}
-            onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, status: event.target.value }))
+            }
           >
-            {(metaQueryData?.statusOptions || Object.keys(STATUS_LABELS)).map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABELS[status] || status}
-              </option>
-            ))}
+            {(metaQueryData?.statusOptions || Object.keys(STATUS_LABELS)).map(
+              (status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status] || status}
+                </option>
+              ),
+            )}
           </select>
         </AdminFormField>
 
-        <AdminFormField label="密钥槽位" helperText="需要和环境变量对应时再绑定。">
+        <AdminFormField
+          label="密钥槽位"
+          helperText="需要和环境变量对应时再绑定。"
+        >
           <select
             className={adminSelectClassName}
             value={form.keySlot}
-            onChange={(event) => setForm((current) => ({ ...current, keySlot: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                keySlot: event.target.value,
+              }))
+            }
           >
             <option value="">暂不绑定</option>
             {keySlotOptions.map((slot) => (
               <option key={slot.slot} value={slot.slot}>
                 {`槽位 ${slot.slot} · 默认角色 ${formatRole(slot.configuredRole)}`}
-                {slot.assignedMemberId && slot.assignedMemberId !== editingMember?.id
+                {slot.assignedMemberId &&
+                slot.assignedMemberId !== editingMember?.id
                   ? "（已占用）"
                   : slot.missing
                     ? "（当前环境未配置）"
@@ -414,18 +495,28 @@ export function MemberEditorModalContent({
         </AdminFormField>
       </div>
 
-      <AdminFormField label="备注" helperText="记下这位成员负责的内容范围或值班说明。">
+      <AdminFormField
+        label="备注"
+        helperText="记下这位成员负责的内容范围或值班说明。"
+      >
         <textarea
           className={adminTextareaClassName}
           rows={4}
           value={form.notes}
-          onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
+          onChange={(event) =>
+            setForm((current) => ({ ...current, notes: event.target.value }))
+          }
           placeholder="例如：负责首页编排、作品上架和创作者署名维护。"
         />
       </AdminFormField>
 
       <div className="flex flex-wrap justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isPending}
+        >
           取消
         </Button>
         <Button type="button" onClick={onSave} disabled={isPending}>
@@ -440,25 +531,45 @@ export function TotpSecretModalContent({ totpSheet, onCopy, onClose }) {
   return (
     <div className="space-y-4">
       <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
-        <p className="text-sm font-semibold text-slate-950">{totpSheet?.member?.name || "后台成员"}</p>
+        <p className="text-sm font-semibold text-slate-950">
+          {totpSheet?.member?.name || "后台成员"}
+        </p>
         <p className="mt-1 text-sm text-slate-600">
           新密钥只会展示一次，关闭后不会再明文返回。
         </p>
       </div>
 
-      <AdminFormField label="手动录入密钥" helperText="需要手动添加到验证器时，直接复制这一串。">
+      <AdminFormField
+        label="手动录入密钥"
+        helperText="需要手动添加到验证器时，直接复制这一串。"
+      >
         <div className="flex gap-2">
-          <input className={adminInputClassName} readOnly value={totpSheet?.secret || ""} />
-          <Button type="button" variant="outline" onClick={() => onCopy(totpSheet?.secret || "", "密钥")}>
+          <input
+            className={adminInputClassName}
+            readOnly
+            value={totpSheet?.secret || ""}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onCopy(totpSheet?.secret || "", "密钥")}
+          >
             <Copy className="size-4" />
             复制
           </Button>
         </div>
       </AdminFormField>
 
-      <AdminFormField label="验证器导入链接" helperText="支持导入链接的验证器可以直接使用。">
+      <AdminFormField
+        label="验证器导入链接"
+        helperText="支持导入链接的验证器可以直接使用。"
+      >
         <div className="flex gap-2">
-          <input className={adminInputClassName} readOnly value={totpSheet?.otpauthUrl || ""} />
+          <input
+            className={adminInputClassName}
+            readOnly
+            value={totpSheet?.otpauthUrl || ""}
+          />
           <Button
             type="button"
             variant="outline"

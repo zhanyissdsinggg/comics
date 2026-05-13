@@ -67,12 +67,14 @@ export default function MatureContentSettingsPage() {
     if (isAdultMode) {
       return {
         label: "Mature Mode On",
-        description: "Mature titles can be opened from the separate mature catalog.",
+        description:
+          "Mature titles can be opened from the separate mature catalog.",
       };
     }
     return {
       label: "Hidden",
-      description: "Mature titles stay hidden until you turn Mature Mode back on.",
+      description:
+        "Mature titles stay hidden until you turn Mature Mode back on.",
     };
   }, [adultConfirmed, isAdultMode, regionConfig.legalAge, viewerSignedIn]);
 
@@ -144,7 +146,9 @@ export default function MatureContentSettingsPage() {
   const handleAgeConfirm = useCallback(async () => {
     await confirmAge(ageRuleKey);
     setActiveModal(null);
-    setFeedback("Age verification saved. Mature Mode is now on for this device.");
+    setFeedback(
+      "Age verification saved. Mature Mode is now on for this device.",
+    );
   }, [ageRuleKey, confirmAge]);
 
   const handleHideHistoryChange = useCallback(
@@ -224,9 +228,9 @@ export default function MatureContentSettingsPage() {
                 </Link>
               </div>
               <p className="text-sm leading-6 text-white/62">
-                Normal mode shows normal content only. Adult mode switches
-                home, search, rankings, library, and reader to adult-only
-                content, and the two modes stay mutually exclusive.
+                Normal mode shows normal content only. Adult mode switches home,
+                search, rankings, library, and reader to adult-only content, and
+                the two modes stay mutually exclusive.
               </p>
             </div>
           </SurfacePanel>

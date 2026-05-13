@@ -15,7 +15,9 @@ export function SlotIdentity({ slotMeta, itemId = "", hint = "" }) {
 
   return (
     <div className="space-y-2">
-      <div className="text-lg font-semibold text-slate-950">{slotMeta.label}</div>
+      <div className="text-lg font-semibold text-slate-950">
+        {slotMeta.label}
+      </div>
       <div className="flex flex-wrap gap-2 text-xs">
         <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-1 font-mono text-slate-600 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
           {slotMeta.token}
@@ -26,23 +28,39 @@ export function SlotIdentity({ slotMeta, itemId = "", hint = "" }) {
           </span>
         ) : null}
       </div>
-      {resolvedHint ? <p className="text-sm leading-6 text-slate-600">{resolvedHint}</p> : null}
+      {resolvedHint ? (
+        <p className="text-sm leading-6 text-slate-600">{resolvedHint}</p>
+      ) : null}
     </div>
   );
 }
 
-export function RecommendationCard({ title, description, meta = null, footer = null, children }) {
+export function RecommendationCard({
+  title,
+  description,
+  meta = null,
+  footer = null,
+  children,
+}) {
   return (
     <article className="rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
-          {description ? <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p> : null}
+          {description ? (
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {description}
+            </p>
+          ) : null}
         </div>
         {meta}
       </div>
       {children ? <div className="mt-4">{children}</div> : null}
-      {footer ? <div className="mt-4 border-t border-[color:var(--gush-border)] pt-4">{footer}</div> : null}
+      {footer ? (
+        <div className="mt-4 border-t border-[color:var(--gush-border)] pt-4">
+          {footer}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -85,7 +103,9 @@ export function CreateSlotModalContent({
       <AdminFormField
         label="系统标识"
         helperText={
-          slotForm.preset === "custom" ? "只使用小写字母、数字和短横线。" : "这个标识会根据预设自动填入。"
+          slotForm.preset === "custom"
+            ? "只使用小写字母、数字和短横线。"
+            : "这个标识会根据预设自动填入。"
         }
       >
         <input
@@ -93,18 +113,31 @@ export function CreateSlotModalContent({
           type="text"
           value={slotForm.slotToken}
           readOnly={slotForm.preset !== "custom"}
-          onChange={(event) => setSlotForm((current) => ({ ...current, slotToken: event.target.value }))}
+          onChange={(event) =>
+            setSlotForm((current) => ({
+              ...current,
+              slotToken: event.target.value,
+            }))
+          }
           placeholder="例如：library-return"
           className={adminInputClassName}
         />
       </AdminFormField>
 
-      <AdminFormField label="作品编号" helperText="多个作品编号可用逗号或换行分隔。">
+      <AdminFormField
+        label="作品编号"
+        helperText="多个作品编号可用逗号或换行分隔。"
+      >
         <textarea
           id="slot-series-ids"
           rows={5}
           value={slotForm.seriesIdsText}
-          onChange={(event) => setSlotForm((current) => ({ ...current, seriesIdsText: event.target.value }))}
+          onChange={(event) =>
+            setSlotForm((current) => ({
+              ...current,
+              seriesIdsText: event.target.value,
+            }))
+          }
           placeholder={"series_001\nseries_002"}
           className={adminTextareaClassName}
         />
@@ -140,16 +173,29 @@ export function CreateRankingModalContent({
             id="ranking-name"
             type="text"
             value={rankingForm.name}
-            onChange={(event) => setRankingForm((current) => ({ ...current, name: event.target.value }))}
+            onChange={(event) =>
+              setRankingForm((current) => ({
+                ...current,
+                name: event.target.value,
+              }))
+            }
             placeholder="例如：weekly-trending"
             className={adminInputClassName}
           />
         </AdminFormField>
-        <AdminFormField label="榜单类型" helperText="这里只保留当前仍建议新建的榜单策略。">
+        <AdminFormField
+          label="榜单类型"
+          helperText="这里只保留当前仍建议新建的榜单策略。"
+        >
           <select
             id="ranking-type"
             value={rankingForm.rankingType}
-            onChange={(event) => setRankingForm((current) => ({ ...current, rankingType: event.target.value }))}
+            onChange={(event) =>
+              setRankingForm((current) => ({
+                ...current,
+                rankingType: event.target.value,
+              }))
+            }
             className={adminSelectClassName}
           >
             {rankingTypeOptions.map((option) => (
@@ -163,7 +209,12 @@ export function CreateRankingModalContent({
           <select
             id="ranking-range"
             value={rankingForm.timeRange}
-            onChange={(event) => setRankingForm((current) => ({ ...current, timeRange: event.target.value }))}
+            onChange={(event) =>
+              setRankingForm((current) => ({
+                ...current,
+                timeRange: event.target.value,
+              }))
+            }
             className={adminSelectClassName}
           >
             {timeRangeOptions.map((option) => (
@@ -177,7 +228,12 @@ export function CreateRankingModalContent({
           <select
             id="ranking-series-type"
             value={rankingForm.seriesType}
-            onChange={(event) => setRankingForm((current) => ({ ...current, seriesType: event.target.value }))}
+            onChange={(event) =>
+              setRankingForm((current) => ({
+                ...current,
+                seriesType: event.target.value,
+              }))
+            }
             className={adminSelectClassName}
           >
             {seriesTypeOptions.map((option) => (
@@ -194,7 +250,12 @@ export function CreateRankingModalContent({
             min="1"
             max="200"
             value={rankingForm.maxItems}
-            onChange={(event) => setRankingForm((current) => ({ ...current, maxItems: event.target.value }))}
+            onChange={(event) =>
+              setRankingForm((current) => ({
+                ...current,
+                maxItems: event.target.value,
+              }))
+            }
             className={adminInputClassName}
           />
         </AdminFormField>
@@ -204,7 +265,12 @@ export function CreateRankingModalContent({
             <input
               type="checkbox"
               checked={rankingForm.adult}
-              onChange={(event) => setRankingForm((current) => ({ ...current, adult: event.target.checked }))}
+              onChange={(event) =>
+                setRankingForm((current) => ({
+                  ...current,
+                  adult: event.target.checked,
+                }))
+              }
               className={adminCheckboxClassName}
             />
           </label>
@@ -213,7 +279,12 @@ export function CreateRankingModalContent({
             <input
               type="checkbox"
               checked={rankingForm.active}
-              onChange={(event) => setRankingForm((current) => ({ ...current, active: event.target.checked }))}
+              onChange={(event) =>
+                setRankingForm((current) => ({
+                  ...current,
+                  active: event.target.checked,
+                }))
+              }
               className={adminCheckboxClassName}
             />
           </label>
@@ -226,7 +297,12 @@ export function CreateRankingModalContent({
   );
 }
 
-export function DeleteRecommendationContent({ deleteTarget, onCancel, onConfirm, isBusy }) {
+export function DeleteRecommendationContent({
+  deleteTarget,
+  onCancel,
+  onConfirm,
+  isBusy,
+}) {
   return (
     <div className="space-y-4">
       <p className="text-sm leading-6 text-slate-600">
@@ -235,10 +311,20 @@ export function DeleteRecommendationContent({ deleteTarget, onCancel, onConfirm,
           : `确定删除榜单规则“${deleteTarget?.item?.name || deleteTarget?.item?.ranking || "未知"}”吗？`}
       </p>
       <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isBusy}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isBusy}
+        >
           取消
         </Button>
-        <Button type="button" variant="destructive" onClick={onConfirm} disabled={isBusy}>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={onConfirm}
+          disabled={isBusy}
+        >
           {isBusy ? "删除中..." : "删除"}
         </Button>
       </div>

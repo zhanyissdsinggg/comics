@@ -11,51 +11,63 @@ import { Button } from "@/components/ui/button";
 const RAIL_THEME_BY_ID = {
   following: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   continue: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   trending: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   completed: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   new: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   ttf: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   adult: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-[rgba(255,182,211,0.16)] bg-[linear-gradient(180deg,rgba(17,15,27,0.98)_0%,rgba(8,8,15,0.98)_100%)] text-white shadow-[0_24px_56px_rgba(4,4,12,0.4)]",
+    darkPanel:
+      "border border-[rgba(255,182,211,0.16)] bg-[linear-gradient(180deg,rgba(17,15,27,0.98)_0%,rgba(8,8,15,0.98)_100%)] text-white shadow-[0_24px_56px_rgba(4,4,12,0.4)]",
   },
   history: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   starter: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   "ai-recommended": {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   recommended: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
   default: {
     darkAccent: "text-white/65",
-    darkPanel: "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
+    darkPanel:
+      "border border-white/10 bg-[linear-gradient(180deg,rgba(18,16,31,0.98)_0%,rgba(12,11,22,0.98)_100%)] text-white shadow-[0_20px_48px_rgba(8,6,20,0.28)]",
   },
 };
 
@@ -114,10 +126,7 @@ export default function Rail({
               </h2>
               {reason ? (
                 <p
-                  className={cn(
-                    "max-w-2xl text-sm leading-7",
-                    "text-white/75",
-                  )}
+                  className={cn("max-w-2xl text-sm leading-7", "text-white/75")}
                 >
                   {reason}
                 </p>
@@ -138,9 +147,7 @@ export default function Rail({
           </div>
 
           {showCreatorShelfLinks && safeItems.length > 0 ? (
-            <div
-              className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]"
-            >
+            <div className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]">
               <div className="p-4">
                 <CreatorShelfLinks
                   items={safeItems}
@@ -156,9 +163,7 @@ export default function Rail({
           ) : null}
 
           {safeItems.length === 0 ? (
-            <div
-              className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]"
-            >
+            <div className="mt-5 rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] py-0 shadow-[0_14px_34px_rgba(8,6,20,0.2)]">
               <div className="p-8 text-center">
                 <p className="text-sm font-semibold text-white/70">
                   Nothing here yet.

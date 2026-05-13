@@ -40,7 +40,10 @@ export function EntitlementProvider({ children }) {
     }
     const entitlement = response.data?.entitlement;
     if (entitlement?.seriesId) {
-      setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+      setBySeriesId((prev) => ({
+        ...prev,
+        [entitlement.seriesId]: entitlement,
+      }));
     }
     return response;
   }, []);
@@ -59,7 +62,10 @@ export function EntitlementProvider({ children }) {
         }
         const entitlement = response.data?.entitlement;
         if (entitlement?.seriesId) {
-          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+          setBySeriesId((prev) => ({
+            ...prev,
+            [entitlement.seriesId]: entitlement,
+          }));
         }
         if (response.data?.wallet) {
           setWallet(response.data.wallet);
@@ -67,7 +73,7 @@ export function EntitlementProvider({ children }) {
         report("UNLOCK_EPISODE");
         return response;
       }),
-    [report, setWallet, withInflight]
+    [report, setWallet, withInflight],
   );
 
   const unlockPack = useCallback(
@@ -84,7 +90,10 @@ export function EntitlementProvider({ children }) {
         }
         const entitlement = response.data?.entitlement;
         if (entitlement?.seriesId) {
-          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+          setBySeriesId((prev) => ({
+            ...prev,
+            [entitlement.seriesId]: entitlement,
+          }));
         }
         if (response.data?.wallet) {
           setWallet(response.data.wallet);
@@ -92,7 +101,7 @@ export function EntitlementProvider({ children }) {
         report("UNLOCK_EPISODE");
         return response;
       }),
-    [report, setWallet, withInflight]
+    [report, setWallet, withInflight],
   );
 
   const claimTTF = useCallback(
@@ -108,7 +117,10 @@ export function EntitlementProvider({ children }) {
         }
         const entitlement = response.data?.entitlement;
         if (entitlement?.seriesId) {
-          setBySeriesId((prev) => ({ ...prev, [entitlement.seriesId]: entitlement }));
+          setBySeriesId((prev) => ({
+            ...prev,
+            [entitlement.seriesId]: entitlement,
+          }));
         }
         if (response.data?.wallet) {
           setWallet(response.data.wallet);
@@ -116,12 +128,18 @@ export function EntitlementProvider({ children }) {
         report("UNLOCK_EPISODE");
         return response;
       }),
-    [report, setWallet, withInflight]
+    [report, setWallet, withInflight],
   );
 
   const value = useMemo(
-    () => ({ bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF }),
-    [bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF]
+    () => ({
+      bySeriesId,
+      loadEntitlement,
+      unlockEpisode,
+      unlockPack,
+      claimTTF,
+    }),
+    [bySeriesId, loadEntitlement, unlockEpisode, unlockPack, claimTTF],
   );
 
   return (
@@ -134,7 +152,9 @@ export function EntitlementProvider({ children }) {
 export function useEntitlementStore() {
   const context = useContext(EntitlementContext);
   if (!context) {
-    throw new Error("useEntitlementStore must be used within EntitlementProvider");
+    throw new Error(
+      "useEntitlementStore must be used within EntitlementProvider",
+    );
   }
   return context;
 }

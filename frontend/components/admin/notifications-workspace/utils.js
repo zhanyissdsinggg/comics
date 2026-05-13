@@ -17,8 +17,12 @@ export const sortOptions = [
 ];
 
 export function getContentPreview(content) {
-  const text = String(content || "").replace(/\s+/g, " ").trim();
-  return text.length > 120 ? `${text.slice(0, 120)}...` : text || "暂无通知正文";
+  const text = String(content || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 120
+    ? `${text.slice(0, 120)}...`
+    : text || "暂无通知正文";
 }
 
 export function formatDate(value) {
@@ -38,7 +42,11 @@ export function formatDate(value) {
   }).format(date);
 }
 
-export function buildNotificationsMetricCards({ total, titledCount, bodyCount }) {
+export function buildNotificationsMetricCards({
+  total,
+  titledCount,
+  bodyCount,
+}) {
   return [
     {
       label: "当前通知",

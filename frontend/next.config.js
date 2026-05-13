@@ -18,17 +18,22 @@ function getFrontendIdentityHeaders() {
   );
   const repoSlug = normalizeHeaderValue(
     process.env.VERCEL_GIT_REPO_SLUG ||
-      (process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split("/")[1] : ""),
+      (process.env.GITHUB_REPOSITORY
+        ? process.env.GITHUB_REPOSITORY.split("/")[1]
+        : ""),
     "",
   );
-  const repo = repoOwner && repoSlug
-    ? `${repoOwner}/${repoSlug}`
-    : normalizeHeaderValue(process.env.GITHUB_REPOSITORY, "unknown");
+  const repo =
+    repoOwner && repoSlug
+      ? `${repoOwner}/${repoSlug}`
+      : normalizeHeaderValue(process.env.GITHUB_REPOSITORY, "unknown");
 
   return [
     {
       key: "X-Gush-Frontend-Revision",
-      value: normalizeHeaderValue(process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA),
+      value: normalizeHeaderValue(
+        process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA,
+      ),
     },
     {
       key: "X-Gush-Frontend-Repo",
@@ -36,7 +41,9 @@ function getFrontendIdentityHeaders() {
     },
     {
       key: "X-Gush-Frontend-Branch",
-      value: normalizeHeaderValue(process.env.VERCEL_GIT_COMMIT_REF || process.env.GITHUB_REF_NAME),
+      value: normalizeHeaderValue(
+        process.env.VERCEL_GIT_COMMIT_REF || process.env.GITHUB_REF_NAME,
+      ),
     },
     {
       key: "X-Gush-Frontend-Deployment",

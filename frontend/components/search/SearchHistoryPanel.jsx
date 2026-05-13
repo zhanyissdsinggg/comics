@@ -178,9 +178,9 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
 
         {trendingKeywords.length > 0 ? (
           <div className="space-y-2.5 border-t-2 border-white/10 pt-5">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
-                Trending
-              </p>
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+              Trending
+            </p>
             <div className="flex flex-wrap gap-2">
               {trendingKeywords.map((keyword, index) => (
                 <button

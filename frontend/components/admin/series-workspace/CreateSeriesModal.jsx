@@ -69,7 +69,9 @@ export default function CreateSeriesModal(props) {
 
         <div className="grid gap-6 lg:grid-cols-[1fr,1.1fr]">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">封面图片</label>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              封面图片
+            </label>
             <div
               onDragOver={(event) => {
                 event.preventDefault();
@@ -101,7 +103,11 @@ export default function CreateSeriesModal(props) {
                     onClick={() =>
                       setCreateForm((current) => {
                         revokeObjectUrl(current.coverPreviewUrl);
-                        return { ...current, coverFile: null, coverPreviewUrl: "" };
+                        return {
+                          ...current,
+                          coverFile: null,
+                          coverPreviewUrl: "",
+                        };
                       })
                     }
                   >
@@ -112,14 +118,20 @@ export default function CreateSeriesModal(props) {
                 <label className="flex min-h-[320px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-6 text-center text-slate-500">
                   <Upload size={28} className="text-slate-950" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-950">把图片拖到这里，或点击上传</p>
-                    <p className="mt-1 text-xs text-slate-500">支持 JPG、PNG、GIF，大小不超过 10MB。</p>
+                    <p className="text-sm font-semibold text-slate-950">
+                      把图片拖到这里，或点击上传
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      支持 JPG、PNG、GIF，大小不超过 10MB。
+                    </p>
                   </div>
                   <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(event) => handleCoverInput(event.target.files?.[0])}
+                    onChange={(event) =>
+                      handleCoverInput(event.target.files?.[0])
+                    }
                   />
                 </label>
               )}
@@ -128,24 +140,36 @@ export default function CreateSeriesModal(props) {
 
           <div className="space-y-4">
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">作品标题 *</span>
+              <span className="text-sm font-semibold text-slate-700">
+                作品标题 *
+              </span>
               <input
                 value={createForm.title}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, title: event.target.value }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    title: event.target.value,
+                  }))
                 }
                 placeholder="例如：午夜契约"
                 className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
               />
-              <span className="text-xs text-slate-500">建议作品编号：{suggestedSeriesId}</span>
+              <span className="text-xs text-slate-500">
+                建议作品编号：{suggestedSeriesId}
+              </span>
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">创作者 / 团队署名</span>
+              <span className="text-sm font-semibold text-slate-700">
+                创作者 / 团队署名
+              </span>
               <input
                 value={createForm.author}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, author: event.target.value }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    author: event.target.value,
+                  }))
                 }
                 placeholder="例如：Studio LICO"
                 className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
@@ -156,19 +180,29 @@ export default function CreateSeriesModal(props) {
             </label>
 
             <div className="space-y-2">
-              <span className="text-sm font-semibold text-slate-700">作品形式</span>
+              <span className="text-sm font-semibold text-slate-700">
+                作品形式
+              </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => setCreateForm((current) => ({ ...current, type: "comic" }))}
-                  className={getChoiceButtonClasses(createForm.type === "comic")}
+                  onClick={() =>
+                    setCreateForm((current) => ({ ...current, type: "comic" }))
+                  }
+                  className={getChoiceButtonClasses(
+                    createForm.type === "comic",
+                  )}
                 >
                   漫画
                 </button>
                 <button
                   type="button"
-                  onClick={() => setCreateForm((current) => ({ ...current, type: "novel" }))}
-                  className={getChoiceButtonClasses(createForm.type === "novel")}
+                  onClick={() =>
+                    setCreateForm((current) => ({ ...current, type: "novel" }))
+                  }
+                  className={getChoiceButtonClasses(
+                    createForm.type === "novel",
+                  )}
                 >
                   小说
                 </button>
@@ -180,7 +214,10 @@ export default function CreateSeriesModal(props) {
                 type="checkbox"
                 checked={createForm.adult}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, adult: event.target.checked }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    adult: event.target.checked,
+                  }))
                 }
                 className={adminCheckboxClassName}
               />
@@ -192,7 +229,10 @@ export default function CreateSeriesModal(props) {
                 type="checkbox"
                 checked={createForm.isPublished}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, isPublished: event.target.checked }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    isPublished: event.target.checked,
+                  }))
                 }
                 className={adminCheckboxClassName}
               />
@@ -201,11 +241,16 @@ export default function CreateSeriesModal(props) {
 
             <div className="grid gap-3">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-slate-700">连载状态</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  连载状态
+                </span>
                 <select
                   value={createForm.status}
                   onChange={(event) =>
-                    setCreateForm((current) => ({ ...current, status: event.target.value }))
+                    setCreateForm((current) => ({
+                      ...current,
+                      status: event.target.value,
+                    }))
                   }
                   className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
                 >
@@ -219,11 +264,16 @@ export default function CreateSeriesModal(props) {
             </div>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">作品简介</span>
+              <span className="text-sm font-semibold text-slate-700">
+                作品简介
+              </span>
               <textarea
                 value={createForm.description}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, description: event.target.value }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
                 }
                 placeholder="写一段清楚、克制的作品简介。"
                 rows={4}
@@ -232,11 +282,16 @@ export default function CreateSeriesModal(props) {
             </label>
 
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-700">题材与标签</span>
+              <span className="text-sm font-semibold text-slate-700">
+                题材与标签
+              </span>
               <input
                 value={createForm.genres}
                 onChange={(event) =>
-                  setCreateForm((current) => ({ ...current, genres: event.target.value }))
+                  setCreateForm((current) => ({
+                    ...current,
+                    genres: event.target.value,
+                  }))
                 }
                 placeholder="动作、恋爱、奇幻"
                 className="w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-[color:var(--gush-border-strong)]"
@@ -244,7 +299,9 @@ export default function CreateSeriesModal(props) {
             </label>
 
             <div className="space-y-2">
-              <span className="text-sm font-semibold text-slate-700">创建后前往</span>
+              <span className="text-sm font-semibold text-slate-700">
+                创建后前往
+              </span>
               <div className="grid gap-2">
                 {CREATE_FLOW_OPTIONS.map((option) => (
                   <button
@@ -263,14 +320,21 @@ export default function CreateSeriesModal(props) {
                     }`}
                   >
                     <p className="text-sm font-semibold">{option.label}</p>
-                    <p className="mt-1 text-xs text-slate-500">{option.helper}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {option.helper}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="secondary" className="flex-1" onClick={closeCreateModal}>
+              <Button
+                type="button"
+                variant="secondary"
+                className="flex-1"
+                onClick={closeCreateModal}
+              >
                 取消
               </Button>
               <Button

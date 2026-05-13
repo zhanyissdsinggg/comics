@@ -1,5 +1,8 @@
 import { expect, test, type Route } from "@playwright/test";
-import { createBannerPlaceholder, createPosterPlaceholder } from "./support/placeholders";
+import {
+  createBannerPlaceholder,
+  createPosterPlaceholder,
+} from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
 import { tabToAndExpectVisibleFocus } from "./support/keyboard";
@@ -60,7 +63,8 @@ const HOME_SERIES = [
     type: "comic",
     status: "Completed",
     adult: false,
-    description: "Manual binge-ready pick that should replace the default chart leader.",
+    description:
+      "Manual binge-ready pick that should replace the default chart leader.",
     coverUrl: createPosterPlaceholder("Last Ember Files"),
     badge: "",
     badges: [],
@@ -110,7 +114,9 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Home accessibility", () => {
-  test("home should expose typed cover alt text across hero and shelves", async ({ page }) => {
+  test("home should expose typed cover alt text across hero and shelves", async ({
+    page,
+  }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("cookie_consent", "accepted");
     });
@@ -119,13 +125,21 @@ test.describe("Home accessibility", () => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -165,7 +179,13 @@ test.describe("Home accessibility", () => {
 
       if (pathname === "/api/search/hot") {
         await fulfillJson(route, {
-          keywords: [{ keyword: "rocket choir", count: 920, growthLabel: "Featured pick" }],
+          keywords: [
+            {
+              keyword: "rocket choir",
+              count: 920,
+              growthLabel: "Featured pick",
+            },
+          ],
         });
         return;
       }
@@ -212,19 +232,39 @@ test.describe("Home accessibility", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Read original comics and novels in one place." })).toBeVisible({
+    await expect(
+      page.getByRole("heading", {
+        name: "Read original comics and novels in one place.",
+      }),
+    ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Velvet Voltage" }).first()).toBeVisible({
+    await expect(
+      page
+        .getByRole("img", { name: "Comic cover image for Velvet Voltage" })
+        .first(),
+    ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Soft Launch Kiss" }).first()).toBeVisible({
+    await expect(
+      page
+        .getByRole("img", { name: "Comic cover image for Soft Launch Kiss" })
+        .first(),
+    ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Last Ember Files" }).first()).toBeVisible({
+    await expect(
+      page
+        .getByRole("img", { name: "Comic cover image for Last Ember Files" })
+        .first(),
+    ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Rocket Choir" }).first()).toBeVisible({
+    await expect(
+      page
+        .getByRole("img", { name: "Comic cover image for Rocket Choir" })
+        .first(),
+    ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
@@ -233,7 +273,9 @@ test.describe("Home accessibility", () => {
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
 
-  test("mobile home bottom navigation should keep visible keyboard focus", async ({ page }) => {
+  test("mobile home bottom navigation should keep visible keyboard focus", async ({
+    page,
+  }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("cookie_consent", "accepted");
     });
@@ -242,13 +284,21 @@ test.describe("Home accessibility", () => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 

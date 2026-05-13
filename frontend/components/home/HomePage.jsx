@@ -10,10 +10,16 @@ import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
 import PortraitCard from "./PortraitCard";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
-import { buildHomeHeroItems, getHomeEditorialSnapshot } from "../../lib/homeMerchandising";
+import {
+  buildHomeHeroItems,
+  getHomeEditorialSnapshot,
+} from "../../lib/homeMerchandising";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { normalizeGenreList } from "../../lib/coverPresentation";
-import { buildEditorialCardHook, buildEditorialHook } from "../../lib/editorialHooks";
+import {
+  buildEditorialCardHook,
+  buildEditorialHook,
+} from "../../lib/editorialHooks";
 import { getSearchParam } from "../../lib/pageSearchParams";
 import { filterBlockedPublicSeries } from "../../lib/publicCatalogVisibility";
 import {
@@ -63,7 +69,9 @@ function sanitizeHomepageSeriesList(seriesList) {
 }
 
 function buildHeroSummary(series) {
-  const normalizedTitle = String(series?.title || "").trim().toLowerCase();
+  const normalizedTitle = String(series?.title || "")
+    .trim()
+    .toLowerCase();
   if (
     normalizedTitle &&
     /crown|king|kingdom|prince|royal|throne/.test(normalizedTitle)
@@ -145,7 +153,9 @@ function buildEpisodeSignal(series) {
 
 function buildCoverAltText(series) {
   const title = String(series?.title || "").trim();
-  const type = String(series?.type || "").trim().toLowerCase();
+  const type = String(series?.type || "")
+    .trim()
+    .toLowerCase();
 
   if (title && (type === "comic" || type === "novel")) {
     return `${type.charAt(0).toUpperCase()}${type.slice(1)} cover for ${title}`;
@@ -158,7 +168,12 @@ function buildCoverAltText(series) {
   return "Series cover";
 }
 
-function buildSectionItems(seriesList, section, excludedIds = new Set(), limit = 6) {
+function buildSectionItems(
+  seriesList,
+  section,
+  excludedIds = new Set(),
+  limit = 6,
+) {
   const filtered = sanitizeHomepageSeriesList(seriesList).filter((series) => {
     const seriesId = String(series?.id || "").trim();
     return seriesId && !excludedIds.has(seriesId);
@@ -167,11 +182,15 @@ function buildSectionItems(seriesList, section, excludedIds = new Set(), limit =
   let ranked = filtered;
   if (section === "updates") {
     ranked = [...filtered].sort(
-      (left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+      (left, right) =>
+        toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
     );
   } else if (section === "completed") {
     ranked = filtered.filter(
-      (series) => String(series?.status || "").trim().toLowerCase() === "completed",
+      (series) =>
+        String(series?.status || "")
+          .trim()
+          .toLowerCase() === "completed",
     );
   }
 
@@ -212,7 +231,9 @@ function buildReaderHref(seriesId, episodeId) {
 }
 
 function hasHomepageSlot(homepageSlots, slotName) {
-  const normalizedSlotName = String(slotName || "").trim().toLowerCase();
+  const normalizedSlotName = String(slotName || "")
+    .trim()
+    .toLowerCase();
   return (Array.isArray(homepageSlots) ? homepageSlots : []).some(
     (slot) =>
       String(slot?.slot || slot?.name || slot?.id || "")
@@ -221,19 +242,31 @@ function hasHomepageSlot(homepageSlots, slotName) {
   );
 }
 
-function createCanonicalHomeView(seriesList, homepageSlots, preferredFeaturedSeriesId = "") {
+function createCanonicalHomeView(
+  seriesList,
+  homepageSlots,
+  preferredFeaturedSeriesId = "",
+) {
   const safeSeriesList = sanitizeHomepageSeriesList(seriesList);
-  const editorialSnapshot = getHomeEditorialSnapshot(safeSeriesList, { homepageSlots });
+  const editorialSnapshot = getHomeEditorialSnapshot(safeSeriesList, {
+    homepageSlots,
+  });
   const canonicalHeroSeriesId = String(preferredFeaturedSeriesId || "").trim();
   const hasExplicitHomeHeroSlot = hasHomepageSlot(homepageSlots, "home-hero");
   const heroCandidates = buildHomeHeroItems(safeSeriesList, { homepageSlots })
     .map((item) =>
-      safeSeriesList.find((series) => String(series?.id || "").trim() === String(item?.seriesId || "").trim()),
+      safeSeriesList.find(
+        (series) =>
+          String(series?.id || "").trim() ===
+          String(item?.seriesId || "").trim(),
+      ),
     )
     .filter(Boolean);
 
   const featuredSeries =
-    safeSeriesList.find((series) => String(series?.id || "").trim() === canonicalHeroSeriesId) ||
+    safeSeriesList.find(
+      (series) => String(series?.id || "").trim() === canonicalHeroSeriesId,
+    ) ||
     (hasExplicitHomeHeroSlot ? heroCandidates[0] : null) ||
     editorialSnapshot.breakoutPick ||
     editorialSnapshot.freeStartPick ||
@@ -245,11 +278,20 @@ function createCanonicalHomeView(seriesList, homepageSlots, preferredFeaturedSer
   const trendingSeed = [
     ...heroCandidates,
     editorialSnapshot.breakoutPick,
-    ...(Array.isArray(editorialSnapshot.safeCatalog) ? editorialSnapshot.safeCatalog : []),
+    ...(Array.isArray(editorialSnapshot.safeCatalog)
+      ? editorialSnapshot.safeCatalog
+      : []),
     ...safeSeriesList,
   ];
-  const trendingExcludedIds = new Set([String(featuredSeries?.id || "").trim()].filter(Boolean));
-  const trendingItems = buildSectionItems(trendingSeed, "trending", trendingExcludedIds, 6);
+  const trendingExcludedIds = new Set(
+    [String(featuredSeries?.id || "").trim()].filter(Boolean),
+  );
+  const trendingItems = buildSectionItems(
+    trendingSeed,
+    "trending",
+    trendingExcludedIds,
+    6,
+  );
 
   const newUpdatesExcludedIds = new Set(
     [featuredSeries?.id, ...trendingItems.map((item) => item.id)]
@@ -341,7 +383,9 @@ function HomeSection({
                 {title}
               </h2>
               {description ? (
-                <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">{description}</p>
+                <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
+                  {description}
+                </p>
               ) : null}
             </div>
           </div>
@@ -359,7 +403,10 @@ function HomeSection({
         <div className="space-y-3">
           {items.map((series) => {
             const latestLabel = buildEpisodeSignal(series);
-            const readHref = buildReaderHref(series.id, inferFirstEpisodeId(series));
+            const readHref = buildReaderHref(
+              series.id,
+              inferFirstEpisodeId(series),
+            );
             return (
               <Link
                 key={series.id}
@@ -414,7 +461,9 @@ function HomeSection({
               {title}
             </h2>
             {description ? (
-              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">{description}</p>
+              <p className="mt-1 text-sm text-[var(--gush-ink-soft)]">
+                {description}
+              </p>
             ) : null}
           </div>
         </div>
@@ -437,7 +486,9 @@ function HomeSection({
               series?.type,
               series?.status,
             );
-            const genreLine = formatTitleCardGenres(series?.genres, { limit: 3 });
+            const genreLine = formatTitleCardGenres(series?.genres, {
+              limit: 3,
+            });
             const creatorLine = formatTitleCardCreator(creatorName);
             const signal = buildSeriesSignal(series, section);
 
@@ -493,7 +544,9 @@ function HomeSection({
 
 function HomeHero({ featuredSeries, featuredReadHref }) {
   const hasFeaturedSeries = Boolean(featuredSeries);
-  const title = String(featuredSeries?.title || "Find your next obsession").trim();
+  const title = String(
+    featuredSeries?.title || "Find your next obsession",
+  ).trim();
   const creatorName = resolveSeriesCreatorName(featuredSeries);
   const genres = hasFeaturedSeries
     ? getPrimaryGenres(featuredSeries?.genres, 3)
@@ -501,8 +554,12 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
   const summary = hasFeaturedSeries
     ? buildHeroSummary(featuredSeries)
     : "A sharp turn, one bad choice, and the kind of story that keeps the next chapter impossible to ignore.";
-  const meta = hasFeaturedSeries ? buildSeriesMeta(featuredSeries) : "Editorial picks / cover-first / late-night worthy";
-  const updatedLabel = hasFeaturedSeries ? buildUpdatedLabel(featuredSeries) : "Fresh today";
+  const meta = hasFeaturedSeries
+    ? buildSeriesMeta(featuredSeries)
+    : "Editorial picks / cover-first / late-night worthy";
+  const updatedLabel = hasFeaturedSeries
+    ? buildUpdatedLabel(featuredSeries)
+    : "Fresh today";
   const primaryHref = hasFeaturedSeries ? featuredReadHref : "/search";
   const secondaryHref = hasFeaturedSeries
     ? `/series/${encodeURIComponent(featuredSeries.id)}`
@@ -541,7 +598,9 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
           {meta ? (
             <p className="text-sm text-[var(--gush-ink-faint)]">{meta}</p>
           ) : creatorName ? (
-            <p className="text-sm text-[var(--gush-ink-faint)]">{creatorName}</p>
+            <p className="text-sm text-[var(--gush-ink-faint)]">
+              {creatorName}
+            </p>
           ) : null}
 
           <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-[24px] border border-white/8 bg-[rgba(15,13,19,0.72)] p-3 backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-0 sm:flex-row sm:items-center">
@@ -550,7 +609,9 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
               data-testid="home-hero-primary-cta"
               className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-[rgba(255,79,154,0.3)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-6 text-sm font-semibold text-[#1a0e16] shadow-[var(--gush-shadow-button)] transition-all duration-150 hover:-translate-y-0.5"
             >
-              {hasFeaturedSeries ? getStartReadingLabel(featuredSeries, 1) || "Start reading" : "Start reading"}
+              {hasFeaturedSeries
+                ? getStartReadingLabel(featuredSeries, 1) || "Start reading"
+                : "Start reading"}
               <ArrowRight className="size-4" />
             </Link>
             <Link
@@ -655,12 +716,18 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
 
   useEffect(() => {
     setCanonicalHomeView(
-      createCanonicalHomeView(seriesList, homepageSlots, initialFeaturedSeriesId),
+      createCanonicalHomeView(
+        seriesList,
+        homepageSlots,
+        initialFeaturedSeriesId,
+      ),
     );
   }, [homepageSlots, initialFeaturedSeriesId, seriesList]);
 
   useEffect(() => {
-    const featuredSeriesId = String(canonicalHomeView.featuredSeries?.id || "").trim();
+    const featuredSeriesId = String(
+      canonicalHomeView.featuredSeries?.id || "",
+    ).trim();
     if (!featuredSeriesId) {
       return;
     }
@@ -683,10 +750,13 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
         if (cancelled || !response?.ok) {
           return;
         }
-        const episodes = Array.isArray(response.data?.episodes) ? response.data.episodes : [];
+        const episodes = Array.isArray(response.data?.episodes)
+          ? response.data.episodes
+          : [];
         const firstEpisodeId =
           [...episodes].sort(
-            (left, right) => Number(left?.number || 0) - Number(right?.number || 0),
+            (left, right) =>
+              Number(left?.number || 0) - Number(right?.number || 0),
           )[0]?.id || "";
         if (!firstEpisodeId) {
           return;
@@ -700,10 +770,13 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
     };
   }, [canonicalHomeView.featuredSeries, featuredReadHref]);
 
-  const { featuredSeries, trendingItems, newUpdateItems, completedItems } = canonicalHomeView;
+  const { featuredSeries, trendingItems, newUpdateItems, completedItems } =
+    canonicalHomeView;
 
   const handleVibeSelect = (vibe) => {
-    const normalized = String(vibe || "").trim().toLowerCase();
+    const normalized = String(vibe || "")
+      .trim()
+      .toLowerCase();
     if (normalized === "weekend binge") {
       router.push("/search?status=completed");
       return;

@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Header adult toggle", () => {
-  test("mobile bottom navigation should expose the same 18+ mode entry", async ({ page }) => {
+  test("mobile bottom navigation should expose the same 18+ mode entry", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 390, height: 844 });
 
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -10,14 +12,18 @@ test.describe("Header adult toggle", () => {
     await page.waitForLoadState("load");
     await expect(page.locator("body")).not.toBeEmpty({ timeout: 15000 });
 
-    const bottomNav = page.getByRole("navigation", { name: "Mobile bottom navigation" });
+    const bottomNav = page.getByRole("navigation", {
+      name: "Mobile bottom navigation",
+    });
     await expect(bottomNav).toBeVisible();
     await expect(
       bottomNav.getByRole("button", { name: /Enter 18\+ mode|18\+/i }),
     ).toBeVisible();
   });
 
-  test("adult route should redirect signed-out readers to the mature gate", async ({ page }) => {
+  test("adult route should redirect signed-out readers to the mature gate", async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto("/adult", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/adult-gate\?reason=NEED_LOGIN/);
@@ -26,7 +32,9 @@ test.describe("Header adult toggle", () => {
     ).toBeVisible();
   });
 
-  test("adult route should require age confirmation before showing mature catalog", async ({ page }) => {
+  test("adult route should require age confirmation before showing mature catalog", async ({
+    page,
+  }) => {
     await page.context().addCookies([
       {
         name: "mn_is_signed_in",
@@ -116,41 +124,46 @@ test.describe("Header adult toggle", () => {
       });
     });
 
-    await page.route("http://127.0.0.1:4000/api/series?adult=1", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          series: [
-            {
-              id: "series-012",
-              title: "Midnight Heat",
-              adult: true,
-              type: "comic",
-              coverTone: "#4b1730",
-              coverUrl: "",
-              latest: "Ep 2",
-              latestEpisodeId: "series-012e2",
-              episodeCount: 2,
-              genres: ["Mature", "Thriller"],
-              status: "Ongoing",
-              description: "Late-night city thriller.",
-              creator: {
-                label: "Vale After Dark",
-                type: "studio",
-                slug: "vale-after-dark",
-                creatorId: "creator_vale_after_dark",
-                isFallback: false,
+    await page.route(
+      "http://127.0.0.1:4000/api/series?adult=1",
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            series: [
+              {
+                id: "series-012",
+                title: "Midnight Heat",
+                adult: true,
+                type: "comic",
+                coverTone: "#4b1730",
+                coverUrl: "",
+                latest: "Ep 2",
+                latestEpisodeId: "series-012e2",
+                episodeCount: 2,
+                genres: ["Mature", "Thriller"],
+                status: "Ongoing",
+                description: "Late-night city thriller.",
+                creator: {
+                  label: "Vale After Dark",
+                  type: "studio",
+                  slug: "vale-after-dark",
+                  creatorId: "creator_vale_after_dark",
+                  isFallback: false,
+                },
+                creatorCredits: [],
               },
-              creatorCredits: [],
-            },
-          ],
-        }),
-      });
-    });
+            ],
+          }),
+        });
+      },
+    );
 
     await page.goto("/adult", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/adult$/);
-    await expect(page.getByRole("heading", { name: "Mature Mode On" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Mature Mode On" }),
+    ).toBeVisible();
   });
 });

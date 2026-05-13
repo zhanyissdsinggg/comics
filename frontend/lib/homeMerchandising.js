@@ -360,7 +360,9 @@ export function buildHomeHeroItems(seriesList, options = {}) {
 
 export function getHomeEditorialSnapshot(seriesList, options = {}) {
   const visibleCatalog = getVisibleCatalog(seriesList);
-  const safeCatalog = visibleCatalog.filter((series) => !isAdultContent(series));
+  const safeCatalog = visibleCatalog.filter(
+    (series) => !isAdultContent(series),
+  );
   const genres = new Set();
   let newCount = 0;
   let adultCount = 0;

@@ -19,22 +19,33 @@ const PLAN_PREVIEWS = [
     id: "basic",
     name: "Basic",
     badge: "Entry",
-    summary: "For casual readers who want lighter recurring value without overcommitting.",
+    summary:
+      "For casual readers who want lighter recurring value without overcommitting.",
     perks: ["Daily reads", "Faster unlock pacing", "Clean monthly billing"],
   },
   {
     id: "pro",
     name: "Pro",
     badge: "Popular",
-    summary: "A denser tier for readers who bounce between multiple active series every week.",
-    perks: ["Higher daily allowance", "Better chapter savings", "Monthly points bonus"],
+    summary:
+      "A denser tier for readers who bounce between multiple active series every week.",
+    perks: [
+      "Higher daily allowance",
+      "Better chapter savings",
+      "Monthly points bonus",
+    ],
   },
   {
     id: "vip",
     name: "VIP",
     badge: "Top Tier",
-    summary: "The heavy-reader lane with the strongest value and the least friction.",
-    perks: ["Largest recurring bundle", "Best unlock savings", "Priority support"],
+    summary:
+      "The heavy-reader lane with the strongest value and the least friction.",
+    perks: [
+      "Largest recurring bundle",
+      "Best unlock savings",
+      "Priority support",
+    ],
   },
 ];
 
@@ -68,8 +79,9 @@ function SubscribeContent() {
                   Membership is coming soon.
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300 md:mt-4 md:text-base md:leading-7">
-                  The subscription layer is still being staged, but the structure is ready:
-                  recurring plans, chapter savings, and a cleaner lane for heavy readers.
+                  The subscription layer is still being staged, but the
+                  structure is ready: recurring plans, chapter savings, and a
+                  cleaner lane for heavy readers.
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2.5 sm:flex-row md:mt-8 md:gap-3">
@@ -96,19 +108,25 @@ function SubscribeContent() {
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Status
                     </p>
-                    <p className="mt-2 text-sm font-bold text-white">Preview only</p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      Preview only
+                    </p>
                   </div>
                   <div className="rounded-[22px] border border-white/10 bg-black/20 p-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Billing
                     </p>
-                    <p className="mt-2 text-sm font-bold text-white">Not live yet</p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      Not live yet
+                    </p>
                   </div>
                   <div className="rounded-[22px] border border-white/10 bg-black/20 p-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                       Access
                     </p>
-                    <p className="mt-2 text-sm font-bold text-white">Free chapters still open</p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      Free chapters still open
+                    </p>
                   </div>
                 </div>
               </div>
@@ -144,9 +162,12 @@ function SubscribeContent() {
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white">Storefront stays active</p>
+                    <p className="text-sm font-bold text-white">
+                      Storefront stays active
+                    </p>
                     <p className="mt-1 text-sm leading-5 text-gray-400">
-                      Point packs and free reading remain the live purchase path for now.
+                      Point packs and free reading remain the live purchase path
+                      for now.
                     </p>
                   </div>
                 </div>
@@ -155,9 +176,12 @@ function SubscribeContent() {
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white">Plan architecture is ready</p>
+                    <p className="text-sm font-bold text-white">
+                      Plan architecture is ready
+                    </p>
                     <p className="mt-1 text-sm leading-5 text-gray-400">
-                      Tiers, positioning, and savings messaging are staged for launch.
+                      Tiers, positioning, and savings messaging are staged for
+                      launch.
                     </p>
                   </div>
                 </div>
@@ -168,7 +192,8 @@ function SubscribeContent() {
                   Fallback path
                 </p>
                 <p className="mt-2 text-sm leading-5 text-gray-400">
-                  Until recurring billing goes live, the storefront keeps the same reader journey moving through points and free chapters.
+                  Until recurring billing goes live, the storefront keeps the
+                  same reader journey moving through points and free chapters.
                 </p>
               </div>
             </div>
@@ -209,7 +234,9 @@ function SubscribeContent() {
                       <h3 className="text-xl font-black text-white md:text-2xl">
                         {plan.name}
                       </h3>
-                      <p className="mt-1 text-sm text-gray-400">{plan.summary}</p>
+                      <p className="mt-1 text-sm text-gray-400">
+                        {plan.summary}
+                      </p>
                     </div>
                     <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-200">
                       {plan.badge}
@@ -218,7 +245,10 @@ function SubscribeContent() {
 
                   <div className="space-y-2.5">
                     {plan.perks.map((perk) => (
-                      <div key={`${plan.id}-${perk}`} className="flex items-center gap-3 text-sm text-gray-300">
+                      <div
+                        key={`${plan.id}-${perk}`}
+                        className="flex items-center gap-3 text-sm text-gray-300"
+                      >
                         <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                         {perk}
                       </div>
@@ -230,7 +260,8 @@ function SubscribeContent() {
                       Launch Note
                     </p>
                     <p className="mt-2 text-sm leading-5 text-gray-400">
-                      This tier is staged as a preview card until recurring billing opens.
+                      This tier is staged as a preview card until recurring
+                      billing opens.
                     </p>
                   </div>
                 </div>
@@ -250,9 +281,12 @@ function SubscribeContent() {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Safe rollout</h3>
+                <h3 className="text-base font-black text-white">
+                  Safe rollout
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Membership stays hidden behind preview mode until checkout and entitlement flows are ready.
+                  Membership stays hidden behind preview mode until checkout and
+                  entitlement flows are ready.
                 </p>
               </div>
             </div>
@@ -262,9 +296,12 @@ function SubscribeContent() {
                 <Zap className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Points still lead</h3>
+                <h3 className="text-base font-black text-white">
+                  Points still lead
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  The current monetization path remains the wallet, so readers do not hit a dead-end.
+                  The current monetization path remains the wallet, so readers
+                  do not hit a dead-end.
                 </p>
               </div>
             </div>
@@ -274,9 +311,12 @@ function SubscribeContent() {
                 <Crown className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Consistent account path</h3>
+                <h3 className="text-base font-black text-white">
+                  Consistent account path
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  This preview page keeps the same navigation and account entry points used across the storefront.
+                  This preview page keeps the same navigation and account entry
+                  points used across the storefront.
                 </p>
               </div>
             </div>

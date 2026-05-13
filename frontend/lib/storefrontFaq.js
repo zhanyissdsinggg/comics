@@ -10,7 +10,9 @@ function toNumber(value) {
 }
 
 function normalizeText(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getEpisodeCount(series, episodes) {
@@ -23,10 +25,13 @@ function getEpisodeCount(series, episodes) {
 }
 
 function getMaxPreviewPages(episodes) {
-  return (Array.isArray(episodes) ? episodes : []).reduce((maxValue, episode) => {
-    const nextValue = toNumber(episode?.previewFreePages);
-    return nextValue > maxValue ? nextValue : maxValue;
-  }, 0);
+  return (Array.isArray(episodes) ? episodes : []).reduce(
+    (maxValue, episode) => {
+      const nextValue = toNumber(episode?.previewFreePages);
+      return nextValue > maxValue ? nextValue : maxValue;
+    },
+    0,
+  );
 }
 
 function getStatusAnswer(seriesTitle, statusLabel) {
@@ -58,20 +63,17 @@ export function getSiteFaqItems() {
     {
       id: "unlock-episodes",
       question: "How do I unlock chapters?",
-      answer:
-        "Use points to unlock a chapter. Some series also start free.",
+      answer: "Use points to unlock a chapter. Some series also start free.",
     },
     {
       id: "cancel-membership",
       question: "How do I cancel my plan?",
-      answer:
-        "Go to Account, find your plan, and cancel it there.",
+      answer: "Go to Account, find your plan, and cancel it there.",
     },
     {
       id: "view-orders",
       question: "Where do I see what I bought?",
-      answer:
-        "Go to Orders to see recent purchases and any order ID you need.",
+      answer: "Go to Orders to see recent purchases and any order ID you need.",
     },
     {
       id: "adult-access",
@@ -98,7 +100,10 @@ export function getSeriesFaqItems({ series, episodes }) {
   const episodeCount = getEpisodeCount(series, episodes);
   const freeEpisodeCount = toNumber(series?.freeEpisodeCount);
   const maxPreviewPages = getMaxPreviewPages(episodes);
-  const leadGenre = Array.isArray(series?.genres) && series.genres.length > 0 ? normalizeText(series.genres[0]) : "";
+  const leadGenre =
+    Array.isArray(series?.genres) && series.genres.length > 0
+      ? normalizeText(series.genres[0])
+      : "";
 
   return [
     {
@@ -109,15 +114,18 @@ export function getSeriesFaqItems({ series, episodes }) {
     {
       id: "series-free-access",
       question: `Can I try ${seriesTitle} before paying?`,
-      answer: getFreeAccessAnswer(seriesTitle, freeEpisodeCount, maxPreviewPages),
+      answer: getFreeAccessAnswer(
+        seriesTitle,
+        freeEpisodeCount,
+        maxPreviewPages,
+      ),
     },
     {
       id: "series-creator",
       question: `Who created ${seriesTitle}?`,
-      answer:
-        creatorIdentity.hasPublicCredit
-          ? `${seriesTitle} is credited to ${creatorIdentity.displayName}.`
-          : `${CREATOR_FALLBACK_DETAIL} Public creator names will appear here once they are attached upstream.`,
+      answer: creatorIdentity.hasPublicCredit
+        ? `${seriesTitle} is credited to ${creatorIdentity.displayName}.`
+        : `${CREATOR_FALLBACK_DETAIL} Public creator names will appear here once they are attached upstream.`,
     },
     {
       id: "series-episodes",

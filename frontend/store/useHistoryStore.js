@@ -46,7 +46,9 @@ function normalizeHistoryEntries(entries) {
 
 function createOptimisticHistoryEntry(payload) {
   return {
-    id: payload?.id || `history_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+    id:
+      payload?.id ||
+      `history_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
     seriesId: payload?.seriesId,
     episodeId: payload?.episodeId,
     title: payload?.title || "",
@@ -88,7 +90,10 @@ export function HistoryProvider({ children }) {
 
       const optimisticEntry = createOptimisticHistoryEntry(payload);
       setItems((currentItems) =>
-        normalizeHistoryEntries([optimisticEntry, ...currentItems]).slice(0, 100),
+        normalizeHistoryEntries([optimisticEntry, ...currentItems]).slice(
+          0,
+          100,
+        ),
       );
 
       const response = await apiPost("/api/history", optimisticEntry);
@@ -105,7 +110,9 @@ export function HistoryProvider({ children }) {
     [items, loadHistory, addHistory],
   );
 
-  return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>;
+  return (
+    <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>
+  );
 }
 
 export function useHistoryStore() {

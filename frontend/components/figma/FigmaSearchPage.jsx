@@ -13,9 +13,7 @@ import {
   Star,
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
-import {
-  getContentModeQueryParam,
-} from "../../lib/contentFilters";
+import { getContentModeQueryParam } from "../../lib/contentFilters";
 import { trackEvent } from "../../lib/trackEvent";
 import FigmaChrome from "./FigmaChrome";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
@@ -69,7 +67,9 @@ function normalizeHotKeywords(keywords = []) {
 }
 
 function normalizeInitialFormat(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (normalized === "novel" || normalized === "novels") {
     return SEARCH_FORMATS.NOVELS;
   }
@@ -232,7 +232,9 @@ function SearchContent({
   );
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeSort, setActiveSort] = useState("RELEVANCE");
-  const [remoteItems, setRemoteItems] = useState(() => mapRemoteResults(initialResults));
+  const [remoteItems, setRemoteItems] = useState(() =>
+    mapRemoteResults(initialResults),
+  );
   const [hotKeywords, setHotKeywords] = useState(() => {
     const keywords = normalizeHotKeywords(initialHotKeywords);
     return keywords.length > 0 ? keywords : FALLBACK_KEYWORDS;
@@ -334,7 +336,11 @@ function SearchContent({
       },
     )
       .then((response) => {
-        if (!active || !response.ok || !Array.isArray(response.data?.keywords)) {
+        if (
+          !active ||
+          !response.ok ||
+          !Array.isArray(response.data?.keywords)
+        ) {
           return;
         }
         const keywords = normalizeHotKeywords(response.data.keywords);
@@ -363,7 +369,9 @@ function SearchContent({
 
   const interactiveQueryItems = useMemo(() => {
     const normalizedQuery = effectiveCatalogQuery.toLowerCase();
-    return interactiveItems.filter((item) => matchesQuery(item, normalizedQuery));
+    return interactiveItems.filter((item) =>
+      matchesQuery(item, normalizedQuery),
+    );
   }, [effectiveCatalogQuery, interactiveItems]);
 
   const formatCounts = useMemo(
@@ -425,7 +433,8 @@ function SearchContent({
     }
     if (activeSort === "VIEWS") {
       return [...genreFilteredItems].sort(
-        (left, right) => Number(right?.viewsValue || 0) - Number(left?.viewsValue || 0),
+        (left, right) =>
+          Number(right?.viewsValue || 0) - Number(left?.viewsValue || 0),
       );
     }
     return [...genreFilteredItems];
@@ -445,7 +454,8 @@ function SearchContent({
       return;
     }
 
-    const eventName = contentMode === "adult" ? "adult_search_submit" : "search_submit";
+    const eventName =
+      contentMode === "adult" ? "adult_search_submit" : "search_submit";
     const submitKey = JSON.stringify({
       eventName,
       query: normalizedQuery,
@@ -471,7 +481,14 @@ function SearchContent({
       sort: activeSort,
       sourceSection: "search_page",
     });
-  }, [activeFormat, activeGenre, activeSort, contentMode, hasSearchIntent, normalizedQuery]);
+  }, [
+    activeFormat,
+    activeGenre,
+    activeSort,
+    contentMode,
+    hasSearchIntent,
+    normalizedQuery,
+  ]);
 
   useEffect(() => {
     if (loading || error || !hasSearchIntent || sortedItems.length > 0) {
@@ -612,8 +629,8 @@ function SearchContent({
                 Find something worth ruining your sleep schedule for.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:mt-4 md:text-base md:leading-7">
-                Real catalog search for comics and novels, plus interactive picks
-                in one place.
+                Real catalog search for comics and novels, plus interactive
+                picks in one place.
               </p>
 
               <form
@@ -622,7 +639,9 @@ function SearchContent({
               >
                 <div className="flex flex-col gap-2.5 md:flex-row md:items-center">
                   <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[18px] bg-white/5 px-3 py-2.5 md:gap-3 md:rounded-[20px] md:px-4 md:py-3">
-                    <Search className={cn("h-5 w-5 shrink-0", palette.primaryText)} />
+                    <Search
+                      className={cn("h-5 w-5 shrink-0", palette.primaryText)}
+                    />
                     <input
                       type="text"
                       value={query}
@@ -635,7 +654,8 @@ function SearchContent({
                     <SlidersHorizontal className="h-4 w-4" />
                     {activeFormat === SEARCH_FORMATS.ALL
                       ? "All formats"
-                      : FORMAT_OPTIONS.find((item) => item.key === activeFormat)?.label}
+                      : FORMAT_OPTIONS.find((item) => item.key === activeFormat)
+                          ?.label}
                   </div>
                 </div>
               </form>
@@ -679,7 +699,10 @@ function SearchContent({
                       className={cn(
                         "rounded-[24px] border p-3.5 text-left transition-all md:p-4",
                         activeFormat === option.key
-                          ? cn(palette.primaryBg, "border-transparent text-white shadow-xl")
+                          ? cn(
+                              palette.primaryBg,
+                              "border-transparent text-white shadow-xl",
+                            )
                           : "border-white/10 bg-black/20 text-gray-300 hover:bg-white/5",
                       )}
                     >
@@ -689,7 +712,9 @@ function SearchContent({
                           {count}
                         </span>
                       </div>
-                      <div className="mt-3 text-sm font-black md:mt-5 md:text-lg">{option.label}</div>
+                      <div className="mt-3 text-sm font-black md:mt-5 md:text-lg">
+                        {option.label}
+                      </div>
                     </button>
                   );
                 })}
@@ -709,7 +734,9 @@ function SearchContent({
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
                   Filters
                 </p>
-                <h2 className="mt-2 text-xl font-black text-white md:text-2xl">Genres</h2>
+                <h2 className="mt-2 text-xl font-black text-white md:text-2xl">
+                  Genres
+                </h2>
                 <div className="mt-4 flex flex-wrap gap-2 md:mt-5">
                   {genreOptions.map((genre) => (
                     <button
@@ -754,7 +781,12 @@ function SearchContent({
                     >
                       {option.label}
                       {activeSort === option.key ? (
-                        <div className={cn("h-2.5 w-2.5 rounded-full", palette.primaryMuted)} />
+                        <div
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            palette.primaryMuted,
+                          )}
+                        />
                       ) : null}
                     </button>
                   ))}
@@ -783,7 +815,9 @@ function SearchContent({
                       <h3 className="mt-2 text-2xl font-black text-white">
                         {featuredItem.title}
                       </h3>
-                      <p className="mt-2 text-sm text-gray-300">{featuredItem.author}</p>
+                      <p className="mt-2 text-sm text-gray-300">
+                        {featuredItem.author}
+                      </p>
                     </div>
                   </div>
                   <div className="p-5">
@@ -809,11 +843,15 @@ function SearchContent({
                     Results
                   </p>
                   <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                    {deferredQuery.trim() ? `Matches for "${deferredQuery.trim()}"` : "Browse the catalog"}
+                    {deferredQuery.trim()
+                      ? `Matches for "${deferredQuery.trim()}"`
+                      : "Browse the catalog"}
                   </h2>
                 </div>
                 <div className="text-sm font-bold text-gray-400">
-                  {loading ? "Loading..." : `${sortedItems.length} results live`}
+                  {loading
+                    ? "Loading..."
+                    : `${sortedItems.length} results live`}
                 </div>
               </div>
 
@@ -837,14 +875,19 @@ function SearchContent({
                       className={cn(
                         "min-w-[128px] shrink-0 rounded-[20px] border px-3 py-2.5 text-left transition-all",
                         activeFormat === option.key
-                          ? cn(palette.primaryBg, "border-transparent text-white shadow-xl")
+                          ? cn(
+                              palette.primaryBg,
+                              "border-transparent text-white shadow-xl",
+                            )
                           : "border-white/10 bg-black/20 text-gray-300 hover:bg-white/5",
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
-                          <span className="text-xs font-black">{option.label}</span>
+                          <span className="text-xs font-black">
+                            {option.label}
+                          </span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-[0.18em]">
                           {count}
@@ -900,10 +943,12 @@ function SearchContent({
                     palette.border,
                   )}
                 >
-                  <h3 className="text-2xl font-black text-white">No matches yet</h3>
+                  <h3 className="text-2xl font-black text-white">
+                    No matches yet
+                  </h3>
                   <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-gray-400">
-                    Try a broader keyword, switch formats, or drop the genre filter.
-                    The current combo just came up empty.
+                    Try a broader keyword, switch formats, or drop the genre
+                    filter. The current combo just came up empty.
                   </p>
                 </div>
               )}

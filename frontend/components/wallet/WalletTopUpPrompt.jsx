@@ -174,9 +174,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating
-          ? "bg-black/82 backdrop-blur-md"
-          : "bg-transparent"
+        isAnimating ? "bg-black/82 backdrop-blur-md" : "bg-transparent"
       }`}
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
@@ -327,7 +325,12 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
             </div>
           )}
 
-          <SurfacePanel tone="muted" accent="blue" appearance="dark" className="p-4">
+          <SurfacePanel
+            tone="muted"
+            accent="blue"
+            appearance="dark"
+            className="p-4"
+          >
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <Sparkles size={16} />

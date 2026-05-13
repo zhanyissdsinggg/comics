@@ -19,9 +19,11 @@ export default function AuthRequiredModal() {
 
     return subscribeAuthRequired((payload) => {
       const source = payload?.source || "";
-      const allowAuto = pathname?.startsWith("/series") || pathname?.startsWith("/read");
+      const allowAuto =
+        pathname?.startsWith("/series") || pathname?.startsWith("/read");
       const hasSiteHeader =
-        typeof document !== "undefined" && Boolean(document.querySelector('[data-site-header="1"]'));
+        typeof document !== "undefined" &&
+        Boolean(document.querySelector('[data-site-header="1"]'));
 
       if (source === "event" && hasSiteHeader) {
         return;

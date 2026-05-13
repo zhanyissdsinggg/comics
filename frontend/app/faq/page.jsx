@@ -140,10 +140,7 @@ export default function FAQPage() {
                 appearance="dark"
                 accent="cyan"
               >
-                <StorefrontSectionHeading
-                  eyebrow="More"
-                  title={item.title}
-                />
+                <StorefrontSectionHeading eyebrow="More" title={item.title} />
                 <Link
                   href={item.href}
                   className={`mt-6 inline-flex ${storefrontSecondaryButtonClass}`}

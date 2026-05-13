@@ -437,17 +437,22 @@ export default function SeriesPage({
   ]);
 
   useEffect(() => {
-    const seriesType = String(data?.series?.type || "").trim().toLowerCase();
+    const seriesType = String(data?.series?.type || "")
+      .trim()
+      .toLowerCase();
     if (!data?.series?.id || seriesType !== "novel") {
       setInteractiveStory(null);
       return;
     }
 
     let cancelled = false;
-    apiGet(`/api/interactive-stories/by-series/${encodeURIComponent(seriesId)}`, {
-      suppressAuthModal: true,
-      cacheMs: 30_000,
-    })
+    apiGet(
+      `/api/interactive-stories/by-series/${encodeURIComponent(seriesId)}`,
+      {
+        suppressAuthModal: true,
+        cacheMs: 30_000,
+      },
+    )
       .then((response) => {
         if (cancelled) {
           return;
@@ -592,12 +597,9 @@ export default function SeriesPage({
     fetchSeries({ bust: true });
   };
 
-  const handleRead = useCallback(
-    (seriesIdValue, episodeId) => {
-      trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
-    },
-    [],
-  );
+  const handleRead = useCallback((seriesIdValue, episodeId) => {
+    trackEvent("click_episode_read", { seriesId: seriesIdValue, episodeId });
+  }, []);
 
   const handleUnlock = useCallback(
     (seriesIdValue, episodeId, idempotencyKey) =>
@@ -853,7 +855,12 @@ export default function SeriesPage({
     return (
       <main className={seriesPageShellClass}>
         <div className="mx-auto max-w-[960px] px-4 py-8 md:px-8 md:py-10">
-          <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-6 sm:p-7">
+          <SurfacePanel
+            appearance="dark"
+            tone="highlight"
+            accent="rose"
+            className="p-6 sm:p-7"
+          >
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/58">
               Series unavailable
             </p>
@@ -1022,7 +1029,11 @@ export default function SeriesPage({
               </div>
               <button
                 type="button"
-                onClick={() => router.push(`/series/${encodeURIComponent(seriesId)}/interactive`)}
+                onClick={() =>
+                  router.push(
+                    `/series/${encodeURIComponent(seriesId)}/interactive`,
+                  )
+                }
                 className={storefrontSecondaryButtonClass}
               >
                 Start reading

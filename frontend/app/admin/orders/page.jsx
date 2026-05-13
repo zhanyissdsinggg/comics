@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   OrdersSummaryCards,
   OrdersTableSection,
-} from '@/components/admin/orders-workspace/sections';
+} from "@/components/admin/orders-workspace/sections";
 import {
   buildOrdersExportCsv,
   buildOrdersMetricCards,
@@ -16,17 +16,17 @@ import {
   searchFields,
   sortFields,
   sortOptions,
-} from '@/components/admin/orders-workspace/utils';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { useAdminList } from '@/lib/hooks/useAdminList';
-import { useBulkMutation } from '@/lib/hooks/useBulkMutation';
+} from "@/components/admin/orders-workspace/utils";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { AdminSortModal } from "@/components/admin/common/AdminSortModal";
+import { useAdminList } from "@/lib/hooks/useAdminList";
+import { useBulkMutation } from "@/lib/hooks/useBulkMutation";
 
 export default function AdminOrdersPage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const {
     items: orders,
@@ -49,7 +49,7 @@ export default function AdminOrdersPage() {
     toggleSelect,
     selectAll,
     clearSelection,
-  } = useAdminList('orders', searchFields, sortFields, 'createdAt', 'desc');
+  } = useAdminList("orders", searchFields, sortFields, "createdAt", "desc");
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const refundedCount = useMemo(
@@ -59,7 +59,7 @@ export default function AdminOrdersPage() {
   const revenueInView = useMemo(
     () =>
       orders.reduce((total, order) => {
-        if (String(order.status || '').toUpperCase() === 'FAILED') {
+        if (String(order.status || "").toUpperCase() === "FAILED") {
           return total;
         }
 
@@ -79,8 +79,8 @@ export default function AdminOrdersPage() {
 
   const bulkRefundMutation = useBulkMutation(
     {
-      endpoint: 'orders/refund',
-      method: 'POST',
+      endpoint: "orders/refund",
+      method: "POST",
       appendIdToPath: false,
       bodyBuilder: (id) => {
         const order = orders.find((item) => item.id === id);
@@ -90,29 +90,35 @@ export default function AdminOrdersPage() {
     {
       onSuccess: () => {
         clearSelection();
-        setFeedback({ type: 'success', message: '已为所选订单发起退款。' });
+        setFeedback({ type: "success", message: "已为所选订单发起退款。" });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `发起退款失败：${mutationError.message}` });
+        setFeedback({
+          type: "error",
+          message: `发起退款失败：${mutationError.message}`,
+        });
       },
     },
   );
 
   const bulkDeleteMutation = useBulkMutation(
     {
-      endpoint: 'orders',
-      method: 'DELETE',
+      endpoint: "orders",
+      method: "DELETE",
     },
     {
       onSuccess: () => {
         clearSelection();
         setIsDeleteConfirmOpen(false);
-        setFeedback({ type: 'success', message: '已删除所选订单。' });
+        setFeedback({ type: "success", message: "已删除所选订单。" });
         refetch();
       },
       onError: (mutationError) => {
-        setFeedback({ type: 'error', message: `删除所选订单失败：${mutationError.message}` });
+        setFeedback({
+          type: "error",
+          message: `删除所选订单失败：${mutationError.message}`,
+        });
       },
     },
   );
@@ -121,15 +127,18 @@ export default function AdminOrdersPage() {
     const csv = buildOrdersExportCsv(orders, selectedIdsSet);
 
     if (!csv) {
-      setFeedback({ type: 'error', message: '请至少选择一笔订单后再导出。' });
+      setFeedback({ type: "error", message: "请至少选择一笔订单后再导出。" });
       return;
     }
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `订单-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `订单-${new Date().toISOString().split("T")[0]}.csv`,
+    );
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -141,7 +150,7 @@ export default function AdminOrdersPage() {
 
         <AdminFeedbackBanner
           feedback={feedback}
-          onDismiss={() => setFeedback({ type: '', message: '' })}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
         />
 
         <OrdersTableSection
@@ -151,7 +160,9 @@ export default function AdminOrdersPage() {
           onSearchTermChange={setSearchTerm}
           onOpenSortModal={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
-          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          onToggleSortOrder={() =>
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+          }
           selectedIds={selectedIds}
           clearSelection={clearSelection}
           onBulkRefund={() => bulkRefundMutation.mutate(selectedIds)}
@@ -159,7 +170,7 @@ export default function AdminOrdersPage() {
           onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
           deletePending={bulkDeleteMutation.isPending}
           isError={isError}
-          errorMessage={error?.message || '订单列表加载失败。'}
+          errorMessage={error?.message || "订单列表加载失败。"}
           onRetry={refetch}
           isLoading={isLoading}
           hasItems={orders.length > 0}

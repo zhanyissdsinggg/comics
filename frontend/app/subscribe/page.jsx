@@ -31,7 +31,9 @@ export default async function Page({ searchParams }) {
   }
 
   const payload = await loadSubscriptionPlansSeoPayload();
-  const SubscribePage = (await import("../../components/subscribe/SubscribePage")).default;
+  const SubscribePage = (
+    await import("../../components/subscribe/SubscribePage")
+  ).default;
 
   return (
     <WalletProvider>

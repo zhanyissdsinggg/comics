@@ -75,7 +75,8 @@ function SeriesDetailContent({
   initialState = "ready",
 }) {
   const router = useRouter();
-  const { palette, contentMode, isAdultMode, handleAdultToggle } = useFigmaSite();
+  const { palette, contentMode, isAdultMode, handleAdultToggle } =
+    useFigmaSite();
   const [payload, setPayload] = useState(() =>
     initialSeries
       ? {
@@ -126,7 +127,10 @@ function SeriesDetailContent({
           setPayload(null);
           if (response.status === 403 || response.error === "ADULT_GATED") {
             setError("ADULT_GATED");
-          } else if (response.status === 404 || response.error === "NOT_FOUND") {
+          } else if (
+            response.status === 404 ||
+            response.error === "NOT_FOUND"
+          ) {
             setError("NOT_FOUND");
           } else {
             setError("UNAVAILABLE");
@@ -137,7 +141,11 @@ function SeriesDetailContent({
 
         if (!matchesContentMode(response.data.series, contentMode)) {
           setPayload(null);
-          setError(isAdultContent(response.data.series) ? "ADULT_GATED" : "MODE_MISMATCH");
+          setError(
+            isAdultContent(response.data.series)
+              ? "ADULT_GATED"
+              : "MODE_MISMATCH",
+          );
           setLoading(false);
           return;
         }
@@ -168,10 +176,9 @@ function SeriesDetailContent({
   const detailItem = useMemo(() => {
     const mapped = buildFigmaSeriesItem(payload?.series, {
       interactive: false,
-      defaultEpisodeId:
-        String(
-          payload?.episodes?.[0]?.id || payload?.series?.latestEpisodeId || "",
-        ).trim(),
+      defaultEpisodeId: String(
+        payload?.episodes?.[0]?.id || payload?.series?.latestEpisodeId || "",
+      ).trim(),
     });
     return mapped;
   }, [payload?.episodes, payload?.series]);
@@ -256,7 +263,9 @@ function SeriesDetailContent({
               )}
             >
               <h1 className="mb-3 text-3xl font-black text-white">
-                {error === "UNAVAILABLE" ? "Story unavailable" : "Story not found"}
+                {error === "UNAVAILABLE"
+                  ? "Story unavailable"
+                  : "Story not found"}
               </h1>
               <p className="mx-auto max-w-lg text-gray-400">
                 {error === "UNAVAILABLE"
@@ -270,7 +279,11 @@ function SeriesDetailContent({
     );
   }
 
-  if (detailItem && !matchesContentMode(detailItem, contentMode) && isAdultContent(detailItem)) {
+  if (
+    detailItem &&
+    !matchesContentMode(detailItem, contentMode) &&
+    isAdultContent(detailItem)
+  ) {
     return (
       <ModeBlockedState
         palette={palette}
@@ -283,7 +296,11 @@ function SeriesDetailContent({
     );
   }
 
-  if (detailItem && !matchesContentMode(detailItem, contentMode) && !isAdultContent(detailItem)) {
+  if (
+    detailItem &&
+    !matchesContentMode(detailItem, contentMode) &&
+    !isAdultContent(detailItem)
+  ) {
     return (
       <ModeBlockedState
         palette={palette}
@@ -399,11 +416,19 @@ function SeriesDetailContent({
 
         <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-4 py-10 md:flex-row md:gap-12 md:px-8 md:py-20">
           <div className="order-2 w-full shrink-0 pt-2 md:order-1 md:w-72 md:pt-0">
-            <div className={cn("rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6", palette.surface, palette.border)}>
+            <div
+              className={cn(
+                "rounded-[24px] border p-4 shadow-xl md:rounded-[28px] md:p-6",
+                palette.surface,
+                palette.border,
+              )}
+            >
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                 Story Brief
               </p>
-              <h3 className="mt-3 text-lg font-black text-white md:text-xl">Synopsis</h3>
+              <h3 className="mt-3 text-lg font-black text-white md:text-xl">
+                Synopsis
+              </h3>
               <p className="mt-3 text-sm leading-6 text-gray-400 md:leading-relaxed">
                 {detailItem.description}
               </p>
@@ -413,7 +438,11 @@ function SeriesDetailContent({
                     Format
                   </p>
                   <p className="mt-2 text-sm font-bold text-white">
-                    {isInteractive ? "Interactive story" : isNovel ? "Novel serial" : "Comic series"}
+                    {isInteractive
+                      ? "Interactive story"
+                      : isNovel
+                        ? "Novel serial"
+                        : "Comic series"}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
@@ -429,7 +458,13 @@ function SeriesDetailContent({
           </div>
 
           <div className="order-1 flex-1 md:order-2">
-            <div className={cn("rounded-[26px] border p-4 shadow-xl md:rounded-[30px] md:p-6", palette.surface, palette.border)}>
+            <div
+              className={cn(
+                "rounded-[26px] border p-4 shadow-xl md:rounded-[30px] md:p-6",
+                palette.surface,
+                palette.border,
+              )}
+            >
               <div className="mb-5 flex flex-col items-start gap-2.5 border-b border-gray-800 pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-6 md:pb-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">

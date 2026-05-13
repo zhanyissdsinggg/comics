@@ -4,7 +4,8 @@ import { createPageMetadata } from "../../lib/seo";
 
 export const metadata = createPageMetadata({
   title: "Settings",
-  description: "Manage reading preferences, mature access, and device behavior.",
+  description:
+    "Manage reading preferences, mature access, and device behavior.",
   path: "/settings",
   robots: {
     index: false,

@@ -115,7 +115,13 @@ const PWAInstallPrompt = React.memo(() => {
     localStorage.setItem("mn_pwa_prompt_dismissed", "true");
   }, []);
 
-  if (isAdminRoute || useFigmaChrome || isInstalled || isMobileViewport || !showPrompt) {
+  if (
+    isAdminRoute ||
+    useFigmaChrome ||
+    isInstalled ||
+    isMobileViewport ||
+    !showPrompt
+  ) {
     return null;
   }
 
@@ -135,8 +141,8 @@ const PWAInstallPrompt = React.memo(() => {
               {isIOS ? (
                 <p className="mt-1 text-xs leading-6 text-white/66 sm:text-sm">
                   On iPhone, open{" "}
-                  <span className="font-semibold text-white">Share</span>,
-                  then choose{" "}
+                  <span className="font-semibold text-white">Share</span>, then
+                  choose{" "}
                   <span className="font-semibold text-white">
                     Add to Home Screen
                   </span>

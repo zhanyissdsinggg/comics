@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   NotificationsListSection,
   NotificationsSummaryCards,
-} from '@/components/admin/notifications-workspace/sections';
+} from "@/components/admin/notifications-workspace/sections";
 import {
   searchFields,
   sortFields,
   sortOptions,
-} from '@/components/admin/notifications-workspace/utils';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { useAdminList } from '@/lib/hooks/useAdminList';
-import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
+} from "@/components/admin/notifications-workspace/utils";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { AdminSortModal } from "@/components/admin/common/AdminSortModal";
+import { useAdminList } from "@/lib/hooks/useAdminList";
+import { useBulkDelete } from "@/lib/hooks/useBulkMutation";
 
 export default function AdminNotificationsPage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const {
     items: notifications,
@@ -46,27 +46,42 @@ export default function AdminNotificationsPage() {
     toggleSelect,
     selectAll,
     clearSelection,
-  } = useAdminList('notifications', searchFields, sortFields, 'createdAt', 'desc');
+  } = useAdminList(
+    "notifications",
+    searchFields,
+    sortFields,
+    "createdAt",
+    "desc",
+  );
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const titledCount = useMemo(
-    () => notifications.filter((notification) => String(notification.title || '').trim()).length,
+    () =>
+      notifications.filter((notification) =>
+        String(notification.title || "").trim(),
+      ).length,
     [notifications],
   );
   const bodyCount = useMemo(
-    () => notifications.filter((notification) => String(notification.content || '').trim()).length,
+    () =>
+      notifications.filter((notification) =>
+        String(notification.content || "").trim(),
+      ).length,
     [notifications],
   );
 
-  const bulkDeleteMutation = useBulkDelete('notifications', {
+  const bulkDeleteMutation = useBulkDelete("notifications", {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '已删除所选通知。' });
+      setFeedback({ type: "success", message: "已删除所选通知。" });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除所选通知失败：${mutationError.message}` });
+      setFeedback({
+        type: "error",
+        message: `删除所选通知失败：${mutationError.message}`,
+      });
     },
   });
 
@@ -81,7 +96,7 @@ export default function AdminNotificationsPage() {
 
         <AdminFeedbackBanner
           feedback={feedback}
-          onDismiss={() => setFeedback({ type: '', message: '' })}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
         />
 
         <NotificationsListSection
@@ -89,13 +104,15 @@ export default function AdminNotificationsPage() {
           onSearchTermChange={setSearchTerm}
           onOpenSortModal={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
-          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          onToggleSortOrder={() =>
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+          }
           selectedIds={selectedIds}
           clearSelection={clearSelection}
           onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
           deletePending={bulkDeleteMutation.isPending}
           isError={isError}
-          errorMessage={error?.message || '通知加载失败。'}
+          errorMessage={error?.message || "通知加载失败。"}
           onRetry={refetch}
           isLoading={isLoading}
           notifications={notifications}

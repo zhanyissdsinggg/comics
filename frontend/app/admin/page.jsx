@@ -18,7 +18,10 @@ const AdminDashboardClean = dynamicImport(
         <Skeleton className="h-48 rounded-[32px]" />
         <div className="grid gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={`admin-dashboard-card-${index}`} className="h-32 rounded-[28px]" />
+            <Skeleton
+              key={`admin-dashboard-card-${index}`}
+              className="h-32 rounded-[28px]"
+            />
           ))}
         </div>
         <Skeleton className="h-80 rounded-[28px]" />

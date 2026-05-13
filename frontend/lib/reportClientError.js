@@ -1,5 +1,9 @@
 function toStringSafe(value) {
-  return typeof value === "string" ? value : value instanceof Error ? value.message : String(value || "");
+  return typeof value === "string"
+    ? value
+    : value instanceof Error
+      ? value.message
+      : String(value || "");
 }
 
 export async function reportClientError(input = {}) {
@@ -8,7 +12,9 @@ export async function reportClientError(input = {}) {
   }
 
   const payload = {
-    boundaryName: toStringSafe(input.boundaryName || input.errorBoundary || "unknown-boundary"),
+    boundaryName: toStringSafe(
+      input.boundaryName || input.errorBoundary || "unknown-boundary",
+    ),
     message: toStringSafe(input.message || input.error),
     stack: toStringSafe(input.stack),
     componentStack: toStringSafe(input.componentStack),

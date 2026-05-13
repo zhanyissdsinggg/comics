@@ -260,7 +260,7 @@ export default function FilterBar({
                     className={cn(
                       "inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-semibold transition-colors",
                       subtleButtonClass,
-                        (showGenrePicker || selectedGenre !== "all") &&
+                      (showGenrePicker || selectedGenre !== "all") &&
                         (isLight
                           ? "border-[rgba(29,29,31,0.14)] bg-[rgba(29,29,31,0.06)] text-slate-900"
                           : "border-[rgba(255,79,154,0.28)] bg-[rgba(255,79,154,0.16)] text-white"),
@@ -290,9 +290,9 @@ export default function FilterBar({
                   <div
                     className={cn(
                       "absolute left-0 top-full z-20 mt-2 w-full max-w-[min(20rem,calc(100vw-3rem))] border px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.08)]",
-                        isLight
-                          ? "rounded-[22px] border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.98)]"
-                          : "rounded-[22px] border-white/10 bg-[rgba(17,13,24,0.98)]",
+                      isLight
+                        ? "rounded-[22px] border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.98)]"
+                        : "rounded-[22px] border-white/10 bg-[rgba(17,13,24,0.98)]",
                     )}
                   >
                     <div className="flex flex-wrap gap-2">

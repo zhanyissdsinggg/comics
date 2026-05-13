@@ -225,7 +225,7 @@ const SearchBar = memo(function SearchBar({
   return (
     <div ref={containerRef} className="relative w-full">
       <div
-          className={cn(
+        className={cn(
           "relative flex items-center gap-2 rounded-full px-4 py-2.5 transition-all duration-150 touch-manipulation",
           shellClass,
         )}
@@ -339,16 +339,11 @@ const SearchBar = memo(function SearchBar({
               <div>
                 <div className="mb-2 flex items-center justify-between px-3 py-1">
                   <div className="flex items-center gap-2">
-                    <Search
-                      size={14}
-                      className="text-white/55"
-                    />
+                    <Search size={14} className="text-white/55" />
                     <span
                       className={cn(
                         "text-xs font-semibold",
-                        isHome
-                          ? "text-white/55"
-                          : "text-white/55",
+                        isHome ? "text-white/55" : "text-white/55",
                       )}
                     >
                       Recent
@@ -384,19 +379,17 @@ const SearchBar = memo(function SearchBar({
                         type="button"
                         variant="ghost"
                         onClick={() => handleHistoryClick(query)}
-                          className={cn(
-                            "h-auto flex-1 justify-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm hover:bg-transparent",
-                            isHome
+                        className={cn(
+                          "h-auto flex-1 justify-start gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm hover:bg-transparent",
+                          isHome
                             ? "text-white/70 hover:text-white"
                             : "text-white/70 hover:text-white",
                         )}
                       >
                         <Search
-                            className={cn(
+                          className={cn(
                             "size-3.5",
-                            isHome
-                              ? "text-white/40"
-                              : "text-white/40",
+                            isHome ? "text-white/40" : "text-white/40",
                           )}
                         />
                         <span className="truncate">{query}</span>
@@ -406,7 +399,7 @@ const SearchBar = memo(function SearchBar({
                         size="icon-xs"
                         variant="ghost"
                         onClick={() => handleDeleteHistory(query)}
-                          className={cn(
+                        className={cn(
                           "rounded-full",
                           isHome
                             ? "text-white/40 hover:bg-red-500/10 hover:text-red-400"
@@ -423,7 +416,7 @@ const SearchBar = memo(function SearchBar({
             ) : null}
 
             <div
-                  className={cn(
+              className={cn(
                 searchHistory.length > 0
                   ? "mt-2 border-t border-white/10 pt-2"
                   : "",
@@ -432,18 +425,12 @@ const SearchBar = memo(function SearchBar({
               <div className="mb-2 flex items-center gap-2 px-3 py-1">
                 <Search
                   size={14}
-                  className={cn(
-                    isHome
-                      ? "text-white/40"
-                      : "text-white/40",
-                  )}
+                  className={cn(isHome ? "text-white/40" : "text-white/40")}
                 />
                 <span
                   className={cn(
                     "text-xs font-semibold",
-                    isHome
-                      ? "text-white/55"
-                      : "text-white/55",
+                    isHome ? "text-white/55" : "text-white/55",
                   )}
                 >
                   {discoveryHeading}
@@ -463,22 +450,18 @@ const SearchBar = memo(function SearchBar({
                   >
                     <span className="min-w-0">
                       <span
-                          className={cn(
+                        className={cn(
                           "block text-sm font-medium",
-                          isHome
-                            ? "text-white"
-                            : "text-white",
+                          isHome ? "text-white" : "text-white",
                         )}
                       >
                         {lane.label}
                       </span>
                       {lane.hint ? (
                         <span
-                            className={cn(
+                          className={cn(
                             "mt-0.5 block text-xs",
-                            isHome
-                              ? "text-white/55"
-                              : "text-white/55",
+                            isHome ? "text-white/55" : "text-white/55",
                           )}
                         >
                           {lane.hint}
@@ -488,9 +471,7 @@ const SearchBar = memo(function SearchBar({
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 text-xs font-semibold",
-                        isHome
-                          ? "text-white/45"
-                          : "text-white/45",
+                        isHome ? "text-white/45" : "text-white/45",
                       )}
                     >
                       Explore

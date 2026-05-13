@@ -164,14 +164,18 @@ export default function MobileBottomNav({
               <span
                 className={cn(
                   "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                  isActive ? "bg-[var(--gush-cyan)] opacity-100" : "bg-transparent opacity-0",
+                  isActive
+                    ? "bg-[var(--gush-cyan)] opacity-100"
+                    : "bg-transparent opacity-0",
                 )}
               />
               <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.95} />
               <span
                 className={cn(
                   "text-[10px] leading-none",
-                  isActive ? "font-semibold uppercase tracking-[0.1em]" : "font-medium uppercase tracking-[0.08em]",
+                  isActive
+                    ? "font-semibold uppercase tracking-[0.1em]"
+                    : "font-medium uppercase tracking-[0.08em]",
                 )}
               >
                 {item.label}
@@ -185,7 +189,9 @@ export default function MobileBottomNav({
             type="button"
             onClick={onAdultToggleClick}
             aria-pressed={isAdultMode}
-            aria-label={isAdultMode ? "Back to normal mode" : `Enter ${legalAge}+ mode`}
+            aria-label={
+              isAdultMode ? "Back to normal mode" : `Enter ${legalAge}+ mode`
+            }
             data-testid="mobile-content-mode-toggle"
             className={cn(
               "relative flex min-h-[58px] flex-col items-center justify-center gap-1 rounded-[20px] px-1.5 py-2 text-center transition-all duration-150",
@@ -197,7 +203,9 @@ export default function MobileBottomNav({
             <span
               className={cn(
                 "absolute left-1/2 top-1.5 h-[3px] w-6 -translate-x-1/2 rounded-full transition-all duration-200",
-                isAdultMode ? "bg-[#ffd6e8] opacity-100" : "bg-transparent opacity-0",
+                isAdultMode
+                  ? "bg-[#ffd6e8] opacity-100"
+                  : "bg-transparent opacity-0",
               )}
             />
             {isAdultMode ? (

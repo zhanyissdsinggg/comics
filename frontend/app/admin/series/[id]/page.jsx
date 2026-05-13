@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { AdminDataState } from '@/components/admin/common/AdminDataState';
+import AdminShell from "@/components/admin/AdminShell";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { AdminDataState } from "@/components/admin/common/AdminDataState";
 import {
   BasicInformationSection,
   CoverSection,
@@ -19,7 +19,7 @@ import {
   RecordInfoSection,
   SeriesHeaderActions,
   SummaryCardsSection,
-} from '@/components/admin/series-detail/sections';
+} from "@/components/admin/series-detail/sections";
 import {
   buildCreditsPayload,
   buildCreditsState,
@@ -42,9 +42,9 @@ import {
   TYPE_OPTIONS,
   validateCreditsDraft,
   validateSeriesDraft,
-} from '@/components/admin/series-detail/utils';
-import { adminFetchJson, adminUpload } from '@/lib/adminApiClient';
-import { getAdminSeriesReadiness } from '@/lib/adminSeriesReadiness';
+} from "@/components/admin/series-detail/utils";
+import { adminFetchJson, adminUpload } from "@/lib/adminApiClient";
+import { getAdminSeriesReadiness } from "@/lib/adminSeriesReadiness";
 
 export default function AdminSeriesDetailPage() {
   const params = useParams();
@@ -60,14 +60,14 @@ export default function AdminSeriesDetailPage() {
   const [creditsFeedback, setCreditsFeedback] = useState(EMPTY_FEEDBACK);
 
   const seriesQuery = useQuery({
-    queryKey: ['admin', 'series', seriesId],
+    queryKey: ["admin", "series", seriesId],
     enabled: Boolean(seriesId),
     staleTime: 60_000,
     queryFn: () => fetchSeriesDetail(seriesId),
   });
 
   const creditsQuery = useQuery({
-    queryKey: ['admin', 'series', seriesId, 'credits'],
+    queryKey: ["admin", "series", seriesId, "credits"],
     enabled: Boolean(seriesId),
     staleTime: 60_000,
     queryFn: () => fetchSeriesCredits(seriesId),
@@ -103,13 +103,13 @@ export default function AdminSeriesDetailPage() {
 
   const publicCredits = useMemo(
     () =>
-      buildCreditsPayload(isCreditsEditing ? creditsDraft : baselineCredits).filter(
-        (credit) => credit.isPublic,
-      ),
+      buildCreditsPayload(
+        isCreditsEditing ? creditsDraft : baselineCredits,
+      ).filter((credit) => credit.isPublic),
     [baselineCredits, creditsDraft, isCreditsEditing],
   );
 
-  const authorFallback = creditsQuery.data?.author || series?.author || '';
+  const authorFallback = creditsQuery.data?.author || series?.author || "";
   const creatorPreviewLabel = useMemo(
     () => buildCreatorPreviewLabel(publicCredits, authorFallback),
     [authorFallback, publicCredits],
@@ -149,47 +149,63 @@ export default function AdminSeriesDetailPage() {
         readiness,
         authorFallback,
       }),
-    [authorFallback, creatorPreviewLabel, formData, publicCredits, readiness, series],
+    [
+      authorFallback,
+      creatorPreviewLabel,
+      formData,
+      publicCredits,
+      readiness,
+      series,
+    ],
   );
 
   const saveMutation = useMutation({
     mutationFn: async (draft) => {
-      const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ series: buildSeriesPayload(draft) }),
-      });
+      const { response, data } = await adminFetchJson(
+        `/api/admin/series/${seriesId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ series: buildSeriesPayload(draft) }),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '作品详情保存失败。');
+        throw new Error(data?.message || data?.error || "作品详情保存失败。");
       }
 
       return data?.series || null;
     },
     onSuccess: (updatedSeries) => {
       if (updatedSeries) {
-        queryClient.setQueryData(['admin', 'series', seriesId], updatedSeries);
+        queryClient.setQueryData(["admin", "series", seriesId], updatedSeries);
         setFormData(buildFormState(updatedSeries));
       }
 
       setIsEditing(false);
-      setFeedback({ type: 'success', message: '作品详情已保存。' });
+      setFeedback({ type: "success", message: "作品详情已保存。" });
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '作品详情保存失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "作品详情保存失败。"),
+      });
     },
   });
 
   const saveCreditsMutation = useMutation({
     mutationFn: async (draft) => {
-      const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}/credits`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credits: buildCreditsPayload(draft) }),
-      });
+      const { response, data } = await adminFetchJson(
+        `/api/admin/series/${seriesId}/credits`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credits: buildCreditsPayload(draft) }),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(data?.message || data?.error || '创作者署名保存失败。');
+        throw new Error(data?.message || data?.error || "创作者署名保存失败。");
       }
 
       return data || null;
@@ -198,18 +214,18 @@ export default function AdminSeriesDetailPage() {
       const nextCreditsState = buildCreditsState(data?.credits);
       setCreditsDraft(nextCreditsState);
       setIsCreditsEditing(false);
-      setCreditsFeedback({ type: 'success', message: '创作者署名已保存。' });
+      setCreditsFeedback({ type: "success", message: "创作者署名已保存。" });
 
-      queryClient.setQueryData(['admin', 'series', seriesId, 'credits'], {
+      queryClient.setQueryData(["admin", "series", seriesId, "credits"], {
         credits: Array.isArray(data?.credits) ? data.credits : [],
         creator: data?.creator || null,
-        author: String(data?.author || ''),
+        author: String(data?.author || ""),
       });
-      queryClient.setQueryData(['admin', 'series', seriesId], (current) =>
+      queryClient.setQueryData(["admin", "series", seriesId], (current) =>
         current
           ? {
               ...current,
-              author: String(data?.author || ''),
+              author: String(data?.author || ""),
               creator: data?.creator || current.creator,
               creatorCredits: Array.isArray(data?.publicCredits)
                 ? data.publicCredits
@@ -220,8 +236,8 @@ export default function AdminSeriesDetailPage() {
     },
     onError: (error) => {
       setCreditsFeedback({
-        type: 'error',
-        message: getErrorMessage(error, '创作者署名保存失败。'),
+        type: "error",
+        message: getErrorMessage(error, "创作者署名保存失败。"),
       });
     },
   });
@@ -229,27 +245,39 @@ export default function AdminSeriesDetailPage() {
   const uploadMutation = useMutation({
     mutationFn: async (file) => {
       const uploadPayload = new FormData();
-      uploadPayload.append('file', file);
-      const response = await adminUpload('/api/admin/upload/image', uploadPayload);
+      uploadPayload.append("file", file);
+      const response = await adminUpload(
+        "/api/admin/upload/image",
+        uploadPayload,
+      );
 
       if (!response.ok || !response.data?.url) {
-        throw new Error(response.error || response.message || '封面上传失败。');
+        throw new Error(response.error || response.message || "封面上传失败。");
       }
 
       return response.data;
     },
     onSuccess: (data) => {
       setFormData((current) => ({ ...current, coverUrl: data.url }));
-      setFeedback({ type: 'success', message: '封面已上传，保存后会写入作品记录。' });
+      setFeedback({
+        type: "success",
+        message: "封面已上传，保存后会写入作品记录。",
+      });
       setIsEditing(true);
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '封面上传失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "封面上传失败。"),
+      });
     },
   });
 
   const handleFieldChange = (field) => (event) => {
-    const nextValue = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+    const nextValue =
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.value;
     setFormData((current) => ({ ...current, [field]: nextValue }));
   };
 
@@ -257,18 +285,18 @@ export default function AdminSeriesDetailPage() {
     setCreditsDraft((current) =>
       current.map((credit) => {
         if (credit.id !== creditId) {
-          return field === 'isPrimary' && value
+          return field === "isPrimary" && value
             ? { ...credit, isPrimary: false }
             : credit;
         }
 
-        if (field === 'isPrimary') {
+        if (field === "isPrimary") {
           return { ...credit, isPrimary: Boolean(value) };
         }
 
         return {
           ...credit,
-          [field]: field === 'sortOrder' ? Number(value) || 0 : value,
+          [field]: field === "sortOrder" ? Number(value) || 0 : value,
         };
       }),
     );
@@ -277,7 +305,10 @@ export default function AdminSeriesDetailPage() {
   const handleAddCredit = () => {
     setCreditsFeedback(EMPTY_FEEDBACK);
     setIsCreditsEditing(true);
-    setCreditsDraft((current) => [...current, createEmptyCreditRow(current.length)]);
+    setCreditsDraft((current) => [
+      ...current,
+      createEmptyCreditRow(current.length),
+    ]);
   };
 
   const handleRemoveCredit = (creditId) => {
@@ -319,7 +350,7 @@ export default function AdminSeriesDetailPage() {
     const validationMessage = validateSeriesDraft(formData);
 
     if (validationMessage) {
-      setFeedback({ type: 'error', message: validationMessage });
+      setFeedback({ type: "error", message: validationMessage });
       return;
     }
 
@@ -331,7 +362,7 @@ export default function AdminSeriesDetailPage() {
     const validationMessage = validateCreditsDraft(creditsDraft);
 
     if (validationMessage) {
-      setCreditsFeedback({ type: 'error', message: validationMessage });
+      setCreditsFeedback({ type: "error", message: validationMessage });
       return;
     }
 
@@ -340,19 +371,19 @@ export default function AdminSeriesDetailPage() {
 
   const handleCoverUpload = (event) => {
     const file = event.target.files?.[0];
-    event.target.value = '';
+    event.target.value = "";
 
     if (!file) {
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      setFeedback({ type: 'error', message: '请上传有效的图片文件。' });
+    if (!file.type.startsWith("image/")) {
+      setFeedback({ type: "error", message: "请上传有效的图片文件。" });
       return;
     }
 
     if (file.size > MAX_UPLOAD_BYTES) {
-      setFeedback({ type: 'error', message: '封面图片大小不能超过 10MB。' });
+      setFeedback({ type: "error", message: "封面图片大小不能超过 10MB。" });
       return;
     }
 
@@ -373,7 +404,10 @@ export default function AdminSeriesDetailPage() {
         <AdminDataState
           isLoading={false}
           hasData={false}
-          emptyMessage={getErrorMessage(seriesQuery.error, '作品详情加载失败。')}
+          emptyMessage={getErrorMessage(
+            seriesQuery.error,
+            "作品详情加载失败。",
+          )}
         />
       </AdminShell>
     );
@@ -382,21 +416,27 @@ export default function AdminSeriesDetailPage() {
   if (!series) {
     return (
       <AdminShell title="作品详情" subtitle="没有找到这部作品。">
-        <AdminDataState isLoading={false} hasData={false} emptyMessage="这条作品记录不存在。" />
+        <AdminDataState
+          isLoading={false}
+          hasData={false}
+          emptyMessage="这条作品记录不存在。"
+        />
       </AdminShell>
     );
   }
 
   return (
     <AdminShell
-      title={series.title || '作品详情'}
+      title={series.title || "作品详情"}
       subtitle="优先维护读者会直接看到的作品信息和真实署名。"
       actions={
         <SeriesHeaderActions
-          onBackToList={() => router.push('/admin/series')}
-          onOpenEpisodes={() => router.push(`/admin/series/${seriesId}/episodes`)}
+          onBackToList={() => router.push("/admin/series")}
+          onOpenEpisodes={() =>
+            router.push(`/admin/series/${seriesId}/episodes`)
+          }
           onOpenStorefront={() =>
-            window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')
+            window.open(`/series/${seriesId}`, "_blank", "noopener,noreferrer")
           }
           isEditing={isEditing}
           onStartEditing={handleStartEditing}
@@ -410,7 +450,10 @@ export default function AdminSeriesDetailPage() {
       <div className="space-y-6">
         <SummaryCardsSection cards={insightState.summaryCards} />
 
-        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
+        />
         <AdminFeedbackBanner
           feedback={creditsFeedback}
           onDismiss={() => setCreditsFeedback(EMPTY_FEEDBACK)}
@@ -424,7 +467,10 @@ export default function AdminSeriesDetailPage() {
           statusOptions={STATUS_OPTIONS}
         />
 
-        <div id="creator" className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
+        <div
+          id="creator"
+          className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]"
+        >
           <div className="space-y-6">
             <CoverSection
               formData={formData}
@@ -451,8 +497,8 @@ export default function AdminSeriesDetailPage() {
               loading={creditsQuery.isLoading}
               errorMessage={
                 creditsQuery.isError
-                  ? getErrorMessage(creditsQuery.error, '创作者署名加载失败。')
-                  : ''
+                  ? getErrorMessage(creditsQuery.error, "创作者署名加载失败。")
+                  : ""
               }
               onStartEditing={handleStartCreditsEditing}
               onCancelEditing={handleCancelCreditsEditing}

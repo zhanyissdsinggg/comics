@@ -33,7 +33,12 @@ export function isValidSeriesPayload(payload) {
     return false;
   }
 
-  if (isBlockedSeriesKey(id) || isBlockedSeriesKey(series.slug) || isBlockedSeriesKey(series.handle) || isBlockedSeriesKey(series.fixtureKey)) {
+  if (
+    isBlockedSeriesKey(id) ||
+    isBlockedSeriesKey(series.slug) ||
+    isBlockedSeriesKey(series.handle) ||
+    isBlockedSeriesKey(series.fixtureKey)
+  ) {
     return false;
   }
 
@@ -92,7 +97,10 @@ export function validateReaderPayload(seriesId, episodeId, payload) {
     return false;
   }
 
-  if (isBlockedSeriesKey(normalizedSeriesId) || isBlockedSeriesKey(normalizedEpisodeId)) {
+  if (
+    isBlockedSeriesKey(normalizedSeriesId) ||
+    isBlockedSeriesKey(normalizedEpisodeId)
+  ) {
     return false;
   }
 
@@ -115,7 +123,9 @@ export function validateReaderPayload(seriesId, episodeId, payload) {
     return false;
   }
 
-  return episodes.some((item) => normalizeString(item?.id) === normalizedEpisodeId);
+  return episodes.some(
+    (item) => normalizeString(item?.id) === normalizedEpisodeId,
+  );
 }
 
 export function logSeriesInvariant(message, details = {}) {

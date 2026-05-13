@@ -60,7 +60,14 @@ const TITLE_KEYS = new Set([
   "episode_title",
   "content_title",
 ]);
-const QUERY_KEYS = new Set(["q", "query", "search", "search_query", "keyword", "term"]);
+const QUERY_KEYS = new Set([
+  "q",
+  "query",
+  "search",
+  "search_query",
+  "keyword",
+  "term",
+]);
 const AD_PLATFORM_ALLOWED_KEYS = new Set([
   "page_path",
   "content_mode",
@@ -214,7 +221,9 @@ function toSnakeCase(key) {
 }
 
 function normalizeText(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function getCurrentContentMode() {
@@ -266,7 +275,10 @@ function getBaseUrl() {
     return envBase.replace(/\/$/, "");
   }
 
-  if (typeof window !== "undefined" && !window.location.hostname.includes("localhost")) {
+  if (
+    typeof window !== "undefined" &&
+    !window.location.hostname.includes("localhost")
+  ) {
     return window.location.origin;
   }
 
@@ -317,7 +329,10 @@ function recordSuccess() {
   if (circuitBreakerState === "HALF_OPEN") {
     consecutiveSuccesses += 1;
     if (consecutiveSuccesses >= CIRCUIT_BREAKER_SUCCESS_THRESHOLD) {
-      log("log", "[analytics] Circuit breaker closing after successful requests");
+      log(
+        "log",
+        "[analytics] Circuit breaker closing after successful requests",
+      );
       circuitBreakerState = "CLOSED";
       consecutiveSuccesses = 0;
     }
@@ -330,15 +345,24 @@ function recordFailure() {
   lastFailureTime = Date.now();
 
   if (circuitBreakerState === "HALF_OPEN") {
-    log("warn", "[analytics] Circuit breaker reopening after failure in HALF_OPEN state");
+    log(
+      "warn",
+      "[analytics] Circuit breaker reopening after failure in HALF_OPEN state",
+    );
     circuitBreakerState = "OPEN";
     circuitBreakerOpenTime = Date.now();
     consecutiveSuccesses = 0;
     return;
   }
 
-  if (circuitBreakerState === "CLOSED" && consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
-    log("error", `[analytics] Circuit breaker opening after ${consecutiveFailures} consecutive failures`);
+  if (
+    circuitBreakerState === "CLOSED" &&
+    consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD
+  ) {
+    log(
+      "error",
+      `[analytics] Circuit breaker opening after ${consecutiveFailures} consecutive failures`,
+    );
     circuitBreakerState = "OPEN";
     circuitBreakerOpenTime = Date.now();
   }
@@ -379,7 +403,10 @@ async function processBatch() {
 
   if (!checkCircuitBreaker()) {
     if (EVENT_QUEUE.length > 100) {
-      log("warn", `[analytics] Circuit breaker is OPEN, clearing ${EVENT_QUEUE.length} queued events`);
+      log(
+        "warn",
+        `[analytics] Circuit breaker is OPEN, clearing ${EVENT_QUEUE.length} queued events`,
+      );
       EVENT_QUEUE.length = 0;
     }
     return;
@@ -406,7 +433,10 @@ async function processBatch() {
     const is405Error = response.status === 405;
 
     if (is405Error) {
-      log("error", "[analytics] 405 Method Not Allowed - backend does not support /api/events/batch, clearing queue");
+      log(
+        "error",
+        "[analytics] 405 Method Not Allowed - backend does not support /api/events/batch, clearing queue",
+      );
       EVENT_QUEUE.length = 0;
       circuitBreakerState = "OPEN";
       circuitBreakerOpenTime = Date.now();
@@ -433,7 +463,10 @@ async function processBatch() {
     if (retryCount < MAX_RETRY_ATTEMPTS && circuitBreakerState !== "OPEN") {
       EVENT_QUEUE.unshift(...eventsToSend);
     } else {
-      log("error", "[analytics] Max retry attempts reached or circuit breaker open, dropping events");
+      log(
+        "error",
+        "[analytics] Max retry attempts reached or circuit breaker open, dropping events",
+      );
       if (retryCount >= MAX_RETRY_ATTEMPTS) {
         retryCount = 0;
       }
@@ -481,9 +514,7 @@ function normalizePrimitive(value) {
   }
 
   if (Array.isArray(value)) {
-    const parts = value
-      .map((item) => normalizePrimitive(item))
-      .filter(Boolean);
+    const parts = value.map((item) => normalizePrimitive(item)).filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : undefined;
   }
 
@@ -822,7 +853,10 @@ function sendToSnap(payload) {
 }
 
 function sendToMixpanel(payload) {
-  if (typeof window === "undefined" || typeof window.mixpanel?.track !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.mixpanel?.track !== "function"
+  ) {
     return;
   }
 
@@ -845,7 +879,10 @@ function queueEvent(payload) {
 }
 
 function dispatchPayload(payload) {
-  if (typeof window !== "undefined" && !ANALYTICS_EVENT_SET.has(payload.event)) {
+  if (
+    typeof window !== "undefined" &&
+    !ANALYTICS_EVENT_SET.has(payload.event)
+  ) {
     log("warn", "[track] Unknown event:", payload.event);
   }
 
@@ -878,7 +915,9 @@ export function trackPageView(path, props = {}) {
     PAGE_VIEW_EVENT,
     {
       ...props,
-      pagePath: String(path || props.page_path || getClientContext().page_path || ""),
+      pagePath: String(
+        path || props.page_path || getClientContext().page_path || "",
+      ),
     },
     "pageview",
   );

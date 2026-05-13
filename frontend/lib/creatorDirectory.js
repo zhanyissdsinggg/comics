@@ -1,7 +1,4 @@
-import {
-  buildCreatorPathFromSlug,
-  getCreatorDisplayName,
-} from "./creators";
+import { buildCreatorPathFromSlug, getCreatorDisplayName } from "./creators";
 import { resolveSeriesCreatorIdentity } from "./creatorIdentity";
 import {
   filterBlockedPublicGenres,
@@ -69,12 +66,14 @@ function buildCreatorBucket(identity) {
 
 function sortCreatorSeries(items) {
   return [...items].sort((left, right) => {
-    const popularityDelta = getCatalogPriority(right) - getCatalogPriority(left);
+    const popularityDelta =
+      getCatalogPriority(right) - getCatalogPriority(left);
     if (popularityDelta !== 0) {
       return popularityDelta;
     }
 
-    const updatedDelta = new Date(right?.updatedAt || 0) - new Date(left?.updatedAt || 0);
+    const updatedDelta =
+      new Date(right?.updatedAt || 0) - new Date(left?.updatedAt || 0);
     if (updatedDelta !== 0) {
       return updatedDelta;
     }
@@ -110,7 +109,11 @@ export function buildCreatorDirectory(seriesList) {
     }
 
     const updatedAt = normalizeIsoDate(series?.updatedAt);
-    if (updatedAt && (!current.latestUpdatedAt || Date.parse(updatedAt) > Date.parse(current.latestUpdatedAt))) {
+    if (
+      updatedAt &&
+      (!current.latestUpdatedAt ||
+        Date.parse(updatedAt) > Date.parse(current.latestUpdatedAt))
+    ) {
       current.latestUpdatedAt = updatedAt;
     }
 
@@ -123,21 +126,28 @@ export function buildCreatorDirectory(seriesList) {
       const genreCounts = new Map();
 
       sortedSeries.forEach((series) => {
-        (Array.isArray(series?.genres) ? series.genres : []).forEach((genre) => {
-          const key = String(genre || "").trim();
-          if (!key) {
-            return;
-          }
-          genreCounts.set(key, (genreCounts.get(key) || 0) + 1);
-        });
+        (Array.isArray(series?.genres) ? series.genres : []).forEach(
+          (genre) => {
+            const key = String(genre || "").trim();
+            if (!key) {
+              return;
+            }
+            genreCounts.set(key, (genreCounts.get(key) || 0) + 1);
+          },
+        );
       });
 
       const topGenres = Array.from(genreCounts.entries())
-        .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+        .sort(
+          (left, right) =>
+            right[1] - left[1] || left[0].localeCompare(right[0]),
+        )
         .map(([genre]) => genre)
         .slice(0, 3);
       const genres = filterBlockedPublicGenres(
-        Array.from(genreCounts.keys()).sort((left, right) => left.localeCompare(right)),
+        Array.from(genreCounts.keys()).sort((left, right) =>
+          left.localeCompare(right),
+        ),
       );
 
       return {
@@ -149,7 +159,9 @@ export function buildCreatorDirectory(seriesList) {
         leadSummary:
           sortedSeries[0]?.description ||
           `${sortedSeries[0]?.title || "The lead title"}${
-            topGenres[0] ? ` brings together ${topGenres[0].toLowerCase()} elements.` : "."
+            topGenres[0]
+              ? ` brings together ${topGenres[0].toLowerCase()} elements.`
+              : "."
           }`,
       };
     })
@@ -158,7 +170,9 @@ export function buildCreatorDirectory(seriesList) {
         return right.titleCount - left.titleCount;
       }
 
-      const updatedDelta = Date.parse(right.latestUpdatedAt || 0) - Date.parse(left.latestUpdatedAt || 0);
+      const updatedDelta =
+        Date.parse(right.latestUpdatedAt || 0) -
+        Date.parse(left.latestUpdatedAt || 0);
       if (updatedDelta !== 0) {
         return updatedDelta;
       }

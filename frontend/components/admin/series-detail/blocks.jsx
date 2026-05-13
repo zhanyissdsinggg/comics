@@ -52,8 +52,12 @@ export function CreditDraftCard({
     <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-slate-950">署名 {index + 1}</p>
-          {credit.isPrimary ? <AdminBadge tone="accent">主署名</AdminBadge> : null}
+          <p className="text-sm font-semibold text-slate-950">
+            署名 {index + 1}
+          </p>
+          {credit.isPrimary ? (
+            <AdminBadge tone="accent">主署名</AdminBadge>
+          ) : null}
           <AdminBadge tone={credit.isPublic ? "success" : "warning"}>
             {credit.isPublic ? "公开" : "仅后台"}
           </AdminBadge>
@@ -74,7 +78,9 @@ export function CreditDraftCard({
             type="text"
             value={credit.name}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "name", event.target.value)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "name", event.target.value)
+            }
             className={adminInputClassName}
           />
         </AdminFormField>
@@ -82,7 +88,9 @@ export function CreditDraftCard({
           <select
             value={credit.role}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "role", event.target.value)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "role", event.target.value)
+            }
             className={adminSelectClassName}
           >
             {roleOptions.map((option) => (
@@ -96,7 +104,9 @@ export function CreditDraftCard({
           <select
             value={credit.type}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "type", event.target.value)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "type", event.target.value)
+            }
             className={adminSelectClassName}
           >
             {typeOptions.map((option) => (
@@ -112,7 +122,9 @@ export function CreditDraftCard({
             min="0"
             value={credit.sortOrder}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "sortOrder", event.target.value)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "sortOrder", event.target.value)
+            }
             className={adminInputClassName}
           />
         </AdminFormField>
@@ -128,7 +140,9 @@ export function CreditDraftCard({
             type="checkbox"
             checked={credit.isPublic}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "isPublic", event.target.checked)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "isPublic", event.target.checked)
+            }
             className={adminCheckboxClassName}
           />
         </label>
@@ -145,7 +159,9 @@ export function CreditDraftCard({
             type="checkbox"
             checked={credit.isPrimary}
             disabled={!isEditing}
-            onChange={(event) => onFieldChange(credit.id, "isPrimary", event.target.checked)}
+            onChange={(event) =>
+              onFieldChange(credit.id, "isPrimary", event.target.checked)
+            }
             className={adminCheckboxClassName}
           />
         </label>

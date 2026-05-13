@@ -247,21 +247,21 @@ export default function NotificationsPage() {
             description=""
             actions={
               <>
-              <button
-                type="button"
-                onClick={() => router.push("/library")}
-                className={storefrontPrimaryButtonClass}
-                data-testid="notifications-go-library"
-              >
-                Library
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/search")}
-                className={storefrontSecondaryButtonClass}
-              >
-                Search
-              </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/library")}
+                  className={storefrontPrimaryButtonClass}
+                  data-testid="notifications-go-library"
+                >
+                  Library
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/search")}
+                  className={storefrontSecondaryButtonClass}
+                >
+                  Search
+                </button>
               </>
             }
           />

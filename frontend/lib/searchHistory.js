@@ -101,10 +101,14 @@ export function saveSearchHistoryItem(query, options = {}) {
   const trimmed = typeof query === "string" ? query.trim() : "";
 
   if (!trimmed) {
-    return Array.isArray(currentItems) ? normalizeSearchHistory(currentItems, limit) : [];
+    return Array.isArray(currentItems)
+      ? normalizeSearchHistory(currentItems, limit)
+      : [];
   }
 
-  const baseItems = Array.isArray(currentItems) ? currentItems : readSearchHistory({ limit });
+  const baseItems = Array.isArray(currentItems)
+    ? currentItems
+    : readSearchHistory({ limit });
   return writeSearchHistory([trimmed, ...baseItems], { limit });
 }
 
@@ -113,10 +117,14 @@ export function removeSearchHistoryItem(query, options = {}) {
   const trimmed = typeof query === "string" ? query.trim().toLowerCase() : "";
 
   if (!trimmed) {
-    return Array.isArray(currentItems) ? normalizeSearchHistory(currentItems, limit) : [];
+    return Array.isArray(currentItems)
+      ? normalizeSearchHistory(currentItems, limit)
+      : [];
   }
 
-  const baseItems = Array.isArray(currentItems) ? currentItems : readSearchHistory({ limit });
+  const baseItems = Array.isArray(currentItems)
+    ? currentItems
+    : readSearchHistory({ limit });
   const nextItems = baseItems.filter((item) => item.toLowerCase() !== trimmed);
   return writeSearchHistory(nextItems, { limit });
 }

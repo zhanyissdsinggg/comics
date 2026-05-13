@@ -71,7 +71,7 @@ export function ProgressProvider({ children }) {
       return;
     }
     const keys = Object.keys(window.localStorage).filter((key) =>
-      key.startsWith("mn_progress_")
+      key.startsWith("mn_progress_"),
     );
     const next = {};
     keys.forEach((key) => {
@@ -96,7 +96,10 @@ export function ProgressProvider({ children }) {
         setBySeriesId(normalizedProgress);
         if (typeof window !== "undefined") {
           Object.entries(normalizedProgress).forEach(([seriesId, value]) => {
-            window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(value));
+            window.localStorage.setItem(
+              getProgressKey(seriesId),
+              JSON.stringify(value),
+            );
           });
         }
       }
@@ -119,7 +122,10 @@ export function ProgressProvider({ children }) {
         updatedAt: Date.now(),
       };
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(getProgressKey(seriesId), JSON.stringify(payload));
+        window.localStorage.setItem(
+          getProgressKey(seriesId),
+          JSON.stringify(payload),
+        );
       }
       setBySeriesId((prev) => ({ ...prev, [seriesId]: payload }));
 
@@ -144,7 +150,7 @@ export function ProgressProvider({ children }) {
         timerRef.current = null;
       }, 2000);
     },
-    [isSignedIn]
+    [isSignedIn],
   );
 
   const loadProgress = useCallback(async () => {
@@ -163,12 +169,19 @@ export function ProgressProvider({ children }) {
 
   const getProgress = useCallback(
     (seriesId) => bySeriesId[seriesId] || null,
-    [bySeriesId]
+    [bySeriesId],
   );
 
   const value = useMemo(
-    () => ({ bySeriesId, progressMap: bySeriesId, setProgress, getProgress, loadProgress, loaded }),
-    [bySeriesId, getProgress, setProgress, loadProgress, loaded]
+    () => ({
+      bySeriesId,
+      progressMap: bySeriesId,
+      setProgress,
+      getProgress,
+      loadProgress,
+      loaded,
+    }),
+    [bySeriesId, getProgress, setProgress, loadProgress, loaded],
   );
 
   return (

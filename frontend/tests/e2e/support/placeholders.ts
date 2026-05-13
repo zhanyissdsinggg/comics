@@ -48,9 +48,19 @@ export function createPosterPlaceholder(label: string): string {
 }
 
 export function createBannerPlaceholder(label: string): string {
-  return createInlinePlaceholder({ label, width: 1600, height: 900, background: "#101827" });
+  return createInlinePlaceholder({
+    label,
+    width: 1600,
+    height: 900,
+    background: "#101827",
+  });
 }
 
 export function createReaderPagePlaceholder(label: string): string {
-  return createInlinePlaceholder({ label, width: 800, height: 1200, background: "#111827" });
+  return createInlinePlaceholder({
+    label,
+    width: 800,
+    height: 1200,
+    background: "#111827",
+  });
 }

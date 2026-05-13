@@ -70,8 +70,12 @@ export function UsersDirectorySection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">按邮箱或账号编号定位用户，再按创建顺序复核账号状态。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按邮箱或账号编号定位用户，再按创建顺序复核账号状态。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -88,10 +92,17 @@ export function UsersDirectorySection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量动作</p>
-          <p className="mt-2 text-sm text-slate-600">批量封禁、恢复和删除都放在这里，避免和行内操作混在一起。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            批量动作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            批量封禁、恢复和删除都放在这里，避免和行内操作混在一起。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="secondary"
@@ -145,7 +156,9 @@ export function UsersDirectorySection(props) {
                   <input
                     type="checkbox"
                     aria-label="选择全部用户"
-                    checked={users.length > 0 && selectedIds.length === users.length}
+                    checked={
+                      users.length > 0 && selectedIds.length === users.length
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                   />
@@ -171,11 +184,15 @@ export function UsersDirectorySection(props) {
                   </td>
                   <td className="px-4 py-4">
                     <div className="space-y-1">
-                      <p className="font-semibold text-slate-950">{user.email || "未填写邮箱"}</p>
+                      <p className="font-semibold text-slate-950">
+                        {user.email || "未填写邮箱"}
+                      </p>
                       <p className="text-xs text-slate-500">{user.id}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDate(user.createdAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDate(user.createdAt)}
+                  </td>
                   <td className="px-4 py-4">
                     <AdminBadge tone={user.isBlocked ? "danger" : "success"}>
                       {user.isBlocked ? "已封禁" : "正常"}
@@ -252,7 +269,9 @@ export function UsersGuideSection() {
             className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
           >
             <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {item.description}
+            </p>
           </div>
         ))}
       </div>

@@ -52,27 +52,31 @@ export function BehaviorProvider({ children }) {
   }, []);
 
   const viewSeries = useCallback(
-    (seriesId) =>
-      pushEvent({ type: "view_series", seriesId, ts: Date.now() }),
-    [pushEvent]
+    (seriesId) => pushEvent({ type: "view_series", seriesId, ts: Date.now() }),
+    [pushEvent],
   );
 
   const readEpisode = useCallback(
     (seriesId, episodeId) =>
       pushEvent({ type: "read_episode", seriesId, episodeId, ts: Date.now() }),
-    [pushEvent]
+    [pushEvent],
   );
 
   const unlockEpisode = useCallback(
     (seriesId, episodeId) =>
-      pushEvent({ type: "unlock_episode", seriesId, episodeId, ts: Date.now() }),
-    [pushEvent]
+      pushEvent({
+        type: "unlock_episode",
+        seriesId,
+        episodeId,
+        ts: Date.now(),
+      }),
+    [pushEvent],
   );
 
   const followSeries = useCallback(
     (seriesId) =>
       pushEvent({ type: "follow_series", seriesId, ts: Date.now() }),
-    [pushEvent]
+    [pushEvent],
   );
 
   const value = useMemo(
@@ -83,7 +87,7 @@ export function BehaviorProvider({ children }) {
       unlockEpisode,
       followSeries,
     }),
-    [behavior, viewSeries, readEpisode, unlockEpisode, followSeries]
+    [behavior, viewSeries, readEpisode, unlockEpisode, followSeries],
   );
 
   return (

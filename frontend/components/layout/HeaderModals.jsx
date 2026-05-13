@@ -23,12 +23,8 @@ export default function HeaderModals({
   variant = "default",
 }) {
   const { signIn } = useAuthStore();
-  const {
-    requestAdultToggle,
-    confirmAge,
-    ageRuleKey,
-    legalAge,
-  } = useAdultGateStore();
+  const { requestAdultToggle, confirmAge, ageRuleKey, legalAge } =
+    useAdultGateStore();
   const { paidPts, bonusPts } = useWalletStore();
 
   useEffect(() => {
@@ -72,14 +68,17 @@ export default function HeaderModals({
     onAuthError(
       mode === "register"
         ? "Registration failed. Try a different email."
-        : "Invalid email or password."
+        : "Invalid email or password.",
     );
     return response;
   };
 
   const handleAgeConfirm = (ruleKey) => {
     const resolvedRuleKey = ruleKey || ageRuleKey;
-    trackEvent("adult_gate_confirm", { source: "header", ruleKey: resolvedRuleKey });
+    trackEvent("adult_gate_confirm", {
+      source: "header",
+      ruleKey: resolvedRuleKey,
+    });
     confirmAge(resolvedRuleKey);
     onModalClose("age");
   };
@@ -99,11 +98,12 @@ export default function HeaderModals({
         "/store",
         {
           entryPoint: "HEADER_TOPUP",
-          offerId: packageId !== "auto" ? `points_pack_${packageId}` : undefined,
+          offerId:
+            packageId !== "auto" ? `points_pack_${packageId}` : undefined,
           sourcePath: currentPath,
           returnTo: currentPath,
         },
-        { focus: packageId }
+        { focus: packageId },
       );
       window.location.href = target;
     }
@@ -160,5 +160,3 @@ export default function HeaderModals({
     </>
   );
 }
-
-

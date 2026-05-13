@@ -42,12 +42,12 @@ export default function EditorialHero({
           ) : null}
 
           <h1
-              className={cn(
-                "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
-                isLight ? "text-slate-950" : "text-white",
-              )}
-            >
-              {title}
+            className={cn(
+              "mt-3 max-w-4xl font-display text-[1.95rem] font-semibold leading-[0.96] tracking-tight sm:text-[2.35rem] xl:text-[3rem]",
+              isLight ? "text-slate-950" : "text-white",
+            )}
+          >
+            {title}
           </h1>
 
           {description ? (

@@ -2,13 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Bell,
-  CheckCheck,
-  Gift,
-  LoaderCircle,
-  Sparkles,
-} from "lucide-react";
+import { Bell, CheckCheck, Gift, LoaderCircle, Sparkles } from "lucide-react";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useNotificationsStore } from "../../store/useNotificationsStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
@@ -22,7 +16,9 @@ function resolveNotificationHref(item) {
       `/read/${encodeURIComponent(item.seriesId)}/${encodeURIComponent(item.episodeId)}`,
       {
         entryPoint:
-          item.type === "TTF_READY" ? "FIGMA_NOTIFICATION_TTF" : "FIGMA_NOTIFICATION_EPISODE",
+          item.type === "TTF_READY"
+            ? "FIGMA_NOTIFICATION_TTF"
+            : "FIGMA_NOTIFICATION_EPISODE",
         sourcePath: "/notifications",
         sourceSeriesId: item.seriesId,
         sourceEpisodeId: item.episodeId,
@@ -32,17 +28,23 @@ function resolveNotificationHref(item) {
   }
 
   if (item?.seriesId) {
-    return buildPathWithAttribution(`/series/${encodeURIComponent(item.seriesId)}`, {
-      entryPoint: "FIGMA_NOTIFICATION_SERIES",
-      sourcePath: "/notifications",
-      sourceSeriesId: item.seriesId,
-      returnTo: "/notifications",
-    });
+    return buildPathWithAttribution(
+      `/series/${encodeURIComponent(item.seriesId)}`,
+      {
+        entryPoint: "FIGMA_NOTIFICATION_SERIES",
+        sourcePath: "/notifications",
+        sourceSeriesId: item.seriesId,
+        returnTo: "/notifications",
+      },
+    );
   }
 
   if (item?.type === "PROMO" || item?.type === "SUB_VOUCHER") {
     return buildPathWithAttribution("/store", {
-      entryPoint: item.type === "PROMO" ? "FIGMA_NOTIFICATION_PROMO" : "FIGMA_NOTIFICATION_VOUCHER",
+      entryPoint:
+        item.type === "PROMO"
+          ? "FIGMA_NOTIFICATION_PROMO"
+          : "FIGMA_NOTIFICATION_VOUCHER",
       sourcePath: "/notifications",
       returnTo: "/notifications",
     });
@@ -68,7 +70,9 @@ function NotificationCard({ card, workingId, onOpen }) {
       onClick={() => onOpen(card)}
       className={cn(
         "group flex w-full items-start gap-3 rounded-[24px] border p-4 text-left shadow-xl transition-all hover:-translate-y-0.5 hover:bg-white/[0.03] active:scale-[0.99] md:gap-4 md:rounded-[26px] md:p-5",
-        card.read ? cn(palette.surface, palette.border) : "border-indigo-500/25 bg-indigo-500/8",
+        card.read
+          ? cn(palette.surface, palette.border)
+          : "border-indigo-500/25 bg-indigo-500/8",
       )}
     >
       <div
@@ -86,7 +90,9 @@ function NotificationCard({ card, workingId, onOpen }) {
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-base font-black text-white md:text-lg">{card.title}</h3>
+          <h3 className="text-base font-black text-white md:text-lg">
+            {card.title}
+          </h3>
           {!card.read ? (
             <span className="rounded-full bg-red-500/12 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-400">
               New
@@ -113,7 +119,8 @@ function NotificationsContent() {
   const router = useRouter();
   const { palette } = useFigmaSite();
   const { isAdultMode } = useAdultGateStore();
-  const { notifications, unreadCount, loadNotifications, markRead } = useNotificationsStore();
+  const { notifications, unreadCount, loadNotifications, markRead } =
+    useNotificationsStore();
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState("");
   const [error, setError] = useState("");
@@ -152,7 +159,9 @@ function NotificationsContent() {
   };
 
   const handleMarkAll = async () => {
-    const unreadIds = notifications.filter((item) => !item.read).map((item) => item.id);
+    const unreadIds = notifications
+      .filter((item) => !item.read)
+      .map((item) => item.id);
     if (unreadIds.length === 0) {
       return;
     }
@@ -185,7 +194,8 @@ function NotificationsContent() {
                   Everything worth opening lives here.
                 </h1>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-gray-400 md:mt-4 md:max-w-2xl md:leading-7">
-                  Episode drops, promo pushes, and time-to-free unlocks are all wired to the same notification feed.
+                  Episode drops, promo pushes, and time-to-free unlocks are all
+                  wired to the same notification feed.
                 </p>
               </div>
 
@@ -215,7 +225,6 @@ function NotificationsContent() {
                 </button>
               </div>
             </div>
-
           </section>
 
           <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
@@ -271,19 +280,25 @@ function NotificationsContent() {
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Episode drops
                   </p>
-                  <p className="mt-2 text-sm font-bold text-white">Chapter and route alerts</p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    Chapter and route alerts
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Store prompts
                   </p>
-                  <p className="mt-2 text-sm font-bold text-white">Promo and voucher notices</p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    Promo and voucher notices
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Return path
                   </p>
-                  <p className="mt-2 text-sm font-bold text-white">One tap back into reading</p>
+                  <p className="mt-2 text-sm font-bold text-white">
+                    One tap back into reading
+                  </p>
                 </div>
               </div>
             </div>
@@ -298,9 +313,12 @@ function NotificationsContent() {
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                 Queue Health
               </p>
-              <div className="mt-3 text-3xl font-black text-white">{notifications.length}</div>
+              <div className="mt-3 text-3xl font-black text-white">
+                {notifications.length}
+              </div>
               <p className="mt-2 text-sm leading-6 text-gray-400">
-                Alerts are balanced between release drops, promotional nudges, and entitlement updates.
+                Alerts are balanced between release drops, promotional nudges,
+                and entitlement updates.
               </p>
               <div className="mt-4 space-y-3">
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
@@ -308,7 +326,9 @@ function NotificationsContent() {
                     Priority
                   </p>
                   <p className="mt-2 text-sm font-bold text-white">
-                    {unreadCount > 0 ? "Unread items waiting" : "Inbox under control"}
+                    {unreadCount > 0
+                      ? "Unread items waiting"
+                      : "Inbox under control"}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
@@ -371,9 +391,12 @@ function NotificationsContent() {
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
                 <Bell className="h-8 w-8 text-gray-500" />
               </div>
-              <h2 className="mt-5 text-2xl font-black text-white">Inbox cleared</h2>
+              <h2 className="mt-5 text-2xl font-black text-white">
+                Inbox cleared
+              </h2>
               <p className="mt-3 text-sm leading-6 text-gray-400">
-                No new alerts right now. When the backend drops another update, it will show here.
+                No new alerts right now. When the backend drops another update,
+                it will show here.
               </p>
             </div>
           )}

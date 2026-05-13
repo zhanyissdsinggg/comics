@@ -1,8 +1,17 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
-import { applyPreferencesToStorage, readPreferenceFlag } from "../lib/preferencesClient";
+import {
+  applyPreferencesToStorage,
+  readPreferenceFlag,
+} from "../lib/preferencesClient";
 
 const NotificationsContext = createContext(null);
 const PREF_KEYS = {
@@ -22,55 +31,65 @@ export function NotificationsProvider({ children }) {
     }
   }, []);
 
-  const loadNotifications = useCallback(async (adultFlag) => {
-    const suffix = adultFlag ? `?adult=${adultFlag}` : "";
-    apiGet("/api/preferences").then((prefResponse) => {
-      if (prefResponse.ok && prefResponse.data?.preferences) {
-        applyPreferencesToStorage(prefResponse.data.preferences);
-      }
-    });
-    const response = await apiGet(`/api/notifications${suffix}`, { cacheMs: 5000 });
-    if (response.ok && Array.isArray(response.data?.notifications)) {
-      const prefs = readPreferences();
-      const filtered = response.data.notifications.filter((item) => {
-        if (item.type === "NEW_EPISODE") {
-          return prefs.newEpisode;
+  const loadNotifications = useCallback(
+    async (adultFlag) => {
+      const suffix = adultFlag ? `?adult=${adultFlag}` : "";
+      apiGet("/api/preferences").then((prefResponse) => {
+        if (prefResponse.ok && prefResponse.data?.preferences) {
+          applyPreferencesToStorage(prefResponse.data.preferences);
         }
-        if (item.type === "TTF_READY") {
-          return prefs.ttfReady;
-        }
-        if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
-          return prefs.promo;
-        }
-        return true;
       });
-      syncList({ ...response, data: { ...response.data, notifications: filtered } });
-    } else {
-      syncList(response);
-    }
-    return response;
-  }, [syncList]);
+      const response = await apiGet(`/api/notifications${suffix}`, {
+        cacheMs: 5000,
+      });
+      if (response.ok && Array.isArray(response.data?.notifications)) {
+        const prefs = readPreferences();
+        const filtered = response.data.notifications.filter((item) => {
+          if (item.type === "NEW_EPISODE") {
+            return prefs.newEpisode;
+          }
+          if (item.type === "TTF_READY") {
+            return prefs.ttfReady;
+          }
+          if (item.type === "PROMO" || item.type === "SUB_VOUCHER") {
+            return prefs.promo;
+          }
+          return true;
+        });
+        syncList({
+          ...response,
+          data: { ...response.data, notifications: filtered },
+        });
+      } else {
+        syncList(response);
+      }
+      return response;
+    },
+    [syncList],
+  );
 
   const markRead = useCallback(
     async (notificationIds) => {
-      const response = await apiPost("/api/notifications/read", { notificationIds });
+      const response = await apiPost("/api/notifications/read", {
+        notificationIds,
+      });
       if (response.ok) {
         setNotifications((prev) =>
           prev.map((item) =>
-            notificationIds.includes(item.id) ? { ...item, read: true } : item
-          )
+            notificationIds.includes(item.id) ? { ...item, read: true } : item,
+          ),
         );
       } else {
         syncList(response);
       }
       return response;
     },
-    [syncList]
+    [syncList],
   );
 
   const unreadCount = useMemo(
     () => notifications.filter((item) => !item.read).length,
-    [notifications]
+    [notifications],
   );
 
   const value = useMemo(
@@ -81,7 +100,7 @@ export function NotificationsProvider({ children }) {
       loadNotifications,
       markRead,
     }),
-    [notifications, unreadCount, loaded, loadNotifications, markRead]
+    [notifications, unreadCount, loaded, loadNotifications, markRead],
   );
 
   return (
@@ -94,7 +113,9 @@ export function NotificationsProvider({ children }) {
 export function useNotificationsStore() {
   const context = useContext(NotificationsContext);
   if (!context) {
-    throw new Error("useNotificationsStore must be used within NotificationsProvider");
+    throw new Error(
+      "useNotificationsStore must be used within NotificationsProvider",
+    );
   }
   return context;
 }

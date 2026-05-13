@@ -304,7 +304,10 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
 
         setSeriesList(
           seriesResponse.ok
-            ? filterContentByMode(seriesResponse.data?.series || [], contentMode)
+            ? filterContentByMode(
+                seriesResponse.data?.series || [],
+                contentMode,
+              )
             : [],
         );
         setEntitlements(
@@ -379,7 +382,11 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: progressPercent >= 0.98 ? "Read" : "In Progress",
-            primaryLine: formatProgressLabel(series, currentChapter, totalChapters),
+            primaryLine: formatProgressLabel(
+              series,
+              currentChapter,
+              totalChapters,
+            ),
             summary: series.type ? `${series.type} series` : "",
             updatedLabel: formatRelativeTime(
               progress.updatedAt || historyEntry?.createdAt,
@@ -493,20 +500,20 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: "Unlocked",
-            
-              primaryLine: formatUnlockedSummary(
-                series,
-                entry.unlockedEpisodeIds.length,
-                latestUnlockedChapter,
-              ),
-              summary: progress?.lastEpisodeId
-                ? `Resume ${formatInstallmentLabel(
-                    series,
-                    parseEpisodeNumber(progress.lastEpisodeId) || "?",
-                  )}`
-                : series.type
-                  ? `${series.type} series`
-                  : "",
+
+            primaryLine: formatUnlockedSummary(
+              series,
+              entry.unlockedEpisodeIds.length,
+              latestUnlockedChapter,
+            ),
+            summary: progress?.lastEpisodeId
+              ? `Resume ${formatInstallmentLabel(
+                  series,
+                  parseEpisodeNumber(progress.lastEpisodeId) || "?",
+                )}`
+              : series.type
+                ? `${series.type} series`
+                : "",
             updatedLabel: formatRelativeTime(
               progress?.updatedAt || historyEntry?.createdAt,
             ),
@@ -597,7 +604,11 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   const buttonBaseClass = storefrontSecondaryButtonClass;
 
   return (
-    <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
+    <SurfacePanel
+      className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      appearance="dark"
+      accent="blue"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
@@ -663,7 +674,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 >
                   <Icon className="size-4" />
                   <span>{tab.label}</span>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-black bg-[#FFE500] text-black" : "border-white/20 bg-[#0a0a0a] text-white/70"}`}>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-black bg-[#FFE500] text-black" : "border-white/20 bg-[#0a0a0a] text-white/70"}`}
+                  >
                     {signedInCount[tab.id]}
                   </span>
                 </button>

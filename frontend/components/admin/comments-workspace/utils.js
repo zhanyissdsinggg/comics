@@ -21,8 +21,12 @@ export const sortOptions = [
 ];
 
 export function getContentPreview(content) {
-  const text = String(content || "").replace(/\s+/g, " ").trim();
-  return text.length > 120 ? `${text.slice(0, 120)}...` : text || "暂无评论内容";
+  const text = String(content || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 120
+    ? `${text.slice(0, 120)}...`
+    : text || "暂无评论内容";
 }
 
 export function formatDate(value) {

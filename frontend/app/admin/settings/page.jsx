@@ -38,7 +38,9 @@ function SettingsContent() {
           </Link>
         }
       >
-        <p>后台会话优先使用安全 Cookie，不再把 token 散落在 URL 或本地存储里。</p>
+        <p>
+          后台会话优先使用安全 Cookie，不再把 token 散落在 URL 或本地存储里。
+        </p>
         <p className="mt-2">
           正常登录已经切到
           <code className="mx-1 rounded bg-[rgba(15,23,42,0.06)] px-1.5 py-0.5">
@@ -98,7 +100,9 @@ function SettingsContent() {
           }
         >
           <ul className="space-y-2">
-            <li>作品、章节、创作者、推荐位、活动、订单、通知已经能支撑日常运营</li>
+            <li>
+              作品、章节、创作者、推荐位、活动、订单、通知已经能支撑日常运营
+            </li>
             <li>后台成员页负责维护真实的管理员目录</li>
             <li>停用成员后，会在下一次验权或刷新会话时失去后台访问能力</li>
             <li>后续可继续补创作者资料和专题编排</li>
@@ -111,10 +115,7 @@ function SettingsContent() {
 
 export default function Page() {
   return (
-    <AdminLayout
-      title="系统设置"
-      subtitle="查看访问方式、成员治理和运行边界。"
-    >
+    <AdminLayout title="系统设置" subtitle="查看访问方式、成员治理和运行边界。">
       <SettingsContent />
     </AdminLayout>
   );

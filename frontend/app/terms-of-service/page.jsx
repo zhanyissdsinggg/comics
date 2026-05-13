@@ -149,7 +149,9 @@ function ContactCard() {
   return (
     <StorefrontInfoCard title="Legal contact">
       <p className="mt-3 text-sm font-medium text-white/68">
-        <span className="font-black uppercase tracking-[0.08em] text-white">Email:</span>{" "}
+        <span className="font-black uppercase tracking-[0.08em] text-white">
+          Email:
+        </span>{" "}
         <a
           href={`mailto:${siteConfig.legalEmail}`}
           className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
@@ -159,7 +161,9 @@ function ContactCard() {
       </p>
       {siteConfig.companyAddress ? (
         <p className="mt-3 text-sm font-medium text-white/68">
-          <span className="font-black uppercase tracking-[0.08em] text-white">Address:</span>{" "}
+          <span className="font-black uppercase tracking-[0.08em] text-white">
+            Address:
+          </span>{" "}
           {siteConfig.companyAddress}
         </p>
       ) : null}
@@ -179,7 +183,8 @@ export default function TermsOfServicePage() {
             title="Terms."
             description={
               <>
-                Using {siteConfig.siteName} means you agree to these Terms and our{" "}
+                Using {siteConfig.siteName} means you agree to these Terms and
+                our{" "}
                 <Link
                   href="/privacy-policy"
                   className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
@@ -196,7 +201,9 @@ export default function TermsOfServicePage() {
               },
               {
                 label: "Covers",
-                value: monetizationLive ? "Browsing + purchases" : "Browsing + future purchases",
+                value: monetizationLive
+                  ? "Browsing + purchases"
+                  : "Browsing + future purchases",
               },
             ]}
           />

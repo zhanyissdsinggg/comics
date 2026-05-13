@@ -141,7 +141,11 @@ export function formatLabel(value, fallback = "未命名渠道") {
 }
 
 function markUnavailable(defaultValue) {
-  if (defaultValue && typeof defaultValue === "object" && !Array.isArray(defaultValue)) {
+  if (
+    defaultValue &&
+    typeof defaultValue === "object" &&
+    !Array.isArray(defaultValue)
+  ) {
     return { ...defaultValue, __unavailable: true };
   }
 

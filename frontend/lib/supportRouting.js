@@ -4,7 +4,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Billing & purchases",
     title: "Billing & purchases",
     subject: "Billing issue",
-    description: "Wrong charge, missing purchase, duplicate payment, refund issue, or receipt problem.",
+    description:
+      "Wrong charge, missing purchase, duplicate payment, refund issue, or receipt problem.",
     draft: "What happened? Add the charge or order details.",
   },
   login: {
@@ -12,7 +13,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Login & account",
     title: "Login & account",
     subject: "Login help",
-    description: "Email verification, password reset, sign-in trouble, account recovery, or sync issues.",
+    description:
+      "Email verification, password reset, sign-in trouble, account recovery, or sync issues.",
     draft: "What part of sign-in is not working?",
   },
   technical: {
@@ -20,7 +22,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Reader issue",
     title: "Reader issue",
     subject: "Reader issue",
-    description: "Broken reader pages, missing chapters, progress problems, playback failures, or pages that will not load.",
+    description:
+      "Broken reader pages, missing chapters, progress problems, playback failures, or pages that will not load.",
     draft: "Which title or chapter broke?",
   },
   adult: {
@@ -28,7 +31,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Mature access",
     title: "Mature content access",
     subject: "Mature content access",
-    description: "18+ access, age check failures, hidden mature titles, region mismatch, or Hide 18+ history questions.",
+    description:
+      "18+ access, age check failures, hidden mature titles, region mismatch, or Hide 18+ history questions.",
     draft: "Is this about age check, region, hidden titles, or 18+ history?",
   },
   content: {
@@ -36,7 +40,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Content issue",
     title: "Content report",
     subject: "Content report",
-    description: "Cover issues, translation quality, metadata mistakes, title reports, or creator-credit problems.",
+    description:
+      "Cover issues, translation quality, metadata mistakes, title reports, or creator-credit problems.",
     draft: "Which title or creator page needs review?",
   },
   other: {
@@ -44,7 +49,8 @@ const SUPPORT_TOPIC_MAP = {
     label: "Other",
     title: "Other",
     subject: "Support request",
-    description: "Anything else that does not fit the other support categories.",
+    description:
+      "Anything else that does not fit the other support categories.",
     draft: "Tell us what you need help with.",
   },
 };
@@ -69,7 +75,9 @@ const SUPPORT_TOPIC_ALIASES = {
 };
 
 export function getSupportTopicPreset(topic) {
-  const rawKey = String(topic || "").trim().toLowerCase();
+  const rawKey = String(topic || "")
+    .trim()
+    .toLowerCase();
   const key = SUPPORT_TOPIC_ALIASES[rawKey] || rawKey;
   return SUPPORT_TOPIC_MAP[key] || null;
 }

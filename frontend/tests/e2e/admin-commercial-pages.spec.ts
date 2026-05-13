@@ -17,7 +17,11 @@ const MOCK_ADMIN_SESSION = {
 
 type AdminRouteHandler = (route: Route, url: URL) => Promise<boolean>;
 
-async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
+async function fulfillJson(
+  route: Route,
+  body: unknown,
+  status = 200,
+): Promise<void> {
   await route.fulfill({
     status,
     contentType: "application/json",
@@ -29,7 +33,10 @@ async function primeAdminSession(page: Page): Promise<void> {
   await page.addInitScript(() => undefined);
 }
 
-async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Promise<void> {
+async function installAdminApiMocks(
+  page: Page,
+  handler: AdminRouteHandler,
+): Promise<void> {
   await page.route("**/api/health", async (route) => {
     await fulfillJson(route, { ok: true });
   });
@@ -39,7 +46,11 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
     const pathname = url.pathname;
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
+      await fulfillJson(route, {
+        success: true,
+        valid: true,
+        session: MOCK_ADMIN_SESSION,
+      });
       return;
     }
 
@@ -57,7 +68,9 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
 }
 
 test.describe("Admin commercial page regressions", () => {
-  test("marketing renders the calm campaign workspace with live data views", async ({ page }) => {
+  test("marketing renders the calm campaign workspace with live data views", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, async (route, url) => {
       if (url.pathname.endsWith("/api/admin/marketing/campaigns")) {
@@ -66,7 +79,8 @@ test.describe("Admin commercial page regressions", () => {
             {
               id: "campaign-1",
               name: "Spring comeback",
-              description: "Reconnect dormant readers with a simpler homepage message.",
+              description:
+                "Reconnect dormant readers with a simpler homepage message.",
               type: "email",
               status: "active",
               targetSegment: "at-risk",
@@ -134,7 +148,9 @@ test.describe("Admin commercial page regressions", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/marketing", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/marketing", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByRole("heading", { name: "营销活动" })).toBeVisible({
@@ -143,7 +159,9 @@ test.describe("Admin commercial page regressions", () => {
     await expect(page.getByRole("button", { name: "新建活动" })).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("Spring comeback", { exact: true })).toBeVisible({
+    await expect(
+      page.getByText("Spring comeback", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -161,7 +179,9 @@ test.describe("Admin commercial page regressions", () => {
     await expectNoRuntimeIssues("/admin/marketing", runtimeIssues);
   });
 
-  test("revenue renders overview, channel, and promotion views in the new admin language", async ({ page }) => {
+  test("revenue renders overview, channel, and promotion views in the new admin language", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, async (route, url) => {
       if (url.pathname.includes("/api/admin/revenue/stats")) {
@@ -190,7 +210,12 @@ test.describe("Admin commercial page regressions", () => {
       if (url.pathname.includes("/api/admin/revenue/channels")) {
         await fulfillJson(route, {
           channels: [
-            { channel: "apple_store", orders: 200, revenue: 7000, avgOrderValue: 35 },
+            {
+              channel: "apple_store",
+              orders: 200,
+              revenue: 7000,
+              avgOrderValue: 35,
+            },
           ],
         });
         return true;
@@ -199,7 +224,14 @@ test.describe("Admin commercial page regressions", () => {
       if (url.pathname.includes("/api/admin/revenue/promotions")) {
         await fulfillJson(route, {
           promotions: [
-            { promotionId: "promo-1", title: "Spring relaunch", orders: 122, revenue: 3800, roi: null, active: true },
+            {
+              promotionId: "promo-1",
+              title: "Spring relaunch",
+              orders: 122,
+              revenue: 3800,
+              roi: null,
+              active: true,
+            },
           ],
           attributionModel: "order_audit",
           roiAvailable: false,
@@ -209,12 +241,19 @@ test.describe("Admin commercial page regressions", () => {
 
       if (url.pathname.endsWith("/api/admin/revenue/user-value-distribution")) {
         await fulfillJson(route, {
-          distribution: { highValue: 24, mediumValue: 80, lowValue: 160, noValue: 300 },
+          distribution: {
+            highValue: 24,
+            mediumValue: 80,
+            lowValue: 160,
+            noValue: 300,
+          },
         });
         return true;
       }
 
-      if (url.pathname.includes("/api/admin/revenue/order-status-distribution")) {
+      if (
+        url.pathname.includes("/api/admin/revenue/order-status-distribution")
+      ) {
         await fulfillJson(route, {
           distribution: { pending: 18, paid: 420, failed: 9, refunded: 12 },
         });
@@ -225,10 +264,14 @@ test.describe("Admin commercial page regressions", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/revenue", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/revenue", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "营收", exact: true })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { level: 1, name: "营收", exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("heading", { name: "收入总览" })).toBeVisible({
@@ -244,7 +287,9 @@ test.describe("Admin commercial page regressions", () => {
     });
 
     await page.getByRole("button", { name: /活动|Promotions/ }).click();
-    await expect(page.getByText("Spring relaunch", { exact: true })).toBeVisible({
+    await expect(
+      page.getByText("Spring relaunch", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await page.waitForTimeout(300);

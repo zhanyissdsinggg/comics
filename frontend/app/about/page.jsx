@@ -83,10 +83,7 @@ export default function AboutPage() {
           </SurfacePanel>
 
           <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
-            <StorefrontSectionHeading
-              eyebrow="Details"
-              title="Contact."
-            />
+            <StorefrontSectionHeading eyebrow="Details" title="Contact." />
             <div className="space-y-3 text-sm text-white/70">
               <p>
                 <span className="font-semibold text-white">Support:</span>{" "}

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 function createQueryClient() {
   return new QueryClient({
@@ -10,8 +10,8 @@ function createQueryClient() {
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,
-        refetchOnReconnect: 'stale',
-        refetchOnMount: 'stale',
+        refetchOnReconnect: "stale",
+        refetchOnMount: "stale",
         retry: 2,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
@@ -36,5 +36,7 @@ function getQueryClient() {
 export function QueryProvider({ children }) {
   const queryClient = useMemo(() => getQueryClient(), []);
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }

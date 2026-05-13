@@ -25,13 +25,18 @@ const MOJIBAKE_PATTERNS = [
 test.describe("Copy integrity", () => {
   for (const route of ROUTES_TO_CHECK) {
     test(`should not show mojibake text on ${route}`, async ({ page }) => {
-      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+      const response = await page.goto(route, {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.ok()).toBeTruthy();
 
       await page.waitForLoadState("load");
       await expect(page.locator("body")).not.toBeEmpty();
 
-      const bodyText = (await page.locator("body").innerText()).replace(/\s+/g, " ");
+      const bodyText = (await page.locator("body").innerText()).replace(
+        /\s+/g,
+        " ",
+      );
 
       for (const pattern of MOJIBAKE_PATTERNS) {
         expect(bodyText).not.toMatch(pattern);

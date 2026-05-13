@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, BookOpen, Copy, Flame, RefreshCw, Search, Sparkles, Star, Zap } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  Copy,
+  Flame,
+  RefreshCw,
+  Search,
+  Sparkles,
+  Star,
+  Zap,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import SurfacePanel from "@/components/common/SurfacePanel";
@@ -19,7 +29,10 @@ import {
   getReaderProof,
 } from "../../lib/homeMerchandising";
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
-import { getStorefrontSlotDisplayMeta, normalizeStorefrontSlotToken } from "../../lib/storefrontSlots";
+import {
+  getStorefrontSlotDisplayMeta,
+  normalizeStorefrontSlotToken,
+} from "../../lib/storefrontSlots";
 import {
   ActionButton,
   EmptyState,
@@ -61,13 +74,18 @@ export default function AdminHomeMerchandisingPage() {
   const [performanceNotice, setPerformanceNotice] = useState("");
 
   const loadSlotsOnly = async () => {
-    const { response, data } = await adminFetchJson("/api/admin/recommendations/slots?limit=100", {
-      cache: "no-store",
-    });
+    const { response, data } = await adminFetchJson(
+      "/api/admin/recommendations/slots?limit=100",
+      {
+        cache: "no-store",
+      },
+    );
     if (!response.ok) {
       throw new Error(data?.message || data?.error || "推荐位配置加载失败。");
     }
-    const nextSlots = Array.isArray(data?.slots) ? data.slots.filter(Boolean).map(normalizeSlot) : [];
+    const nextSlots = Array.isArray(data?.slots)
+      ? data.slots.filter(Boolean).map(normalizeSlot)
+      : [];
     setSlots(nextSlots);
     return nextSlots;
   };
@@ -88,24 +106,33 @@ export default function AdminHomeMerchandisingPage() {
         setError("");
         setWarnings([]);
 
-        const [seriesResult, slotsResult, hotResult] = await Promise.allSettled([
-          adminFetchJson("/api/admin/series", { cache: "no-store" }),
-          adminFetchJson("/api/admin/recommendations/slots?limit=100", { cache: "no-store" }),
-          apiGet("/api/search/hot?adult=0&window=day", {
-            cacheMs: 0,
-            bust: true,
-            suppressAuthModal: true,
-          }),
-        ]);
+        const [seriesResult, slotsResult, hotResult] = await Promise.allSettled(
+          [
+            adminFetchJson("/api/admin/series", { cache: "no-store" }),
+            adminFetchJson("/api/admin/recommendations/slots?limit=100", {
+              cache: "no-store",
+            }),
+            apiGet("/api/search/hot?adult=0&window=day", {
+              cacheMs: 0,
+              bust: true,
+              suppressAuthModal: true,
+            }),
+          ],
+        );
 
         if (cancelled) {
           return;
         }
 
-        if (seriesResult.status !== "fulfilled" || !seriesResult.value.response.ok) {
+        if (
+          seriesResult.status !== "fulfilled" ||
+          !seriesResult.value.response.ok
+        ) {
           const message =
             seriesResult.status === "fulfilled"
-              ? seriesResult.value.data?.message || seriesResult.value.data?.error || "作品数据加载失败。"
+              ? seriesResult.value.data?.message ||
+                seriesResult.value.data?.error ||
+                "作品数据加载失败。"
               : seriesResult.reason instanceof Error
                 ? seriesResult.reason.message
                 : "作品数据加载失败。";
@@ -123,7 +150,10 @@ export default function AdminHomeMerchandisingPage() {
         setSeriesList(nextSeries);
 
         const nextWarnings = [];
-        if (slotsResult.status === "fulfilled" && slotsResult.value.response.ok) {
+        if (
+          slotsResult.status === "fulfilled" &&
+          slotsResult.value.response.ok
+        ) {
           setSlots(
             Array.isArray(slotsResult.value.data?.slots)
               ? slotsResult.value.data.slots.filter(Boolean).map(normalizeSlot)
@@ -135,7 +165,11 @@ export default function AdminHomeMerchandisingPage() {
         }
 
         if (hotResult.status === "fulfilled" && hotResult.value.ok) {
-          setHotKeywords(Array.isArray(hotResult.value.data?.keywords) ? hotResult.value.data.keywords : []);
+          setHotKeywords(
+            Array.isArray(hotResult.value.data?.keywords)
+              ? hotResult.value.data.keywords
+              : [],
+          );
         } else {
           setHotKeywords([]);
           nextWarnings.push("搜索关注点暂时不可用，其余编排区块仍可正常使用。");
@@ -148,7 +182,11 @@ export default function AdminHomeMerchandisingPage() {
           return;
         }
 
-        setError(loadError instanceof Error ? loadError.message : "首页编排工作台加载失败。");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "首页编排工作台加载失败。",
+        );
         setSeriesList([]);
         setSlots([]);
         setHotKeywords([]);
@@ -162,11 +200,26 @@ export default function AdminHomeMerchandisingPage() {
     };
   }, [isAuthenticated, isLoading]);
 
-  const publishedSeries = useMemo(() => seriesList.filter((series) => series.isPublished), [seriesList]);
-  const seriesById = useMemo(() => new Map(seriesList.map((series) => [series.id, series])), [seriesList]);
-  const editorialSnapshot = useMemo(() => getHomeEditorialSnapshot(publishedSeries), [publishedSeries]);
-  const heroItems = useMemo(() => buildHomeHeroItems(publishedSeries).slice(0, 6), [publishedSeries]);
-  const heroCandidates = useMemo(() => getHomeHeroCandidates(publishedSeries, { limit: 6 }), [publishedSeries]);
+  const publishedSeries = useMemo(
+    () => seriesList.filter((series) => series.isPublished),
+    [seriesList],
+  );
+  const seriesById = useMemo(
+    () => new Map(seriesList.map((series) => [series.id, series])),
+    [seriesList],
+  );
+  const editorialSnapshot = useMemo(
+    () => getHomeEditorialSnapshot(publishedSeries),
+    [publishedSeries],
+  );
+  const heroItems = useMemo(
+    () => buildHomeHeroItems(publishedSeries).slice(0, 6),
+    [publishedSeries],
+  );
+  const heroCandidates = useMemo(
+    () => getHomeHeroCandidates(publishedSeries, { limit: 6 }),
+    [publishedSeries],
+  );
   const libraryReturnCandidates = useMemo(
     () =>
       getLibraryReturnCandidates(publishedSeries, {
@@ -179,35 +232,54 @@ export default function AdminHomeMerchandisingPage() {
 
   const hotSignals = useMemo(
     () =>
-      (Array.isArray(hotKeywords) ? hotKeywords : []).filter(Boolean).slice(0, 6).map((item, index) => ({
-        id: `${typeof item === "string" ? item : item.keyword || item.label || "keyword"}-${index}`,
-        label: typeof item === "string" ? item : item.keyword || item.label || "搜索词",
-        detail:
-          item && typeof item === "object"
-            ? item.growthLabel || (typeof item.count === "number" ? `${item.count.toLocaleString()} 次搜索` : "搜索关注点")
-            : "搜索关注点",
-      })),
+      (Array.isArray(hotKeywords) ? hotKeywords : [])
+        .filter(Boolean)
+        .slice(0, 6)
+        .map((item, index) => ({
+          id: `${typeof item === "string" ? item : item.keyword || item.label || "keyword"}-${index}`,
+          label:
+            typeof item === "string"
+              ? item
+              : item.keyword || item.label || "搜索词",
+          detail:
+            item && typeof item === "object"
+              ? item.growthLabel ||
+                (typeof item.count === "number"
+                  ? `${item.count.toLocaleString()} 次搜索`
+                  : "搜索关注点")
+              : "搜索关注点",
+        })),
     [hotKeywords],
   );
 
   const slotBlueprints = useMemo(() => {
     const slotRecommendationMap = {
       "home-hero": heroItems.map((item) => item.seriesId).filter(Boolean),
-      "home-free-start": editorialSnapshot.freeStartPick?.id ? [editorialSnapshot.freeStartPick.id] : [],
-      "home-binge-ready": editorialSnapshot.completedPick?.id ? [editorialSnapshot.completedPick.id] : [],
-      "home-breakout": editorialSnapshot.breakoutPick?.id ? [editorialSnapshot.breakoutPick.id] : [],
-      "library-return": libraryReturnCandidates.map((entry) => entry.series?.id).filter(Boolean),
+      "home-free-start": editorialSnapshot.freeStartPick?.id
+        ? [editorialSnapshot.freeStartPick.id]
+        : [],
+      "home-binge-ready": editorialSnapshot.completedPick?.id
+        ? [editorialSnapshot.completedPick.id]
+        : [],
+      "home-breakout": editorialSnapshot.breakoutPick?.id
+        ? [editorialSnapshot.breakoutPick.id]
+        : [],
+      "library-return": libraryReturnCandidates
+        .map((entry) => entry.series?.id)
+        .filter(Boolean),
     };
 
-    return Object.entries(slotRecommendationMap).map(([slotId, recommendedIds]) => {
-      const slotMeta = getStorefrontSlotDisplayMeta(slotId);
-      return {
-        id: slotId,
-        label: slotMeta.label,
-        hint: slotMeta.hint,
-        recommendedIds,
-      };
-    });
+    return Object.entries(slotRecommendationMap).map(
+      ([slotId, recommendedIds]) => {
+        const slotMeta = getStorefrontSlotDisplayMeta(slotId);
+        return {
+          id: slotId,
+          label: slotMeta.label,
+          hint: slotMeta.hint,
+          recommendedIds,
+        };
+      },
+    );
   }, [editorialSnapshot, heroItems, libraryReturnCandidates]);
 
   const slotCards = useMemo(
@@ -219,9 +291,15 @@ export default function AdminHomeMerchandisingPage() {
               .map(normalizeStorefrontSlotToken)
               .includes(normalizeStorefrontSlotToken(slot.id)),
           ) || null;
-        const currentIds = Array.isArray(current?.seriesIds) ? current.seriesIds : [];
-        const recommendedSeries = slot.recommendedIds.map((id) => seriesById.get(id)).filter(Boolean);
-        const currentSeries = currentIds.map((id) => seriesById.get(id)).filter(Boolean);
+        const currentIds = Array.isArray(current?.seriesIds)
+          ? current.seriesIds
+          : [];
+        const recommendedSeries = slot.recommendedIds
+          .map((id) => seriesById.get(id))
+          .filter(Boolean);
+        const currentSeries = currentIds
+          .map((id) => seriesById.get(id))
+          .filter(Boolean);
         const aligned =
           current &&
           currentIds.length === slot.recommendedIds.length &&
@@ -237,15 +315,28 @@ export default function AdminHomeMerchandisingPage() {
           state: !current ? "rose" : aligned ? "emerald" : "amber",
           stateLabel: !current ? "未配置" : aligned ? "已对齐" : "待同步",
           canApplyRecommendation: slot.recommendedIds.length > 0,
-          actionLabel: !current ? "应用当前建议" : aligned ? "已经对齐" : "同步当前建议",
+          actionLabel: !current
+            ? "应用当前建议"
+            : aligned
+              ? "已经对齐"
+              : "同步当前建议",
         };
       }),
     [seriesById, slotBlueprints, slots],
   );
 
-  const slotCoverageCount = useMemo(() => slotCards.filter((item) => item.current).length, [slotCards]);
-  const slotIssueCount = useMemo(() => slotCards.filter((item) => !item.aligned).length, [slotCards]);
-  const trackedCurrentSlots = useMemo(() => slotCards.filter((slot) => slot.current?.id), [slotCards]);
+  const slotCoverageCount = useMemo(
+    () => slotCards.filter((item) => item.current).length,
+    [slotCards],
+  );
+  const slotIssueCount = useMemo(
+    () => slotCards.filter((item) => !item.aligned).length,
+    [slotCards],
+  );
+  const trackedCurrentSlots = useMemo(
+    () => slotCards.filter((slot) => slot.current?.id),
+    [slotCards],
+  );
   const slotPerformanceCards = useMemo(
     () =>
       trackedCurrentSlots.map((slot) => ({
@@ -260,9 +351,11 @@ export default function AdminHomeMerchandisingPage() {
     () =>
       slotPerformanceCards.reduce(
         (summary, slot) => ({
-          totalImpressions: summary.totalImpressions + slot.performance.totalImpressions,
+          totalImpressions:
+            summary.totalImpressions + slot.performance.totalImpressions,
           totalClicks: summary.totalClicks + slot.performance.totalClicks,
-          totalConversions: summary.totalConversions + slot.performance.totalConversions,
+          totalConversions:
+            summary.totalConversions + slot.performance.totalConversions,
         }),
         { totalImpressions: 0, totalClicks: 0, totalConversions: 0 },
       ),
@@ -271,14 +364,18 @@ export default function AdminHomeMerchandisingPage() {
   const summaryCtr = useMemo(
     () =>
       performanceSummary.totalImpressions > 0
-        ? (performanceSummary.totalClicks / performanceSummary.totalImpressions) * 100
+        ? (performanceSummary.totalClicks /
+            performanceSummary.totalImpressions) *
+          100
         : 0,
     [performanceSummary],
   );
   const summaryConversionRate = useMemo(
     () =>
       performanceSummary.totalClicks > 0
-        ? (performanceSummary.totalConversions / performanceSummary.totalClicks) * 100
+        ? (performanceSummary.totalConversions /
+            performanceSummary.totalClicks) *
+          100
         : 0,
     [performanceSummary],
   );
@@ -287,26 +384,38 @@ export default function AdminHomeMerchandisingPage() {
       slotCards
         .map((slot) => {
           const performanceLoaded =
-            !slot.current?.id || Object.prototype.hasOwnProperty.call(slotPerformanceMap, slot.current.id);
+            !slot.current?.id ||
+            Object.prototype.hasOwnProperty.call(
+              slotPerformanceMap,
+              slot.current.id,
+            );
           const performance =
             slot.current?.id && performanceLoaded
-              ? slotPerformanceMap[slot.current.id] || normalizePerformance(null)
+              ? slotPerformanceMap[slot.current.id] ||
+                normalizePerformance(null)
               : normalizePerformance(null);
           const enrichedSlot = { ...slot, performance, performanceLoaded };
           return {
             ...enrichedSlot,
-            plan: buildSlotOptimizationPlan(enrichedSlot, getSlotReplacementCandidates(enrichedSlot, heroCandidates)),
+            plan: buildSlotOptimizationPlan(
+              enrichedSlot,
+              getSlotReplacementCandidates(enrichedSlot, heroCandidates),
+            ),
           };
         })
         .sort((left, right) => right.plan.priority - left.plan.priority),
     [heroCandidates, slotCards, slotPerformanceMap],
   );
   const urgentOptimizationCount = useMemo(
-    () => slotOptimizationCards.filter((slot) => slot.plan.priority >= 60).length,
+    () =>
+      slotOptimizationCards.filter((slot) => slot.plan.priority >= 60).length,
     [slotOptimizationCards],
   );
   const readyHeroCount = useMemo(
-    () => heroCandidates.filter(({ series }) => getAdminSeriesReadiness(series).isReady).length,
+    () =>
+      heroCandidates.filter(
+        ({ series }) => getAdminSeriesReadiness(series).isReady,
+      ).length,
     [heroCandidates],
   );
 
@@ -356,7 +465,9 @@ export default function AdminHomeMerchandisingPage() {
           }
 
           if (result.status === "fulfilled" && result.value.response.ok) {
-            nextPerformanceMap[slotId] = normalizePerformance(result.value.data?.performance);
+            nextPerformanceMap[slotId] = normalizePerformance(
+              result.value.data?.performance,
+            );
             return;
           }
 
@@ -367,9 +478,13 @@ export default function AdminHomeMerchandisingPage() {
         setSlotPerformanceMap(nextPerformanceMap);
 
         if (failedCount === trackedCurrentSlots.length) {
-          setPerformanceNotice("表现数据暂时不可用，先按当前编排方案维护，等归因恢复后再判断。");
+          setPerformanceNotice(
+            "表现数据暂时不可用，先按当前编排方案维护，等归因恢复后再判断。",
+          );
         } else if (failedCount > 0) {
-          setPerformanceNotice("部分推荐位指标暂时没有回传，但其余数据仍可参考。");
+          setPerformanceNotice(
+            "部分推荐位指标暂时没有回传，但其余数据仍可参考。",
+          );
         }
       } catch (loadError) {
         if (cancelled) {
@@ -378,7 +493,9 @@ export default function AdminHomeMerchandisingPage() {
 
         setSlotPerformanceMap({});
         setPerformanceNotice(
-          loadError instanceof Error ? loadError.message : "推荐位表现数据加载失败。",
+          loadError instanceof Error
+            ? loadError.message
+            : "推荐位表现数据加载失败。",
         );
       } finally {
         if (!cancelled) {
@@ -395,11 +512,17 @@ export default function AdminHomeMerchandisingPage() {
 
   const handleCopyIds = async (label, ids) => {
     if (!Array.isArray(ids) || ids.length === 0) {
-      setFeedback({ type: "error", message: `${label} 当前没有可复制的作品编号。` });
+      setFeedback({
+        type: "error",
+        message: `${label} 当前没有可复制的作品编号。`,
+      });
       return;
     }
     if (typeof navigator === "undefined" || !navigator.clipboard) {
-      setFeedback({ type: "error", message: "当前浏览器不支持直接复制到剪贴板。"});
+      setFeedback({
+        type: "error",
+        message: "当前浏览器不支持直接复制到剪贴板。",
+      });
       return;
     }
     try {
@@ -408,14 +531,20 @@ export default function AdminHomeMerchandisingPage() {
     } catch (copyError) {
       setFeedback({
         type: "error",
-        message: copyError instanceof Error ? copyError.message : "复制失败，请稍后重试。",
+        message:
+          copyError instanceof Error
+            ? copyError.message
+            : "复制失败，请稍后重试。",
       });
     }
   };
 
   const handleApplyRecommendation = async (slot) => {
     if (!slot?.id || slot.recommendedIds.length === 0) {
-      setFeedback({ type: "error", message: `${slot?.label || "当前推荐位"} 还没有可用的建议作品。` });
+      setFeedback({
+        type: "error",
+        message: `${slot?.label || "当前推荐位"} 还没有可用的建议作品。`,
+      });
       return;
     }
     try {
@@ -444,12 +573,17 @@ export default function AdminHomeMerchandisingPage() {
       await loadSlotsOnly();
       setFeedback({
         type: "success",
-        message: slot.current ? `${slot.label} 已同步到当前编排建议。` : `${slot.label} 已创建。`,
+        message: slot.current
+          ? `${slot.label} 已同步到当前编排建议。`
+          : `${slot.label} 已创建。`,
       });
     } catch (saveError) {
       setFeedback({
         type: "error",
-        message: saveError instanceof Error ? saveError.message : `${slot.label} 保存失败。`,
+        message:
+          saveError instanceof Error
+            ? saveError.message
+            : `${slot.label} 保存失败。`,
       });
     } finally {
       setSavingSlot("");
@@ -464,7 +598,10 @@ export default function AdminHomeMerchandisingPage() {
     } catch (refreshError) {
       setFeedback({
         type: "error",
-        message: refreshError instanceof Error ? refreshError.message : "推荐位配置刷新失败。",
+        message:
+          refreshError instanceof Error
+            ? refreshError.message
+            : "推荐位配置刷新失败。",
       });
     } finally {
       setRefreshing(false);
@@ -541,7 +678,12 @@ export default function AdminHomeMerchandisingPage() {
           </div>
         ) : null}
 
-        <SurfacePanel appearance="light" tone="highlight" accent="blue" className="p-0">
+        <SurfacePanel
+          appearance="light"
+          tone="highlight"
+          accent="blue"
+          className="p-0"
+        >
           <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -558,17 +700,39 @@ export default function AdminHomeMerchandisingPage() {
                   onClick={() => void handleRefreshSlots()}
                   className="border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
                 >
-                  <RefreshCw className={cn("h-4 w-4", refreshing ? "animate-spin" : "")} />
+                  <RefreshCw
+                    className={cn("h-4 w-4", refreshing ? "animate-spin" : "")}
+                  />
                   {refreshing ? "刷新中..." : "刷新推荐位"}
                 </ActionButton>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <MetricCard label="可编排作品" value={publishedSeries.length.toLocaleString()} hint="当前可以进入首页编排池的已上线作品。" tone="blue" />
-              <MetricCard label="已配置推荐位" value={slotCoverageCount.toLocaleString()} hint="关键首页入口中已经配置完成的数量。" tone="emerald" />
-              <MetricCard label="待处理推荐位" value={slotIssueCount.toLocaleString()} hint="仍需补齐或重新对齐的首页入口。" tone="amber" />
-              <MetricCard label="可上主视觉的作品" value={readyHeroCount.toLocaleString()} hint="足够完整，能承担首页强曝光的作品。" tone={readyHeroCount > 0 ? "cyan" : "rose"} />
+              <MetricCard
+                label="可编排作品"
+                value={publishedSeries.length.toLocaleString()}
+                hint="当前可以进入首页编排池的已上线作品。"
+                tone="blue"
+              />
+              <MetricCard
+                label="已配置推荐位"
+                value={slotCoverageCount.toLocaleString()}
+                hint="关键首页入口中已经配置完成的数量。"
+                tone="emerald"
+              />
+              <MetricCard
+                label="待处理推荐位"
+                value={slotIssueCount.toLocaleString()}
+                hint="仍需补齐或重新对齐的首页入口。"
+                tone="amber"
+              />
+              <MetricCard
+                label="可上主视觉的作品"
+                value={readyHeroCount.toLocaleString()}
+                hint="足够完整，能承担首页强曝光的作品。"
+                tone={readyHeroCount > 0 ? "cyan" : "rose"}
+              />
             </div>
           </div>
         </SurfacePanel>
@@ -576,12 +740,12 @@ export default function AdminHomeMerchandisingPage() {
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  推荐位状态
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  先看关键入口，再处理次级位置。
-                </p>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                推荐位状态
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                先看关键入口，再处理次级位置。
+              </p>
             </div>
           </div>
 
@@ -592,22 +756,31 @@ export default function AdminHomeMerchandisingPage() {
                 className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">{slot.label}</h3>
-                  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(slot.state)}`}>
+                  <h3 className="text-[1.2rem] font-semibold tracking-tight text-slate-950">
+                    {slot.label}
+                  </h3>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getToneClasses(slot.state)}`}
+                  >
                     {slot.stateLabel}
                   </span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{slot.hint}</p>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {slot.hint}
+                </p>
 
-                    <div className="mt-4 space-y-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          建议作品
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      建议作品
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {slot.recommendedSeries.length > 0 ? (
                         slot.recommendedSeries.map((series) => (
-                          <span key={`${slot.id}-recommended-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.025)]">
+                          <span
+                            key={`${slot.id}-recommended-${series.id}`}
+                            className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.025)]"
+                          >
                             {series.title}
                           </span>
                         ))
@@ -619,14 +792,17 @@ export default function AdminHomeMerchandisingPage() {
                     </div>
                   </div>
 
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          当前配置
-                        </p>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      当前配置
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {slot.currentSeries.length > 0 ? (
                         slot.currentSeries.map((series) => (
-                          <span key={`${slot.id}-current-${series.id}`} className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          <span
+                            key={`${slot.id}-current-${series.id}`}
+                            className="inline-flex items-center rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700"
+                          >
                             {series.title}
                           </span>
                         ))
@@ -647,12 +823,28 @@ export default function AdminHomeMerchandisingPage() {
                         ? "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
                         : "opacity-60",
                     )}
-                    disabled={!slot.canApplyRecommendation || savingSlot === slot.id || slot.aligned}
-                    >
-                      <RefreshCw className={cn("h-4 w-4", savingSlot === slot.id ? "animate-spin" : "")} />
-                      {savingSlot === slot.id ? "保存中..." : slot.actionLabel}
+                    disabled={
+                      !slot.canApplyRecommendation ||
+                      savingSlot === slot.id ||
+                      slot.aligned
+                    }
+                  >
+                    <RefreshCw
+                      className={cn(
+                        "h-4 w-4",
+                        savingSlot === slot.id ? "animate-spin" : "",
+                      )}
+                    />
+                    {savingSlot === slot.id ? "保存中..." : slot.actionLabel}
                   </ActionButton>
-                  <ActionButton onClick={() => void handleCopyIds(`${slot.label} 建议方案`, slot.recommendedIds)}>
+                  <ActionButton
+                    onClick={() =>
+                      void handleCopyIds(
+                        `${slot.label} 建议方案`,
+                        slot.recommendedIds,
+                      )
+                    }
+                  >
                     <Copy className="h-4 w-4" />
                     复制建议作品编号
                   </ActionButton>
@@ -665,30 +857,55 @@ export default function AdminHomeMerchandisingPage() {
         <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
           <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
             <div>
-                <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
-                  重点入口推荐
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  这些入口要让编辑和读者都一眼看懂。
-                </p>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                重点入口推荐
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                这些入口要让编辑和读者都一眼看懂。
+              </p>
             </div>
 
             <div className="grid gap-4">
               {[
-                { id: "free", label: "从这里开始", icon: Zap, series: editorialSnapshot.freeStartPick },
-                { id: "binge", label: "适合连看", icon: BookOpen, series: editorialSnapshot.completedPick },
-                { id: "breakout", label: "近期亮点", icon: Flame, series: editorialSnapshot.breakoutPick },
-                { id: "return", label: "继续读这部", icon: Star, series: libraryReturnCandidates[0]?.series || null },
+                {
+                  id: "free",
+                  label: "从这里开始",
+                  icon: Zap,
+                  series: editorialSnapshot.freeStartPick,
+                },
+                {
+                  id: "binge",
+                  label: "适合连看",
+                  icon: BookOpen,
+                  series: editorialSnapshot.completedPick,
+                },
+                {
+                  id: "breakout",
+                  label: "近期亮点",
+                  icon: Flame,
+                  series: editorialSnapshot.breakoutPick,
+                },
+                {
+                  id: "return",
+                  label: "继续读这部",
+                  icon: Star,
+                  series: libraryReturnCandidates[0]?.series || null,
+                },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
+                  <div
+                    key={item.id}
+                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
+                  >
                     <div className="flex items-start gap-3">
                       <div className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-slate-950 shadow-[0_6px_16px_rgba(15,23,42,0.03)]">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                        <p className="text-sm font-semibold text-slate-950">
+                          {item.label}
+                        </p>
                         <p className="mt-2 text-base font-semibold text-slate-900">
                           {item.series?.title || "还没有足够稳的作品"}
                         </p>
@@ -726,9 +943,16 @@ export default function AdminHomeMerchandisingPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {hotSignals.map((signal) => (
-                  <div key={signal.id} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-                    <p className="text-sm font-semibold text-slate-950">{signal.label}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{signal.detail}</p>
+                  <div
+                    key={signal.id}
+                    className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-4 py-4 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]"
+                  >
+                    <p className="text-sm font-semibold text-slate-950">
+                      {signal.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {signal.detail}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -753,14 +977,18 @@ export default function AdminHomeMerchandisingPage() {
           slotOptimizationCards={slotOptimizationCards}
           handleApplyRecommendation={handleApplyRecommendation}
           savingSlot={savingSlot}
-          openSeriesEditor={(seriesId) => router.push(`/admin/series/${seriesId}`)}
+          openSeriesEditor={(seriesId) =>
+            router.push(`/admin/series/${seriesId}`)
+          }
           handleCopyIds={handleCopyIds}
         />
 
         <HeroCandidatesSection
           heroCandidates={heroCandidates}
           getReaderProof={getReaderProof}
-          openSeriesEditor={(seriesId) => router.push(`/admin/series/${seriesId}`)}
+          openSeriesEditor={(seriesId) =>
+            router.push(`/admin/series/${seriesId}`)
+          }
           openSeriesPreview={openSeriesPreview}
           handleCopyIds={handleCopyIds}
         />
@@ -768,4 +996,3 @@ export default function AdminHomeMerchandisingPage() {
     </AdminShell>
   );
 }
-

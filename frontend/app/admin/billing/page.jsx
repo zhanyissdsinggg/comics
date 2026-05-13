@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   BillingPackagesSection,
   BillingSnapshotSection,
   BillingSummaryCards,
-} from '@/components/admin/billing-workspace/sections';
+} from "@/components/admin/billing-workspace/sections";
 import {
   buildBillingMetricCards,
   buildBillingSnapshotItems,
@@ -19,19 +19,19 @@ import {
   searchFields,
   sortFields,
   sortOptions,
-} from '@/components/admin/billing-workspace/utils';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { AdminPageSection } from '@/components/admin/common/AdminWorkspacePrimitives';
-import { apiGet } from '@/lib/apiClient';
-import { useAdminList } from '@/lib/hooks/useAdminList';
-import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
+} from "@/components/admin/billing-workspace/utils";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { AdminSortModal } from "@/components/admin/common/AdminSortModal";
+import { AdminPageSection } from "@/components/admin/common/AdminWorkspacePrimitives";
+import { apiGet } from "@/lib/apiClient";
+import { useAdminList } from "@/lib/hooks/useAdminList";
+import { useBulkDelete } from "@/lib/hooks/useBulkMutation";
 
 export default function AdminBillingPage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [billingAvailability, setBillingAvailability] = useState(null);
   const [plans, setPlans] = useState([]);
 
@@ -56,15 +56,15 @@ export default function AdminBillingPage() {
     toggleSelect,
     selectAll,
     clearSelection,
-  } = useAdminList('billing', searchFields, sortFields, 'createdAt', 'desc');
+  } = useAdminList("billing", searchFields, sortFields, "createdAt", "desc");
 
   useEffect(() => {
     let mounted = true;
 
     const loadOverview = async () => {
       const [topupsResponse, plansResponse] = await Promise.all([
-        apiGet('/api/billing/topups'),
-        apiGet('/api/billing/plans'),
+        apiGet("/api/billing/topups"),
+        apiGet("/api/billing/plans"),
       ]);
 
       if (!mounted) {
@@ -89,19 +89,25 @@ export default function AdminBillingPage() {
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  const bulkDeleteMutation = useBulkDelete('billing', {
+  const bulkDeleteMutation = useBulkDelete("billing", {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '已删除所选充值套餐。' });
+      setFeedback({ type: "success", message: "已删除所选充值套餐。" });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除所选充值套餐失败：${mutationError.message}` });
+      setFeedback({
+        type: "error",
+        message: `删除所选充值套餐失败：${mutationError.message}`,
+      });
     },
   });
 
-  const packageSummary = useMemo(() => buildPackageSummary(packages), [packages]);
+  const packageSummary = useMemo(
+    () => buildPackageSummary(packages),
+    [packages],
+  );
   const planSummary = useMemo(() => buildPlanSummary(plans), [plans]);
   const metricCards = useMemo(
     () => buildBillingMetricCards(packageSummary, planSummary),
@@ -116,14 +122,15 @@ export default function AdminBillingPage() {
     [packageSummary, planSummary],
   );
 
-  const isDemoBilling = String(billingAvailability?.billingMode || '').toLowerCase() === 'demo';
+  const isDemoBilling =
+    String(billingAvailability?.billingMode || "").toLowerCase() === "demo";
   const demoBillingFeedback = isDemoBilling
     ? {
-        type: 'warning',
+        type: "warning",
         message:
-          '当前为演示支付模式（未接入真实支付提供商）。为避免误判，后台已隐藏演示套餐列表；接入支付后将展示真实可售套餐与会员方案。',
+          "当前为演示支付模式（未接入真实支付提供商）。为避免误判，后台已隐藏演示套餐列表；接入支付后将展示真实可售套餐与会员方案。",
       }
-    : { type: '', message: '' };
+    : { type: "", message: "" };
 
   return (
     <AdminShell title="充值与会员" subtitle="查看套餐、会员方案和可售状态。">
@@ -132,7 +139,7 @@ export default function AdminBillingPage() {
 
         <AdminFeedbackBanner
           feedback={demoBillingFeedback.type ? demoBillingFeedback : feedback}
-          onDismiss={() => setFeedback({ type: '', message: '' })}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
         />
 
         <BillingSnapshotSection
@@ -158,14 +165,16 @@ export default function AdminBillingPage() {
             searchTerm={searchTerm}
             onSearchTermChange={setSearchTerm}
             sortOrder={sortOrder}
-            onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            onToggleSortOrder={() =>
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+            }
             onOpenSortModal={() => setIsSortModalOpen(true)}
             selectedIds={selectedIds}
             clearSelection={clearSelection}
             onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
             deletePending={bulkDeleteMutation.isPending}
             isError={isError}
-            errorMessage={error?.message || '充值套餐加载失败。'}
+            errorMessage={error?.message || "充值套餐加载失败。"}
             onRetry={refetch}
             isLoading={isLoading}
             hasItems={packages.length > 0}

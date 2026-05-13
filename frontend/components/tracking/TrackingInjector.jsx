@@ -28,7 +28,10 @@ function appendSnippet(target, code, slot) {
   try {
     parsedDoc = parser.parseFromString(code, "text/html");
   } catch (error) {
-    console.error(`[tracking] Failed to parse snippet for slot ${slot}:`, error);
+    console.error(
+      `[tracking] Failed to parse snippet for slot ${slot}:`,
+      error,
+    );
     return;
   }
 

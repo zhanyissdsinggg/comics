@@ -113,11 +113,7 @@ export default function HeaderMenuModal({
       href: "/notifications",
       icon: Bell,
       badge:
-        unreadCount > 0
-          ? unreadCount > 99
-            ? "99+"
-            : String(unreadCount)
-          : "",
+        unreadCount > 0 ? (unreadCount > 99 ? "99+" : String(unreadCount)) : "",
     },
   ];
 

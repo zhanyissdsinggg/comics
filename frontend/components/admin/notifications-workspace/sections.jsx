@@ -13,10 +13,18 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
-import { buildNotificationsMetricCards, formatDate, getContentPreview } from "./utils";
+import {
+  buildNotificationsMetricCards,
+  formatDate,
+  getContentPreview,
+} from "./utils";
 
 export function NotificationsSummaryCards({ total, titledCount, bodyCount }) {
-  const cards = buildNotificationsMetricCards({ total, titledCount, bodyCount });
+  const cards = buildNotificationsMetricCards({
+    total,
+    titledCount,
+    bodyCount,
+  });
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -61,8 +69,12 @@ export function NotificationsListSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">按标题、正文和通知编号快速定位，再切换时间顺序清理历史通知。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按标题、正文和通知编号快速定位，再切换时间顺序清理历史通知。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -76,10 +88,17 @@ export function NotificationsListSection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前动作</p>
-          <p className="mt-2 text-sm text-slate-600">先确认已选通知，再统一删除过期或错误下发的消息。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            当前动作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先确认已选通知，再统一删除过期或错误下发的消息。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="destructive"
@@ -114,7 +133,10 @@ export function NotificationsListSection(props) {
                 <th className="px-4 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === notifications.length && notifications.length > 0}
+                    checked={
+                      selectedIds.length === notifications.length &&
+                      notifications.length > 0
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                     aria-label="选择全部通知"
@@ -141,12 +163,16 @@ export function NotificationsListSection(props) {
                     <div className="font-medium text-slate-950">
                       {notification.title || "未命名通知"}
                     </div>
-                    <div className="mt-1 text-xs text-slate-500">{notification.id}</div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {notification.id}
+                    </div>
                   </td>
                   <td className="max-w-[36rem] px-4 py-4 text-slate-600">
                     {getContentPreview(notification.content)}
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDate(notification.createdAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDate(notification.createdAt)}
+                  </td>
                 </AdminTableRow>
               ))}
             </tbody>

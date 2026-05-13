@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   CommentsListSection,
   CommentsSummaryCards,
-} from '@/components/admin/comments-workspace/sections';
+} from "@/components/admin/comments-workspace/sections";
 import {
   searchFields,
   sortFields,
   sortOptions,
-} from '@/components/admin/comments-workspace/utils';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { AdminSortModal } from '@/components/admin/common/AdminSortModal';
-import { useAdminList } from '@/lib/hooks/useAdminList';
-import { useBulkDelete } from '@/lib/hooks/useBulkMutation';
+} from "@/components/admin/comments-workspace/utils";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { AdminSortModal } from "@/components/admin/common/AdminSortModal";
+import { useAdminList } from "@/lib/hooks/useAdminList";
+import { useBulkDelete } from "@/lib/hooks/useBulkMutation";
 
 export default function AdminCommentsPage() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const {
     items: comments,
@@ -46,30 +46,41 @@ export default function AdminCommentsPage() {
     toggleSelect,
     selectAll,
     clearSelection,
-  } = useAdminList('comments', searchFields, sortFields, 'createdAt', 'desc');
+  } = useAdminList("comments", searchFields, sortFields, "createdAt", "desc");
 
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const ratedCount = useMemo(
     () =>
       comments.filter(
-        (comment) => comment.rating !== null && comment.rating !== undefined && comment.rating !== '',
+        (comment) =>
+          comment.rating !== null &&
+          comment.rating !== undefined &&
+          comment.rating !== "",
       ).length,
     [comments],
   );
   const uniqueReaders = useMemo(
-    () => new Set(comments.map((comment) => comment.userEmail || comment.userId).filter(Boolean)).size,
+    () =>
+      new Set(
+        comments
+          .map((comment) => comment.userEmail || comment.userId)
+          .filter(Boolean),
+      ).size,
     [comments],
   );
 
-  const bulkDeleteMutation = useBulkDelete('comments', {
+  const bulkDeleteMutation = useBulkDelete("comments", {
     onSuccess: () => {
       clearSelection();
       setIsDeleteConfirmOpen(false);
-      setFeedback({ type: 'success', message: '已删除所选评论。' });
+      setFeedback({ type: "success", message: "已删除所选评论。" });
       refetch();
     },
     onError: (mutationError) => {
-      setFeedback({ type: 'error', message: `删除所选评论失败：${mutationError.message}` });
+      setFeedback({
+        type: "error",
+        message: `删除所选评论失败：${mutationError.message}`,
+      });
     },
   });
 
@@ -84,7 +95,7 @@ export default function AdminCommentsPage() {
 
         <AdminFeedbackBanner
           feedback={feedback}
-          onDismiss={() => setFeedback({ type: '', message: '' })}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
         />
 
         <CommentsListSection
@@ -92,13 +103,15 @@ export default function AdminCommentsPage() {
           onSearchTermChange={setSearchTerm}
           onOpenSortModal={() => setIsSortModalOpen(true)}
           sortOrder={sortOrder}
-          onToggleSortOrder={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          onToggleSortOrder={() =>
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+          }
           selectedIds={selectedIds}
           clearSelection={clearSelection}
           onOpenDeleteConfirm={() => setIsDeleteConfirmOpen(true)}
           deletePending={bulkDeleteMutation.isPending}
           isError={isError}
-          errorMessage={error?.message || '评论加载失败。'}
+          errorMessage={error?.message || "评论加载失败。"}
           onRetry={refetch}
           isLoading={isLoading}
           comments={comments}

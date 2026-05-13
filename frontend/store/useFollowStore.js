@@ -53,7 +53,10 @@ export function FollowProvider({ children }) {
   // ???????? localStorage
   const saveCollections = useCallback((newCollections) => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("mn_collections", JSON.stringify(newCollections));
+      window.localStorage.setItem(
+        "mn_collections",
+        JSON.stringify(newCollections),
+      );
     }
     setCollections(newCollections);
   }, []);
@@ -80,12 +83,12 @@ export function FollowProvider({ children }) {
 
   const follow = useCallback(
     (seriesId) => updateFollow(seriesId, "FOLLOW"),
-    [updateFollow]
+    [updateFollow],
   );
 
   const unfollow = useCallback(
     (seriesId) => updateFollow(seriesId, "UNFOLLOW"),
-    [updateFollow]
+    [updateFollow],
   );
 
   const createCollection = useCallback(
@@ -100,32 +103,33 @@ export function FollowProvider({ children }) {
       saveCollections(newCollections);
       return newCollection;
     },
-    [collections, saveCollections]
+    [collections, saveCollections],
   );
 
   // 閼颁胶甯囧▔銊╁櫞閿涙艾鍨归梽銈嗘暪閽樺繐銇?
   const deleteCollection = useCallback(
     (collectionId) => {
-
-      if (["default", "reading", "completed", "wishlist"].includes(collectionId)) {
+      if (
+        ["default", "reading", "completed", "wishlist"].includes(collectionId)
+      ) {
         return { ok: false, error: "Cannot delete default collection" };
       }
       const newCollections = collections.filter((c) => c.id !== collectionId);
       saveCollections(newCollections);
       return { ok: true };
     },
-    [collections, saveCollections]
+    [collections, saveCollections],
   );
 
   const renameCollection = useCallback(
     (collectionId, newName) => {
       const newCollections = collections.map((c) =>
-        c.id === collectionId ? { ...c, name: newName } : c
+        c.id === collectionId ? { ...c, name: newName } : c,
       );
       saveCollections(newCollections);
       return { ok: true };
     },
-    [collections, saveCollections]
+    [collections, saveCollections],
   );
 
   // ??????????????
@@ -144,28 +148,31 @@ export function FollowProvider({ children }) {
       saveCollections(newCollections);
       return { ok: true };
     },
-    [collections, saveCollections]
+    [collections, saveCollections],
   );
 
   const removeFromCollection = useCallback(
     (collectionId, seriesId) => {
       const newCollections = collections.map((c) => {
         if (c.id === collectionId) {
-          return { ...c, seriesIds: c.seriesIds.filter((id) => id !== seriesId) };
+          return {
+            ...c,
+            seriesIds: c.seriesIds.filter((id) => id !== seriesId),
+          };
         }
         return c;
       });
       saveCollections(newCollections);
       return { ok: true };
     },
-    [collections, saveCollections]
+    [collections, saveCollections],
   );
 
   const getCollectionsForSeries = useCallback(
     (seriesId) => {
       return collections.filter((c) => c.seriesIds.includes(seriesId));
     },
-    [collections]
+    [collections],
   );
 
   const value = useMemo(
@@ -194,10 +201,12 @@ export function FollowProvider({ children }) {
       addToCollection,
       removeFromCollection,
       getCollectionsForSeries,
-    ]
+    ],
   );
 
-  return <FollowContext.Provider value={value}>{children}</FollowContext.Provider>;
+  return (
+    <FollowContext.Provider value={value}>{children}</FollowContext.Provider>
+  );
 }
 
 export function useFollowStore() {

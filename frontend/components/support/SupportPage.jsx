@@ -74,7 +74,13 @@ function shouldUseMailtoFallback(response) {
   );
 }
 
-function buildMailtoHref({ replyEmail, subject, message, orderId, topicLabel }) {
+function buildMailtoHref({
+  replyEmail,
+  subject,
+  message,
+  orderId,
+  topicLabel,
+}) {
   const lines = [];
   if (topicLabel) {
     lines.push(`Issue type: ${topicLabel}`);
@@ -340,7 +346,8 @@ export default function SupportPage() {
 
       setFeedback({
         type: "error",
-        text: response.error || "Couldn't send that. Try again or email support.",
+        text:
+          response.error || "Couldn't send that. Try again or email support.",
       });
     } catch {
       handleMailtoFallback({
@@ -504,11 +511,15 @@ export default function SupportPage() {
                     id="support-issue-details-copy"
                     className="text-sm font-semibold leading-6 text-white/70"
                   >
-                    Choose the issue type and the best reply email for this request.
+                    Choose the issue type and the best reply email for this
+                    request.
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
-                      <fieldset className="space-y-3" aria-describedby="support-topic-help">
+                      <fieldset
+                        className="space-y-3"
+                        aria-describedby="support-topic-help"
+                      >
                         <legend className={fieldLabelClass}>Issue type</legend>
                         <p
                           id="support-topic-help"
@@ -543,9 +554,10 @@ export default function SupportPage() {
                                       checked={active}
                                       aria-describedby={descriptionId}
                                       onChange={(event) => {
-                                        const nextPreset = getSupportTopicPreset(
-                                          event.target.value,
-                                        );
+                                        const nextPreset =
+                                          getSupportTopicPreset(
+                                            event.target.value,
+                                          );
                                         setActiveTopic(event.target.value);
                                         setSuccessState(null);
 
@@ -556,7 +568,11 @@ export default function SupportPage() {
                                               : nextPreset.subject || "",
                                           );
                                           setMessage((current) => {
-                                            if (!isAutofilledSupportMessage(current)) {
+                                            if (
+                                              !isAutofilledSupportMessage(
+                                                current,
+                                              )
+                                            ) {
                                               return current;
                                             }
                                             return nextPreset.draft || "";
@@ -586,7 +602,10 @@ export default function SupportPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="support-email" className={fieldLabelClass}>
+                      <label
+                        htmlFor="support-email"
+                        className={fieldLabelClass}
+                      >
                         Reply email
                       </label>
                       <input
@@ -611,11 +630,15 @@ export default function SupportPage() {
                     id="support-request-details-copy"
                     className="text-sm font-semibold leading-6 text-white/70"
                   >
-                    Add any order details, a short subject, and the full message.
+                    Add any order details, a short subject, and the full
+                    message.
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="support-order-id" className={fieldLabelClass}>
+                      <label
+                        htmlFor="support-order-id"
+                        className={fieldLabelClass}
+                      >
                         Order ID optional
                       </label>
                       <input
@@ -630,7 +653,10 @@ export default function SupportPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="support-subject" className={fieldLabelClass}>
+                      <label
+                        htmlFor="support-subject"
+                        className={fieldLabelClass}
+                      >
                         Subject
                       </label>
                       <input
@@ -645,7 +671,10 @@ export default function SupportPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="support-message" className={fieldLabelClass}>
+                    <label
+                      htmlFor="support-message"
+                      className={fieldLabelClass}
+                    >
                       Message
                     </label>
                     <textarea

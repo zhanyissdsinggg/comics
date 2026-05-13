@@ -74,13 +74,17 @@ function looksLikeGenericCopy(text) {
   }
 
   const lowerText = normalized.toLowerCase();
-  const conflictCount = CONFLICT_HINTS.filter((token) => lowerText.includes(token)).length;
+  const conflictCount = CONFLICT_HINTS.filter((token) =>
+    lowerText.includes(token),
+  ).length;
 
   return normalized.length > 150 && conflictCount === 0;
 }
 
 function buildGenreProfile(series) {
-  return normalizeGenreList(series?.genres).filter((genre) => !isMatureGenreValue(genre));
+  return normalizeGenreList(series?.genres).filter(
+    (genre) => !isMatureGenreValue(genre),
+  );
 }
 
 function buildGenreFallback(series, { includeTitle = false } = {}) {
@@ -130,7 +134,11 @@ function buildGenreFallback(series, { includeTitle = false } = {}) {
     return `${leadIn} moves like a plan that already went wrong once, with pressure building every time the fix gets uglier.`;
   }
 
-  if (String(series?.status || "").trim().toLowerCase() === "completed") {
+  if (
+    String(series?.status || "")
+      .trim()
+      .toLowerCase() === "completed"
+  ) {
     return `${leadIn} is all sharp turns, emotional fallout, and a finish that lands without making you wait around for it.`;
   }
 
@@ -149,7 +157,9 @@ function extractEditorialSentence(text) {
     .filter(Boolean);
 
   const candidate =
-    sentences.find((sentence) => sentence.length >= 36 && !looksLikeGenericCopy(sentence)) ||
+    sentences.find(
+      (sentence) => sentence.length >= 36 && !looksLikeGenericCopy(sentence),
+    ) ||
     sentences[0] ||
     normalized;
 

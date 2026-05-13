@@ -116,7 +116,10 @@ function HeroFactCard({ label, value, detail, href = "" }) {
   }
 
   return (
-    <Link href={href} className="block transition-transform duration-150 hover:-translate-y-0.5">
+    <Link
+      href={href}
+      className="block transition-transform duration-150 hover:-translate-y-0.5"
+    >
       {content}
     </Link>
   );
@@ -138,7 +141,8 @@ export default function SeriesHeader({
 }) {
   const genres = Array.isArray(series?.genres) ? series.genres : [];
   const isAdult = Boolean(series?.adult);
-  const isCompleted = String(series?.status || "").toLowerCase() === "completed";
+  const isCompleted =
+    String(series?.status || "").toLowerCase() === "completed";
   const headerHighlights = genres.slice(0, 3).filter(Boolean);
   const primaryAction = onPrimaryAction || null;
   const normalizedPrimaryActionHref = String(primaryActionHref || "").trim();
@@ -162,14 +166,16 @@ export default function SeriesHeader({
       label: "Format",
       value: formatSeriesKind(series?.type),
       detail:
-        genres.length > 0
-          ? genres.slice(0, 2).join(" / ")
-          : "Story format",
+        genres.length > 0 ? genres.slice(0, 2).join(" / ") : "Story format",
     },
     {
       label: "Status",
-      value: isCompleted ? "Finished" : capitalize(series?.status || "updating"),
-      detail: isCompleted ? "Full run" : `New ${installmentPluralLabel.toLowerCase()}`,
+      value: isCompleted
+        ? "Finished"
+        : capitalize(series?.status || "updating"),
+      detail: isCompleted
+        ? "Full run"
+        : `New ${installmentPluralLabel.toLowerCase()}`,
     },
     {
       label: installmentPluralLabel,
@@ -304,9 +310,14 @@ export default function SeriesHeader({
                       ? "border border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-[#ffd5e5] shadow-[0_14px_30px_rgba(255,79,154,0.16)] hover:-translate-y-0.5"
                       : storefrontSecondaryButtonClass
                   }`}
-                  aria-label={isFollowing ? "Remove from library" : "Save to library"}
+                  aria-label={
+                    isFollowing ? "Remove from library" : "Save to library"
+                  }
                 >
-                  <Heart size={18} className={isFollowing ? "fill-current" : ""} />
+                  <Heart
+                    size={18}
+                    className={isFollowing ? "fill-current" : ""}
+                  />
                   <span>{isFollowing ? "Saved" : "Add to Library"}</span>
                 </button>
               ) : null}
@@ -349,7 +360,9 @@ export default function SeriesHeader({
                   Reading pace
                 </p>
                 <p className="mt-3 text-sm leading-6 text-white/76">
-                  {isCompleted ? "Finished and ready to binge." : `New ${installmentPluralLabel.toLowerCase()} on deck.`}
+                  {isCompleted
+                    ? "Finished and ready to binge."
+                    : `New ${installmentPluralLabel.toLowerCase()} on deck.`}
                 </p>
               </div>
             </div>

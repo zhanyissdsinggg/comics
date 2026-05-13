@@ -336,7 +336,7 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         label: "Status",
         value: "Signed in",
-          hint: !hydrated
+        hint: !hydrated
           ? "Loading"
           : user?.emailVerified
             ? "Synced"
@@ -365,9 +365,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             : orders.length > 0
               ? orders.length.toLocaleString()
               : "None yet",
-        hint: ordersLoading
-          ? "Loading"
-          : "Billing",
+        hint: ordersLoading ? "Loading" : "Billing",
       },
     ];
   }, [
@@ -453,7 +451,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               )}`
             : "Active"
           : "",
-          cta: subscription?.active ? "Plans" : "See plans",
+        cta: subscription?.active ? "Plans" : "See plans",
         onClick: () =>
           router.push(
             buildPathWithAttribution("/subscribe", {
@@ -464,30 +462,30 @@ export default function AccountPage({ initialSignedIn = false }) {
           ),
         accentClass: actionPrimaryButtonClass,
       },
-        {
-          id: "purchases",
-          eyebrow: "Purchases",
-          title: "Orders",
-          description: "",
-          cta: "Orders",
+      {
+        id: "purchases",
+        eyebrow: "Purchases",
+        title: "Orders",
+        description: "",
+        cta: "Orders",
         onClick: () => router.push("/orders"),
         accentClass: actionSecondaryButtonClass,
       },
-        {
-          id: "library",
-          eyebrow: "Reading",
-          title: "Library",
-          description: "",
-          cta: "Library",
+      {
+        id: "library",
+        eyebrow: "Reading",
+        title: "Library",
+        description: "",
+        cta: "Library",
         onClick: () => router.push("/library"),
         accentClass: actionSecondaryButtonClass,
       },
-        {
-          id: "support",
-          eyebrow: "Support",
-          title: "Support",
-          description: "",
-          cta: "Support",
+      {
+        id: "support",
+        eyebrow: "Support",
+        title: "Support",
+        description: "",
+        cta: "Support",
         onClick: () =>
           router.push(
             buildSupportPath({
@@ -534,9 +532,7 @@ export default function AccountPage({ initialSignedIn = false }) {
   const checkboxCardClass =
     "flex items-center gap-3 rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const messageIsError = /failed|couldn't|not found/i.test(message);
-  const accountDeskTitle = viewerSignedIn
-    ? "Account"
-    : "Support";
+  const accountDeskTitle = viewerSignedIn ? "Account" : "Support";
   const accountDeskCopy = viewerSignedIn
     ? orders.length > 0
       ? "Orders, plans, support"
@@ -640,11 +636,7 @@ export default function AccountPage({ initialSignedIn = false }) {
             </SurfacePanel>
           ) : null}
 
-          <SurfacePanel
-            className="space-y-4"
-            appearance="dark"
-            accent="cyan"
-          >
+          <SurfacePanel className="space-y-4" appearance="dark" accent="cyan">
             <div className="space-y-2">
               <p className={sectionEyebrowClass}>Device settings</p>
               <h2 className={sectionTitleClass}>Local preferences</h2>
@@ -836,11 +828,11 @@ export default function AccountPage({ initialSignedIn = false }) {
               {viewerSignedIn ? (
                 <>
                   <button
-                  type="button"
-                  onClick={() => router.push("/library")}
-                  className={primaryButtonClass}
-                >
-                  Library
+                    type="button"
+                    onClick={() => router.push("/library")}
+                    className={primaryButtonClass}
+                  >
+                    Library
                   </button>
                   <button
                     type="button"
@@ -961,7 +953,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <label className={fieldLabelClass}>Display name</label>
                         <input
                           value={displayName}
-                          onChange={(event) => setDisplayName(event.target.value)}
+                          onChange={(event) =>
+                            setDisplayName(event.target.value)
+                          }
                           placeholder="Your name"
                           className={fieldClass}
                         />
@@ -1011,7 +1005,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <input
                           type="checkbox"
                           checked={notifyNew}
-                          onChange={(event) => setNotifyNew(event.target.checked)}
+                          onChange={(event) =>
+                            setNotifyNew(event.target.checked)
+                          }
                           className={checkboxClass}
                         />
                         New chapter alerts
@@ -1020,7 +1016,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <input
                           type="checkbox"
                           checked={notifyTtf}
-                          onChange={(event) => setNotifyTtf(event.target.checked)}
+                          onChange={(event) =>
+                            setNotifyTtf(event.target.checked)
+                          }
                           className={checkboxClass}
                         />
                         Free read alerts
@@ -1029,7 +1027,9 @@ export default function AccountPage({ initialSignedIn = false }) {
                         <input
                           type="checkbox"
                           checked={notifyPromo}
-                          onChange={(event) => setNotifyPromo(event.target.checked)}
+                          onChange={(event) =>
+                            setNotifyPromo(event.target.checked)
+                          }
                           className={checkboxClass}
                         />
                         Deals and offers
@@ -1186,9 +1186,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               >
                 <div className="space-y-2">
                   <p className={sectionEyebrowClass}>Reading setup</p>
-                  <h2 className={sectionTitleClass}>
-                    Region and language
-                  </h2>
+                  <h2 className={sectionTitleClass}>Region and language</h2>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -1293,9 +1291,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Billing</p>
-                    <h2 className={sectionTitleClass}>
-                      Billing
-                    </h2>
+                    <h2 className={sectionTitleClass}>Billing</h2>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-semibold text-white/70">
                     <div>
@@ -1333,7 +1329,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                           setWorking("cancel");
                           const response = await cancelSubscription();
                           if (response.ok) {
-                    setMessage("Plan canceled.");
+                            setMessage("Plan canceled.");
                           } else {
                             setMessage(
                               response.error || "Couldn't end your plan.",
@@ -1356,9 +1352,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 >
                   <div className="space-y-2">
                     <p className={sectionEyebrowClass}>Security</p>
-                    <h2 className={sectionTitleClass}>
-                      Sign-in and recovery
-                    </h2>
+                    <h2 className={sectionTitleClass}>Sign-in and recovery</h2>
                   </div>
 
                   {hydrated && isSignedIn ? (
@@ -1528,10 +1522,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   ) : (
                     <div className="space-y-3">
                       {orders.slice(0, 5).map((order) => (
-                        <div
-                          key={order.orderId}
-                          className={orderCardClass}
-                        >
+                        <div key={order.orderId} className={orderCardClass}>
                           <div className="flex items-center justify-between gap-3">
                             <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
                               {order.packageId}

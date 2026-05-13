@@ -246,7 +246,10 @@ export default function RankingsPage({
   const router = useRouter();
   const { contentMode, isAdultMode } = useAdultGateStore();
   const [seriesList, setSeriesList] = useState(
-    filterContentByMode(Array.isArray(initialSeries) ? initialSeries : [], contentMode),
+    filterContentByMode(
+      Array.isArray(initialSeries) ? initialSeries : [],
+      contentMode,
+    ),
   );
   const [loading, setLoading] = useState(!hasInitialSeries);
   const [commerceNotice, setCommerceNotice] = useState(null);
@@ -259,39 +262,35 @@ export default function RankingsPage({
       setLoading(true);
     }
     const adultFlag = getContentModeQueryParam(contentMode);
-    apiGet(`/api/rankings?adult=${adultFlag}&type=popular`).then(
-      (response) => {
-        if (response.ok) {
-          const rankings = filterContentByMode(
-            Array.isArray(response.data?.rankings)
-              ? response.data.rankings
-              : [],
-            contentMode,
-          );
-          if (rankings.length > 0) {
-            setSeriesList(rankings);
-            setLoading(false);
-            return;
-          }
-        }
-
-        apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
-          if (fallbackResponse.ok) {
-            setSeriesList(
-              filterContentByMode(
-                Array.isArray(fallbackResponse.data?.series)
-                  ? fallbackResponse.data.series
-                  : [],
-                contentMode,
-              ),
-            );
-          } else {
-            setSeriesList([]);
-          }
+    apiGet(`/api/rankings?adult=${adultFlag}&type=popular`).then((response) => {
+      if (response.ok) {
+        const rankings = filterContentByMode(
+          Array.isArray(response.data?.rankings) ? response.data.rankings : [],
+          contentMode,
+        );
+        if (rankings.length > 0) {
+          setSeriesList(rankings);
           setLoading(false);
-        });
-      },
-    );
+          return;
+        }
+      }
+
+      apiGet(`/api/series?adult=${adultFlag}`).then((fallbackResponse) => {
+        if (fallbackResponse.ok) {
+          setSeriesList(
+            filterContentByMode(
+              Array.isArray(fallbackResponse.data?.series)
+                ? fallbackResponse.data.series
+                : [],
+              contentMode,
+            ),
+          );
+        } else {
+          setSeriesList([]);
+        }
+        setLoading(false);
+      });
+    });
   }, [activeView.id, contentMode, hasInitialSeries]);
 
   useEffect(() => {
@@ -378,11 +377,7 @@ export default function RankingsPage({
           <RankingsLoadingState />
         ) : curatedSeries.length === 0 ? (
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.28fr)_360px]">
-            <SurfacePanel
-              className="space-y-4"
-              appearance="dark"
-              accent="rose"
-            >
+            <SurfacePanel className="space-y-4" appearance="dark" accent="rose">
               <div>
                 <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.05em] text-white">
                   Nothing here yet.
@@ -406,11 +401,7 @@ export default function RankingsPage({
               </div>
             </SurfacePanel>
 
-            <SurfacePanel
-              className="space-y-4"
-              appearance="dark"
-              accent="rose"
-            >
+            <SurfacePanel className="space-y-4" appearance="dark" accent="rose">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/60">
                   Keep reading
@@ -441,7 +432,7 @@ export default function RankingsPage({
                   className="group w-full rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,20,34,0.98)_0%,rgba(17,13,24,0.98)_100%)] p-3.5 text-left text-white shadow-[0_26px_68px_rgba(8,6,20,0.3)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 sm:p-5"
                   aria-label={`View ${leadEntry.title}`}
                 >
-                    <div className="grid gap-3.5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
+                  <div className="grid gap-3.5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
                     <Cover
                       tone={leadEntry.coverTone}
                       coverUrl={leadEntry.coverUrl}

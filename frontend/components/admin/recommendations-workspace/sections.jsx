@@ -33,7 +33,12 @@ export function RecommendationsStatsSection({ cards }) {
   );
 }
 
-export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDeleteModal }) {
+export function SlotsSection({
+  slotsQuery,
+  slots,
+  onOpenCreateModal,
+  onOpenDeleteModal,
+}) {
   return (
     <AdminPageSection
       title="推荐位"
@@ -49,26 +54,38 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
       <AdminDataState
         isLoading={slotsQuery.isLoading}
         hasData={slots.length > 0}
-        emptyMessage={slotsQuery.isError ? slotsQuery.errorMessage : "还没有推荐位。"}
+        emptyMessage={
+          slotsQuery.isError ? slotsQuery.errorMessage : "还没有推荐位。"
+        }
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
           {slots.map((slot) => {
-            const seriesIds = Array.isArray(slot.seriesIds) ? slot.seriesIds : [];
-            const slotMeta = getStorefrontSlotDisplayMeta(slot.slot || slot.name);
+            const seriesIds = Array.isArray(slot.seriesIds)
+              ? slot.seriesIds
+              : [];
+            const slotMeta = getStorefrontSlotDisplayMeta(
+              slot.slot || slot.name,
+            );
 
             return (
-            <RecommendationCard
-              key={slot.id}
-              title={slotMeta.label}
-              description={slotMeta.hint}
-                meta={<AdminBadge tone="accent">{seriesIds.length} 部作品</AdminBadge>}
+              <RecommendationCard
+                key={slot.id}
+                title={slotMeta.label}
+                description={slotMeta.hint}
+                meta={
+                  <AdminBadge tone="accent">
+                    {seriesIds.length} 部作品
+                  </AdminBadge>
+                }
                 footer={
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-slate-500">更新于 {formatDateTime(slot.updatedAt)}</p>
-                  <Button
-                    type="button"
-                    variant="destructive"
+                    <p className="text-xs text-slate-500">
+                      更新于 {formatDateTime(slot.updatedAt)}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="destructive"
                       size="sm"
                       onClick={() => onOpenDeleteModal("slot", slot)}
                     >
@@ -90,7 +107,9 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
                       </span>
                     ))
                   ) : (
-                    <span className="text-sm text-slate-500">还没有分配作品。</span>
+                    <span className="text-sm text-slate-500">
+                      还没有分配作品。
+                    </span>
                   )}
                 </div>
               </RecommendationCard>
@@ -102,7 +121,12 @@ export function SlotsSection({ slotsQuery, slots, onOpenCreateModal, onOpenDelet
   );
 }
 
-export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, onOpenDeleteModal }) {
+export function RankingsSection({
+  rankingsQuery,
+  rankings,
+  onOpenCreateModal,
+  onOpenDeleteModal,
+}) {
   return (
     <AdminPageSection
       title="榜单规则"
@@ -118,7 +142,11 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
       <AdminDataState
         isLoading={rankingsQuery.isLoading}
         hasData={rankings.length > 0}
-        emptyMessage={rankingsQuery.isError ? rankingsQuery.errorMessage : "还没有榜单规则。"}
+        emptyMessage={
+          rankingsQuery.isError
+            ? rankingsQuery.errorMessage
+            : "还没有榜单规则。"
+        }
         wrap={false}
       >
         <div className="grid gap-4 xl:grid-cols-2">
@@ -136,7 +164,9 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
               }
               footer={
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-slate-500">更新于 {formatDateTime(ranking.updatedAt)}</p>
+                  <p className="text-xs text-slate-500">
+                    更新于 {formatDateTime(ranking.updatedAt)}
+                  </p>
                   <Button
                     type="button"
                     variant="destructive"
@@ -151,11 +181,17 @@ export function RankingsSection({ rankingsQuery, rankings, onOpenCreateModal, on
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">最大作品数</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950">{ranking.maxItems || 0}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    最大作品数
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-slate-950">
+                    {ranking.maxItems || 0}
+                  </p>
                 </div>
                 <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">适用范围</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    适用范围
+                  </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">
                     {ranking.adult ? "允许 18+ 内容" : "普通内容"}
                   </p>
@@ -199,15 +235,25 @@ export function AnalyticsSection({
             value={formatNumber(analyticsSummary.views)}
             detail="进入作品详情页的次数。"
           />
-          <AdminMetricCard label="点击" value={formatNumber(analyticsSummary.clicks)} detail="推荐位点击量。" />
-          <AdminMetricCard label="转化" value={formatNumber(analyticsSummary.conversions)} detail="被跟踪到的下游动作。" />
+          <AdminMetricCard
+            label="点击"
+            value={formatNumber(analyticsSummary.clicks)}
+            detail="推荐位点击量。"
+          />
+          <AdminMetricCard
+            label="转化"
+            value={formatNumber(analyticsSummary.conversions)}
+            detail="被跟踪到的下游动作。"
+          />
         </div>
         <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
           <AdminFormField label="推荐位筛选">
             <select
               id="analytics-slot-filter"
               value={analyticsSlotFilter}
-              onChange={(event) => onAnalyticsSlotFilterChange(event.target.value)}
+              onChange={(event) =>
+                onAnalyticsSlotFilterChange(event.target.value)
+              }
               className={adminSelectClassName}
             >
               {analyticsFilterOptions.map((option) => (
@@ -219,7 +265,10 @@ export function AnalyticsSection({
           </AdminFormField>
           {selectedAnalyticsSlotMeta ? (
             <div className="mt-4">
-              <SlotIdentity slotMeta={selectedAnalyticsSlotMeta} hint={selectedAnalyticsSlotMeta.hint} />
+              <SlotIdentity
+                slotMeta={selectedAnalyticsSlotMeta}
+                hint={selectedAnalyticsSlotMeta.hint}
+              />
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-slate-600">
@@ -246,7 +295,11 @@ export function AnalyticsSection({
         <AdminDataState
           isLoading={analyticsQuery.isLoading}
           hasData={analytics.length > 0}
-          emptyMessage={analyticsQuery.isError ? analyticsQuery.errorMessage : "当前筛选下没有分析记录。"}
+          emptyMessage={
+            analyticsQuery.isError
+              ? analyticsQuery.errorMessage
+              : "当前筛选下没有分析记录。"
+          }
           wrap={false}
         >
           <div className="overflow-hidden rounded-[28px] border border-[color:var(--gush-border)] bg-white shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
@@ -267,28 +320,46 @@ export function AnalyticsSection({
                 </thead>
                 <tbody>
                   {analytics.map((item) => {
-                    const slotMeta = getStorefrontSlotDisplayMeta(item.slot || item.slotId);
+                    const slotMeta = getStorefrontSlotDisplayMeta(
+                      item.slot || item.slotId,
+                    );
                     return (
                       <tr
                         key={item.id}
                         className="border-t border-[color:var(--gush-border)] text-sm text-slate-700 transition hover:bg-[color:var(--gush-page-bg-muted)]"
                       >
-                        <td className="px-4 py-4">{formatDateTime(item.date)}</td>
+                        <td className="px-4 py-4">
+                          {formatDateTime(item.date)}
+                        </td>
                         <td className="px-4 py-4">
                           <div className="space-y-1">
-                            <p className="font-semibold text-slate-950">{slotMeta.label}</p>
-                            <p className="text-xs text-slate-500">{slotMeta.token}</p>
+                            <p className="font-semibold text-slate-950">
+                              {slotMeta.label}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {slotMeta.token}
+                            </p>
                           </div>
                         </td>
                         <td className="px-4 py-4 font-mono text-xs text-slate-600">
                           {item.seriesId || "未知作品"}
                         </td>
-                        <td className="px-4 py-4">{formatNumber(item.impressions)}</td>
-                        <td className="px-4 py-4">{formatNumber(item.views)}</td>
-                        <td className="px-4 py-4">{formatNumber(item.clicks)}</td>
-                        <td className="px-4 py-4">{formatNumber(item.conversions)}</td>
+                        <td className="px-4 py-4">
+                          {formatNumber(item.impressions)}
+                        </td>
+                        <td className="px-4 py-4">
+                          {formatNumber(item.views)}
+                        </td>
+                        <td className="px-4 py-4">
+                          {formatNumber(item.clicks)}
+                        </td>
+                        <td className="px-4 py-4">
+                          {formatNumber(item.conversions)}
+                        </td>
                         <td className="px-4 py-4">{formatPercent(item.ctr)}</td>
-                        <td className="px-4 py-4">{formatPercent(item.conversionRate)}</td>
+                        <td className="px-4 py-4">
+                          {formatPercent(item.conversionRate)}
+                        </td>
                       </tr>
                     );
                   })}

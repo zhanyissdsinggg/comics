@@ -79,7 +79,10 @@ export function ReaderSettingsProvider({ children }) {
 
   const setLayoutMode = useCallback((mode) => {
     setSettings((prev) => {
-      const next = { ...prev, layoutMode: mode === "horizontal" ? "horizontal" : "vertical" };
+      const next = {
+        ...prev,
+        layoutMode: mode === "horizontal" ? "horizontal" : "vertical",
+      };
       writeSettings(next);
       return next;
     });
@@ -101,7 +104,10 @@ export function ReaderSettingsProvider({ children }) {
   const setReadingMode = useCallback((mode) => {
     setSettings((prev) => {
       const validModes = ["scroll", "single", "double"];
-      const next = { ...prev, readingMode: validModes.includes(mode) ? mode : "scroll" };
+      const next = {
+        ...prev,
+        readingMode: validModes.includes(mode) ? mode : "scroll",
+      };
       writeSettings(next);
       return next;
     });
@@ -207,7 +213,7 @@ export function ReaderSettingsProvider({ children }) {
       toggleFullscreen,
       setAutoScroll,
       setAutoScrollSpeed,
-    ]
+    ],
   );
 
   return (
@@ -220,7 +226,9 @@ export function ReaderSettingsProvider({ children }) {
 export function useReaderSettingsStore() {
   const context = useContext(ReaderSettingsContext);
   if (!context) {
-    throw new Error("useReaderSettingsStore must be used within ReaderSettingsProvider");
+    throw new Error(
+      "useReaderSettingsStore must be used within ReaderSettingsProvider",
+    );
   }
   return context;
 }

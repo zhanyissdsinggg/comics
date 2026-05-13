@@ -1,6 +1,12 @@
 ﻿"use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { getApiBaseUrl } from "../../lib/apiClient";
 import { buildAdminSession } from "../../lib/adminAccess";
@@ -265,53 +271,60 @@ export function AdminAuthProvider({ children }) {
     return () => clearInterval(timer);
   }, [isAuthenticated, logout, session]);
 
-  const login = useCallback(async (email, password, totpCode = "") => {
-    try {
-      const baseUrl = getApiBaseUrl();
-      const normalizedEmail = String(email || "").trim();
-      const normalizedPassword = String(password || "");
-      const normalizedTotp = String(totpCode || "").trim();
-      const payload = { email: normalizedEmail, password: normalizedPassword };
-
-      if (normalizedTotp) {
-        payload.totpCode = normalizedTotp;
-      }
-
-      const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-
-      const raw = await response.json().catch(() => ({}));
-      const data = unwrapPayload(raw);
-      if (!response.ok || data.success === false) {
-        return { success: false, error: data?.message || "账号或密码无效。" };
-      }
-
-      const nextSession = buildAdminSession(data.session);
-      if (nextSession) {
-        writeAuthSnapshot(true, nextSession);
-        setIsAuthenticated(true);
-        setSession(nextSession);
-      }
-
-      const valid = await verifySession();
-      if (!valid) {
-        return {
-          success: false,
-          error: "登录成功，但后台会话 Cookie 没有建立。请检查 Cookie 或代理配置。",
+  const login = useCallback(
+    async (email, password, totpCode = "") => {
+      try {
+        const baseUrl = getApiBaseUrl();
+        const normalizedEmail = String(email || "").trim();
+        const normalizedPassword = String(password || "");
+        const normalizedTotp = String(totpCode || "").trim();
+        const payload = {
+          email: normalizedEmail,
+          password: normalizedPassword,
         };
-      }
 
-      setIsLoading(false);
-      return { success: true };
-    } catch (error) {
-      console.error("admin login failed:", error);
-      return { success: false, error: "登录失败，请稍后再试。" };
-    }
-  }, [verifySession]);
+        if (normalizedTotp) {
+          payload.totpCode = normalizedTotp;
+        }
+
+        const response = await fetch(`${baseUrl}/api/admin/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        const raw = await response.json().catch(() => ({}));
+        const data = unwrapPayload(raw);
+        if (!response.ok || data.success === false) {
+          return { success: false, error: data?.message || "账号或密码无效。" };
+        }
+
+        const nextSession = buildAdminSession(data.session);
+        if (nextSession) {
+          writeAuthSnapshot(true, nextSession);
+          setIsAuthenticated(true);
+          setSession(nextSession);
+        }
+
+        const valid = await verifySession();
+        if (!valid) {
+          return {
+            success: false,
+            error:
+              "登录成功，但后台会话 Cookie 没有建立。请检查 Cookie 或代理配置。",
+          };
+        }
+
+        setIsLoading(false);
+        return { success: true };
+      } catch (error) {
+        console.error("admin login failed:", error);
+        return { success: false, error: "登录失败，请稍后再试。" };
+      }
+    },
+    [verifySession],
+  );
 
   const value = {
     isAuthenticated,
@@ -325,7 +338,11 @@ export function AdminAuthProvider({ children }) {
     logout,
   };
 
-  return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
+  return (
+    <AdminAuthContext.Provider value={value}>
+      {children}
+    </AdminAuthContext.Provider>
+  );
 }
 
 export function useAdminAuth() {
@@ -335,6 +352,3 @@ export function useAdminAuth() {
   }
   return context;
 }
-
-
-

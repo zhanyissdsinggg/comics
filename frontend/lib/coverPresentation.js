@@ -142,7 +142,9 @@ function findPaletteKey(genres, badge, tone) {
   if (/(action|battle|martial|adventure|hero|sports|war)/.test(combined)) {
     return "action";
   }
-  if (/(thriller|horror|mystery|crime|psychological|suspense|dark)/.test(combined)) {
+  if (
+    /(thriller|horror|mystery|crime|psychological|suspense|dark)/.test(combined)
+  ) {
     return "thriller";
   }
   if (/(sci|cyber|mecha|future|space|tech|robot)/.test(combined)) {
@@ -158,11 +160,19 @@ function findPaletteKey(genres, badge, tone) {
     return "drama";
   }
 
-  return TONE_KEYS[String(tone || "").trim().toLowerCase()] || TONE_KEYS.default;
+  return (
+    TONE_KEYS[
+      String(tone || "")
+        .trim()
+        .toLowerCase()
+    ] || TONE_KEYS.default
+  );
 }
 
 function trimLabel(value, maxLength = 36) {
-  const text = String(value || "").replace(/\s+/g, " ").trim();
+  const text = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (!text) {
     return "";
   }
@@ -173,7 +183,9 @@ function trimLabel(value, maxLength = 36) {
 }
 
 function labelsMatch(left, right) {
-  return trimLabel(left, 40).toLowerCase() === trimLabel(right, 40).toLowerCase();
+  return (
+    trimLabel(left, 40).toLowerCase() === trimLabel(right, 40).toLowerCase()
+  );
 }
 
 export function normalizeGenreList(input) {
@@ -193,12 +205,16 @@ export function normalizeGenreList(input) {
     return parts.map((part) => trimLabel(part, 22)).filter(Boolean);
   };
 
-  const values = Array.isArray(input) ? input.flatMap(splitGenreValue) : splitGenreValue(input);
+  const values = Array.isArray(input)
+    ? input.flatMap(splitGenreValue)
+    : splitGenreValue(input);
   return Array.from(new Set(values)).slice(0, 4);
 }
 
 export function getSeriesTypeLabel(value, fallback = "") {
-  const raw = String(value || "").trim().toLowerCase();
+  const raw = String(value || "")
+    .trim()
+    .toLowerCase();
   if (!raw) {
     return fallback;
   }
@@ -212,7 +228,9 @@ export function getSeriesTypeLabel(value, fallback = "") {
 }
 
 export function normalizeCoverBadge(value) {
-  const raw = String(value || "").replace(/\s+/g, " ").trim();
+  const raw = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (!raw) {
     return "";
   }
@@ -243,11 +261,13 @@ export function getCoverArtDirection({
   seriesType = "",
   eyebrow = "",
 }) {
-  const palette = PALETTES[findPaletteKey(genres, badge, tone)] || PALETTES.default;
+  const palette =
+    PALETTES[findPaletteKey(genres, badge, tone)] || PALETTES.default;
   const typeLabel = getSeriesTypeLabel(seriesType, "Series");
   const genreLabels = normalizeGenreList(genres);
   const primaryGenre = genreLabels[0] || palette.label;
-  const secondaryGenre = genreLabels[1] || trimLabel(eyebrow, 34) || `${typeLabel} on Gush`;
+  const secondaryGenre =
+    genreLabels[1] || trimLabel(eyebrow, 34) || `${typeLabel} on Gush`;
   const normalizedBadgeLabel = normalizeCoverBadge(badge);
   const badgeLabel =
     normalizedBadgeLabel &&
@@ -272,7 +292,9 @@ export function getCoverCardMeta(item = {}) {
   const subtitleValue = String(item?.subtitle || "").trim();
   const subtitleLooksEditorial =
     /[/|,]/.test(subtitleValue) &&
-    !/(episode|chapter|continue|last read|updated|rating|saved|series)/i.test(subtitleValue);
+    !/(episode|chapter|continue|last read|updated|rating|saved|series)/i.test(
+      subtitleValue,
+    );
   const genreSource =
     Array.isArray(item?.genres) && item.genres.length > 0
       ? item.genres
@@ -283,7 +305,8 @@ export function getCoverCardMeta(item = {}) {
           : [];
   const genres = normalizeGenreList(genreSource);
   const typeLabel = getSeriesTypeLabel(item?.seriesType || item?.type, "");
-  const badgeLabel = item?.adult || item?.isAdult ? "18+" : normalizeCoverBadge(item?.badge);
+  const badgeLabel =
+    item?.adult || item?.isAdult ? "18+" : normalizeCoverBadge(item?.badge);
   const chips = [];
 
   if (typeLabel) {
@@ -292,7 +315,10 @@ export function getCoverCardMeta(item = {}) {
   if (genres[0]) {
     chips.push({ id: "genre", label: genres[0], tone: "accent" });
   }
-  if (badgeLabel && !chips.some((chip) => chip.label.toLowerCase() === badgeLabel.toLowerCase())) {
+  if (
+    badgeLabel &&
+    !chips.some((chip) => chip.label.toLowerCase() === badgeLabel.toLowerCase())
+  ) {
     chips.push({
       id: "badge",
       label: badgeLabel,
@@ -309,7 +335,9 @@ export function getCoverCardMeta(item = {}) {
 
   const normalizedGenreText = genres.join(" / ").toLowerCase();
   const detailText =
-    rawDetail && rawDetail.toLowerCase() !== normalizedGenreText ? rawDetail : "";
+    rawDetail && rawDetail.toLowerCase() !== normalizedGenreText
+      ? rawDetail
+      : "";
 
   return {
     genres,
@@ -336,7 +364,9 @@ export function isLikelyPlaceholderCover(url) {
     );
   } catch {
     const lowerValue = value.toLowerCase();
-    return PLACEHOLDER_PATH_FRAGMENTS.some((fragment) => lowerValue.includes(fragment));
+    return PLACEHOLDER_PATH_FRAGMENTS.some((fragment) =>
+      lowerValue.includes(fragment),
+    );
   }
 }
 

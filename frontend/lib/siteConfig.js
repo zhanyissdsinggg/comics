@@ -56,13 +56,12 @@ export const siteConfig = {
   defaultDescription:
     clean(process.env.NEXT_PUBLIC_SITE_DESCRIPTION) ||
     "Read comics and novels on Gush.",
-  tagline:
-    clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) ||
-    "Comics and novels.",
+  tagline: clean(process.env.NEXT_PUBLIC_SITE_TAGLINE) || "Comics and novels.",
   aboutSummary:
     clean(process.env.NEXT_PUBLIC_ABOUT_SUMMARY) ||
     "Gush brings comics and novels together in one reading home.",
-  supportEmail: clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
+  supportEmail:
+    clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@gushcomics.com",
   privacyEmail:
     clean(process.env.NEXT_PUBLIC_PRIVACY_EMAIL) ||
     clean(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) ||
@@ -108,9 +107,11 @@ export const siteConfig = {
     ),
   },
   matureContent: {
-    enabled: parseEnvFlag(
-      ["NEXT_PUBLIC_ENABLE_MATURE_CONTENT", "ENABLE_MATURE_CONTENT", { defaultValue: true }],
-    ),
+    enabled: parseEnvFlag([
+      "NEXT_PUBLIC_ENABLE_MATURE_CONTENT",
+      "ENABLE_MATURE_CONTENT",
+      { defaultValue: true },
+    ]),
   },
 };
 

@@ -1,6 +1,9 @@
 "use client";
 
-import { storefrontPrimaryButtonClass, storefrontSecondaryButtonClass } from "../components/common/StorefrontPagePrimitives";
+import {
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../components/common/StorefrontPagePrimitives";
 import SurfacePanel from "../components/common/SurfacePanel";
 
 export default function GlobalError({ reset }) {

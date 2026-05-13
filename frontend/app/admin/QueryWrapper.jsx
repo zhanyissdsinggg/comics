@@ -1,11 +1,14 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
 const QueryProvider = dynamic(
-  () => import('../../lib/queryProvider').then((module) => ({ default: module.QueryProvider })),
-  { ssr: false }
+  () =>
+    import("../../lib/queryProvider").then((module) => ({
+      default: module.QueryProvider,
+    })),
+  { ssr: false },
 );
 
 export function QueryWrapper({ children }) {

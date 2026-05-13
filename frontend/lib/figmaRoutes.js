@@ -25,7 +25,6 @@ export function isFigmaRoute(pathname) {
   }
 
   return (
-    normalizedPath.startsWith("/read/") ||
-    normalizedPath.startsWith("/series/")
+    normalizedPath.startsWith("/read/") || normalizedPath.startsWith("/series/")
   );
 }

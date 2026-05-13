@@ -16,7 +16,13 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
-import { formatAmount, formatDate, getStatusLabel, getStatusTone, isRefunded } from "./utils";
+import {
+  formatAmount,
+  formatDate,
+  getStatusLabel,
+  getStatusTone,
+  isRefunded,
+} from "./utils";
 
 export function OrdersSummaryCards({ cards }) {
   return (
@@ -66,7 +72,12 @@ export function OrdersTableSection(props) {
       description="按订单或用户编号搜索，再处理退款或导出。"
       eyebrow="交易处理"
       action={
-        <Button type="button" variant="secondary" onClick={onExport} disabled={exportDisabled}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onExport}
+          disabled={exportDisabled}
+        >
           <Download className="size-4" />
           导出所选
         </Button>
@@ -74,8 +85,12 @@ export function OrdersTableSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">先锁定订单或用户，再按时间顺序复核退款与异常支付。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先锁定订单或用户，再按时间顺序复核退款与异常支付。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -92,10 +107,17 @@ export function OrdersTableSection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量动作</p>
-          <p className="mt-2 text-sm text-slate-600">先看清选择范围，再统一退款或删除记录，导出用于复核留档。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            批量动作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先看清选择范围，再统一退款或删除记录，导出用于复核留档。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="outline"
@@ -140,7 +162,9 @@ export function OrdersTableSection(props) {
                   <input
                     type="checkbox"
                     aria-label="选择全部订单"
-                    checked={orders.length > 0 && selectedIds.length === orders.length}
+                    checked={
+                      orders.length > 0 && selectedIds.length === orders.length
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                   />
@@ -169,11 +193,15 @@ export function OrdersTableSection(props) {
                     <div className="space-y-1">
                       <p className="font-semibold text-slate-950">{order.id}</p>
                       <p className="text-xs text-slate-500">
-                        {order.orderId ? `支付网关编号：${order.orderId}` : '站内订单记录'}
+                        {order.orderId
+                          ? `支付网关编号：${order.orderId}`
+                          : "站内订单记录"}
                       </p>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{order.userId || "未知用户"}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {order.userId || "未知用户"}
+                  </td>
                   <td className="px-4 py-4 font-semibold text-slate-950">
                     {formatAmount(order.amount, order.currency)}
                   </td>
@@ -182,7 +210,9 @@ export function OrdersTableSection(props) {
                       {getStatusLabel(order.status)}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDate(order.createdAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDate(order.createdAt)}
+                  </td>
                   <td className="px-4 py-4">
                     {!isRefunded(order.status) ? (
                       <Button

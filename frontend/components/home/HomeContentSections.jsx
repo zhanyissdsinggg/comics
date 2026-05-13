@@ -110,15 +110,30 @@ function HomeSectionHeader({
     <div className="mb-6 flex flex-col gap-3 sm:mb-8 md:flex-row md:items-end md:justify-between">
       <div className="max-w-[38rem]">
         {eyebrow ? (
-          <p className={cn("text-[11px] font-black uppercase tracking-[0.18em] sm:text-sm", styles.eyebrow)}>
+          <p
+            className={cn(
+              "text-[11px] font-black uppercase tracking-[0.18em] sm:text-sm",
+              styles.eyebrow,
+            )}
+          >
             {eyebrow}
           </p>
         ) : null}
-        <h2 className={cn("mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] sm:mt-2", styles.title)}>
+        <h2
+          className={cn(
+            "mt-1.5 text-[clamp(1.7rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] sm:mt-2",
+            styles.title,
+          )}
+        >
           {title}
         </h2>
         {description ? (
-          <p className={cn("mt-3 max-w-[34rem] text-sm font-semibold leading-6", styles.description)}>
+          <p
+            className={cn(
+              "mt-3 max-w-[34rem] text-sm font-semibold leading-6",
+              styles.description,
+            )}
+          >
             {description}
           </p>
         ) : null}
@@ -199,7 +214,9 @@ function ShelfComicCard({ item, onClick, actionLabel = "View title" }) {
     <button
       type="button"
       onClick={onClick}
-      data-testid={item?.id ? `home-shelf-series-${item.id}` : "home-shelf-series"}
+      data-testid={
+        item?.id ? `home-shelf-series-${item.id}` : "home-shelf-series"
+      }
       className="group text-left"
       aria-label={actionLabel ? `${actionLabel} ${title}` : `View ${title}`}
     >
@@ -239,9 +256,9 @@ function ShelfComicCard({ item, onClick, actionLabel = "View title" }) {
             </p>
           ) : null}
           {meta ? (
-          <p className="mt-1 line-clamp-1 text-[10px] font-semibold text-white/78 sm:mt-2 sm:text-[11px]">
-            {meta}
-          </p>
+            <p className="mt-1 line-clamp-1 text-[10px] font-semibold text-white/78 sm:mt-2 sm:text-[11px]">
+              {meta}
+            </p>
           ) : null}
         </div>
       </div>
@@ -267,7 +284,9 @@ function HomeShelfSection({
   const styles = SECTION_STYLES[sectionTone] || SECTION_STYLES.featured;
 
   return (
-    <section className={cn("border-y-[4px] border-black py-9 sm:py-14", styles.shell)}>
+    <section
+      className={cn("border-y-[4px] border-black py-9 sm:py-14", styles.shell)}
+    >
       <div className="mx-auto max-w-[1320px] px-4 md:px-8">
         <HomeSectionHeader
           eyebrow={eyebrow}
@@ -359,9 +378,7 @@ function LeaderboardCard({ item, rank, onClick }) {
       <div
         className={cn(
           "text-center text-[2rem] font-black leading-none tracking-[-0.06em] sm:text-[2.5rem]",
-          rank <= 3
-            ? "text-[#00E5FF]"
-            : "text-white/35",
+          rank <= 3 ? "text-[#00E5FF]" : "text-white/35",
         )}
       >
         {rank}
@@ -499,7 +516,9 @@ function GenreKeywordBar({ keywords = [], onGuideClick }) {
             <button
               key={`${pill}-${index}`}
               type="button"
-              onClick={() => onGuideClick?.(`/search?genre=${encodeURIComponent(pill)}`)}
+              onClick={() =>
+                onGuideClick?.(`/search?genre=${encodeURIComponent(pill)}`)
+              }
               className={cn(
                 "shrink-0 rounded-full border-2 border-black px-4 py-2.5 text-xs font-black tracking-[0.06em] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 sm:px-5 sm:py-3 sm:text-sm",
                 colors[index % colors.length],
@@ -541,7 +560,9 @@ export default function HomeContentSections({
   ]
     .filter((item, index, source) => {
       const itemId = String(item?.id || "").trim();
-      return itemId && source.findIndex((entry) => entry?.id === itemId) === index;
+      return (
+        itemId && source.findIndex((entry) => entry?.id === itemId) === index
+      );
     })
     .slice(0, 6);
 
@@ -626,10 +647,10 @@ export default function HomeContentSections({
         </>
       )}
 
-    <section className="border-y-[4px] border-black bg-white py-12 sm:py-16">
-      <div className="mx-auto max-w-[1320px] px-4 md:px-8">
-        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-[36rem]">
+      <section className="border-y-[4px] border-black bg-white py-12 sm:py-16">
+        <div className="mx-auto max-w-[1320px] px-4 md:px-8">
+          <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-[36rem]">
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-black/65 sm:text-sm">
                 Explore
               </p>
@@ -661,7 +682,6 @@ export default function HomeContentSections({
               />
             ))}
           </div>
-
         </div>
       </section>
 

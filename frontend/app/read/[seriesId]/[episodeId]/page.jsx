@@ -46,9 +46,13 @@ export async function generateMetadata({ params }) {
     notFound();
   }
   const includeAdult = await isServerAdultModeEnabled();
-  const { series, episode, state } = await loadReaderSeoPayload(seriesId, episodeId, {
-    includeAdult,
-  });
+  const { series, episode, state } = await loadReaderSeoPayload(
+    seriesId,
+    episodeId,
+    {
+      includeAdult,
+    },
+  );
 
   if (!series || !episode || state !== "ready") {
     return createPageMetadata({
@@ -111,9 +115,13 @@ export default async function Page({ params }) {
     notFound();
   }
   const includeAdult = await isServerAdultModeEnabled();
-  const { series, episode, episodes, state } = await loadReaderSeoPayload(seriesId, episodeId, {
-    includeAdult,
-  });
+  const { series, episode, episodes, state } = await loadReaderSeoPayload(
+    seriesId,
+    episodeId,
+    {
+      includeAdult,
+    },
+  );
   const isModeBlocked = state === "adult-gated" || state === "mode-mismatch";
   const isRecoverableShellState = isModeBlocked || state === "unavailable";
   if (
@@ -143,7 +151,8 @@ export default async function Page({ params }) {
     episode?.number,
   );
   const episodeTitle =
-    episode && !isDefaultInstallmentTitle(episode?.title, series?.type || episode)
+    episode &&
+    !isDefaultInstallmentTitle(episode?.title, series?.type || episode)
       ? String(episode.title || "").trim()
       : defaultEpisodeLabel;
 

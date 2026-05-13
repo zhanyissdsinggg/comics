@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { apiGet } from "../lib/apiClient";
 
 const BrandingContext = createContext(null);
@@ -80,10 +87,14 @@ export function BrandingProvider({ children }) {
 
   const value = useMemo(
     () => ({ branding, setBranding, loadBranding, loaded }),
-    [branding, loadBranding, loaded]
+    [branding, loadBranding, loaded],
   );
 
-  return <BrandingContext.Provider value={value}>{children}</BrandingContext.Provider>;
+  return (
+    <BrandingContext.Provider value={value}>
+      {children}
+    </BrandingContext.Provider>
+  );
 }
 
 export function useBrandingStore() {

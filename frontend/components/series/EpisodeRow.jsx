@@ -356,10 +356,10 @@ function EpisodeRow({
       return;
     }
 
-  if (
-    accessState.actionKind === "read" ||
-    accessState.actionKind === "preview"
-  ) {
+    if (
+      accessState.actionKind === "read" ||
+      accessState.actionKind === "preview"
+    ) {
       onRead(seriesId, episode?.id);
       return;
     }
@@ -372,14 +372,14 @@ function EpisodeRow({
     if (accessState.actionKind === "unlock") {
       openUnlockModal();
       return;
-  }
+    }
 
-  if (accessState.actionKind === "locked") {
-    return;
-  }
+    if (accessState.actionKind === "locked") {
+      return;
+    }
 
-  onSubscribe(seriesId, episode?.id);
-};
+    onSubscribe(seriesId, episode?.id);
+  };
 
   const actionClassName =
     accessState.actionKind === "claim" ||
@@ -388,9 +388,9 @@ function EpisodeRow({
       ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontPrimaryButtonClass}`
       : accessState.actionKind === "locked"
         ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
-      : accessState.actionKind === "subscribe"
-        ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
-        : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
+        : accessState.actionKind === "subscribe"
+          ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
+          : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
   const readHref = buildReaderPath(seriesId, episode?.id);
   const isDirectReadLink =
     accessState.actionKind === "read" || accessState.actionKind === "preview";

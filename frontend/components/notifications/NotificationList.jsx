@@ -27,10 +27,10 @@ export default function NotificationList({
     });
   };
 
-    const getMeta = (item) => {
-      if (item.type === "NEW_EPISODE") {
-        return "New chapter";
-      }
+  const getMeta = (item) => {
+    if (item.type === "NEW_EPISODE") {
+      return "New chapter";
+    }
     if (item.type === "TTF_READY") {
       return "Free unlock";
     }
@@ -86,9 +86,7 @@ export default function NotificationList({
           key={item.id}
           className={[
             "rounded-[26px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
-            item.read
-              ? "text-white/85"
-              : "text-white",
+            item.read ? "text-white/85" : "text-white",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -98,9 +96,7 @@ export default function NotificationList({
                   {item.title}
                 </p>
                 {!item.read ? (
-                  <span
-                    className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                  >
+                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     Unread
                   </span>
                 ) : null}

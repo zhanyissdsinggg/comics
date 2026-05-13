@@ -19,13 +19,17 @@ export default function AdminRouteGuard({ children }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading, routePatterns, homePath } = useAdminAuth();
+  const { isAuthenticated, isLoading, routePatterns, homePath } =
+    useAdminAuth();
 
   const isLoginPage = pathname === "/admin/login";
   const nextParam = searchParams?.get("next") || "";
 
   const nextPath = useMemo(() => {
-    if (isSafeAdminPath(nextParam) && canAccessAdminRoute(nextParam, routePatterns)) {
+    if (
+      isSafeAdminPath(nextParam) &&
+      canAccessAdminRoute(nextParam, routePatterns)
+    ) {
       return nextParam;
     }
     return homePath || "/admin";

@@ -44,7 +44,9 @@ export function NamingRiskSection({
     <SurfacePanel appearance="light" accent="amber" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">命名清理</h2>
+          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+            命名清理
+          </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             先把同一位创作者的名字收成一个版本。
           </p>
@@ -57,22 +59,28 @@ export function NamingRiskSection({
       ) : (
         <div className="space-y-3">
           {namingRiskPreview.map((creator) => (
-            <div
-              key={creator.slug}
-              className={contentCardClassName}
-            >
+            <div key={creator.slug} className={contentCardClassName}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-semibold text-slate-950">{creator.name}</p>
-                    <StatusPill tone="amber">发现 {creator.variants.length} 种写法</StatusPill>
+                    <p className="text-base font-semibold text-slate-950">
+                      {creator.name}
+                    </p>
+                    <StatusPill tone="amber">
+                      发现 {creator.variants.length} 种写法
+                    </StatusPill>
                   </div>
                   <p className="text-sm leading-6 text-slate-600">
-                    关联 {creator.titleCount} 部作品，已发布 {creator.publishedCount} 部，草稿 {creator.unpublishedCount} 部。
+                    关联 {creator.titleCount} 部作品，已发布{" "}
+                    {creator.publishedCount} 部，草稿 {creator.unpublishedCount}{" "}
+                    部。
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {creator.variants.map((variant) => (
-                      <StatusPill key={`${creator.slug}-${variant}`} tone="slate">
+                      <StatusPill
+                        key={`${creator.slug}-${variant}`}
+                        tone="slate"
+                      >
                         {variant}
                       </StatusPill>
                     ))}
@@ -81,7 +89,9 @@ export function NamingRiskSection({
 
                 <div className={actionTrayClassName}>
                   <ActionButton
-                    onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
+                    onClick={() =>
+                      handleOpenSeries(creator.spotlightSeries?.id)
+                    }
                     className={primaryActionClassName}
                   >
                     <Edit3 className="h-4 w-4" />
@@ -89,7 +99,8 @@ export function NamingRiskSection({
                   </ActionButton>
                   <ActionButton onClick={() => handleCopyCreatorName(creator)}>
                     <Copy className="h-4 w-4" />
-                    {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
+                    {copyFeedback.slug === creator.slug &&
+                    copyFeedback.type === "success"
                       ? "已复制"
                       : "复制规范名称"}
                   </ActionButton>
@@ -103,7 +114,10 @@ export function NamingRiskSection({
   );
 }
 
-export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries }) {
+export function MissingCreditsSection({
+  missingCreatorPreview,
+  handleOpenSeries,
+}) {
   return (
     <SurfacePanel appearance="light" accent="cyan" className="space-y-5">
       <div className="flex items-start justify-between gap-3">
@@ -119,7 +133,10 @@ export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries 
       </div>
 
       {missingCreatorPreview.length === 0 ? (
-        <EmptyState title="当前没有缺失署名" description="当前作品都已有可用署名。" />
+        <EmptyState
+          title="当前没有缺失署名"
+          description="当前作品都已有可用署名。"
+        />
       ) : (
         <div className="space-y-3">
           {missingCreatorPreview.map((series) => (
@@ -129,15 +146,18 @@ export function MissingCreditsSection({ missingCreatorPreview, handleOpenSeries 
             >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-base font-semibold text-slate-950">{series.title}</p>
+                  <p className="text-base font-semibold text-slate-950">
+                    {series.title}
+                  </p>
                   <StatusPill tone="slate">{series.id}</StatusPill>
                   <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
                     {series.isPublished ? "已发布" : "草稿"}
                   </StatusPill>
                 </div>
                 <p className="text-sm leading-6 text-slate-600">
-                  {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
-                  更新于 {formatDateLabel(series.updatedAt)}
+                  {series.type === "novel" ? "小说" : "漫画"} |{" "}
+                  {formatSeriesStatusLabel(series.status)} | 更新于{" "}
+                  {formatDateLabel(series.updatedAt)}
                 </p>
               </div>
 
@@ -172,7 +192,10 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
       </div>
 
       {legacyAuthorPreview.length === 0 ? (
-        <EmptyState title="当前没有兼容层残留" description="署名已经不再依赖旧 author 字段。" />
+        <EmptyState
+          title="当前没有兼容层残留"
+          description="署名已经不再依赖旧 author 字段。"
+        />
       ) : (
         <div className="space-y-3">
           {legacyAuthorPreview.map((series) => (
@@ -182,14 +205,20 @@ export function LegacyAuthorSection({ legacyAuthorPreview, handleOpenSeries }) {
             >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-base font-semibold text-slate-950">{series.title}</p>
+                  <p className="text-base font-semibold text-slate-950">
+                    {series.title}
+                  </p>
                   <StatusPill tone="slate">{series.id}</StatusPill>
                   <StatusPill tone="amber">旧 author 兼容层</StatusPill>
                 </div>
                 <p className="text-sm leading-6 text-slate-600">
-                  当前署名：<span className="font-medium text-slate-950">{series.author || "未填写"}</span>
+                  当前署名：
+                  <span className="font-medium text-slate-950">
+                    {series.author || "未填写"}
+                  </span>
                   {" | "}
-                  {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)}
+                  {series.type === "novel" ? "小说" : "漫画"} |{" "}
+                  {formatSeriesStatusLabel(series.status)}
                 </p>
               </div>
 
@@ -224,13 +253,16 @@ export function CreatorDirectorySection({
     <SurfacePanel appearance="light" accent="blue" className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">创作者目录</h2>
+          <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+            创作者目录
+          </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             在一个地方看覆盖率、命名状态和前台路径。
           </p>
         </div>
         <p className="text-sm text-slate-500">
-          草稿 {audit.stats.unpublishedSeriesCount} 部，命名风险 {audit.stats.namingRiskCreatorCount} 处
+          草稿 {audit.stats.unpublishedSeriesCount} 部，命名风险{" "}
+          {audit.stats.namingRiskCreatorCount} 处
         </p>
       </div>
 
@@ -256,20 +288,26 @@ export function CreatorDirectorySection({
                       <h3 className="text-[1.3rem] font-semibold tracking-tight text-slate-950">
                         {creator.name}
                       </h3>
-                      <StatusPill tone={creator.hasNamingRisk ? "amber" : "emerald"}>
+                      <StatusPill
+                        tone={creator.hasNamingRisk ? "amber" : "emerald"}
+                      >
                         {creator.hasNamingRisk ? "命名待清理" : "命名稳定"}
                       </StatusPill>
                     </div>
 
                     <p className="text-sm leading-6 text-slate-600">
-                      代表作品：{creator.spotlightSeries?.title || "暂未设置"} | 前台已就绪 {creator.readySeriesCount} 部 |
-                      最近更新于 {formatDateLabel(creator.latestUpdatedAt)}
+                      代表作品：{creator.spotlightSeries?.title || "暂未设置"} |
+                      前台已就绪 {creator.readySeriesCount} 部 | 最近更新于{" "}
+                      {formatDateLabel(creator.latestUpdatedAt)}
                     </p>
 
                     {creator.topGenres.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {creator.topGenres.map((genre) => (
-                          <StatusPill key={`${creator.slug}-${genre}`} tone="slate">
+                          <StatusPill
+                            key={`${creator.slug}-${genre}`}
+                            tone="slate"
+                          >
                             {genre}
                           </StatusPill>
                         ))}
@@ -282,7 +320,9 @@ export function CreatorDirectorySection({
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         作品数
                       </p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.titleCount}</p>
+                      <p className="mt-2 text-2xl font-semibold text-slate-950">
+                        {creator.titleCount}
+                      </p>
                     </div>
                     <div className={metricTileClassName}>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -296,13 +336,17 @@ export function CreatorDirectorySection({
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         已发布
                       </p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.publishedCount}</p>
+                      <p className="mt-2 text-2xl font-semibold text-slate-950">
+                        {creator.publishedCount}
+                      </p>
                     </div>
                     <div className={metricTileClassName}>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         前台已就绪
                       </p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-950">{creator.readySeriesCount}</p>
+                      <p className="mt-2 text-2xl font-semibold text-slate-950">
+                        {creator.readySeriesCount}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -314,7 +358,10 @@ export function CreatorDirectorySection({
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {creator.variants.map((variant) => (
-                        <StatusPill key={`${creator.slug}-variant-${variant}`} tone="amber">
+                        <StatusPill
+                          key={`${creator.slug}-variant-${variant}`}
+                          tone="amber"
+                        >
                           {variant}
                         </StatusPill>
                       ))}
@@ -324,20 +371,27 @@ export function CreatorDirectorySection({
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   <ActionButton
-                    onClick={() => handleOpenSeries(creator.spotlightSeries?.id)}
+                    onClick={() =>
+                      handleOpenSeries(creator.spotlightSeries?.id)
+                    }
                     className={primaryActionClassName}
                     data-testid={`admin-creator-card-${creator.id}-edit-spotlight`}
                   >
                     <Edit3 className="h-4 w-4" />
                     编辑代表作品
                   </ActionButton>
-                  <ActionButton onClick={() => handleOpenSeriesLibraryByCreator(creator.name)}>
+                  <ActionButton
+                    onClick={() =>
+                      handleOpenSeriesLibraryByCreator(creator.name)
+                    }
+                  >
                     <Search className="h-4 w-4" />
                     在作品库中搜索
                   </ActionButton>
                   <ActionButton onClick={() => handleCopyCreatorName(creator)}>
                     <Copy className="h-4 w-4" />
-                    {copyFeedback.slug === creator.slug && copyFeedback.type === "success"
+                    {copyFeedback.slug === creator.slug &&
+                    copyFeedback.type === "success"
                       ? "已复制"
                       : "复制规范名称"}
                   </ActionButton>
@@ -350,16 +404,26 @@ export function CreatorDirectorySection({
                   </ActionButton>
                   {creator.spotlightSeries?.id ? (
                     <ActionButton
-                      onClick={() => handleOpenStorefrontSeries(creator.spotlightSeries.id)}
+                      onClick={() =>
+                        handleOpenStorefrontSeries(creator.spotlightSeries.id)
+                      }
                       data-testid={`admin-creator-card-${creator.id}-storefront-series`}
                     >
                       <ArrowUpRight className="h-4 w-4" />
                       查看前台代表作品
                     </ActionButton>
                   ) : null}
-                  <ActionButton onClick={() => handleToggleCreatorExpanded(creator.slug)}>
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    {isExpanded ? "收起关联作品" : `查看关联作品（${creator.titleCount}）`}
+                  <ActionButton
+                    onClick={() => handleToggleCreatorExpanded(creator.slug)}
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                    {isExpanded
+                      ? "收起关联作品"
+                      : `查看关联作品（${creator.titleCount}）`}
                   </ActionButton>
                 </div>
 
@@ -367,10 +431,12 @@ export function CreatorDirectorySection({
                   <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                      <p className="text-sm font-semibold text-slate-950">关联作品</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        <p className="text-sm font-semibold text-slate-950">
+                          关联作品
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
                           继续核对作品级署名和前台页。
-                      </p>
+                        </p>
                       </div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         共 {creator.series.length} 部
@@ -385,28 +451,43 @@ export function CreatorDirectorySection({
                         >
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-base font-semibold text-slate-950">{series.title}</p>
+                              <p className="text-base font-semibold text-slate-950">
+                                {series.title}
+                              </p>
                               <StatusPill tone="slate">{series.id}</StatusPill>
-                              <StatusPill tone={series.isPublished ? "emerald" : "amber"}>
+                              <StatusPill
+                                tone={series.isPublished ? "emerald" : "amber"}
+                              >
                                 {series.isPublished ? "已发布" : "草稿"}
                               </StatusPill>
                             </div>
                             <p className="text-sm leading-6 text-slate-600">
-                              {series.type === "novel" ? "小说" : "漫画"} | {formatSeriesStatusLabel(series.status)} |
-                              更新于 {formatDateLabel(series.updatedAt)}
+                              {series.type === "novel" ? "小说" : "漫画"} |{" "}
+                              {formatSeriesStatusLabel(series.status)} | 更新于{" "}
+                              {formatDateLabel(series.updatedAt)}
                             </p>
                             <p className="text-sm leading-6 text-slate-600">
-                              资料状态：<span className="text-slate-950">{getSeriesMetadataSummary(series)}</span>
+                              资料状态：
+                              <span className="text-slate-950">
+                                {getSeriesMetadataSummary(series)}
+                              </span>
                             </p>
                           </div>
 
                           <div className="flex w-full flex-wrap gap-2">
-                            <ActionButton onClick={() => handleOpenSeries(series.id)} className={primaryActionClassName}>
+                            <ActionButton
+                              onClick={() => handleOpenSeries(series.id)}
+                              className={primaryActionClassName}
+                            >
                               <Edit3 className="h-4 w-4" />
                               编辑作品
                             </ActionButton>
                             {series.isPublished ? (
-                              <ActionButton onClick={() => handleOpenStorefrontSeries(series.id)}>
+                              <ActionButton
+                                onClick={() =>
+                                  handleOpenStorefrontSeries(series.id)
+                                }
+                              >
                                 <ArrowUpRight className="h-4 w-4" />
                                 查看前台页
                               </ActionButton>

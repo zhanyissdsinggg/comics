@@ -1,6 +1,9 @@
 "use client";
 
-import { normalizeAdminErrorMessage, adminFetchJson } from "@/lib/adminApiClient";
+import {
+  normalizeAdminErrorMessage,
+  adminFetchJson,
+} from "@/lib/adminApiClient";
 
 export const VIEW_TABS = [
   { value: "stats", label: "总览" },
@@ -56,11 +59,15 @@ export function formatDate(value) {
 
 export function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat("zh-CN").format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat("zh-CN").format(
+    Number.isFinite(amount) ? amount : 0,
+  );
 }
 
 export function getSegmentLabel(segment) {
-  return SEGMENT_FILTERS.find((item) => item.key === segment)?.label || "自定义分群";
+  return (
+    SEGMENT_FILTERS.find((item) => item.key === segment)?.label || "自定义分群"
+  );
 }
 
 export function formatChurnRiskLabel(churnRisk) {
@@ -93,7 +100,9 @@ export async function fetchAnalyticsAdminPayload(path) {
   const { response, data } = await adminFetchJson(path, { cache: "no-store" });
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
+    throw new Error(
+      data?.message || data?.error || `请求失败，状态码 ${response.status}。`,
+    );
   }
 
   return data || {};
@@ -149,7 +158,8 @@ export function buildStatsInsights(stats) {
       message:
         Number(stats?.highValueUsers || 0) > 0
           ? `高价值读者的人均消费约为 ${formatCurrency(
-              Number(stats?.totalRevenue || 0) / Number(stats?.highValueUsers || 1),
+              Number(stats?.totalRevenue || 0) /
+                Number(stats?.highValueUsers || 1),
             )}。`
           : "等当前数据里出现高价值读者后，这里会自动更新。",
     },

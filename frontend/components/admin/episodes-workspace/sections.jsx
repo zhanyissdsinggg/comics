@@ -27,7 +27,9 @@ export function EpisodesHeaderActions({
   return (
     <div className="grid gap-3 lg:grid-cols-[auto_auto]">
       <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">导航与查看</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          导航与查看
+        </p>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Button type="button" variant="outline" onClick={onBackToSeries}>
             <ArrowLeft className="size-4" />
@@ -40,7 +42,9 @@ export function EpisodesHeaderActions({
         </div>
       </div>
       <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">新增动作</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          新增动作
+        </p>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onOpenBulkUpload}>
             <Upload className="size-4" />
@@ -140,8 +144,12 @@ export function EpisodesWorkspaceSection({
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">先用搜索和排序缩小范围，再在表格里直接调整章节内容。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先用搜索和排序缩小范围，再在表格里直接调整章节内容。
+          </p>
           <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px_180px]">
             <input
               value={searchTerm}
@@ -167,8 +175,12 @@ export function EpisodesWorkspaceSection({
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">选择与批量处理</p>
-          <p className="mt-2 text-sm text-slate-600">勾选后的章节可以统一修改，删除动作单独放在这里，避免误触。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            选择与批量处理
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            勾选后的章节可以统一修改，删除动作单独放在这里，避免误触。
+          </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
               已选 {selectedIds.length} 章
@@ -186,7 +198,9 @@ export function EpisodesWorkspaceSection({
       </div>
 
       <div className="mb-6 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">快速筛选</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          快速筛选
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {quickFilters.map((filter) => (
             <QuickFilterChip
@@ -200,7 +214,10 @@ export function EpisodesWorkspaceSection({
       </div>
 
       {episodesQueryErrorMessage ? (
-        <AdminPageSection title="加载失败" description={episodesQueryErrorMessage} />
+        <AdminPageSection
+          title="加载失败"
+          description={episodesQueryErrorMessage}
+        />
       ) : episodes.length === 0 ? (
         <AdminPageSection
           title="当前视图下还没有章节"

@@ -35,20 +35,20 @@ export function mergeSeriesCommerceAccess(detailPayload, commercePayload) {
   }
 
   const accessMap = buildCommerceEpisodeMap(commercePayload);
-  const episodes = (Array.isArray(detailPayload?.episodes) ? detailPayload.episodes : []).map(
-    (episode) => {
-      const episodeId = String(episode?.id || "").trim();
-      const access = accessMap.get(episodeId);
-      if (!access) {
-        return episode;
-      }
+  const episodes = (
+    Array.isArray(detailPayload?.episodes) ? detailPayload.episodes : []
+  ).map((episode) => {
+    const episodeId = String(episode?.id || "").trim();
+    const access = accessMap.get(episodeId);
+    if (!access) {
+      return episode;
+    }
 
-      return {
-        ...episode,
-        access,
-      };
-    },
-  );
+    return {
+      ...episode,
+      access,
+    };
+  });
 
   return {
     ...detailPayload,
@@ -62,20 +62,20 @@ export function mergeSeriesCommerceEpisodes(detailPayload, commercePayload) {
   }
 
   const accessMap = buildCommerceEpisodeMap(commercePayload);
-  const episodes = (Array.isArray(detailPayload?.episodes) ? detailPayload.episodes : []).map(
-    (episode) => {
-      const episodeId = String(episode?.id || "").trim();
-      const access = accessMap.get(episodeId);
-      if (!access) {
-        return episode;
-      }
+  const episodes = (
+    Array.isArray(detailPayload?.episodes) ? detailPayload.episodes : []
+  ).map((episode) => {
+    const episodeId = String(episode?.id || "").trim();
+    const access = accessMap.get(episodeId);
+    if (!access) {
+      return episode;
+    }
 
-      return {
-        ...episode,
-        ...access,
-      };
-    },
-  );
+    return {
+      ...episode,
+      ...access,
+    };
+  });
 
   return {
     ...detailPayload,

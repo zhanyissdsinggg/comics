@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
-import { BulkUploadModal } from '@/components/admin/episodes/BulkUploadModal';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { AdminDataState } from '@/components/admin/common/AdminDataState';
-import { Modal } from '@/components/admin/common/Modal';
+import AdminShell from "@/components/admin/AdminShell";
+import { BulkUploadModal } from "@/components/admin/episodes/BulkUploadModal";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { AdminDataState } from "@/components/admin/common/AdminDataState";
+import { Modal } from "@/components/admin/common/Modal";
 import {
   BulkUpdateModalContent,
   CreateEpisodeModalContent,
   EpisodesHeaderActions,
   EpisodesSummaryCards,
   EpisodesWorkspaceSection,
-} from '@/components/admin/episodes-workspace/sections';
+} from "@/components/admin/episodes-workspace/sections";
 import {
   buildBulkUpdatePayload,
   buildCreateEpisodePayload,
@@ -36,13 +36,13 @@ import {
   SORT_OPTIONS,
   toInteger,
   validateNewEpisodeDraft,
-} from '@/components/admin/episodes-workspace/utils';
-import { adminFetch, readAdminResponseMessage } from '@/lib/adminApiClient';
+} from "@/components/admin/episodes-workspace/utils";
+import { adminFetch, readAdminResponseMessage } from "@/lib/adminApiClient";
 
 const DEFAULT_FILTERS = {
-  priceType: 'all',
-  previewStatus: 'all',
-  ttfEligible: 'all',
+  priceType: "all",
+  previewStatus: "all",
+  ttfEligible: "all",
 };
 
 export default function AdminEpisodesPage() {
@@ -51,10 +51,10 @@ export default function AdminEpisodesPage() {
   const queryClient = useQueryClient();
   const seriesId = normalizeParam(params?.id);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  const [sortBy, setSortBy] = useState('number');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortBy, setSortBy] = useState("number");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -68,11 +68,13 @@ export default function AdminEpisodesPage() {
   const [newEpisode, setNewEpisode] = useState(EMPTY_NEW_EPISODE);
   const [bulkForm, setBulkForm] = useState(EMPTY_BULK_FORM);
   const [episodeDrafts, setEpisodeDrafts] = useState({});
-  const [showCreateCommercialFields, setShowCreateCommercialFields] = useState(false);
-  const [showBulkCommercialFields, setShowBulkCommercialFields] = useState(false);
+  const [showCreateCommercialFields, setShowCreateCommercialFields] =
+    useState(false);
+  const [showBulkCommercialFields, setShowBulkCommercialFields] =
+    useState(false);
 
   const seriesQuery = useQuery({
-    queryKey: ['admin', 'series', seriesId, 'detail'],
+    queryKey: ["admin", "series", seriesId, "detail"],
     enabled: Boolean(seriesId),
     staleTime: 60_000,
     queryFn: () => fetchSeriesDetail(seriesId),
@@ -80,10 +82,10 @@ export default function AdminEpisodesPage() {
 
   const episodesQuery = useQuery({
     queryKey: [
-      'admin',
-      'series',
+      "admin",
+      "series",
       seriesId,
-      'episodes',
+      "episodes",
       deferredSearchTerm,
       sortBy,
       sortOrder,
@@ -118,8 +120,9 @@ export default function AdminEpisodesPage() {
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const allCurrentPageSelected =
-    episodes.length > 0 && episodes.every((episode) => selectedSet.has(episode.id));
-  const isCanonicalNumberSort = sortBy === 'number' && sortOrder === 'asc';
+    episodes.length > 0 &&
+    episodes.every((episode) => selectedSet.has(episode.id));
+  const isCanonicalNumberSort = sortBy === "number" && sortOrder === "asc";
 
   useEffect(() => {
     setPage(1);
@@ -131,21 +134,30 @@ export default function AdminEpisodesPage() {
 
   const invalidateEpisodeData = async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['admin', 'series', seriesId, 'episodes'] }),
-      queryClient.invalidateQueries({ queryKey: ['admin', 'series', seriesId, 'detail'] }),
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "series", seriesId, "episodes"],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "series", seriesId, "detail"],
+      }),
     ]);
   };
 
   const createEpisodeMutation = useMutation({
     mutationFn: async (payload) => {
-      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminFetch(
+        `/api/admin/series/${seriesId}/episodes`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '创建章节失败。'));
+        throw new Error(
+          await readAdminResponseMessage(response, "创建章节失败。"),
+        );
       }
 
       return response.json();
@@ -154,24 +166,32 @@ export default function AdminEpisodesPage() {
       setIsAddModalOpen(false);
       setNewEpisode(EMPTY_NEW_EPISODE);
       setShowCreateCommercialFields(false);
-      setFeedback({ type: 'success', message: '章节已创建。' });
+      setFeedback({ type: "success", message: "章节已创建。" });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建章节失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "创建章节失败。"),
+      });
     },
   });
 
   const updateEpisodeMutation = useMutation({
     mutationFn: async ({ episodeId, payload }) => {
-      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/${episodeId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminFetch(
+        `/api/admin/series/${seriesId}/episodes/${episodeId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '更新章节失败。'));
+        throw new Error(
+          await readAdminResponseMessage(response, "更新章节失败。"),
+        );
       }
 
       return response.json();
@@ -182,24 +202,32 @@ export default function AdminEpisodesPage() {
         delete next[variables.episodeId];
         return next;
       });
-      setFeedback({ type: 'success', message: '章节修改已保存。' });
+      setFeedback({ type: "success", message: "章节修改已保存。" });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '更新章节失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "更新章节失败。"),
+      });
     },
   });
 
   const bulkUpdateMutation = useMutation({
     mutationFn: async ({ ids, updates }) => {
-      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/bulk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, updates }),
-      });
+      const response = await adminFetch(
+        `/api/admin/series/${seriesId}/episodes/bulk`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids, updates }),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '批量更新章节失败。'));
+        throw new Error(
+          await readAdminResponseMessage(response, "批量更新章节失败。"),
+        );
       }
 
       return response.json();
@@ -209,23 +237,31 @@ export default function AdminEpisodesPage() {
       setBulkForm(EMPTY_BULK_FORM);
       setShowBulkCommercialFields(false);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: '已更新所选章节。' });
+      setFeedback({ type: "success", message: "已更新所选章节。" });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '批量更新章节失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "批量更新章节失败。"),
+      });
     },
   });
 
   const deleteEpisodesMutation = useMutation({
     mutationFn: async (ids) => {
       for (const id of ids) {
-        const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/${id}`, {
-          method: 'DELETE',
-        });
+        const response = await adminFetch(
+          `/api/admin/series/${seriesId}/episodes/${id}`,
+          {
+            method: "DELETE",
+          },
+        );
 
         if (!response.ok) {
-          throw new Error(await readAdminResponseMessage(response, '删除章节失败。'));
+          throw new Error(
+            await readAdminResponseMessage(response, "删除章节失败。"),
+          );
         }
       }
     },
@@ -233,34 +269,45 @@ export default function AdminEpisodesPage() {
       setIsDeleteConfirmOpen(false);
       setPendingDeleteIds([]);
       setSelectedIds([]);
-      setFeedback({ type: 'success', message: '已删除所选章节。' });
+      setFeedback({ type: "success", message: "已删除所选章节。" });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除章节失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "删除章节失败。"),
+      });
     },
   });
 
   const reorderEpisodesMutation = useMutation({
     mutationFn: async (payload) => {
-      const response = await adminFetch(`/api/admin/series/${seriesId}/episodes/reorder`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminFetch(
+        `/api/admin/series/${seriesId}/episodes/reorder`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
-        throw new Error(await readAdminResponseMessage(response, '更新章节顺序失败。'));
+        throw new Error(
+          await readAdminResponseMessage(response, "更新章节顺序失败。"),
+        );
       }
 
       return response.json();
     },
     onSuccess: async () => {
-      setFeedback({ type: 'success', message: '章节顺序已更新。' });
+      setFeedback({ type: "success", message: "章节顺序已更新。" });
       await invalidateEpisodeData();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '更新章节顺序失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "更新章节顺序失败。"),
+      });
     },
   });
 
@@ -280,7 +327,7 @@ export default function AdminEpisodesPage() {
       return draftValue;
     }
 
-    return String(episode[field] ?? '');
+    return String(episode[field] ?? "");
   };
 
   const clearEpisodeDraftField = (episodeId, field) => {
@@ -297,15 +344,15 @@ export default function AdminEpisodesPage() {
     });
   };
 
-  const commitEpisodeField = (episode, field, { type = 'string' } = {}) => {
+  const commitEpisodeField = (episode, field, { type = "string" } = {}) => {
     const draftValue = episodeDrafts[episode.id]?.[field];
     if (draftValue === undefined) {
       return;
     }
 
-    if (type === 'number') {
+    if (type === "number") {
       if (!isNonNegativeIntegerString(draftValue, { allowEmpty: true })) {
-        setFeedback({ type: 'error', message: '请输入有效的非负整数。' });
+        setFeedback({ type: "error", message: "请输入有效的非负整数。" });
         return;
       }
 
@@ -323,10 +370,10 @@ export default function AdminEpisodesPage() {
       return;
     }
 
-    const nextValue = String(draftValue ?? '').trim();
-    const currentValue = String(episode[field] ?? '').trim();
+    const nextValue = String(draftValue ?? "").trim();
+    const currentValue = String(episode[field] ?? "").trim();
     if (!nextValue) {
-      setFeedback({ type: 'error', message: '章节标题不能为空。' });
+      setFeedback({ type: "error", message: "章节标题不能为空。" });
       return;
     }
     if (nextValue === currentValue) {
@@ -343,7 +390,7 @@ export default function AdminEpisodesPage() {
   const handleCreateEpisode = () => {
     const validationMessage = validateNewEpisodeDraft(newEpisode);
     if (validationMessage) {
-      setFeedback({ type: 'error', message: validationMessage });
+      setFeedback({ type: "error", message: validationMessage });
       return;
     }
 
@@ -357,7 +404,7 @@ export default function AdminEpisodesPage() {
     });
 
     if (errorMessage) {
-      setFeedback({ type: 'error', message: errorMessage });
+      setFeedback({ type: "error", message: errorMessage });
       return;
     }
 
@@ -395,7 +442,7 @@ export default function AdminEpisodesPage() {
       return;
     }
 
-    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const swapIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     const target = episodes[swapIndex];
     if (!target) {
       return;
@@ -419,7 +466,10 @@ export default function AdminEpisodesPage() {
   );
   const quickFilterId = useMemo(() => getQuickFilterId(filters), [filters]);
 
-  if (seriesQuery.isLoading || (episodesQuery.isLoading && !episodesQuery.data)) {
+  if (
+    seriesQuery.isLoading ||
+    (episodesQuery.isLoading && !episodesQuery.data)
+  ) {
     return (
       <AdminShell title="章节管理" subtitle="正在加载章节工作台...">
         <AdminDataState isLoading={true} hasData={false} />
@@ -433,7 +483,10 @@ export default function AdminEpisodesPage() {
         <AdminDataState
           isLoading={false}
           hasData={false}
-          emptyMessage={getErrorMessage(seriesQuery.error, '作品详情加载失败。')}
+          emptyMessage={getErrorMessage(
+            seriesQuery.error,
+            "作品详情加载失败。",
+          )}
         />
       </AdminShell>
     );
@@ -442,20 +495,24 @@ export default function AdminEpisodesPage() {
   if (!series) {
     return (
       <AdminShell title="章节管理" subtitle="没有找到对应作品。">
-        <AdminDataState isLoading={false} hasData={false} emptyMessage="这条作品记录不存在。" />
+        <AdminDataState
+          isLoading={false}
+          hasData={false}
+          emptyMessage="这条作品记录不存在。"
+        />
       </AdminShell>
     );
   }
 
   return (
     <AdminShell
-      title={series.title || '章节管理'}
+      title={series.title || "章节管理"}
       subtitle="集中维护章节号、标题、试看页数和发布时间。"
       actions={
         <EpisodesHeaderActions
           onBackToSeries={() => router.push(`/admin/series/${seriesId}`)}
           onOpenStorefront={() =>
-            window.open(`/series/${seriesId}`, '_blank', 'noopener,noreferrer')
+            window.open(`/series/${seriesId}`, "_blank", "noopener,noreferrer")
           }
           onOpenBulkUpload={() => setIsUploadModalOpen(true)}
           onOpenCreateEpisode={() => setIsAddModalOpen(true)}
@@ -465,7 +522,10 @@ export default function AdminEpisodesPage() {
       <div className="space-y-6">
         <EpisodesSummaryCards pagination={pagination} pageStats={pageStats} />
 
-        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
+        />
 
         <EpisodesWorkspaceSection
           searchTerm={searchTerm}
@@ -478,14 +538,16 @@ export default function AdminEpisodesPage() {
           quickFilterId={quickFilterId}
           episodesQueryErrorMessage={
             episodesQuery.isError
-              ? getErrorMessage(episodesQuery.error, '章节列表加载失败。')
-              : ''
+              ? getErrorMessage(episodesQuery.error, "章节列表加载失败。")
+              : ""
           }
           episodes={episodes}
           pagination={pagination}
           onSearchChange={setSearchTerm}
           onSortByChange={setSortBy}
-          onSortOrderToggle={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          onSortOrderToggle={() =>
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+          }
           onOpenBulkUpdate={() => setIsBulkModalOpen(true)}
           onAutoRenumber={handleAutoRenumber}
           onOpenDeleteSelected={() => openDeleteConfirm(selectedIds)}
@@ -551,7 +613,9 @@ export default function AdminEpisodesPage() {
         isOpen={isDeleteConfirmOpen}
         title="删除章节"
         message={`确定删除 ${pendingDeleteIds.length} 个章节吗？此操作无法撤销。`}
-        confirmText={deleteEpisodesMutation.isPending ? '删除中...' : '删除章节'}
+        confirmText={
+          deleteEpisodesMutation.isPending ? "删除中..." : "删除章节"
+        }
         cancelText="取消"
         isDangerous={true}
         isLoading={deleteEpisodesMutation.isPending}
@@ -564,7 +628,10 @@ export default function AdminEpisodesPage() {
         seriesId={seriesId}
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={async () => {
-          setFeedback({ type: 'success', message: '批量上传已完成，章节列表已刷新。' });
+          setFeedback({
+            type: "success",
+            message: "批量上传已完成，章节列表已刷新。",
+          });
           await invalidateEpisodeData();
         }}
       />

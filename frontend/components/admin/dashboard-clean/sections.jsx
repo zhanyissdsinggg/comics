@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, LifeBuoy, PenSquare, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  LifeBuoy,
+  PenSquare,
+  Sparkles,
+} from "lucide-react";
 
 import SurfacePanel from "@/components/common/SurfacePanel";
 
@@ -53,8 +59,12 @@ export function PendingItemsSection({ insights }) {
               </p>
               <ArrowRight className="size-4 text-slate-400" />
             </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
-            <p className="mt-3 text-xs font-medium text-slate-500">点进去直接处理对应作品。</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {item.description}
+            </p>
+            <p className="mt-3 text-xs font-medium text-slate-500">
+              点进去直接处理对应作品。
+            </p>
           </Link>
         ))}
       </div>
@@ -73,12 +83,17 @@ export function LatestSeriesSection({ latestUpdated }) {
       <div className="mt-5 space-y-3">
         {latestUpdated.length > 0 ? (
           latestUpdated.map((series) => {
-            const creatorReady = resolveSeriesCreatorIdentity(series).hasPublicCredit;
+            const creatorReady =
+              resolveSeriesCreatorIdentity(series).hasPublicCredit;
             const missing = [
               !creatorReady && "署名待补",
               !safeText(series?.coverUrl || series?.coverImage) && "封面待补",
-              safeNumber(series?.episodeCount ?? series?._count?.episodes ?? series?.totalEpisodes, 0) === 0 &&
-                "无章节",
+              safeNumber(
+                series?.episodeCount ??
+                  series?._count?.episodes ??
+                  series?.totalEpisodes,
+                0,
+              ) === 0 && "无章节",
             ]
               .filter(Boolean)
               .join(" / ");
@@ -125,9 +140,15 @@ export function QuickActionsSection() {
                 <Icon className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-slate-950">{item.label}</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>
-                <p className="mt-3 text-xs font-medium text-slate-500">进入后可继续编辑和复核。</p>
+                <p className="text-sm font-semibold text-slate-950">
+                  {item.label}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {item.description}
+                </p>
+                <p className="mt-3 text-xs font-medium text-slate-500">
+                  进入后可继续编辑和复核。
+                </p>
               </div>
             </Link>
           );
@@ -160,10 +181,18 @@ export function SupportQueueSection({ support }) {
             <QueueItem
               key={ticket.id}
               title={safeText(ticket.subject || ticket.topic) || "未命名工单"}
-              detail={safeText(ticket.userEmail || ticket.replyEmail || ticket.userId) || "未记录联系信息"}
+              detail={
+                safeText(
+                  ticket.userEmail || ticket.replyEmail || ticket.userId,
+                ) || "未记录联系信息"
+              }
               meta={`${formatTicketState(ticket.status)} · ${relativeTime(ticket.updatedAt || ticket.createdAt)}`}
               badge={formatTicketState(ticket.status)}
-              tone={ticket.status === "open" || ticket.status === "pending" ? "warning" : "accent"}
+              tone={
+                ticket.status === "open" || ticket.status === "pending"
+                  ? "warning"
+                  : "accent"
+              }
             />
           ))
         ) : (
@@ -195,12 +224,19 @@ export function OrdersQueueSection({ orders }) {
         {orders.length > 0 ? (
           orders.map((order) => (
             <QueueItem
-              key={safeText(order.id || order.orderId) || `${order.userId}-${order.createdAt}`}
+              key={
+                safeText(order.id || order.orderId) ||
+                `${order.userId}-${order.createdAt}`
+              }
               title={safeText(order.orderId || order.id) || "未命名订单"}
               detail={`${safeText(order.userId) || "未记录用户"} · ${usd.format(safeNumber(order?.amount))}`}
               meta={`${formatOrderState(order.status)} · ${relativeTime(order.createdAt)}`}
               badge={formatOrderState(order.status)}
-              tone={order.status === "paid" || order.status === "completed" ? "success" : "warning"}
+              tone={
+                order.status === "paid" || order.status === "completed"
+                  ? "success"
+                  : "warning"
+              }
             />
           ))
         ) : (
@@ -230,16 +266,20 @@ export function CommentsQueueSection({ comments }) {
       />
       <div className="mt-5 space-y-3">
         {comments.length > 0 ? (
-          comments.slice(0, 5).map((comment) => (
-            <QueueItem
-              key={comment.id}
-              title={safeText(comment.author) || "匿名读者"}
-              detail={safeText(comment.text).slice(0, 72) || "没有可显示的评论内容"}
-              meta={relativeTime(comment.createdAt)}
-              badge={comment.hidden ? "已隐藏" : "已显示"}
-              tone={comment.hidden ? "warning" : "success"}
-            />
-          ))
+          comments
+            .slice(0, 5)
+            .map((comment) => (
+              <QueueItem
+                key={comment.id}
+                title={safeText(comment.author) || "匿名读者"}
+                detail={
+                  safeText(comment.text).slice(0, 72) || "没有可显示的评论内容"
+                }
+                meta={relativeTime(comment.createdAt)}
+                badge={comment.hidden ? "已隐藏" : "已显示"}
+                tone={comment.hidden ? "warning" : "success"}
+              />
+            ))
         ) : (
           <EmptyBlock title="当前没有评论列表" description="没有评论。" />
         )}

@@ -27,7 +27,9 @@ function resolveAuthState(authResponse) {
   const payload = authResponse.data || {};
   const user = payload.user || null;
   const isSignedIn =
-    typeof payload.isSignedIn === "boolean" ? payload.isSignedIn : Boolean(user);
+    typeof payload.isSignedIn === "boolean"
+      ? payload.isSignedIn
+      : Boolean(user);
 
   return {
     isSignedIn,
@@ -67,7 +69,8 @@ function mergeAdultStateIfNewer(preferences = {}, requestStartedAt = 0) {
 
   return {
     ...preferences,
-    hideAdultHistory: window.localStorage.getItem("mn_hide_adult_history") === "1",
+    hideAdultHistory:
+      window.localStorage.getItem("mn_hide_adult_history") === "1",
     matureModeEnabled: window.localStorage.getItem("mn_adult_mode") === "1",
     matureVerification: readStoredMatureVerification(region),
   };
@@ -140,7 +143,7 @@ export function AuthProvider({ children }) {
       }
       return response;
     },
-    [applyAuthState]
+    [applyAuthState],
   );
 
   const register = useCallback(
@@ -154,7 +157,7 @@ export function AuthProvider({ children }) {
       }
       return response;
     },
-    [applyAuthState]
+    [applyAuthState],
   );
 
   const signOut = useCallback(async () => {
@@ -169,12 +172,21 @@ export function AuthProvider({ children }) {
       }
       return login(email, password);
     },
-    [login, register]
+    [login, register],
   );
 
   const value = useMemo(
-    () => ({ hydrated, isSignedIn, user, signIn, signOut, login, register, refresh }),
-    [hydrated, isSignedIn, user, signIn, signOut, login, register, refresh]
+    () => ({
+      hydrated,
+      isSignedIn,
+      user,
+      signIn,
+      signOut,
+      login,
+      register,
+      refresh,
+    }),
+    [hydrated, isSignedIn, user, signIn, signOut, login, register, refresh],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

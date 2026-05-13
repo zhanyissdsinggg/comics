@@ -109,18 +109,28 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Library merchandising", () => {
-  test("library should prioritize the admin-managed return slot before chart fallback picks", async ({ page }) => {
+  test("library should prioritize the admin-managed return slot before chart fallback picks", async ({
+    page,
+  }) => {
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -215,7 +225,9 @@ test.describe("Library merchandising", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/library", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/library", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     const recommendedRail = page.locator("section").filter({
@@ -229,24 +241,36 @@ test.describe("Library merchandising", () => {
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(recommendedRail.getByRole("button", { name: /Midnight Ledger/i })).toBeVisible({
+    await expect(
+      recommendedRail.getByRole("button", { name: /Midnight Ledger/i }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(recommendedRail.getByText("Staff pick to resume", { exact: true })).toBeVisible({
+    await expect(
+      recommendedRail.getByText("Staff pick to resume", { exact: true }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(recommendedRail.getByRole("button", { name: /Shadow Relay/i })).toBeVisible({
+    await expect(
+      recommendedRail.getByRole("button", { name: /Shadow Relay/i }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 
-    await recommendedRail.getByRole("button", { name: /Midnight Ledger/i }).click();
+    await recommendedRail
+      .getByRole("button", { name: /Midnight Ledger/i })
+      .click();
     await page.waitForURL(
       /\/series\/series-002\?entry=LIBRARY_RETURN_SLOT&campaignId=library_return_slot&sourcePath=%2Flibrary/,
       { timeout: LIBRARY_UI_TIMEOUT_MS },
     );
 
-    await expect(page.getByText("Library").first()).toBeVisible({ timeout: LIBRARY_UI_TIMEOUT_MS });
-    await expect(page.getByRole("button", { name: "Back to library" })).toBeVisible({
+    await expect(page.getByText("Library").first()).toBeVisible({
+      timeout: LIBRARY_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Back to library" }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 

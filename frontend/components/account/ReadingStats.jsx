@@ -100,7 +100,12 @@ const ReadingStats = React.memo(() => {
   ];
 
   return (
-    <SurfacePanel appearance="dark" accent="cyan" tone="muted" className="space-y-5">
+    <SurfacePanel
+      appearance="dark"
+      accent="cyan"
+      tone="muted"
+      className="space-y-5"
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">

@@ -23,9 +23,15 @@ export function useHomeData() {
 export function HomeDataProvider({ children, initialData = null }) {
   const { shouldRetry } = useRetryPolicy();
   const requestRef = useRef(0);
-  const initialSeriesList = Array.isArray(initialData?.seriesList) ? initialData.seriesList : [];
-  const initialHotKeywords = Array.isArray(initialData?.hotKeywords) ? initialData.hotKeywords : [];
-  const initialHomepageSlots = Array.isArray(initialData?.homepageSlots) ? initialData.homepageSlots : [];
+  const initialSeriesList = Array.isArray(initialData?.seriesList)
+    ? initialData.seriesList
+    : [];
+  const initialHotKeywords = Array.isArray(initialData?.hotKeywords)
+    ? initialData.hotKeywords
+    : [];
+  const initialHomepageSlots = Array.isArray(initialData?.homepageSlots)
+    ? initialData.homepageSlots
+    : [];
   const hasInitialData = Boolean(initialData?.ready);
 
   const [seriesList, setSeriesList] = useState(initialSeriesList);
@@ -49,85 +55,100 @@ export function HomeDataProvider({ children, initialData = null }) {
 
     parallelRequests3(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
-      () => apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, { cacheMs: 60000 }),
-      () => apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, { cacheMs: 60000 }),
+      () =>
+        apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, {
+          cacheMs: 60000,
+        }),
+      () =>
+        apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+          cacheMs: 60000,
+        }),
     )
-      .then(([nextSeriesResponse, nextHotKeywordsResponse, nextHomepageSlotsResponse]) => {
-        if (!isCurrentRequest()) {
-          return;
-        }
-
-        setSeriesResponse(nextSeriesResponse);
-        if (nextSeriesResponse.ok) {
-          setSeriesList(nextSeriesResponse.data?.series || []);
-          if (nextSeriesResponse.stale) {
-            apiGet(`/api/series?adult=${adultFlag}`, {
-              cacheMs: 30000,
-              bust: true,
-              dedupeMs: 0,
-            }).then((freshResponse) => {
-              if (!isCurrentRequest()) {
-                return;
-              }
-              setSeriesResponse(freshResponse);
-              if (freshResponse.ok) {
-                setSeriesList(freshResponse.data?.series || []);
-              }
-            });
+      .then(
+        ([
+          nextSeriesResponse,
+          nextHotKeywordsResponse,
+          nextHomepageSlotsResponse,
+        ]) => {
+          if (!isCurrentRequest()) {
+            return;
           }
-        } else if (nextSeriesResponse.status === 0 || nextSeriesResponse.status >= 500) {
-          if (shouldRetry(`home_series_${adultFlag}`)) {
-            setTimeout(() => {
+
+          setSeriesResponse(nextSeriesResponse);
+          if (nextSeriesResponse.ok) {
+            setSeriesList(nextSeriesResponse.data?.series || []);
+            if (nextSeriesResponse.stale) {
               apiGet(`/api/series?adult=${adultFlag}`, {
                 cacheMs: 30000,
                 bust: true,
-              }).then((retryResponse) => {
+                dedupeMs: 0,
+              }).then((freshResponse) => {
                 if (!isCurrentRequest()) {
                   return;
                 }
-                setSeriesResponse(retryResponse);
-                if (retryResponse.ok) {
-                  setSeriesList(retryResponse.data?.series || []);
+                setSeriesResponse(freshResponse);
+                if (freshResponse.ok) {
+                  setSeriesList(freshResponse.data?.series || []);
                 }
               });
-            }, 600);
+            }
+          } else if (
+            nextSeriesResponse.status === 0 ||
+            nextSeriesResponse.status >= 500
+          ) {
+            if (shouldRetry(`home_series_${adultFlag}`)) {
+              setTimeout(() => {
+                apiGet(`/api/series?adult=${adultFlag}`, {
+                  cacheMs: 30000,
+                  bust: true,
+                }).then((retryResponse) => {
+                  if (!isCurrentRequest()) {
+                    return;
+                  }
+                  setSeriesResponse(retryResponse);
+                  if (retryResponse.ok) {
+                    setSeriesList(retryResponse.data?.series || []);
+                  }
+                });
+              }, 600);
+            }
           }
-        }
 
-        if (nextHotKeywordsResponse.ok) {
-          setHotKeywords(nextHotKeywordsResponse.data?.keywords || []);
-          if (nextHotKeywordsResponse.stale) {
-            apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, {
-              cacheMs: 60000,
-              bust: true,
-              dedupeMs: 0,
-            }).then((freshResponse) => {
-              if (!isCurrentRequest() || !freshResponse.ok) {
-                return;
-              }
-              setHotKeywords(freshResponse.data?.keywords || []);
-            });
+          if (nextHotKeywordsResponse.ok) {
+            setHotKeywords(nextHotKeywordsResponse.data?.keywords || []);
+            if (nextHotKeywordsResponse.stale) {
+              apiGet(`/api/search/hot?adult=${adultFlag}&window=${hotWindow}`, {
+                cacheMs: 60000,
+                bust: true,
+                dedupeMs: 0,
+              }).then((freshResponse) => {
+                if (!isCurrentRequest() || !freshResponse.ok) {
+                  return;
+                }
+                setHotKeywords(freshResponse.data?.keywords || []);
+              });
+            }
           }
-        }
 
-        if (nextHomepageSlotsResponse.ok) {
-          setHomepageSlots(nextHomepageSlotsResponse.data?.slots || []);
-          if (nextHomepageSlotsResponse.stale) {
-            apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
-              cacheMs: 60000,
-              bust: true,
-              dedupeMs: 0,
-            }).then((freshResponse) => {
-              if (!isCurrentRequest() || !freshResponse.ok) {
-                return;
-              }
-              setHomepageSlots(freshResponse.data?.slots || []);
-            });
+          if (nextHomepageSlotsResponse.ok) {
+            setHomepageSlots(nextHomepageSlotsResponse.data?.slots || []);
+            if (nextHomepageSlotsResponse.stale) {
+              apiGet(`/api/recommendations/homepage?adult=${adultFlag}`, {
+                cacheMs: 60000,
+                bust: true,
+                dedupeMs: 0,
+              }).then((freshResponse) => {
+                if (!isCurrentRequest() || !freshResponse.ok) {
+                  return;
+                }
+                setHomepageSlots(freshResponse.data?.slots || []);
+              });
+            }
+          } else {
+            setHomepageSlots([]);
           }
-        } else {
-          setHomepageSlots([]);
-        }
-      })
+        },
+      )
       .finally(() => {
         if (isCurrentRequest()) {
           setLoading(false);

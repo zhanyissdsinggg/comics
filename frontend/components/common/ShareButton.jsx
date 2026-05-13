@@ -32,7 +32,9 @@ function sanitizeShareUrl(rawUrl) {
 
   try {
     const base =
-      typeof window !== "undefined" ? window.location.origin : "https://www.gushcomics.com";
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://www.gushcomics.com";
     const parsed = new URL(value, base);
 
     Array.from(parsed.searchParams.keys()).forEach((key) => {
@@ -41,7 +43,10 @@ function sanitizeShareUrl(rawUrl) {
       }
     });
 
-    if (typeof window !== "undefined" && parsed.origin === window.location.origin) {
+    if (
+      typeof window !== "undefined" &&
+      parsed.origin === window.location.origin
+    ) {
       const query = parsed.searchParams.toString();
       return `${parsed.pathname}${query ? `?${query}` : ""}${parsed.hash || ""}`;
     }
@@ -182,24 +187,24 @@ const ShareButton = React.memo(function ShareButton({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative border-b border-white/10 bg-black px-5 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                  Share
-                </p>
-                <h3 className="mt-3 text-3xl font-black leading-none tracking-[-0.06em] text-white">
-                  Send this title
-                </h3>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    Share
+                  </p>
+                  <h3 className="mt-3 text-3xl font-black leading-none tracking-[-0.06em] text-white">
+                    Send this title
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="rounded-full border-2 border-white/20 bg-black p-2 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-[#111111]"
+                  aria-label="Close"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full border-2 border-white/20 bg-black p-2 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-[#111111]"
-                aria-label="Close"
-              >
-                <X size={16} />
-              </button>
-            </div>
             </div>
 
             <div className="relative grid grid-cols-3 gap-3 p-5">

@@ -1,5 +1,15 @@
-import { devices, expect, type Browser, type BrowserContext, type Page, type Route } from "@playwright/test";
-import { createPosterPlaceholder, createReaderPagePlaceholder } from "./placeholders";
+import {
+  devices,
+  expect,
+  type Browser,
+  type BrowserContext,
+  type Page,
+  type Route,
+} from "@playwright/test";
+import {
+  createPosterPlaceholder,
+  createReaderPagePlaceholder,
+} from "./placeholders";
 import { collectRuntimeIssues, type RuntimeIssueCollector } from "./runtime";
 
 export const MOBILE_DEVICE = devices["iPhone 13"];
@@ -24,15 +34,27 @@ type HistoryEntry = {
 
 export type MockState = {
   seriesCatalog: Array<Record<string, unknown>>;
-  seriesDetails: Record<string, { series: Record<string, unknown>; episodes: Array<Record<string, unknown>> }>;
+  seriesDetails: Record<
+    string,
+    {
+      series: Record<string, unknown>;
+      episodes: Array<Record<string, unknown>>;
+    }
+  >;
   episodes: Record<string, { episode: Record<string, unknown> }>;
   progress: Record<string, ProgressEntry>;
   history: HistoryEntry[];
   followedSeriesIds: string[];
   bookmarks: Record<string, Array<Record<string, unknown>>>;
-  entitlements: Record<string, { seriesId: string; unlockedEpisodeIds: string[] }>;
+  entitlements: Record<
+    string,
+    { seriesId: string; unlockedEpisodeIds: string[] }
+  >;
   rewards: Record<string, unknown>;
-  missions: { daily: Array<Record<string, unknown>>; weekly: Array<Record<string, unknown>> };
+  missions: {
+    daily: Array<Record<string, unknown>>;
+    weekly: Array<Record<string, unknown>>;
+  };
   wallet: Record<string, unknown>;
 };
 
@@ -83,7 +105,10 @@ function createSeries(options: {
   };
 }
 
-function createEpisodes(seriesId: string, count = 2): Array<Record<string, unknown>> {
+function createEpisodes(
+  seriesId: string,
+  count = 2,
+): Array<Record<string, unknown>> {
   return Array.from({ length: count }).map((_, index) => ({
     id: `${seriesId}-e${index + 1}`,
     seriesId,
@@ -95,7 +120,10 @@ function createEpisodes(seriesId: string, count = 2): Array<Record<string, unkno
   }));
 }
 
-function createReaderEpisode(seriesId: string, title: string): { episode: Record<string, unknown> } {
+function createReaderEpisode(
+  seriesId: string,
+  title: string,
+): { episode: Record<string, unknown> } {
   return {
     episode: {
       id: `${seriesId}-e1`,
@@ -130,7 +158,10 @@ function normalizeHistory(entries: HistoryEntry[]): HistoryEntry[] {
     const key = `${entry.seriesId}:${entry.episodeId}`;
     const current = deduped.get(key);
 
-    if (!current || toTimestamp(entry.createdAt) >= toTimestamp(current.createdAt)) {
+    if (
+      !current ||
+      toTimestamp(entry.createdAt) >= toTimestamp(current.createdAt)
+    ) {
       deduped.set(key, entry);
     }
   });
@@ -187,7 +218,8 @@ export function createLibraryReadingStateMock(): MockState {
     id: "series-fresh",
     title: "Fresh Atlas",
     author: "Atlas Works",
-    description: "Fresh title used to verify new reading progress shows up in Library.",
+    description:
+      "Fresh title used to verify new reading progress shows up in Library.",
     status: "Ongoing",
     badge: "NEW",
     genres: ["Fantasy", "Adventure"],
@@ -216,10 +248,22 @@ export function createLibraryReadingStateMock(): MockState {
     seriesCatalog: catalog,
     seriesDetails,
     episodes: {
-      "series-reading:series-reading-e1": createReaderEpisode("series-reading", "Orbit Testament"),
-      "series-read:series-read-e1": createReaderEpisode("series-read", "Velvet Signal"),
-      "series-unread:series-unread-e1": createReaderEpisode("series-unread", "Paper Moon"),
-      "series-fresh:series-fresh-e1": createReaderEpisode("series-fresh", "Fresh Atlas"),
+      "series-reading:series-reading-e1": createReaderEpisode(
+        "series-reading",
+        "Orbit Testament",
+      ),
+      "series-read:series-read-e1": createReaderEpisode(
+        "series-read",
+        "Velvet Signal",
+      ),
+      "series-unread:series-unread-e1": createReaderEpisode(
+        "series-unread",
+        "Paper Moon",
+      ),
+      "series-fresh:series-fresh-e1": createReaderEpisode(
+        "series-fresh",
+        "Fresh Atlas",
+      ),
     },
     progress: {
       "series-reading": {
@@ -254,8 +298,14 @@ export function createLibraryReadingStateMock(): MockState {
     followedSeriesIds: ["series-reading", "series-read", "series-unread"],
     bookmarks: {},
     entitlements: {
-      "series-reading": { seriesId: "series-reading", unlockedEpisodeIds: ["series-reading-e1"] },
-      "series-read": { seriesId: "series-read", unlockedEpisodeIds: ["series-read-e1"] },
+      "series-reading": {
+        seriesId: "series-reading",
+        unlockedEpisodeIds: ["series-reading-e1"],
+      },
+      "series-read": {
+        seriesId: "series-read",
+        unlockedEpisodeIds: ["series-read-e1"],
+      },
       "series-unread": { seriesId: "series-unread", unlockedEpisodeIds: [] },
       "series-fresh": { seriesId: "series-fresh", unlockedEpisodeIds: [] },
     },
@@ -280,7 +330,11 @@ export function createLibraryReadingStateMock(): MockState {
   };
 }
 
-async function fulfillJson(route: Route, status: number, body: unknown): Promise<void> {
+async function fulfillJson(
+  route: Route,
+  status: number,
+  body: unknown,
+): Promise<void> {
   await route.fulfill({
     status,
     contentType: "application/json",
@@ -296,19 +350,31 @@ function readRequestJson(route: Route): Record<string, unknown> {
   }
 }
 
-async function handleApiRoute(route: Route, state: MockState, session: SessionMode): Promise<void> {
+async function handleApiRoute(
+  route: Route,
+  state: MockState,
+  session: SessionMode,
+): Promise<void> {
   const requestUrl = new URL(route.request().url());
   const pathname = requestUrl.pathname;
   const searchParams = requestUrl.searchParams;
   const method = route.request().method().toUpperCase();
 
-  if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+  if (
+    pathname === "/api/health" ||
+    pathname === "/api/health/ready" ||
+    pathname === "/api/health/live"
+  ) {
     await fulfillJson(route, 200, { ok: true, dbOk: true });
     return;
   }
 
   if (pathname === "/api/meta/version") {
-    await fulfillJson(route, 200, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+    await fulfillJson(route, 200, {
+      name: "gush-backend",
+      version: "0.1.0",
+      commit: "test-commit",
+    });
     return;
   }
 
@@ -327,7 +393,10 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
       route,
       200,
       session === "signed-in"
-        ? { isSignedIn: true, user: { id: "user-001", email: "reader@example.com" } }
+        ? {
+            isSignedIn: true,
+            user: { id: "user-001", email: "reader@example.com" },
+          }
         : { isSignedIn: false, user: null },
     );
     return;
@@ -375,14 +444,22 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
 
   if (pathname.startsWith("/api/series/")) {
     const seriesId = pathname.replace("/api/series/", "");
-    await fulfillJson(route, 200, state.seriesDetails[seriesId] || { series: null, episodes: [] });
+    await fulfillJson(
+      route,
+      200,
+      state.seriesDetails[seriesId] || { series: null, episodes: [] },
+    );
     return;
   }
 
   if (pathname === "/api/episode") {
     const seriesId = String(searchParams.get("seriesId") || "");
     const episodeId = String(searchParams.get("episodeId") || "");
-    await fulfillJson(route, 200, state.episodes[`${seriesId}:${episodeId}`] || { episode: null });
+    await fulfillJson(
+      route,
+      200,
+      state.episodes[`${seriesId}:${episodeId}`] || { episode: null },
+    );
     return;
   }
 
@@ -390,7 +467,9 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     await fulfillJson(
       route,
       session === "signed-in" ? 200 : 401,
-      session === "signed-in" ? { progress: state.progress } : { error: "UNAUTHENTICATED" },
+      session === "signed-in"
+        ? { progress: state.progress }
+        : { error: "UNAUTHENTICATED" },
     );
     return;
   }
@@ -418,7 +497,9 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     await fulfillJson(
       route,
       session === "signed-in" ? 200 : 401,
-      session === "signed-in" ? { history: state.history } : { error: "UNAUTHENTICATED" },
+      session === "signed-in"
+        ? { history: state.history }
+        : { error: "UNAUTHENTICATED" },
     );
     return;
   }
@@ -435,7 +516,10 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
       createdAt,
     };
 
-    state.history = normalizeHistory([nextEntry, ...state.history]).slice(0, 100);
+    state.history = normalizeHistory([nextEntry, ...state.history]).slice(
+      0,
+      100,
+    );
     await fulfillJson(route, 200, { history: state.history });
     return;
   }
@@ -452,7 +536,9 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
   }
 
   if (pathname === "/api/follow" && method === "POST") {
-    await fulfillJson(route, 200, { followedSeriesIds: state.followedSeriesIds });
+    await fulfillJson(route, 200, {
+      followedSeriesIds: state.followedSeriesIds,
+    });
     return;
   }
 
@@ -460,12 +546,17 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     await fulfillJson(
       route,
       session === "signed-in" ? 200 : 401,
-      session === "signed-in" ? { bookmarks: state.bookmarks } : { error: "UNAUTHENTICATED" },
+      session === "signed-in"
+        ? { bookmarks: state.bookmarks }
+        : { error: "UNAUTHENTICATED" },
     );
     return;
   }
 
-  if (pathname === "/api/bookmarks" && (method === "POST" || method === "DELETE")) {
+  if (
+    pathname === "/api/bookmarks" &&
+    (method === "POST" || method === "DELETE")
+  ) {
     await fulfillJson(route, 200, { bookmarks: state.bookmarks });
     return;
   }
@@ -479,8 +570,15 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     return;
   }
 
-  if (pathname === "/api/rewards/checkin" || pathname === "/api/rewards/makeup") {
-    await fulfillJson(route, 200, { state: state.rewards, rewardPts: 20, wallet: state.wallet });
+  if (
+    pathname === "/api/rewards/checkin" ||
+    pathname === "/api/rewards/makeup"
+  ) {
+    await fulfillJson(route, 200, {
+      state: state.rewards,
+      rewardPts: 20,
+      wallet: state.wallet,
+    });
     return;
   }
 
@@ -493,7 +591,10 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     return;
   }
 
-  if (pathname === "/api/missions/claim" || pathname === "/api/missions/report") {
+  if (
+    pathname === "/api/missions/claim" ||
+    pathname === "/api/missions/report"
+  ) {
     await fulfillJson(route, 200, state.missions);
     return;
   }
@@ -502,7 +603,9 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
     await fulfillJson(
       route,
       session === "signed-in" ? 200 : 401,
-      session === "signed-in" ? { wallet: state.wallet } : { error: "UNAUTHENTICATED" },
+      session === "signed-in"
+        ? { wallet: state.wallet }
+        : { error: "UNAUTHENTICATED" },
     );
     return;
   }
@@ -515,7 +618,10 @@ async function handleApiRoute(route: Route, state: MockState, session: SessionMo
   if (pathname === "/api/entitlements") {
     const seriesId = String(searchParams.get("seriesId") || "");
     await fulfillJson(route, 200, {
-      entitlement: state.entitlements[seriesId] || { seriesId, unlockedEpisodeIds: [] },
+      entitlement: state.entitlements[seriesId] || {
+        seriesId,
+        unlockedEpisodeIds: [],
+      },
     });
     return;
   }
@@ -552,7 +658,9 @@ export async function openLibraryReadingStatePage(
   const context = await browser.newContext({
     ...MOBILE_DEVICE,
   });
-  await context.route("**/api/**", (route) => handleApiRoute(route, state, session));
+  await context.route("**/api/**", (route) =>
+    handleApiRoute(route, state, session),
+  );
 
   const page = await context.newPage();
   const runtimeIssues = collectRuntimeIssues(page);
@@ -566,7 +674,9 @@ export async function openLibraryReadingStatePage(
   };
 }
 
-export async function closeLibraryReadingStatePage(openedPage: OpenedLibraryPage): Promise<void> {
+export async function closeLibraryReadingStatePage(
+  openedPage: OpenedLibraryPage,
+): Promise<void> {
   await openedPage.context.close();
 }
 

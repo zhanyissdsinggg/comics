@@ -1,16 +1,16 @@
-﻿import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { adminFetch } from '../adminApiClient';
+﻿import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { adminFetch } from "../adminApiClient";
 
 export interface SearchFieldConfig {
   field: string;
-  type: 'string' | 'number' | 'date';
+  type: "string" | "number" | "date";
   caseSensitive?: boolean;
 }
 
 export interface SortFieldConfig {
   field: string;
-  type: 'string' | 'number' | 'date' | 'boolean';
+  type: "string" | "number" | "date" | "boolean";
 }
 
 type FilterValue = string | number | boolean | null | undefined;
@@ -27,10 +27,13 @@ export interface AdminListPagination {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function extractItems<T>(data: AdminListPayload<T> | undefined, endpoint: string): T[] {
+function extractItems<T>(
+  data: AdminListPayload<T> | undefined,
+  endpoint: string,
+): T[] {
   if (!data) {
     return [];
   }
@@ -38,7 +41,7 @@ function extractItems<T>(data: AdminListPayload<T> | undefined, endpoint: string
     return data;
   }
 
-  const pathSegments = endpoint.split('/');
+  const pathSegments = endpoint.split("/");
   const lastSegment = pathSegments[pathSegments.length - 1];
   const firstSegment = pathSegments[0];
   const candidates = [data[lastSegment], data[firstSegment], data.data];
@@ -52,7 +55,9 @@ function extractItems<T>(data: AdminListPayload<T> | undefined, endpoint: string
   return [];
 }
 
-function extractMeta(data: AdminListPayload<unknown> | undefined): Record<string, unknown> {
+function extractMeta(
+  data: AdminListPayload<unknown> | undefined,
+): Record<string, unknown> {
   if (isRecord(data) && isRecord(data.meta)) {
     return data.meta;
   }
@@ -73,13 +78,17 @@ function extractPagination<T>(
       page: Number(pagination.page ?? fallbackPage),
       pageSize: Number(pagination.pageSize ?? fallbackPageSize),
       total: Number(pagination.total ?? totalItems),
-      totalPages: Number(pagination.totalPages ?? Math.max(1, Math.ceil(totalItems / fallbackPageSize))),
+      totalPages: Number(
+        pagination.totalPages ??
+          Math.max(1, Math.ceil(totalItems / fallbackPageSize)),
+      ),
       hasNextPage: Boolean(pagination.hasNextPage),
       hasPrevPage: Boolean(pagination.hasPrevPage),
     };
   }
 
-  const totalPages = totalItems > 0 ? Math.ceil(totalItems / fallbackPageSize) : 1;
+  const totalPages =
+    totalItems > 0 ? Math.ceil(totalItems / fallbackPageSize) : 1;
 
   return {
     page: fallbackPage,
@@ -91,8 +100,11 @@ function extractPagination<T>(
   };
 }
 
-function toSelectableId<T extends { id: string }>(item: T, idField: string): string {
-  if (idField === 'id') {
+function toSelectableId<T extends { id: string }>(
+  item: T,
+  idField: string,
+): string {
+  if (idField === "id") {
     return item.id;
   }
 
@@ -101,7 +113,7 @@ function toSelectableId<T extends { id: string }>(item: T, idField: string): str
   }
 
   const rawId = item[idField];
-  return typeof rawId === 'string' ? rawId : String(rawId ?? item.id);
+  return typeof rawId === "string" ? rawId : String(rawId ?? item.id);
 }
 
 export interface UseAdminListReturn<T> {
@@ -120,8 +132,8 @@ export interface UseAdminListReturn<T> {
   setSearchTerm: (term: string) => void;
   sortBy: string;
   setSortBy: (field: string) => void;
-  sortOrder: 'asc' | 'desc';
-  setSortOrder: (order: 'asc' | 'desc') => void;
+  sortOrder: "asc" | "desc";
+  setSortOrder: (order: "asc" | "desc") => void;
   filters: FilterState;
   setFilter: (key: string, value: FilterValue) => void;
   clearFilters: () => void;
@@ -136,12 +148,12 @@ export function useAdminList<T extends { id: string }>(
   endpoint: string,
   _searchFields: SearchFieldConfig[],
   _sortFields: SortFieldConfig[],
-  defaultSort: string = 'createdAt',
-  defaultSortOrder: 'asc' | 'desc' = 'desc'
+  defaultSort: string = "createdAt",
+  defaultSortOrder: "asc" | "desc" = "desc",
 ): UseAdminListReturn<T> {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState(defaultSort);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(defaultSortOrder);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultSortOrder);
   const [filters, setFilters] = useState<FilterState>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
@@ -149,27 +161,41 @@ export function useAdminList<T extends { id: string }>(
 
   const filtersKey = JSON.stringify(filters);
 
-  const { data, isLoading, refetch, error, isError } = useQuery<AdminListPayload<T>, Error>({
-    queryKey: ['admin', endpoint, searchTerm, sortBy, sortOrder, filtersKey, page, pageSize],
+  const { data, isLoading, refetch, error, isError } = useQuery<
+    AdminListPayload<T>,
+    Error
+  >({
+    queryKey: [
+      "admin",
+      endpoint,
+      searchTerm,
+      sortBy,
+      sortOrder,
+      filtersKey,
+      page,
+      pageSize,
+    ],
     queryFn: async ({ signal }) => {
       const params = new URLSearchParams();
 
       if (searchTerm) {
-        params.append('search', searchTerm);
+        params.append("search", searchTerm);
       }
 
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
-      params.append('page', String(page));
-      params.append('pageSize', String(pageSize));
+      params.append("sortBy", sortBy);
+      params.append("sortOrder", sortOrder);
+      params.append("page", String(page));
+      params.append("pageSize", String(pageSize));
 
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value !== undefined && value !== null && value !== "") {
           params.append(key, String(value));
         }
       });
 
-      const response = await adminFetch(`/api/admin/${endpoint}?${params}`, { signal });
+      const response = await adminFetch(`/api/admin/${endpoint}?${params}`, {
+        signal,
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch ${endpoint}`);
       }
@@ -180,7 +206,10 @@ export function useAdminList<T extends { id: string }>(
     placeholderData: (previousData) => previousData,
   });
 
-  const items = useMemo(() => extractItems<T>(data, endpoint), [data, endpoint]);
+  const items = useMemo(
+    () => extractItems<T>(data, endpoint),
+    [data, endpoint],
+  );
   const meta = useMemo(() => extractMeta(data), [data]);
   const pagination = useMemo(
     () => extractPagination(data, page, pageSize, items.length),
@@ -200,11 +229,13 @@ export function useAdminList<T extends { id: string }>(
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id],
     );
   };
 
-  const selectAll = (itemsToSelect: T[], idField: string = 'id') => {
+  const selectAll = (itemsToSelect: T[], idField: string = "id") => {
     setSelectedIds(itemsToSelect.map((item) => toSelectableId(item, idField)));
   };
 

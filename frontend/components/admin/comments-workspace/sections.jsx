@@ -67,8 +67,12 @@ export function CommentsListSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">按评论编号、读者或正文关键词查找，再切换时间顺序快速复核。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按评论编号、读者或正文关键词查找，再切换时间顺序快速复核。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -85,10 +89,17 @@ export function CommentsListSection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前操作</p>
-          <p className="mt-2 text-sm text-slate-600">先确认选择，再统一删除异常评论，避免误删正常反馈。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            当前操作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先确认选择，再统一删除异常评论，避免误删正常反馈。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="destructive"
@@ -123,7 +134,10 @@ export function CommentsListSection(props) {
                 <th className="px-4 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === comments.length && comments.length > 0}
+                    checked={
+                      selectedIds.length === comments.length &&
+                      comments.length > 0
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                     aria-label="选择全部评论"
@@ -143,7 +157,7 @@ export function CommentsListSection(props) {
                       type="checkbox"
                       checked={selectedIdsSet.has(comment.id)}
                       onChange={() => onToggleSelect(comment.id)}
-                        className={adminCheckboxClassName}
+                      className={adminCheckboxClassName}
                       aria-label={`选择评论 ${comment.id}`}
                     />
                   </td>
@@ -151,14 +165,18 @@ export function CommentsListSection(props) {
                     <div className="font-medium text-slate-950">
                       {getContentPreview(comment.content || comment.text)}
                     </div>
-                    <div className="mt-1 text-xs text-slate-500">{comment.id}</div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {comment.id}
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <div className="font-medium text-slate-950">
                       {comment.userEmail || comment.userId || "未知读者"}
                     </div>
                     {comment.userEmail && comment.userId ? (
-                      <div className="mt-1 text-xs text-slate-500">{comment.userId}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {comment.userId}
+                      </div>
                     ) : null}
                   </td>
                   <td className="px-4 py-4">
@@ -166,7 +184,9 @@ export function CommentsListSection(props) {
                       {formatRating(comment.rating)}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDate(comment.createdAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDate(comment.createdAt)}
+                  </td>
                 </AdminTableRow>
               ))}
             </tbody>

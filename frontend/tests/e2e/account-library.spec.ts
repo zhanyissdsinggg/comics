@@ -10,7 +10,8 @@ const SERIES_LIST = [
     title: "Dragon Ledger",
     type: "comic",
     adult: false,
-    coverTone: "linear-gradient(160deg, rgba(47,107,255,0.18) 0%, rgba(15,23,42,0.12) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(47,107,255,0.18) 0%, rgba(15,23,42,0.12) 100%)",
     coverUrl: createPosterPlaceholder("Dragon Ledger"),
     badge: "Popular",
     badges: ["Popular"],
@@ -31,7 +32,8 @@ const SERIES_LIST = [
     title: "Velvet Archive",
     type: "novel",
     adult: false,
-    coverTone: "linear-gradient(160deg, rgba(249,115,22,0.18) 0%, rgba(15,23,42,0.1) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(249,115,22,0.18) 0%, rgba(15,23,42,0.1) 100%)",
     coverUrl: createPosterPlaceholder("Velvet Archive"),
     badge: "New",
     badges: ["New"],
@@ -52,7 +54,8 @@ const SERIES_LIST = [
     title: "Neon Prayer",
     type: "comic",
     adult: false,
-    coverTone: "linear-gradient(160deg, rgba(16,185,129,0.18) 0%, rgba(15,23,42,0.1) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(16,185,129,0.18) 0%, rgba(15,23,42,0.1) 100%)",
     coverUrl: createPosterPlaceholder("Neon Prayer"),
     badge: "",
     badges: [],
@@ -81,7 +84,9 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 test.describe("Account My Library", () => {
   test.setTimeout(120000);
 
-  test("signed-in account dashboard should render tabbed library views for continue reading, bookmarks, and unlocked", async ({ page }) => {
+  test("signed-in account dashboard should render tabbed library views for continue reading, bookmarks, and unlocked", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
     await page.addInitScript(() => {
@@ -92,13 +97,21 @@ test.describe("Account My Library", () => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -145,7 +158,9 @@ test.describe("Account My Library", () => {
       }
 
       if (pathname === "/api/auth/providers") {
-        await fulfillJson(route, { providers: { google: false, password: true } });
+        await fulfillJson(route, {
+          providers: { google: false, password: true },
+        });
         return;
       }
 
@@ -235,11 +250,18 @@ test.describe("Account My Library", () => {
           entitlements: [
             {
               seriesId: "series-alpha",
-              unlockedEpisodeIds: Array.from({ length: 12 }, (_, index) => `series-alphae${index + 1}`),
+              unlockedEpisodeIds: Array.from(
+                { length: 12 },
+                (_, index) => `series-alphae${index + 1}`,
+              ),
             },
             {
               seriesId: "series-gamma",
-              unlockedEpisodeIds: ["series-gammae1", "series-gammae2", "series-gammae3"],
+              unlockedEpisodeIds: [
+                "series-gammae1",
+                "series-gammae2",
+                "series-gammae3",
+              ],
             },
           ],
         });
@@ -254,33 +276,54 @@ test.describe("Account My Library", () => {
       await fulfillJson(route, {});
     });
 
-    const response = await page.goto("/account", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/account", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Keep your next read closer than the settings." })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Keep your next read closer than the settings.",
+      }),
+    ).toBeVisible();
 
     const continueTab = page.getByRole("tab", { name: /Continue Reading 2/ });
     await expect(continueTab).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("heading", { name: "Dragon Ledger" })).toBeVisible({ timeout: 15000 });
-    await expect(page.getByRole("img", { name: "Cover image for Dragon Ledger" })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Dragon Ledger" }),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByRole("img", { name: "Cover image for Dragon Ledger" }),
+    ).toBeVisible({
       timeout: 15000,
     });
-    await expect(page.getByText("Read Chapter 12 of 50")).toBeVisible({ timeout: 15000 });
-    await expect(page.getByRole("button", { name: "Resume" }).first()).toBeVisible({
+    await expect(page.getByText("Read Chapter 12 of 50")).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(
+      page.getByRole("button", { name: "Resume" }).first(),
+    ).toBeVisible({
       timeout: 15000,
     });
 
     const bookmarksTab = page.getByRole("tab", { name: /Bookmarks 1/ });
     await continueTab.focus();
     await expect(continueTab).toBeFocused();
-    await expectVisibleFocusIndicator(continueTab, "Account Continue Reading tab");
+    await expectVisibleFocusIndicator(
+      continueTab,
+      "Account Continue Reading tab",
+    );
     await continueTab.press("Tab");
     await expect(bookmarksTab).toBeFocused();
     await expectVisibleFocusIndicator(bookmarksTab, "Account Bookmarks tab");
     await bookmarksTab.dispatchEvent("click");
     await expect(bookmarksTab).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("heading", { name: "Velvet Archive" })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText("Saved to your shelf with 1 saved spot")).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Velvet Archive" }),
+    ).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByText("Saved to your shelf with 1 saved spot"),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -290,7 +333,9 @@ test.describe("Account My Library", () => {
     await expectVisibleFocusIndicator(unlockedTab, "Account Unlocked tab");
     await unlockedTab.dispatchEvent("click");
     await expect(unlockedTab).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByText("12 chapters unlocked - up to Chapter 12")).toBeVisible({
+    await expect(
+      page.getByText("12 chapters unlocked - up to Chapter 12"),
+    ).toBeVisible({
       timeout: 10000,
     });
     await expect(page.getByText("Neon Prayer")).toBeVisible({ timeout: 10000 });

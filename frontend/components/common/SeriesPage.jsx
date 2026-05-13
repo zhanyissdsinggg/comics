@@ -17,11 +17,14 @@ import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
 const PAGE_CONFIG = {
   comic: {
     title: "Comics",
-    heroDescription: "Big panels, fast chapters, and stories worth staying up for.",
+    heroDescription:
+      "Big panels, fast chapters, and stories worth staying up for.",
     pathname: "/comics",
     emptyTitle: "No comics found",
-    emptyDescription: "Try a different filter or jump back into the stories landing right now.",
-    shelfLead: "Cover-first picks for nights when one more chapter turns into five.",
+    emptyDescription:
+      "Try a different filter or jump back into the stories landing right now.",
+    shelfLead:
+      "Cover-first picks for nights when one more chapter turns into five.",
     collectionEyebrow: "Explore",
     collectionTitle: "All comics",
   },
@@ -30,15 +33,19 @@ const PAGE_CONFIG = {
     heroDescription: "Slow burns, sharp twists, and late-night reads.",
     pathname: "/novels",
     emptyTitle: "No novels found",
-    emptyDescription: "Try a different filter or jump back into the reads readers are passing around.",
-    shelfLead: "Character-first reads, bad decisions, and twists that hit harder after midnight.",
+    emptyDescription:
+      "Try a different filter or jump back into the reads readers are passing around.",
+    shelfLead:
+      "Character-first reads, bad decisions, and twists that hit harder after midnight.",
     collectionEyebrow: "Explore",
     collectionTitle: "All novels",
   },
 };
 
 function normalizeStatus(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function toNumber(value) {
@@ -92,7 +99,9 @@ function getSeriesSubtitle(series) {
   if (getEpisodeCount(series) > 0) {
     return formatInstallmentCount(series, getEpisodeCount(series));
   }
-  return normalizeStatus(series?.status) === "completed" ? "Finished" : "Ongoing";
+  return normalizeStatus(series?.status) === "completed"
+    ? "Finished"
+    : "Ongoing";
 }
 
 function mapSeriesCardItem(series) {
@@ -111,12 +120,7 @@ function mapSeriesCardItem(series) {
   };
 }
 
-function CatalogSection({
-  title,
-  items,
-  href,
-  ctaLabel,
-}) {
+function CatalogSection({ title, items, href, ctaLabel }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
@@ -161,7 +165,9 @@ export default function SeriesPage({
   hasInitialSeries = false,
 }) {
   const router = useRouter();
-  const [series, setSeries] = useState(Array.isArray(initialSeries) ? initialSeries : []);
+  const [series, setSeries] = useState(
+    Array.isArray(initialSeries) ? initialSeries : [],
+  );
   const [loading, setLoading] = useState(!hasInitialSeries);
 
   const config = PAGE_CONFIG[type] || PAGE_CONFIG.comic;
@@ -187,10 +193,14 @@ export default function SeriesPage({
         });
 
         if (!response.ok) {
-          throw new Error(response.message || response.error || `Failed to load ${type}s`);
+          throw new Error(
+            response.message || response.error || `Failed to load ${type}s`,
+          );
         }
 
-        setSeries((response.data?.series || []).filter((item) => item.type === type));
+        setSeries(
+          (response.data?.series || []).filter((item) => item.type === type),
+        );
       } catch (error) {
         console.error(`Failed to load ${type}s:`, error);
       } finally {
@@ -215,7 +225,9 @@ export default function SeriesPage({
       });
 
       const nextQuery = params.toString();
-      router.replace(nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname);
+      router.replace(
+        nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname,
+      );
     },
     [config.pathname, router, searchParams],
   );
@@ -244,7 +256,9 @@ export default function SeriesPage({
       const params = new URLSearchParams(searchParams.toString());
       params.set("genre", genre);
       const nextQuery = params.toString();
-      map[genre] = nextQuery ? `${config.pathname}?${nextQuery}` : config.pathname;
+      map[genre] = nextQuery
+        ? `${config.pathname}?${nextQuery}`
+        : config.pathname;
       return map;
     }, {});
   }, [config.pathname, genres, searchParams]);
@@ -277,7 +291,9 @@ export default function SeriesPage({
 
     return result.sort((left, right) => {
       if (sortBy === "title") {
-        return String(left?.title || "").localeCompare(String(right?.title || ""));
+        return String(left?.title || "").localeCompare(
+          String(right?.title || ""),
+        );
       }
       if (sortBy === "latest") {
         return toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt);
@@ -289,7 +305,9 @@ export default function SeriesPage({
   const trendingItems = useMemo(
     () =>
       [...series]
-        .sort((left, right) => getEditorialScore(right) - getEditorialScore(left))
+        .sort(
+          (left, right) => getEditorialScore(right) - getEditorialScore(left),
+        )
         .slice(0, 6)
         .map(mapSeriesCardItem),
     [series],
@@ -298,7 +316,10 @@ export default function SeriesPage({
   const newUpdateItems = useMemo(
     () =>
       [...series]
-        .sort((left, right) => toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt))
+        .sort(
+          (left, right) =>
+            toTimestamp(right?.updatedAt) - toTimestamp(left?.updatedAt),
+        )
         .slice(0, 6)
         .map(mapSeriesCardItem),
     [series],
@@ -308,7 +329,9 @@ export default function SeriesPage({
     () =>
       [...series]
         .filter((item) => normalizeStatus(item?.status) === "completed")
-        .sort((left, right) => getEditorialScore(right) - getEditorialScore(left))
+        .sort(
+          (left, right) => getEditorialScore(right) - getEditorialScore(left),
+        )
         .slice(0, 4)
         .map(mapSeriesCardItem),
     [series],
@@ -353,13 +376,19 @@ export default function SeriesPage({
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
               {Array.from({ length: 6 }).map((_, index) => (
-                <SkeletonCard key={`series-shelf-skeleton-${index}`} appearance="dark" />
+                <SkeletonCard
+                  key={`series-shelf-skeleton-${index}`}
+                  appearance="dark"
+                />
               ))}
             </div>
             <div className="rounded-[24px] border border-white/10 bg-[#111111] p-5">
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
                 {Array.from({ length: 10 }).map((_, index) => (
-                  <SkeletonCard key={`series-grid-skeleton-${index}`} appearance="dark" />
+                  <SkeletonCard
+                    key={`series-grid-skeleton-${index}`}
+                    appearance="dark"
+                  />
                 ))}
               </div>
             </div>

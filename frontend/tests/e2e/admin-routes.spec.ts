@@ -26,51 +26,63 @@ const MOCK_ADMIN_SESSION = {
 const ADMIN_ROUTE_CASES = [
   {
     route: "/admin/users",
-    emptyStatePattern: /No users match this view yet\.|暂无用户|当前视图下还没有匹配的用户。|鏆傛棤鐢ㄦ埛/,
+    emptyStatePattern:
+      /No users match this view yet\.|暂无用户|当前视图下还没有匹配的用户。|鏆傛棤鐢ㄦ埛/,
   },
   {
     route: "/admin/support",
-    emptyStatePattern: /No support tickets yet\.|No tickets match the current filters\.|暂无工单|当前还没有客服工单。|当前筛选条件下没有匹配的工单。|当前视图下还没有匹配的客服工单。|鏆傛棤宸ュ崟/,
+    emptyStatePattern:
+      /No support tickets yet\.|No tickets match the current filters\.|暂无工单|当前还没有客服工单。|当前筛选条件下没有匹配的工单。|当前视图下还没有匹配的客服工单。|鏆傛棤宸ュ崟/,
   },
   {
     route: "/admin/analytics",
-    emptyStatePattern: /当前还没有可用的分析数据。|暂无分析数据|Analytics data is not available yet\./,
+    emptyStatePattern:
+      /当前还没有可用的分析数据。|暂无分析数据|Analytics data is not available yet\./,
   },
   {
     route: "/admin/orders",
-    emptyStatePattern: /No orders match this view yet\.|暂无订单|当前视图下还没有匹配的订单。/,
+    emptyStatePattern:
+      /No orders match this view yet\.|暂无订单|当前视图下还没有匹配的订单。/,
   },
   {
     route: "/admin/comments",
-    emptyStatePattern: /No comments match this view yet\.|暂无评论|当前视图下还没有匹配的评论。/,
+    emptyStatePattern:
+      /No comments match this view yet\.|暂无评论|当前视图下还没有匹配的评论。/,
   },
   {
     route: "/admin/notifications",
-    emptyStatePattern: /No notifications match this view yet\.|暂无通知|当前视图下还没有匹配的通知。/,
+    emptyStatePattern:
+      /No notifications match this view yet\.|暂无通知|当前视图下还没有匹配的通知。/,
   },
   {
     route: "/admin/promotions",
-    emptyStatePattern: /No promotions match this view yet\.|暂无活动|当前视图下还没有匹配的活动。/,
+    emptyStatePattern:
+      /No promotions match this view yet\.|暂无活动|当前视图下还没有匹配的活动。/,
   },
   {
     route: "/admin/billing",
-    emptyStatePattern: /No top-up packages match this view yet\.|暂无充值套餐|当前视图下还没有匹配的充值套餐。/,
+    emptyStatePattern:
+      /No top-up packages match this view yet\.|暂无充值套餐|当前视图下还没有匹配的充值套餐。/,
   },
   {
     route: "/admin/marketing",
-    emptyStatePattern: /No campaigns are available for this view\.|暂无活动|当前视图下还没有可用的活动。/,
+    emptyStatePattern:
+      /No campaigns are available for this view\.|暂无活动|当前视图下还没有可用的活动。/,
   },
   {
     route: "/admin/recommendations",
-    emptyStatePattern: /No recommendation slots exist yet\.|暂无推荐位|当前还没有推荐位。/,
+    emptyStatePattern:
+      /No recommendation slots exist yet\.|暂无推荐位|当前还没有推荐位。/,
   },
   {
     route: "/admin/logs",
-    emptyStatePattern: /No audit logs were found for this view\.|未找到审计日志|当前视图下没有审计日志。/,
+    emptyStatePattern:
+      /No audit logs were found for this view\.|未找到审计日志|当前视图下没有审计日志。/,
   },
   {
     route: "/admin/revenue",
-    emptyStatePattern: /No revenue data is available for this range\.|暂无收入数据|当前时间范围内还没有收入数据。/,
+    emptyStatePattern:
+      /No revenue data is available for this range\.|暂无收入数据|当前时间范围内还没有收入数据。/,
   },
 ] as const;
 
@@ -83,7 +95,8 @@ const MERCH_SERIES_BODY = {
       type: "comic",
       status: "Completed",
       adult: false,
-      description: "A binge-ready romance thriller built for homepage rotation.",
+      description:
+        "A binge-ready romance thriller built for homepage rotation.",
       coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
       bannerUrl: "https://cdn.example.com/series-hero-001-banner.jpg",
       genres: ["Romance", "Thriller"],
@@ -126,13 +139,22 @@ async function primeAdminSession(page: Page): Promise<void> {
   await page.addInitScript(() => undefined);
 }
 
-function buildRecommendationSlotState(body: unknown): Array<Record<string, unknown>> {
-  if (!body || typeof body !== "object" || !Array.isArray((body as { slots?: unknown[] }).slots)) {
+function buildRecommendationSlotState(
+  body: unknown,
+): Array<Record<string, unknown>> {
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !Array.isArray((body as { slots?: unknown[] }).slots)
+  ) {
     return [];
   }
 
   return (body as { slots?: unknown[] }).slots
-    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        Boolean(entry) && typeof entry === "object",
+    )
     .map((entry, index) => {
       const slotName =
         typeof entry.slot === "string"
@@ -145,11 +167,17 @@ function buildRecommendationSlotState(body: unknown): Array<Record<string, unkno
         id: typeof entry.id === "string" ? entry.id : `slot-${index + 1}`,
         slot: slotName,
         name: typeof entry.name === "string" ? entry.name : slotName,
-        seriesIds: Array.isArray(entry.seriesIds) ? entry.seriesIds.map((item) => String(item || "")) : [],
+        seriesIds: Array.isArray(entry.seriesIds)
+          ? entry.seriesIds.map((item) => String(item || ""))
+          : [],
         createdAt:
-          typeof entry.createdAt === "string" ? entry.createdAt : "2026-03-12T00:00:00.000Z",
+          typeof entry.createdAt === "string"
+            ? entry.createdAt
+            : "2026-03-12T00:00:00.000Z",
         updatedAt:
-          typeof entry.updatedAt === "string" ? entry.updatedAt : "2026-03-12T00:00:00.000Z",
+          typeof entry.updatedAt === "string"
+            ? entry.updatedAt
+            : "2026-03-12T00:00:00.000Z",
       };
     });
 }
@@ -188,7 +216,9 @@ async function installAdminApiMocks(
     revenueOrderStatusBody?: unknown;
   } = {},
 ): Promise<void> {
-  let recommendationSlotsState = buildRecommendationSlotState(options.recommendationSlotsBody);
+  let recommendationSlotsState = buildRecommendationSlotState(
+    options.recommendationSlotsBody,
+  );
 
   await page.route("**/api/health", async (route) => {
     await fulfillJson(route, { ok: true });
@@ -204,7 +234,11 @@ async function installAdminApiMocks(
     const method = route.request().method();
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
+      await fulfillJson(route, {
+        success: true,
+        valid: true,
+        session: MOCK_ADMIN_SESSION,
+      });
       return;
     }
 
@@ -217,41 +251,50 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/stats/dashboard")) {
-      await fulfillJson(route, options.dashboardStatsBody ?? {
-        users: { total: 0, change: 0, trend: "up" },
-        series: { total: 0, change: 0, trend: "up" },
-        orders: { total: 0, change: 0, trend: "up" },
-        revenue: { total: 0, change: 0, trend: "up" },
-        views: { total: 0, change: 0, trend: "up" },
-        comments: { total: 0, change: 0, trend: "up" },
-      });
+      await fulfillJson(
+        route,
+        options.dashboardStatsBody ?? {
+          users: { total: 0, change: 0, trend: "up" },
+          series: { total: 0, change: 0, trend: "up" },
+          orders: { total: 0, change: 0, trend: "up" },
+          revenue: { total: 0, change: 0, trend: "up" },
+          views: { total: 0, change: 0, trend: "up" },
+          comments: { total: 0, change: 0, trend: "up" },
+        },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/creators/audit")) {
-      await fulfillJson(route, options.creatorsAuditBody ?? {
-        audit: {
-          creators: [],
-          missingAuthorSeries: [],
-          legacyAuthorOnlySeries: [],
-          namingRiskCreators: [],
-          stats: {
-            totalSeries: 0,
-            creatorCount: 0,
-            attributedSeriesCount: 0,
-            structuredCreatorSeriesCount: 0,
-            legacyAuthorOnlySeriesCount: 0,
-            missingAuthorSeriesCount: 0,
-            namingRiskCreatorCount: 0,
-            unpublishedSeriesCount: 0,
+      await fulfillJson(
+        route,
+        options.creatorsAuditBody ?? {
+          audit: {
+            creators: [],
+            missingAuthorSeries: [],
+            legacyAuthorOnlySeries: [],
+            namingRiskCreators: [],
+            stats: {
+              totalSeries: 0,
+              creatorCount: 0,
+              attributedSeriesCount: 0,
+              structuredCreatorSeriesCount: 0,
+              legacyAuthorOnlySeriesCount: 0,
+              missingAuthorSeriesCount: 0,
+              namingRiskCreatorCount: 0,
+              unpublishedSeriesCount: 0,
+            },
           },
         },
-      });
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/users")) {
-      await fulfillJson(route, options.usersBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.usersBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
@@ -261,32 +304,53 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/support")) {
-      await fulfillJson(route, options.supportBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.supportBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/orders")) {
-      await fulfillJson(route, options.ordersBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.ordersBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/comments")) {
-      await fulfillJson(route, options.commentsBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.commentsBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/notifications")) {
-      await fulfillJson(route, options.notificationsBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.notificationsBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/promotions")) {
-      await fulfillJson(route, options.promotionsBody ?? { promotions: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.promotionsBody ?? {
+          promotions: [],
+          pagination: EMPTY_PAGINATION,
+        },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/billing")) {
-      await fulfillJson(route, options.billingBody ?? { data: [], pagination: EMPTY_PAGINATION });
+      await fulfillJson(
+        route,
+        options.billingBody ?? { data: [], pagination: EMPTY_PAGINATION },
+      );
       return;
     }
 
@@ -296,29 +360,41 @@ async function installAdminApiMocks(
     }
 
     if (pathname.endsWith("/api/admin/analytics/segments")) {
-      await fulfillJson(route, options.analyticsSegmentsBody ?? {
-        segments: {
-          users: [],
-          total: 0,
-          limit: 20,
-          offset: 0,
+      await fulfillJson(
+        route,
+        options.analyticsSegmentsBody ?? {
+          segments: {
+            users: [],
+            total: 0,
+            limit: 20,
+            offset: 0,
+          },
         },
-      });
+      );
       return;
     }
 
     if (/\/api\/admin\/analytics\/users\/[^/]+$/.test(pathname)) {
-      await fulfillJson(route, options.analyticsUserBody ?? { analytics: null });
+      await fulfillJson(
+        route,
+        options.analyticsUserBody ?? { analytics: null },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/marketing/campaigns")) {
-      await fulfillJson(route, options.marketingCampaignsBody ?? { campaigns: [], total: 0 });
+      await fulfillJson(
+        route,
+        options.marketingCampaignsBody ?? { campaigns: [], total: 0 },
+      );
       return;
     }
 
     if (pathname.includes("/api/admin/marketing/stats/by-segment")) {
-      await fulfillJson(route, options.marketingSegmentsBody ?? { segments: [] });
+      await fulfillJson(
+        route,
+        options.marketingSegmentsBody ?? { segments: [] },
+      );
       return;
     }
 
@@ -334,7 +410,10 @@ async function installAdminApiMocks(
 
     if (pathname.endsWith("/api/admin/recommendations/slots")) {
       if (method === "POST") {
-        const body = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        const body = JSON.parse(route.request().postData() || "{}") as Record<
+          string,
+          unknown
+        >;
         const slotName =
           typeof body.slot === "string"
             ? body.slot
@@ -345,7 +424,9 @@ async function installAdminApiMocks(
           id: `slot-${recommendationSlotsState.length + 1}`,
           slot: slotName,
           name: slotName,
-          seriesIds: Array.isArray(body.seriesIds) ? body.seriesIds.map((item) => String(item || "")) : [],
+          seriesIds: Array.isArray(body.seriesIds)
+            ? body.seriesIds.map((item) => String(item || ""))
+            : [],
           createdAt: "2026-03-12T00:00:00.000Z",
           updatedAt: "2026-03-12T00:00:00.000Z",
         };
@@ -354,11 +435,16 @@ async function installAdminApiMocks(
         return;
       }
 
-      await fulfillJson(route, { slots: recommendationSlotsState, total: recommendationSlotsState.length });
+      await fulfillJson(route, {
+        slots: recommendationSlotsState,
+        total: recommendationSlotsState.length,
+      });
       return;
     }
 
-    if (/\/api\/admin\/recommendations\/slots\/[^/]+\/performance$/.test(pathname)) {
+    if (
+      /\/api\/admin\/recommendations\/slots\/[^/]+\/performance$/.test(pathname)
+    ) {
       const pathnameParts = pathname.split("/");
       const slotId = pathnameParts[pathnameParts.length - 2] || "";
       await fulfillJson(route, {
@@ -377,7 +463,10 @@ async function installAdminApiMocks(
       const slotId = pathname.split("/").pop() || "";
 
       if (method === "PATCH") {
-        const body = JSON.parse(route.request().postData() || "{}") as Record<string, unknown>;
+        const body = JSON.parse(route.request().postData() || "{}") as Record<
+          string,
+          unknown
+        >;
         recommendationSlotsState = recommendationSlotsState.map((slot) => {
           if (slot.id !== slotId) {
             return slot;
@@ -401,25 +490,34 @@ async function installAdminApiMocks(
           };
         });
 
-        const updatedSlot = recommendationSlotsState.find((slot) => slot.id === slotId) || null;
+        const updatedSlot =
+          recommendationSlotsState.find((slot) => slot.id === slotId) || null;
         await fulfillJson(route, { slot: updatedSlot });
         return;
       }
 
       if (method === "DELETE") {
-        recommendationSlotsState = recommendationSlotsState.filter((slot) => slot.id !== slotId);
+        recommendationSlotsState = recommendationSlotsState.filter(
+          (slot) => slot.id !== slotId,
+        );
         await fulfillJson(route, { success: true });
         return;
       }
     }
 
     if (pathname.endsWith("/api/admin/recommendations/rankings")) {
-      await fulfillJson(route, options.recommendationRankingsBody ?? { configs: [], total: 0 });
+      await fulfillJson(
+        route,
+        options.recommendationRankingsBody ?? { configs: [], total: 0 },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/recommendations/analytics")) {
-      await fulfillJson(route, options.recommendationAnalyticsBody ?? { analytics: [], total: 0 });
+      await fulfillJson(
+        route,
+        options.recommendationAnalyticsBody ?? { analytics: [], total: 0 },
+      );
       return;
     }
 
@@ -444,17 +542,30 @@ async function installAdminApiMocks(
     }
 
     if (pathname.includes("/api/admin/revenue/promotions")) {
-      await fulfillJson(route, options.revenuePromotionsBody ?? { promotions: [], attributionModel: null, roiAvailable: true });
+      await fulfillJson(
+        route,
+        options.revenuePromotionsBody ?? {
+          promotions: [],
+          attributionModel: null,
+          roiAvailable: true,
+        },
+      );
       return;
     }
 
     if (pathname.endsWith("/api/admin/revenue/user-value-distribution")) {
-      await fulfillJson(route, options.revenueUserValueBody ?? { distribution: null });
+      await fulfillJson(
+        route,
+        options.revenueUserValueBody ?? { distribution: null },
+      );
       return;
     }
 
     if (pathname.includes("/api/admin/revenue/order-status-distribution")) {
-      await fulfillJson(route, options.revenueOrderStatusBody ?? { distribution: null });
+      await fulfillJson(
+        route,
+        options.revenueOrderStatusBody ?? { distribution: null },
+      );
       return;
     }
 
@@ -463,7 +574,9 @@ async function installAdminApiMocks(
 }
 
 test.describe("Admin route regression", () => {
-  test("should render admin dashboard with actionable content data", async ({ page }) => {
+  test("should render admin dashboard with actionable content data", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       dashboardStatsBody: {
@@ -482,7 +595,8 @@ test.describe("Admin route regression", () => {
             author: "Studio North",
             type: "comic",
             status: "Ongoing",
-            description: "A polished fantasy series with enough details to ship confidently to storefront readers.",
+            description:
+              "A polished fantasy series with enough details to ship confidently to storefront readers.",
             coverUrl: "https://cdn.example.com/alpha.jpg",
             genres: ["Fantasy"],
             episodeCount: 24,
@@ -558,43 +672,77 @@ test.describe("Admin route regression", () => {
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "待处理事项" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("待补公开署名").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "最近更新的作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "客服队列" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "最近订单" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "最新评论" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("Beta Draft").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("支付失败").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("reader@example.com").first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: "待处理事项" })).toBeVisible(
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
+    await expect(page.getByText("待补公开署名").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { name: "最近更新的作品" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "客服队列" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: "最近订单" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: "最新评论" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Beta Draft").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("支付失败").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("reader@example.com").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin", runtimeIssues);
   });
 
   for (const scenario of ADMIN_ROUTE_CASES) {
-    test(`should render ${scenario.route} empty state without runtime crash`, async ({ page }) => {
+    test(`should render ${scenario.route} empty state without runtime crash`, async ({
+      page,
+    }) => {
       await primeAdminSession(page);
       await installAdminApiMocks(page);
       const runtimeIssues = collectRuntimeIssues(page);
 
-      const response = await page.goto(scenario.route, { waitUntil: "domcontentloaded" });
+      const response = await page.goto(scenario.route, {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.ok()).toBeTruthy();
 
-      await expect(page).toHaveURL(new RegExp(`${scenario.route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
-      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-      await expect(page.locator("main")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+      await expect(page).toHaveURL(
+        new RegExp(`${scenario.route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`),
+      );
+      await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible(
+        { timeout: ADMIN_UI_TIMEOUT_MS },
+      );
+      await expect(page.locator("main")).toBeVisible({
+        timeout: ADMIN_UI_TIMEOUT_MS,
+      });
 
       await page.waitForTimeout(300);
       await expectNoRuntimeIssues(scenario.route, runtimeIssues);
     });
   }
 
-  test("should render merchandising workspace with homepage recommendations", async ({ page }) => {
+  test("should render merchandising workspace with homepage recommendations", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       seriesBody: MERCH_SERIES_BODY,
@@ -608,41 +756,71 @@ test.describe("Admin route regression", () => {
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/merchandising", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "首页编排" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "推荐位状态" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "主视觉候选作品" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("继续读这部", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("适合连看", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "Midnight Signal" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("今日关注", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("button", { name: "应用当前建议" }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "首页编排" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("heading", { name: "推荐位状态" })).toBeVisible(
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
+    await expect(
+      page.getByRole("heading", { name: "主视觉候选作品" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByText("继续读这部", { exact: true }).first(),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByText("适合连看", { exact: true }).first(),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { name: "Midnight Signal" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByText("今日关注", { exact: true })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "应用当前建议" }).first(),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
   });
 
-  test("should render storefront audit workspace with editorial admin copy", async ({ page }) => {
+  test("should render storefront audit workspace with editorial admin copy", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       seriesBody: MERCH_SERIES_BODY,
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/storefront", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/storefront", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "前台巡检" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("先补读者真的会感觉到的缺口。", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "建议处理顺序" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "前台巡检" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByText("先补读者真的会感觉到的缺口。", { exact: false }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { name: "建议处理顺序" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/storefront", runtimeIssues);
   });
 
-  test("should render creators workspace with editorial admin copy", async ({ page }) => {
+  test("should render creators workspace with editorial admin copy", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       creatorsAuditBody: {
@@ -671,7 +849,8 @@ test.describe("Admin route regression", () => {
                 adult: false,
                 isPublished: true,
                 coverUrl: "https://cdn.example.com/series-hero-001-cover.jpg",
-                description: "A binge-ready romance thriller built for homepage rotation.",
+                description:
+                  "A binge-ready romance thriller built for homepage rotation.",
                 genres: ["Romance", "Thriller"],
                 updatedAt: "2026-03-12T08:00:00.000Z",
                 episodeCount: 48,
@@ -723,18 +902,28 @@ test.describe("Admin route regression", () => {
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/creators", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/creators", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "创作者" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("先补齐署名，再收命名。", { exact: false })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByRole("heading", { name: "筛选创作者目录" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { level: 1, name: "创作者" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByText("先补齐署名，再收命名。", { exact: false }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { name: "筛选创作者目录" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/creators", runtimeIssues);
   });
 
-  test("should sync merchandising recommendations into an existing slot", async ({ page }) => {
+  test("should sync merchandising recommendations into an existing slot", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       seriesBody: MERCH_SERIES_BODY,
@@ -752,12 +941,16 @@ test.describe("Admin route regression", () => {
         total: 1,
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
+        keywords: [
+          { keyword: "romance", count: 1820, growthLabel: "今日关注" },
+        ],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/merchandising", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     const slotHealthSection = page.locator("section").filter({
@@ -767,14 +960,22 @@ test.describe("Admin route regression", () => {
       has: page.getByRole("heading", { name: "首页主视觉" }),
     });
 
-    await expect(heroSlotCard.getByText("待同步", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(heroSlotCard.getByText("待同步", { exact: true })).toBeVisible(
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
     await heroSlotCard.getByRole("button", { name: "同步当前建议" }).click();
 
-    await expect(page.getByText("首页主视觉 已同步到当前编排建议。", { exact: true })).toBeVisible({
+    await expect(
+      page.getByText("首页主视觉 已同步到当前编排建议。", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(heroSlotCard.getByText("已对齐", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(heroSlotCard.getByText("Midnight Signal", { exact: true }).first()).toBeVisible({
+    await expect(heroSlotCard.getByText("已对齐", { exact: true })).toBeVisible(
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
+    await expect(
+      heroSlotCard.getByText("Midnight Signal", { exact: true }).first(),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -782,7 +983,9 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
   });
 
-  test("should show merchandising performance for active homepage slots", async ({ page }) => {
+  test("should show merchandising performance for active homepage slots", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       seriesBody: MERCH_SERIES_BODY,
@@ -824,25 +1027,42 @@ test.describe("Admin route regression", () => {
         },
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
+        keywords: [
+          { keyword: "romance", count: 1820, growthLabel: "今日关注" },
+        ],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/merchandising", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     const performanceSection = page.locator("section").filter({
       has: page.getByRole("heading", { name: "推荐位表现" }),
     });
 
-    await expect(performanceSection.getByText("曝光", { exact: true }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(performanceSection.getByText(/7K|7,000|7000/)).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(performanceSection.getByText("2.70%", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(performanceSection.getByText("当前作品：Midnight Signal / Neon Contract", { exact: true })).toBeVisible({
+    await expect(
+      performanceSection.getByText("曝光", { exact: true }).first(),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(performanceSection.getByText(/7K|7,000|7000/)).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(performanceSection.getByText("状态稳定", { exact: true }).first()).toBeVisible({
+    await expect(
+      performanceSection.getByText("2.70%", { exact: true }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      performanceSection.getByText(
+        "当前作品：Midnight Signal / Neon Contract",
+        { exact: true },
+      ),
+    ).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(
+      performanceSection.getByText("状态稳定", { exact: true }).first(),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -850,7 +1070,9 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
   });
 
-  test("should show merchandising optimization guidance for low-performing slots", async ({ page }) => {
+  test("should show merchandising optimization guidance for low-performing slots", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, {
       seriesBody: MERCH_SERIES_BODY,
@@ -877,12 +1099,16 @@ test.describe("Admin route regression", () => {
         },
       },
       hotKeywordsBody: {
-        keywords: [{ keyword: "romance", count: 1820, growthLabel: "今日关注" }],
+        keywords: [
+          { keyword: "romance", count: 1820, growthLabel: "今日关注" },
+        ],
       },
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/merchandising", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/merchandising", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     const optimizationSection = page.locator("section").filter({
@@ -892,15 +1118,23 @@ test.describe("Admin route regression", () => {
       hasText: "点击承接偏弱",
     });
 
-    await expect(lowCtrCard).toContainText(/复制备选作品(?:\s*ID|编号)/, { timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(lowCtrCard).toContainText("Neon Contract", { timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(lowCtrCard).toContainText("1.09%", { timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lowCtrCard).toContainText(/复制备选作品(?:\s*ID|编号)/, {
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(lowCtrCard).toContainText("Neon Contract", {
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(lowCtrCard).toContainText("1.09%", {
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/merchandising", runtimeIssues);
   });
 
-  test("should defer recommendation requests until each tab is opened", async ({ page }) => {
+  test("should defer recommendation requests until each tab is opened", async ({
+    page,
+  }) => {
     let slotsRequests = 0;
     let rankingsRequests = 0;
     let analyticsRequests = 0;
@@ -925,11 +1159,17 @@ test.describe("Admin route regression", () => {
     await installAdminApiMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/recommendations", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "搜索与发现" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("只有打开“榜单规则”标签后才会加载。", { exact: true })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "搜索与发现" })).toBeVisible(
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
+    await expect(
+      page.getByText("只有打开“榜单规则”标签后才会加载。", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect.poll(() => slotsRequests).toBe(1);
@@ -946,12 +1186,16 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
   });
 
-  test("should only offer current ranking strategies when creating a new ranking rule", async ({ page }) => {
+  test("should only offer current ranking strategies when creating a new ranking rule", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/recommendations", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await page.getByRole("button", { name: /榜单|Rankings/ }).click();
@@ -959,19 +1203,27 @@ test.describe("Admin route regression", () => {
 
     const rankingOptions = page.locator("#ranking-type option");
     await expect(rankingOptions).toHaveText(["趋势排序", "新作优先"]);
-    await expect(page.getByText("旧评分（兼容）", { exact: true })).toHaveCount(0);
-    await expect(page.getByText("旧评分人数（兼容）", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("旧评分（兼容）", { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(
+      page.getByText("旧评分人数（兼容）", { exact: true }),
+    ).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
   });
 
-  test("should filter recommendation analytics by slot token", async ({ page }) => {
+  test("should filter recommendation analytics by slot token", async ({
+    page,
+  }) => {
     const analyticsRequests: string[] = [];
 
     page.on("request", (request) => {
       const requestUrl = new URL(request.url());
-      if (requestUrl.pathname.endsWith("/api/admin/recommendations/analytics")) {
+      if (
+        requestUrl.pathname.endsWith("/api/admin/recommendations/analytics")
+      ) {
         analyticsRequests.push(request.url());
       }
     });
@@ -980,28 +1232,45 @@ test.describe("Admin route regression", () => {
     await installAdminApiMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/recommendations", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await page.getByRole("button", { name: /分析|Analytics/ }).click();
-    await expect(page.locator("#analytics-slot-filter")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("#analytics-slot-filter")).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
     await page.locator("#analytics-slot-filter").selectOption("library-return");
 
-    await expect.poll(() =>
-      analyticsRequests.some((requestUrl) => new URL(requestUrl).searchParams.get("slot") === "library-return"),
-    ).toBe(true);
+    await expect
+      .poll(() =>
+        analyticsRequests.some(
+          (requestUrl) =>
+            new URL(requestUrl).searchParams.get("slot") === "library-return",
+        ),
+      )
+      .toBe(true);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
   });
 
-  test("should create a library return slot from the preset form", async ({ page }) => {
+  test("should create a library return slot from the preset form", async ({
+    page,
+  }) => {
     let createdSlotPayload: Record<string, unknown> | null = null;
 
     page.on("request", (request) => {
       const pathname = new URL(request.url()).pathname;
-      if (pathname.endsWith("/api/admin/recommendations/slots") && request.method() === "POST") {
-        createdSlotPayload = JSON.parse(request.postData() || "{}") as Record<string, unknown>;
+      if (
+        pathname.endsWith("/api/admin/recommendations/slots") &&
+        request.method() === "POST"
+      ) {
+        createdSlotPayload = JSON.parse(request.postData() || "{}") as Record<
+          string,
+          unknown
+        >;
       }
     });
 
@@ -1009,19 +1278,29 @@ test.describe("Admin route regression", () => {
     await installAdminApiMocks(page);
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/recommendations", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/recommendations", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
     await page.getByRole("button", { name: "新建推荐位" }).click();
 
-    await expect(page.locator("#slot-preset")).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.locator("#slot-preset")).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
     await expect(page.locator("#slot-token")).toHaveValue("library-return");
-    await page.locator("#slot-series-ids").fill("series-hero-001\nseries-hero-002");
+    await page
+      .locator("#slot-series-ids")
+      .fill("series-hero-001\nseries-hero-002");
     await page.locator('[role="dialog"] button[type="submit"]').click();
 
     await expect.poll(() => createdSlotPayload?.slot).toBe("library-return");
-    await expect.poll(() => createdSlotPayload?.seriesIds).toEqual(["series-hero-001", "series-hero-002"]);
+    await expect
+      .poll(() => createdSlotPayload?.seriesIds)
+      .toEqual(["series-hero-001", "series-hero-002"]);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/recommendations", runtimeIssues);
@@ -1055,10 +1334,14 @@ test.describe("Admin route regression", () => {
     });
     const runtimeIssues = collectRuntimeIssues(page);
 
-    const response = await page.goto("/admin/logs", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/logs", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "审计日志" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(page.getByRole("heading", { name: "审计日志" })).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
     await page.locator("select").nth(1).selectOption("operator-fallback");
 
     const rows = page.locator("tbody tr");
@@ -1070,7 +1353,9 @@ test.describe("Admin route regression", () => {
     await expectNoRuntimeIssues("/admin/logs", runtimeIssues);
   });
 
-  test("should render admin support data without requesting docs-json", async ({ page }) => {
+  test("should render admin support data without requesting docs-json", async ({
+    page,
+  }) => {
     let docsJsonRequests = 0;
 
     page.on("request", (request) => {
@@ -1106,20 +1391,37 @@ test.describe("Admin route regression", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/support", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/support", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { level: 1, name: "客服" })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("reader@example.com", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.getByText("I was charged twice and need a refund update.", { exact: true })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(page.locator("tbody span").filter({ hasText: /^(Open|待处理)$/ }).first()).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { level: 1, name: "客服" }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByText("reader@example.com", { exact: true }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByText("I was charged twice and need a refund update.", {
+        exact: true,
+      }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page
+        .locator("tbody span")
+        .filter({ hasText: /^(Open|待处理)$/ })
+        .first(),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/support", runtimeIssues);
     expect(docsJsonRequests).toBe(0);
   });
 
-  test("should not send bearer headers for admin api requests", async ({ page }) => {
+  test("should not send bearer headers for admin api requests", async ({
+    page,
+  }) => {
     const authorizationHeaders: string[] = [];
 
     page.on("request", (request) => {
@@ -1135,10 +1437,14 @@ test.describe("Admin route regression", () => {
     await primeAdminSession(page);
     await installAdminApiMocks(page);
 
-    const response = await page.goto("/admin/settings", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/settings", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: /系统设置|System Settings/ })).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { name: /系统设置|System Settings/ }),
+    ).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
     expect(authorizationHeaders).toEqual([]);
   });
 });

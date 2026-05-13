@@ -17,7 +17,11 @@ const MOCK_ADMIN_SESSION = {
 
 type AdminRouteHandler = (route: Route, url: URL) => Promise<boolean>;
 
-async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
+async function fulfillJson(
+  route: Route,
+  body: unknown,
+  status = 200,
+): Promise<void> {
   await route.fulfill({
     status,
     contentType: "application/json",
@@ -28,20 +32,29 @@ async function fulfillJson(route: Route, body: unknown, status = 200): Promise<v
 async function primeAdminSession(
   page: Page,
   options: {
-    localTrackingSnapshot?: { savedAt: string; values: Record<string, unknown> };
+    localTrackingSnapshot?: {
+      savedAt: string;
+      values: Record<string, unknown>;
+    };
   } = {},
 ): Promise<void> {
   await page.addInitScript(
     ([trackingSnapshot]) => {
       if (trackingSnapshot) {
-        window.localStorage.setItem("mn_tracking_settings_v1", JSON.stringify(trackingSnapshot));
+        window.localStorage.setItem(
+          "mn_tracking_settings_v1",
+          JSON.stringify(trackingSnapshot),
+        );
       }
     },
     [options.localTrackingSnapshot ?? null],
   );
 }
 
-async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Promise<void> {
+async function installAdminApiMocks(
+  page: Page,
+  handler: AdminRouteHandler,
+): Promise<void> {
   await page.route("**/api/health", async (route) => {
     await fulfillJson(route, { ok: true });
   });
@@ -51,7 +64,11 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
     const pathname = url.pathname;
 
     if (pathname.endsWith("/api/admin/auth/verify")) {
-      await fulfillJson(route, { success: true, valid: true, session: MOCK_ADMIN_SESSION });
+      await fulfillJson(route, {
+        success: true,
+        valid: true,
+        session: MOCK_ADMIN_SESSION,
+      });
       return;
     }
 
@@ -72,7 +89,9 @@ async function installAdminApiMocks(page: Page, handler: AdminRouteHandler): Pro
 }
 
 test.describe("Admin config page regressions", () => {
-  test("branding waits for hydrated server config before enabling saves", async ({ page }) => {
+  test("branding waits for hydrated server config before enabling saves", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
     await installAdminApiMocks(page, async (route, url) => {
       if (url.pathname.endsWith("/api/admin/branding")) {
@@ -91,10 +110,14 @@ test.describe("Admin config page regressions", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/branding", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/branding", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText(/正在加载品牌配置|Loading branding settings/)).toBeVisible({
+    await expect(
+      page.getByText(/正在加载品牌配置|Loading branding settings/),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     await expect(page.getByTestId("admin-branding-logo-input")).toHaveValue(
@@ -103,7 +126,9 @@ test.describe("Admin config page regressions", () => {
         timeout: ADMIN_UI_TIMEOUT_MS,
       },
     );
-    await expect(page.getByRole("button", { name: /保存品牌配置|Save branding/ })).toBeEnabled({
+    await expect(
+      page.getByRole("button", { name: /保存品牌配置|Save branding/ }),
+    ).toBeEnabled({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -111,7 +136,9 @@ test.describe("Admin config page regressions", () => {
     await expectNoRuntimeIssues("/admin/branding", runtimeIssues);
   });
 
-  test("email jobs ignores stale responses when the admin switches views quickly", async ({ page }) => {
+  test("email jobs ignores stale responses when the admin switches views quickly", async ({
+    page,
+  }) => {
     await primeAdminSession(page);
 
     let allRequestCount = 0;
@@ -166,10 +193,14 @@ test.describe("Admin config page regressions", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/email-jobs", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/email-jobs", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({
+    await expect(
+      page.getByText("all@example.com", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
@@ -177,16 +208,22 @@ test.describe("Admin config page regressions", () => {
     await page.getByTestId("admin-tab-all").click();
 
     await page.waitForTimeout(900);
-    await expect(page.getByText("all@example.com", { exact: true })).toBeVisible({
+    await expect(
+      page.getByText("all@example.com", { exact: true }),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText("failed@example.com", { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByText("failed@example.com", { exact: true }),
+    ).toHaveCount(0);
 
     await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/email-jobs", runtimeIssues);
   });
 
-  test("tracking keeps a newer local draft instead of overwriting it with older server data", async ({ page }) => {
+  test("tracking keeps a newer local draft instead of overwriting it with older server data", async ({
+    page,
+  }) => {
     await primeAdminSession(page, {
       localTrackingSnapshot: {
         savedAt: "2026-03-12T10:00:00.000Z",
@@ -217,7 +254,9 @@ test.describe("Admin config page regressions", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/admin/tracking", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/admin/tracking", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.locator('input[value="LOCAL-PIXEL"]')).toBeVisible({

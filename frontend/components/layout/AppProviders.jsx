@@ -11,7 +11,10 @@ import { ProgressProvider } from "../../store/useProgressStore";
 import { FollowProvider } from "../../store/useFollowStore";
 import { NotificationsProvider } from "../../store/useNotificationsStore";
 import { BehaviorProvider } from "../../store/useBehaviorStore";
-import { BrandingProvider, useBrandingStore } from "../../store/useBrandingStore";
+import {
+  BrandingProvider,
+  useBrandingStore,
+} from "../../store/useBrandingStore";
 import { RegionProvider } from "../../store/useRegionStore";
 import { HistoryProvider } from "../../store/useHistoryStore";
 import { ToastProvider } from "../common/ToastContext";

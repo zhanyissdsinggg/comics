@@ -26,9 +26,7 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
   };
 
   return (
-    <div
-      className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}
-    >
+    <div className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
       {title ? (
         <p className="text-sm font-black uppercase tracking-[0.14em]">
           {title}
@@ -126,9 +124,7 @@ function ResetPageContent() {
         title: shouldRefreshLink
           ? "This link has expired"
           : "We could not reset the password",
-        message: shouldRefreshLink
-          ? "Request a new email below."
-          : message,
+        message: shouldRefreshLink ? "Request a new email below." : message,
       });
       if (shouldRefreshLink) {
         setToken("");
@@ -144,9 +140,7 @@ function ResetPageContent() {
       title="Reset your password"
       description=""
       asideTitle="Next"
-      asideBody={
-        hasToken ? "Set a new password." : "Send a reset link."
-      }
+      asideBody={hasToken ? "Set a new password." : "Send a reset link."}
     >
       <div className="space-y-6">
         <div className="relative">
@@ -163,10 +157,7 @@ function ResetPageContent() {
 
         {hasToken ? (
           <div className="space-y-4">
-            <StorefrontInfoCard
-              title="Link loaded"
-              description=""
-            />
+            <StorefrontInfoCard title="Link loaded" description="" />
             <input
               type="password"
               value={password}

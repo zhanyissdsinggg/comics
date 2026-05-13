@@ -133,9 +133,21 @@ const ADULT_EPISODE_PAYLOADS = {
       pricePts: 0,
       previewFreePages: 3,
       pages: [
-        { url: createReaderPagePlaceholder("Midnight Heat Ep1 P1"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("Midnight Heat Ep1 P2"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("Midnight Heat Ep1 P3"), w: 800, h: 1200 },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep1 P1"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep1 P2"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep1 P3"),
+          w: 800,
+          h: 1200,
+        },
       ],
       paragraphs: [],
     },
@@ -149,16 +161,32 @@ const ADULT_EPISODE_PAYLOADS = {
       pricePts: 0,
       previewFreePages: 3,
       pages: [
-        { url: createReaderPagePlaceholder("Midnight Heat Ep2 P1"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("Midnight Heat Ep2 P2"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("Midnight Heat Ep2 P3"), w: 800, h: 1200 },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep2 P1"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep2 P2"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("Midnight Heat Ep2 P3"),
+          w: 800,
+          h: 1200,
+        },
       ],
       paragraphs: [],
     },
   },
 };
 
-async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
+async function fulfillJson(
+  route: Route,
+  body: unknown,
+  status = 200,
+): Promise<void> {
   await route.fulfill({
     status,
     contentType: "application/json",
@@ -178,42 +206,45 @@ async function seedAdultState(
   const adultConfirmed = options.adultConfirmed ?? false;
   const adultMode = options.adultMode ?? false;
 
-  await page.addInitScript(({ adultConfirmed: nextConfirmed, adultMode: nextMode }) => {
-    const verification = nextConfirmed
-      ? {
-          verified: true,
-          provider: "local-gate",
-          region: "global",
-          expiresAt: null,
-          referenceId: null,
-          verifiedAt: "2026-05-10T12:00:00.000Z",
+  await page.addInitScript(
+    ({ adultConfirmed: nextConfirmed, adultMode: nextMode }) => {
+      const verification = nextConfirmed
+        ? {
+            verified: true,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: "2026-05-10T12:00:00.000Z",
+          }
+        : {
+            verified: false,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: null,
+          };
+
+      const seedIfMissing = (key: string, value: string) => {
+        if (window.localStorage.getItem(key) === null) {
+          window.localStorage.setItem(key, value);
         }
-      : {
-          verified: false,
-          provider: "local-gate",
-          region: "global",
-          expiresAt: null,
-          referenceId: null,
-          verifiedAt: null,
-        };
+      };
 
-    const seedIfMissing = (key: string, value: string) => {
-      if (window.localStorage.getItem(key) === null) {
-        window.localStorage.setItem(key, value);
-      }
-    };
-
-    // Seed only once so a user-triggered toggle can survive reloads inside the same test.
-    seedIfMissing("mn_region", "global");
-    seedIfMissing("mn_age_rule", "global");
-    seedIfMissing("mn_adult_confirmed", nextConfirmed ? "1" : "0");
-    seedIfMissing("mn_adult_mode", nextMode ? "1" : "0");
-    seedIfMissing("mn_mature_hidden", nextMode ? "0" : "1");
-    seedIfMissing("mn_mature_verification", JSON.stringify(verification));
-  }, {
-    adultConfirmed,
-    adultMode,
-  });
+      // Seed only once so a user-triggered toggle can survive reloads inside the same test.
+      seedIfMissing("mn_region", "global");
+      seedIfMissing("mn_age_rule", "global");
+      seedIfMissing("mn_adult_confirmed", nextConfirmed ? "1" : "0");
+      seedIfMissing("mn_adult_mode", nextMode ? "1" : "0");
+      seedIfMissing("mn_mature_hidden", nextMode ? "0" : "1");
+      seedIfMissing("mn_mature_verification", JSON.stringify(verification));
+    },
+    {
+      adultConfirmed,
+      adultMode,
+    },
+  );
 
   await page.context().addCookies([
     {
@@ -346,7 +377,8 @@ async function installContentModeRoutes(
           nextPreferences.matureVerification &&
           typeof nextPreferences.matureVerification === "object"
         ) {
-          matureConfirmed = nextPreferences.matureVerification.verified === true;
+          matureConfirmed =
+            nextPreferences.matureVerification.verified === true;
         }
 
         await fulfillJson(route, {
@@ -431,7 +463,9 @@ async function installContentModeRoutes(
     }
 
     if (pathname === "/api/search") {
-      const query = String(requestUrl.searchParams.get("q") || "").trim().toLowerCase();
+      const query = String(requestUrl.searchParams.get("q") || "")
+        .trim()
+        .toLowerCase();
       const results = activeCatalog.filter((item) =>
         !query ? true : item.title.toLowerCase().includes(query),
       );
@@ -445,7 +479,9 @@ async function installContentModeRoutes(
     }
 
     if (pathname === "/api/search/suggest") {
-      const query = String(requestUrl.searchParams.get("q") || "").trim().toLowerCase();
+      const query = String(requestUrl.searchParams.get("q") || "")
+        .trim()
+        .toLowerCase();
       const suggestions = activeCatalog
         .map((item) => item.title)
         .filter((title) => title.toLowerCase().includes(query));
@@ -492,13 +528,19 @@ async function installContentModeRoutes(
       return;
     }
 
-    if (pathname === "/api/episode" && requestUrl.searchParams.get("seriesId") === "series-012") {
-      const requestedEpisodeId = String(requestUrl.searchParams.get("episodeId") || "").trim();
+    if (
+      pathname === "/api/episode" &&
+      requestUrl.searchParams.get("seriesId") === "series-012"
+    ) {
+      const requestedEpisodeId = String(
+        requestUrl.searchParams.get("episodeId") || "",
+      ).trim();
       adultEpisodeRequests.push(requestedEpisodeId);
       await fulfillJson(
         route,
-        ADULT_EPISODE_PAYLOADS[requestedEpisodeId as keyof typeof ADULT_EPISODE_PAYLOADS] ||
-          ADULT_EPISODE_PAYLOADS["series-012e1"],
+        ADULT_EPISODE_PAYLOADS[
+          requestedEpisodeId as keyof typeof ADULT_EPISODE_PAYLOADS
+        ] || ADULT_EPISODE_PAYLOADS["series-012e1"],
       );
       return;
     }
@@ -518,7 +560,9 @@ async function installContentModeRoutes(
 }
 
 test.describe("Content mode filtering", () => {
-  test("the default experience should start in normal mode", async ({ page }) => {
+  test("the default experience should start in normal mode", async ({
+    page,
+  }) => {
     await installContentModeRoutes(page, {
       adultMode: false,
       adultConfirmed: false,
@@ -540,12 +584,18 @@ test.describe("Content mode filtering", () => {
     });
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
     await expect
-      .poll(() => page.evaluate(() => window.localStorage.getItem("mn_adult_mode") || "0"))
+      .poll(() =>
+        page.evaluate(
+          () => window.localStorage.getItem("mn_adult_mode") || "0",
+        ),
+      )
       .toBe("0");
     await expectNoShellPlaceholderCopy(page);
   });
 
-  test("home should only render the normal catalog by default", async ({ page }) => {
+  test("home should only render the normal catalog by default", async ({
+    page,
+  }) => {
     await installContentModeRoutes(page, {
       adultMode: false,
       adultConfirmed: false,
@@ -655,7 +705,9 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: /Neon Heir/i }).first()).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Vampire Oath");
@@ -688,7 +740,9 @@ test.describe("Content mode filtering", () => {
     await expect(page.locator("body")).not.toContainText("Neon Heir");
   });
 
-  test("rankings should stay on the normal catalog by default", async ({ page }) => {
+  test("rankings should stay on the normal catalog by default", async ({
+    page,
+  }) => {
     await installContentModeRoutes(page, {
       adultMode: false,
       adultConfirmed: false,
@@ -709,7 +763,9 @@ test.describe("Content mode filtering", () => {
     await expectNoShellPlaceholderCopy(page);
   });
 
-  test("rankings should switch to the adult catalog in adult mode", async ({ page }) => {
+  test("rankings should switch to the adult catalog in adult mode", async ({
+    page,
+  }) => {
     await seedAdultState(page, {
       signedIn: true,
       adultConfirmed: true,
@@ -735,7 +791,9 @@ test.describe("Content mode filtering", () => {
     await expectNoShellPlaceholderCopy(page);
   });
 
-  test("adult mode comics should not render normal comics", async ({ page }) => {
+  test("adult mode comics should not render normal comics", async ({
+    page,
+  }) => {
     await seedAdultState(page, {
       signedIn: true,
       adultConfirmed: true,
@@ -747,7 +805,9 @@ test.describe("Content mode filtering", () => {
       signedIn: true,
     });
 
-    const response = await page.goto("/comics", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/comics", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(
@@ -758,7 +818,9 @@ test.describe("Content mode filtering", () => {
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
   });
 
-  test("adult mode novels should not render normal novels", async ({ page }) => {
+  test("adult mode novels should not render normal novels", async ({
+    page,
+  }) => {
     await seedAdultState(page, {
       signedIn: true,
       adultConfirmed: true,
@@ -770,7 +832,9 @@ test.describe("Content mode filtering", () => {
       signedIn: true,
     });
 
-    const response = await page.goto("/novels", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/novels", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(
@@ -804,7 +868,11 @@ test.describe("Content mode filtering", () => {
     await expect(desktopToggle).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await desktopToggle.click();
     await expect
-      .poll(() => page.evaluate(() => window.localStorage.getItem("mn_adult_mode") || "0"))
+      .poll(() =>
+        page.evaluate(
+          () => window.localStorage.getItem("mn_adult_mode") || "0",
+        ),
+      )
       .toBe("1");
 
     await expect(
@@ -885,12 +953,17 @@ test.describe("Content mode filtering", () => {
     await page.goto("/", {
       waitUntil: "domcontentloaded",
     });
-    await page.getByRole("link", { name: /The Last Kingdom/i }).first().click();
+    await page
+      .getByRole("link", { name: /The Last Kingdom/i })
+      .first()
+      .click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
     await expectSinglePublicChrome(page);
   });
 
-  test("search zero-result state should render without crashing", async ({ page }) => {
+  test("search zero-result state should render without crashing", async ({
+    page,
+  }) => {
     await installContentModeRoutes(page, {
       adultMode: false,
       adultConfirmed: false,
@@ -935,7 +1008,9 @@ test.describe("Content mode filtering", () => {
     expect(routes.wasAdultEpisodeRequested()).toBe(false);
   });
 
-  test("adult reader should load after adult mode is enabled", async ({ page }) => {
+  test("adult reader should load after adult mode is enabled", async ({
+    page,
+  }) => {
     await seedAdultState(page, {
       signedIn: true,
       adultConfirmed: true,
@@ -955,13 +1030,17 @@ test.describe("Content mode filtering", () => {
     await expect(page.getByText("Midnight Heat").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Reader actions" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Reader actions" }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     expect(routes.wasAdultEpisodeRequested()).toBe(true);
   });
 
-  test("adult reader next chapter should stay inside the adult catalog", async ({ page }) => {
+  test("adult reader next chapter should stay inside the adult catalog", async ({
+    page,
+  }) => {
     await seedAdultState(page, {
       signedIn: true,
       adultConfirmed: true,
@@ -978,7 +1057,9 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("button", { name: "Reader actions" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Reader actions" }),
+    ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
 
@@ -1017,7 +1098,10 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: /Back to normal mode|Normal/i }).first().click();
+    await page
+      .getByRole("button", { name: /Back to normal mode|Normal/i })
+      .first()
+      .click();
 
     await expect(
       page.getByRole("heading", { name: /The Last Kingdom/i }).first(),

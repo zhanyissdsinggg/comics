@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import ShareButton from "../common/ShareButton";
 import SurfacePanel from "../common/SurfacePanel";
 import { resolveCreatorIdentity } from "../../lib/creatorIdentity";
-import { formatInstallmentLabel, getInstallmentLabel } from "../../lib/seriesFormatLabels";
+import {
+  formatInstallmentLabel,
+  getInstallmentLabel,
+} from "../../lib/seriesFormatLabels";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
@@ -232,9 +235,7 @@ export default function SeriesTrustPanel({
           </p>
           <p className="mt-3 text-sm leading-7 text-white/72">
             {series?.title || "This title"} fits if you want{" "}
-            {status === "completed"
-              ? "a finished run"
-              : "something to follow"}
+            {status === "completed" ? "a finished run" : "something to follow"}
             {leadGenre ? `, especially inside ${leadGenre}` : ""}
             {secondaryGenre ? ` and ${secondaryGenre}` : ""}.
           </p>

@@ -45,7 +45,7 @@ function calculateSeriesSimilarity(series1, series2) {
 export function getContentBasedRecommendations(
   allSeries,
   userSeriesIds,
-  limit = 10
+  limit = 10,
 ) {
   if (!Array.isArray(allSeries) || allSeries.length === 0) {
     return [];
@@ -69,7 +69,7 @@ export function getContentBasedRecommendations(
     .filter((s) => !userSeriesIds.includes(s.id))
     .map((candidate) => {
       const similarities = userSeries.map((s) =>
-        calculateSeriesSimilarity(s, candidate)
+        calculateSeriesSimilarity(s, candidate),
       );
       const avgSimilarity =
         similarities.length > 0
@@ -94,7 +94,7 @@ export function getCollaborativeRecommendations(
   allSeries,
   userSeriesIds,
   allUsersBehavior = [],
-  limit = 10
+  limit = 10,
 ) {
   if (!Array.isArray(allSeries) || allSeries.length === 0) {
     return [];
@@ -156,19 +156,19 @@ export function getHybridRecommendations(
   allSeries,
   userSeriesIds,
   allUsersBehavior = [],
-  limit = 10
+  limit = 10,
 ) {
   const contentBased = getContentBasedRecommendations(
     allSeries,
     userSeriesIds,
-    limit * 2
+    limit * 2,
   );
 
   const collaborative = getCollaborativeRecommendations(
     allSeries,
     userSeriesIds,
     allUsersBehavior,
-    limit * 2
+    limit * 2,
   );
 
   const combined = new Map();
@@ -208,7 +208,7 @@ export function getRecommendations({
   strategy = "hybrid",
 }) {
   const userSeriesIds = Array.from(
-    new Set([...historySeriesIds, ...followedSeriesIds, ...progressSeriesIds])
+    new Set([...historySeriesIds, ...followedSeriesIds, ...progressSeriesIds]),
   );
 
   switch (strategy) {
@@ -219,7 +219,7 @@ export function getRecommendations({
         allSeries,
         userSeriesIds,
         allUsersBehavior,
-        limit
+        limit,
       );
     case "hybrid":
     default:
@@ -227,7 +227,7 @@ export function getRecommendations({
         allSeries,
         userSeriesIds,
         allUsersBehavior,
-        limit
+        limit,
       );
   }
 }

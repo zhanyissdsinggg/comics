@@ -65,7 +65,9 @@ function toEpisodeStateList(episodeStateMap) {
 }
 
 function buildEpisodeAvailabilityExplainer(series, counts, hasCountdown) {
-  const installmentPlural = getInstallmentLabel(series, { plural: true }).toLowerCase();
+  const installmentPlural = getInstallmentLabel(series, {
+    plural: true,
+  }).toLowerCase();
 
   if (counts.free > 0 && counts.preview > 0) {
     return "";
@@ -90,7 +92,9 @@ function buildEpisodeAvailabilityExplainer(series, counts, hasCountdown) {
   }
 
   if (counts.membership > 0) {
-    return counts.points > 0 ? `Some ${installmentPlural} are already open.` : "";
+    return counts.points > 0
+      ? `Some ${installmentPlural} are already open.`
+      : "";
   }
 
   if (hasCountdown) {
@@ -117,7 +121,10 @@ function getEpisodeEntryLabel(series, firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "free") {
-    return counts.preview === 0 && counts.points === 0 && counts.membership === 0 && counts.locked === 0
+    return counts.preview === 0 &&
+      counts.points === 0 &&
+      counts.membership === 0 &&
+      counts.locked === 0
       ? `All ${installmentPlural.toLowerCase()} open`
       : `${installmentLabel} 1 open`;
   }
@@ -127,7 +134,7 @@ function getEpisodeEntryLabel(series, firstState, counts, hasCountdown) {
   }
 
   if (firstState.primaryState === "membership") {
-      return "Ready to read";
+    return "Ready to read";
   }
 
   if (firstState.primaryState === "points") {
@@ -191,14 +198,21 @@ function toPrice(value, fallback = 0) {
 }
 
 function getEpisodeAccessPayload(episode) {
-  if (episode && typeof episode === "object" && episode.access && typeof episode.access === "object") {
+  if (
+    episode &&
+    typeof episode === "object" &&
+    episode.access &&
+    typeof episode.access === "object"
+  ) {
     return episode.access;
   }
   return {};
 }
 
 function buildEpisodeAccessState(primaryState, overrides = {}) {
-  const meta = EPISODE_PRIMARY_STATE_META[primaryState] || EPISODE_PRIMARY_STATE_META.locked;
+  const meta =
+    EPISODE_PRIMARY_STATE_META[primaryState] ||
+    EPISODE_PRIMARY_STATE_META.locked;
   return {
     primaryState,
     stateLabel: meta.stateLabel,
@@ -218,7 +232,10 @@ export function getEpisodeAccessState({
   fallbackPrice = 0,
 }) {
   const access = getEpisodeAccessPayload(episode);
-  const basePrice = toPrice(access?.pricePts ?? episode?.pricePts, fallbackPrice);
+  const basePrice = toPrice(
+    access?.pricePts ?? episode?.pricePts,
+    fallbackPrice,
+  );
   const previewPages = Number(episode?.previewFreePages || 0);
   const hasPreview = previewPages > 0;
   const rawReadyAt = access?.ttfReadyAt ?? episode?.ttfReadyAt;
@@ -359,7 +376,9 @@ export function getEpisodeAccessState({
       basePrice,
       previewPages,
       countdownMs,
-      shortLabel: countdownMs ? `In ${formatEpisodeCountdown(countdownMs)}` : "Locked",
+      shortLabel: countdownMs
+        ? `In ${formatEpisodeCountdown(countdownMs)}`
+        : "Locked",
       helperText: "",
       rowHelperText: "",
       supportLabel: "",
@@ -394,7 +413,9 @@ export function buildEpisodeAccessStateMap({
   nowMs = Date.now(),
   fallbackPrice = 0,
 }) {
-  const unlockedSet = new Set(Array.isArray(unlockedEpisodeIds) ? unlockedEpisodeIds : []);
+  const unlockedSet = new Set(
+    Array.isArray(unlockedEpisodeIds) ? unlockedEpisodeIds : [],
+  );
   const map = new Map();
 
   (Array.isArray(episodes) ? episodes : []).forEach((episode) => {
@@ -435,19 +456,27 @@ export function getEpisodeAvailabilitySummary({
 }) {
   const counts = getEpisodeAvailabilityCounts(episodeStateMap);
   const states = toEpisodeStateList(episodeStateMap);
-  const hasCountdown = states.some((state) => Number(state?.countdownMs || 0) > 0);
+  const hasCountdown = states.some(
+    (state) => Number(state?.countdownMs || 0) > 0,
+  );
   const summaryItems = EPISODE_PRIMARY_STATE_ORDER.filter(
     (state) => counts[state] > 0,
   ).map(
     (state) =>
       `${counts[state].toLocaleString()} ${EPISODE_PRIMARY_STATE_META[state].summaryLabel}`,
   );
-  const sortedEpisodes = sortEpisodesByNumber(Array.isArray(episodes) ? episodes : []);
+  const sortedEpisodes = sortEpisodesByNumber(
+    Array.isArray(episodes) ? episodes : [],
+  );
   const firstEpisode = sortedEpisodes[0] || null;
   const firstState = firstEpisode
     ? episodeStateMap?.get?.(firstEpisode.id) || null
     : null;
-  const explainer = buildEpisodeAvailabilityExplainer(series, counts, hasCountdown);
+  const explainer = buildEpisodeAvailabilityExplainer(
+    series,
+    counts,
+    hasCountdown,
+  );
 
   return {
     counts,
@@ -475,7 +504,9 @@ export function getSeriesPrimaryReadAction({
   nowMs = Date.now(),
 }) {
   const list = Array.isArray(episodes)
-    ? [...episodes].sort((left, right) => Number(left?.number || 0) - Number(right?.number || 0))
+    ? [...episodes].sort(
+        (left, right) => Number(left?.number || 0) - Number(right?.number || 0),
+      )
     : [];
   const progressEpisode = progress?.lastEpisodeId
     ? list.find((episode) => episode?.id === progress.lastEpisodeId)

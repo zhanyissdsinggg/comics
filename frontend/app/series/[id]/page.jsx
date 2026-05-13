@@ -8,9 +8,7 @@ import { notFound } from "next/navigation";
 import { buildNoIndexRobots, createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
 import { siteConfig } from "../../../lib/siteConfig";
-import {
-  formatInstallmentCount,
-} from "../../../lib/seriesFormatLabels";
+import { formatInstallmentCount } from "../../../lib/seriesFormatLabels";
 import { buildSeriesStructuredData } from "../../../lib/structuredData";
 import {
   isBlockedPublicSeriesIdentifier,
@@ -81,14 +79,19 @@ export async function generateMetadata({ params }) {
 
   const statusLabel = String(series.status || "").trim() || "Ongoing";
   const authorLabel = resolveSeriesCreatorName(series);
-  const genreLabel = Array.isArray(series.genres) && series.genres.length > 0 ? series.genres.slice(0, 2).join(" / ") : "";
+  const genreLabel =
+    Array.isArray(series.genres) && series.genres.length > 0
+      ? series.genres.slice(0, 2).join(" / ")
+      : "";
   const episodeCount = Number(series.episodeCount || 0);
   const baseDescription = String(series.description || "").trim();
   const generatedDescription = [
     `Read ${series.title} on ${siteConfig.siteName}.`,
     authorLabel ? `By ${authorLabel}.` : "",
     genreLabel ? `${genreLabel}.` : "",
-    episodeCount > 0 ? `${formatInstallmentCount(series, episodeCount)} live.` : "",
+    episodeCount > 0
+      ? `${formatInstallmentCount(series, episodeCount)} live.`
+      : "",
     `Status: ${statusLabel}.`,
   ]
     .filter(Boolean)
@@ -98,7 +101,9 @@ export async function generateMetadata({ params }) {
     `18+ mature series on ${siteConfig.siteName}.`,
     authorLabel ? `By ${authorLabel}.` : "",
     genreLabel ? `${genreLabel}.` : "",
-    episodeCount > 0 ? `${formatInstallmentCount(series, episodeCount)} live.` : "",
+    episodeCount > 0
+      ? `${formatInstallmentCount(series, episodeCount)} live.`
+      : "",
     `Status: ${statusLabel}.`,
   ]
     .filter(Boolean)
@@ -110,7 +115,8 @@ export async function generateMetadata({ params }) {
     description: isMatureSeries ? matureDescription : description,
     path: `/series/${seriesId}`,
     image: series.coverUrl || null,
-    openGraphType: String(series.type || "").toLowerCase() === "novel" ? "book" : "website",
+    openGraphType:
+      String(series.type || "").toLowerCase() === "novel" ? "book" : "website",
     robots: isMatureSeries ? buildNoIndexRobots({ follow: false }) : undefined,
   });
 }
@@ -153,7 +159,10 @@ export default async function SeriesRoutePage({ params }) {
 
   return (
     <>
-      <StructuredDataScript id={`series-jsonld-${seriesId}`} data={structuredData} />
+      <StructuredDataScript
+        id={`series-jsonld-${seriesId}`}
+        data={structuredData}
+      />
       <WalletProvider>
         <RewardsProvider>
           <EntitlementProvider>

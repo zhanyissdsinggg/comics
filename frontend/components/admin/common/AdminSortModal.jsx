@@ -22,7 +22,9 @@ export function AdminSortModal({
     >
       <div className="space-y-5">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_20px_rgba(15,23,42,0.03)]">
-          <label className="text-sm font-semibold text-slate-700">{label}</label>
+          <label className="text-sm font-semibold text-slate-700">
+            {label}
+          </label>
           <select
             value={sortBy}
             onChange={(event) => onSortByChange(event.target.value)}

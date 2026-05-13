@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { canReadMatureFromCookieStore } from "./matureContent";
 
 function normalizeBaseUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/\/$/, "");
 }
 
 function getServerApiBaseUrl() {
@@ -78,8 +80,8 @@ export async function resolveServerAdultGate() {
       const verified = isVerifiedMatureStatus(parsed);
       const matureModeEnabled = parsed?.matureModeEnabled === true;
       const isSignedIn =
-        String(cookieStore.get("mn_is_signed_in")?.value || "").trim() === "1" ||
-        hasServerSessionCookie(cookieStore);
+        String(cookieStore.get("mn_is_signed_in")?.value || "").trim() ===
+          "1" || hasServerSessionCookie(cookieStore);
 
       if (!isSignedIn) {
         return { reason: "NEED_LOGIN" };
@@ -143,16 +145,16 @@ export async function readServerAdultGateState() {
   const statusCookie = String(
     cookieStore.get("mn_mature_status")?.value || "",
   ).trim();
-  const ageRuleKey = String(cookieStore.get("mn_age_rule")?.value || "global")
-    .trim()
-    .toLowerCase() || "global";
+  const ageRuleKey =
+    String(cookieStore.get("mn_age_rule")?.value || "global")
+      .trim()
+      .toLowerCase() || "global";
 
   if (statusCookie) {
     try {
       const parsed = JSON.parse(statusCookie);
       const adultConfirmed = isVerifiedMatureStatus(parsed);
-      const isAdultMode =
-        adultConfirmed && parsed?.matureModeEnabled === true;
+      const isAdultMode = adultConfirmed && parsed?.matureModeEnabled === true;
       return {
         adultConfirmed,
         isAdultMode,

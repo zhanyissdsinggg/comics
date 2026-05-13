@@ -3,7 +3,9 @@ import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectVisibleFocusIndicator } from "./support/keyboard";
 
 test.describe("Header search", () => {
-  test("should open quick paths on focus and close on outside click", async ({ page }) => {
+  test("should open quick paths on focus and close on outside click", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
     await page.addInitScript(() => {
@@ -18,8 +20,12 @@ test.describe("Header search", () => {
     });
     await searchInput.focus();
 
-    const featuredLane = page.getByRole("button", { name: /Featured Series/i }).first();
-    const completedLane = page.getByRole("button", { name: /Completed Series/i }).first();
+    const featuredLane = page
+      .getByRole("button", { name: /Featured Series/i })
+      .first();
+    const completedLane = page
+      .getByRole("button", { name: /Completed Series/i })
+      .first();
 
     await expect(featuredLane).toBeVisible();
     await expect(completedLane).toBeVisible();
@@ -39,7 +45,9 @@ test.describe("Header search", () => {
     await expectNoRuntimeIssues("/", runtimeIssues);
   });
 
-  test("should keep search discovery lanes reachable by keyboard in focus order", async ({ page }) => {
+  test("should keep search discovery lanes reachable by keyboard in focus order", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
     await page.addInitScript(() => {
@@ -52,18 +60,28 @@ test.describe("Header search", () => {
     const searchInput = page.getByRole("searchbox", {
       name: "Search series, creators, or genres",
     });
-    const featuredLane = page.getByRole("button", { name: /Featured Series/i }).first();
-    const completedLane = page.getByRole("button", { name: /Completed Series/i }).first();
+    const featuredLane = page
+      .getByRole("button", { name: /Featured Series/i })
+      .first();
+    const completedLane = page
+      .getByRole("button", { name: /Completed Series/i })
+      .first();
 
     await searchInput.focus();
     await expect(searchInput).toBeFocused();
     await searchInput.press("Tab");
     await expect(featuredLane).toBeFocused();
-    await expectVisibleFocusIndicator(featuredLane, "Search discovery Featured Series lane");
+    await expectVisibleFocusIndicator(
+      featuredLane,
+      "Search discovery Featured Series lane",
+    );
 
     await featuredLane.press("Tab");
     await expect(completedLane).toBeFocused();
-    await expectVisibleFocusIndicator(completedLane, "Search discovery Completed Series lane");
+    await expectVisibleFocusIndicator(
+      completedLane,
+      "Search discovery Completed Series lane",
+    );
 
     await expectNoRuntimeIssues("/", runtimeIssues);
   });

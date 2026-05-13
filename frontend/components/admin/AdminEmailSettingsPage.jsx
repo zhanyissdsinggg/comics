@@ -160,11 +160,15 @@ export default function AdminEmailSettingsPage() {
       savedBeforeTest = true;
     }
 
-    const response = await adminPost("/api/admin/email/test", { to: recipient });
+    const response = await adminPost("/api/admin/email/test", {
+      to: recipient,
+    });
     if (response.ok) {
       setFeedback({
         type: "success",
-        message: savedBeforeTest ? "配置已保存，并已发出测试邮件。" : "测试邮件已发出。",
+        message: savedBeforeTest
+          ? "配置已保存，并已发出测试邮件。"
+          : "测试邮件已发出。",
       });
     } else {
       setFeedback({
@@ -186,7 +190,10 @@ export default function AdminEmailSettingsPage() {
 
   if (!isAuthenticated) {
     return (
-      <AdminPageSection title="邮件投递" description="需要管理员权限后，才能编辑邮件配置。">
+      <AdminPageSection
+        title="邮件投递"
+        description="需要管理员权限后，才能编辑邮件配置。"
+      >
         <p className="text-sm text-slate-500">请先登录后台，再管理发信配置。</p>
       </AdminPageSection>
     );
@@ -194,7 +201,10 @@ export default function AdminEmailSettingsPage() {
 
   if (loading) {
     return (
-      <AdminPageSection title="邮件投递" description="正在读取已保存的发信配置。">
+      <AdminPageSection
+        title="邮件投递"
+        description="正在读取已保存的发信配置。"
+      >
         <p className="text-sm text-slate-500">正在加载邮件配置...</p>
       </AdminPageSection>
     );
@@ -202,14 +212,19 @@ export default function AdminEmailSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: "", message: "" })}
+      />
 
       <AdminPageSection
         title="发信通道"
         description="先定通道、发件地址和通知邮箱。"
         action={
           <div className="flex flex-wrap items-center gap-2">
-            {hasUnsavedChanges ? <AdminBadge tone="warning">有未保存更改</AdminBadge> : null}
+            {hasUnsavedChanges ? (
+              <AdminBadge tone="warning">有未保存更改</AdminBadge>
+            ) : null}
             <Button
               type="button"
               variant="outline"
@@ -231,7 +246,10 @@ export default function AdminEmailSettingsPage() {
         }
       >
         <div className="grid gap-4 lg:grid-cols-3">
-          <AdminFormField label="投递通道" helperText="选择当前使用的发信方式。">
+          <AdminFormField
+            label="投递通道"
+            helperText="选择当前使用的发信方式。"
+          >
             <select
               value={draft.provider}
               onChange={(event) => handleChange("provider", event.target.value)}
@@ -245,36 +263,52 @@ export default function AdminEmailSettingsPage() {
             </select>
           </AdminFormField>
 
-          <AdminFormField label="默认发件地址" helperText="读者会看到这个发件地址。">
-              <input
-                value={draft.from}
-                onChange={(event) => handleChange("from", event.target.value)}
-                className={adminInputClassName}
-                placeholder="notice@example.com"
-                data-testid="admin-email-from-input"
-              />
+          <AdminFormField
+            label="默认发件地址"
+            helperText="读者会看到这个发件地址。"
+          >
+            <input
+              value={draft.from}
+              onChange={(event) => handleChange("from", event.target.value)}
+              className={adminInputClassName}
+              placeholder="notice@example.com"
+              data-testid="admin-email-from-input"
+            />
           </AdminFormField>
 
-          <AdminFormField label="运营通知邮箱" helperText="投递异常和系统提醒会发到这里。">
-              <input
-                value={draft.adminNotifyEmail}
-                onChange={(event) => handleChange("adminNotifyEmail", event.target.value)}
-                className={adminInputClassName}
-                placeholder="ops@example.com"
-              />
+          <AdminFormField
+            label="运营通知邮箱"
+            helperText="投递异常和系统提醒会发到这里。"
+          >
+            <input
+              value={draft.adminNotifyEmail}
+              onChange={(event) =>
+                handleChange("adminNotifyEmail", event.target.value)
+              }
+              className={adminInputClassName}
+              placeholder="ops@example.com"
+            />
           </AdminFormField>
         </div>
       </AdminPageSection>
 
-      <AdminPageSection title="密钥与回调" description="把密钥和回调集中放在一起。">
+      <AdminPageSection
+        title="密钥与回调"
+        description="把密钥和回调集中放在一起。"
+      >
         <div className="space-y-4">
-          <AdminFormField label="默认回调地址" helperText="启用回调通道时会使用这里的地址。">
-              <input
-                value={draft.webhookUrl}
-                onChange={(event) => handleChange("webhookUrl", event.target.value)}
-                className={adminInputClassName}
-                placeholder="https://notify.example.com/email/webhook"
-              />
+          <AdminFormField
+            label="默认回调地址"
+            helperText="启用回调通道时会使用这里的地址。"
+          >
+            <input
+              value={draft.webhookUrl}
+              onChange={(event) =>
+                handleChange("webhookUrl", event.target.value)
+              }
+              className={adminInputClassName}
+              placeholder="https://notify.example.com/email/webhook"
+            />
           </AdminFormField>
 
           <div className="grid gap-4 xl:grid-cols-3">
@@ -283,10 +317,15 @@ export default function AdminEmailSettingsPage() {
                 key={field.key}
                 className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]"
               >
-                <AdminFormField label={field.label} helperText="继续沿用当前值时，保持原样即可。">
+                <AdminFormField
+                  label={field.label}
+                  helperText="继续沿用当前值时，保持原样即可。"
+                >
                   <input
                     value={draft[field.key]}
-                    onChange={(event) => handleChange(field.key, event.target.value)}
+                    onChange={(event) =>
+                      handleChange(field.key, event.target.value)
+                    }
                     className={adminInputClassName}
                     placeholder={field.placeholder}
                   />
@@ -308,19 +347,28 @@ export default function AdminEmailSettingsPage() {
         </div>
       </AdminPageSection>
 
-      <AdminPageSection title="测试邮件" description="用当前草稿发一封测试邮件。">
+      <AdminPageSection
+        title="测试邮件"
+        description="用当前草稿发一封测试邮件。"
+      >
         <div className="grid gap-4">
           <AdminFormField
             label="测试收件人"
-            helperText={hasUnsavedChanges ? "发送前会先保存当前草稿。" : "会直接使用当前已保存的配置。"}
+            helperText={
+              hasUnsavedChanges
+                ? "发送前会先保存当前草稿。"
+                : "会直接使用当前已保存的配置。"
+            }
           >
-              <input
-                value={draft.testRecipient}
-                onChange={(event) => handleChange("testRecipient", event.target.value)}
-                className={adminInputClassName}
-                placeholder="qa@example.com"
-                data-testid="admin-email-test-recipient"
-              />
+            <input
+              value={draft.testRecipient}
+              onChange={(event) =>
+                handleChange("testRecipient", event.target.value)
+              }
+              className={adminInputClassName}
+              placeholder="qa@example.com"
+              data-testid="admin-email-test-recipient"
+            />
           </AdminFormField>
         </div>
       </AdminPageSection>

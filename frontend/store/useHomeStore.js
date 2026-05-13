@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 const HomeContext = createContext(null);
 const STORAGE_KEY = "mn_home_tab";
@@ -25,7 +32,10 @@ export function HomeProvider({ children }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ homeTab, setHomeTab: updateHomeTab }), [homeTab, updateHomeTab]);
+  const value = useMemo(
+    () => ({ homeTab, setHomeTab: updateHomeTab }),
+    [homeTab, updateHomeTab],
+  );
 
   return <HomeContext.Provider value={value}>{children}</HomeContext.Provider>;
 }

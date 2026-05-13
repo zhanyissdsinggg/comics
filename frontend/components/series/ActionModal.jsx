@@ -81,14 +81,14 @@ export default function ActionModal({
         </div>
 
         <div className="p-5">
-          <p className="text-sm leading-7 text-white/72">
-            {description}
-          </p>
+          <p className="text-sm leading-7 text-white/72">{description}</p>
 
           {type === "SHORTFALL" ? (
             <div className="mt-4 rounded-[24px] border border-amber-200/16 bg-[rgba(244,201,93,0.12)] px-4 py-3 text-sm text-amber-100 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
               Need{" "}
-              <span className="font-semibold text-amber-50">{shortfallPts}</span>{" "}
+              <span className="font-semibold text-amber-50">
+                {shortfallPts}
+              </span>{" "}
               more points for this chapter.
             </div>
           ) : null}

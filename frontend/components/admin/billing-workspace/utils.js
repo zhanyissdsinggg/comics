@@ -102,7 +102,9 @@ export function buildPackageSummary(packages) {
       const totalPoints = getPackageTotalPoints(pkg);
       const price = toNumber(pkg.price);
       const density = price > 0 ? totalPoints / price : 0;
-      const currentLargestTotal = summary.largest ? getPackageTotalPoints(summary.largest) : 0;
+      const currentLargestTotal = summary.largest
+        ? getPackageTotalPoints(summary.largest)
+        : 0;
       const currency = normalizeUSDisplayCurrency(pkg.currency);
 
       summary.totalCount += 1;
@@ -111,9 +113,15 @@ export function buildPackageSummary(packages) {
         summary.activeCount += 1;
       }
 
-      summary.highestBonus = Math.max(summary.highestBonus, toNumber(pkg.bonusPts));
+      summary.highestBonus = Math.max(
+        summary.highestBonus,
+        toNumber(pkg.bonusPts),
+      );
 
-      if (!summary.cheapest || (price > 0 && price < toNumber(summary.cheapest.price))) {
+      if (
+        !summary.cheapest ||
+        (price > 0 && price < toNumber(summary.cheapest.price))
+      ) {
         summary.cheapest = pkg;
       }
 
@@ -158,9 +166,18 @@ export function buildPlanSummary(plans) {
         summary.activeCount += 1;
       }
 
-      summary.maxDiscount = Math.max(summary.maxDiscount, toNumber(plan.discountPct));
-      summary.maxDailyFree = Math.max(summary.maxDailyFree, toNumber(plan.dailyFreeUnlocks));
-      summary.maxVoucher = Math.max(summary.maxVoucher, toNumber(plan.voucherPts));
+      summary.maxDiscount = Math.max(
+        summary.maxDiscount,
+        toNumber(plan.discountPct),
+      );
+      summary.maxDailyFree = Math.max(
+        summary.maxDailyFree,
+        toNumber(plan.dailyFreeUnlocks),
+      );
+      summary.maxVoucher = Math.max(
+        summary.maxVoucher,
+        toNumber(plan.voucherPts),
+      );
 
       return summary;
     },
@@ -201,14 +218,19 @@ export function buildBillingMetricCards(packageSummary, planSummary) {
 
 export function buildBillingSnapshotItems(billingAvailability) {
   return [
-    { label: "计费模式", value: getBillingModeLabel(billingAvailability?.billingMode) },
+    {
+      label: "计费模式",
+      value: getBillingModeLabel(billingAvailability?.billingMode),
+    },
     {
       label: "购买操作",
       value: billingAvailability?.purchaseActionsEnabled ? "已启用" : "仅预览",
     },
     {
       label: "订阅操作",
-      value: billingAvailability?.subscriptionActionsEnabled ? "已启用" : "仅预览",
+      value: billingAvailability?.subscriptionActionsEnabled
+        ? "已启用"
+        : "仅预览",
     },
     {
       label: "退款操作",

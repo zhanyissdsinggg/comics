@@ -330,7 +330,6 @@ export default function UnlockChapterModal({
               <X size={18} />
             </button>
           </div>
-
         </div>
 
         <div className="relative p-5 sm:p-6">
@@ -339,7 +338,9 @@ export default function UnlockChapterModal({
               <h2 className="font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                 Unlock {installmentLabel}
                 {installmentSuffix} for{" "}
-                <span className="text-[#ffd6e5]">{formatUSNumber(resolvedPrice)}</span>{" "}
+                <span className="text-[#ffd6e5]">
+                  {formatUSNumber(resolvedPrice)}
+                </span>{" "}
                 Points
               </h2>
               <p className="mt-3 text-sm leading-7 text-white/72">

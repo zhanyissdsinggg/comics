@@ -48,15 +48,20 @@ export function normalizeSeries(entry, index) {
     id: String(source.id || `series-${index + 1}`),
     title: normalizeText(source.title) || "未命名作品",
     author: normalizeText(source.author),
-    creatorCredits: Array.isArray(source.creatorCredits) ? source.creatorCredits.filter(Boolean) : [],
+    creatorCredits: Array.isArray(source.creatorCredits)
+      ? source.creatorCredits.filter(Boolean)
+      : [],
     type: source.type === "novel" ? "novel" : "comic",
     status: normalizeText(source.status) || "Ongoing",
     adult: Boolean(source.adult),
     description: normalizeText(source.description),
     coverUrl: normalizeText(source.coverUrl || source.coverImage),
     genres: Array.isArray(source.genres) ? source.genres.filter(Boolean) : [],
-    episodeCount: toNumber(source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes),
-    isPublished: source.isPublished !== undefined ? Boolean(source.isPublished) : true,
+    episodeCount: toNumber(
+      source.episodeCount ?? source?._count?.episodes ?? source.totalEpisodes,
+    ),
+    isPublished:
+      source.isPublished !== undefined ? Boolean(source.isPublished) : true,
     updatedAt: source.updatedAt || source.createdAt || null,
   };
 }
@@ -159,7 +164,11 @@ export function getPriorityScore(series, readiness, contentFootprint) {
     score += 12;
   }
 
-  if (!series.isPublished && readiness.missingCount === 1 && readiness.missingItems[0]?.id === "published") {
+  if (
+    !series.isPublished &&
+    readiness.missingCount === 1 &&
+    readiness.missingItems[0]?.id === "published"
+  ) {
     score += 18;
   }
 
@@ -232,7 +241,8 @@ export function createAuditedSeries(seriesList) {
         return right.priority - left.priority;
       }
 
-      const updatedDelta = getDateValue(right.updatedAt) - getDateValue(left.updatedAt);
+      const updatedDelta =
+        getDateValue(right.updatedAt) - getDateValue(left.updatedAt);
       if (updatedDelta !== 0) {
         return updatedDelta;
       }
@@ -243,14 +253,23 @@ export function createAuditedSeries(seriesList) {
 
 export function getAuditOverview(auditedSeries) {
   const total = auditedSeries.length;
-  const readyCount = auditedSeries.filter((item) => item.readiness.isReady).length;
+  const readyCount = auditedSeries.filter(
+    (item) => item.readiness.isReady,
+  ).length;
   const publishedRiskCount = auditedSeries.filter(
     (item) => item.isPublished && item.readiness.missingCount > 0,
   ).length;
-  const launchReadyDraftCount = auditedSeries.filter((item) => item.launchReady).length;
-  const creatorGapCount = auditedSeries.filter((item) => !item.creatorLabel).length;
+  const launchReadyDraftCount = auditedSeries.filter(
+    (item) => item.launchReady,
+  ).length;
+  const creatorGapCount = auditedSeries.filter(
+    (item) => !item.creatorLabel,
+  ).length;
   const avgScore = total
-    ? Math.round(auditedSeries.reduce((sum, item) => sum + item.readiness.score, 0) / total)
+    ? Math.round(
+        auditedSeries.reduce((sum, item) => sum + item.readiness.score, 0) /
+          total,
+      )
     : 0;
 
   const missingSummary = auditedSeries.reduce((summary, item) => {
@@ -277,10 +296,13 @@ export function filterAuditedSeries(auditedSeries, query, quickFilter) {
   return auditedSeries.filter((series) => {
     const matchesFilter =
       quickFilter === "all" ||
-      (quickFilter === "publishedRisk" && series.isPublished && series.readiness.missingCount > 0) ||
+      (quickFilter === "publishedRisk" &&
+        series.isPublished &&
+        series.readiness.missingCount > 0) ||
       (quickFilter === "launchReady" && series.launchReady) ||
       (quickFilter === "creatorGap" && !series.creatorLabel) ||
-      (quickFilter === "thinPage" && (series.episodeCount <= 0 || !series.coverUrl));
+      (quickFilter === "thinPage" &&
+        (series.episodeCount <= 0 || !series.coverUrl));
 
     if (!matchesFilter) {
       return false;

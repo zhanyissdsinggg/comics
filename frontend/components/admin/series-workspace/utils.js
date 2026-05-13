@@ -105,7 +105,9 @@ export function normalizeSeries(entry, index) {
     id: String(source.id || `series-${index + 1}`),
     title: String(source.title || "未命名作品"),
     author: String(source.author || ""),
-    creatorLabel: creatorIdentity.hasPublicCredit ? creatorIdentity.displayName : "",
+    creatorLabel: creatorIdentity.hasPublicCredit
+      ? creatorIdentity.displayName
+      : "",
     creatorHref: creatorIdentity.hasPublicCredit ? creatorIdentity.href : "",
     hasPublicCreator: creatorIdentity.hasPublicCredit,
     type: source.type === "novel" ? "novel" : "comic",
@@ -122,7 +124,8 @@ export function normalizeSeries(entry, index) {
     ),
     createdAt: source.createdAt || null,
     updatedAt: source.updatedAt || source.createdAt || null,
-    isPublished: source.isPublished !== undefined ? Boolean(source.isPublished) : true,
+    isPublished:
+      source.isPublished !== undefined ? Boolean(source.isPublished) : true,
     isFeatured: Boolean(source.isFeatured),
   };
 }
@@ -177,7 +180,8 @@ export function buildQueryString(search, typeFilter, filters) {
   if (search) params.set("search", search);
   if (typeFilter !== "all") params.set("type", typeFilter);
   if (filters.status !== "all") params.set("status", filters.status);
-  if (filters.publishStatus !== "all") params.set("publishStatus", filters.publishStatus);
+  if (filters.publishStatus !== "all")
+    params.set("publishStatus", filters.publishStatus);
   if (filters.adultContent === "adult") params.set("adult", "true");
   if (filters.adultContent === "general") params.set("adult", "false");
 
@@ -189,25 +193,31 @@ export function buildQueryString(search, typeFilter, filters) {
 
 export function sortSeries(list, sortBy) {
   const items = [...list];
-  const [field, direction] = String(sortBy || DEFAULT_FILTERS.sortBy).split("_");
+  const [field, direction] = String(sortBy || DEFAULT_FILTERS.sortBy).split(
+    "_",
+  );
   const sign = direction === "asc" ? 1 : -1;
 
   return items.sort((left, right) => {
     if (field === "title") return left.title.localeCompare(right.title) * sign;
     if (field === "updatedAt") {
       return (
-        (new Date(left.updatedAt || 0).getTime() - new Date(right.updatedAt || 0).getTime()) *
+        (new Date(left.updatedAt || 0).getTime() -
+          new Date(right.updatedAt || 0).getTime()) *
         sign
       );
     }
     if (field === "createdAt") {
       return (
-        (new Date(left.createdAt || 0).getTime() - new Date(right.createdAt || 0).getTime()) *
+        (new Date(left.createdAt || 0).getTime() -
+          new Date(right.createdAt || 0).getTime()) *
         sign
       );
     }
     if (field === "episodeCount") {
-      return (toNumber(left.episodeCount) - toNumber(right.episodeCount)) * sign;
+      return (
+        (toNumber(left.episodeCount) - toNumber(right.episodeCount)) * sign
+      );
     }
     return 0;
   });

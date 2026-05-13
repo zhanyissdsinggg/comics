@@ -1,13 +1,14 @@
 import { cache } from "react";
 import { buildCreatorDirectory } from "./creatorDirectory";
-import {
-  humanizeCreatorSlug,
-} from "./creators";
+import { humanizeCreatorSlug } from "./creators";
 import {
   resolveSeriesCreatorName,
   seriesMatchesCreatorSlug,
 } from "./creatorIdentity";
-import { buildHomeHeroItems, getHomeEditorialSnapshot } from "./homeMerchandising";
+import {
+  buildHomeHeroItems,
+  getHomeEditorialSnapshot,
+} from "./homeMerchandising";
 import {
   filterBlockedPublicSeries,
   isBlockedPublicCreatorSlug,
@@ -34,7 +35,9 @@ function resolveSeoContentMode(options = {}) {
 }
 
 function normalizeBaseUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/\/$/, "");
 }
 
 function getSeoApiBaseUrl() {
@@ -88,12 +91,14 @@ function getCreatorSeriesScore(series) {
 
 function sortCreatorSeries(items) {
   return [...items].sort((left, right) => {
-    const popularityDelta = getCreatorSeriesScore(right) - getCreatorSeriesScore(left);
+    const popularityDelta =
+      getCreatorSeriesScore(right) - getCreatorSeriesScore(left);
     if (popularityDelta !== 0) {
       return popularityDelta;
     }
 
-    const updatedDelta = new Date(right?.updatedAt || 0) - new Date(left?.updatedAt || 0);
+    const updatedDelta =
+      new Date(right?.updatedAt || 0) - new Date(left?.updatedAt || 0);
     if (updatedDelta !== 0) {
       return updatedDelta;
     }
@@ -110,146 +115,148 @@ export const loadSeriesSeoPayload = cache(async (seriesId) => {
   return routePayload?.payload || null;
 });
 
-export const loadReaderSeoPayload = cache(async (seriesId, episodeId, options = {}) => {
-  if (!seriesId || !episodeId) {
-    return {
-      series: null,
-      episode: null,
-      episodes: [],
-    };
-  }
-
-  if (
-    shouldBlockDemoContentInProduction() &&
-    (isBlockedPublicSeriesIdentifier(seriesId) ||
-      isBlockedPublicSeriesIdentifier(episodeId))
-  ) {
-    return {
-      series: null,
-      episode: null,
-      episodes: [],
-    };
-  }
-
-  const seriesRoutePayload = await loadSeriesRoutePayload(seriesId, options);
-  const contentMode = resolveSeoContentMode(options);
-
-  if (seriesRoutePayload?.state && seriesRoutePayload.state !== "ready") {
-    return {
-      series: null,
-      episode: null,
-      episodes: [],
-      state: seriesRoutePayload.state,
-      gateReason: seriesRoutePayload.gateReason || null,
-    };
-  }
-
-  const series = seriesRoutePayload?.payload?.series || null;
-  const seriesEpisodes = Array.isArray(seriesRoutePayload?.payload?.episodes)
-    ? seriesRoutePayload.payload.episodes
-    : [];
-
-  if (!series) {
-    return {
-      series: null,
-      episode: null,
-      episodes: seriesEpisodes,
-      state: "unavailable",
-      gateReason: null,
-    };
-  }
-
-  if (!matchesContentMode(series, contentMode)) {
-    return {
-      series,
-      episode: null,
-      episodes: seriesEpisodes,
-      state:
-        contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
-      gateReason:
-        contentMode === CONTENT_MODE_ADULT
-          ? "NORMAL_MODE_REQUIRED"
-          : "NEED_AGE_CONFIRM",
-    };
-  }
-
-  const episodePayload = await fetchSeoApiJson(
-    `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}&mode=${encodeURIComponent(contentMode)}`,
-    "reader-metadata",
-  );
-
-  if (!episodePayload?.episode) {
-    return {
-      series,
-      episode: null,
-      episodes: seriesEpisodes,
-      state: "unavailable",
-      gateReason: null,
-    };
-  }
-
-  const rawEpisode = episodePayload.episode;
-  const episodeHasModeSignal = [
-    "adult",
-    "isAdult",
-    "mature",
-    "isMature",
-    "nsfw",
-    "rating",
-    "ageRating",
-    "contentRating",
-    "category",
-    "badge",
-    "badges",
-    "tags",
-    "genres",
-    "mode",
-  ].some((field) => Object.prototype.hasOwnProperty.call(rawEpisode, field));
-  const safeEpisode = episodeHasModeSignal
-    ? rawEpisode
-    : {
-        ...rawEpisode,
-        adult: isAdultContent(series),
+export const loadReaderSeoPayload = cache(
+  async (seriesId, episodeId, options = {}) => {
+    if (!seriesId || !episodeId) {
+      return {
+        series: null,
+        episode: null,
+        episodes: [],
       };
+    }
 
-  if (!matchesContentMode(safeEpisode, contentMode)) {
+    if (
+      shouldBlockDemoContentInProduction() &&
+      (isBlockedPublicSeriesIdentifier(seriesId) ||
+        isBlockedPublicSeriesIdentifier(episodeId))
+    ) {
+      return {
+        series: null,
+        episode: null,
+        episodes: [],
+      };
+    }
+
+    const seriesRoutePayload = await loadSeriesRoutePayload(seriesId, options);
+    const contentMode = resolveSeoContentMode(options);
+
+    if (seriesRoutePayload?.state && seriesRoutePayload.state !== "ready") {
+      return {
+        series: null,
+        episode: null,
+        episodes: [],
+        state: seriesRoutePayload.state,
+        gateReason: seriesRoutePayload.gateReason || null,
+      };
+    }
+
+    const series = seriesRoutePayload?.payload?.series || null;
+    const seriesEpisodes = Array.isArray(seriesRoutePayload?.payload?.episodes)
+      ? seriesRoutePayload.payload.episodes
+      : [];
+
+    if (!series) {
+      return {
+        series: null,
+        episode: null,
+        episodes: seriesEpisodes,
+        state: "unavailable",
+        gateReason: null,
+      };
+    }
+
+    if (!matchesContentMode(series, contentMode)) {
+      return {
+        series,
+        episode: null,
+        episodes: seriesEpisodes,
+        state:
+          contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
+        gateReason:
+          contentMode === CONTENT_MODE_ADULT
+            ? "NORMAL_MODE_REQUIRED"
+            : "NEED_AGE_CONFIRM",
+      };
+    }
+
+    const episodePayload = await fetchSeoApiJson(
+      `/api/episode?seriesId=${encodeURIComponent(seriesId)}&episodeId=${encodeURIComponent(episodeId)}&adult=${getContentModeQueryParam(contentMode)}&mode=${encodeURIComponent(contentMode)}`,
+      "reader-metadata",
+    );
+
+    if (!episodePayload?.episode) {
+      return {
+        series,
+        episode: null,
+        episodes: seriesEpisodes,
+        state: "unavailable",
+        gateReason: null,
+      };
+    }
+
+    const rawEpisode = episodePayload.episode;
+    const episodeHasModeSignal = [
+      "adult",
+      "isAdult",
+      "mature",
+      "isMature",
+      "nsfw",
+      "rating",
+      "ageRating",
+      "contentRating",
+      "category",
+      "badge",
+      "badges",
+      "tags",
+      "genres",
+      "mode",
+    ].some((field) => Object.prototype.hasOwnProperty.call(rawEpisode, field));
+    const safeEpisode = episodeHasModeSignal
+      ? rawEpisode
+      : {
+          ...rawEpisode,
+          adult: isAdultContent(series),
+        };
+
+    if (!matchesContentMode(safeEpisode, contentMode)) {
+      return {
+        series,
+        episode: null,
+        episodes: seriesEpisodes,
+        state:
+          contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
+        gateReason:
+          contentMode === CONTENT_MODE_ADULT
+            ? "NORMAL_MODE_REQUIRED"
+            : "NEED_AGE_CONFIRM",
+      };
+    }
+
+    if (
+      shouldBlockDemoContentInProduction() &&
+      (isBlockedPublicSeriesIdentifier(series?.id) ||
+        isBlockedPublicSeriesIdentifier(series?.slug) ||
+        isBlockedPublicSeriesIdentifier(series?.handle) ||
+        isBlockedPublicSeriesIdentifier(series?.fixtureKey) ||
+        isBlockedPublicSeriesIdentifier(safeEpisode?.seriesId) ||
+        isBlockedPublicSeriesIdentifier(safeEpisode?.id))
+    ) {
+      return {
+        series: null,
+        episode: null,
+        episodes: [],
+      };
+    }
+
     return {
       series,
-      episode: null,
+      episode: safeEpisode,
       episodes: seriesEpisodes,
-      state:
-        contentMode === CONTENT_MODE_ADULT ? "mode-mismatch" : "adult-gated",
-      gateReason:
-        contentMode === CONTENT_MODE_ADULT
-          ? "NORMAL_MODE_REQUIRED"
-          : "NEED_AGE_CONFIRM",
+      state: seriesRoutePayload?.state || "ready",
+      gateReason: seriesRoutePayload?.gateReason || null,
     };
-  }
-
-  if (
-    shouldBlockDemoContentInProduction() &&
-    (isBlockedPublicSeriesIdentifier(series?.id) ||
-      isBlockedPublicSeriesIdentifier(series?.slug) ||
-      isBlockedPublicSeriesIdentifier(series?.handle) ||
-      isBlockedPublicSeriesIdentifier(series?.fixtureKey) ||
-      isBlockedPublicSeriesIdentifier(safeEpisode?.seriesId) ||
-      isBlockedPublicSeriesIdentifier(safeEpisode?.id))
-  ) {
-    return {
-      series: null,
-      episode: null,
-      episodes: [],
-    };
-  }
-
-  return {
-    series,
-    episode: safeEpisode,
-    episodes: seriesEpisodes,
-    state: seriesRoutePayload?.state || "ready",
-    gateReason: seriesRoutePayload?.gateReason || null,
-  };
-});
+  },
+);
 
 export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
   if (!seriesId) {
@@ -262,7 +269,9 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
 
   try {
     const contentMode = resolveSeoContentMode(options);
-    const normalizedSeriesId = String(seriesId || "").trim().toLowerCase();
+    const normalizedSeriesId = String(seriesId || "")
+      .trim()
+      .toLowerCase();
     if (
       shouldBlockDemoContentInProduction() &&
       isBlockedPublicSeriesIdentifier(normalizedSeriesId)
@@ -381,7 +390,9 @@ export const loadSeriesCatalogSeoPayload = cache(async (options = {}) => {
   );
   return {
     series: filterContentByMode(
-      filterBlockedPublicSeries(Array.isArray(payload?.series) ? payload.series : []),
+      filterBlockedPublicSeries(
+        Array.isArray(payload?.series) ? payload.series : [],
+      ),
       contentMode,
     ),
     ready: Boolean(payload),
@@ -391,26 +402,35 @@ export const loadSeriesCatalogSeoPayload = cache(async (options = {}) => {
 export const loadHomepageSeoPayload = cache(async (options = {}) => {
   const contentMode = resolveSeoContentMode(options);
   const adultFlag = getContentModeQueryParam(contentMode);
-  const [seriesPayload, hotPayload, recommendationsPayload] = await Promise.all([
-    fetchSeoApiJson(`/api/series?adult=${adultFlag}&pageSize=100`, "home-series"),
-    fetchSeoApiJson(
-      `/api/search/hot?adult=${adultFlag}&window=day`,
-      "home-hot-keywords",
-    ),
-    fetchSeoApiJson(
-      `/api/recommendations/homepage?adult=${adultFlag}`,
-      "home-recommendations",
-    ),
-  ]);
+  const [seriesPayload, hotPayload, recommendationsPayload] = await Promise.all(
+    [
+      fetchSeoApiJson(
+        `/api/series?adult=${adultFlag}&pageSize=100`,
+        "home-series",
+      ),
+      fetchSeoApiJson(
+        `/api/search/hot?adult=${adultFlag}&window=day`,
+        "home-hot-keywords",
+      ),
+      fetchSeoApiJson(
+        `/api/recommendations/homepage?adult=${adultFlag}`,
+        "home-recommendations",
+      ),
+    ],
+  );
 
   const seriesList = filterContentByMode(
-    filterBlockedPublicSeries(Array.isArray(seriesPayload?.series) ? seriesPayload.series : []),
+    filterBlockedPublicSeries(
+      Array.isArray(seriesPayload?.series) ? seriesPayload.series : [],
+    ),
     contentMode,
   );
   const homepageSlots = Array.isArray(recommendationsPayload?.slots)
     ? recommendationsPayload.slots
     : [];
-  const editorialSnapshot = getHomeEditorialSnapshot(seriesList, { homepageSlots });
+  const editorialSnapshot = getHomeEditorialSnapshot(seriesList, {
+    homepageSlots,
+  });
   const hasExplicitHomeHeroSlot = homepageSlots.some(
     (slot) =>
       String(slot?.slot || slot?.name || slot?.id || "")
@@ -434,7 +454,8 @@ export const loadHomepageSeoPayload = cache(async (options = {}) => {
     );
     const firstEpisode = Array.isArray(detailPayload?.episodes)
       ? [...detailPayload.episodes].sort(
-          (left, right) => Number(left?.number || 0) - Number(right?.number || 0),
+          (left, right) =>
+            Number(left?.number || 0) - Number(right?.number || 0),
         )[0] || null
       : null;
     canonicalHeroFirstEpisodeId = firstEpisode?.id || null;
@@ -486,21 +507,23 @@ export const loadSearchSeoPayload = cache(async (query = "", options = {}) => {
   };
 });
 
-export const loadRankingsSeoPayload = cache(async (type = "popular", window = "all", options = {}) => {
-  const contentMode = resolveSeoContentMode(options);
-  const payload = await fetchSeoApiJson(
-    `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=${getContentModeQueryParam(contentMode)}`,
-    "rankings-page",
-  );
+export const loadRankingsSeoPayload = cache(
+  async (type = "popular", window = "all", options = {}) => {
+    const contentMode = resolveSeoContentMode(options);
+    const payload = await fetchSeoApiJson(
+      `/api/rankings?type=${encodeURIComponent(type)}&window=${encodeURIComponent(window)}&adult=${getContentModeQueryParam(contentMode)}`,
+      "rankings-page",
+    );
 
-  return {
-    rankings: filterContentByMode(
-      Array.isArray(payload?.rankings) ? payload.rankings : [],
-      contentMode,
-    ),
-    ready: Boolean(payload),
-  };
-});
+    return {
+      rankings: filterContentByMode(
+        Array.isArray(payload?.rankings) ? payload.rankings : [],
+        contentMode,
+      ),
+      ready: Boolean(payload),
+    };
+  },
+);
 
 export const loadTopupCatalogSeoPayload = cache(async () => {
   const payload = await fetchSeoApiJson("/api/billing/topups", "store-topups");
@@ -513,7 +536,10 @@ export const loadTopupCatalogSeoPayload = cache(async () => {
 });
 
 export const loadSubscriptionPlansSeoPayload = cache(async () => {
-  const payload = await fetchSeoApiJson("/api/billing/plans", "subscription-plans");
+  const payload = await fetchSeoApiJson(
+    "/api/billing/plans",
+    "subscription-plans",
+  );
   const plans = Array.isArray(payload?.plans) ? payload.plans : [];
 
   return {
@@ -550,13 +576,16 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
   }
 
   try {
-    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
-      next: { revalidate: SEO_REVALIDATE_SECONDS },
-      signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
-      headers: {
-        "x-gush-seo": "creator-metadata",
+    const response = await fetch(
+      `${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`,
+      {
+        next: { revalidate: SEO_REVALIDATE_SECONDS },
+        signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
+        headers: {
+          "x-gush-seo": "creator-metadata",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       return {
@@ -592,13 +621,16 @@ export const loadCreatorSeoPayload = cache(async (creatorSlug) => {
 
 export const loadCreatorsDirectorySeoPayload = cache(async () => {
   try {
-    const response = await fetch(`${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`, {
-      next: { revalidate: SEO_REVALIDATE_SECONDS },
-      signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
-      headers: {
-        "x-gush-seo": "creators-directory",
+    const response = await fetch(
+      `${getSeoApiBaseUrl()}/api/series?adult=0&pageSize=100`,
+      {
+        next: { revalidate: SEO_REVALIDATE_SECONDS },
+        signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
+        headers: {
+          "x-gush-seo": "creators-directory",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       return {

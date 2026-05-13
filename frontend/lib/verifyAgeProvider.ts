@@ -69,8 +69,7 @@ export function normalizeMatureVerificationStatus(
 
   return {
     verified,
-    provider:
-      provider || DEFAULT_MATURE_VERIFICATION_STATUS.provider,
+    provider: provider || DEFAULT_MATURE_VERIFICATION_STATUS.provider,
     region,
     expiresAt: expiresAt || null,
     referenceId: referenceId || null,

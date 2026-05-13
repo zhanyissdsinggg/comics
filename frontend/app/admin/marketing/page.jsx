@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
-import { AdminFeedbackBanner } from '@/components/admin/common/AdminFeedbackBanner';
-import { ConfirmDialog } from '@/components/admin/common/ConfirmDialog';
-import { Modal } from '@/components/admin/common/Modal';
-import { AdminPageSection } from '@/components/admin/common/AdminWorkspacePrimitives';
+import AdminShell from "@/components/admin/AdminShell";
+import { AdminFeedbackBanner } from "@/components/admin/common/AdminFeedbackBanner";
+import { ConfirmDialog } from "@/components/admin/common/ConfirmDialog";
+import { Modal } from "@/components/admin/common/Modal";
+import { AdminPageSection } from "@/components/admin/common/AdminWorkspacePrimitives";
 import {
   CreateCampaignModalContent,
   MarketingCampaignsSection,
@@ -18,7 +18,7 @@ import {
   MarketingStatsSection,
   MarketingSummaryCards,
   MarketingTypesSection,
-} from '@/components/admin/marketing-workspace/sections';
+} from "@/components/admin/marketing-workspace/sections";
 import {
   buildCampaignPayload,
   buildDateQuery,
@@ -31,60 +31,73 @@ import {
   STATUS_OPTIONS,
   tabMeta,
   TYPE_OPTIONS,
-} from '@/components/admin/marketing-workspace/utils';
+} from "@/components/admin/marketing-workspace/utils";
 
 export default function AdminMarketingPage() {
-  const [viewMode, setViewMode] = useState('campaigns');
+  const [viewMode, setViewMode] = useState("campaigns");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [feedback, setFeedback] = useState(EMPTY_FEEDBACK);
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
   });
 
   const dateQuery = buildDateQuery(dateRange);
 
   const campaignsQuery = useQuery({
-    queryKey: ['admin', 'marketing', 'campaigns'],
+    queryKey: ["admin", "marketing", "campaigns"],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload('/api/admin/marketing/campaigns', { cache: 'no-store' });
+      const data = await requestPayload("/api/admin/marketing/campaigns", {
+        cache: "no-store",
+      });
       return Array.isArray(data?.campaigns) ? data.campaigns : [];
     },
   });
 
   const statsQuery = useQuery({
-    queryKey: ['admin', 'marketing', 'stats', dateQuery],
+    queryKey: ["admin", "marketing", "stats", dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats${dateQuery}`, {
-        cache: 'no-store',
-      });
+      const data = await requestPayload(
+        `/api/admin/marketing/stats${dateQuery}`,
+        {
+          cache: "no-store",
+        },
+      );
       return data?.stats || null;
     },
   });
 
   const segmentsQuery = useQuery({
-    queryKey: ['admin', 'marketing', 'segments', dateQuery],
+    queryKey: ["admin", "marketing", "segments", dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats/by-segment${dateQuery}`, {
-        cache: 'no-store',
-      });
+      const data = await requestPayload(
+        `/api/admin/marketing/stats/by-segment${dateQuery}`,
+        {
+          cache: "no-store",
+        },
+      );
       return Array.isArray(data?.segments) ? data.segments : [];
     },
   });
 
   const typesQuery = useQuery({
-    queryKey: ['admin', 'marketing', 'types', dateQuery],
+    queryKey: ["admin", "marketing", "types", dateQuery],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await requestPayload(`/api/admin/marketing/stats/by-type${dateQuery}`, {
-        cache: 'no-store',
-      });
+      const data = await requestPayload(
+        `/api/admin/marketing/stats/by-type${dateQuery}`,
+        {
+          cache: "no-store",
+        },
+      );
       return Array.isArray(data?.types) ? data.types : [];
     },
   });
@@ -99,47 +112,55 @@ export default function AdminMarketingPage() {
 
   const createCampaignMutation = useMutation({
     mutationFn: async (draft) =>
-      requestPayload('/api/admin/marketing/campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      requestPayload("/api/admin/marketing/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildCampaignPayload(draft)),
       }),
     onSuccess: async () => {
-      setViewMode('campaigns');
+      setViewMode("campaigns");
       setIsCreateModalOpen(false);
       setFormData(INITIAL_FORM);
-      setFeedback({ type: 'success', message: '活动已创建。' });
+      setFeedback({ type: "success", message: "活动已创建。" });
       await refreshAll();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '创建活动失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "创建活动失败。"),
+      });
     },
   });
 
   const deleteCampaignMutation = useMutation({
     mutationFn: async (campaignId) =>
       requestPayload(`/api/admin/marketing/campaigns/${campaignId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       }),
     onSuccess: async () => {
       setIsDeleteModalOpen(false);
       setSelectedCampaign(null);
-      setFeedback({ type: 'success', message: '活动已删除。' });
+      setFeedback({ type: "success", message: "活动已删除。" });
       await refreshAll();
     },
     onError: (error) => {
-      setFeedback({ type: 'error', message: getErrorMessage(error, '删除活动失败。') });
+      setFeedback({
+        type: "error",
+        message: getErrorMessage(error, "删除活动失败。"),
+      });
     },
   });
 
-  const campaigns = Array.isArray(campaignsQuery.data) ? campaignsQuery.data : [];
+  const campaigns = Array.isArray(campaignsQuery.data)
+    ? campaignsQuery.data
+    : [];
   const stats = statsQuery.data;
   const segments = Array.isArray(segmentsQuery.data) ? segmentsQuery.data : [];
   const types = Array.isArray(typesQuery.data) ? typesQuery.data : [];
 
   const metricSnapshot = useMemo(() => {
     const activeCampaigns = campaigns.filter(
-      (campaign) => String(campaign?.status || '').toLowerCase() === 'active',
+      (campaign) => String(campaign?.status || "").toLowerCase() === "active",
     ).length;
 
     return {
@@ -150,8 +171,10 @@ export default function AdminMarketingPage() {
     };
   }, [campaigns, stats]);
 
-  const setFormValue = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
-  const setRangeValue = (key, value) => setDateRange((current) => ({ ...current, [key]: value }));
+  const setFormValue = (key, value) =>
+    setFormData((current) => ({ ...current, [key]: value }));
+  const setRangeValue = (key, value) =>
+    setDateRange((current) => ({ ...current, [key]: value }));
 
   const openCreateModal = () => {
     setFeedback(EMPTY_FEEDBACK);
@@ -160,20 +183,27 @@ export default function AdminMarketingPage() {
   };
 
   const handleCreateCampaign = () => {
-    const budgetValue = formData.budget === '' ? null : Number(formData.budget);
+    const budgetValue = formData.budget === "" ? null : Number(formData.budget);
 
     if (!formData.name.trim()) {
-      setFeedback({ type: 'error', message: '请填写活动名称。' });
+      setFeedback({ type: "error", message: "请填写活动名称。" });
       return;
     }
 
-    if (budgetValue !== null && (!Number.isFinite(budgetValue) || budgetValue < 0)) {
-      setFeedback({ type: 'error', message: '预算必须是有效的非负数字。' });
+    if (
+      budgetValue !== null &&
+      (!Number.isFinite(budgetValue) || budgetValue < 0)
+    ) {
+      setFeedback({ type: "error", message: "预算必须是有效的非负数字。" });
       return;
     }
 
-    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-      setFeedback({ type: 'error', message: '结束日期不能早于开始日期。' });
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      formData.startDate > formData.endDate
+    ) {
+      setFeedback({ type: "error", message: "结束日期不能早于开始日期。" });
       return;
     }
 
@@ -182,7 +212,7 @@ export default function AdminMarketingPage() {
 
   const handleDeleteCampaign = () => {
     if (!selectedCampaign?.id) {
-      setFeedback({ type: 'error', message: '无法识别当前选中的活动。' });
+      setFeedback({ type: "error", message: "无法识别当前选中的活动。" });
       setIsDeleteModalOpen(false);
       return;
     }
@@ -197,7 +227,10 @@ export default function AdminMarketingPage() {
       <div className="space-y-6">
         <MarketingSummaryCards metricSnapshot={metricSnapshot} />
 
-        <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback(EMPTY_FEEDBACK)} />
+        <AdminFeedbackBanner
+          feedback={feedback}
+          onDismiss={() => setFeedback(EMPTY_FEEDBACK)}
+        />
 
         <MarketingControlsSection
           tabs={MARKETING_TABS}
@@ -210,8 +243,11 @@ export default function AdminMarketingPage() {
           onOpenCreate={openCreateModal}
         />
 
-        <AdminPageSection title={tabContentMeta.title} description={tabContentMeta.description}>
-          {viewMode === 'campaigns' ? (
+        <AdminPageSection
+          title={tabContentMeta.title}
+          description={tabContentMeta.description}
+        >
+          {viewMode === "campaigns" ? (
             <MarketingCampaignsSection
               campaignsQuery={campaignsQuery}
               campaigns={campaigns}
@@ -224,15 +260,18 @@ export default function AdminMarketingPage() {
             />
           ) : null}
 
-          {viewMode === 'stats' ? (
+          {viewMode === "stats" ? (
             <MarketingStatsSection statsQuery={statsQuery} stats={stats} />
           ) : null}
 
-          {viewMode === 'by-segment' ? (
-            <MarketingSegmentsSection segmentsQuery={segmentsQuery} segments={segments} />
+          {viewMode === "by-segment" ? (
+            <MarketingSegmentsSection
+              segmentsQuery={segmentsQuery}
+              segments={segments}
+            />
           ) : null}
 
-          {viewMode === 'by-type' ? (
+          {viewMode === "by-type" ? (
             <MarketingTypesSection typesQuery={typesQuery} types={types} />
           ) : null}
         </AdminPageSection>
@@ -260,8 +299,10 @@ export default function AdminMarketingPage() {
       <ConfirmDialog
         isOpen={isDeleteModalOpen}
         title="删除活动"
-        message={`确定删除“${selectedCampaign?.name || '当前活动'}”吗？删除后无法恢复。`}
-        confirmText={deleteCampaignMutation.isPending ? '正在删除...' : '删除活动'}
+        message={`确定删除“${selectedCampaign?.name || "当前活动"}”吗？删除后无法恢复。`}
+        confirmText={
+          deleteCampaignMutation.isPending ? "正在删除..." : "删除活动"
+        }
         cancelText="取消"
         isDangerous={true}
         isLoading={deleteCampaignMutation.isPending}

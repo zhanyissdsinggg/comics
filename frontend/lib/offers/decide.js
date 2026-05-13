@@ -17,12 +17,10 @@ function pickUnlockOffer(bucket, isSubscriber) {
 
 function pickTopupOffer(bucket, shortfallPts) {
   const sorted = [...POINTS_PACKS].sort(
-    (a, b) => a.paidPts + a.bonusPts - (b.paidPts + b.bonusPts)
+    (a, b) => a.paidPts + a.bonusPts - (b.paidPts + b.bonusPts),
   );
   const target = shortfallPts > 0 ? shortfallPts : 1;
-  const match = sorted.find(
-    (pkg) => pkg.paidPts + pkg.bonusPts >= target
-  );
+  const match = sorted.find((pkg) => pkg.paidPts + pkg.bonusPts >= target);
   if (match) {
     return match.id;
   }
@@ -46,7 +44,7 @@ export function decideOffers(context) {
 
   const recommendedUnlockOfferId = pickUnlockOffer(
     unlockBucket,
-    Boolean(user.isSubscriber)
+    Boolean(user.isSubscriber),
   );
   const recommendedTopupPackageId = pickTopupOffer(topupBucket, shortfall);
   const showSubscribeUpsell =

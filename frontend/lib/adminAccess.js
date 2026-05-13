@@ -1,5 +1,7 @@
 export function normalizeAdminRoutePath(value) {
-  const path = String(value || "").split("?")[0].trim();
+  const path = String(value || "")
+    .split("?")[0]
+    .trim();
   return path || "/admin";
 }
 
@@ -18,12 +20,19 @@ export function canAccessAdminRoute(pathname, routePatterns = []) {
     if (normalizedPattern === "/admin") {
       return normalizedPath === "/admin";
     }
-    return normalizedPath === normalizedPattern || normalizedPath.startsWith(`${normalizedPattern}/`);
+    return (
+      normalizedPath === normalizedPattern ||
+      normalizedPath.startsWith(`${normalizedPattern}/`)
+    );
   });
 }
 
 export function getAdminRoleLabel(adminRole) {
-  switch (String(adminRole || "").trim().toLowerCase()) {
+  switch (
+    String(adminRole || "")
+      .trim()
+      .toLowerCase()
+  ) {
     case "content_admin":
       return "内容运营";
     case "user_admin":
@@ -61,19 +70,25 @@ export function buildAdminSession(session) {
 
   return {
     adminId: String(session.adminId || "").trim(),
-    adminRole: String(session.adminRole || "").trim().toLowerCase() || "super_admin",
+    adminRole:
+      String(session.adminRole || "")
+        .trim()
+        .toLowerCase() || "super_admin",
     permissions,
     routePatterns,
     homePath: normalizeAdminRoutePath(session.homePath || "/admin"),
     adminName: String(session.adminName || "").trim() || null,
     adminEmail: String(session.adminEmail || "").trim() || null,
-    memberStatus: String(session.memberStatus || "").trim().toLowerCase() || null,
+    memberStatus:
+      String(session.memberStatus || "")
+        .trim()
+        .toLowerCase() || null,
     authMode: String(session.authMode || "").trim() || null,
     keySlot:
-      session.keySlot !== null
-      && session.keySlot !== undefined
-      && session.keySlot !== ""
-      && Number.isFinite(Number(session.keySlot))
+      session.keySlot !== null &&
+      session.keySlot !== undefined &&
+      session.keySlot !== "" &&
+      Number.isFinite(Number(session.keySlot))
         ? Number(session.keySlot)
         : null,
     totpEnabled: Boolean(session.totpEnabled),

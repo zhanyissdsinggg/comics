@@ -4,17 +4,19 @@ const LOOP_GUARD_HEADER = "x-gush-api-proxy-hop";
 
 function isSafeRetryMethod(method) {
   const normalized = String(method || "GET").toUpperCase();
-  return normalized === "GET" || normalized === "HEAD" || normalized === "OPTIONS";
+  return (
+    normalized === "GET" || normalized === "HEAD" || normalized === "OPTIONS"
+  );
 }
 
 function normalizeBaseUrl(value) {
-  return String(value || "").trim().replace(/\/$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/\/$/, "");
 }
 
 function isSameOrigin(baseUrl, requestUrl) {
-  const envBase =
-    baseUrl ||
-    "";
+  const envBase = baseUrl || "";
 
   const normalizedBase = normalizeBaseUrl(envBase);
   if (!normalizedBase) {
@@ -50,7 +52,11 @@ function getBackendCandidates(requestUrl) {
   return candidates;
 }
 
-function shouldRetryWithFallback(requestMethod, requestPathname, responseStatus) {
+function shouldRetryWithFallback(
+  requestMethod,
+  requestPathname,
+  responseStatus,
+) {
   if (!isSafeRetryMethod(requestMethod)) {
     return false;
   }
@@ -73,7 +79,10 @@ async function forwardRequestToBackend(
 ) {
   const url = new URL(request.url);
   const targetPathname = overridePathname || url.pathname;
-  const targetUrl = new URL(`${targetPathname}${url.search}`, backendBase).toString();
+  const targetUrl = new URL(
+    `${targetPathname}${url.search}`,
+    backendBase,
+  ).toString();
   const method = request.method || "GET";
   const headers = stripHopByHopHeaders(request.headers);
   headers.set(LOOP_GUARD_HEADER, "1");
@@ -116,7 +125,9 @@ function parsePositiveInt(value, fallback) {
 }
 
 function normalizeAdultFilter(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (normalized === "1" || normalized === "true") {
     return "adult";
   }
@@ -135,7 +146,9 @@ function normalizeSeriesSearchPayload(payload, requestUrl) {
       ? payload.data
       : [];
 
-  const search = String(params.get("search") || "").trim().toLowerCase();
+  const search = String(params.get("search") || "")
+    .trim()
+    .toLowerCase();
   const type = String(params.get("type") || "").trim();
   const status = String(params.get("status") || "").trim();
   const adultFilter = normalizeAdultFilter(params.get("adult"));
@@ -169,8 +182,16 @@ function normalizeSeriesSearchPayload(payload, requestUrl) {
   });
 
   const [sortFieldRaw, sortOrderRaw] = sortBy.split("_");
-  const allowedSortFields = new Set(["createdAt", "updatedAt", "title", "rating", "ratingCount"]);
-  const sortField = allowedSortFields.has(sortFieldRaw) ? sortFieldRaw : "createdAt";
+  const allowedSortFields = new Set([
+    "createdAt",
+    "updatedAt",
+    "title",
+    "rating",
+    "ratingCount",
+  ]);
+  const sortField = allowedSortFields.has(sortFieldRaw)
+    ? sortFieldRaw
+    : "createdAt";
   const sortOrder = sortOrderRaw === "asc" ? "asc" : "desc";
 
   filtered.sort((a, b) => {
@@ -256,18 +277,18 @@ async function tryCompatFallback({
 
 export async function handler(request) {
   if (request.headers.get(LOOP_GUARD_HEADER) === "1") {
-    return new Response(
-      JSON.stringify({ error: "PROXY_LOOP_DETECTED" }),
-      { status: 508, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "PROXY_LOOP_DETECTED" }), {
+      status: 508,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const backendCandidates = getBackendCandidates(request.url);
   if (!backendCandidates.length) {
-    return new Response(
-      JSON.stringify({ error: "INVALID_BACKEND_BASE_URL" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "INVALID_BACKEND_BASE_URL" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const requestPathname = new URL(request.url).pathname;
@@ -282,22 +303,33 @@ export async function handler(request) {
   for (let i = 0; i < backendCandidates.length; i += 1) {
     const base = backendCandidates[i];
     try {
-      const next = await forwardRequestToBackend(request, base, requestBodyBuffer);
+      const next = await forwardRequestToBackend(
+        request,
+        base,
+        requestBodyBuffer,
+      );
       response = next;
       responseBase = base;
-      if (!shouldRetryWithFallback(requestMethod, requestPathname, next.status) || i === backendCandidates.length - 1) {
+      if (
+        !shouldRetryWithFallback(requestMethod, requestPathname, next.status) ||
+        i === backendCandidates.length - 1
+      ) {
         break;
       }
     } catch (error) {
       lastError = error;
-      if (!isSafeRetryMethod(requestMethod) || i === backendCandidates.length - 1) {
+      if (
+        !isSafeRetryMethod(requestMethod) ||
+        i === backendCandidates.length - 1
+      ) {
         break;
       }
     }
   }
 
   if (!response) {
-    const message = lastError instanceof Error ? lastError.message : "UPSTREAM_UNAVAILABLE";
+    const message =
+      lastError instanceof Error ? lastError.message : "UPSTREAM_UNAVAILABLE";
     return new Response(
       JSON.stringify({ error: "UPSTREAM_UNAVAILABLE", message }),
       { status: 502, headers: { "Content-Type": "application/json" } },

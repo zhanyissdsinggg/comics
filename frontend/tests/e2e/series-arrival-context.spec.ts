@@ -59,18 +59,28 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Series arrival context", () => {
-  test("series page should explain search-driven arrival context", async ({ page }) => {
+  test("series page should explain search-driven arrival context", async ({
+    page,
+  }) => {
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -120,25 +130,42 @@ test.describe("Series arrival context", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Rocket Choir is trending in search right now." }),
-    ).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
-    await expect(page.getByRole("img", { name: "Comic cover image for Rocket Choir" })).toBeVisible({
-      timeout: SERIES_UI_TIMEOUT_MS,
-    });
-    const arrivalPanel = page.locator("div").filter({
-      has: page.getByRole("heading", {
+      page.getByRole("heading", {
         name: "Rocket Choir is trending in search right now.",
       }),
-    }).first();
-
-    await expect(arrivalPanel.getByText("Search").first()).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
-    await expect(arrivalPanel.getByText("Trending pick").first()).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
-    await expect(arrivalPanel.getByRole("button", { name: "Back to search" })).toBeVisible({
+    ).toBeVisible({ timeout: SERIES_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("img", { name: "Comic cover image for Rocket Choir" }),
+    ).toBeVisible({
       timeout: SERIES_UI_TIMEOUT_MS,
     });
-    await tabToAndExpectVisibleFocus(page, arrivalPanel.getByRole("button", { name: "Back to search" }), {
-      label: "Series arrival Back to search button",
+    const arrivalPanel = page
+      .locator("div")
+      .filter({
+        has: page.getByRole("heading", {
+          name: "Rocket Choir is trending in search right now.",
+        }),
+      })
+      .first();
+
+    await expect(arrivalPanel.getByText("Search").first()).toBeVisible({
+      timeout: SERIES_UI_TIMEOUT_MS,
     });
+    await expect(arrivalPanel.getByText("Trending pick").first()).toBeVisible({
+      timeout: SERIES_UI_TIMEOUT_MS,
+    });
+    await expect(
+      arrivalPanel.getByRole("button", { name: "Back to search" }),
+    ).toBeVisible({
+      timeout: SERIES_UI_TIMEOUT_MS,
+    });
+    await tabToAndExpectVisibleFocus(
+      page,
+      arrivalPanel.getByRole("button", { name: "Back to search" }),
+      {
+        label: "Series arrival Back to search button",
+      },
+    );
 
     await page.waitForTimeout(300);
     await expectNoBasicA11yAuditIssues(page, "/series/series-slot-breakout");

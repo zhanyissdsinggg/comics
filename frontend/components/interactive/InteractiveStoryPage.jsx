@@ -13,7 +13,9 @@ import {
 } from "../common/StorefrontPagePrimitives";
 
 function normalizeText(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function openAuthModal() {
@@ -48,10 +50,13 @@ export default function InteractiveStoryPage({ seriesId }) {
   const { contentMode } = useAdultGateStore();
 
   const loadProgress = useCallback(async (storyId) => {
-    const response = await apiGet(`/api/interactive-stories/${encodeURIComponent(storyId)}/progress`, {
-      bust: true,
-      cacheMs: 0,
-    });
+    const response = await apiGet(
+      `/api/interactive-stories/${encodeURIComponent(storyId)}/progress`,
+      {
+        bust: true,
+        cacheMs: 0,
+      },
+    );
 
     if (response.ok && response.data?.progress) {
       setProgress(response.data.progress);
@@ -157,7 +162,9 @@ export default function InteractiveStoryPage({ seriesId }) {
       }
 
       if (response.status === 400) {
-        setDegradedNotice("That choice isn't available. Reloaded your latest node.");
+        setDegradedNotice(
+          "That choice isn't available. Reloaded your latest node.",
+        );
         await loadProgress(story.id);
         return;
       }
@@ -167,7 +174,10 @@ export default function InteractiveStoryPage({ seriesId }) {
     [contentMode, loadProgress, progress?.node?.id, seriesId, story?.id],
   );
 
-  const storyStateRows = useMemo(() => toStateRows(progress?.state), [progress?.state]);
+  const storyStateRows = useMemo(
+    () => toStateRows(progress?.state),
+    [progress?.state],
+  );
   const node = progress?.node || null;
   const storyTitle = normalizeText(story?.title || "Interactive");
   const storyDescription = normalizeText(story?.description);
@@ -220,7 +230,9 @@ export default function InteractiveStoryPage({ seriesId }) {
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 text-sm font-semibold text-white/80">{storyDescription}</p>
+                <p className="mt-2 text-sm font-semibold text-white/80">
+                  {storyDescription}
+                </p>
               ) : null}
             </div>
             <Link
@@ -233,7 +245,12 @@ export default function InteractiveStoryPage({ seriesId }) {
         </SurfacePanel>
 
         {error ? (
-          <SurfacePanel tone="muted" accent="pink" appearance="dark" className="text-white">
+          <SurfacePanel
+            tone="muted"
+            accent="pink"
+            appearance="dark"
+            className="text-white"
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span>{error}</span>
               {authRequired ? (
@@ -290,7 +307,9 @@ export default function InteractiveStoryPage({ seriesId }) {
                   );
                 })}
                 {node.choices?.length === 0 ? (
-                  <p className="text-sm font-semibold text-white/70">No choices right now.</p>
+                  <p className="text-sm font-semibold text-white/70">
+                    No choices right now.
+                  </p>
                 ) : null}
               </div>
             </SurfacePanel>

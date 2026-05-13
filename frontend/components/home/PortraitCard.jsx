@@ -15,10 +15,10 @@ import {
 function isModifiedEvent(event) {
   return Boolean(
     event.metaKey ||
-      event.altKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.button !== 0,
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.button !== 0,
   );
 }
 
@@ -76,7 +76,11 @@ function PortraitCard({
     .split(" · ")
     .filter(
       (genre) =>
-        !normalizedMetaTokens.has(String(genre || "").trim().toLowerCase()),
+        !normalizedMetaTokens.has(
+          String(genre || "")
+            .trim()
+            .toLowerCase(),
+        ),
     )
     .join(" · ");
 
@@ -127,7 +131,12 @@ function PortraitCard({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/8 to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,79,154,0.14),transparent_26%)]" />
-          <div className={cn("absolute inset-[1px] rounded-[21px]", "border border-white/18")} />
+          <div
+            className={cn(
+              "absolute inset-[1px] rounded-[21px]",
+              "border border-white/18",
+            )}
+          />
 
           {rankLabel ? (
             <div className="absolute left-3 top-3 inline-flex rounded-full border border-white/14 bg-[rgba(10,9,16,0.78)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_24px_rgba(0,0,0,0.24)] backdrop-blur-xl">
@@ -156,7 +165,9 @@ function PortraitCard({
           <p
             className={cn(
               "line-clamp-2 font-display font-semibold tracking-[-0.04em] transition-colors",
-              isCompact ? "text-[1.08rem] leading-5" : "text-[1.16rem] leading-6",
+              isCompact
+                ? "text-[1.08rem] leading-5"
+                : "text-[1.16rem] leading-6",
               "text-white group-hover:text-white",
             )}
           >
@@ -193,7 +204,9 @@ function PortraitCard({
                 key={pill.key}
                 className={cn(
                   "inline-flex items-center whitespace-nowrap rounded-full border font-semibold uppercase shadow-[0_8px_20px_rgba(8,6,20,0.18)]",
-                  isCompact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1 text-[11px]",
+                  isCompact
+                    ? "px-2.5 py-1 text-[10px]"
+                    : "px-3 py-1 text-[11px]",
                   pill.tone === "danger"
                     ? "border-[rgba(255,152,189,0.24)] bg-[rgba(255,102,156,0.18)] text-[#ffd8e7]"
                     : "border-[rgba(255,239,170,0.28)] bg-[rgba(255,231,128,0.16)] text-[#fff4bf]",

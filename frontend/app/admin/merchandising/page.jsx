@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import AdminHomeMerchandisingPage from '@/components/admin/AdminHomeMerchandisingPage';
+import AdminHomeMerchandisingPage from "@/components/admin/AdminHomeMerchandisingPage";
 
 export default function AdminMerchandisingRoute() {
   return <AdminHomeMerchandisingPage />;

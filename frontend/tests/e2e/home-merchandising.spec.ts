@@ -208,17 +208,23 @@ test.describe("Homepage merchandising sync", () => {
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("link", { name: /Continue Reading|Continue Chapter|Start reading/i }),
+      page.getByRole("link", {
+        name: /Continue Reading|Continue Chapter|Start reading/i,
+      }),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      homepageMain.getByRole("button", { name: "Heartbreak", exact: true }).first(),
+      homepageMain
+        .getByRole("button", { name: "Heartbreak", exact: true })
+        .first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
     await expect(
-      homepageMain.getByRole("button", { name: "Magic school", exact: true }).first(),
+      homepageMain
+        .getByRole("button", { name: "Magic school", exact: true })
+        .first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });

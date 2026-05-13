@@ -56,12 +56,16 @@ export function getStatusTone(status) {
 }
 
 export function getMessagePreview(message, limit = 140) {
-  const normalized = String(message || "").replace(/\s+/g, " ").trim();
+  const normalized = String(message || "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (!normalized) {
     return "未附带消息内容。";
   }
 
-  return normalized.length > limit ? `${normalized.slice(0, limit)}...` : normalized;
+  return normalized.length > limit
+    ? `${normalized.slice(0, limit)}...`
+    : normalized;
 }
 
 export function buildSupportMetricCards({ total, openCount, pendingReplies }) {

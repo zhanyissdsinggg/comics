@@ -114,7 +114,9 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           {showLayoutControls ? (
             <div className="space-y-3 rounded-[22px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <div>
-                <div className="text-sm font-semibold text-white">Page view</div>
+                <div className="text-sm font-semibold text-white">
+                  Page view
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <ModeButton
@@ -146,9 +148,13 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
           <div className="space-y-3 rounded-[22px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-sm font-semibold text-white">Brightness</div>
+                <div className="text-sm font-semibold text-white">
+                  Brightness
+                </div>
               </div>
-                <span className="text-sm font-semibold text-white/90">{safeBrightness}%</span>
+              <span className="text-sm font-semibold text-white/90">
+                {safeBrightness}%
+              </span>
             </div>
             <input
               type="range"
@@ -156,7 +162,9 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
               max="150"
               step="5"
               value={safeBrightness}
-              onChange={(event) => onBrightnessChange?.(Number(event.target.value))}
+              onChange={(event) =>
+                onBrightnessChange?.(Number(event.target.value))
+              }
               className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
               style={{
                 background: `linear-gradient(to right, rgb(0 229 255) 0%, rgb(0 229 255) ${
@@ -179,7 +187,9 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 <div>
                   <div className="text-sm font-semibold text-white">Speed</div>
                 </div>
-                <span className="text-sm font-semibold text-white/90">{safeAutoScrollSpeed}x</span>
+                <span className="text-sm font-semibold text-white/90">
+                  {safeAutoScrollSpeed}x
+                </span>
               </div>
               <input
                 type="range"
@@ -187,7 +197,9 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
                 max="5"
                 step="1"
                 value={safeAutoScrollSpeed}
-                onChange={(event) => onAutoScrollSpeedChange?.(Number(event.target.value))}
+                onChange={(event) =>
+                  onAutoScrollSpeedChange?.(Number(event.target.value))
+                }
                 className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-800"
                 style={{
                   background: `linear-gradient(to right, rgb(255 0 122) 0%, rgb(255 0 122) ${
@@ -213,7 +225,11 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
               if (nightMode) {
                 onToggleNight?.();
               }
-              if (showLayoutControls && layoutMode === "horizontal" && !disableLayoutToggle) {
+              if (
+                showLayoutControls &&
+                layoutMode === "horizontal" &&
+                !disableLayoutToggle
+              ) {
                 onToggleLayout?.();
               }
               if (safeBrightness !== 100) {

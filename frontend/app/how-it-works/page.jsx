@@ -175,10 +175,7 @@ export default function HowItWorksPage() {
               <Link href="/orders" className={storefrontPrimaryButtonClass}>
                 Orders
               </Link>
-              <Link
-                href="/support"
-                className={storefrontSecondaryButtonClass}
-              >
+              <Link href="/support" className={storefrontSecondaryButtonClass}>
                 Support
               </Link>
             </div>

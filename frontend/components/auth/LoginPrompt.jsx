@@ -84,18 +84,18 @@ const LoginPrompt = memo(function LoginPrompt({
         }`}
       >
         <div className="border-b-2 border-white/10 bg-black/80 px-6 py-5">
-        <div className="flex justify-center pb-2 sm:hidden">
-          <div className="h-1.5 w-12 rounded-full bg-white/15" />
-        </div>
+          <div className="flex justify-center pb-2 sm:hidden">
+            <div className="h-1.5 w-12 rounded-full bg-white/15" />
+          </div>
 
-        <button
-          type="button"
-          onClick={handleClose}
-          className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black/70 p-2 text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:text-white active:translate-y-px"
-          aria-label="Close sign-in prompt"
-        >
-          <X size={20} />
-        </button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black/70 p-2 text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:text-white active:translate-y-px"
+            aria-label="Close sign-in prompt"
+          >
+            <X size={20} />
+          </button>
 
           <div className="relative text-center">
             {eyebrow ? (

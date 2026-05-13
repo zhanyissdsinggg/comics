@@ -74,7 +74,8 @@ export default function AgeGateModal({
             id="adult-gate-description"
             className="mt-4 text-sm leading-7 text-white/72 sm:text-[15px]"
           >
-            Mature titles are only available to readers who meet the legal age requirement for their region.
+            Mature titles are only available to readers who meet the legal age
+            requirement for their region.
           </p>
         </div>
 
@@ -87,7 +88,8 @@ export default function AgeGateModal({
               {regionLabel} requires {currentAge}+ access for mature titles.
             </p>
             <p className="mt-2 text-sm leading-6 text-white/64">
-              This MVP stores verification status on the device. No document images or raw sensitive data are saved.
+              This MVP stores verification status on the device. No document
+              images or raw sensitive data are saved.
             </p>
           </div>
 

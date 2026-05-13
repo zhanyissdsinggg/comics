@@ -76,9 +76,7 @@ export default function ReaderTopBar({
     "border-white/6 bg-[rgba(255,255,255,0.02)] text-white/34 shadow-none";
 
   return (
-    <header
-      className="sticky top-0 z-40 border-b border-white/8 bg-[rgba(11,10,16,0.82)] text-neutral-100 backdrop-blur-2xl"
-    >
+    <header className="sticky top-0 z-40 border-b border-white/8 bg-[rgba(11,10,16,0.82)] text-neutral-100 backdrop-blur-2xl">
       {typeof progress === "number" ? (
         <div className="h-1 w-full bg-[rgba(255,255,255,0.04)]">
           <div
@@ -89,11 +87,7 @@ export default function ReaderTopBar({
       ) : null}
 
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-3 py-3 sm:flex-nowrap sm:justify-between sm:px-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className={topBarButtonClass}
-        >
+        <button type="button" onClick={onBack} className={topBarButtonClass}>
           Back
         </button>
 

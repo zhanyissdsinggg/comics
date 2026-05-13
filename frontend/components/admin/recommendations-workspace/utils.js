@@ -7,7 +7,11 @@ import {
   getStorefrontSlotPreset,
 } from "@/lib/storefrontSlots";
 
-export { STOREFRONT_SLOT_PRESETS, getStorefrontSlotDisplayMeta, getStorefrontSlotPreset };
+export {
+  STOREFRONT_SLOT_PRESETS,
+  getStorefrontSlotDisplayMeta,
+  getStorefrontSlotPreset,
+};
 
 export const VIEW_TABS = [
   { value: "slots", label: "推荐位" },
@@ -43,10 +47,12 @@ export const SERIES_TYPE_OPTIONS = [
 
 export const ANALYTICS_SLOT_FILTER_OPTIONS = [
   { value: "all", label: "全部推荐位" },
-  ...STOREFRONT_SLOT_PRESETS.filter((item) => item.token !== "custom").map((item) => ({
-    value: item.token,
-    label: item.label,
-  })),
+  ...STOREFRONT_SLOT_PRESETS.filter((item) => item.token !== "custom").map(
+    (item) => ({
+      value: item.token,
+      label: item.label,
+    }),
+  ),
 ];
 
 export const EMPTY_FEEDBACK = { type: "", message: "" };
@@ -112,11 +118,17 @@ export function formatRankingTypeLabel(value) {
 }
 
 export function formatTimeRangeLabel(value) {
-  return TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label || "未知范围";
+  return (
+    TIME_RANGE_OPTIONS.find((option) => option.value === value)?.label ||
+    "未知范围"
+  );
 }
 
 export function formatSeriesTypeLabel(value) {
-  return SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label || "未知类型";
+  return (
+    SERIES_TYPE_OPTIONS.find((option) => option.value === value)?.label ||
+    "未知类型"
+  );
 }
 
 export function formatDateTime(value) {
@@ -180,13 +192,21 @@ export function buildRecommendationStatCards({
     },
     {
       label: "榜单规则",
-      value: rankingsLoaded ? formatNumber(rankingsTotal || 0) : "打开标签后加载",
-      detail: rankingsLoaded ? "当前已配置的榜单规则数量。" : "只有打开“榜单规则”标签后才会加载。",
+      value: rankingsLoaded
+        ? formatNumber(rankingsTotal || 0)
+        : "打开标签后加载",
+      detail: rankingsLoaded
+        ? "当前已配置的榜单规则数量。"
+        : "只有打开“榜单规则”标签后才会加载。",
     },
     {
       label: "分析记录",
-      value: analyticsLoaded ? formatNumber(analyticsTotal || 0) : "打开标签后加载",
-      detail: analyticsLoaded ? "当前已加载的推荐位表现记录数。" : "只有打开“表现分析”标签后才会加载。",
+      value: analyticsLoaded
+        ? formatNumber(analyticsTotal || 0)
+        : "打开标签后加载",
+      detail: analyticsLoaded
+        ? "当前已加载的推荐位表现记录数。"
+        : "只有打开“表现分析”标签后才会加载。",
     },
   ];
 }

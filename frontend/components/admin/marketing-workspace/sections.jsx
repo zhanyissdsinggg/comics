@@ -33,10 +33,27 @@ import {
 export function MarketingSummaryCards({ metricSnapshot }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <AdminMetricCard label="当前活动" value={formatNumber(metricSnapshot.totalCampaigns)} detail="当前工作区内活动总数。" tone="accent" />
-      <AdminMetricCard label="进行中" value={formatNumber(metricSnapshot.activeCampaigns)} detail="仍在运行或排期内的活动。" />
-      <AdminMetricCard label="当前预算" value={formatCurrency(metricSnapshot.totalBudget)} detail="所选时间范围内的计划预算。" />
-      <AdminMetricCard label="平均投入产出比" value={formatPercent(metricSnapshot.avgRoi)} detail="快速判断当前活动效果。" />
+      <AdminMetricCard
+        label="当前活动"
+        value={formatNumber(metricSnapshot.totalCampaigns)}
+        detail="当前工作区内活动总数。"
+        tone="accent"
+      />
+      <AdminMetricCard
+        label="进行中"
+        value={formatNumber(metricSnapshot.activeCampaigns)}
+        detail="仍在运行或排期内的活动。"
+      />
+      <AdminMetricCard
+        label="当前预算"
+        value={formatCurrency(metricSnapshot.totalBudget)}
+        detail="所选时间范围内的计划预算。"
+      />
+      <AdminMetricCard
+        label="平均投入产出比"
+        value={formatPercent(metricSnapshot.avgRoi)}
+        detail="快速判断当前活动效果。"
+      />
     </div>
   );
 }
@@ -71,23 +88,39 @@ export function MarketingControlsSection({
     >
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_340px] xl:items-start">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">视图切换</p>
-          <p className="mt-2 text-sm text-slate-600">按运营目标切换当前视图，避免把活动、表现和人群数据混在一起看。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            视图切换
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按运营目标切换当前视图，避免把活动、表现和人群数据混在一起看。
+          </p>
           <div className="mt-4 space-y-3">
-            <AdminTabs items={tabs} value={viewMode} onChange={onViewModeChange} />
-            <p className="text-sm leading-6 text-slate-500">{tabContentMeta.description}</p>
+            <AdminTabs
+              items={tabs}
+              value={viewMode}
+              onChange={onViewModeChange}
+            />
+            <p className="text-sm leading-6 text-slate-500">
+              {tabContentMeta.description}
+            </p>
           </div>
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">时间范围</p>
-          <p className="mt-2 text-sm text-slate-600">统一切换统计窗口，方便对比最近一段时间的预算和表现。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            时间范围
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            统一切换统计窗口，方便对比最近一段时间的预算和表现。
+          </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <AdminFormField label="开始日期">
               <input
                 type="date"
                 value={dateRange.startDate}
-                onChange={(event) => onRangeValueChange("startDate", event.target.value)}
+                onChange={(event) =>
+                  onRangeValueChange("startDate", event.target.value)
+                }
                 max={dateRange.endDate || undefined}
                 className={adminInputClassName}
               />
@@ -96,7 +129,9 @@ export function MarketingControlsSection({
               <input
                 type="date"
                 value={dateRange.endDate}
-                onChange={(event) => onRangeValueChange("endDate", event.target.value)}
+                onChange={(event) =>
+                  onRangeValueChange("endDate", event.target.value)
+                }
                 min={dateRange.startDate || undefined}
                 className={adminInputClassName}
               />
@@ -148,11 +183,17 @@ export function MarketingCampaignsSection({
                   <td className="px-4 py-4">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-slate-950">{campaign.name || "未命名活动"}</p>
-                        <AdminBadge tone="default">{formatCampaignTypeLabel(campaign.type)}</AdminBadge>
+                        <p className="font-semibold text-slate-950">
+                          {campaign.name || "未命名活动"}
+                        </p>
+                        <AdminBadge tone="default">
+                          {formatCampaignTypeLabel(campaign.type)}
+                        </AdminBadge>
                       </div>
                       {campaign.description ? (
-                        <p className="max-w-md text-sm leading-6 text-slate-600">{campaign.description}</p>
+                        <p className="max-w-md text-sm leading-6 text-slate-600">
+                          {campaign.description}
+                        </p>
                       ) : null}
                     </div>
                   </td>
@@ -164,21 +205,26 @@ export function MarketingCampaignsSection({
                   <td className="px-4 py-4 text-slate-700">
                     <div className="space-y-1">
                       <p>{formatSegmentLabel(campaign.targetSegment)}</p>
-                      <p className="text-xs text-slate-500">创建于 {formatDate(campaign.createdAt, "未知")}</p>
+                      <p className="text-xs text-slate-500">
+                        创建于 {formatDate(campaign.createdAt, "未知")}
+                      </p>
                     </div>
                   </td>
                   <td className="px-4 py-4 text-slate-700">{schedule}</td>
                   <td className="px-4 py-4 text-slate-700">
                     <div className="space-y-1">
                       <p>预算 {formatCurrency(campaign.budget)}</p>
-                      <p className="text-xs text-slate-500">已花费 {formatCurrency(campaign.spent)}</p>
+                      <p className="text-xs text-slate-500">
+                        已花费 {formatCurrency(campaign.spent)}
+                      </p>
                     </div>
                   </td>
                   <td className="px-4 py-4 text-slate-700">
                     <div className="space-y-1">
                       <p>收入 {formatCurrency(metric.revenue)}</p>
                       <p className="text-xs text-slate-500">
-                        {formatNumber(metric.converted)} 次转化，投入产出比 {formatPercent(metric.roi)}
+                        {formatNumber(metric.converted)} 次转化，投入产出比{" "}
+                        {formatPercent(metric.roi)}
                       </p>
                     </div>
                   </td>
@@ -190,7 +236,9 @@ export function MarketingCampaignsSection({
                       onClick={() => onOpenDelete(campaign)}
                       disabled={deletePending}
                     >
-                      {deletePending && selectedCampaignId === campaign.id ? "正在删除..." : "删除"}
+                      {deletePending && selectedCampaignId === campaign.id
+                        ? "正在删除..."
+                        : "删除"}
                     </Button>
                   </td>
                 </AdminTableRow>
@@ -212,12 +260,37 @@ export function MarketingStatsSection({ statsQuery, stats }) {
       wrap={false}
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <AdminMetricCard label="活动总数" value={formatNumber(stats?.totalCampaigns)} detail="当前时间窗口内统计到的活动数量。" tone="accent" />
-        <AdminMetricCard label="进行中活动" value={formatNumber(stats?.activeCampaigns)} detail="当前时间窗口内仍在进行的活动。" />
-        <AdminMetricCard label="总预算" value={formatCurrency(stats?.totalBudget)} detail="计划投入预算。" />
-        <AdminMetricCard label="已花费" value={formatCurrency(stats?.totalSpent)} detail="目前已实际发生的花费。" />
-        <AdminMetricCard label="归因收入" value={formatCurrency(stats?.totalRevenue)} detail="当前已归因到活动的收入。" />
-        <AdminMetricCard label="平均投入产出比" value={formatPercent(stats?.avgRoi)} detail={`累计 ${formatNumber(stats?.totalConverted)} 次转化`} />
+        <AdminMetricCard
+          label="活动总数"
+          value={formatNumber(stats?.totalCampaigns)}
+          detail="当前时间窗口内统计到的活动数量。"
+          tone="accent"
+        />
+        <AdminMetricCard
+          label="进行中活动"
+          value={formatNumber(stats?.activeCampaigns)}
+          detail="当前时间窗口内仍在进行的活动。"
+        />
+        <AdminMetricCard
+          label="总预算"
+          value={formatCurrency(stats?.totalBudget)}
+          detail="计划投入预算。"
+        />
+        <AdminMetricCard
+          label="已花费"
+          value={formatCurrency(stats?.totalSpent)}
+          detail="目前已实际发生的花费。"
+        />
+        <AdminMetricCard
+          label="归因收入"
+          value={formatCurrency(stats?.totalRevenue)}
+          detail="当前已归因到活动的收入。"
+        />
+        <AdminMetricCard
+          label="平均投入产出比"
+          value={formatPercent(stats?.avgRoi)}
+          detail={`累计 ${formatNumber(stats?.totalConverted)} 次转化`}
+        />
       </div>
     </AdminDataState>
   );
@@ -239,17 +312,40 @@ export function MarketingSegmentsSection({ segmentsQuery, segments }) {
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">人群</p>
-                <h3 className="mt-2 text-xl font-semibold text-slate-950">{formatSegmentLabel(segment.segment)}</h3>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  人群
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-slate-950">
+                  {formatSegmentLabel(segment.segment)}
+                </h3>
               </div>
-              <AdminBadge tone="default">{formatNumber(segment.count)} 个活动</AdminBadge>
+              <AdminBadge tone="default">
+                {formatNumber(segment.count)} 个活动
+              </AdminBadge>
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <AdminMetricCard label="预算" value={formatCurrency(segment.budget)} detail="计划投入。" />
-              <AdminMetricCard label="已花费" value={formatCurrency(segment.spent)} detail="实际花费。" />
-              <AdminMetricCard label="收入" value={formatCurrency(segment.revenue)} detail="已归因收入。" tone="accent" />
-              <AdminMetricCard label="转化" value={formatNumber(segment.converted)} detail="完成结果数。" />
+              <AdminMetricCard
+                label="预算"
+                value={formatCurrency(segment.budget)}
+                detail="计划投入。"
+              />
+              <AdminMetricCard
+                label="已花费"
+                value={formatCurrency(segment.spent)}
+                detail="实际花费。"
+              />
+              <AdminMetricCard
+                label="收入"
+                value={formatCurrency(segment.revenue)}
+                detail="已归因收入。"
+                tone="accent"
+              />
+              <AdminMetricCard
+                label="转化"
+                value={formatNumber(segment.converted)}
+                detail="完成结果数。"
+              />
             </div>
           </div>
         ))}
@@ -281,12 +377,24 @@ export function MarketingTypesSection({ typesQuery, types }) {
           <tbody>
             {types.map((typeRow) => (
               <AdminTableRow key={typeRow.type || "unknown"}>
-                <td className="px-4 py-4 font-medium text-slate-950">{formatCampaignTypeLabel(typeRow.type)}</td>
-                <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.count)}</td>
-                <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.budget)}</td>
-                <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.spent)}</td>
-                <td className="px-4 py-4 text-slate-700">{formatCurrency(typeRow.revenue)}</td>
-                <td className="px-4 py-4 text-slate-700">{formatNumber(typeRow.converted)}</td>
+                <td className="px-4 py-4 font-medium text-slate-950">
+                  {formatCampaignTypeLabel(typeRow.type)}
+                </td>
+                <td className="px-4 py-4 text-slate-700">
+                  {formatNumber(typeRow.count)}
+                </td>
+                <td className="px-4 py-4 text-slate-700">
+                  {formatCurrency(typeRow.budget)}
+                </td>
+                <td className="px-4 py-4 text-slate-700">
+                  {formatCurrency(typeRow.spent)}
+                </td>
+                <td className="px-4 py-4 text-slate-700">
+                  {formatCurrency(typeRow.revenue)}
+                </td>
+                <td className="px-4 py-4 text-slate-700">
+                  {formatNumber(typeRow.converted)}
+                </td>
               </AdminTableRow>
             ))}
           </tbody>
@@ -321,7 +429,9 @@ export function CreateCampaignModalContent({
         <AdminFormField label="受众人群">
           <select
             value={formData.targetSegment}
-            onChange={(event) => setFormValue("targetSegment", event.target.value)}
+            onChange={(event) =>
+              setFormValue("targetSegment", event.target.value)
+            }
             className={adminSelectClassName}
           >
             {segmentOptions.map((option) => (

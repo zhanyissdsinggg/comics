@@ -56,7 +56,9 @@ export default function HeaderActions({
           aria-label={`View your wallet${walletTotal > 0 ? ` with ${walletTotal.toLocaleString()} points` : ""}`}
         >
           <Wallet className="size-4" strokeWidth={2} />
-          <span className="text-sm font-semibold tracking-[0.01em]">Wallet</span>
+          <span className="text-sm font-semibold tracking-[0.01em]">
+            Wallet
+          </span>
           <span className="text-xs font-semibold tabular-nums text-white/62">
             {walletTotal.toLocaleString()}
           </span>
@@ -67,7 +69,10 @@ export default function HeaderActions({
         <button
           type="button"
           onClick={() => router.push("/notifications")}
-          className={cn(iconButtonClass, "hidden items-center justify-center sm:inline-flex")}
+          className={cn(
+            iconButtonClass,
+            "hidden items-center justify-center sm:inline-flex",
+          )}
           aria-label={
             unreadCount > 0
               ? `View your notifications, ${unreadCount > 99 ? "99 plus" : unreadCount} unread`
@@ -115,7 +120,10 @@ export default function HeaderActions({
       <button
         type="button"
         onClick={onMenuClick}
-        className={cn(iconButtonClass, "inline-flex items-center justify-center sm:hidden")}
+        className={cn(
+          iconButtonClass,
+          "inline-flex items-center justify-center sm:hidden",
+        )}
         aria-label={
           hydrated && isSignedIn
             ? "Open menu and account options"

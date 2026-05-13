@@ -28,12 +28,26 @@ function readPlaceholdLabel(url) {
 }
 
 function labelsMatch(left, right) {
-  return String(left || "").replace(/\s+/g, " ").trim().toLowerCase() === String(right || "").replace(/\s+/g, " ").trim().toLowerCase();
+  return (
+    String(left || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase() ===
+    String(right || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase()
+  );
 }
 
 function buildCoverAltText(label, seriesType = "") {
-  const normalizedLabel = String(label || "").replace(/\s+/g, " ").trim();
-  const normalizedType = String(seriesType || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const normalizedLabel = String(label || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const normalizedType = String(seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 
   if (normalizedLabel) {
     if (normalizedType === "comic" || normalizedType === "novel") {
@@ -85,7 +99,8 @@ function CoverFallback({
       artDirection.badgeLabel,
       artDirection.secondaryGenre,
     ].some((value) => labelsMatch(value, artDirection.kicker));
-  const shouldShowTypeLabel = Boolean(artDirection.typeLabel) && !artDirection.primaryGenre;
+  const shouldShowTypeLabel =
+    Boolean(artDirection.typeLabel) && !artDirection.primaryGenre;
   const shouldShowSecondaryGenre =
     Boolean(artDirection.secondaryGenre) &&
     ![
@@ -110,7 +125,10 @@ function CoverFallback({
           backgroundImage: `radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.16) 0%, transparent 24%), radial-gradient(circle at 82% 18%, ${artDirection.accentSoft} 0%, transparent 26%), linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.52) 100%)`,
         }}
       />
-      <div className="absolute inset-3 rounded-[22px] border" style={{ borderColor: artDirection.border }} />
+      <div
+        className="absolute inset-3 rounded-[22px] border"
+        style={{ borderColor: artDirection.border }}
+      />
       {isMinimalCard ? (
         <div className="absolute left-4 top-4">
           {minimalChipLabel ? (
@@ -151,7 +169,13 @@ function CoverFallback({
         />
       </div>
       {isMinimalCard ? (
-        <div className="absolute inset-x-4 bottom-4 h-16 rounded-[22px] border backdrop-blur-[3px]" style={{ borderColor: artDirection.border, background: `linear-gradient(180deg, rgba(8, 12, 18, 0.08) 0%, ${artDirection.panel} 100%)` }} />
+        <div
+          className="absolute inset-x-4 bottom-4 h-16 rounded-[22px] border backdrop-blur-[3px]"
+          style={{
+            borderColor: artDirection.border,
+            background: `linear-gradient(180deg, rgba(8, 12, 18, 0.08) 0%, ${artDirection.panel} 100%)`,
+          }}
+        />
       ) : (
         <div className="absolute inset-x-4 bottom-4">
           <div
@@ -251,7 +275,15 @@ export default function Cover({
         {isLoading && (
           <div
             className="absolute inset-0 animate-pulse bg-neutral-800"
-            style={{ background: getCoverArtDirection({ tone, genres, seriesType, badge, eyebrow }).background }}
+            style={{
+              background: getCoverArtDirection({
+                tone,
+                genres,
+                seriesType,
+                badge,
+                eyebrow,
+              }).background,
+            }}
           />
         )}
         {hasError ? (
@@ -284,7 +316,10 @@ export default function Cover({
               }}
               priority={false}
             />
-            <div className="pointer-events-none absolute inset-0" style={overlayStyle} />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={overlayStyle}
+            />
             <div className="pointer-events-none absolute inset-0 border border-black/20" />
           </>
         )}

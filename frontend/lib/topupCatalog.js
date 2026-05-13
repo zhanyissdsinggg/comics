@@ -66,5 +66,9 @@ export async function getTopupPackage(packageId, force = false) {
   }
 
   const { packages } = await fetchTopupCatalogSnapshot(force);
-  return packages.find((item) => item.packageId === normalizedId || item.id === normalizedId) || null;
+  return (
+    packages.find(
+      (item) => item.packageId === normalizedId || item.id === normalizedId,
+    ) || null
+  );
 }

@@ -32,7 +32,9 @@ export function slugifyCreatorName(name) {
 
 export function buildCreatorPathFromSlug(slug) {
   const normalizedSlug = slugifyCreatorName(String(slug || ""));
-  return normalizedSlug ? `/creators/${encodeURIComponent(normalizedSlug)}` : "/creators";
+  return normalizedSlug
+    ? `/creators/${encodeURIComponent(normalizedSlug)}`
+    : "/creators";
 }
 
 export function buildCreatorHref(name) {
@@ -59,12 +61,11 @@ export function humanizeCreatorSlug(slug) {
 
   const slugSegments = normalizedSlug.split("-").filter(Boolean);
   const readableSegments =
-    slugSegments.length > 1 && /^[a-f0-9]{6,12}$/i.test(slugSegments[slugSegments.length - 1])
+    slugSegments.length > 1 &&
+    /^[a-f0-9]{6,12}$/i.test(slugSegments[slugSegments.length - 1])
       ? slugSegments.slice(0, -1)
       : slugSegments;
-  const normalized = readableSegments
-    .join(" ")
-    .trim();
+  const normalized = readableSegments.join(" ").trim();
 
   return normalized.replace(/\b([a-z])/g, (match) => match.toUpperCase());
 }

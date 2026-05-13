@@ -241,20 +241,28 @@ function HomeContent({
     }
     if (activeSort === "Most Views") {
       return [...filteredByGenre].sort(
-        (left, right) => Number(right?.viewsValue || 0) - Number(left?.viewsValue || 0),
+        (left, right) =>
+          Number(right?.viewsValue || 0) - Number(left?.viewsValue || 0),
       );
     }
     return sortByRating(filteredByGenre);
   }, [activeSort, filteredByGenre]);
 
   const modeScopedItems = filterContentByMode(currentItems, contentMode);
-  const heroItem = inferCatalogHero(sortedItems) || inferCatalogHero(modeScopedItems);
+  const heroItem =
+    inferCatalogHero(sortedItems) || inferCatalogHero(modeScopedItems);
   const gridItems = [...sortedItems, ...sortedItems].slice(0, 6);
-  const exploreGridItems = [...sortedItems, ...sortedItems, ...sortedItems].slice(0, 12);
+  const exploreGridItems = [
+    ...sortedItems,
+    ...sortedItems,
+    ...sortedItems,
+  ].slice(0, 12);
   const rankItems = sortByRating(sortedItems).slice(0, 5);
   const genreOptions = buildGenreOptions(currentItems);
   const continueItems = sortedItems.slice(0, 2);
-  const continueSectionHasProgress = continueItems.some((item) => item.hasProgress);
+  const continueSectionHasProgress = continueItems.some(
+    (item) => item.hasProgress,
+  );
 
   const ActionIcon = getActionIcon(contentType);
   const continueLabel = getContinueLabel(contentType);
@@ -287,7 +295,9 @@ function HomeContent({
     }
 
     [
-      heroItem ? { item: heroItem, sourceSection: "home_hero", position: 1 } : null,
+      heroItem
+        ? { item: heroItem, sourceSection: "home_hero", position: 1 }
+        : null,
       ...continueItems.map((item, index) => ({
         item,
         sourceSection: "continue_reading",
@@ -316,7 +326,14 @@ function HomeContent({
           position,
         });
       });
-  }, [catalogLoading, contentMode, continueItems, heroItem, normalizedCatalogSource, rankItems]);
+  }, [
+    catalogLoading,
+    contentMode,
+    continueItems,
+    heroItem,
+    normalizedCatalogSource,
+    rankItems,
+  ]);
 
   const handleGenreSelect = (nextGenre) => {
     trackEvent("genre_filter_click", {
@@ -382,7 +399,12 @@ function HomeContent({
   }
 
   return (
-    <div className={cn("min-h-screen transition-colors duration-500", palette.rootBg)}>
+    <div
+      className={cn(
+        "min-h-screen transition-colors duration-500",
+        palette.rootBg,
+      )}
+    >
       <FigmaChrome>
         <div className="relative w-full overflow-hidden bg-black transition-all duration-700">
           <div className="absolute inset-0">
@@ -442,7 +464,9 @@ function HomeContent({
                   </Link>
                   <Link
                     href={heroItem.detailHref}
-                    onClick={() => handleStoryClick(heroItem, "home_hero_detail", 1)}
+                    onClick={() =>
+                      handleStoryClick(heroItem, "home_hero_detail", 1)
+                    }
                     className={cn(
                       "flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95 sm:w-auto md:px-8 md:py-4 md:text-base",
                       palette.surface,
@@ -474,14 +498,17 @@ function HomeContent({
                         <p className="max-w-[140px] truncate text-base font-bold text-white md:max-w-[150px] md:text-lg">
                           {heroItem.title}
                         </p>
-                        <p className="text-sm text-gray-300">{heroItem.author}</p>
+                        <p className="text-sm text-gray-300">
+                          {heroItem.author}
+                        </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[9px] font-black uppercase tracking-[0.18em] text-gray-300">
                           Latest
                         </span>
                         <span className="rounded bg-white px-2 py-1 text-xs font-black text-black">
-                          {heroItem.latestInstallmentLabel || heroItem.chapterLabel}
+                          {heroItem.latestInstallmentLabel ||
+                            heroItem.chapterLabel}
                         </span>
                       </div>
                     </div>
@@ -552,7 +579,12 @@ function HomeContent({
                     >
                       {sort}
                       {activeSort === sort ? (
-                        <div className={cn("h-2 w-2 rounded-full", palette.primaryMuted)} />
+                        <div
+                          className={cn(
+                            "h-2 w-2 rounded-full",
+                            palette.primaryMuted,
+                          )}
+                        />
                       ) : null}
                     </button>
                   ))}
@@ -588,7 +620,9 @@ function HomeContent({
                   <Link
                     key={`continue-${item.id}`}
                     href={item.readHref}
-                    onClick={() => handleStoryClick(item, "continue_reading", index + 1)}
+                    onClick={() =>
+                      handleStoryClick(item, "continue_reading", index + 1)
+                    }
                     className={cn(
                       "group flex items-center gap-3 rounded-xl border p-3 shadow-sm transition-all hover:shadow-md active:scale-[0.98] md:gap-4 md:p-4",
                       palette.surface,
@@ -602,7 +636,9 @@ function HomeContent({
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                        <ActionIcon className={cn("h-6 w-6", palette.primaryText)} />
+                        <ActionIcon
+                          className={cn("h-6 w-6", palette.primaryText)}
+                        />
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
@@ -617,7 +653,10 @@ function HomeContent({
                       {item.hasProgress ? (
                         <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
                           <div
-                            className={cn("h-full rounded-full", palette.primaryBg)}
+                            className={cn(
+                              "h-full rounded-full",
+                              palette.primaryBg,
+                            )}
                             style={{ width: "45%" }}
                           />
                         </div>
@@ -648,7 +687,13 @@ function HomeContent({
                 </h2>
               </div>
 
-              <div className={cn("overflow-hidden rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4", palette.surface, palette.border)}>
+              <div
+                className={cn(
+                  "overflow-hidden rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4",
+                  palette.surface,
+                  palette.border,
+                )}
+              >
                 <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
@@ -664,81 +709,81 @@ function HomeContent({
                 </div>
 
                 <div className="grid h-auto grid-cols-1 gap-3 md:h-[500px] md:grid-cols-4 md:gap-4">
-                {gridItems[0] ? (
-                  <Link
-                    href={gridItems[0].detailHref}
-                    className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
-                  >
-                    <img
-                      src={gridItems[0].coverUrl}
-                      alt={gridItems[0].title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full p-5 md:p-6">
-                      <span
-                        className={cn(
-                          "mb-3 inline-block rounded-md px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white",
-                          palette.primaryBg,
-                        )}
-                      >
-                        Masterpiece
-                      </span>
-                      <h3 className="mb-2 text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
-                        {gridItems[0].title}
-                      </h3>
-                      <p className="line-clamp-2 text-sm text-gray-300 md:max-w-[80%]">
-                        {gridItems[0].description}
-                      </p>
-                    </div>
-                  </Link>
-                ) : null}
+                  {gridItems[0] ? (
+                    <Link
+                      href={gridItems[0].detailHref}
+                      className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
+                    >
+                      <img
+                        src={gridItems[0].coverUrl}
+                        alt={gridItems[0].title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 w-full p-5 md:p-6">
+                        <span
+                          className={cn(
+                            "mb-3 inline-block rounded-md px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white",
+                            palette.primaryBg,
+                          )}
+                        >
+                          Masterpiece
+                        </span>
+                        <h3 className="mb-2 text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
+                          {gridItems[0].title}
+                        </h3>
+                        <p className="line-clamp-2 text-sm text-gray-300 md:max-w-[80%]">
+                          {gridItems[0].description}
+                        </p>
+                      </div>
+                    </Link>
+                  ) : null}
 
-                {gridItems[1] ? (
-                  <Link
-                    href={gridItems[1].detailHref}
-                    className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
-                  >
-                    <img
-                      src={gridItems[1].coverUrl}
-                      alt={gridItems[1].title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full p-4 md:p-5">
-                      <span className="mb-2 inline-block rounded-md bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
-                        Trending
-                      </span>
-                      <h3 className="truncate text-lg font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-xl">
-                        {gridItems[1].title}
-                      </h3>
-                    </div>
-                  </Link>
-                ) : null}
+                  {gridItems[1] ? (
+                    <Link
+                      href={gridItems[1].detailHref}
+                      className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
+                    >
+                      <img
+                        src={gridItems[1].coverUrl}
+                        alt={gridItems[1].title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 w-full p-4 md:p-5">
+                        <span className="mb-2 inline-block rounded-md bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
+                          Trending
+                        </span>
+                        <h3 className="truncate text-lg font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-xl">
+                          {gridItems[1].title}
+                        </h3>
+                      </div>
+                    </Link>
+                  ) : null}
 
-                {gridItems.slice(2, 4).map((item) => (
-                  <Link
-                    key={item.id}
-                    href={item.detailHref}
-                    className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
-                  >
-                    <img
-                      src={item.coverUrl}
-                      alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
-                    <div className="absolute bottom-0 left-0 w-full p-4">
-                      <h3 className="line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-gray-200">
-                        {item.title}
-                      </h3>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-                        <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                        {item.rating}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                  {gridItems.slice(2, 4).map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.detailHref}
+                      className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
+                    >
+                      <img
+                        src={item.coverUrl}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
+                      <div className="absolute bottom-0 left-0 w-full p-4">
+                        <h3 className="line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-gray-200">
+                          {item.title}
+                        </h3>
+                        <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                          {item.rating}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </section>
@@ -753,7 +798,12 @@ function HomeContent({
                 </h2>
                 {activeGenre !== "All" || activeSort !== "Trending" ? (
                   <div className="flex items-center gap-2 text-sm font-bold text-gray-500">
-                    <div className={cn("h-3 w-3 rounded-full animate-pulse", palette.primaryMuted)} />
+                    <div
+                      className={cn(
+                        "h-3 w-3 rounded-full animate-pulse",
+                        palette.primaryMuted,
+                      )}
+                    />
                     Live Updating
                   </div>
                 ) : null}
@@ -779,7 +829,13 @@ function HomeContent({
                 </div>
               ) : null}
 
-              <div className={cn("rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4", palette.surface, palette.border)}>
+              <div
+                className={cn(
+                  "rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4",
+                  palette.surface,
+                  palette.border,
+                )}
+              >
                 <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
@@ -795,56 +851,58 @@ function HomeContent({
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 md:gap-5 lg:grid-cols-6">
-                {(activeGenre === "All" && activeSort === "Trending"
-                  ? gridItems
-                  : exploreGridItems
-                ).map((item, index) => (
-                  <Link
-                    key={`${item.id}-${index}`}
-                    href={item.detailHref}
-                    className="group block rounded-2xl border border-transparent p-2 transition-all hover:border-white/10 hover:bg-white/[0.03]"
-                  >
-                    <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl ring-1 ring-white/5">
-                      <img
-                        src={item.coverUrl}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                      {item.status ? (
-                        <div
-                          className={cn(
-                            "absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-black tracking-[0.15em] text-white",
-                            item.status === "UP" || item.status === "HOT"
-                              ? palette.primaryBg
-                              : "bg-green-600",
-                          )}
-                        >
-                          {item.status}
-                        </div>
-                      ) : null}
-                      {item.latestInstallmentLabel ? (
-                        <div className="absolute bottom-2 right-2 rounded-full border border-white/10 bg-black/60 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
-                          {item.latestInstallmentLabel}
-                        </div>
-                      ) : null}
-                    </div>
+                  {(activeGenre === "All" && activeSort === "Trending"
+                    ? gridItems
+                    : exploreGridItems
+                  ).map((item, index) => (
+                    <Link
+                      key={`${item.id}-${index}`}
+                      href={item.detailHref}
+                      className="group block rounded-2xl border border-transparent p-2 transition-all hover:border-white/10 hover:bg-white/[0.03]"
+                    >
+                      <div className="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl ring-1 ring-white/5">
+                        <img
+                          src={item.coverUrl}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                        {item.status ? (
+                          <div
+                            className={cn(
+                              "absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-black tracking-[0.15em] text-white",
+                              item.status === "UP" || item.status === "HOT"
+                                ? palette.primaryBg
+                                : "bg-green-600",
+                            )}
+                          >
+                            {item.status}
+                          </div>
+                        ) : null}
+                        {item.latestInstallmentLabel ? (
+                          <div className="absolute bottom-2 right-2 rounded-full border border-white/10 bg-black/60 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                            {item.latestInstallmentLabel}
+                          </div>
+                        ) : null}
+                      </div>
 
-                    <h3 className="min-h-[2.5rem] line-clamp-2 text-sm font-bold leading-tight text-white transition-colors group-hover:text-gray-300 md:text-base">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1 truncate text-[11px] font-medium text-gray-500 md:text-xs">
-                      {item.author}
-                    </p>
-                    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-gray-400 md:text-xs">
-                      <span className="truncate">{getDailyUpdateNote(item)}</span>
-                      <span className="flex shrink-0 items-center gap-1 text-yellow-500">
-                        <Star className="h-3 w-3 fill-current" />
-                        {item.rating}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                      <h3 className="min-h-[2.5rem] line-clamp-2 text-sm font-bold leading-tight text-white transition-colors group-hover:text-gray-300 md:text-base">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 truncate text-[11px] font-medium text-gray-500 md:text-xs">
+                        {item.author}
+                      </p>
+                      <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-gray-400 md:text-xs">
+                        <span className="truncate">
+                          {getDailyUpdateNote(item)}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 text-yellow-500">
+                          <Star className="h-3 w-3 fill-current" />
+                          {item.rating}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </section>
@@ -889,7 +947,9 @@ function HomeContent({
                   <Link
                     key={`rank-${item.id}`}
                     href={item.detailHref}
-                    onClick={() => handleStoryClick(item, "top_rated_picks", index + 1)}
+                    onClick={() =>
+                      handleStoryClick(item, "top_rated_picks", index + 1)
+                    }
                     className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-white/5 active:scale-95 md:gap-4 md:p-2"
                   >
                     <span

@@ -15,7 +15,8 @@ const loadStorePagePayload = cache(async () => {
   const prelaunchStoreByConfig =
     !siteConfig.monetization.checkoutEnabled ||
     !siteConfig.monetization.pointPacksEnabled;
-  const prelaunchStoreByBilling = topupPayload?.billing?.purchaseActionsEnabled !== true;
+  const prelaunchStoreByBilling =
+    topupPayload?.billing?.purchaseActionsEnabled !== true;
 
   return {
     topupPayload,

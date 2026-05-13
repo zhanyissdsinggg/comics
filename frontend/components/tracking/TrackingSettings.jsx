@@ -10,7 +10,10 @@ import {
   adminInputClassName,
   adminTextareaClassName,
 } from "@/components/admin/common/AdminWorkspacePrimitives";
-import { adminGet as apiGet, adminPost as apiPost } from "../../lib/adminApiClient";
+import {
+  adminGet as apiGet,
+  adminPost as apiPost,
+} from "../../lib/adminApiClient";
 
 const TRACKING_GROUPS = [
   {
@@ -206,7 +209,9 @@ function normalizeValues(input, defaults) {
 
   TRACKING_GROUPS.forEach((group) => {
     const groupValues =
-      input[group.id] && typeof input[group.id] === "object" ? input[group.id] : {};
+      input[group.id] && typeof input[group.id] === "object"
+        ? input[group.id]
+        : {};
 
     group.fields.forEach((field) => {
       const stableValue = groupValues[field.key];
@@ -352,7 +357,10 @@ export default function TrackingSettings() {
               : "";
           const serverUpdatedAtMs = parseTimestamp(serverUpdatedAt);
 
-          if (localSnapshot?.savedAtMs && localSnapshot.savedAtMs > serverUpdatedAtMs) {
+          if (
+            localSnapshot?.savedAtMs &&
+            localSnapshot.savedAtMs > serverUpdatedAtMs
+          ) {
             setValues(localSnapshot.values);
             if (localSnapshot.savedAt) {
               setSavedAt(localSnapshot.savedAt);
@@ -368,7 +376,10 @@ export default function TrackingSettings() {
             return;
           }
 
-          const normalizedValues = normalizeValues(response.data.config.values, defaultValues);
+          const normalizedValues = normalizeValues(
+            response.data.config.values,
+            defaultValues,
+          );
           setValues(normalizedValues);
           setSavedAt(serverUpdatedAt);
           setDirty(false);
@@ -387,7 +398,8 @@ export default function TrackingSettings() {
           setDirty(false);
           setStatus({
             tone: "warning",
-            message: "当前账号没有编辑或同步追踪设置的权限，页面已切换为只读模式。",
+            message:
+              "当前账号没有编辑或同步追踪设置的权限，页面已切换为只读模式。",
           });
           setHydrating(false);
           return;
@@ -395,7 +407,8 @@ export default function TrackingSettings() {
 
         setStatus({
           tone: "danger",
-          message: response.error || "服务器配置读取失败，当前仍会保留本地草稿。",
+          message:
+            response.error || "服务器配置读取失败，当前仍会保留本地草稿。",
         });
       } catch {
         if (!mounted) {
@@ -456,7 +469,10 @@ export default function TrackingSettings() {
       const response = await apiPost("/api/admin/tracking", { values });
 
       if (response.ok && response.data?.config) {
-        const normalizedValues = normalizeValues(response.data.config.values, defaultValues);
+        const normalizedValues = normalizeValues(
+          response.data.config.values,
+          defaultValues,
+        );
         const syncedAt =
           typeof response.data.config.updatedAt === "string"
             ? response.data.config.updatedAt
@@ -542,7 +558,9 @@ export default function TrackingSettings() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 最近保存
               </p>
-              <p className="mt-3 text-base font-semibold text-slate-950">{formatSavedAt(savedAt)}</p>
+              <p className="mt-3 text-base font-semibold text-slate-950">
+                {formatSavedAt(savedAt)}
+              </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 本地草稿与服务器同步成功时都会更新这里的时间。
               </p>
@@ -552,7 +570,9 @@ export default function TrackingSettings() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 版本来源
               </p>
-              <p className="mt-3 text-base font-semibold text-slate-950">{localModeLabel}</p>
+              <p className="mt-3 text-base font-semibold text-slate-950">
+                {localModeLabel}
+              </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 页面会优先保留更新时间更晚的版本，避免新草稿被旧配置覆盖。
               </p>
@@ -562,8 +582,12 @@ export default function TrackingSettings() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 当前模式
               </p>
-              <p className="mt-3 text-base font-semibold text-slate-950">{syncStateLabel}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{syncStateDetail}</p>
+              <p className="mt-3 text-base font-semibold text-slate-950">
+                {syncStateLabel}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {syncStateDetail}
+              </p>
             </div>
           </div>
         </div>
@@ -581,8 +605,12 @@ export default function TrackingSettings() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold tracking-tight text-slate-950">{group.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{group.desc}</p>
+                  <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                    {group.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {group.desc}
+                  </p>
                 </div>
                 <AdminBadge tone="default">{group.fields.length} 项</AdminBadge>
               </div>
@@ -604,7 +632,11 @@ export default function TrackingSettings() {
                           placeholder={field.placeholder}
                           value={values[group.id]?.[field.key] || ""}
                           onChange={(event) =>
-                            handleChange(group.id, field.key, event.target.value)
+                            handleChange(
+                              group.id,
+                              field.key,
+                              event.target.value,
+                            )
                           }
                           disabled={readOnly || hydrating}
                           className={adminTextareaClassName}
@@ -615,7 +647,11 @@ export default function TrackingSettings() {
                           placeholder={field.placeholder}
                           value={values[group.id]?.[field.key] || ""}
                           onChange={(event) =>
-                            handleChange(group.id, field.key, event.target.value)
+                            handleChange(
+                              group.id,
+                              field.key,
+                              event.target.value,
+                            )
                           }
                           disabled={readOnly || hydrating}
                           className={adminInputClassName}

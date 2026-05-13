@@ -1,6 +1,9 @@
 "use client";
 
-import { adminFetchJson, normalizeAdminErrorMessage } from "@/lib/adminApiClient";
+import {
+  adminFetchJson,
+  normalizeAdminErrorMessage,
+} from "@/lib/adminApiClient";
 
 export const EMPTY_FEEDBACK = { type: "", message: "" };
 
@@ -108,7 +111,14 @@ export function isRecentlyUpdated(value, days = 30) {
   return dateValue >= Date.now() - days * 24 * 60 * 60 * 1000;
 }
 
-export function buildEpisodesQuery({ searchTerm, sortBy, sortOrder, page, pageSize, filters }) {
+export function buildEpisodesQuery({
+  searchTerm,
+  sortBy,
+  sortOrder,
+  page,
+  pageSize,
+  filters,
+}) {
   const params = new URLSearchParams();
 
   if (searchTerm) {
@@ -134,9 +144,12 @@ export function buildEpisodesQuery({ searchTerm, sortBy, sortOrder, page, pageSi
 }
 
 export async function fetchSeriesDetail(seriesId) {
-  const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, {
-    cache: "no-store",
-  });
+  const { response, data } = await adminFetchJson(
+    `/api/admin/series/${seriesId}`,
+    {
+      cache: "no-store",
+    },
+  );
   if (response.status === 404) {
     return null;
   }
@@ -149,9 +162,12 @@ export async function fetchSeriesDetail(seriesId) {
 
 export async function fetchEpisodes(seriesId, options) {
   const query = buildEpisodesQuery(options);
-  const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}/episodes?${query}`, {
-    cache: "no-store",
-  });
+  const { response, data } = await adminFetchJson(
+    `/api/admin/series/${seriesId}/episodes?${query}`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (!response.ok) {
     throw new Error(data?.message || data?.error || "章节列表加载失败。");
@@ -171,12 +187,17 @@ export async function fetchEpisodes(seriesId, options) {
 }
 
 export function validateNewEpisodeDraft(newEpisode) {
-  if (!isNonNegativeIntegerString(newEpisode.number) || !String(newEpisode.title || "").trim()) {
+  if (
+    !isNonNegativeIntegerString(newEpisode.number) ||
+    !String(newEpisode.title || "").trim()
+  ) {
     return "章节号和标题不能为空。";
   }
 
   if (
-    !isNonNegativeIntegerString(newEpisode.previewFreePages, { allowEmpty: true }) ||
+    !isNonNegativeIntegerString(newEpisode.previewFreePages, {
+      allowEmpty: true,
+    }) ||
     !isNonNegativeIntegerString(newEpisode.pricePts, { allowEmpty: true })
   ) {
     return "试看页数和附加发行设置必须是非负整数。";
@@ -228,7 +249,9 @@ export function buildBulkUpdatePayload({ bulkForm, showBulkCommercialFields }) {
 }
 
 export function getPageStats(episodes, selectedCount) {
-  const previewCount = episodes.filter((episode) => toInteger(episode.previewFreePages, 0) > 0).length;
+  const previewCount = episodes.filter(
+    (episode) => toInteger(episode.previewFreePages, 0) > 0,
+  ).length;
   const recentUpdateCount = episodes.filter((episode) =>
     isRecentlyUpdated(episode.updatedAt || episode.releasedAt, 30),
   ).length;

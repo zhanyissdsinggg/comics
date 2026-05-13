@@ -27,7 +27,11 @@ export function AdminTableShell({
   }
 
   if (isLoading) {
-    return loadingFallback || <LoadingState.Spinner size="md" text="正在加载列表内容" />;
+    return (
+      loadingFallback || (
+        <LoadingState.Spinner size="md" text="正在加载列表内容" />
+      )
+    );
   }
 
   if (!hasItems) {

@@ -19,7 +19,9 @@ export const EMPTY_AUDIT = {
 
 export function formatPercent(value) {
   const parsed = Number(value);
-  const safeValue = Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+  const safeValue = Number.isFinite(parsed)
+    ? Math.max(0, Math.round(parsed))
+    : 0;
   return `${safeValue}%`;
 }
 
@@ -41,11 +43,15 @@ export function formatDateLabel(value) {
 }
 
 export function getErrorMessage(data, response) {
-  return data?.message || data?.error || `请求失败，状态码 ${response.status}。`;
+  return (
+    data?.message || data?.error || `请求失败，状态码 ${response.status}。`
+  );
 }
 
 export function formatSeriesStatusLabel(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
 
   if (normalized === "completed") return "已完结";
   if (normalized === "ongoing") return "连载中";

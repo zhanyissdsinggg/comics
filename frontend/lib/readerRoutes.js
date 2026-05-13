@@ -8,4 +8,3 @@ export function buildReaderPath(seriesId, episodeId) {
 
   return `/read/${normalizedSeriesId}/${normalizedEpisodeId}`;
 }
-

@@ -5,7 +5,9 @@ import { isAdultContent } from "./contentFilters";
 import { getSeriesFaqItems } from "./storefrontFaq";
 
 function normalizeText(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function toNumber(value) {
@@ -40,7 +42,9 @@ function resolveImageUrl(value) {
 }
 
 function pickSeriesSchemaType(series) {
-  return String(series?.type || "").toLowerCase() === "novel" ? "BookSeries" : "ComicSeries";
+  return String(series?.type || "").toLowerCase() === "novel"
+    ? "BookSeries"
+    : "ComicSeries";
 }
 
 function inferCreatorEntityType(name) {
@@ -49,7 +53,11 @@ function inferCreatorEntityType(name) {
     return "Organization";
   }
 
-  if (/\b(studio|team|works|comics|press|entertainment|media|collective|lab|labs|house)\b/.test(normalized)) {
+  if (
+    /\b(studio|team|works|comics|press|entertainment|media|collective|lab|labs|house)\b/.test(
+      normalized,
+    )
+  ) {
     return "Organization";
   }
 
@@ -73,7 +81,9 @@ export function buildOrganizationStructuredData() {
     "@id": `${absoluteUrl("/")}#organization`,
     name: siteConfig.companyName,
     alternateName:
-      siteConfig.siteName !== siteConfig.companyName ? siteConfig.siteName : undefined,
+      siteConfig.siteName !== siteConfig.companyName
+        ? siteConfig.siteName
+        : undefined,
     url: absoluteUrl("/"),
     email: siteConfig.supportEmail || undefined,
     sameAs: sameAs.length > 0 ? sameAs : undefined,
@@ -150,7 +160,9 @@ function buildSeriesEntity(series, creatorEntityId) {
   const creatorName = creatorIdentity.hasPublicCredit
     ? normalizeCreatorName(creatorIdentity.displayName)
     : "";
-  const creatorPath = creatorIdentity.hasPublicCredit ? creatorIdentity.href : null;
+  const creatorPath = creatorIdentity.hasPublicCredit
+    ? creatorIdentity.href
+    : null;
   const hasFreeAccess =
     toNumber(series?.freeEpisodeCount) > 0 ||
     Boolean(series?.hasFreeEpisodes) ||
@@ -164,7 +176,10 @@ function buildSeriesEntity(series, creatorEntityId) {
     name: normalizeText(series?.title),
     description: normalizeText(series?.description) || undefined,
     image: resolveImageUrl(series?.coverUrl),
-    genre: Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres : undefined,
+    genre:
+      Array.isArray(series?.genres) && series.genres.length > 0
+        ? series.genres
+        : undefined,
     author: creatorEntityId
       ? { "@id": creatorEntityId }
       : creatorPath && creatorName
@@ -179,7 +194,9 @@ function buildSeriesEntity(series, creatorEntityId) {
       : undefined,
     isAccessibleForFree: hasFreeAccess,
     keywords:
-      Array.isArray(series?.genres) && series.genres.length > 0 ? series.genres.join(", ") : undefined,
+      Array.isArray(series?.genres) && series.genres.length > 0
+        ? series.genres.join(", ")
+        : undefined,
   };
 }
 
@@ -255,7 +272,9 @@ export function buildSeriesStructuredData({ series, episodes }) {
   const seriesPath = `/series/${encodeURIComponent(series.id)}`;
   const withEpisodeCount = {
     ...series,
-    episodeCount: Array.isArray(episodes) ? episodes.length : Number(series?.episodeCount || 0),
+    episodeCount: Array.isArray(episodes)
+      ? episodes.length
+      : Number(series?.episodeCount || 0),
   };
   const faqItems = getSeriesFaqItems({ series: withEpisodeCount, episodes });
 
@@ -278,24 +297,31 @@ export function buildSeriesStructuredData({ series, episodes }) {
   ].filter(Boolean);
 }
 
-export function buildCreatorStructuredData({ creatorName, creatorPath, items }) {
+export function buildCreatorStructuredData({
+  creatorName,
+  creatorPath,
+  items,
+}) {
   const normalizedCreatorName = normalizeCreatorName(creatorName);
   const creatorEntity = buildCreatorEntity(normalizedCreatorName, creatorPath);
   if (!creatorEntity || !creatorPath) {
     return [];
   }
 
-  const latestModified = (Array.isArray(items) ? items : []).reduce((latest, item) => {
-    const nextDate = toIsoDate(item?.updatedAt);
-    if (!nextDate) {
-      return latest;
-    }
-    if (!latest) {
-      return nextDate;
-    }
+  const latestModified = (Array.isArray(items) ? items : []).reduce(
+    (latest, item) => {
+      const nextDate = toIsoDate(item?.updatedAt);
+      if (!nextDate) {
+        return latest;
+      }
+      if (!latest) {
+        return nextDate;
+      }
 
-    return Date.parse(nextDate) > Date.parse(latest) ? nextDate : latest;
-  }, undefined);
+      return Date.parse(nextDate) > Date.parse(latest) ? nextDate : latest;
+    },
+    undefined,
+  );
 
   return [
     buildBreadcrumbStructuredData([
@@ -311,15 +337,17 @@ export function buildCreatorStructuredData({ creatorName, creatorPath, items }) 
       description: `Browse published titles from ${normalizedCreatorName} on ${siteConfig.siteName}.`,
       dateModified: latestModified,
       mainEntity: creatorEntity,
-      hasPart: (Array.isArray(items) ? items : []).slice(0, 12).map((series) =>
-        buildSeriesEntity(series, creatorEntity["@id"]),
-      ),
+      hasPart: (Array.isArray(items) ? items : [])
+        .slice(0, 12)
+        .map((series) => buildSeriesEntity(series, creatorEntity["@id"])),
     }),
   ].filter(Boolean);
 }
 
 export function buildCreatorsDirectoryStructuredData({ creators }) {
-  const safeCreators = (Array.isArray(creators) ? creators : []).filter((creator) => creator?.name && creator?.path);
+  const safeCreators = (Array.isArray(creators) ? creators : []).filter(
+    (creator) => creator?.name && creator?.path,
+  );
 
   return [
     buildBreadcrumbStructuredData([
@@ -346,7 +374,12 @@ export function buildCreatorsDirectoryStructuredData({ creators }) {
   ].filter(Boolean);
 }
 
-export function buildFaqStructuredData({ path = "/", name = "", description = "", items = [] }) {
+export function buildFaqStructuredData({
+  path = "/",
+  name = "",
+  description = "",
+  items = [],
+}) {
   const normalizedItems = (Array.isArray(items) ? items : [])
     .map((item) => ({
       question: normalizeText(item?.question || item?.q),

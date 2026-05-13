@@ -26,8 +26,12 @@ export function AdminListToolbar({
     >
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">列表工具</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">先缩小范围，再执行排序和批量动作，减少误操作。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            列表工具
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            先缩小范围，再执行排序和批量动作，减少误操作。
+          </p>
           <label className="relative mt-3 block min-w-[220px] xl:max-w-2xl">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
@@ -54,7 +58,11 @@ export function AdminListToolbar({
             {sortOrder === "asc" ? ascendingLabel : descendingLabel}
           </Button>
 
-          {extraActions ? <div className="flex flex-wrap items-center gap-2">{extraActions}</div> : null}
+          {extraActions ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {extraActions}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

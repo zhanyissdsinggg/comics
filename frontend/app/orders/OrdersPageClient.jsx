@@ -456,7 +456,9 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent="blue"
             eyebrow="Orders"
             title={viewerSignedIn ? "Orders" : "Sign in to view purchases"}
-            description={viewerSignedIn ? "" : "Need billing help? Support can help."}
+            description={
+              viewerSignedIn ? "" : "Need billing help? Support can help."
+            }
           />
 
           <StorefrontDesk
@@ -539,11 +541,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent="blue"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <p className="text-sm font-black uppercase tracking-[0.03em]">
-                        Need help?
-                      </p>
-                    </div>
+              <div className="space-y-1">
+                <p className="text-sm font-black uppercase tracking-[0.03em]">
+                  Need help?
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() =>
@@ -569,8 +571,8 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   Tasks
                 </p>
                 <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    Orders
-                  </h2>
+                  Orders
+                </h2>
               </div>
               <StorefrontPathwaysGrid
                 cards={billingTaskCards}
@@ -582,7 +584,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         ) : null}
 
         {!hydrated || loading ? (
-          <SurfacePanel className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
+          <SurfacePanel
+            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
+            accent="blue"
+          >
             <div className="space-y-2">
               <div
                 className="h-4 w-28 animate-pulse rounded-full bg-white/20"
@@ -612,11 +618,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             </div>
           </SurfacePanel>
         ) : orders.length === 0 ? (
-          <SurfacePanel className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" appearance="dark" accent="blue">
-              <StorefrontSectionHeading
-              title="No orders yet"
-              description=""
-            />
+          <SurfacePanel
+            className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            appearance="dark"
+            accent="blue"
+          >
+            <StorefrontSectionHeading title="No orders yet" description="" />
             {emptyOrderActionCards.length > 0 ? (
               <StorefrontPathwaysGrid
                 cards={emptyOrderActionCards}
@@ -652,9 +659,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                   className={secondaryButtonClass}
                   disabled={workingId === "refresh"}
                 >
-                  {workingId === "refresh"
-                    ? "Refreshing..."
-                    : "Refresh"}
+                  {workingId === "refresh" ? "Refreshing..." : "Refresh"}
                 </button>
               </div>
             </div>
@@ -678,9 +683,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           Order ID {order.orderId}
                         </p>
                       </div>
-                      <span className={subtleChipClass}>
-                        {order.status}
-                      </span>
+                      <span className={subtleChipClass}>{order.status}</span>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-white/55">
                       <span className="rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1 font-semibold uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">

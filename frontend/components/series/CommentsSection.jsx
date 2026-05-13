@@ -73,13 +73,13 @@ function buildPromptSuggestions({
       label: "Opening hook",
       text: `The first thing that hooked me in ${safeTitle} was `,
     },
-      {
-        id: "moment",
-        label: isCompleted ? "Ending payoff" : `Latest ${latestInstallmentLabel}`,
-        text: isCompleted
-          ? `The ending of ${safeTitle} worked for me because `
-          : `The latest ${latestInstallmentLabel} of ${safeTitle} stood out to me because `,
-      },
+    {
+      id: "moment",
+      label: isCompleted ? "Ending payoff" : `Latest ${latestInstallmentLabel}`,
+      text: isCompleted
+        ? `The ending of ${safeTitle} worked for me because `
+        : `The latest ${latestInstallmentLabel} of ${safeTitle} stood out to me because `,
+    },
     {
       id: "craft",
       label: author ? `${author} style` : "Art or writing",
@@ -258,10 +258,8 @@ export default function CommentsSection({
     [isSignedIn],
   );
 
-  const secondaryButtonClass =
-    storefrontSecondaryButtonClass;
-  const primaryButtonClass =
-    storefrontPrimaryButtonClass;
+  const secondaryButtonClass = storefrontSecondaryButtonClass;
+  const primaryButtonClass = storefrontPrimaryButtonClass;
   const inputClass =
     "flex-1 rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3 text-sm font-semibold text-white outline-none shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out placeholder:text-white/35 hover:border-white/18 hover:bg-[rgba(255,255,255,0.07)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffd5e5]";
 

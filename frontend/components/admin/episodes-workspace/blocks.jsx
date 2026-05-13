@@ -101,7 +101,9 @@ export function EpisodeTable({
               </td>
               <td className="px-4 py-4">
                 <div className="space-y-2">
-                  <p className="font-semibold text-slate-950">#{episode.number}</p>
+                  <p className="font-semibold text-slate-950">
+                    #{episode.number}
+                  </p>
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
@@ -129,7 +131,13 @@ export function EpisodeTable({
                   <input
                     type="text"
                     value={getEpisodeDraftValue(episode, "title")}
-                    onChange={(event) => setEpisodeDraftValue(episode.id, "title", event.target.value)}
+                    onChange={(event) =>
+                      setEpisodeDraftValue(
+                        episode.id,
+                        "title",
+                        event.target.value,
+                      )
+                    }
                     onBlur={() => commitEpisodeField(episode, "title")}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
@@ -148,9 +156,17 @@ export function EpisodeTable({
                   id={`preview-free-pages-${episode.id}`}
                   value={getEpisodeDraftValue(episode, "previewFreePages")}
                   onChange={(event) =>
-                    setEpisodeDraftValue(episode.id, "previewFreePages", event.target.value)
+                    setEpisodeDraftValue(
+                      episode.id,
+                      "previewFreePages",
+                      event.target.value,
+                    )
                   }
-                  onBlur={() => commitEpisodeField(episode, "previewFreePages", { type: "number" })}
+                  onBlur={() =>
+                    commitEpisodeField(episode, "previewFreePages", {
+                      type: "number",
+                    })
+                  }
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.currentTarget.blur();
@@ -175,7 +191,11 @@ export function EpisodeTable({
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      window.open(`/read/${seriesId}/${episode.id}`, "_blank", "noopener,noreferrer")
+                      window.open(
+                        `/read/${seriesId}/${episode.id}`,
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
                     }
                   >
                     <BookOpen className="size-4" />
@@ -209,9 +229,10 @@ export function EpisodePagination({
   return (
     <div className="flex flex-col gap-4 border-t border-[color:var(--gush-border)] bg-white px-5 py-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
       <div>
-        第 <span className="font-medium text-slate-950">{pagination.page}</span> 页，共{" "}
-        {pagination.totalPages} 页，当前共{" "}
-        <span className="font-medium text-slate-950">{pagination.total}</span> 章
+        第 <span className="font-medium text-slate-950">{pagination.page}</span>{" "}
+        页，共 {pagination.totalPages} 页，当前共{" "}
+        <span className="font-medium text-slate-950">{pagination.total}</span>{" "}
+        章
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -271,7 +292,10 @@ export function CreateEpisodeFields({
             min="1"
             value={newEpisode.number}
             onChange={(event) =>
-              setNewEpisode((current) => ({ ...current, number: event.target.value }))
+              setNewEpisode((current) => ({
+                ...current,
+                number: event.target.value,
+              }))
             }
             className={adminInputClassName}
           />
@@ -282,7 +306,10 @@ export function CreateEpisodeFields({
             type="text"
             value={newEpisode.title}
             onChange={(event) =>
-              setNewEpisode((current) => ({ ...current, title: event.target.value }))
+              setNewEpisode((current) => ({
+                ...current,
+                title: event.target.value,
+              }))
             }
             className={adminInputClassName}
           />
@@ -294,7 +321,10 @@ export function CreateEpisodeFields({
             min="0"
             value={newEpisode.previewFreePages}
             onChange={(event) =>
-              setNewEpisode((current) => ({ ...current, previewFreePages: event.target.value }))
+              setNewEpisode((current) => ({
+                ...current,
+                previewFreePages: event.target.value,
+              }))
             }
             className={adminInputClassName}
           />
@@ -315,7 +345,10 @@ export function CreateEpisodeFields({
               min="0"
               value={newEpisode.pricePts}
               onChange={(event) =>
-                setNewEpisode((current) => ({ ...current, pricePts: event.target.value }))
+                setNewEpisode((current) => ({
+                  ...current,
+                  pricePts: event.target.value,
+                }))
               }
               className={adminInputClassName}
             />
@@ -327,7 +360,10 @@ export function CreateEpisodeFields({
               type="checkbox"
               checked={newEpisode.ttfEligible}
               onChange={(event) =>
-                setNewEpisode((current) => ({ ...current, ttfEligible: event.target.checked }))
+                setNewEpisode((current) => ({
+                  ...current,
+                  ttfEligible: event.target.checked,
+                }))
               }
               className={adminCheckboxClassName}
             />
@@ -354,7 +390,10 @@ export function BulkUpdateFields({
             min="0"
             value={bulkForm.previewFreePages}
             onChange={(event) =>
-              setBulkForm((current) => ({ ...current, previewFreePages: event.target.value }))
+              setBulkForm((current) => ({
+                ...current,
+                previewFreePages: event.target.value,
+              }))
             }
             className={adminInputClassName}
           />
@@ -375,7 +414,10 @@ export function BulkUpdateFields({
               min="0"
               value={bulkForm.pricePts}
               onChange={(event) =>
-                setBulkForm((current) => ({ ...current, pricePts: event.target.value }))
+                setBulkForm((current) => ({
+                  ...current,
+                  pricePts: event.target.value,
+                }))
               }
               className={adminInputClassName}
             />
@@ -385,7 +427,10 @@ export function BulkUpdateFields({
               id="bulk-ttf-eligible"
               value={bulkForm.ttfEligible}
               onChange={(event) =>
-                setBulkForm((current) => ({ ...current, ttfEligible: event.target.value }))
+                setBulkForm((current) => ({
+                  ...current,
+                  ttfEligible: event.target.value,
+                }))
               }
               className={adminSelectClassName}
             >

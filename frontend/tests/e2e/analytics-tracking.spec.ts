@@ -22,7 +22,9 @@ async function captureAnalyticsBatches(page: Page) {
     const payload = route.request().postDataJSON() as {
       events?: CapturedEvent[];
     };
-    capturedEvents.push(...(Array.isArray(payload?.events) ? payload.events : []));
+    capturedEvents.push(
+      ...(Array.isArray(payload?.events) ? payload.events : []),
+    );
     await route.fulfill({
       status: 201,
       contentType: "application/json",
@@ -38,7 +40,9 @@ async function flushAnalytics(page: Page, capturedEvents: CapturedEvent[]) {
     window.dispatchEvent(new Event("beforeunload"));
   });
 
-  await expect.poll(() => capturedEvents.length, { timeout: 10000 }).toBeGreaterThan(0);
+  await expect
+    .poll(() => capturedEvents.length, { timeout: 10000 })
+    .toBeGreaterThan(0);
 }
 
 async function mockSharedApiRoutes(
@@ -80,7 +84,11 @@ async function mockSharedApiRoutes(
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ name: "gush-backend", version: "0.1.0", commit: "test-commit" }),
+        body: JSON.stringify({
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        }),
       });
       return;
     }
@@ -122,7 +130,9 @@ async function mockSharedApiRoutes(
         contentType: "application/json",
         body: JSON.stringify({
           isSignedIn: signedIn,
-          user: signedIn ? { id: "reader-001", email: "reader@example.com" } : null,
+          user: signedIn
+            ? { id: "reader-001", email: "reader@example.com" }
+            : null,
         }),
       });
       return;
@@ -160,7 +170,9 @@ async function mockSharedApiRoutes(
     }
 
     if (pathname === "/api/search") {
-      const query = (requestUrl.searchParams.get("q") || "").trim().toLowerCase();
+      const query = (requestUrl.searchParams.get("q") || "")
+        .trim()
+        .toLowerCase();
       const results =
         query === "midnight heat"
           ? [
@@ -171,13 +183,16 @@ async function mockSharedApiRoutes(
                 author: "Vale After Dark",
                 description: "Late-night thriller in the city.",
                 adult: adultFlag === "1",
-                genres: adultFlag === "1" ? ["Mature", "Thriller"] : ["Thriller"],
+                genres:
+                  adultFlag === "1" ? ["Mature", "Thriller"] : ["Thriller"],
                 coverUrl: createReaderPagePlaceholder("Search Cover"),
                 rating: 4.8,
                 viewsText: "12K",
                 viewsValue: 12000,
-                latestEpisodeId: adultFlag === "1" ? "adult-001e1" : "series-001e1",
-                firstEpisodeId: adultFlag === "1" ? "adult-001e1" : "series-001e1",
+                latestEpisodeId:
+                  adultFlag === "1" ? "adult-001e1" : "series-001e1",
+                firstEpisodeId:
+                  adultFlag === "1" ? "adult-001e1" : "series-001e1",
                 episodeCount: 8,
                 status: "UP",
               },
@@ -232,7 +247,10 @@ type ReaderMockOptions = {
   adult?: boolean;
 };
 
-async function mockReaderApiRoutes(page: Page, options: ReaderMockOptions = {}) {
+async function mockReaderApiRoutes(
+  page: Page,
+  options: ReaderMockOptions = {},
+) {
   const seriesId = options.seriesId || "series-001";
   const episodeId = options.episodeId || `${seriesId}e1`;
   const signedIn = options.signedIn ?? false;
@@ -264,7 +282,11 @@ async function mockReaderApiRoutes(page: Page, options: ReaderMockOptions = {}) 
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ name: "gush-backend", version: "0.1.0", commit: "test-commit" }),
+        body: JSON.stringify({
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        }),
       });
       return;
     }
@@ -302,7 +324,9 @@ async function mockReaderApiRoutes(page: Page, options: ReaderMockOptions = {}) 
         contentType: "application/json",
         body: JSON.stringify({
           isSignedIn: signedIn,
-          user: signedIn ? { id: "reader-001", email: "reader@example.com" } : null,
+          user: signedIn
+            ? { id: "reader-001", email: "reader@example.com" }
+            : null,
         }),
       });
       return;
@@ -391,9 +415,21 @@ async function mockReaderApiRoutes(page: Page, options: ReaderMockOptions = {}) 
             pricePts: 0,
             previewFreePages: 3,
             pages: [
-              { url: createReaderPagePlaceholder("Reader P1"), w: 800, h: 1200 },
-              { url: createReaderPagePlaceholder("Reader P2"), w: 800, h: 1200 },
-              { url: createReaderPagePlaceholder("Reader P3"), w: 800, h: 1200 },
+              {
+                url: createReaderPagePlaceholder("Reader P1"),
+                w: 800,
+                h: 1200,
+              },
+              {
+                url: createReaderPagePlaceholder("Reader P2"),
+                w: 800,
+                h: 1200,
+              },
+              {
+                url: createReaderPagePlaceholder("Reader P3"),
+                w: 800,
+                h: 1200,
+              },
             ],
             paragraphs: [],
           },
@@ -471,17 +507,23 @@ test.describe("Analytics tracking", () => {
       },
     });
 
-    const response = await page.goto("/search", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/search", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    const searchInput = page.getByPlaceholder("Search titles, creators, or genres...");
+    const searchInput = page.getByPlaceholder(
+      "Search titles, creators, or genres...",
+    );
     await expect(searchInput).toBeVisible();
     await searchInput.fill("midnight heat");
     await expect(page.getByText("Midnight Heat").first()).toBeVisible();
 
     await flushAnalytics(page, capturedEvents);
 
-    const searchSubmit = capturedEvents.find((event) => event.event === "search_submit");
+    const searchSubmit = capturedEvents.find(
+      (event) => event.event === "search_submit",
+    );
     expect(searchSubmit).toBeTruthy();
     expect(searchSubmit?.props?.has_query).toBe(true);
     expect(searchSubmit?.props?.query_length).toBe(13);
@@ -515,36 +557,42 @@ test.describe("Analytics tracking", () => {
       },
     ]);
 
-    await page.addInitScript(({ trackingConfigRaw }) => {
-      window.__gtagCalls = [];
-      window.__snaptrCalls = [];
-      window.gtag = (...args) => {
-        window.__gtagCalls.push(args);
-      };
-      window.snaptr = (...args) => {
-        window.__snaptrCalls.push(args);
-      };
-      window.__mnGoogleTagScriptLoaded = true;
-      window.__mnSnapPixelScriptLoaded = true;
-      window.localStorage.setItem("mn_region", "global");
-      window.localStorage.setItem("mn_adult_confirmed", "1");
-      window.localStorage.setItem("mn_age_rule", "global");
-      window.localStorage.setItem("mn_adult_mode", "0");
-      window.localStorage.setItem(
-        "mn_mature_verification",
-        JSON.stringify({
-          verified: true,
-          provider: "local-gate",
-          region: "global",
-          expiresAt: null,
-          referenceId: null,
-          verifiedAt: "2026-05-11T00:00:00.000Z",
-        }),
-      );
-      window.localStorage.setItem("mn_tracking_settings_v1", trackingConfigRaw);
-    }, {
-      trackingConfigRaw: buildTrackingConfig(trackedConfig),
-    });
+    await page.addInitScript(
+      ({ trackingConfigRaw }) => {
+        window.__gtagCalls = [];
+        window.__snaptrCalls = [];
+        window.gtag = (...args) => {
+          window.__gtagCalls.push(args);
+        };
+        window.snaptr = (...args) => {
+          window.__snaptrCalls.push(args);
+        };
+        window.__mnGoogleTagScriptLoaded = true;
+        window.__mnSnapPixelScriptLoaded = true;
+        window.localStorage.setItem("mn_region", "global");
+        window.localStorage.setItem("mn_adult_confirmed", "1");
+        window.localStorage.setItem("mn_age_rule", "global");
+        window.localStorage.setItem("mn_adult_mode", "0");
+        window.localStorage.setItem(
+          "mn_mature_verification",
+          JSON.stringify({
+            verified: true,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: "2026-05-11T00:00:00.000Z",
+          }),
+        );
+        window.localStorage.setItem(
+          "mn_tracking_settings_v1",
+          trackingConfigRaw,
+        );
+      },
+      {
+        trackingConfigRaw: buildTrackingConfig(trackedConfig),
+      },
+    );
 
     await mockSharedApiRoutes(page, {
       signedIn: true,
@@ -594,7 +642,9 @@ test.describe("Analytics tracking", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const adultToggle = page.getByRole("button", { name: /Enter 18\+ mode|18\+/i }).first();
+    const adultToggle = page
+      .getByRole("button", { name: /Enter 18\+ mode|18\+/i })
+      .first();
     await expect(adultToggle).toBeVisible();
     await adultToggle.click();
 
@@ -609,13 +659,16 @@ test.describe("Analytics tracking", () => {
     const gtagCalls = await page.evaluate(() => window.__gtagCalls);
     expect(
       gtagCalls.some(
-        (entry) => entry[0] === "event" && entry[1] === "content_mode_enter_adult",
+        (entry) =>
+          entry[0] === "event" && entry[1] === "content_mode_enter_adult",
       ),
     ).toBe(true);
 
     const snaptrCalls = await page.evaluate(() => window.__snaptrCalls);
     expect(
-      snaptrCalls.some((entry) => entry[0] === "init" && entry[1] === "SNAP-PIXEL-123"),
+      snaptrCalls.some(
+        (entry) => entry[0] === "init" && entry[1] === "SNAP-PIXEL-123",
+      ),
     ).toBe(true);
 
     await expectNoRuntimeIssues("/", runtimeIssues);
@@ -637,22 +690,32 @@ test.describe("Analytics tracking", () => {
 
     await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
 
-    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "auto" }));
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "auto" }),
+    );
     await page.waitForTimeout(300);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "auto" }));
     await page.waitForTimeout(300);
-    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "auto" }));
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "auto" }),
+    );
 
     await flushAnalytics(page, capturedEvents);
 
-    const progressEvents = capturedEvents.filter((event) => event.event === "episode_progress");
-    const milestones = progressEvents.map((event) => Number(event.props?.milestone || 0));
+    const progressEvents = capturedEvents.filter(
+      (event) => event.event === "episode_progress",
+    );
+    const milestones = progressEvents.map((event) =>
+      Number(event.props?.milestone || 0),
+    );
 
     expect(milestones.length).toBeGreaterThan(0);
     expect(new Set(milestones).size).toBe(milestones.length);
   });
 
-  test("adult reader blocked events should stay sanitized", async ({ page }) => {
+  test("adult reader blocked events should stay sanitized", async ({
+    page,
+  }) => {
     const capturedEvents = await captureAnalyticsBatches(page);
     await mockReaderApiRoutes(page, {
       seriesId: "adult-001",
@@ -666,10 +729,14 @@ test.describe("Analytics tracking", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText(/Adult mode required|Confirm your age|Enable adult mode/i)).toBeVisible();
+    await expect(
+      page.getByText(/Adult mode required|Confirm your age|Enable adult mode/i),
+    ).toBeVisible();
     await flushAnalytics(page, capturedEvents);
 
-    const blockedEvent = capturedEvents.find((event) => event.event === "adult_reader_blocked");
+    const blockedEvent = capturedEvents.find(
+      (event) => event.event === "adult_reader_blocked",
+    );
     expect(blockedEvent).toBeTruthy();
     expect(blockedEvent?.props?.is_adult).toBe(true);
     expect(blockedEvent?.props).not.toHaveProperty("title");

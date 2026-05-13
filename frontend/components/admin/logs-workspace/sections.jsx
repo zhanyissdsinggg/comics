@@ -15,7 +15,12 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
-import { buildLogsMetricCards, formatDateTime, getAdminIdentity, summarizeDetails } from "./utils";
+import {
+  buildLogsMetricCards,
+  formatDateTime,
+  getAdminIdentity,
+  summarizeDetails,
+} from "./utils";
 
 export function LogsSummaryCards({ total, actionCount, adminCount }) {
   const cards = buildLogsMetricCards({ total, actionCount, adminCount });
@@ -89,7 +94,11 @@ export function LogsTableSection({ logsQuery, logs }) {
       description="先看时间、操作者和动作摘要。"
       eyebrow="审计记录"
       action={
-        <Button type="button" variant="outline" onClick={() => logsQuery.refetch()}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => logsQuery.refetch()}
+        >
           <RefreshCw className="size-4" />
           刷新
         </Button>
@@ -98,7 +107,10 @@ export function LogsTableSection({ logsQuery, logs }) {
       {logsQuery.isLoading ? (
         <LoadingState.Spinner size="md" text="正在加载审计日志" />
       ) : logsQuery.error ? (
-        <LoadingState.ErrorState error={logsQuery.error.message} onRetry={() => logsQuery.refetch()} />
+        <LoadingState.ErrorState
+          error={logsQuery.error.message}
+          onRetry={() => logsQuery.refetch()}
+        />
       ) : logs.length === 0 ? (
         <LoadingState.EmptyState message="当前筛选下没有审计日志。" />
       ) : (
@@ -121,14 +133,24 @@ export function LogsTableSection({ logsQuery, logs }) {
                     {formatDateTime(log.createdAt || log.timestamp)}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="font-medium text-slate-950">{getAdminIdentity(log) || "未知操作者"}</div>
-                    <div className="mt-1 text-xs text-slate-500">{log.ip || "未记录 IP"}</div>
+                    <div className="font-medium text-slate-950">
+                      {getAdminIdentity(log) || "未知操作者"}
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {log.ip || "未记录 IP"}
+                    </div>
                   </td>
                   <td className="px-4 py-4">
-                    <AdminBadge tone="accent">{log.action || "未知动作"}</AdminBadge>
+                    <AdminBadge tone="accent">
+                      {log.action || "未知动作"}
+                    </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 text-slate-700">{log.resource || "未知资源"}</td>
-                  <td className="px-4 py-4 text-slate-700">{log.resourceId || "暂无目标编号"}</td>
+                  <td className="px-4 py-4 text-slate-700">
+                    {log.resource || "未知资源"}
+                  </td>
+                  <td className="px-4 py-4 text-slate-700">
+                    {log.resourceId || "暂无目标编号"}
+                  </td>
                   <td className="max-w-[28rem] px-4 py-4 text-xs leading-6 text-slate-600">
                     {summarizeDetails(log.details)}
                   </td>

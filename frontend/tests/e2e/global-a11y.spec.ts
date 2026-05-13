@@ -2,7 +2,10 @@ import { expect, test, type Route } from "@playwright/test";
 import { createPosterPlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
-import { expectVisibleFocusIndicator, tabToAndExpectVisibleFocus } from "./support/keyboard";
+import {
+  expectVisibleFocusIndicator,
+  tabToAndExpectVisibleFocus,
+} from "./support/keyboard";
 
 const SEARCH_UI_TIMEOUT_MS = 15000;
 const SEARCH_SERIES = {
@@ -37,17 +40,28 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
   });
 }
 
-async function handleSearchRoute(route: Route, signedIn: boolean): Promise<void> {
+async function handleSearchRoute(
+  route: Route,
+  signedIn: boolean,
+): Promise<void> {
   const requestUrl = new URL(route.request().url());
   const pathname = requestUrl.pathname;
 
-  if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+  if (
+    pathname === "/api/health" ||
+    pathname === "/api/health/ready" ||
+    pathname === "/api/health/live"
+  ) {
     await fulfillJson(route, { ok: true, dbOk: true });
     return;
   }
 
   if (pathname === "/api/meta/version") {
-    await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+    await fulfillJson(route, {
+      name: "gush-backend",
+      version: "0.1.0",
+      commit: "test-commit",
+    });
     return;
   }
 
@@ -149,7 +163,9 @@ async function handleSearchRoute(route: Route, signedIn: boolean): Promise<void>
 }
 
 test.describe("Global accessibility guardrails", () => {
-  test("desktop search should expose named header controls, dynamic cover alt text, and visible focus", async ({ page }) => {
+  test("desktop search should expose named header controls, dynamic cover alt text, and visible focus", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
     await page.addInitScript(() => {
@@ -158,20 +174,30 @@ test.describe("Global accessibility guardrails", () => {
     await page.route("**/api/**", (route) => handleSearchRoute(route, true));
     await page.setViewportSize({ width: 1280, height: 900 });
 
-    const response = await page.goto("/search?q=dragon", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/search?q=dragon", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     const searchInput = page
-      .getByPlaceholder(/Search series, creators\.\.\.|Search titles, genres, or creators|Search titles/i)
+      .getByPlaceholder(
+        /Search series, creators\.\.\.|Search titles, genres, or creators|Search titles/i,
+      )
       .first();
     await expect(searchInput).toBeVisible({ timeout: SEARCH_UI_TIMEOUT_MS });
-    await expect(page.getByRole("button", { name: "View your wallet" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "View your wallet" }),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "View your notifications" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "View your notifications" }),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Dragon Ledger" })).toBeVisible({
+    await expect(
+      page.getByRole("img", { name: "Comic cover image for Dragon Ledger" }),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
 
@@ -179,8 +205,12 @@ test.describe("Global accessibility guardrails", () => {
       label: "Desktop header search input",
       focusRingTarget: searchInput.locator("xpath=.."),
     });
-    const walletButton = page.getByRole("button", { name: /View your wallet/i });
-    const notificationsButton = page.getByRole("button", { name: /View your notifications/i });
+    const walletButton = page.getByRole("button", {
+      name: /View your wallet/i,
+    });
+    const notificationsButton = page.getByRole("button", {
+      name: /View your notifications/i,
+    });
     const adultToggle = page.getByRole("button", {
       name: /Switch to 18\+ mode|Switch to standard mode/i,
     });
@@ -192,11 +222,17 @@ test.describe("Global accessibility guardrails", () => {
 
     await notificationsButton.focus();
     await expect(notificationsButton).toBeFocused();
-    await expectVisibleFocusIndicator(notificationsButton, "Desktop notifications button");
+    await expectVisibleFocusIndicator(
+      notificationsButton,
+      "Desktop notifications button",
+    );
 
     await adultToggle.focus();
     await expect(adultToggle).toBeFocused();
-    await expectVisibleFocusIndicator(adultToggle, "Desktop adult content toggle");
+    await expectVisibleFocusIndicator(
+      adultToggle,
+      "Desktop adult content toggle",
+    );
 
     await accountButton.focus();
     await expect(accountButton).toBeFocused();
@@ -207,7 +243,9 @@ test.describe("Global accessibility guardrails", () => {
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
   });
 
-  test("mobile header should expose labeled search and menu controls", async ({ page }) => {
+  test("mobile header should expose labeled search and menu controls", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
 
     await page.addInitScript(() => {
@@ -216,22 +254,34 @@ test.describe("Global accessibility guardrails", () => {
     await page.route("**/api/**", (route) => handleSearchRoute(route, false));
     await page.setViewportSize({ width: 390, height: 844 });
 
-    const response = await page.goto("/search", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/search", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByRole("link", { name: "Open search" })).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Open main menu" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Open main menu" }),
+    ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
-    await tabToAndExpectVisibleFocus(page, page.getByRole("link", { name: "Open search" }), {
-      label: "Mobile Open search control",
-    });
-    await tabToAndExpectVisibleFocus(page, page.getByRole("button", { name: "Open main menu" }), {
-      label: "Mobile main menu button",
-      resetBeforeTab: false,
-    });
+    await tabToAndExpectVisibleFocus(
+      page,
+      page.getByRole("link", { name: "Open search" }),
+      {
+        label: "Mobile Open search control",
+      },
+    );
+    await tabToAndExpectVisibleFocus(
+      page,
+      page.getByRole("button", { name: "Open main menu" }),
+      {
+        label: "Mobile main menu button",
+        resetBeforeTab: false,
+      },
+    );
 
     await page.waitForTimeout(300);
     await expectNoBasicA11yAuditIssues(page, "/search");

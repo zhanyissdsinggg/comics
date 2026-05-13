@@ -10,6 +10,8 @@ export async function checkBackendHealth() {
   }
   lastCheckedAt = now;
   const response = await apiGet("/api/health", { cacheMs: 0, bust: true });
-  lastStatus = response.ok ? { ok: true } : { ok: false, error: response.error };
+  lastStatus = response.ok
+    ? { ok: true }
+    : { ok: false, error: response.error };
   return lastStatus;
 }

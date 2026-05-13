@@ -1423,14 +1423,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
       });
       return;
     }
-      setModalState({
-        type: "SUCCESS",
-        title: "Pack unlocked",
-        description: `${formatInstallmentCount(
-          readerSeriesType,
-          targets.length,
-        )} are ready.`,
-      });
+    setModalState({
+      type: "SUCCESS",
+      title: "Pack unlocked",
+      description: `${formatInstallmentCount(
+        readerSeriesType,
+        targets.length,
+      )} are ready.`,
+    });
     router.push(buildEpisodeHref(targets[0].id));
   };
 
@@ -1576,11 +1576,11 @@ export default function ReaderPage({ seriesId, episodeId }) {
           onBack={() => router.push(buildSeriesHref())}
         />
         <div className="mx-auto max-w-3xl px-4 py-10">
-            <NetworkFallback
-              compact
-              title={`This ${readerInstallmentLabelLower} didn't load.`}
-              description="Try again."
-              onRetry={() => fetchEpisode({ bustSeries: true })}
+          <NetworkFallback
+            compact
+            title={`This ${readerInstallmentLabelLower} didn't load.`}
+            description="Try again."
+            onRetry={() => fetchEpisode({ bustSeries: true })}
           >
             <button
               type="button"
@@ -1600,9 +1600,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 )
               }
               className={lightSecondaryButtonClass}
-              >
-                Support
-              </button>
+            >
+              Support
+            </button>
           </NetworkFallback>
         </div>
       </main>
@@ -1743,7 +1743,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
               Keep Reading
             </h2>
             <p className="mt-2 text-sm font-medium leading-7 text-white/68">
-              {previewCount || previewParagraphs ? "Preview ends here." : "Unlock next."}
+              {previewCount || previewParagraphs
+                ? "Preview ends here."
+                : "Unlock next."}
             </p>
             {previewCount ? (
               <p className="mt-2 text-xs font-medium text-white/58">
@@ -1765,15 +1767,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   {isSignedIn ? `${walletBalance} points` : "Sign in"}
                 </p>
                 <p className="mt-1 text-xs font-medium text-black/70">
-                  {isSignedIn
-                    ? "Ready"
-                    : "Sign in"}
+                  {isSignedIn ? "Ready" : "Sign in"}
                 </p>
               </div>
-                <div className={lightInfoCardClass}>
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/75">
-                    This {readerInstallmentLabelLower}
-                  </p>
+              <div className={lightInfoCardClass}>
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-black/75">
+                  This {readerInstallmentLabelLower}
+                </p>
                 <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
                   {currentPricing.finalPrice === 0
                     ? "Free"
@@ -1792,14 +1792,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   Your access
                 </p>
                 <p className="mt-2 text-lg font-black uppercase tracking-[-0.03em] text-black">
-                  {!isSignedIn ? "Signed out" : isSubscriber ? "Member" : "Points"}
-                </p>
-                <p className="mt-1 text-xs font-medium text-black/70">
                   {!isSignedIn
-                    ? "Sign in"
+                    ? "Signed out"
                     : isSubscriber
                       ? "Member"
                       : "Points"}
+                </p>
+                <p className="mt-1 text-xs font-medium text-black/70">
+                  {!isSignedIn ? "Sign in" : isSubscriber ? "Member" : "Points"}
                 </p>
               </div>
             </div>
@@ -1814,7 +1814,9 @@ export default function ReaderPage({ seriesId, episodeId }) {
             ) : null}
             {upcomingEpisodes.length > 0 ? (
               <div className={`mt-4 ${lightInfoCardClass} text-left`}>
-                <p className="text-sm font-black uppercase tracking-[0.04em] text-black">Up next</p>
+                <p className="text-sm font-black uppercase tracking-[0.04em] text-black">
+                  Up next
+                </p>
                 <div className="mt-3 space-y-2">
                   {upcomingEpisodes.map((item) => (
                     <div
@@ -2177,15 +2179,15 @@ export default function ReaderPage({ seriesId, episodeId }) {
           compareItems={
             modalState?.type === "SHORTFALL" &&
             offerDecision?.recommendedUnlockOffer?.episodes > 1
-                ? [
-                    {
+              ? [
+                  {
                     label: `Single ${readerInstallmentLabelLower}`,
-                      value: `${episodeData?.pricePts || 0} points`,
-                    },
-                    {
+                    value: `${episodeData?.pricePts || 0} points`,
+                  },
+                  {
                     label: `${offerDecision.recommendedUnlockOffer.episodes}-${readerInstallmentLabelLower} pack`,
-                      value: `${offerDecision.recommendedUnlockOffer.pricePts} points`,
-                    },
+                    value: `${offerDecision.recommendedUnlockOffer.pricePts} points`,
+                  },
                   {
                     label: "Plans",
                     value: isSubscriber
@@ -2197,8 +2199,8 @@ export default function ReaderPage({ seriesId, episodeId }) {
           }
           compareTitle="Compare options"
           tips={
-              modalState?.type === "SHORTFALL"
-                ? [
+            modalState?.type === "SHORTFALL"
+              ? [
                   `Unlocked ${readerInstallmentPluralLower} stay in your library.`,
                   `Packs usually cost less per ${readerInstallmentLabelLower}.`,
                   "Plans can unlock free reads.",
@@ -2313,8 +2315,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
                       setModalState({
                         type: "ERROR",
                         title: "Points didn't load",
-                        description:
-                          "Checkout didn't finish.",
+                        description: "Checkout didn't finish.",
                       });
                     },
                     variant: "primary",

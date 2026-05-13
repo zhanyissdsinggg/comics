@@ -53,7 +53,9 @@ function AccountContent({ seriesList = [] }) {
     [bookmarksBySeries, catalogItems],
   );
   const walletTotal = formatWalletTotal({ paidPts, bonusPts });
-  const displayName = String(user?.email || user?.name || "Reader").split("@")[0];
+  const displayName = String(user?.email || user?.name || "Reader").split(
+    "@",
+  )[0];
   const memberCode = String(walletTotal || 84920).padStart(5, "0");
 
   if (!isSignedIn) {
@@ -81,8 +83,8 @@ function AccountContent({ seriesList = [] }) {
                 This device, for now.
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-6 text-gray-300 md:mt-4 md:max-w-2xl md:text-base md:leading-7">
-                Sign in to sync your library, wallet balance, and reading progress
-                across every screen you use.
+                Sign in to sync your library, wallet balance, and reading
+                progress across every screen you use.
               </p>
               <div className="mt-6 flex flex-col items-stretch gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
                 <button
@@ -137,7 +139,9 @@ function AccountContent({ seriesList = [] }) {
                     palette.border,
                   )}
                 >
-                  <h2 className="text-lg font-black text-white md:text-xl">{item.title}</h2>
+                  <h2 className="text-lg font-black text-white md:text-xl">
+                    {item.title}
+                  </h2>
                   <p className="mt-2.5 text-sm leading-6 text-gray-400 md:mt-3 md:leading-7">
                     {item.body}
                   </p>
@@ -184,7 +188,9 @@ function AccountContent({ seriesList = [] }) {
                 <div
                   className={cn(
                     "absolute -bottom-3 -right-3 z-20 flex h-10 w-10 items-center justify-center rounded-xl shadow-lg",
-                    isAdultMode ? "bg-red-600 text-white" : "bg-yellow-500 text-black",
+                    isAdultMode
+                      ? "bg-red-600 text-white"
+                      : "bg-yellow-500 text-black",
                   )}
                 >
                   <Crown className="h-5 w-5 fill-current" />
@@ -219,7 +225,9 @@ function AccountContent({ seriesList = [] }) {
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                       Status
                     </p>
-                    <p className="mt-2 text-sm font-bold text-white">Verified reader</p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      Verified reader
+                    </p>
                   </div>
                   <div className="rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
@@ -233,7 +241,9 @@ function AccountContent({ seriesList = [] }) {
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                       Sync
                     </p>
-                    <p className="mt-2 text-sm font-bold text-white">Library live</p>
+                    <p className="mt-2 text-sm font-bold text-white">
+                      Library live
+                    </p>
                   </div>
                 </div>
 
@@ -281,14 +291,16 @@ function AccountContent({ seriesList = [] }) {
                   <span className="mb-1 font-bold text-yellow-500">Coins</span>
                 </div>
                 <p className="mt-3 text-sm text-gray-500">
-                  Paid {paidPts.toLocaleString()} | Bonus {bonusPts.toLocaleString()}
+                  Paid {paidPts.toLocaleString()} | Bonus{" "}
+                  {bonusPts.toLocaleString()}
                 </p>
                 <div className="mt-4 rounded-[20px] border border-white/10 bg-black/20 px-4 py-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Account lane
                   </p>
                   <p className="mt-2 text-sm leading-5 text-gray-400">
-                    Use the wallet for chapter unlocks, then manage plans and settings from the same account area.
+                    Use the wallet for chapter unlocks, then manage plans and
+                    settings from the same account area.
                   </p>
                 </div>
               </div>
@@ -446,8 +458,8 @@ function AccountContent({ seriesList = [] }) {
                     No Bookmarks Yet
                   </h3>
                   <p className="mb-6 max-w-sm text-gray-400">
-                    Save your favorite titles and they&apos;ll show up here for quick
-                    access.
+                    Save your favorite titles and they&apos;ll show up here for
+                    quick access.
                   </p>
                   <Link
                     href="/"

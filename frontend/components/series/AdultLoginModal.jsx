@@ -6,7 +6,12 @@ import {
   LOGIN_GATE_TITLE,
 } from "../../lib/adultGateCopy";
 
-export default function AdultLoginModal({ open, onClose, onSubmit, errorMessage }) {
+export default function AdultLoginModal({
+  open,
+  onClose,
+  onSubmit,
+  errorMessage,
+}) {
   return (
     <LoginGateModal
       open={open}

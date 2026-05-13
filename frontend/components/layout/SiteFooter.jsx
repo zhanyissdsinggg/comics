@@ -240,7 +240,9 @@ export default function SiteFooter({
               ) : null}
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
-              <p>Copyright {currentYear} {siteConfig.companyName}</p>
+              <p>
+                Copyright {currentYear} {siteConfig.companyName}
+              </p>
               <p className="text-white/40">{footerLegalStatement}</p>
             </div>
           </div>
@@ -342,7 +344,9 @@ export default function SiteFooter({
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span>Copyright {currentYear} {siteConfig.companyName}</span>
+              <span>
+                Copyright {currentYear} {siteConfig.companyName}
+              </span>
               {siteConfig.companyAddress ? (
                 <span>{siteConfig.companyAddress}</span>
               ) : null}

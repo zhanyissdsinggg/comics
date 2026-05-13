@@ -1,11 +1,11 @@
-﻿import { useMutation, UseMutationOptions } from '@tanstack/react-query';
-import { adminFetch } from '../adminApiClient';
+﻿import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { adminFetch } from "../adminApiClient";
 
 export type BulkMutationPayload = Record<string, unknown>;
 
 export interface BulkMutationConfig {
   endpoint: string;
-  method: 'DELETE' | 'PATCH' | 'POST';
+  method: "DELETE" | "PATCH" | "POST";
   bodyBuilder?: (id: string) => BulkMutationPayload;
   appendIdToPath?: boolean;
 }
@@ -17,16 +17,21 @@ export interface UseBulkMutationReturn {
   error: Error | null;
 }
 
-async function readResponseError(response: Response, fallbackMessage: string): Promise<string> {
+async function readResponseError(
+  response: Response,
+  fallbackMessage: string,
+): Promise<string> {
   try {
     const payload = await response.json();
     const message = payload?.message ?? payload?.error ?? payload?.details;
 
     if (Array.isArray(message)) {
-      return message.find((item) => typeof item === 'string') || fallbackMessage;
+      return (
+        message.find((item) => typeof item === "string") || fallbackMessage
+      );
     }
 
-    if (typeof message === 'string' && message.trim()) {
+    if (typeof message === "string" && message.trim()) {
       return message;
     }
   } catch {
@@ -47,12 +52,12 @@ async function readResponseError(response: Response, fallbackMessage: string): P
 
 export function useBulkMutation(
   config: BulkMutationConfig,
-  options?: Omit<UseMutationOptions<void, Error, string[]>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, Error, string[]>, "mutationFn">,
 ): UseBulkMutationReturn {
   const mutation = useMutation<void, Error, string[]>({
     mutationFn: async (ids: string[]) => {
       if (!ids || ids.length === 0) {
-        throw new Error('No items selected');
+        throw new Error("No items selected");
       }
 
       const requests = ids.map(async (id) => {
@@ -64,7 +69,7 @@ export function useBulkMutation(
           method: config.method,
         };
 
-        if (config.method === 'PATCH' || config.method === 'POST') {
+        if (config.method === "PATCH" || config.method === "POST") {
           const body = config.bodyBuilder ? config.bodyBuilder(id) : {};
           requestOptions.body = JSON.stringify(body);
         }
@@ -72,27 +77,38 @@ export function useBulkMutation(
         const response = await adminFetch(url, requestOptions);
         if (!response.ok) {
           throw new Error(
-            await readResponseError(response, `${config.method} ${config.endpoint} failed for ${id}.`)
+            await readResponseError(
+              response,
+              `${config.method} ${config.endpoint} failed for ${id}.`,
+            ),
           );
         }
       });
 
       const results = await Promise.allSettled(requests);
-      const failed = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+      const failed = results.filter(
+        (result): result is PromiseRejectedResult =>
+          result.status === "rejected",
+      );
 
       if (failed.length > 0) {
         const firstError = failed[0]?.reason;
-        const firstMessage = firstError instanceof Error ? firstError.message : String(firstError || 'Unknown error');
+        const firstMessage =
+          firstError instanceof Error
+            ? firstError.message
+            : String(firstError || "Unknown error");
 
         if (ids.length === 1) {
           throw new Error(firstMessage);
         }
 
-        throw new Error(`${failed.length}/${ids.length} operations failed. ${firstMessage}`);
+        throw new Error(
+          `${failed.length}/${ids.length} operations failed. ${firstMessage}`,
+        );
       }
     },
     onError: (error) => {
-      console.error('Bulk operation failed:', error);
+      console.error("Bulk operation failed:", error);
     },
     ...options,
   });
@@ -107,32 +123,32 @@ export function useBulkMutation(
 
 export function useBulkDelete(
   endpoint: string,
-  options?: Omit<UseMutationOptions<void, Error, string[]>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, Error, string[]>, "mutationFn">,
 ): UseBulkMutationReturn {
   return useBulkMutation(
     {
       endpoint,
-      method: 'DELETE',
+      method: "DELETE",
     },
-    options
+    options,
   );
 }
 
 export function useBulkUpdateStatus(
   endpoint: string,
-  statusField: string = 'status',
+  statusField: string = "status",
   statusValue: unknown = null,
-  options?: Omit<UseMutationOptions<void, Error, string[]>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, Error, string[]>, "mutationFn">,
 ): UseBulkMutationReturn {
   return useBulkMutation(
     {
       endpoint,
-      method: 'PATCH',
+      method: "PATCH",
       bodyBuilder: () => ({
         [statusField]: statusValue,
       }),
     },
-    options
+    options,
   );
 }
 
@@ -140,16 +156,16 @@ export function useBulkUpdateBoolean(
   endpoint: string,
   fieldName: string,
   fieldValue: boolean,
-  options?: Omit<UseMutationOptions<void, Error, string[]>, 'mutationFn'>
+  options?: Omit<UseMutationOptions<void, Error, string[]>, "mutationFn">,
 ): UseBulkMutationReturn {
   return useBulkMutation(
     {
       endpoint,
-      method: 'PATCH',
+      method: "PATCH",
       bodyBuilder: () => ({
         [fieldName]: fieldValue,
       }),
     },
-    options
+    options,
   );
 }

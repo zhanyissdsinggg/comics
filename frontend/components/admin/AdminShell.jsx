@@ -39,8 +39,19 @@ const NAV_GROUPS = [
   {
     label: "工作台",
     items: [
-      { label: "仪表盘", href: "/admin", icon: BarChart3, match: ["/admin"], exact: true },
-      { label: "数据分析", href: "/admin/analytics", icon: BarChart3, match: ["/admin/analytics"] },
+      {
+        label: "仪表盘",
+        href: "/admin",
+        icon: BarChart3,
+        match: ["/admin"],
+        exact: true,
+      },
+      {
+        label: "数据分析",
+        href: "/admin/analytics",
+        icon: BarChart3,
+        match: ["/admin/analytics"],
+      },
       {
         label: "作品",
         href: "/admin/series",
@@ -52,48 +63,158 @@ const NAV_GROUPS = [
           { label: "小说", href: "/admin/series?type=novel" },
         ],
       },
-      { label: "创作者", href: "/admin/creators", icon: PenSquare, match: ["/admin/creators"] },
-      { label: "互动小说", href: "/admin/interactive-stories", icon: BookOpen, match: ["/admin/interactive-stories"] },
+      {
+        label: "创作者",
+        href: "/admin/creators",
+        icon: PenSquare,
+        match: ["/admin/creators"],
+      },
+      {
+        label: "互动小说",
+        href: "/admin/interactive-stories",
+        icon: BookOpen,
+        match: ["/admin/interactive-stories"],
+      },
     ],
   },
   {
     label: "发现与前台",
     items: [
-      { label: "前台巡检", href: "/admin/storefront", icon: Search, match: ["/admin/storefront"] },
-      { label: "首页编排", href: "/admin/merchandising", icon: Sparkles, match: ["/admin/merchandising"] },
-      { label: "推荐位", href: "/admin/recommendations", icon: Sparkles, match: ["/admin/recommendations"] },
-      { label: "评论", href: "/admin/comments", icon: MessageSquare, match: ["/admin/comments"] },
+      {
+        label: "前台巡检",
+        href: "/admin/storefront",
+        icon: Search,
+        match: ["/admin/storefront"],
+      },
+      {
+        label: "首页编排",
+        href: "/admin/merchandising",
+        icon: Sparkles,
+        match: ["/admin/merchandising"],
+      },
+      {
+        label: "推荐位",
+        href: "/admin/recommendations",
+        icon: Sparkles,
+        match: ["/admin/recommendations"],
+      },
+      {
+        label: "评论",
+        href: "/admin/comments",
+        icon: MessageSquare,
+        match: ["/admin/comments"],
+      },
     ],
   },
   {
     label: "用户与服务",
     items: [
-      { label: "用户", href: "/admin/users", icon: Users, match: ["/admin/users"] },
-      { label: "客服支持", href: "/admin/support", icon: LifeBuoy, match: ["/admin/support"] },
-      { label: "通知", href: "/admin/notifications", icon: Bell, match: ["/admin/notifications"] },
-      { label: "审计日志", href: "/admin/logs", icon: ScrollText, match: ["/admin/logs"] },
+      {
+        label: "用户",
+        href: "/admin/users",
+        icon: Users,
+        match: ["/admin/users"],
+      },
+      {
+        label: "客服支持",
+        href: "/admin/support",
+        icon: LifeBuoy,
+        match: ["/admin/support"],
+      },
+      {
+        label: "通知",
+        href: "/admin/notifications",
+        icon: Bell,
+        match: ["/admin/notifications"],
+      },
+      {
+        label: "审计日志",
+        href: "/admin/logs",
+        icon: ScrollText,
+        match: ["/admin/logs"],
+      },
     ],
   },
   {
     label: "商业与收入",
     items: [
-      { label: "活动", href: "/admin/promotions", icon: Megaphone, match: ["/admin/promotions"] },
-      { label: "营销", href: "/admin/marketing", icon: Megaphone, match: ["/admin/marketing"] },
-      { label: "订单", href: "/admin/orders", icon: Receipt, match: ["/admin/orders"] },
-      { label: "收入", href: "/admin/revenue", icon: CreditCard, match: ["/admin/revenue"] },
-      { label: "计费", href: "/admin/billing", icon: CreditCard, match: ["/admin/billing"] },
+      {
+        label: "活动",
+        href: "/admin/promotions",
+        icon: Megaphone,
+        match: ["/admin/promotions"],
+      },
+      {
+        label: "营销",
+        href: "/admin/marketing",
+        icon: Megaphone,
+        match: ["/admin/marketing"],
+      },
+      {
+        label: "订单",
+        href: "/admin/orders",
+        icon: Receipt,
+        match: ["/admin/orders"],
+      },
+      {
+        label: "收入",
+        href: "/admin/revenue",
+        icon: CreditCard,
+        match: ["/admin/revenue"],
+      },
+      {
+        label: "计费",
+        href: "/admin/billing",
+        icon: CreditCard,
+        match: ["/admin/billing"],
+      },
     ],
   },
   {
     label: "设置",
     items: [
-      { label: "品牌素材", href: "/admin/branding", icon: Image, match: ["/admin/branding"] },
-      { label: "邮件设置", href: "/admin/email-settings", icon: Mail, match: ["/admin/email-settings"] },
-      { label: "邮件任务", href: "/admin/email-jobs", icon: MailCheck, match: ["/admin/email-jobs"] },
-      { label: "追踪设置", href: "/admin/tracking", icon: Radar, match: ["/admin/tracking"] },
-      { label: "后台成员", href: "/admin/members", icon: ShieldCheck, match: ["/admin/members"] },
-      { label: "地区", href: "/admin/regions", icon: Globe, match: ["/admin/regions"] },
-      { label: "系统设置", href: "/admin/settings", icon: Settings, match: ["/admin/settings"] },
+      {
+        label: "品牌素材",
+        href: "/admin/branding",
+        icon: Image,
+        match: ["/admin/branding"],
+      },
+      {
+        label: "邮件设置",
+        href: "/admin/email-settings",
+        icon: Mail,
+        match: ["/admin/email-settings"],
+      },
+      {
+        label: "邮件任务",
+        href: "/admin/email-jobs",
+        icon: MailCheck,
+        match: ["/admin/email-jobs"],
+      },
+      {
+        label: "追踪设置",
+        href: "/admin/tracking",
+        icon: Radar,
+        match: ["/admin/tracking"],
+      },
+      {
+        label: "后台成员",
+        href: "/admin/members",
+        icon: ShieldCheck,
+        match: ["/admin/members"],
+      },
+      {
+        label: "地区",
+        href: "/admin/regions",
+        icon: Globe,
+        match: ["/admin/regions"],
+      },
+      {
+        label: "系统设置",
+        href: "/admin/settings",
+        icon: Settings,
+        match: ["/admin/settings"],
+      },
     ],
   },
 ];
@@ -152,13 +273,16 @@ export default function AdminShell({ title, subtitle, children, actions }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const breadcrumb = getBreadcrumb(pathname);
-  const { adminRole, permissions, routePatterns, homePath, session } = useAdminAuth();
+  const { adminRole, permissions, routePatterns, homePath, session } =
+    useAdminAuth();
   const roleLabel = getAdminRoleLabel(adminRole);
   const effectiveHomePath = homePath || "/admin";
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState(new Set(["/admin/series"]));
+  const [expandedMenus, setExpandedMenus] = useState(
+    new Set(["/admin/series"]),
+  );
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const visibleNavGroups = useMemo(
@@ -169,7 +293,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
           .map((item) => ({
             ...item,
             children: Array.isArray(item.children)
-              ? item.children.filter((child) => canAccessAdminRoute(child.href, routePatterns))
+              ? item.children.filter((child) =>
+                  canAccessAdminRoute(child.href, routePatterns),
+                )
               : item.children,
           }))
           .filter((item) => canAccessAdminRoute(item.href, routePatterns)),
@@ -237,13 +363,18 @@ export default function AdminShell({ title, subtitle, children, actions }) {
           className={cn(
             "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.04)] transition-all duration-300 lg:relative",
             isCollapsed ? "w-[92px]" : "w-[284px]",
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+            isMobileMenuOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0",
           )}
         >
           <div className="flex h-full flex-col">
             <div className="border-b border-[color:var(--gush-border)] px-4 py-5">
               <div className="flex items-start justify-between gap-3">
-                <Link href={effectiveHomePath} className="flex items-center gap-3">
+                <Link
+                  href={effectiveHomePath}
+                  className="flex items-center gap-3"
+                >
                   <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-sm font-semibold tracking-[0.18em] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
                     TT
                   </div>
@@ -265,7 +396,11 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 lg:flex"
                   aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
                 >
-                  {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                  {isCollapsed ? (
+                    <ChevronRight size={18} />
+                  ) : (
+                    <ChevronLeft size={18} />
+                  )}
                 </button>
               </div>
 
@@ -274,8 +409,12 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                     当前分区
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950">{activeGroupLabel}</p>
-                  <p className="mt-1 text-sm text-slate-600">侧边导航已经按运营对象分组，优先从这里进入高频工作区。</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-950">
+                    {activeGroupLabel}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    侧边导航已经按运营对象分组，优先从这里进入高频工作区。
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -314,9 +453,13 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                     {group.items.map((item) => {
                       const isActive = item.exact
                         ? pathname === item.href
-                        : item.match?.some((prefix) => pathname.startsWith(prefix));
+                        : item.match?.some((prefix) =>
+                            pathname.startsWith(prefix),
+                          );
                       const Icon = item.icon;
-                      const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+                      const hasChildren =
+                        Array.isArray(item.children) &&
+                        item.children.length > 0;
                       const isExpanded = expandedMenus.has(item.href);
 
                       const baseClass =
@@ -332,15 +475,25 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                             <button
                               type="button"
                               onClick={() => toggleMenu(item.href)}
-                              className={cn(baseClass, isActive ? activeClass : idleClass)}
+                              className={cn(
+                                baseClass,
+                                isActive ? activeClass : idleClass,
+                              )}
                               title={isCollapsed ? item.label : undefined}
                             >
                               <Icon
                                 size={18}
-                                className={cn("shrink-0", isActive ? "text-slate-950" : "text-slate-400")}
+                                className={cn(
+                                  "shrink-0",
+                                  isActive
+                                    ? "text-slate-950"
+                                    : "text-slate-400",
+                                )}
                               />
                               {!isCollapsed ? (
-                                <span className="flex-1 truncate text-left">{item.label}</span>
+                                <span className="flex-1 truncate text-left">
+                                  {item.label}
+                                </span>
                               ) : null}
                               {!isCollapsed ? (
                                 <ChevronDown
@@ -355,14 +508,24 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                           ) : (
                             <Link
                               href={item.href}
-                              className={cn(baseClass, isActive ? activeClass : idleClass)}
+                              className={cn(
+                                baseClass,
+                                isActive ? activeClass : idleClass,
+                              )}
                               title={isCollapsed ? item.label : undefined}
                             >
                               <Icon
                                 size={18}
-                                className={cn("shrink-0", isActive ? "text-slate-950" : "text-slate-400")}
+                                className={cn(
+                                  "shrink-0",
+                                  isActive
+                                    ? "text-slate-950"
+                                    : "text-slate-400",
+                                )}
                               />
-                              {!isCollapsed ? <span className="truncate">{item.label}</span> : null}
+                              {!isCollapsed ? (
+                                <span className="truncate">{item.label}</span>
+                              ) : null}
                               {isActive && !isCollapsed ? (
                                 <span className="ml-auto h-2 w-2 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
                               ) : null}
@@ -372,7 +535,11 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                           {hasChildren && isExpanded && !isCollapsed ? (
                             <div className="mt-1 ml-6 space-y-1 border-l border-[color:var(--gush-border)] pl-3">
                               {item.children.map((child) => {
-                                const childIsActive = isChildLinkActive(pathname, searchParams, child.href);
+                                const childIsActive = isChildLinkActive(
+                                  pathname,
+                                  searchParams,
+                                  child.href,
+                                );
 
                                 return (
                                   <Link
@@ -385,7 +552,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                         : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
                                     )}
                                   >
-                                    <span className="truncate">{child.label}</span>
+                                    <span className="truncate">
+                                      {child.label}
+                                    </span>
                                     {childIsActive ? (
                                       <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
                                     ) : null}

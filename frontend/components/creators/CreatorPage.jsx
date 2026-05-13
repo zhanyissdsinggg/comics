@@ -86,7 +86,9 @@ function buildCreatorItems(seriesList, creatorSlug) {
         return scoreDelta;
       }
 
-      return Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0);
+      return (
+        Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0)
+      );
     });
 }
 

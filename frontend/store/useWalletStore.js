@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
 import {
   clearPersistedPaymentAttribution,
@@ -43,7 +51,10 @@ function createIdempotencyKey(prefix) {
 function resolvePaymentOptions(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     return {
-      attribution: mergePaymentAttribution(loadPersistedPaymentAttribution(), input || null),
+      attribution: mergePaymentAttribution(
+        loadPersistedPaymentAttribution(),
+        input || null,
+      ),
       expectedAmount: undefined,
       provider: undefined,
       createIdempotencyKey: undefined,
@@ -63,15 +74,26 @@ function resolvePaymentOptions(input) {
   const expectedAmount = Number(options.expectedAmount);
 
   return {
-    attribution: mergePaymentAttribution(loadPersistedPaymentAttribution(), options.attribution),
-    expectedAmount: Number.isFinite(expectedAmount) && expectedAmount > 0 ? expectedAmount : undefined,
-    provider: typeof options.provider === "string" ? options.provider.trim() : undefined,
+    attribution: mergePaymentAttribution(
+      loadPersistedPaymentAttribution(),
+      options.attribution,
+    ),
+    expectedAmount:
+      Number.isFinite(expectedAmount) && expectedAmount > 0
+        ? expectedAmount
+        : undefined,
+    provider:
+      typeof options.provider === "string"
+        ? options.provider.trim()
+        : undefined,
     createIdempotencyKey:
-      typeof options.createIdempotencyKey === "string" && options.createIdempotencyKey.trim()
+      typeof options.createIdempotencyKey === "string" &&
+      options.createIdempotencyKey.trim()
         ? options.createIdempotencyKey.trim()
         : undefined,
     confirmIdempotencyKey:
-      typeof options.confirmIdempotencyKey === "string" && options.confirmIdempotencyKey.trim()
+      typeof options.confirmIdempotencyKey === "string" &&
+      options.confirmIdempotencyKey.trim()
         ? options.confirmIdempotencyKey.trim()
         : undefined,
   };
@@ -98,7 +120,9 @@ export function WalletProvider({ children }) {
   const setWallet = useCallback((nextWallet) => {
     setWalletState((currentWallet) => {
       const resolvedWallet =
-        typeof nextWallet === "function" ? nextWallet(currentWallet) : nextWallet;
+        typeof nextWallet === "function"
+          ? nextWallet(currentWallet)
+          : nextWallet;
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(
@@ -168,9 +192,16 @@ export function WalletProvider({ children }) {
         offerId: attribution?.offerId,
       });
 
-      const response = await apiPost("/api/subscription", { planId, attribution });
+      const response = await apiPost("/api/subscription", {
+        planId,
+        attribution,
+      });
       if (response.ok && response.data?.subscription) {
-        setWallet((prev) => ({ ...prev, subscription: response.data.subscription, plan: planId }));
+        setWallet((prev) => ({
+          ...prev,
+          subscription: response.data.subscription,
+          plan: planId,
+        }));
         loadWallet();
         clearPersistedPaymentAttribution();
         trackEvent("subscribe_success", {
@@ -192,13 +223,17 @@ export function WalletProvider({ children }) {
       });
       return response;
     },
-    [isSignedIn, loadWallet, setWallet]
+    [isSignedIn, loadWallet, setWallet],
   );
 
   const cancelSubscription = useCallback(async () => {
     const response = await apiDelete("/api/subscription");
     if (response.ok) {
-      setWallet((prev) => ({ ...prev, subscription: response.data?.subscription || null, plan: "free" }));
+      setWallet((prev) => ({
+        ...prev,
+        subscription: response.data?.subscription || null,
+        plan: "free",
+      }));
       trackEvent("subscribe_cancel", {});
     }
     return response;
@@ -209,7 +244,9 @@ export function WalletProvider({ children }) {
       const normalizedPackageId = normalizePackageId(packageId);
       const requestOptions = resolvePaymentOptions(options);
       const attribution = mergePaymentAttribution(requestOptions.attribution, {
-        offerId: requestOptions.attribution?.offerId || `points_pack_${normalizedPackageId}`,
+        offerId:
+          requestOptions.attribution?.offerId ||
+          `points_pack_${normalizedPackageId}`,
       });
 
       if (attribution) {
@@ -227,9 +264,13 @@ export function WalletProvider({ children }) {
       }
 
       const requestPromise = (async () => {
-        const pkg = await getTopupPackage(normalizedPackageId).catch(() => null);
+        const pkg = await getTopupPackage(normalizedPackageId).catch(
+          () => null,
+        );
         const catalogAmount = Number(pkg?.price);
-        const expectedAmount = requestOptions.expectedAmount ?? (Number.isFinite(catalogAmount) ? catalogAmount : undefined);
+        const expectedAmount =
+          requestOptions.expectedAmount ??
+          (Number.isFinite(catalogAmount) ? catalogAmount : undefined);
 
         if (!Number.isFinite(expectedAmount) || expectedAmount <= 0) {
           trackEvent("topup_fail", {
@@ -244,9 +285,11 @@ export function WalletProvider({ children }) {
 
         const provider = requestOptions.provider || "stripe";
         const createRequestKey =
-          requestOptions.createIdempotencyKey || createIdempotencyKey(`topup_create_${normalizedPackageId}`);
+          requestOptions.createIdempotencyKey ||
+          createIdempotencyKey(`topup_create_${normalizedPackageId}`);
         const confirmRequestKey =
-          requestOptions.confirmIdempotencyKey || createIdempotencyKey(`topup_confirm_${normalizedPackageId}`);
+          requestOptions.confirmIdempotencyKey ||
+          createIdempotencyKey(`topup_confirm_${normalizedPackageId}`);
 
         trackEvent("topup_start", {
           packageId: normalizedPackageId,
@@ -317,15 +360,24 @@ export function WalletProvider({ children }) {
         inflightRef.current.delete(key);
       }
     },
-    [isSignedIn, setWallet]
+    [isSignedIn, setWallet],
   );
 
   const value = useMemo(
-    () => ({ ...wallet, loadWallet, topup, subscribe, cancelSubscription, setWallet }),
-    [cancelSubscription, loadWallet, setWallet, subscribe, topup, wallet]
+    () => ({
+      ...wallet,
+      loadWallet,
+      topup,
+      subscribe,
+      cancelSubscription,
+      setWallet,
+    }),
+    [cancelSubscription, loadWallet, setWallet, subscribe, topup, wallet],
   );
 
-  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
+  return (
+    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
+  );
 }
 
 export function useWalletStore() {

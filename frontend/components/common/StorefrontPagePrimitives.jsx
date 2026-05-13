@@ -28,9 +28,7 @@ export function StorefrontSectionHeading({
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 text-sm leading-7 text-white/66">
-            {description}
-          </p>
+          <p className="mt-3 text-sm leading-7 text-white/66">{description}</p>
         ) : null}
       </div>
     </div>
@@ -50,7 +48,10 @@ export function StorefrontDesk({
       tone="muted"
       accent="cyan"
       appearance="dark"
-      className={cn("flex h-full flex-col justify-between space-y-6", className)}
+      className={cn(
+        "flex h-full flex-col justify-between space-y-6",
+        className,
+      )}
     >
       <StorefrontSectionHeading
         eyebrow={eyebrow}
@@ -81,9 +82,7 @@ export function StorefrontInfoCard({
         {title}
       </h3>
       {description ? (
-        <p className="mt-3 text-sm leading-7 text-white/70">
-          {description}
-        </p>
+        <p className="mt-3 text-sm leading-7 text-white/70">{description}</p>
       ) : null}
       {children}
     </div>

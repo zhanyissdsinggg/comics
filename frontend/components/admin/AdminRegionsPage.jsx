@@ -39,13 +39,17 @@ function normalizeCountryCodes(items) {
 }
 
 function normalizeLengthValues(values) {
-  const source = Array.isArray(values) ? values : String(values || "").split(",");
+  const source = Array.isArray(values)
+    ? values
+    : String(values || "").split(",");
 
-  return [...new Set(
-    source
-      .map((value) => Number(String(value).trim()))
-      .filter((value) => Number.isInteger(value) && value > 0),
-  )].sort((left, right) => left - right);
+  return [
+    ...new Set(
+      source
+        .map((value) => Number(String(value).trim()))
+        .filter((value) => Number.isInteger(value) && value > 0),
+    ),
+  ].sort((left, right) => left - right);
 }
 
 function findDuplicateCountryCodes(items) {
@@ -67,7 +71,9 @@ function findDuplicateCountryCodes(items) {
 }
 
 function buildPayload(countryCodes, lengthRules) {
-  const normalizedCountryCodes = normalizeCountryCodes(countryCodes).filter((item) => item.code);
+  const normalizedCountryCodes = normalizeCountryCodes(countryCodes).filter(
+    (item) => item.code,
+  );
   const allowedCodes = new Set(normalizedCountryCodes.map((item) => item.code));
   const normalizedRules = {};
 
@@ -120,7 +126,10 @@ export default function AdminRegionsPage() {
 
     const response = await adminGet("/api/admin/regions");
     if (response.ok) {
-      const payload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
+      const payload = buildPayload(
+        response.data?.config?.countryCodes,
+        response.data?.config?.lengthRules,
+      );
       setCountryCodes(payload.countryCodes);
       setLengthRules(payload.lengthRules);
       setFeedback({ type: "", message: "" });
@@ -184,7 +193,9 @@ export default function AdminRegionsPage() {
 
   const removeCode = (index) => {
     const code = normalizeDialCode(countryCodes[index]?.code || "");
-    setCountryCodes((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    setCountryCodes((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index),
+    );
     setLengthRules((current) => {
       if (!code) {
         return current;
@@ -221,7 +232,10 @@ export default function AdminRegionsPage() {
     const response = await adminPost("/api/admin/regions", payload);
 
     if (response.ok) {
-      const nextPayload = buildPayload(response.data?.config?.countryCodes, response.data?.config?.lengthRules);
+      const nextPayload = buildPayload(
+        response.data?.config?.countryCodes,
+        response.data?.config?.lengthRules,
+      );
       setCountryCodes(nextPayload.countryCodes);
       setLengthRules(nextPayload.lengthRules);
       setFeedback({ type: "success", message: "地区设置已保存。" });
@@ -237,7 +251,9 @@ export default function AdminRegionsPage() {
 
   const handleExport = () => {
     const payload = buildPayload(countryCodes, lengthRules);
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8;" });
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -271,7 +287,10 @@ export default function AdminRegionsPage() {
         message: "地区设置已导入，保存后生效。",
       });
     } catch {
-      setFeedback({ type: "error", message: "导入失败，请上传有效的 JSON 配置文件。" });
+      setFeedback({
+        type: "error",
+        message: "导入失败，请上传有效的 JSON 配置文件。",
+      });
     } finally {
       event.target.value = "";
     }
@@ -295,7 +314,10 @@ export default function AdminRegionsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminFeedbackBanner feedback={feedback} onDismiss={() => setFeedback({ type: "", message: "" })} />
+      <AdminFeedbackBanner
+        feedback={feedback}
+        onDismiss={() => setFeedback({ type: "", message: "" })}
+      />
 
       <AdminPageSection
         title="手机号码规则"
@@ -309,7 +331,11 @@ export default function AdminRegionsPage() {
               onChange={handleImport}
               className="hidden"
             />
-            <Button type="button" variant="outline" onClick={() => importInputRef.current?.click()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => importInputRef.current?.click()}
+            >
               导入配置
             </Button>
             <Button type="button" variant="outline" onClick={handleExport}>
@@ -325,8 +351,12 @@ export default function AdminRegionsPage() {
           <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-base font-semibold text-slate-950">国际区号</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">每一条只保留区号和显示名称。</p>
+                <h3 className="text-base font-semibold text-slate-950">
+                  国际区号
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  每一条只保留区号和显示名称。
+                </p>
               </div>
               <Button type="button" variant="outline" onClick={addCode}>
                 新增条目
@@ -347,7 +377,9 @@ export default function AdminRegionsPage() {
                     <AdminFormField label="区号">
                       <input
                         value={item.code}
-                        onChange={(event) => updateCode(index, "code", event.target.value)}
+                        onChange={(event) =>
+                          updateCode(index, "code", event.target.value)
+                        }
                         className={adminInputClassName}
                         placeholder="+1"
                       />
@@ -356,13 +388,19 @@ export default function AdminRegionsPage() {
                     <AdminFormField label="地区名称">
                       <input
                         value={item.label}
-                        onChange={(event) => updateCode(index, "label", event.target.value)}
+                        onChange={(event) =>
+                          updateCode(index, "label", event.target.value)
+                        }
                         className={adminInputClassName}
                         placeholder="美国"
                       />
                     </AdminFormField>
 
-                    <Button type="button" variant="outline" onClick={() => removeCode(index)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => removeCode(index)}
+                    >
                       删除
                     </Button>
                   </div>
@@ -373,30 +411,41 @@ export default function AdminRegionsPage() {
 
           <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
             <div>
-              <h3 className="text-base font-semibold text-slate-950">本地号码长度</h3>
+              <h3 className="text-base font-semibold text-slate-950">
+                本地号码长度
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                多个长度用逗号分隔，例如 <code>10</code> 或 <code>9,10,11</code>。
+                多个长度用逗号分隔，例如 <code>10</code> 或 <code>9,10,11</code>
+                。
               </p>
             </div>
 
-            {countryCodes.filter((item) => normalizeDialCode(item.code)).length === 0 ? (
+            {countryCodes.filter((item) => normalizeDialCode(item.code))
+              .length === 0 ? (
               <div className="mt-6 rounded-[24px] border border-dashed border-[color:var(--gush-border)] bg-white p-6 text-sm text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.025)]">
                 请先添加至少一个国际区号，再填写长度规则。
               </div>
             ) : (
               <div className="mt-6 space-y-3">
                 {countryCodes
-                  .map((item) => ({ ...item, code: normalizeDialCode(item.code) }))
+                  .map((item) => ({
+                    ...item,
+                    code: normalizeDialCode(item.code),
+                  }))
                   .filter((item) => item.code)
                   .map((item, index) => (
                     <label
                       key={`${item.code}-${index}`}
                       className="grid gap-2 rounded-[22px] border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015] md:grid-cols-[110px_minmax(0,1fr)] md:items-center"
                     >
-                      <span className="text-sm font-semibold text-slate-700">{item.code}</span>
+                      <span className="text-sm font-semibold text-slate-700">
+                        {item.code}
+                      </span>
                       <input
                         value={(lengthRules[item.code] || []).join(",")}
-                        onChange={(event) => updateRule(item.code, event.target.value)}
+                        onChange={(event) =>
+                          updateRule(item.code, event.target.value)
+                        }
                         className={adminInputClassName}
                         placeholder="10"
                       />

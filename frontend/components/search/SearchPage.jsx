@@ -30,9 +30,7 @@ import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
 } from "../../lib/commerceSuccess";
-import {
-  formatInstallmentCount,
-} from "../../lib/seriesFormatLabels";
+import { formatInstallmentCount } from "../../lib/seriesFormatLabels";
 import {
   readSearchHistory,
   saveSearchHistoryItem,
@@ -171,13 +169,9 @@ function normalizeKeywordList(items) {
     .filter(
       (item) =>
         item &&
-        ![
-          item.label,
-          item.value,
-          item.hint,
-          item.badge,
-          item.title,
-        ].some((value) => isPublicSearchBlockedLabel(value)),
+        ![item.label, item.value, item.hint, item.badge, item.title].some(
+          (value) => isPublicSearchBlockedLabel(value),
+        ),
     )
     .filter(Boolean);
 }
@@ -196,7 +190,9 @@ function isPublicSearchBlockedLabel(value) {
 }
 
 function sanitizeSeriesList(items) {
-  return filterBlockedPublicSeries(items).filter((item) => !isMatureTitle(item));
+  return filterBlockedPublicSeries(items).filter(
+    (item) => !isMatureTitle(item),
+  );
 }
 
 function sanitizeSuggestionList(items) {
@@ -643,7 +639,9 @@ export default function SearchPage() {
           return;
         }
         if (response.ok) {
-          setSuggestions(sanitizeSuggestionList(response.data?.suggestions || []));
+          setSuggestions(
+            sanitizeSuggestionList(response.data?.suggestions || []),
+          );
         } else if (response.error === "ADULT_GATED") {
           forceDisableAdultMode();
           setSuggestions([]);
@@ -674,7 +672,8 @@ export default function SearchPage() {
   }, []);
 
   const reco = useMemo(
-    () => recommendRails(catalog, behavior, progressMap, { isAdultMode: false }),
+    () =>
+      recommendRails(catalog, behavior, progressMap, { isAdultMode: false }),
     [catalog, behavior, progressMap],
   );
   const editorialSnapshot = useMemo(
@@ -829,7 +828,8 @@ export default function SearchPage() {
             id: "free-unlock",
             eyebrow: "Start here",
             title: "Jump into a crowd favorite.",
-            description: "A quick way to land on a title with a clean entry point.",
+            description:
+              "A quick way to land on a title with a clean entry point.",
             ctaLabel: "View title",
             onClick: () => router.push("/rankings?view=start-here"),
             accentClass: featuredRailCardClass,
@@ -839,7 +839,8 @@ export default function SearchPage() {
             id: "completed-binge-slot",
             eyebrow: "Binge this weekend",
             title: `${completedPick.title}.`,
-            description: "Completed and ready when you want the full ride without waiting.",
+            description:
+              "Completed and ready when you want the full ride without waiting.",
             ctaLabel: "Start reading",
             onClick: () =>
               handleSeriesClick(
@@ -853,7 +854,8 @@ export default function SearchPage() {
             id: "completed-binge",
             eyebrow: "Binge this weekend",
             title: "Completed stories, no waiting.",
-            description: "Open the finished shelf when you want payoff tonight.",
+            description:
+              "Open the finished shelf when you want payoff tonight.",
             ctaLabel: "View title",
             onClick: () =>
               updateParams(
@@ -889,7 +891,8 @@ export default function SearchPage() {
             id: "breakout-watch",
             eyebrow: "Hot this week",
             title: `Try ${leadHotLabel}.`,
-            description: "A good next move when you want a mood-led search instead of starting from scratch.",
+            description:
+              "A good next move when you want a mood-led search instead of starting from scratch.",
             ctaLabel: "View title",
             onClick: () =>
               updateParams(
@@ -903,7 +906,7 @@ export default function SearchPage() {
                 { resetPage: true },
               ),
             accentClass: railCardClass,
-          }
+          },
     ];
   }, [
     breakoutPick,
@@ -1013,7 +1016,9 @@ export default function SearchPage() {
                 {query ? "Best match" : "Now trending"}
               </p>
               <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
-                {query ? "Closest to what you searched." : "Start with what readers are opening now."}
+                {query
+                  ? "Closest to what you searched."
+                  : "Start with what readers are opening now."}
               </h2>
             </div>
 
@@ -1077,7 +1082,9 @@ export default function SearchPage() {
                   Mood shortcut
                 </p>
                 <h3 className="font-display text-[1.35rem] font-semibold leading-[0.94] tracking-[-0.04em] text-white">
-                  {mastheadLeadKeyword ? `Try ${mastheadLeadKeyword.label}.` : "Search by feeling first."}
+                  {mastheadLeadKeyword
+                    ? `Try ${mastheadLeadKeyword.label}.`
+                    : "Search by feeling first."}
                 </h3>
                 <p className="text-sm leading-6 text-white/66">
                   {mastheadLeadKeyword?.hint ||
@@ -1092,7 +1099,10 @@ export default function SearchPage() {
                   Search tip
                 </p>
                 <p className="text-sm leading-6 text-white/68">
-                  Try a vibe like <span className="text-white">dark mystery</span>, <span className="text-white">soft romance</span>, or <span className="text-white">weekend binge</span>.
+                  Try a vibe like{" "}
+                  <span className="text-white">dark mystery</span>,{" "}
+                  <span className="text-white">soft romance</span>, or{" "}
+                  <span className="text-white">weekend binge</span>.
                 </p>
               </div>
               {!query && history.length > 0 ? (
@@ -1101,7 +1111,8 @@ export default function SearchPage() {
                     Pick up where you left off
                   </p>
                   <p className="text-sm leading-6 text-white/68">
-                    Your recent searches stay close so it is easier to jump back into a mood or creator.
+                    Your recent searches stay close so it is easier to jump back
+                    into a mood or creator.
                   </p>
                 </div>
               ) : null}
@@ -1142,11 +1153,7 @@ export default function SearchPage() {
         />
 
         {shouldShowReco ? (
-          <SurfacePanel
-            className="space-y-8"
-            appearance="dark"
-            accent="cyan"
-          >
+          <SurfacePanel className="space-y-8" appearance="dark" accent="cyan">
             <SearchSectionHeader
               eyebrow="Next up"
               title={recoPanelTitle}
@@ -1213,11 +1220,7 @@ export default function SearchPage() {
 
         {showResultSections ? (
           <>
-            <SurfacePanel
-              className="space-y-5"
-              appearance="dark"
-              accent="cyan"
-            >
+            <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
               <SearchSectionHeader
                 eyebrow="Results"
                 title={query ? `"${query}"` : "Browse"}
@@ -1243,7 +1246,9 @@ export default function SearchPage() {
                     </button>
                     <select
                       value={sort}
-                      onChange={(event) => updateParam("sort", event.target.value)}
+                      onChange={(event) =>
+                        updateParam("sort", event.target.value)
+                      }
                       className={filterSelectClass}
                     >
                       {SORT_OPTIONS.map((option) => (

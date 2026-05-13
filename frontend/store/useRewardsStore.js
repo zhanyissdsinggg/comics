@@ -65,12 +65,17 @@ export function RewardsProvider({ children }) {
     const response = await apiPost("/api/rewards/checkin");
     if (response.ok) {
       trackEvent("checkin_success", {});
-      setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
+      setRewards(
+        normalizeRewards(response.data?.state, response.data?.rewardPts),
+      );
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
     } else {
-      trackEvent("checkin_fail", { status: response.status, errorCode: response.error });
+      trackEvent("checkin_fail", {
+        status: response.status,
+        errorCode: response.error,
+      });
     }
     return response;
   }, [isSignedIn, setWallet]);
@@ -86,12 +91,17 @@ export function RewardsProvider({ children }) {
     const response = await apiPost("/api/rewards/makeup");
     if (response.ok) {
       trackEvent("makeup_success", {});
-      setRewards(normalizeRewards(response.data?.state, response.data?.rewardPts));
+      setRewards(
+        normalizeRewards(response.data?.state, response.data?.rewardPts),
+      );
       if (response.data?.wallet) {
         setWallet(response.data.wallet);
       }
     } else {
-      trackEvent("makeup_fail", { status: response.status, errorCode: response.error });
+      trackEvent("makeup_fail", {
+        status: response.status,
+        errorCode: response.error,
+      });
     }
     return response;
   }, [isSignedIn, setWallet]);
@@ -130,27 +140,34 @@ export function RewardsProvider({ children }) {
           setWallet(response.data.wallet);
         }
       } else {
-        trackEvent("mission_claim_fail", { missionId, status: response.status, errorCode: response.error });
+        trackEvent("mission_claim_fail", {
+          missionId,
+          status: response.status,
+          errorCode: response.error,
+        });
       }
       return response;
     },
-    [isSignedIn, setWallet]
+    [isSignedIn, setWallet],
   );
 
-  const report = useCallback(async (eventType) => {
-    if (!isSignedIn) {
-      return unauthenticatedResponse();
-    }
-    trackEvent("mission_progress_event", { eventType });
-    const response = await apiPost("/api/missions/report", { eventType });
-    if (response.ok) {
-      setMissions({
-        daily: response.data?.daily || [],
-        weekly: response.data?.weekly || [],
-      });
-    }
-    return response;
-  }, [isSignedIn]);
+  const report = useCallback(
+    async (eventType) => {
+      if (!isSignedIn) {
+        return unauthenticatedResponse();
+      }
+      trackEvent("mission_progress_event", { eventType });
+      const response = await apiPost("/api/missions/report", { eventType });
+      if (response.ok) {
+        setMissions({
+          daily: response.data?.daily || [],
+          weekly: response.data?.weekly || [],
+        });
+      }
+      return response;
+    },
+    [isSignedIn],
+  );
 
   const value = useMemo(
     () => ({
@@ -163,10 +180,21 @@ export function RewardsProvider({ children }) {
       claimMission,
       report,
     }),
-    [rewards, missions, loadRewards, checkIn, makeUp, loadMissions, claimMission, report]
+    [
+      rewards,
+      missions,
+      loadRewards,
+      checkIn,
+      makeUp,
+      loadMissions,
+      claimMission,
+      report,
+    ],
   );
 
-  return <RewardsContext.Provider value={value}>{children}</RewardsContext.Provider>;
+  return (
+    <RewardsContext.Provider value={value}>{children}</RewardsContext.Provider>
+  );
 }
 
 export function useRewardsStore() {

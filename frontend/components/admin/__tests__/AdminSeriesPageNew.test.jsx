@@ -1,7 +1,12 @@
 ﻿import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AdminSeriesPageNew from "../AdminSeriesPageNew";
-import { adminDelete, adminGet, adminPatch, adminPost } from "../../../lib/adminApiClient";
+import {
+  adminDelete,
+  adminGet,
+  adminPatch,
+  adminPost,
+} from "../../../lib/adminApiClient";
 
 jest.mock("next/image", () => {
   return function MockImage(props) {
@@ -99,7 +104,9 @@ describe("AdminSeriesPageNew", () => {
     render(<AdminSeriesPageNew />);
 
     await waitFor(() => {
-      expect(adminGet).toHaveBeenCalledWith(expect.stringContaining("/api/admin/series/search/advanced"));
+      expect(adminGet).toHaveBeenCalledWith(
+        expect.stringContaining("/api/admin/series/search/advanced"),
+      );
     });
   });
 
@@ -119,7 +126,9 @@ describe("AdminSeriesPageNew", () => {
 
     await waitFor(() => {
       const requestUrls = adminGet.mock.calls.map(([url]) => String(url));
-      expect(requestUrls.some((url) => url.includes("search=Alpha"))).toBe(true);
+      expect(requestUrls.some((url) => url.includes("search=Alpha"))).toBe(
+        true,
+      );
     });
   });
 
@@ -154,7 +163,7 @@ describe("AdminSeriesPageNew", () => {
             id: "series-1",
             isPublished: true,
           }),
-        })
+        }),
       );
     });
   });
@@ -166,8 +175,14 @@ describe("AdminSeriesPageNew", () => {
     await screen.findByText("Alpha Comic");
 
     await user.click(screen.getByRole("button", { name: "新增作品" }));
-    await user.type(screen.getByRole("textbox", { name: /作品标题/i }), "Creator Launch");
-    await user.type(screen.getByRole("textbox", { name: /作者 \/ 工作室/i }), "Studio LICO");
+    await user.type(
+      screen.getByRole("textbox", { name: /作品标题/i }),
+      "Creator Launch",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: /作者 \/ 工作室/i }),
+      "Studio LICO",
+    );
     await user.click(screen.getByRole("button", { name: "创建" }));
 
     await waitFor(() => {
@@ -178,7 +193,7 @@ describe("AdminSeriesPageNew", () => {
             title: "Creator Launch",
             author: "Studio LICO",
           }),
-        })
+        }),
       );
     });
   });

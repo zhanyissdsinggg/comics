@@ -51,7 +51,12 @@ function getEpisodeCount(series, episodes) {
   return directCount > 0 ? directCount : 0;
 }
 
-function getPrimaryAction({ series, continueHref, startHref, freeEpisodeCount }) {
+function getPrimaryAction({
+  series,
+  continueHref,
+  startHref,
+  freeEpisodeCount,
+}) {
   if (continueHref) {
     return {
       label: "Keep Reading",

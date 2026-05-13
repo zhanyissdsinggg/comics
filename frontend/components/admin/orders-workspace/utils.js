@@ -97,7 +97,11 @@ export function isRefunded(status) {
   return String(status || "").toUpperCase() === "REFUNDED";
 }
 
-export function buildOrdersMetricCards({ total, refundedCount, revenueInView }) {
+export function buildOrdersMetricCards({
+  total,
+  refundedCount,
+  revenueInView,
+}) {
   return [
     {
       label: "当前订单",

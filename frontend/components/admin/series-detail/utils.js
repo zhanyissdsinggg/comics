@@ -1,6 +1,9 @@
 "use client";
 
-import { adminFetchJson, normalizeAdminErrorMessage } from "@/lib/adminApiClient";
+import {
+  adminFetchJson,
+  normalizeAdminErrorMessage,
+} from "@/lib/adminApiClient";
 
 export const TYPE_OPTIONS = [
   { value: "comic", label: "漫画" },
@@ -74,7 +77,8 @@ export function buildFormState(series) {
     type: series?.type || "comic",
     status: series?.status || "Ongoing",
     adult: Boolean(series?.adult),
-    isPublished: series?.isPublished !== undefined ? Boolean(series.isPublished) : true,
+    isPublished:
+      series?.isPublished !== undefined ? Boolean(series.isPublished) : true,
     description: series?.description || "",
     genres: Array.isArray(series?.genres) ? series.genres.join(", ") : "",
     coverUrl: series?.coverUrl || "",
@@ -135,23 +139,32 @@ export function buildCreditsPayload(credits) {
     .map((credit, index) => ({
       creatorId: String(credit?.creatorId || "").trim(),
       name: String(credit?.name || "").trim(),
-      role: String(credit?.role || "AUTHOR").trim().toUpperCase(),
-      type: String(credit?.type || "person").trim().toLowerCase(),
+      role: String(credit?.role || "AUTHOR")
+        .trim()
+        .toUpperCase(),
+      type: String(credit?.type || "person")
+        .trim()
+        .toLowerCase(),
       sortOrder: Number(credit?.sortOrder ?? index) || index,
       isPrimary: Boolean(credit?.isPrimary),
       isPublic: credit?.isPublic !== false,
     }))
     .filter((credit) => credit.name);
 
-  const firstPublicIndex = normalizedRows.findIndex((credit) => credit.isPublic);
-  const hasPrimary = normalizedRows.some((credit) => credit.isPrimary && credit.isPublic);
+  const firstPublicIndex = normalizedRows.findIndex(
+    (credit) => credit.isPublic,
+  );
+  const hasPrimary = normalizedRows.some(
+    (credit) => credit.isPrimary && credit.isPublic,
+  );
 
   return normalizedRows.map((credit, index) => ({
     ...credit,
     sortOrder: index,
     isPrimary: hasPrimary
       ? credit.isPrimary && credit.isPublic
-      : index === (firstPublicIndex >= 0 ? firstPublicIndex : 0) && credit.isPublic,
+      : index === (firstPublicIndex >= 0 ? firstPublicIndex : 0) &&
+        credit.isPublic,
   }));
 }
 
@@ -164,8 +177,8 @@ export function validateSeriesDraft(formData) {
 }
 
 export function validateCreditsDraft(credits) {
-  const namedCredits = (Array.isArray(credits) ? credits : []).filter((credit) =>
-    String(credit?.name || "").trim(),
+  const namedCredits = (Array.isArray(credits) ? credits : []).filter(
+    (credit) => String(credit?.name || "").trim(),
   );
 
   if (namedCredits.length === 0) {
@@ -207,9 +220,12 @@ export function getErrorMessage(error, fallbackMessage) {
 }
 
 export async function fetchSeriesDetail(seriesId) {
-  const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}`, {
-    cache: "no-store",
-  });
+  const { response, data } = await adminFetchJson(
+    `/api/admin/series/${seriesId}`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (response.status === 404) {
     return null;
@@ -223,9 +239,12 @@ export async function fetchSeriesDetail(seriesId) {
 }
 
 export async function fetchSeriesCredits(seriesId) {
-  const { response, data } = await adminFetchJson(`/api/admin/series/${seriesId}/credits`, {
-    cache: "no-store",
-  });
+  const { response, data } = await adminFetchJson(
+    `/api/admin/series/${seriesId}/credits`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (response.status === 404) {
     return null;
@@ -247,7 +266,8 @@ export function buildCreatorPreviewLabel(publicCredits, authorFallback = "") {
     return authorFallback || "待补充";
   }
 
-  const primaryCredit = publicCredits.find((credit) => credit.isPrimary) || publicCredits[0];
+  const primaryCredit =
+    publicCredits.find((credit) => credit.isPrimary) || publicCredits[0];
   if (!primaryCredit) {
     return "待补充";
   }
@@ -274,9 +294,14 @@ export function buildSeriesInsightState({
   const normalizedGenres = normalizeGenresInput(formData.genres);
   const descriptionLength = formData.description.trim().length;
   const coverStatus = formData.coverUrl.trim() ? "封面已补齐" : "封面待补";
-  const synopsisStatus = descriptionLength > 0 ? `简介 ${descriptionLength} 字` : "简介待补";
-  const genreStatus = normalizedGenres.length > 0 ? `${normalizedGenres.length} 个标签` : "标签待补";
-  const hasLegacyAuthorFallback = !publicCredits.length && Boolean(authorFallback);
+  const synopsisStatus =
+    descriptionLength > 0 ? `简介 ${descriptionLength} 字` : "简介待补";
+  const genreStatus =
+    normalizedGenres.length > 0
+      ? `${normalizedGenres.length} 个标签`
+      : "标签待补";
+  const hasLegacyAuthorFallback =
+    !publicCredits.length && Boolean(authorFallback);
 
   const creatorStatusDetail = publicCredits.length
     ? `${publicCredits.length} 条公开署名 · ${coverStatus} · ${genreStatus}`
@@ -296,7 +321,9 @@ export function buildSeriesInsightState({
       {
         label: "章节数",
         value: String(series?.episodeCount || 0),
-        detail: series?.latestEpisodeId ? `最新章节：${series.latestEpisodeId}` : "还没有章节。",
+        detail: series?.latestEpisodeId
+          ? `最新章节：${series.latestEpisodeId}`
+          : "还没有章节。",
         tone: "accent",
       },
       {

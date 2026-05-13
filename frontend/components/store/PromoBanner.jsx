@@ -18,9 +18,7 @@ function getPromoCopy(promotion, offer) {
     return {
       tag: "Welcome Back",
       title: promotion.title || "Returning Reward",
-      description:
-        promotion.description ||
-        "Extra points when you come back.",
+      description: promotion.description || "Extra points when you come back.",
     };
   }
   if (promotion?.type === "HOLIDAY") {

@@ -54,6 +54,12 @@ export async function expectNoRuntimeIssues(
   route: string,
   collector: RuntimeIssueCollector,
 ): Promise<void> {
-  expect(collector.pageErrors, `${route} emitted pageerror events`).toHaveLength(0);
-  expect(collector.consoleErrors, `${route} emitted fatal console errors`).toHaveLength(0);
+  expect(
+    collector.pageErrors,
+    `${route} emitted pageerror events`,
+  ).toHaveLength(0);
+  expect(
+    collector.consoleErrors,
+    `${route} emitted fatal console errors`,
+  ).toHaveLength(0);
 }

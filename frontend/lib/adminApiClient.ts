@@ -3,7 +3,6 @@
  * Keeps auth headers and CSRF handling in one place.
  */
 
-
 import {
   apiGet,
   apiPost,
@@ -49,14 +48,19 @@ function getCsrfToken(): string {
   if (typeof document === "undefined") {
     return "";
   }
-  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+  const token = document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute("content");
   return token || "";
 }
 
 /**
  * Attach CSRF headers for unsafe HTTP methods.
  */
-function addCsrfToken(headers: Record<string, string>, method?: string): Record<string, string> {
+function addCsrfToken(
+  headers: Record<string, string>,
+  method?: string,
+): Record<string, string> {
   if (!method || !["POST", "PATCH", "DELETE"].includes(method.toUpperCase())) {
     return headers;
   }
@@ -102,7 +106,7 @@ function toHeaderRecord(headers?: HeadersInit): Record<string, string> {
 
 function prepareAdminHeaders(
   method?: string,
-  customHeaders?: HeadersInit
+  customHeaders?: HeadersInit,
 ): Record<string, string> {
   const headers = toHeaderRecord(customHeaders);
 
@@ -120,7 +124,7 @@ function prepareAdminHeaders(
 
 export async function adminFetch(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<Response> {
   const method = options.method || "GET";
   const headers = prepareAdminHeaders(method, options.headers);
@@ -139,13 +143,12 @@ export async function adminFetch(
   return response;
 }
 
-
 export async function adminFetchJson<T = unknown>(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<{ response: Response; data: T }> {
   const response = await adminFetch(url, options);
-  const data = await response.json().catch(() => ({} as T));
+  const data = await response.json().catch(() => ({}) as T);
   return { response, data };
 }
 
@@ -154,12 +157,15 @@ function extractAdminMessage(payload: unknown): string {
     return "";
   }
 
-  const candidate = (payload as Record<string, unknown>).message
-    ?? (payload as Record<string, unknown>).error
-    ?? (payload as Record<string, unknown>).details;
+  const candidate =
+    (payload as Record<string, unknown>).message ??
+    (payload as Record<string, unknown>).error ??
+    (payload as Record<string, unknown>).details;
 
   if (Array.isArray(candidate)) {
-    return candidate.find((item) => typeof item === "string" && item.trim()) || "";
+    return (
+      candidate.find((item) => typeof item === "string" && item.trim()) || ""
+    );
   }
 
   return typeof candidate === "string" ? candidate.trim() : "";
@@ -167,7 +173,7 @@ function extractAdminMessage(payload: unknown): string {
 
 export function normalizeAdminErrorMessage(
   error: unknown,
-  fallbackMessage: string
+  fallbackMessage: string,
 ): string {
   const rawMessage =
     error instanceof Error
@@ -182,10 +188,10 @@ export function normalizeAdminErrorMessage(
 
   const normalized = rawMessage.toLowerCase();
   if (
-    normalized === "fetch failed"
-    || normalized.includes("failed to fetch")
-    || normalized.includes("networkerror when attempting to fetch resource")
-    || normalized.includes("load failed")
+    normalized === "fetch failed" ||
+    normalized.includes("failed to fetch") ||
+    normalized.includes("networkerror when attempting to fetch resource") ||
+    normalized.includes("load failed")
   ) {
     return fallbackMessage;
   }
@@ -195,7 +201,7 @@ export function normalizeAdminErrorMessage(
 
 export async function readAdminResponseMessage(
   response: Response,
-  fallbackMessage: string
+  fallbackMessage: string,
 ): Promise<string> {
   try {
     const text = await response.text();
@@ -223,7 +229,7 @@ export async function readAdminResponseMessage(
  */
 export async function adminGet<T = unknown>(
   path: string,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("GET", options.headers);
   return apiGet<T>(path, { ...options, headers });
@@ -235,7 +241,7 @@ export async function adminGet<T = unknown>(
 export async function adminPost<T = unknown>(
   path: string,
   body?: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("POST", options.headers);
   return apiPost<T>(path, body, { ...options, headers });
@@ -247,7 +253,7 @@ export async function adminPost<T = unknown>(
 export async function adminPatch<T = unknown>(
   path: string,
   body?: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("PATCH", options.headers);
   return apiPatch<T>(path, body, { ...options, headers });
@@ -258,7 +264,7 @@ export async function adminPatch<T = unknown>(
 export async function adminDelete<T = unknown>(
   path: string,
   body?: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("DELETE", options.headers);
   return apiDelete<T>(path, body, { ...options, headers });
@@ -271,7 +277,7 @@ export async function adminDelete<T = unknown>(
 export async function adminUpload<T = unknown>(
   path: string,
   formData: FormData,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<T>> {
   const headers = prepareAdminHeaders("POST", options.headers);
   return apiUpload<T>(path, formData, { ...options, headers });
@@ -284,9 +290,12 @@ export async function adminUpload<T = unknown>(
 export async function getAdminUsers(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/users?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/users?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Fetch admin orders. */
@@ -294,9 +303,12 @@ export async function getAdminUsers(
 export async function getAdminOrders(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/orders?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/orders?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Fetch admin notifications. */
@@ -304,9 +316,12 @@ export async function getAdminOrders(
 export async function getAdminNotifications(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/notifications?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/notifications?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Fetch admin promotions. */
@@ -314,16 +329,19 @@ export async function getAdminNotifications(
 export async function getAdminPromotions(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/promotions?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/promotions?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Create an admin promotion. */
 
 export async function createAdminPromotion(
   data: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminPost("/api/admin/promotions", data, options);
 }
@@ -333,7 +351,7 @@ export async function createAdminPromotion(
 export async function updateAdminPromotion(
   id: string,
   data: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch(`/api/admin/promotions/${id}`, data, options);
 }
@@ -342,7 +360,7 @@ export async function updateAdminPromotion(
 
 export async function deleteAdminPromotion(
   id: string,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/promotions/${id}`, undefined, options);
 }
@@ -351,7 +369,7 @@ export async function deleteAdminPromotion(
  * Fetch admin branding settings.
  */
 export async function getAdminBranding(
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminGet("/api/admin/branding", options);
 }
@@ -361,7 +379,7 @@ export async function getAdminBranding(
  */
 export async function updateAdminBranding(
   data: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch("/api/admin/branding", data, options);
 }
@@ -371,16 +389,19 @@ export async function updateAdminBranding(
 export async function getAdminSeries(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/series?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/series?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Create an admin series item. */
 
 export async function createAdminSeries(
   data: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminPost("/api/admin/series", data, options);
 }
@@ -390,7 +411,7 @@ export async function createAdminSeries(
 export async function updateAdminSeries(
   id: string,
   data: AdminApiPayload,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminPatch(`/api/admin/series/${id}`, data, options);
 }
@@ -399,7 +420,7 @@ export async function updateAdminSeries(
 
 export async function deleteAdminSeries(
   id: string,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/series/${id}`, undefined, options);
 }
@@ -409,16 +430,19 @@ export async function deleteAdminSeries(
 export async function getAdminComments(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/comments?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/comments?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /** Delete an admin comment. */
 
 export async function deleteAdminComment(
   id: string,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<AdminApiRecord>> {
   return adminDelete(`/api/admin/comments/${id}`, undefined, options);
 }
@@ -428,7 +452,7 @@ export async function deleteAdminComment(
 export async function getAdminLogs(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
   return adminGet(`/api/admin/logs?page=${page}&pageSize=${pageSize}`, options);
 }
@@ -438,9 +462,12 @@ export async function getAdminLogs(
 export async function getAdminBilling(
   page: number = 1,
   pageSize: number = 20,
-  options: AdminApiOptions = {}
+  options: AdminApiOptions = {},
 ): Promise<ApiResponse<PaginatedResponse<AdminApiRecord>>> {
-  return adminGet(`/api/admin/billing?page=${page}&pageSize=${pageSize}`, options);
+  return adminGet(
+    `/api/admin/billing?page=${page}&pageSize=${pageSize}`,
+    options,
+  );
 }
 
 /**
@@ -450,5 +477,3 @@ export async function getAdminBilling(
 export function getAdminApiBaseUrl(): string {
   return getApiBaseUrl();
 }
-
-

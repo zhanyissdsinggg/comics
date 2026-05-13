@@ -33,7 +33,9 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
     <div className="rounded-[24px] border-[3px] border-white/20 bg-black px-4 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
+          <p
+            className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}
+          >
             From
           </p>
           <p className="mt-2 text-sm font-black uppercase tracking-[0.02em] text-white">
@@ -58,10 +60,10 @@ function MetaPill({ children, accent = false }) {
   return (
     <span
       className={`rounded-full border-2 border-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
-          accent
-            ? "bg-[#FFE500] text-black"
-            : "bg-black text-white/70 border-white/20"
-        }`}
+        accent
+          ? "bg-[#FFE500] text-black"
+          : "bg-black text-white/70 border-white/20"
+      }`}
     >
       {children}
     </span>
@@ -213,7 +215,9 @@ export default function EndOfEpisodeOverlay({
             <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
+                  <p
+                    className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}
+                  >
                     Ready now
                   </p>
                   <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-white">
@@ -221,23 +225,19 @@ export default function EndOfEpisodeOverlay({
                   </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <MetaPill accent>{nextEpisodeStatusLabel}</MetaPill>
-                    <MetaPill>
-                      {isSubscriber
-                        ? "Member"
-                        : "Ready"}
-                    </MetaPill>
+                    <MetaPill>{isSubscriber ? "Member" : "Ready"}</MetaPill>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <button
-                      ref={primaryActionRef}
-                      type="button"
-                      onClick={onNext}
-                      className={`px-4 py-2 text-sm ${primaryButtonClass}`}
-                    >
+                  <button
+                    ref={primaryActionRef}
+                    type="button"
+                    onClick={onNext}
+                    className={`px-4 py-2 text-sm ${primaryButtonClass}`}
+                  >
                     Keep Reading
-                    </button>
+                  </button>
                   {onViewSeries ? (
                     <button
                       type="button"
@@ -254,7 +254,9 @@ export default function EndOfEpisodeOverlay({
             <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
-                  <p className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}>
+                  <p
+                    className={`text-[11px] font-black uppercase tracking-[0.24em] ${accentTextClass}`}
+                  >
                     Next
                   </p>
                   <h3 className="mt-2 text-xl font-black uppercase tracking-[-0.03em] text-white">
@@ -307,8 +309,10 @@ export default function EndOfEpisodeOverlay({
                     {primaryLabel}
                   </button>
 
-                {showPackPrimary && packSavingsText ? (
-                    <p className={`text-xs font-black uppercase tracking-[0.08em] ${accentTextClass}`}>
+                  {showPackPrimary && packSavingsText ? (
+                    <p
+                      className={`text-xs font-black uppercase tracking-[0.08em] ${accentTextClass}`}
+                    >
                       {packSavingsText}
                     </p>
                   ) : null}
@@ -325,12 +329,16 @@ export default function EndOfEpisodeOverlay({
                       >
                         {STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
-                          <span className={`ml-2 text-[10px] font-black uppercase tracking-[0.08em] ${accentTextClass}`}>
+                          <span
+                            className={`ml-2 text-[10px] font-black uppercase tracking-[0.08em] ${accentTextClass}`}
+                          >
                             {upsellBadge}
                           </span>
                         ) : null}
                       </button>
-                      <p className="text-xs font-semibold leading-5 text-white/70">{subscriptionNote}</p>
+                      <p className="text-xs font-semibold leading-5 text-white/70">
+                        {subscriptionNote}
+                      </p>
                     </>
                   ) : (
                     <>
@@ -342,7 +350,9 @@ export default function EndOfEpisodeOverlay({
                         {secondaryLabel}
                       </button>
                       {packNote ? (
-                        <p className="text-xs font-semibold leading-5 text-white/70">{packNote}</p>
+                        <p className="text-xs font-semibold leading-5 text-white/70">
+                          {packNote}
+                        </p>
                       ) : null}
                     </>
                   )}

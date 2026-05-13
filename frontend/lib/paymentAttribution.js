@@ -110,7 +110,10 @@ export function readPaymentAttributionFromSearchParams(searchParams) {
     if (typeof searchParams.get !== "function") {
       return undefined;
     }
-    return searchParams.get(key) || (fallbackKey ? searchParams.get(fallbackKey) : undefined);
+    return (
+      searchParams.get(key) ||
+      (fallbackKey ? searchParams.get(fallbackKey) : undefined)
+    );
   };
 
   return normalizePaymentAttribution({
@@ -177,7 +180,8 @@ export function clearPersistedPaymentAttribution() {
 export function buildPathWithAttribution(path, attribution, extraParams = {}) {
   const rawPath = String(path || "");
   const hashIndex = rawPath.indexOf("#");
-  const pathWithoutHash = hashIndex >= 0 ? rawPath.slice(0, hashIndex) : rawPath;
+  const pathWithoutHash =
+    hashIndex >= 0 ? rawPath.slice(0, hashIndex) : rawPath;
   const hash = hashIndex >= 0 ? rawPath.slice(hashIndex) : "";
   const [pathname, rawQuery = ""] = pathWithoutHash.split("?");
   const params = new URLSearchParams(rawQuery);

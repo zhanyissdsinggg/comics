@@ -1,43 +1,52 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   AnalyticsSegmentsSection,
   AnalyticsStatsSection,
   AnalyticsUserDetailSection,
-} from '@/components/admin/analytics-workspace/sections';
+} from "@/components/admin/analytics-workspace/sections";
 import {
   buildStatsCards,
   fetchAnalyticsAdminPayload,
   getErrorMessage,
   SEGMENT_FILTERS,
   VIEW_TABS,
-} from '@/components/admin/analytics-workspace/utils';
-import { AdminTabs } from '@/components/admin/common/AdminWorkspacePrimitives';
+} from "@/components/admin/analytics-workspace/utils";
+import { AdminTabs } from "@/components/admin/common/AdminWorkspacePrimitives";
 
 export default function AdminUserAnalyticsPage() {
-  const [viewMode, setViewMode] = useState('stats');
-  const [selectedSegment, setSelectedSegment] = useState('all');
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [viewMode, setViewMode] = useState("stats");
+  const [selectedSegment, setSelectedSegment] = useState("all");
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
   const statsQuery = useQuery({
-    queryKey: ['admin', 'analytics', 'stats'],
+    queryKey: ["admin", "analytics", "stats"],
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await fetchAnalyticsAdminPayload('/api/admin/analytics/stats');
+      const data = await fetchAnalyticsAdminPayload(
+        "/api/admin/analytics/stats",
+      );
       return data?.stats || null;
     },
   });
 
   const segmentsQuery = useQuery({
-    queryKey: ['admin', 'analytics', 'segments', selectedSegment, page, pageSize],
+    queryKey: [
+      "admin",
+      "analytics",
+      "segments",
+      selectedSegment,
+      page,
+      pageSize,
+    ],
     staleTime: 60_000,
     placeholderData: (previous) => previous,
     queryFn: async () => {
@@ -47,7 +56,9 @@ export default function AdminUserAnalyticsPage() {
         offset: String((page - 1) * pageSize),
       });
 
-      const data = await fetchAnalyticsAdminPayload(`/api/admin/analytics/segments?${params}`);
+      const data = await fetchAnalyticsAdminPayload(
+        `/api/admin/analytics/segments?${params}`,
+      );
       return (
         data?.segments || {
           users: [],
@@ -60,11 +71,13 @@ export default function AdminUserAnalyticsPage() {
   });
 
   const userDetailQuery = useQuery({
-    queryKey: ['admin', 'analytics', 'user', selectedUserId],
+    queryKey: ["admin", "analytics", "user", selectedUserId],
     enabled: Boolean(selectedUserId),
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await fetchAnalyticsAdminPayload(`/api/admin/analytics/users/${selectedUserId}`);
+      const data = await fetchAnalyticsAdminPayload(
+        `/api/admin/analytics/users/${selectedUserId}`,
+      );
       return data?.analytics || null;
     },
   });
@@ -92,7 +105,7 @@ export default function AdminUserAnalyticsPage() {
 
   useEffect(() => {
     setPage(1);
-    setSelectedUserId('');
+    setSelectedUserId("");
   }, [selectedSegment]);
 
   const handleSelectSegment = (segment) => {
@@ -102,7 +115,7 @@ export default function AdminUserAnalyticsPage() {
 
   const handleOpenUser = (userId) => {
     setSelectedUserId(userId);
-    setViewMode('user-detail');
+    setViewMode("user-detail");
   };
 
   return (
@@ -110,7 +123,7 @@ export default function AdminUserAnalyticsPage() {
       <div className="space-y-6">
         <AdminTabs items={VIEW_TABS} value={viewMode} onChange={setViewMode} />
 
-        {viewMode === 'stats' ? (
+        {viewMode === "stats" ? (
           <AnalyticsStatsSection
             statsQuery={statsQuery}
             stats={stats}
@@ -119,7 +132,7 @@ export default function AdminUserAnalyticsPage() {
           />
         ) : null}
 
-        {viewMode === 'segments' ? (
+        {viewMode === "segments" ? (
           <AnalyticsSegmentsSection
             segmentFilters={SEGMENT_FILTERS}
             selectedSegment={selectedSegment}
@@ -139,14 +152,14 @@ export default function AdminUserAnalyticsPage() {
           />
         ) : null}
 
-        {viewMode === 'user-detail' ? (
+        {viewMode === "user-detail" ? (
           <AnalyticsUserDetailSection
             selectedSegment={selectedSegment}
             selectedUserId={selectedUserId}
             userDetailQuery={userDetailQuery}
             analytics={analytics}
             getErrorMessage={getErrorMessage}
-            onBack={() => setViewMode('segments')}
+            onBack={() => setViewMode("segments")}
           />
         ) : null}
       </div>

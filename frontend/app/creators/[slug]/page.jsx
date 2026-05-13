@@ -28,7 +28,8 @@ export async function generateMetadata({ params }) {
     });
   }
   const creatorPayload = await loadCreatorSeoPayload(creatorSlug);
-  const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
+  const hasCreatorItems =
+    Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
   const creatorName =
     creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug);
 
@@ -38,7 +39,9 @@ export async function generateMetadata({ params }) {
       ? `${creatorName} on ${siteConfig.siteName}.`
       : "Creator.",
     path: hasCreatorItems ? buildCreatorPathFromSlug(creatorSlug) : "/creators",
-    image: hasCreatorItems ? creatorPayload?.items?.[0]?.coverUrl || null : null,
+    image: hasCreatorItems
+      ? creatorPayload?.items?.[0]?.coverUrl || null
+      : null,
   });
 }
 
@@ -52,17 +55,22 @@ export default async function CreatorRoutePage({ params }) {
   if (creatorPayload?.blocked) {
     notFound();
   }
-  const hasCreatorItems = Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
+  const hasCreatorItems =
+    Array.isArray(creatorPayload?.items) && creatorPayload.items.length > 0;
 
   const structuredData = buildCreatorStructuredData({
-    creatorName: creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug),
+    creatorName:
+      creatorPayload?.creatorName || humanizeCreatorSlug(creatorSlug),
     creatorPath: buildCreatorPathFromSlug(creatorSlug),
     items: hasCreatorItems ? creatorPayload.items : [],
   });
 
   return (
     <>
-      <StructuredDataScript id={`creator-jsonld-${creatorSlug}`} data={structuredData} />
+      <StructuredDataScript
+        id={`creator-jsonld-${creatorSlug}`}
+        data={structuredData}
+      />
       <CreatorPage
         creatorSlug={creatorSlug}
         initialCatalog={creatorPayload?.items || []}

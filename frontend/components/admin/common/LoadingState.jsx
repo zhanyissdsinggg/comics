@@ -11,7 +11,10 @@ const DEFAULT_ERROR_TITLE = "这个页面暂时无法加载";
 const DEFAULT_ERROR_MESSAGE = "这次请求没有正常完成，请稍后再试。";
 const RETRY_LABEL = "重新加载";
 
-export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, height = "h-12" }) {
+export const SkeletonLoader = React.memo(function SkeletonLoader({
+  count = 5,
+  height = "h-12",
+}) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, index) => (
@@ -26,7 +29,10 @@ export const SkeletonLoader = React.memo(function SkeletonLoader({ count = 5, he
 
 SkeletonLoader.displayName = "SkeletonLoader";
 
-export const Spinner = React.memo(function Spinner({ size = "md", text = DEFAULT_LOADING_TEXT }) {
+export const Spinner = React.memo(function Spinner({
+  size = "md",
+  text = DEFAULT_LOADING_TEXT,
+}) {
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-6 w-6",
@@ -36,7 +42,9 @@ export const Spinner = React.memo(function Spinner({ size = "md", text = DEFAULT
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-[26px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-6 py-10 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
       <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white shadow-[0_6px_18px_rgba(15,23,42,0.04)]">
-        <RefreshCw className={`${sizeClasses[size]} animate-spin text-slate-900`} />
+        <RefreshCw
+          className={`${sizeClasses[size]} animate-spin text-slate-900`}
+        />
       </div>
       {text ? <p className="text-sm text-slate-500">{text}</p> : null}
     </div>
@@ -73,9 +81,14 @@ export const EmptyState = React.memo(function AdminEmptyState({
   message,
   action,
 }) {
-  const resolvedTitle = message && title === DEFAULT_EMPTY_TITLE ? message : title;
+  const resolvedTitle =
+    message && title === DEFAULT_EMPTY_TITLE ? message : title;
   const resolvedDescription =
-    message && title === DEFAULT_EMPTY_TITLE && description === DEFAULT_EMPTY_DESCRIPTION ? "" : description;
+    message &&
+    title === DEFAULT_EMPTY_TITLE &&
+    description === DEFAULT_EMPTY_DESCRIPTION
+      ? ""
+      : description;
 
   return (
     <SharedEmptyState
@@ -94,8 +107,12 @@ EmptyState.displayName = "AdminEmptyState";
 export const ErrorState = React.memo(function ErrorState({ error, onRetry }) {
   return (
     <div className="rounded-[28px] border border-red-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(254,242,242,0.96))] px-6 py-10 text-center shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-      <h3 className="text-lg font-semibold text-red-700">{DEFAULT_ERROR_TITLE}</h3>
-      <p className="mt-2 text-sm leading-6 text-red-600">{error || DEFAULT_ERROR_MESSAGE}</p>
+      <h3 className="text-lg font-semibold text-red-700">
+        {DEFAULT_ERROR_TITLE}
+      </h3>
+      <p className="mt-2 text-sm leading-6 text-red-600">
+        {error || DEFAULT_ERROR_MESSAGE}
+      </p>
       {onRetry ? (
         <div className="mt-5 flex justify-center">
           <Button type="button" variant="outline" onClick={onRetry}>

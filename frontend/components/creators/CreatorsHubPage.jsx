@@ -117,7 +117,9 @@ function getLatestUpdatedSeries(creator) {
     [...items].sort(
       (left, right) =>
         Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0),
-    )[0] || creator?.spotlightSeries || null
+    )[0] ||
+    creator?.spotlightSeries ||
+    null
   );
 }
 
@@ -426,7 +428,9 @@ export default function CreatorsHubPage({
   }, [genreOptions, initialGenreFilter]);
 
   const filteredCreators = useMemo(() => {
-    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const normalizedQuery = String(query || "")
+      .trim()
+      .toLowerCase();
 
     return creators.filter((creator) => {
       const role = normalizeCreatorRole(creator);
@@ -454,7 +458,9 @@ export default function CreatorsHubPage({
     active
       ? `${creatorFilterChipClass} border-[rgba(255,79,154,0.24)] bg-[rgba(255,79,154,0.14)] text-white`
       : `${creatorFilterChipClass} border-white/10 bg-[rgba(255,255,255,0.03)] text-white/78 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.06)] hover:text-white`;
-  const normalizedQuery = String(query || "").trim().toLowerCase();
+  const normalizedQuery = String(query || "")
+    .trim()
+    .toLowerCase();
   const showFeaturedCreators =
     !normalizedQuery && activeRole === "all" && activeGenre === "All";
   const creatorResultsLabel = getCreatorResultsLabel(activeRole, activeGenre);
@@ -477,7 +483,8 @@ export default function CreatorsHubPage({
                 Creators
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
-                Artists, writers, studios, and teams with shelves worth following.
+                Artists, writers, studios, and teams with shelves worth
+                following.
               </p>
             </div>
 
@@ -486,7 +493,8 @@ export default function CreatorsHubPage({
                 Why browse here
               </p>
               <p className="mt-2 text-sm leading-6 text-white/72">
-                Find the shelves behind your favorite stories, then follow the creators whose pacing, drama, or art style keeps hitting.
+                Find the shelves behind your favorite stories, then follow the
+                creators whose pacing, drama, or art style keeps hitting.
               </p>
             </div>
           </div>
@@ -512,7 +520,10 @@ export default function CreatorsHubPage({
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {featuredCreators.map((creator) => (
-                <CreatorCard key={`featured-${creator.slug}`} creator={creator} />
+                <CreatorCard
+                  key={`featured-${creator.slug}`}
+                  creator={creator}
+                />
               ))}
             </div>
           </SurfacePanel>

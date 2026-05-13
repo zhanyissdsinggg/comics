@@ -23,7 +23,12 @@ import {
   getSegmentLabel,
 } from "./utils";
 
-export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorMessage }) {
+export function AnalyticsStatsSection({
+  statsQuery,
+  stats,
+  statsCards,
+  getErrorMessage,
+}) {
   const insightCards = buildStatsInsights(stats);
 
   return (
@@ -59,8 +64,12 @@ export function AnalyticsStatsSection({ statsQuery, stats, statsCards, getErrorM
                     key={card.title}
                     className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]"
                   >
-                    <p className="text-sm font-semibold text-slate-950">{card.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{card.message}</p>
+                    <p className="text-sm font-semibold text-slate-950">
+                      {card.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {card.message}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -112,7 +121,10 @@ export function AnalyticsSegmentsSection({
 
       <AdminTableShell
         isError={segmentsQuery.isError}
-        errorMessage={getErrorMessage(segmentsQuery.error, "读者分群加载失败。")}
+        errorMessage={getErrorMessage(
+          segmentsQuery.error,
+          "读者分群加载失败。",
+        )}
         onRetry={() => segmentsQuery.refetch()}
         isLoading={segmentsQuery.isLoading}
         hasItems={users.length > 0}
@@ -148,13 +160,17 @@ export function AnalyticsSegmentsSection({
                         <p className="font-semibold text-slate-950">
                           {segmentUser.email || "未填写邮箱"}
                         </p>
-                        <p className="text-xs text-slate-500">{segmentUser.id}</p>
+                        <p className="text-xs text-slate-500">
+                          {segmentUser.id}
+                        </p>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-slate-600">
                       {formatNumber(segmentUser.wallet?.coins)}
                     </td>
-                    <td className="px-4 py-4 text-slate-600">{formatCurrency(metrics?.ltv)}</td>
+                    <td className="px-4 py-4 text-slate-600">
+                      {formatCurrency(metrics?.ltv)}
+                    </td>
                     <td className="px-4 py-4 text-slate-600">
                       {formatNumber(behavior?.seriesViewed)}
                     </td>
@@ -163,9 +179,16 @@ export function AnalyticsSegmentsSection({
                         {formatChurnRiskLabel(metrics?.churnRisk)}
                       </AdminBadge>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">{formatDate(segmentUser.createdAt)}</td>
+                    <td className="px-4 py-4 text-slate-600">
+                      {formatDate(segmentUser.createdAt)}
+                    </td>
                     <td className="px-4 py-4">
-                      <Button type="button" variant="outline" size="sm" onClick={() => onOpenUser(segmentUser.id)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onOpenUser(segmentUser.id)}
+                      >
                         打开用户
                       </Button>
                     </td>
@@ -213,7 +236,10 @@ export function AnalyticsUserDetailSection({
         <AdminDataState
           isLoading={false}
           hasData={false}
-          emptyMessage={getErrorMessage(userDetailQuery.error, "用户详情加载失败。")}
+          emptyMessage={getErrorMessage(
+            userDetailQuery.error,
+            "用户详情加载失败。",
+          )}
         />
       ) : (
         <AdminDataState
@@ -265,32 +291,62 @@ export function AnalyticsUserDetailSection({
 
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-                    <p className="text-sm font-semibold text-slate-950">消费记录</p>
+                    <p className="text-sm font-semibold text-slate-950">
+                      消费记录
+                    </p>
                     <AdminKeyValueList
                       className="mt-4"
                       items={[
-                        { label: "首单时间", value: formatDate(ltv?.firstOrderDate) },
-                        { label: "最近订单", value: formatDate(ltv?.lastOrderDate) },
-                        { label: "订单数", value: formatNumber(ltv?.totalOrders) },
-                        { label: "所在分群", value: getSegmentLabel(selectedSegment) },
+                        {
+                          label: "首单时间",
+                          value: formatDate(ltv?.firstOrderDate),
+                        },
+                        {
+                          label: "最近订单",
+                          value: formatDate(ltv?.lastOrderDate),
+                        },
+                        {
+                          label: "订单数",
+                          value: formatNumber(ltv?.totalOrders),
+                        },
+                        {
+                          label: "所在分群",
+                          value: getSegmentLabel(selectedSegment),
+                        },
                       ]}
                     />
                   </div>
                   <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-                    <p className="text-sm font-semibold text-slate-950">阅读行为</p>
+                    <p className="text-sm font-semibold text-slate-950">
+                      阅读行为
+                    </p>
                     <AdminKeyValueList
                       className="mt-4"
                       items={[
-                        { label: "浏览作品数", value: formatNumber(userBehavior?.seriesViewed) },
+                        {
+                          label: "浏览作品数",
+                          value: formatNumber(userBehavior?.seriesViewed),
+                        },
                         {
                           label: "阅读时长",
                           value: `${formatNumber(
-                            Math.round(Number(userBehavior?.readingTime || 0) / 60),
+                            Math.round(
+                              Number(userBehavior?.readingTime || 0) / 60,
+                            ),
                           )} 分钟`,
                         },
-                        { label: "评论数", value: formatNumber(userBehavior?.commentsCount) },
-                        { label: "评分数", value: formatNumber(userBehavior?.ratingsCount) },
-                        { label: "书签数", value: formatNumber(userBehavior?.bookmarksCount) },
+                        {
+                          label: "评论数",
+                          value: formatNumber(userBehavior?.commentsCount),
+                        },
+                        {
+                          label: "评分数",
+                          value: formatNumber(userBehavior?.ratingsCount),
+                        },
+                        {
+                          label: "书签数",
+                          value: formatNumber(userBehavior?.bookmarksCount),
+                        },
                       ]}
                     />
                   </div>
@@ -301,7 +357,9 @@ export function AnalyticsUserDetailSection({
                 <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-950">留存状态</p>
+                      <p className="text-sm font-semibold text-slate-950">
+                        留存状态
+                      </p>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
                         一句话看清流失风险。
                       </p>
@@ -310,18 +368,31 @@ export function AnalyticsUserDetailSection({
                       {formatChurnRiskLabel(analytics?.churnRisk)}
                     </AdminBadge>
                   </div>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{retentionMessage}</p>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">
+                    {retentionMessage}
+                  </p>
                 </div>
 
                 <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-6 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-                  <p className="text-sm font-semibold text-slate-950">快速信息</p>
+                  <p className="text-sm font-semibold text-slate-950">
+                    快速信息
+                  </p>
                   <AdminKeyValueList
                     className="mt-4"
                     items={[
                       { label: "加入时间", value: formatDate(user?.createdAt) },
-                      { label: "钱包余额", value: formatNumber(user?.wallet?.coins) },
-                      { label: "赠送余额", value: formatNumber(user?.wallet?.bonusCoins) },
-                      { label: "最近活跃", value: formatDate(userBehavior?.lastActiveAt) },
+                      {
+                        label: "钱包余额",
+                        value: formatNumber(user?.wallet?.coins),
+                      },
+                      {
+                        label: "赠送余额",
+                        value: formatNumber(user?.wallet?.bonusCoins),
+                      },
+                      {
+                        label: "最近活跃",
+                        value: formatDate(userBehavior?.lastActiveAt),
+                      },
                     ]}
                   />
                 </div>

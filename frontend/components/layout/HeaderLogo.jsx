@@ -30,9 +30,7 @@ export default function HeaderLogo({ variant = "default" }) {
       aria-label="Go to home"
       className="group flex shrink-0 items-center gap-3 pr-2 text-left transition-all duration-300"
     >
-      <span
-        className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[16px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.28)_0%,rgba(167,139,250,0.22)_100%)] shadow-[0_18px_36px_rgba(0,0,0,0.28)] ring-1 ring-white/8 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:shadow-[0_22px_42px_rgba(0,0,0,0.34)]"
-      >
+      <span className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-[16px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.28)_0%,rgba(167,139,250,0.22)_100%)] shadow-[0_18px_36px_rgba(0,0,0,0.28)] ring-1 ring-white/8 transition-all duration-150 group-hover:-translate-y-0.5 group-hover:shadow-[0_22px_42px_rgba(0,0,0,0.34)]">
         <span className="relative text-xl font-black tracking-[-0.04em] text-white">
           {siteConfig.siteName.slice(0, 1)}
         </span>

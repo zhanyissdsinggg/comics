@@ -24,28 +24,43 @@ export function ToastProvider({ children }) {
    * @param {string} type 消息类型：success、error、warning、info
    * @param {number} duration 持续时间（毫秒），0表示不自动关闭
    */
-  const showToast = useCallback((message, type = "info", duration = 3000) => {
-    const id = Date.now() + Math.random();
-    const toast = { id, message, type, duration };
+  const showToast = useCallback(
+    (message, type = "info", duration = 3000) => {
+      const id = Date.now() + Math.random();
+      const toast = { id, message, type, duration };
 
-    setToasts((prev) => [...prev, toast]);
+      setToasts((prev) => [...prev, toast]);
 
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
 
-    return id;
-  }, [removeToast]);
+      return id;
+    },
+    [removeToast],
+  );
 
   /**
    * 老王说：快捷方法
    */
-  const success = useCallback((message, duration) => showToast(message, "success", duration), [showToast]);
-  const error = useCallback((message, duration) => showToast(message, "error", duration), [showToast]);
-  const warning = useCallback((message, duration) => showToast(message, "warning", duration), [showToast]);
-  const info = useCallback((message, duration) => showToast(message, "info", duration), [showToast]);
+  const success = useCallback(
+    (message, duration) => showToast(message, "success", duration),
+    [showToast],
+  );
+  const error = useCallback(
+    (message, duration) => showToast(message, "error", duration),
+    [showToast],
+  );
+  const warning = useCallback(
+    (message, duration) => showToast(message, "warning", duration),
+    [showToast],
+  );
+  const info = useCallback(
+    (message, duration) => showToast(message, "info", duration),
+    [showToast],
+  );
 
   const value = {
     toasts,
@@ -57,7 +72,9 @@ export function ToastProvider({ children }) {
     info,
   };
 
-  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+  return (
+    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
+  );
 }
 
 /**

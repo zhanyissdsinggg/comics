@@ -45,8 +45,7 @@ export default function LoginGateModal({
     "rounded-full border-2 border-white/20 bg-black px-6 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
   const activePillClass =
     "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
-  const dividerClass =
-    "h-px flex-1 bg-[#111111]";
+  const dividerClass = "h-px flex-1 bg-[#111111]";
   const primaryButtonClass =
     "rounded-full border-2 border-black bg-[#00E5FF] px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
 
@@ -165,9 +164,7 @@ export default function LoginGateModal({
       onClose?.();
       return;
     }
-    setSocialError(
-      "Google sign-in worked, but the session did not refresh.",
-    );
+    setSocialError("Google sign-in worked, but the session did not refresh.");
   }, [onClose, refresh]);
 
   const handleSocialError = useCallback((message) => {
@@ -198,9 +195,7 @@ export default function LoginGateModal({
                 type="button"
                 onClick={() => setOtpChannel("email")}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-                  otpChannel === "email"
-                    ? activePillClass
-                    : secondaryPillClass
+                  otpChannel === "email" ? activePillClass : secondaryPillClass
                 }`}
               >
                 Email OTP
@@ -209,9 +204,7 @@ export default function LoginGateModal({
                 type="button"
                 onClick={() => setOtpChannel("sms")}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-300 ${
-                  otpChannel === "sms"
-                    ? activePillClass
-                    : secondaryPillClass
+                  otpChannel === "sms" ? activePillClass : secondaryPillClass
                 }`}
               >
                 SMS OTP
@@ -322,9 +315,7 @@ export default function LoginGateModal({
               type="button"
               onClick={() => setMode("login")}
               className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
-                mode === "login"
-                  ? activePillClass
-                  : secondaryPillClass
+                mode === "login" ? activePillClass : secondaryPillClass
               }`}
             >
               Sign in
@@ -333,9 +324,7 @@ export default function LoginGateModal({
               type="button"
               onClick={() => setMode("register")}
               className={`flex-1 px-4 py-2 font-semibold transition-all duration-300 ${
-                mode === "register"
-                  ? activePillClass
-                  : secondaryPillClass
+                mode === "register" ? activePillClass : secondaryPillClass
               }`}
             >
               Register
@@ -347,7 +336,7 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-              className="font-black uppercase tracking-[0.06em] text-white/55 transition-colors duration-300 hover:text-white"
+            className="font-black uppercase tracking-[0.06em] text-white/55 transition-colors duration-300 hover:text-white"
           >
             Forgot password?
           </button>
@@ -371,10 +360,7 @@ export default function LoginGateModal({
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            className={primaryButtonClass}
-          >
+          <button type="submit" className={primaryButtonClass}>
             {mode === "register" ? "Register" : "Sign in"}
           </button>
         </div>

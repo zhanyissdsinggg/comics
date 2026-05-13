@@ -15,7 +15,8 @@ const RANKINGS_LIST = [
     adult: false,
     description: "Lead ranking entry used for accessibility verification.",
     coverUrl: createPosterPlaceholder("Crimson Orbit"),
-    coverTone: "linear-gradient(160deg, rgba(47,107,255,0.18) 0%, rgba(15,23,42,0.12) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(47,107,255,0.18) 0%, rgba(15,23,42,0.12) 100%)",
     badge: "Trending",
     badges: ["Trending"],
     genres: ["Fantasy", "Action"],
@@ -39,7 +40,8 @@ const RANKINGS_LIST = [
     adult: false,
     description: "Supporting ranking entry used for shared cover checks.",
     coverUrl: createPosterPlaceholder("Velvet Relay"),
-    coverTone: "linear-gradient(160deg, rgba(249,115,22,0.18) 0%, rgba(15,23,42,0.10) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(249,115,22,0.18) 0%, rgba(15,23,42,0.10) 100%)",
     badge: "Completed",
     badges: ["Completed"],
     genres: ["Drama", "Mystery"],
@@ -63,7 +65,8 @@ const RANKINGS_LIST = [
     adult: false,
     description: "Novel ranking entry used to verify typed alt text.",
     coverUrl: createPosterPlaceholder("Paper Halo"),
-    coverTone: "linear-gradient(160deg, rgba(16,185,129,0.18) 0%, rgba(15,23,42,0.10) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(16,185,129,0.18) 0%, rgba(15,23,42,0.10) 100%)",
     badge: "New",
     badges: ["New"],
     genres: ["Romance", "Fantasy"],
@@ -87,7 +90,8 @@ const RANKINGS_LIST = [
     adult: false,
     description: "Board entry used for list cover verification.",
     coverUrl: createPosterPlaceholder("Neon Trial"),
-    coverTone: "linear-gradient(160deg, rgba(168,85,247,0.18) 0%, rgba(15,23,42,0.10) 100%)",
+    coverTone:
+      "linear-gradient(160deg, rgba(168,85,247,0.18) 0%, rgba(15,23,42,0.10) 100%)",
     badge: "",
     badges: [],
     genres: ["Sci-Fi", "Thriller"],
@@ -113,7 +117,9 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Rankings accessibility", () => {
-  test("rankings should expose typed cover alt text and visible keyboard focus on editorial filters", async ({ page }) => {
+  test("rankings should expose typed cover alt text and visible keyboard focus on editorial filters", async ({
+    page,
+  }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("cookie_consent", "accepted");
     });
@@ -122,13 +128,21 @@ test.describe("Rankings accessibility", () => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -182,30 +196,51 @@ test.describe("Rankings accessibility", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Featured stories." })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Featured stories." }),
+    ).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Crimson Orbit" })).toBeVisible({
+    await expect(
+      page.getByRole("img", { name: "Comic cover image for Crimson Orbit" }),
+    ).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Velvet Relay" })).toBeVisible({
+    await expect(
+      page.getByRole("img", { name: "Comic cover image for Velvet Relay" }),
+    ).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Novel cover image for Paper Halo" })).toBeVisible({
+    await expect(
+      page.getByRole("img", { name: "Novel cover image for Paper Halo" }),
+    ).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("img", { name: "Comic cover image for Neon Trial" })).toBeVisible({
+    await expect(
+      page.getByRole("img", { name: "Comic cover image for Neon Trial" }),
+    ).toBeVisible({
       timeout: RANKINGS_UI_TIMEOUT_MS,
     });
 
-    const featuredFilter = page.getByRole("button", { name: "Featured", exact: true });
-    await expect(featuredFilter).toBeVisible({ timeout: RANKINGS_UI_TIMEOUT_MS });
+    const featuredFilter = page.getByRole("button", {
+      name: "Featured",
+      exact: true,
+    });
+    await expect(featuredFilter).toBeVisible({
+      timeout: RANKINGS_UI_TIMEOUT_MS,
+    });
     await tabToAndExpectVisibleFocus(page, featuredFilter, {
       label: "Rankings Featured filter",
     });
 
     await page.waitForTimeout(300);
-    await expectNoBasicA11yAuditIssues(page, "/rankings?type=popular&window=all");
-    await expectNoRuntimeIssues("/rankings?type=popular&window=all", runtimeIssues);
+    await expectNoBasicA11yAuditIssues(
+      page,
+      "/rankings?type=popular&window=all",
+    );
+    await expectNoRuntimeIssues(
+      "/rankings?type=popular&window=all",
+      runtimeIssues,
+    );
   });
 });

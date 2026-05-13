@@ -63,7 +63,9 @@ function buildSitemapEntry(path, lastModified, options = {}) {
         : ROUTE_CHANGE_FREQUENCIES[normalizedPath] || "weekly"),
     priority:
       options.priority ??
-      (normalizedPath.startsWith("/creators/") ? 0.7 : ROUTE_PRIORITIES[normalizedPath] || 0.7),
+      (normalizedPath.startsWith("/creators/")
+        ? 0.7
+        : ROUTE_PRIORITIES[normalizedPath] || 0.7),
   };
 }
 
@@ -116,7 +118,9 @@ function buildCreatorEntries(seriesList, currentDate) {
     creatorPaths.add(creatorIdentity.href);
   });
 
-  return Array.from(creatorPaths).map((path) => buildSitemapEntry(path, currentDate));
+  return Array.from(creatorPaths).map((path) =>
+    buildSitemapEntry(path, currentDate),
+  );
 }
 
 export default async function sitemap() {

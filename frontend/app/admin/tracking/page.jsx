@@ -9,10 +9,7 @@ import TrackingSettings from "../../../components/tracking/TrackingSettings";
 
 export default function AdminTrackingPage() {
   return (
-    <AdminLayout
-      title="追踪设置"
-      subtitle="管理脚本、令牌和草稿。"
-    >
+    <AdminLayout title="追踪设置" subtitle="管理脚本、令牌和草稿。">
       <Suspense
         fallback={
           <div className="space-y-4">

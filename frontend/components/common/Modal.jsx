@@ -104,9 +104,7 @@ export const Modal = memo(function Modal({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating
-          ? "bg-black/72 backdrop-blur-md"
-          : "bg-black/0"
+        isAnimating ? "bg-black/72 backdrop-blur-md" : "bg-black/0"
       }`}
       onClick={handleOverlayClick}
       style={{ WebkitTapHighlightColor: "transparent" }}
@@ -154,7 +152,9 @@ export const Modal = memo(function Modal({
           </div>
         )}
 
-        <div className="relative max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
+        <div className="relative max-h-[70vh] overflow-y-auto px-6 py-4">
+          {children}
+        </div>
 
         {footer ? (
           <div className="relative border-t-2 border-black px-6 py-4">
@@ -177,8 +177,7 @@ export const ConfirmModal = memo(function ConfirmModal({
   variant = "default",
 }) {
   const variantClasses = {
-    default:
-      storefrontPrimaryButtonClass,
+    default: storefrontPrimaryButtonClass,
     danger:
       "inline-flex items-center justify-center rounded-full border-2 border-black bg-[#FF007A] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95",
     warning:

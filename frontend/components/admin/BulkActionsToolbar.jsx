@@ -62,15 +62,23 @@ export default function BulkActionsToolbar({
               {selectedCount}
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">批量操作</p>
-              <p className="text-sm font-semibold text-slate-950">已选择 {selectedCount} 部作品</p>
-              <p className="text-xs text-slate-500">先确认选择无误，再统一发布、转草稿或删除。</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                批量操作
+              </p>
+              <p className="text-sm font-semibold text-slate-950">
+                已选择 {selectedCount} 部作品
+              </p>
+              <p className="text-xs text-slate-500">
+                先确认选择无误，再统一发布、转草稿或删除。
+              </p>
             </div>
           </div>
 
           <div className="grid gap-2 md:grid-cols-[auto_auto_auto] lg:justify-end">
             <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">发布动作</p>
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                发布动作
+              </p>
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
@@ -98,7 +106,9 @@ export default function BulkActionsToolbar({
             </div>
 
             <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">选择控制</p>
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                选择控制
+              </p>
               <Button
                 type="button"
                 variant="ghost"
@@ -113,7 +123,9 @@ export default function BulkActionsToolbar({
             </div>
 
             <div className="rounded-[20px] border border-rose-200 bg-rose-50/72 p-2 shadow-[0_8px_20px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">危险操作</p>
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-500">
+                危险操作
+              </p>
               <Button
                 type="button"
                 variant="destructive"

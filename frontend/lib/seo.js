@@ -23,7 +23,9 @@ function resolveSocialImage(image) {
     return {
       ...defaultSocialImage,
       ...image,
-      url: /^https?:\/\//i.test(String(image.url)) ? String(image.url) : absoluteUrl(String(image.url)),
+      url: /^https?:\/\//i.test(String(image.url))
+        ? String(image.url)
+        : absoluteUrl(String(image.url)),
     };
   }
 
@@ -60,7 +62,9 @@ export function createPageMetadata({
   openGraphType = "website",
   robots = undefined,
 }) {
-  const pageTitle = title ? `${title} | ${siteConfig.siteName}` : siteConfig.siteName;
+  const pageTitle = title
+    ? `${title} | ${siteConfig.siteName}`
+    : siteConfig.siteName;
   const summary = description || siteConfig.defaultDescription;
   const socialImage = resolveSocialImage(image);
 

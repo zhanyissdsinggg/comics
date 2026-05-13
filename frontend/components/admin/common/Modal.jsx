@@ -41,8 +41,16 @@ export const Modal = React.memo(function Modal({
         {hasHeader ? (
           <div className="flex items-start justify-between gap-4 border-b border-[color:var(--gush-border)] px-6 pb-5 pt-6">
             <div className="min-w-0">
-              {title ? <h3 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">{title}</h3> : null}
-              {subtitle ? <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{subtitle}</p> : null}
+              {title ? (
+                <h3 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                  {title}
+                </h3>
+              ) : null}
+              {subtitle ? (
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                  {subtitle}
+                </p>
+              ) : null}
             </div>
             {closeButton ? (
               <button

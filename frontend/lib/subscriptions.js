@@ -54,7 +54,9 @@ function normalizePlanCatalog(plans) {
 }
 
 function hasPlanEntries(plans) {
-  return Boolean(plans && typeof plans === "object" && Object.keys(plans).length > 0);
+  return Boolean(
+    plans && typeof plans === "object" && Object.keys(plans).length > 0,
+  );
 }
 
 export function resolvePlanCatalog(plans) {
@@ -70,7 +72,10 @@ export function setPlanCatalog(plans) {
   dynamicCatalog = normalizedPlans;
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem("mn_plan_catalog", JSON.stringify(normalizedPlans));
+      window.localStorage.setItem(
+        "mn_plan_catalog",
+        JSON.stringify(normalizedPlans),
+      );
     } catch (err) {
       // ignore storage errors
     }

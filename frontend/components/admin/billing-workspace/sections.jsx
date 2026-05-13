@@ -33,7 +33,10 @@ export function BillingSummaryCards({ cards }) {
   );
 }
 
-export function BillingSnapshotSection({ billingSnapshotItems, membershipSnapshotItems }) {
+export function BillingSnapshotSection({
+  billingSnapshotItems,
+  membershipSnapshotItems,
+}) {
   return (
     <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
       <AdminPageSection
@@ -90,8 +93,12 @@ export function BillingPackagesSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">按套餐编号、名称或标签定位，再按时间顺序复核当前售卖内容。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按套餐编号、名称或标签定位，再按时间顺序复核当前售卖内容。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -108,10 +115,17 @@ export function BillingPackagesSection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量清理</p>
-          <p className="mt-2 text-sm text-slate-600">套餐删除单独放在这里，避免和价格、点数浏览信息混在一处。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            批量清理
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            套餐删除单独放在这里，避免和价格、点数浏览信息混在一处。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="destructive"
@@ -146,7 +160,10 @@ export function BillingPackagesSection(props) {
                 <th className="px-4 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === packages.length && packages.length > 0}
+                    checked={
+                      selectedIds.length === packages.length &&
+                      packages.length > 0
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                     aria-label="选择全部套餐"
@@ -179,16 +196,20 @@ export function BillingPackagesSection(props) {
                       <div className="font-medium text-slate-950">
                         {pkg.name || pkg.label || "未命名套餐"}
                       </div>
-                      <div className="mt-1 text-xs text-slate-500">{pkg.id}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {pkg.id}
+                      </div>
                     </td>
                     <td className="px-4 py-4 text-slate-700">
                       {formatCurrency(pkg.price, pkg.currency)}
                     </td>
                     <td className="px-4 py-4">
-                      <div className="font-medium text-slate-950">{formatPoints(totalPoints)} 点</div>
+                      <div className="font-medium text-slate-950">
+                        {formatPoints(totalPoints)} 点
+                      </div>
                       <div className="mt-1 text-xs text-slate-500">
-                        付费 {formatPoints(pkg.paidPts || pkg.points || 0)} 点 · 赠送{" "}
-                        {formatPoints(pkg.bonusPts || 0)} 点
+                        付费 {formatPoints(pkg.paidPts || pkg.points || 0)} 点 ·
+                        赠送 {formatPoints(pkg.bonusPts || 0)} 点
                       </div>
                     </td>
                     <td className="px-4 py-4">
@@ -196,7 +217,9 @@ export function BillingPackagesSection(props) {
                         {isActive ? "启用中" : "已暂停"}
                       </AdminBadge>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">{formatDate(pkg.createdAt)}</td>
+                    <td className="px-4 py-4 text-slate-600">
+                      {formatDate(pkg.createdAt)}
+                    </td>
                   </AdminTableRow>
                 );
               })}

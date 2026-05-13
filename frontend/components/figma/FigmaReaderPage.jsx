@@ -44,7 +44,10 @@ import {
 import { cn, isAdultContent } from "./figma-utils";
 
 function createIdempotencyKey() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `reader_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
@@ -73,7 +76,10 @@ function formatPriceLabel(value) {
 
 function resolveEpisodeDisplayTitle(title, fallbackLabel, seriesType) {
   const normalizedTitle = String(title || "").trim();
-  if (!normalizedTitle || isDefaultInstallmentTitle(normalizedTitle, seriesType)) {
+  if (
+    !normalizedTitle ||
+    isDefaultInstallmentTitle(normalizedTitle, seriesType)
+  ) {
     return fallbackLabel;
   }
 
@@ -137,7 +143,10 @@ function resolveModeBlockFromError(response) {
     return "normal";
   }
 
-  if (response.error === "ADULT_GATED" || response.reason === "NEED_AGE_CONFIRM") {
+  if (
+    response.error === "ADULT_GATED" ||
+    response.reason === "NEED_AGE_CONFIRM"
+  ) {
     return "adult";
   }
 
@@ -160,7 +169,9 @@ function Pill({ className = "", children }) {
 function Metric({ label, value, hint }) {
   return (
     <div className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">{label}</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+        {label}
+      </p>
       <p className="mt-2 text-base font-black text-white">{value}</p>
       {hint ? <p className="mt-1 text-xs text-gray-400">{hint}</p> : null}
     </div>
@@ -177,9 +188,13 @@ function QueueCard({
 }) {
   return (
     <div className="rounded-[26px] border border-white/10 bg-black/20 p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">{eyebrow}</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+        {eyebrow}
+      </p>
       <p className="mt-2 text-sm font-black text-white">{title}</p>
-      <p className="mt-2 min-h-[44px] text-sm leading-6 text-gray-400">{description}</p>
+      <p className="mt-2 min-h-[44px] text-sm leading-6 text-gray-400">
+        {description}
+      </p>
       <button
         type="button"
         onClick={onClick}
@@ -206,15 +221,27 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const episodeCompleteRef = useRef("");
   const adultReaderEnterRef = useRef("");
   const progressMilestonesRef = useRef([]);
-  const { palette, contentMode, handleAdultToggle, confirmAdultMode, openLogin } = useFigmaSite();
+  const {
+    palette,
+    contentMode,
+    handleAdultToggle,
+    confirmAdultMode,
+    openLogin,
+  } = useFigmaSite();
   const { bookmarksBySeries, addBookmark, removeBookmark } = useBookmarkStore();
   const { loadEntitlement, unlockEpisode, bySeriesId } = useEntitlementStore();
   const { isSignedIn } = useAuthStore();
   const { isAdultMode } = useAdultGateStore();
   const { addHistory } = useHistoryStore();
   const { loadWallet, paidPts, bonusPts } = useWalletStore();
-  const { nightMode, toggleNightMode, layoutMode, setLayoutMode, brightness, setBrightness } =
-    useReaderSettingsStore();
+  const {
+    nightMode,
+    toggleNightMode,
+    layoutMode,
+    setLayoutMode,
+    brightness,
+    setBrightness,
+  } = useReaderSettingsStore();
   const [seriesData, setSeriesData] = useState(null);
   const [episodeData, setEpisodeData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -347,7 +374,14 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     }
 
     void loadEntitlement(seriesId);
-  }, [contentMode, isSignedIn, loadEntitlement, modeBlock, seriesData?.series, seriesId]);
+  }, [
+    contentMode,
+    isSignedIn,
+    loadEntitlement,
+    modeBlock,
+    seriesData?.series,
+    seriesId,
+  ]);
 
   useEffect(() => {
     if (!isSignedIn || !episodeData?.id || modeBlock) {
@@ -360,13 +394,30 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   }, [episodeData?.id, isSignedIn, loadWallet, modeBlock]);
 
   useEffect(() => {
-    if (!isSignedIn || historyLoggedRef.current || !seriesData?.series || !episodeData?.id) {
+    if (
+      !isSignedIn ||
+      historyLoggedRef.current ||
+      !seriesData?.series ||
+      !episodeData?.id
+    ) {
       return;
     }
 
     historyLoggedRef.current = true;
-    void addHistory({ seriesId, episodeId, title: seriesData.series.title, percent: 0.08 });
-  }, [addHistory, episodeData?.id, episodeId, isSignedIn, seriesData?.series, seriesId]);
+    void addHistory({
+      seriesId,
+      episodeId,
+      title: seriesData.series.title,
+      percent: 0.08,
+    });
+  }, [
+    addHistory,
+    episodeData?.id,
+    episodeId,
+    isSignedIn,
+    seriesData?.series,
+    seriesId,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -402,39 +453,63 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const episodes = useMemo(() => {
     const list = Array.isArray(seriesData?.episodes) ? seriesData.episodes : [];
     return list.filter((item) =>
-      matchesContentMode(withFallbackAdultFlag(item, seriesIsAdult), contentMode),
+      matchesContentMode(
+        withFallbackAdultFlag(item, seriesIsAdult),
+        contentMode,
+      ),
     );
   }, [contentMode, seriesData, seriesIsAdult]);
   const currentEpisode = useMemo(
-    () => episodes.find((item) => String(item?.id || "") === String(episodeId || "")) || null,
+    () =>
+      episodes.find(
+        (item) => String(item?.id || "") === String(episodeId || ""),
+      ) || null,
     [episodeId, episodes],
   );
   const currentIndex = useMemo(
-    () => episodes.findIndex((item) => String(item?.id || "") === String(episodeId || "")),
+    () =>
+      episodes.findIndex(
+        (item) => String(item?.id || "") === String(episodeId || ""),
+      ),
     [episodeId, episodes],
   );
   const prevEpisode = currentIndex > 0 ? episodes[currentIndex - 1] : null;
   const nextEpisode =
-    currentIndex >= 0 && currentIndex < episodes.length - 1 ? episodes[currentIndex + 1] : null;
+    currentIndex >= 0 && currentIndex < episodes.length - 1
+      ? episodes[currentIndex + 1]
+      : null;
   const seriesType = seriesData?.series?.type || episodeData?.type || "comic";
   const installmentLabel = getInstallmentLabel(seriesType);
   const installmentPlural = getInstallmentLabel(seriesType, { plural: true });
   const currentNumber = currentEpisode?.number || episodeData?.number || 1;
-  const currentInstallmentLabel = formatInstallmentLabel(seriesType, currentNumber);
+  const currentInstallmentLabel = formatInstallmentLabel(
+    seriesType,
+    currentNumber,
+  );
   const rawEpisodeTitle = String(
-    currentEpisode?.title || episodeData?.title || fallbackData?.episodeTitle || "",
+    currentEpisode?.title ||
+      episodeData?.title ||
+      fallbackData?.episodeTitle ||
+      "",
   ).trim();
   const currentEpisodeTitle =
     rawEpisodeTitle && !isDefaultInstallmentTitle(rawEpisodeTitle, seriesType)
       ? rawEpisodeTitle
       : currentInstallmentLabel;
   const currentPricePts = Number(
-    currentEpisode?.access?.pricePts ?? currentEpisode?.pricePts ?? episodeData?.pricePts ?? 0,
+    currentEpisode?.access?.pricePts ??
+      currentEpisode?.pricePts ??
+      episodeData?.pricePts ??
+      0,
   );
   const unlocked =
-    currentPricePts <= 0 || entitlement.unlockedEpisodeIds.includes(String(episodeId));
+    currentPricePts <= 0 ||
+    entitlement.unlockedEpisodeIds.includes(String(episodeId));
   const seriesBookmarks = useMemo(
-    () => (Array.isArray(bookmarksBySeries?.[seriesId]) ? bookmarksBySeries[seriesId] : []),
+    () =>
+      Array.isArray(bookmarksBySeries?.[seriesId])
+        ? bookmarksBySeries[seriesId]
+        : [],
     [bookmarksBySeries, seriesId],
   );
   const currentBookmark = useMemo(
@@ -445,10 +520,14 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     [episodeId, seriesBookmarks],
   );
   const isComic = (episodeData?.type || seriesType) === "comic";
-  const previewCount = !unlocked && isComic ? episodeData?.previewFreePages ?? 3 : null;
-  const previewParagraphs = !unlocked && !isComic ? episodeData?.previewParagraphs ?? 3 : null;
+  const previewCount =
+    !unlocked && isComic ? (episodeData?.previewFreePages ?? 3) : null;
+  const previewParagraphs =
+    !unlocked && !isComic ? (episodeData?.previewParagraphs ?? 3) : null;
   const pages = Array.isArray(episodeData?.pages) ? episodeData.pages : [];
-  const paragraphs = Array.isArray(episodeData?.paragraphs) ? episodeData.paragraphs : [];
+  const paragraphs = Array.isArray(episodeData?.paragraphs)
+    ? episodeData.paragraphs
+    : [];
   const visibleUnits = isComic
     ? typeof previewCount === "number"
       ? Math.min(previewCount, pages.length)
@@ -460,7 +539,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   const readingPercent = safeVisibleUnits
     ? Math.max(
         0.01,
-        Math.min(1, (Math.min(activeIndex, safeVisibleUnits - 1) + 1) / safeVisibleUnits),
+        Math.min(
+          1,
+          (Math.min(activeIndex, safeVisibleUnits - 1) + 1) / safeVisibleUnits,
+        ),
       )
     : 0;
   const progressPercent = visibleUnits
@@ -471,23 +553,30 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           Math.min(
             100,
             Math.round(
-              ((Math.min(activeIndex, safeVisibleUnits - 1) + 1) / safeVisibleUnits) * 100,
+              ((Math.min(activeIndex, safeVisibleUnits - 1) + 1) /
+                safeVisibleUnits) *
+                100,
             ),
           ),
         )
     : 0;
   const isEpisodeComplete = Boolean(unlocked && hasReachedChapterEnd);
   const queuePercent =
-    episodes.length > 1 && currentIndex >= 0 ? Math.round(((currentIndex + 1) / episodes.length) * 100) : 100;
+    episodes.length > 1 && currentIndex >= 0
+      ? Math.round(((currentIndex + 1) / episodes.length) * 100)
+      : 100;
   const creatorName =
-    resolveSeriesCreatorName(seriesData?.series) || String(seriesData?.series?.author || "").trim() || "Editorial Crew";
+    resolveSeriesCreatorName(seriesData?.series) ||
+    String(seriesData?.series?.author || "").trim() ||
+    "Editorial Crew";
   const walletBalance = Number(paidPts || 0) + Number(bonusPts || 0);
   const shortfallPts = Math.max(0, currentPricePts - walletBalance);
   const backToSeriesHref =
     fallbackData?.backToSeriesHref || `/series/${encodeURIComponent(seriesId)}`;
   const readerPath = `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`;
   const layoutModeForView = isComic ? layoutMode : "vertical";
-  const shareUrl = typeof window !== "undefined" ? window.location.href : backToSeriesHref;
+  const shareUrl =
+    typeof window !== "undefined" ? window.location.href : backToSeriesHref;
   const readerAnalyticsPayload = useMemo(
     () => ({
       seriesId,
@@ -500,7 +589,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     [contentMode, episodeId, seriesId, seriesIsAdult, seriesType, unlocked],
   );
   const previousQueueLabel = prevEpisode
-    ? formatInstallmentLabel(seriesType, prevEpisode?.number || Math.max(currentNumber - 1, 1))
+    ? formatInstallmentLabel(
+        seriesType,
+        prevEpisode?.number || Math.max(currentNumber - 1, 1),
+      )
     : "Series overview";
   const previousQueueDescription = prevEpisode
     ? resolveEpisodeDisplayTitle(
@@ -513,7 +605,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     ? `${currentInstallmentLabel} is fully open and synced in this reading session.`
     : `${safeVisibleUnits} free ${isComic ? "page" : "block"}${safeVisibleUnits === 1 ? "" : "s"} are open before unlock.`;
   const nextQueueLabel = nextEpisode
-    ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1)
+    ? formatInstallmentLabel(
+        seriesType,
+        nextEpisode?.number || currentNumber + 1,
+      )
     : "Series overview";
   const nextQueueDescription = nextEpisode
     ? `${resolveEpisodeDisplayTitle(nextEpisode?.title, nextQueueLabel, seriesType)} is ready next${
@@ -535,7 +630,13 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
     }
 
     await confirmAdultMode();
-  }, [confirmAdultMode, isSignedIn, openLogin, readerAnalyticsPayload, readerPath]);
+  }, [
+    confirmAdultMode,
+    isSignedIn,
+    openLogin,
+    readerAnalyticsPayload,
+    readerPath,
+  ]);
 
   const handleAdultGateExit = useCallback(() => {
     trackEvent("adult_gate_exit", {
@@ -562,12 +663,19 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
         return;
       }
 
-      trackEvent(direction === "previous" ? "previous_chapter_click" : "next_chapter_click", {
-        ...readerAnalyticsPayload,
-        source,
-        targetEpisodeId: targetEpisode.id,
-      });
-      router.push(`/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`);
+      trackEvent(
+        direction === "previous"
+          ? "previous_chapter_click"
+          : "next_chapter_click",
+        {
+          ...readerAnalyticsPayload,
+          source,
+          targetEpisodeId: targetEpisode.id,
+        },
+      );
+      router.push(
+        `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`,
+      );
     },
     [
       backToSeriesHref,
@@ -646,9 +754,19 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
 
   const handleShare = useCallback(async () => {
     try {
-      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-        await navigator.share({ title: seriesData?.series?.title, text: currentEpisodeTitle, url: shareUrl });
-      } else if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title: seriesData?.series?.title,
+          text: currentEpisodeTitle,
+          url: shareUrl,
+        });
+      } else if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard?.writeText
+      ) {
         await navigator.clipboard.writeText(shareUrl);
       }
       setToast("Reader link ready");
@@ -659,7 +777,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
 
   const handleUnlockCurrent = useCallback(async () => {
     if (!isSignedIn) {
-      openLogin("login", `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`);
+      openLogin(
+        "login",
+        `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`,
+      );
       return;
     }
 
@@ -673,7 +794,11 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       pricePts: currentPricePts,
     });
     setUnlockBusy(true);
-    const response = await unlockEpisode(seriesId, episodeId, createIdempotencyKey());
+    const response = await unlockEpisode(
+      seriesId,
+      episodeId,
+      createIdempotencyKey(),
+    );
     setUnlockBusy(false);
     if (response.ok) {
       trackEvent("unlock_success", {
@@ -755,7 +880,13 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       window.removeEventListener("scroll", updateCompletionState);
       window.removeEventListener("resize", updateCompletionState);
     };
-  }, [loading, pages.length, paragraphs.length, previewCount, previewParagraphs]);
+  }, [
+    loading,
+    pages.length,
+    paragraphs.length,
+    previewCount,
+    previewParagraphs,
+  ]);
 
   useEffect(() => {
     if (modeBlock !== "adult") {
@@ -804,7 +935,11 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       title: currentEpisodeTitle,
     });
 
-    if (seriesIsAdult && contentMode === "adult" && adultReaderEnterRef.current !== episodeKey) {
+    if (
+      seriesIsAdult &&
+      contentMode === "adult" &&
+      adultReaderEnterRef.current !== episodeKey
+    ) {
       adultReaderEnterRef.current = episodeKey;
       trackEvent("adult_reader_enter", {
         ...readerAnalyticsPayload,
@@ -895,7 +1030,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
 
   if (loading) {
     return (
-      <main className={cn("min-h-screen px-4 py-20 text-white", palette.rootBg)}>
+      <main
+        className={cn("min-h-screen px-4 py-20 text-white", palette.rootBg)}
+      >
         <div className="mx-auto max-w-5xl space-y-4">
           <div className="rounded-[30px] border border-white/10 bg-white/5 p-6">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">
@@ -905,12 +1042,16 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               {String(fallbackData?.seriesTitle || "Reader").trim() || "Reader"}
             </h1>
             <p className="mt-2 text-sm text-gray-400">
-              {String(fallbackData?.episodeTitle || "Preparing installment").trim() ||
-                "Preparing installment"}
+              {String(
+                fallbackData?.episodeTitle || "Preparing installment",
+              ).trim() || "Preparing installment"}
             </p>
           </div>
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-[26px] bg-white/5" />
+            <div
+              key={index}
+              className="h-32 animate-pulse rounded-[26px] bg-white/5"
+            />
           ))}
         </div>
       </main>
@@ -923,7 +1064,8 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
         <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
         <h1 className="mb-4 text-3xl font-black">Age Restricted Content</h1>
         <p className="mb-8 max-w-md text-gray-400">
-          This title is marked mature. Enable adult mode before opening the reader.
+          This title is marked mature. Enable adult mode before opening the
+          reader.
         </p>
         <button
           type="button"
@@ -952,7 +1094,8 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
         <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
         <h1 className="mb-4 text-3xl font-black">Normal Mode Required</h1>
         <p className="mb-8 max-w-md text-gray-400">
-          This title belongs to the normal catalog. Switch back to normal mode to keep reading.
+          This title belongs to the normal catalog. Switch back to normal mode
+          to keep reading.
         </p>
         <button
           type="button"
@@ -997,7 +1140,8 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             This installment failed to load
           </h1>
           <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-gray-400">
-            Try again or bounce back to the series queue to reopen the reader cleanly.
+            Try again or bounce back to the series queue to reopen the reader
+            cleanly.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
@@ -1024,7 +1168,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   }
 
   return (
-    <main className={cn("relative min-h-screen overflow-x-hidden pb-28 text-white", palette.rootBg)}>
+    <main
+      className={cn(
+        "relative min-h-screen overflow-x-hidden pb-28 text-white",
+        palette.rootBg,
+      )}
+    >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className={cn(
@@ -1053,7 +1202,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             </button>
             <div className="min-w-0">
               <div className="mb-2 flex flex-wrap gap-2">
-                <Pill className="border-white/10 bg-white/5 text-gray-300">Reader deck</Pill>
+                <Pill className="border-white/10 bg-white/5 text-gray-300">
+                  Reader deck
+                </Pill>
                 <Pill className={cn("border-white/10", palette.primarySoft)}>
                   {currentInstallmentLabel}
                 </Pill>
@@ -1066,7 +1217,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               <h1 className="truncate text-sm font-black text-white md:text-base">
                 {seriesData.series.title}
               </h1>
-              <p className="truncate text-xs text-gray-400 md:text-sm">{currentEpisodeTitle}</p>
+              <p className="truncate text-xs text-gray-400 md:text-sm">
+                {currentEpisodeTitle}
+              </p>
             </div>
           </div>
 
@@ -1118,7 +1271,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
                 Reader actions
               </p>
-              <h2 className="mt-1 text-base font-black text-white">Quick jumps</h2>
+              <h2 className="mt-1 text-base font-black text-white">
+                Quick jumps
+              </h2>
             </div>
             <button
               type="button"
@@ -1137,8 +1292,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-left transition-colors hover:border-white/20 hover:bg-white/[0.06]"
             >
               <span>
-                <span className="block text-sm font-bold text-white">Back to series</span>
-                <span className="mt-1 block text-xs text-gray-400">Open the full queue</span>
+                <span className="block text-sm font-bold text-white">
+                  Back to series
+                </span>
+                <span className="mt-1 block text-xs text-gray-400">
+                  Open the full queue
+                </span>
               </span>
               <ChevronRight className="h-4 w-4 text-white/70" />
             </button>
@@ -1189,7 +1348,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
                 Reader settings
               </p>
-              <h2 className="mt-1 text-base font-black text-white">Live controls</h2>
+              <h2 className="mt-1 text-base font-black text-white">
+                Live controls
+              </h2>
             </div>
             <button
               type="button"
@@ -1204,7 +1365,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <button
               type="button"
-                      onClick={handleToggleNight}
+              onClick={handleToggleNight}
               className={cn(
                 "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
                 nightMode
@@ -1216,7 +1377,7 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             </button>
             <button
               type="button"
-                      onClick={handleToggleLayout}
+              onClick={handleToggleLayout}
               className={cn(
                 "rounded-2xl border px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
                 isComic
@@ -1238,9 +1399,13 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-bold text-white">Brightness</p>
-                <p className="mt-1 text-xs text-gray-400">Tune the reader without leaving the page.</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Tune the reader without leaving the page.
+                </p>
               </div>
-              <span className="text-sm font-black text-white">{brightness}%</span>
+              <span className="text-sm font-black text-white">
+                {brightness}%
+              </span>
             </div>
             <input
               type="range"
@@ -1266,7 +1431,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
           >
             <div className="relative">
               <div className="flex flex-wrap items-center gap-2">
-                <Pill className={cn("border-white/10", palette.primarySoft)}>Active reader</Pill>
+                <Pill className={cn("border-white/10", palette.primarySoft)}>
+                  Active reader
+                </Pill>
                 <Pill className="border-white/10 bg-white/5 text-gray-300">
                   {`${currentIndex >= 0 ? currentIndex + 1 : 1}/${Math.max(episodes.length, 1)} queue`}
                 </Pill>
@@ -1284,7 +1451,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               <p className="mt-3 max-w-3xl text-sm leading-6 text-gray-400">
                 {creatorName} · Released{" "}
                 {formatMetaDate(
-                  currentEpisode?.releasedAt || episodeData?.releasedAt || seriesData.series.updatedAt,
+                  currentEpisode?.releasedAt ||
+                    episodeData?.releasedAt ||
+                    seriesData.series.updatedAt,
                 )}{" "}
                 ·{" "}
                 {unlocked
@@ -1293,21 +1462,45 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <Metric label="Installment" value={currentInstallmentLabel} hint="Current reader label" />
+                <Metric
+                  label="Installment"
+                  value={currentInstallmentLabel}
+                  hint="Current reader label"
+                />
                 <Metric
                   label="Reading mode"
-                  value={isComic ? (layoutModeForView === "horizontal" ? "Horizontal pages" : "Vertical scroll") : "Story text"}
-                  hint={nightMode ? "Night mode enabled" : "Core palette enabled"}
+                  value={
+                    isComic
+                      ? layoutModeForView === "horizontal"
+                        ? "Horizontal pages"
+                        : "Vertical scroll"
+                      : "Story text"
+                  }
+                  hint={
+                    nightMode ? "Night mode enabled" : "Core palette enabled"
+                  }
                 />
                 <Metric
                   label="Access state"
-                  value={unlocked ? "Full chapter open" : `${formatPriceLabel(currentPricePts)} to unlock`}
-                  hint={unlocked ? "No preview cap is active" : "Preview gate is still active"}
+                  value={
+                    unlocked
+                      ? "Full chapter open"
+                      : `${formatPriceLabel(currentPricePts)} to unlock`
+                  }
+                  hint={
+                    unlocked
+                      ? "No preview cap is active"
+                      : "Preview gate is still active"
+                  }
                 />
                 <Metric
                   label="Wallet"
                   value={`${walletBalance} pts`}
-                  hint={isSignedIn ? `${paidPts} paid · ${bonusPts} bonus` : "Sign in to sync points"}
+                  hint={
+                    isSignedIn
+                      ? `${paidPts} paid · ${bonusPts} bonus`
+                      : "Sign in to sync points"
+                  }
                 />
               </div>
             </div>
@@ -1325,18 +1518,32 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
                   Reading queue
                 </p>
-                <h2 className="mt-2 text-xl font-black text-white">What&apos;s around this read</h2>
+                <h2 className="mt-2 text-xl font-black text-white">
+                  What&apos;s around this read
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
-                  Keep the previous and next move visible without breaking the flow.
+                  Keep the previous and next move visible without breaking the
+                  flow.
                 </p>
               </div>
-              <div className={cn("rounded-2xl border px-3 py-2 text-xs font-black", palette.primarySoft)}>
+              <div
+                className={cn(
+                  "rounded-2xl border px-3 py-2 text-xs font-black",
+                  palette.primarySoft,
+                )}
+              >
                 {queuePercent}%
               </div>
             </div>
 
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
-              <div className={cn("h-full transition-[width] duration-300", palette.primaryBg)} style={{ width: `${queuePercent}%` }} />
+              <div
+                className={cn(
+                  "h-full transition-[width] duration-300",
+                  palette.primaryBg,
+                )}
+                style={{ width: `${queuePercent}%` }}
+              />
             </div>
 
             <div className="mt-5 grid gap-3">
@@ -1347,7 +1554,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 ctaLabel={prevEpisode ? "Open previous" : "Back to series"}
                 onClick={
                   prevEpisode
-                    ? () => handleNavigateEpisode(prevEpisode, "previous", "queue-card")
+                    ? () =>
+                        handleNavigateEpisode(
+                          prevEpisode,
+                          "previous",
+                          "queue-card",
+                        )
                     : () => router.push(backToSeriesHref)
                 }
               />
@@ -1357,7 +1569,11 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 description={currentQueueDescription}
                 ctaLabel={unlocked ? "Continue reading" : "Jump to checkpoint"}
                 buttonClassName={cn("text-white", palette.primaryBg)}
-                onClick={unlocked ? () => scrollToNode(endRef.current) : handleJumpToCheckpoint}
+                onClick={
+                  unlocked
+                    ? () => scrollToNode(endRef.current)
+                    : handleJumpToCheckpoint
+                }
               />
               <QueueCard
                 eyebrow="Next"
@@ -1365,11 +1581,14 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 description={nextQueueDescription}
                 ctaLabel={nextEpisode ? "Open next" : "Back to series"}
                 buttonClassName={cn(
-                  nextEpisode ? `text-white ${palette.primaryBg}` : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
+                  nextEpisode
+                    ? `text-white ${palette.primaryBg}`
+                    : "border border-white/10 bg-white/5 text-white hover:bg-white/10",
                 )}
                 onClick={
                   nextEpisode
-                    ? () => handleNavigateEpisode(nextEpisode, "next", "queue-card")
+                    ? () =>
+                        handleNavigateEpisode(nextEpisode, "next", "queue-card")
                     : () => router.push(backToSeriesHref)
                 }
               />
@@ -1431,8 +1650,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                     Unlock the rest of this {installmentLabel.toLowerCase()}.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-                    The preview stops at the hand-off point. Open the rest now, keep your place
-                    synced, and roll straight into the next beat without leaving the reader.
+                    The preview stops at the hand-off point. Open the rest now,
+                    keep your place synced, and roll straight into the next beat
+                    without leaving the reader.
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -1444,12 +1664,22 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                     <Metric
                       label="Wallet total"
                       value={`${walletBalance} pts`}
-                      hint={isSignedIn ? `${paidPts} paid · ${bonusPts} bonus` : "Sign in to check balance"}
+                      hint={
+                        isSignedIn
+                          ? `${paidPts} paid · ${bonusPts} bonus`
+                          : "Sign in to check balance"
+                      }
                     />
                     <Metric
                       label="Shortfall"
-                      value={shortfallPts > 0 ? `${shortfallPts} pts` : "Ready now"}
-                      hint={shortfallPts > 0 ? "Top up to continue instantly" : "Enough points to open now"}
+                      value={
+                        shortfallPts > 0 ? `${shortfallPts} pts` : "Ready now"
+                      }
+                      hint={
+                        shortfallPts > 0
+                          ? "Top up to continue instantly"
+                          : "Enough points to open now"
+                      }
                     />
                   </div>
 
@@ -1458,7 +1688,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                       <button
                         type="button"
                         onClick={() =>
-                          openLogin("login", `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`)
+                          openLogin(
+                            "login",
+                            `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`,
+                          )
                         }
                         className={cn(
                           "inline-flex min-h-[52px] items-center justify-center rounded-2xl px-6 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
@@ -1488,7 +1721,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                           palette.primaryBg,
                         )}
                       >
-                        {unlockBusy ? "Unlocking..." : `Unlock with ${currentPricePts} pts`}
+                        {unlockBusy
+                          ? "Unlocking..."
+                          : `Unlock with ${currentPricePts} pts`}
                       </button>
                     )}
 
@@ -1507,9 +1742,21 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                     Unlock adds
                   </p>
                   <div className="mt-4 space-y-3">
-                    <Metric label="Continue instantly" value="No route break" hint="Stay in the same reading flow after access flips live." />
-                    <Metric label="Queue context" value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more ahead`} hint={`You are reading ${currentInstallmentLabel.toLowerCase()} of ${Math.max(episodes.length, 1)}.`} />
-                    <Metric label="Reading state" value="Synced progress" hint="Signed-in readers keep placement and unlock state together." />
+                    <Metric
+                      label="Continue instantly"
+                      value="No route break"
+                      hint="Stay in the same reading flow after access flips live."
+                    />
+                    <Metric
+                      label="Queue context"
+                      value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more ahead`}
+                      hint={`You are reading ${currentInstallmentLabel.toLowerCase()} of ${Math.max(episodes.length, 1)}.`}
+                    />
+                    <Metric
+                      label="Reading state"
+                      value="Synced progress"
+                      hint="Signed-in readers keep placement and unlock state together."
+                    />
                   </div>
                 </div>
               </div>
@@ -1521,16 +1768,29 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       <section className="px-4 pb-4 pt-8 md:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-4 lg:grid-cols-[1fr_minmax(0,1.35fr)_1fr]">
-            <div className={cn("flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]", palette.surface, palette.border)}>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Previous move</p>
+            <div
+              className={cn(
+                "flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                Previous move
+              </p>
               <h3 className="mt-3 text-lg font-black text-white">
-                {prevEpisode ? formatInstallmentLabel(seriesType, prevEpisode?.number || 1) : "Return to the series"}
+                {prevEpisode
+                  ? formatInstallmentLabel(seriesType, prevEpisode?.number || 1)
+                  : "Return to the series"}
               </h3>
               <p className="mt-2 text-sm leading-6 text-gray-400">
                 {prevEpisode
                   ? resolveEpisodeDisplayTitle(
                       prevEpisode?.title,
-                      formatInstallmentLabel(seriesType, prevEpisode?.number || 1),
+                      formatInstallmentLabel(
+                        seriesType,
+                        prevEpisode?.number || 1,
+                      ),
                       seriesType,
                     )
                   : "No prior installment here, so the series page becomes the safe landing point."}
@@ -1539,7 +1799,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 type="button"
                 onClick={
                   prevEpisode
-                    ? () => handleNavigateEpisode(prevEpisode, "previous", "endcap-card")
+                    ? () =>
+                        handleNavigateEpisode(
+                          prevEpisode,
+                          "previous",
+                          "endcap-card",
+                        )
                     : () => router.push(backToSeriesHref)
                 }
                 className="mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10"
@@ -1548,8 +1813,16 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               </button>
             </div>
 
-            <div className={cn("flex h-full flex-col rounded-[32px] border p-6 text-center shadow-[0_28px_90px_rgba(0,0,0,0.32)]", palette.surface, palette.border)}>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Reader console</p>
+            <div
+              className={cn(
+                "flex h-full flex-col rounded-[32px] border p-6 text-center shadow-[0_28px_90px_rgba(0,0,0,0.32)]",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                Reader console
+              </p>
               <h3 className="mt-3 text-3xl font-black tracking-tight text-white">
                 {unlocked ? "Installment complete." : "Preview checkpoint."}
               </h3>
@@ -1570,8 +1843,12 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                       : "border-white/10 bg-white/5 text-gray-300 hover:border-red-500/25 hover:bg-red-500/10 hover:text-white",
                   )}
                 >
-                  <Heart className={cn("h-7 w-7", liked ? "fill-current" : "")} />
-                  <span className="text-xs font-black uppercase tracking-[0.18em]">Like</span>
+                  <Heart
+                    className={cn("h-7 w-7", liked ? "fill-current" : "")}
+                  />
+                  <span className="text-xs font-black uppercase tracking-[0.18em]">
+                    Like
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -1579,7 +1856,9 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                   className="flex min-h-[108px] w-full max-w-[168px] flex-col items-center justify-center gap-2 rounded-[26px] border border-white/10 bg-white/5 px-4 py-4 text-gray-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-[0.98]"
                 >
                   <Share2 className="h-7 w-7" />
-                  <span className="text-xs font-black uppercase tracking-[0.18em]">Share</span>
+                  <span className="text-xs font-black uppercase tracking-[0.18em]">
+                    Share
+                  </span>
                 </button>
               </div>
 
@@ -1604,19 +1883,37 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
               </div>
             </div>
 
-            <div className={cn("flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]", palette.surface, palette.border)}>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Next move</p>
+            <div
+              className={cn(
+                "flex h-full flex-col rounded-[30px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.28)]",
+                palette.surface,
+                palette.border,
+              )}
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
+                Next move
+              </p>
               <h3 className="mt-3 text-lg font-black text-white">
-                {nextEpisode ? formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1) : "Series overview"}
+                {nextEpisode
+                  ? formatInstallmentLabel(
+                      seriesType,
+                      nextEpisode?.number || currentNumber + 1,
+                    )
+                  : "Series overview"}
               </h3>
               <p className="mt-2 text-sm leading-6 text-gray-400">
                 {nextEpisode
                   ? `${resolveEpisodeDisplayTitle(
                       nextEpisode?.title,
-                      formatInstallmentLabel(seriesType, nextEpisode?.number || currentNumber + 1),
+                      formatInstallmentLabel(
+                        seriesType,
+                        nextEpisode?.number || currentNumber + 1,
+                      ),
                       seriesType,
                     )} is queued next. ${
-                      Number(nextEpisode?.pricePts || 0) > 0 ? `${formatPriceLabel(nextEpisode?.pricePts)} if still locked.` : "It starts free."
+                      Number(nextEpisode?.pricePts || 0) > 0
+                        ? `${formatPriceLabel(nextEpisode?.pricePts)} if still locked.`
+                        : "It starts free."
                     }`
                   : "No next installment is listed yet, so the best next stop is the series overview."}
               </p>
@@ -1624,12 +1921,19 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
                 type="button"
                 onClick={
                   nextEpisode
-                    ? () => handleNavigateEpisode(nextEpisode, "next", "endcap-card")
+                    ? () =>
+                        handleNavigateEpisode(
+                          nextEpisode,
+                          "next",
+                          "endcap-card",
+                        )
                     : () => router.push(backToSeriesHref)
                 }
                 className={cn(
                   "mt-auto inline-flex min-h-[50px] items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white transition-transform active:scale-[0.98]",
-                  nextEpisode ? palette.primaryBg : "border border-white/10 bg-white/5",
+                  nextEpisode
+                    ? palette.primaryBg
+                    : "border border-white/10 bg-white/5",
                 )}
               >
                 {nextEpisode ? "Open next" : "Back to series"}
@@ -1655,7 +1959,10 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
       >
         <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
           <div
-            className={cn("h-full transition-[width] duration-300", palette.primaryBg)}
+            className={cn(
+              "h-full transition-[width] duration-300",
+              palette.primaryBg,
+            )}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -1731,7 +2038,11 @@ function ReaderContent({ seriesId, episodeId, fallbackData = null }) {
   );
 }
 
-export default function FigmaReaderPage({ seriesId, episodeId, fallbackData = null }) {
+export default function FigmaReaderPage({
+  seriesId,
+  episodeId,
+  fallbackData = null,
+}) {
   return (
     <FigmaSiteProvider>
       <ReaderContent

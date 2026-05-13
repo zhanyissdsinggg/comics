@@ -14,7 +14,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAdminAuth } from "./AuthContext";
-import { adminDelete as apiDelete, adminGet as apiGet, adminPatch as apiPatch, adminPost as apiPost, adminUpload } from "../../lib/adminApiClient";
+import {
+  adminDelete as apiDelete,
+  adminGet as apiGet,
+  adminPatch as apiPatch,
+  adminPost as apiPost,
+  adminUpload,
+} from "../../lib/adminApiClient";
 import { ConfirmModal } from "../common/Modal";
 import { AdminFeedbackBanner } from "./common/AdminFeedbackBanner";
 import BulkActionsToolbar from "./BulkActionsToolbar";
@@ -43,7 +49,9 @@ import {
 import { getAdminSeriesReadiness } from "../../lib/adminSeriesReadiness";
 
 function Feedback({ feedback, onDismiss }) {
-  return feedback?.message ? <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} /> : null;
+  return feedback?.message ? (
+    <AdminFeedbackBanner feedback={feedback} onDismiss={onDismiss} />
+  ) : null;
 }
 
 function slugifySeriesTitle(title) {
@@ -60,8 +68,15 @@ export default function AdminSeriesPageNew() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading } = useAdminAuth();
-  const scopedCreatorQuery = useMemo(() => String(searchParams.get("q") || "").trim(), [searchParams]);
-  const paramSearchQuery = useMemo(() => String(searchParams.get("q") || searchParams.get("search") || "").trim(), [searchParams]);
+  const scopedCreatorQuery = useMemo(
+    () => String(searchParams.get("q") || "").trim(),
+    [searchParams],
+  );
+  const paramSearchQuery = useMemo(
+    () =>
+      String(searchParams.get("q") || searchParams.get("search") || "").trim(),
+    [searchParams],
+  );
   const hasScopedCreatorFilter = Boolean(scopedCreatorQuery);
   const [seriesList, setSeriesList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,18 +95,33 @@ export default function AdminSeriesPageNew() {
   const [createForm, setCreateForm] = useState(createEmptyCreateForm);
   const [isDragging, setIsDragging] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [duplicateDialog, setDuplicateDialog] = useState({ isOpen: false, series: null, newId: "" });
+  const [duplicateDialog, setDuplicateDialog] = useState({
+    isOpen: false,
+    series: null,
+    newId: "",
+  });
   const [isDuplicating, setIsDuplicating] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: "", message: "", onConfirm: null, variant: "default" });
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    variant: "default",
+  });
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 250);
+    const timeoutId = window.setTimeout(
+      () => setDebouncedSearchQuery(searchQuery.trim()),
+      250,
+    );
     return () => window.clearTimeout(timeoutId);
   }, [searchQuery]);
 
   useEffect(() => {
     const nextType = searchParams.get("type");
-    setTypeFilter(nextType === "comic" || nextType === "novel" ? nextType : "all");
+    setTypeFilter(
+      nextType === "comic" || nextType === "novel" ? nextType : "all",
+    );
     setSearchQuery(paramSearchQuery);
     setDebouncedSearchQuery(paramSearchQuery);
   }, [paramSearchQuery, searchParams]);
@@ -100,23 +130,40 @@ export default function AdminSeriesPageNew() {
     if (!isLoading && !isAuthenticated) router.push("/admin/login");
   }, [isAuthenticated, isLoading, router]);
 
-  useEffect(() => () => revokeObjectUrl(createForm.coverPreviewUrl), [createForm.coverPreviewUrl]);
+  useEffect(
+    () => () => revokeObjectUrl(createForm.coverPreviewUrl),
+    [createForm.coverPreviewUrl],
+  );
 
   const loadSeries = useCallback(async () => {
     setLoading(true);
     const response = hasScopedCreatorFilter
       ? await apiGet("/api/admin/series")
-      : await apiGet(`/api/admin/series/search/advanced?${buildQueryString(debouncedSearchQuery, typeFilter, advancedFilters)}`);
+      : await apiGet(
+          `/api/admin/series/search/advanced?${buildQueryString(debouncedSearchQuery, typeFilter, advancedFilters)}`,
+        );
     if (response.ok) {
-      const nextSeries = extractSeriesCollection(response.data).filter(Boolean).map(normalizeSeries);
+      const nextSeries = extractSeriesCollection(response.data)
+        .filter(Boolean)
+        .map(normalizeSeries);
       setSeriesList(nextSeries);
-      setSelectedSeries((current) => current.filter((id) => nextSeries.some((series) => series.id === id)));
+      setSelectedSeries((current) =>
+        current.filter((id) => nextSeries.some((series) => series.id === id)),
+      );
     } else {
       setSeriesList([]);
-      setFeedback({ type: "error", message: response.error || "作品列表加载失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || "作品列表加载失败。",
+      });
     }
     setLoading(false);
-  }, [advancedFilters, debouncedSearchQuery, hasScopedCreatorFilter, typeFilter]);
+  }, [
+    advancedFilters,
+    debouncedSearchQuery,
+    hasScopedCreatorFilter,
+    typeFilter,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -137,12 +184,18 @@ export default function AdminSeriesPageNew() {
         series.author.toLowerCase().includes(normalizedQuery) ||
         series.creatorLabel.toLowerCase().includes(normalizedQuery);
       const matchesType = typeFilter === "all" || series.type === typeFilter;
-      const matchesStatus = advancedFilters.status === "all" || series.status === advancedFilters.status;
+      const matchesStatus =
+        advancedFilters.status === "all" ||
+        series.status === advancedFilters.status;
       const matchesAdult =
         advancedFilters.adultContent === "all" ||
         (advancedFilters.adultContent === "adult" && series.adult) ||
         (advancedFilters.adultContent === "general" && !series.adult);
-      const matchesPublish = advancedFilters.publishStatus === "all" || (advancedFilters.publishStatus === "published" && series.isPublished) || (advancedFilters.publishStatus === "unpublished" && !series.isPublished);
+      const matchesPublish =
+        advancedFilters.publishStatus === "all" ||
+        (advancedFilters.publishStatus === "published" && series.isPublished) ||
+        (advancedFilters.publishStatus === "unpublished" &&
+          !series.isPublished);
       const matchesQuick =
         quickFilter === "all" ||
         (quickFilter === "needsMetadata" && readiness.missingCount > 0) ||
@@ -151,19 +204,41 @@ export default function AdminSeriesPageNew() {
         (quickFilter === "noCover" && !series.coverUrl) ||
         (quickFilter === "draft" && !series.isPublished) ||
         (quickFilter === "adult" && series.adult);
-      return matchesSearch && matchesType && matchesStatus && matchesAdult && matchesPublish && matchesQuick;
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesStatus &&
+        matchesAdult &&
+        matchesPublish &&
+        matchesQuick
+      );
     });
     return sortSeries(items, advancedFilters.sortBy);
-  }, [advancedFilters.adultContent, advancedFilters.publishStatus, advancedFilters.sortBy, advancedFilters.status, quickFilter, searchQuery, seriesList, typeFilter]);
+  }, [
+    advancedFilters.adultContent,
+    advancedFilters.publishStatus,
+    advancedFilters.sortBy,
+    advancedFilters.status,
+    quickFilter,
+    searchQuery,
+    seriesList,
+    typeFilter,
+  ]);
 
   const seriesOverview = useMemo(() => {
     const total = seriesList.length;
     const comics = seriesList.filter((item) => item.type === "comic").length;
     const novels = seriesList.filter((item) => item.type === "novel").length;
-    const readyCount = seriesList.filter((item) => getAdminSeriesReadiness(item).missingCount === 0).length;
-    const noAuthor = seriesList.filter((item) => !item.creatorLabel.trim()).length;
+    const readyCount = seriesList.filter(
+      (item) => getAdminSeriesReadiness(item).missingCount === 0,
+    ).length;
+    const noAuthor = seriesList.filter(
+      (item) => !item.creatorLabel.trim(),
+    ).length;
     const drafts = seriesList.filter((item) => !item.isPublished).length;
-    const noEpisodes = seriesList.filter((item) => item.episodeCount === 0).length;
+    const noEpisodes = seriesList.filter(
+      (item) => item.episodeCount === 0,
+    ).length;
     const noCover = seriesList.filter((item) => !item.coverUrl).length;
 
     return {
@@ -178,9 +253,17 @@ export default function AdminSeriesPageNew() {
       stats: [
         { label: "全部作品", value: total, hint: "当前目录总量" },
         { label: "漫画", value: comics, hint: `另有 ${novels} 部小说` },
-        { label: "可进前台", value: readyCount, hint: `仍有 ${noAuthor} 部缺少创作者署名` },
+        {
+          label: "可进前台",
+          value: readyCount,
+          hint: `仍有 ${noAuthor} 部缺少创作者署名`,
+        },
         { label: "待补章节", value: noEpisodes, hint: "适合优先做上架前收口" },
-        { label: "待补封面", value: noCover, hint: `另有 ${drafts} 部仍在草稿` },
+        {
+          label: "待补封面",
+          value: noCover,
+          hint: `另有 ${drafts} 部仍在草稿`,
+        },
       ],
     };
   }, [seriesList]);
@@ -218,11 +301,22 @@ export default function AdminSeriesPageNew() {
       title: "目录状态稳定，可以继续上新",
       description: "当前资料和章节基础较完整，适合继续推进更新和首页编排。",
     };
-  }, [seriesList.length, seriesOverview.drafts, seriesOverview.noAuthor, seriesOverview.noCover, seriesOverview.noEpisodes]);
+  }, [
+    seriesList.length,
+    seriesOverview.drafts,
+    seriesOverview.noAuthor,
+    seriesOverview.noCover,
+    seriesOverview.noEpisodes,
+  ]);
 
-  const suggestedSeriesId = useMemo(() => `${slugifySeriesTitle(createForm.title)}-xxxxxx`, [createForm.title]);
+  const suggestedSeriesId = useMemo(
+    () => `${slugifySeriesTitle(createForm.title)}-xxxxxx`,
+    [createForm.title],
+  );
 
-  const allVisibleSelected = filteredSeries.length > 0 && filteredSeries.every((series) => selectedSeries.includes(series.id));
+  const allVisibleSelected =
+    filteredSeries.length > 0 &&
+    filteredSeries.every((series) => selectedSeries.includes(series.id));
   const dismissFeedback = () => setFeedback(EMPTY_FEEDBACK);
   const resetCreateForm = useCallback(() => {
     setCreateForm((current) => {
@@ -231,10 +325,20 @@ export default function AdminSeriesPageNew() {
     });
   }, []);
   const updateSeriesLocally = useCallback((seriesId, updater) => {
-    setSeriesList((current) => current.map((series) => (series.id === seriesId ? updater(series) : series)));
+    setSeriesList((current) =>
+      current.map((series) =>
+        series.id === seriesId ? updater(series) : series,
+      ),
+    );
   }, []);
-  const handleOpenDetails = useCallback((seriesId) => router.push(`/admin/series/${seriesId}`), [router]);
-  const handleOpenEpisodes = useCallback((seriesId) => router.push(`/admin/series/${seriesId}/episodes`), [router]);
+  const handleOpenDetails = useCallback(
+    (seriesId) => router.push(`/admin/series/${seriesId}`),
+    [router],
+  );
+  const handleOpenEpisodes = useCallback(
+    (seriesId) => router.push(`/admin/series/${seriesId}/episodes`),
+    [router],
+  );
   const handleOpenFrontend = useCallback((seriesId) => {
     if (typeof window === "undefined") {
       return;
@@ -242,11 +346,23 @@ export default function AdminSeriesPageNew() {
 
     window.open(`/series/${seriesId}`, "_blank", "noopener,noreferrer");
   }, []);
-  const handleToggleSelection = (seriesId) => setSelectedSeries((current) => (current.includes(seriesId) ? current.filter((item) => item !== seriesId) : [...current, seriesId]));
-  const handleToggleSelectAll = () => setSelectedSeries(allVisibleSelected ? [] : filteredSeries.map((series) => series.id));
+  const handleToggleSelection = (seriesId) =>
+    setSelectedSeries((current) =>
+      current.includes(seriesId)
+        ? current.filter((item) => item !== seriesId)
+        : [...current, seriesId],
+    );
+  const handleToggleSelectAll = () =>
+    setSelectedSeries(
+      allVisibleSelected ? [] : filteredSeries.map((series) => series.id),
+    );
   const handleStartEdit = (series) => {
     setEditingId(series.id);
-    setEditingDraft({ title: series.title, status: series.status, adult: series.adult });
+    setEditingDraft({
+      title: series.title,
+      status: series.status,
+      adult: series.adult,
+    });
   };
   const handleCancelEdit = () => {
     setEditingId("");
@@ -261,36 +377,66 @@ export default function AdminSeriesPageNew() {
     const target = seriesList.find((series) => series.id === seriesId);
     if (!target) return;
     setIsSavingEdit(true);
-    const response = await apiPatch(`/api/admin/series/${seriesId}`, { series: buildSeriesPayload(target, { title: editingDraft.title.trim(), status: editingDraft.status, adult: editingDraft.adult }) });
+    const response = await apiPatch(`/api/admin/series/${seriesId}`, {
+      series: buildSeriesPayload(target, {
+        title: editingDraft.title.trim(),
+        status: editingDraft.status,
+        adult: editingDraft.adult,
+      }),
+    });
     if (response.ok) {
-      updateSeriesLocally(seriesId, (current) => ({ ...current, title: editingDraft.title.trim(), status: editingDraft.status, adult: editingDraft.adult, updatedAt: new Date().toISOString() }));
+      updateSeriesLocally(seriesId, (current) => ({
+        ...current,
+        title: editingDraft.title.trim(),
+        status: editingDraft.status,
+        adult: editingDraft.adult,
+        updatedAt: new Date().toISOString(),
+      }));
       setFeedback({ type: "success", message: "作品信息已更新。" });
       handleCancelEdit();
     } else {
-      setFeedback({ type: "error", message: response.error || "更改保存失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || "更改保存失败。",
+      });
     }
     setIsSavingEdit(false);
   };
 
   const handleTogglePublish = async (series) => {
     const nextPublished = !series.isPublished;
-    const response = await apiPatch(`/api/admin/series/${series.id}`, { series: buildSeriesPayload(series, { isPublished: nextPublished }) });
+    const response = await apiPatch(`/api/admin/series/${series.id}`, {
+      series: buildSeriesPayload(series, { isPublished: nextPublished }),
+    });
     if (response.ok) {
-      updateSeriesLocally(series.id, (current) => ({ ...current, isPublished: nextPublished, updatedAt: new Date().toISOString() }));
-      setFeedback({ type: "success", message: nextPublished ? "作品已发布到前台。" : "作品已转回草稿。" });
+      updateSeriesLocally(series.id, (current) => ({
+        ...current,
+        isPublished: nextPublished,
+        updatedAt: new Date().toISOString(),
+      }));
+      setFeedback({
+        type: "success",
+        message: nextPublished ? "作品已发布到前台。" : "作品已转回草稿。",
+      });
     } else {
-      setFeedback({ type: "error", message: response.error || "发布状态更新失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || "发布状态更新失败。",
+      });
     }
   };
 
   const uploadCoverImage = async (file) => {
     if (!file) return "";
-    if (!file.type.startsWith("image/")) throw new Error("请上传有效的图片文件。");
-    if (file.size > MAX_UPLOAD_BYTES) throw new Error("封面图片大小不能超过 10MB。");
+    if (!file.type.startsWith("image/"))
+      throw new Error("请上传有效的图片文件。");
+    if (file.size > MAX_UPLOAD_BYTES)
+      throw new Error("封面图片大小不能超过 10MB。");
     const formData = new FormData();
     formData.append("file", file);
     const response = await adminUpload("/api/admin/upload/image", formData);
-    if (!response.ok || !response.data?.url) throw new Error(response.error || "封面上传失败。");
+    if (!response.ok || !response.data?.url)
+      throw new Error(response.error || "封面上传失败。");
     return response.data.url;
   };
 
@@ -346,30 +492,46 @@ export default function AdminSeriesPageNew() {
 
       await loadSeries();
     } catch (error) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "创建作品失败。" });
+      setFeedback({
+        type: "error",
+        message: error instanceof Error ? error.message : "创建作品失败。",
+      });
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleDelete = (series) => setConfirmDialog({
-    isOpen: true,
-    title: "删除作品",
-    message: `确定删除《${series.title}》吗？此操作无法撤销。`,
-    variant: "danger",
-    onConfirm: async () => {
-      const response = await apiDelete(`/api/admin/series/${series.id}`);
-      if (response.ok) {
-        setSeriesList((current) => current.filter((item) => item.id !== series.id));
-        setSelectedSeries((current) => current.filter((id) => id !== series.id));
-        setFeedback({ type: "success", message: "作品已删除。" });
-      } else {
-        setFeedback({ type: "error", message: response.error || "删除作品失败。" });
-      }
-    },
-  });
+  const handleDelete = (series) =>
+    setConfirmDialog({
+      isOpen: true,
+      title: "删除作品",
+      message: `确定删除《${series.title}》吗？此操作无法撤销。`,
+      variant: "danger",
+      onConfirm: async () => {
+        const response = await apiDelete(`/api/admin/series/${series.id}`);
+        if (response.ok) {
+          setSeriesList((current) =>
+            current.filter((item) => item.id !== series.id),
+          );
+          setSelectedSeries((current) =>
+            current.filter((id) => id !== series.id),
+          );
+          setFeedback({ type: "success", message: "作品已删除。" });
+        } else {
+          setFeedback({
+            type: "error",
+            message: response.error || "删除作品失败。",
+          });
+        }
+      },
+    });
 
-  const handleOpenDuplicate = (series) => setDuplicateDialog({ isOpen: true, series, newId: `${slugifySeriesTitle(series.title)}-copy` });
+  const handleOpenDuplicate = (series) =>
+    setDuplicateDialog({
+      isOpen: true,
+      series,
+      newId: `${slugifySeriesTitle(series.title)}-copy`,
+    });
   const handleDuplicate = async () => {
     const source = duplicateDialog.series;
     const nextId = duplicateDialog.newId.trim();
@@ -378,39 +540,73 @@ export default function AdminSeriesPageNew() {
       return;
     }
     setIsDuplicating(true);
-    const response = await apiPost("/api/admin/series", { series: buildSeriesPayload(source, { id: nextId, title: `${source.title}（副本）` }) });
+    const response = await apiPost("/api/admin/series", {
+      series: buildSeriesPayload(source, {
+        id: nextId,
+        title: `${source.title}（副本）`,
+      }),
+    });
     if (response.ok) {
       setFeedback({ type: "success", message: "作品已复制。" });
       setDuplicateDialog({ isOpen: false, series: null, newId: "" });
       await loadSeries();
     } else {
-      setFeedback({ type: "error", message: response.error || "复制作品失败。" });
+      setFeedback({
+        type: "error",
+        message: response.error || "复制作品失败。",
+      });
     }
     setIsDuplicating(false);
   };
 
   const updatePublishStateForSelection = async (nextPublished) => {
-    const targets = seriesList.filter((series) => selectedSeries.includes(series.id));
-    await Promise.all(targets.map((series) => apiPatch(`/api/admin/series/${series.id}`, { series: buildSeriesPayload(series, { isPublished: nextPublished }) })));
-    setSeriesList((current) => current.map((series) => (selectedSeries.includes(series.id) ? { ...series, isPublished: nextPublished, updatedAt: new Date().toISOString() } : series)));
-    setFeedback({ type: "success", message: nextPublished ? "已发布所选作品。" : "已将所选作品转为草稿。" });
+    const targets = seriesList.filter((series) =>
+      selectedSeries.includes(series.id),
+    );
+    await Promise.all(
+      targets.map((series) =>
+        apiPatch(`/api/admin/series/${series.id}`, {
+          series: buildSeriesPayload(series, { isPublished: nextPublished }),
+        }),
+      ),
+    );
+    setSeriesList((current) =>
+      current.map((series) =>
+        selectedSeries.includes(series.id)
+          ? {
+              ...series,
+              isPublished: nextPublished,
+              updatedAt: new Date().toISOString(),
+            }
+          : series,
+      ),
+    );
+    setFeedback({
+      type: "success",
+      message: nextPublished ? "已发布所选作品。" : "已将所选作品转为草稿。",
+    });
   };
 
   const handleBulkPublish = async () => updatePublishStateForSelection(true);
   const handleBulkUnpublish = async () => updatePublishStateForSelection(false);
-  const handleBulkDelete = async () => setConfirmDialog({
-    isOpen: true,
-    title: "删除已选作品",
-    message: `确定删除 ${selectedSeries.length} 部已选作品吗？此操作无法撤销。`,
-    variant: "danger",
-    onConfirm: async () => {
-      const ids = [...selectedSeries];
-      await Promise.all(ids.map((id) => apiDelete(`/api/admin/series/${id}`)));
-      setSeriesList((current) => current.filter((series) => !ids.includes(series.id)));
-      setSelectedSeries([]);
-      setFeedback({ type: "success", message: "已删除所选作品。" });
-    },
-  });
+  const handleBulkDelete = async () =>
+    setConfirmDialog({
+      isOpen: true,
+      title: "删除已选作品",
+      message: `确定删除 ${selectedSeries.length} 部已选作品吗？此操作无法撤销。`,
+      variant: "danger",
+      onConfirm: async () => {
+        const ids = [...selectedSeries];
+        await Promise.all(
+          ids.map((id) => apiDelete(`/api/admin/series/${id}`)),
+        );
+        setSeriesList((current) =>
+          current.filter((series) => !ids.includes(series.id)),
+        );
+        setSelectedSeries([]);
+        setFeedback({ type: "success", message: "已删除所选作品。" });
+      },
+    });
 
   const handleCoverInput = (file) => {
     if (!file) return;
@@ -424,7 +620,11 @@ export default function AdminSeriesPageNew() {
     }
     setCreateForm((current) => {
       revokeObjectUrl(current.coverPreviewUrl);
-      return { ...current, coverFile: file, coverPreviewUrl: URL.createObjectURL(file) };
+      return {
+        ...current,
+        coverFile: file,
+        coverPreviewUrl: URL.createObjectURL(file),
+      };
     });
   };
 
@@ -433,43 +633,87 @@ export default function AdminSeriesPageNew() {
     resetCreateForm();
   };
 
-  if (isLoading || loading) return <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-8 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">正在加载作品工作台...</section>;
-  if (!isAuthenticated) return <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-10 text-center text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">需要管理员权限才能查看此页面。</section>;
+  if (isLoading || loading)
+    return (
+      <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-8 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+        正在加载作品工作台...
+      </section>
+    );
+  if (!isAuthenticated)
+    return (
+      <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-10 text-center text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+        需要管理员权限才能查看此页面。
+      </section>
+    );
 
   return (
     <div className="space-y-6">
       <section className="rounded-[28px] border border-[color:var(--gush-border)] bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] xl:items-start">
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">作品工作台</p>
-            <h2 className="text-2xl font-semibold text-slate-950">先把作品资料和章节补完整，再决定是否发布。</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              作品工作台
+            </p>
+            <h2 className="text-2xl font-semibold text-slate-950">
+              先把作品资料和章节补完整，再决定是否发布。
+            </h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-600">
               这里负责作品目录的日常整理。先查找、筛选和复核，再进入详情页或章节管理，不用来回跳很多层。
             </p>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">目录整理</p>
-                <p className="mt-2 text-sm font-semibold text-slate-950">先看草稿和资料缺口</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">减少前台空封面、缺署名和空目录的问题。</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  目录整理
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">
+                  先看草稿和资料缺口
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  减少前台空封面、缺署名和空目录的问题。
+                </p>
               </div>
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">编辑路径</p>
-                <p className="mt-2 text-sm font-semibold text-slate-950">详情、章节、发布放在一起</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">常用动作就近可点，不需要再去找分散按钮。</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  编辑路径
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">
+                  详情、章节、发布放在一起
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  常用动作就近可点，不需要再去找分散按钮。
+                </p>
               </div>
               <div className="rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">今天建议</p>
-                <p className="mt-2 text-sm font-semibold text-slate-950">{workspaceFocus.title}</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">{workspaceFocus.description}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  今天建议
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-950">
+                  {workspaceFocus.title}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {workspaceFocus.description}
+                </p>
               </div>
             </div>
           </div>
           <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.94))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">快捷操作</p>
-            <h3 className="mt-2 text-lg font-semibold text-slate-950">从这里开始新增或补录作品</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">新建后可以直接进入详情页，或者顺着去补章节，不用多走一步。</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              快捷操作
+            </p>
+            <h3 className="mt-2 text-lg font-semibold text-slate-950">
+              从这里开始新增或补录作品
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              新建后可以直接进入详情页，或者顺着去补章节，不用多走一步。
+            </p>
             <div className="mt-5 flex flex-col gap-2">
-              <Button type="button" onClick={() => { setCreateForm(createEmptyCreateForm()); setShowCreateModal(true); }}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setCreateForm(createEmptyCreateForm());
+                  setShowCreateModal(true);
+                }}
+              >
                 <Plus className="size-4" />
                 <span>新增作品</span>
               </Button>
@@ -497,10 +741,19 @@ export default function AdminSeriesPageNew() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {seriesOverview.stats.map((item) => (
-          <article key={item.label} className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#fafafc)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">目录概况</p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">{item.label}</p>
-            <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
+          <article
+            key={item.label}
+            className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#fafafc)] p-5 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              目录概况
+            </p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">
+              {item.label}
+            </p>
+            <p className="mt-3 text-3xl font-semibold text-slate-950">
+              {item.value}
+            </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">{item.hint}</p>
           </article>
         ))}
@@ -512,8 +765,11 @@ export default function AdminSeriesPageNew() {
             <div className="flex flex-col gap-3 rounded-[24px] border border-sky-200 bg-sky-50/88 px-4 py-4 text-sm text-sky-700 md:flex-row md:items-center md:justify-between">
               <p>
                 当前列表已按创作者筛选：
-                <span className="font-semibold text-slate-950"> {scopedCreatorQuery}</span>。
-                会同时匹配作品标题、编号和创作者署名。
+                <span className="font-semibold text-slate-950">
+                  {" "}
+                  {scopedCreatorQuery}
+                </span>
+                。 会同时匹配作品标题、编号和创作者署名。
               </p>
               <Button
                 type="button"
@@ -527,10 +783,23 @@ export default function AdminSeriesPageNew() {
           ) : null}
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
             <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">内容范围</p>
-              <p className="mt-2 text-sm text-slate-600">先切换作品类型，再决定要不要叠加快速筛选。</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                内容范围
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                先切换作品类型，再决定要不要叠加快速筛选。
+              </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {TYPE_TABS.map((tab) => <button key={tab.value} type="button" onClick={() => setTypeFilter(tab.value)} className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}>{tab.label}</button>)}
+                {TYPE_TABS.map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setTypeFilter(tab.value)}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${typeFilter === tab.value ? "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.04)]" : "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/78 text-slate-600 hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950"}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {QUICK_FILTERS.map((filter) => (
@@ -547,27 +816,53 @@ export default function AdminSeriesPageNew() {
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f8f8fa)] p-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">查找与视图</p>
-              <p className="mt-2 text-sm text-slate-600">搜索、进阶筛选、选择数量和视图切换放在一处，操作更顺手。</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                查找与视图
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                搜索、进阶筛选、选择数量和视图切换放在一处，操作更顺手。
+              </p>
               <div className="mt-4 flex w-full flex-col gap-3">
                 <div className="flex w-full flex-col gap-3 xl:flex-row">
                   <label className="flex min-w-[260px] flex-1 items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.03)] transition focus-within:border-[color:var(--gush-border-strong)] focus-within:ring-[3px] focus-within:ring-slate-200/55">
                     <Search size={16} className="text-slate-400" />
-                    <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="搜索作品标题、编号或创作者署名..." className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400" />
+                    <input
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="搜索作品标题、编号或创作者署名..."
+                      className="w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
+                    />
                   </label>
                   <div className="xl:shrink-0">
-                    <AdvancedFilters filters={advancedFilters} onFiltersChange={setAdvancedFilters} />
+                    <AdvancedFilters
+                      filters={advancedFilters}
+                      onFiltersChange={setAdvancedFilters}
+                    />
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
-                    当前结果 <span className="font-semibold text-slate-950">{filteredSeries.length}</span> 部
+                    当前结果{" "}
+                    <span className="font-semibold text-slate-950">
+                      {filteredSeries.length}
+                    </span>{" "}
+                    部
                   </p>
                   <p className="rounded-full border border-[color:var(--gush-border)] bg-white px-3 py-2 text-sm text-slate-600 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
-                    已选 <span className="font-semibold text-slate-950">{selectedSeries.length}</span> 部
+                    已选{" "}
+                    <span className="font-semibold text-slate-950">
+                      {selectedSeries.length}
+                    </span>{" "}
+                    部
                   </p>
-                  <Button type="button" variant="secondary" size="sm" onClick={handleToggleSelectAll} disabled={filteredSeries.length === 0}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleToggleSelectAll}
+                    disabled={filteredSeries.length === 0}
+                  >
                     {allVisibleSelected ? "清空选择" : "全选当前结果"}
                   </Button>
                   <div className="flex items-center overflow-hidden rounded-full border border-[color:var(--gush-border)] bg-white p-1 shadow-[0_6px_16px_rgba(15,23,42,0.025)]">
@@ -597,13 +892,61 @@ export default function AdminSeriesPageNew() {
         </div>
       </section>
 
-      <BulkActionsToolbar selectedCount={selectedSeries.length} onPublish={handleBulkPublish} onUnpublish={handleBulkUnpublish} onDelete={handleBulkDelete} onCancel={() => setSelectedSeries([])} />
+      <BulkActionsToolbar
+        selectedCount={selectedSeries.length}
+        onPublish={handleBulkPublish}
+        onUnpublish={handleBulkUnpublish}
+        onDelete={handleBulkDelete}
+        onCancel={() => setSelectedSeries([])}
+      />
 
       {filteredSeries.length === 0 ? (
-        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-12 text-center shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]"><ImageIcon size={36} className="mx-auto text-slate-400" /><h3 className="mt-4 text-lg font-semibold text-slate-950">当前筛选下没有匹配作品</h3><p className="mt-2 text-sm text-slate-600">{searchQuery || typeFilter !== "all" || quickFilter !== "all" || advancedFilters.status !== "all" || advancedFilters.publishStatus !== "all" || advancedFilters.adultContent !== "all" ? "可以尝试放宽筛选条件或换个搜索词。" : "先从新增第一部作品开始建立目录。"}</p></section>
+        <section className="rounded-[28px] border border-dashed border-[color:var(--gush-border)] bg-white p-12 text-center shadow-[0_14px_32px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+          <ImageIcon size={36} className="mx-auto text-slate-400" />
+          <h3 className="mt-4 text-lg font-semibold text-slate-950">
+            当前筛选下没有匹配作品
+          </h3>
+          <p className="mt-2 text-sm text-slate-600">
+            {searchQuery ||
+            typeFilter !== "all" ||
+            quickFilter !== "all" ||
+            advancedFilters.status !== "all" ||
+            advancedFilters.publishStatus !== "all" ||
+            advancedFilters.adultContent !== "all"
+              ? "可以尝试放宽筛选条件或换个搜索词。"
+              : "先从新增第一部作品开始建立目录。"}
+          </p>
+        </section>
       ) : (
-        <section className={viewMode === "grid" ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
-          {filteredSeries.map((series) => <SeriesCard key={series.id} series={series} viewMode={viewMode} isSelected={selectedSeries.includes(series.id)} isEditing={editingId === series.id} editDraft={editingId === series.id ? editingDraft : null} isSaving={isSavingEdit} onSelect={handleToggleSelection} onStartEdit={handleStartEdit} onEditDraftChange={setEditingDraft} onSaveEdit={() => handleSaveEdit(series.id)} onCancelEdit={handleCancelEdit} onOpenDetails={handleOpenDetails} onOpenEpisodes={handleOpenEpisodes} onOpenFrontend={handleOpenFrontend} onTogglePublish={handleTogglePublish} onDuplicate={handleOpenDuplicate} onDelete={handleDelete} />)}
+        <section
+          className={
+            viewMode === "grid"
+              ? "grid gap-5 md:grid-cols-2 xl:grid-cols-3"
+              : "space-y-4"
+          }
+        >
+          {filteredSeries.map((series) => (
+            <SeriesCard
+              key={series.id}
+              series={series}
+              viewMode={viewMode}
+              isSelected={selectedSeries.includes(series.id)}
+              isEditing={editingId === series.id}
+              editDraft={editingId === series.id ? editingDraft : null}
+              isSaving={isSavingEdit}
+              onSelect={handleToggleSelection}
+              onStartEdit={handleStartEdit}
+              onEditDraftChange={setEditingDraft}
+              onSaveEdit={() => handleSaveEdit(series.id)}
+              onCancelEdit={handleCancelEdit}
+              onOpenDetails={handleOpenDetails}
+              onOpenEpisodes={handleOpenEpisodes}
+              onOpenFrontend={handleOpenFrontend}
+              onTogglePublish={handleTogglePublish}
+              onDuplicate={handleOpenDuplicate}
+              onDelete={handleDelete}
+            />
+          ))}
         </section>
       )}
 
@@ -627,8 +970,18 @@ export default function AdminSeriesPageNew() {
         isDuplicating={isDuplicating}
       />
 
-      <ConfirmModal isOpen={confirmDialog.isOpen} onClose={() => setConfirmDialog((current) => ({ ...current, isOpen: false }))} onConfirm={confirmDialog.onConfirm} title={confirmDialog.title} message={confirmDialog.message} confirmText="确认" cancelText="取消" variant={confirmDialog.variant} />
+      <ConfirmModal
+        isOpen={confirmDialog.isOpen}
+        onClose={() =>
+          setConfirmDialog((current) => ({ ...current, isOpen: false }))
+        }
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText="确认"
+        cancelText="取消"
+        variant={confirmDialog.variant}
+      />
     </div>
   );
 }
-

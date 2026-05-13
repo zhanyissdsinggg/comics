@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
 
 const CouponContext = createContext(null);
@@ -28,10 +34,12 @@ export function CouponProvider({ children }) {
 
   const value = useMemo(
     () => ({ coupons, loaded, loadCoupons, claimCoupon }),
-    [coupons, loaded, loadCoupons, claimCoupon]
+    [coupons, loaded, loadCoupons, claimCoupon],
   );
 
-  return <CouponContext.Provider value={value}>{children}</CouponContext.Provider>;
+  return (
+    <CouponContext.Provider value={value}>{children}</CouponContext.Provider>
+  );
 }
 
 export function useCouponStore() {

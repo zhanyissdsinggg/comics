@@ -1,5 +1,4 @@
-
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import AdminLoginPage from "../../../components/admin/AdminLoginPage";
 import { createPageMetadata } from "../../../lib/seo";

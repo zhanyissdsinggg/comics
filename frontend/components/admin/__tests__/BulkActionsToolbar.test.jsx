@@ -24,7 +24,9 @@ describe("BulkActionsToolbar", () => {
 
   it("renders nothing when no rows are selected", () => {
     const callbacks = createCallbacks();
-    const { container } = render(<BulkActionsToolbar selectedCount={0} {...callbacks} />);
+    const { container } = render(
+      <BulkActionsToolbar selectedCount={0} {...callbacks} />,
+    );
 
     expect(container.firstChild).toBeNull();
   });
@@ -35,7 +37,9 @@ describe("BulkActionsToolbar", () => {
 
     expect(screen.getByText("已选择 5 项")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "发布" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "取消发布" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "取消发布" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "删除" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "清空" })).toBeInTheDocument();
   });
@@ -81,7 +85,9 @@ describe("BulkActionsToolbar", () => {
     deferred.resolve();
 
     await waitFor(() => {
-      expect(screen.queryByText("正在发布 2 部作品...")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("正在发布 2 部作品..."),
+      ).not.toBeInTheDocument();
     });
   });
 

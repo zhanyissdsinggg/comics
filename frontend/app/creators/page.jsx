@@ -42,12 +42,15 @@ export default async function CreatorsPageRoute({ searchParams }) {
 
   return (
     <>
-      <StructuredDataScript id="creators-directory-jsonld" data={structuredData} />
+      <StructuredDataScript
+        id="creators-directory-jsonld"
+        data={structuredData}
+      />
       <CreatorsHubPage
         initialCatalog={initialCatalog}
         hasInitialCatalog={Boolean(
           (payload?.ready === true && creatorCatalog.length > 0) ||
-            (catalogPayload?.ready === true && initialCatalog.length > 0)
+          (catalogPayload?.ready === true && initialCatalog.length > 0),
         )}
         initialTypeFilter={resolvedSearchParams.type || ""}
         initialGenreFilter={resolvedSearchParams.genre || ""}

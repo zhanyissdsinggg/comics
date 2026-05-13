@@ -21,7 +21,12 @@ export function ActionButton({ children, className = "", ...props }) {
   );
 }
 
-export function PillButton({ active = false, children, className = "", ...props }) {
+export function PillButton({
+  active = false,
+  children,
+  className = "",
+  ...props
+}) {
   return (
     <button
       type="button"
@@ -42,8 +47,10 @@ export function PillButton({ active = false, children, className = "", ...props 
 export function MetricCard({ title, value, hint, tone = "blue" }) {
   const toneClasses = {
     blue: "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#f7f7f9)]",
-    emerald: "border-emerald-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,253,245,0.95))]",
-    amber: "border-amber-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,251,235,0.95))]",
+    emerald:
+      "border-emerald-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,253,245,0.95))]",
+    amber:
+      "border-amber-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,251,235,0.95))]",
     rose: "border-rose-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))]",
   };
 
@@ -55,7 +62,9 @@ export function MetricCard({ title, value, hint, tone = "blue" }) {
       )}
     >
       <p className="text-sm text-slate-600">{title}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
+      <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+        {value}
+      </p>
       <p className="mt-2 text-xs leading-6 text-slate-500">{hint}</p>
     </div>
   );
@@ -93,15 +102,15 @@ export function StatusPill({ children, tone = "slate" }) {
 
 export function LoadingView() {
   return (
-    <AdminShell
-      title="创作者"
-      subtitle="正在整理创作者署名和前台身份数据。"
-    >
+    <AdminShell title="创作者" subtitle="正在整理创作者署名和前台身份数据。">
       <div className="space-y-6">
         <Skeleton className="h-48 rounded-[32px]" />
         <div className="grid gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={`creator-metric-${index}`} className="h-32 rounded-[28px]" />
+            <Skeleton
+              key={`creator-metric-${index}`}
+              className="h-32 rounded-[28px]"
+            />
           ))}
         </div>
         <Skeleton className="h-32 rounded-[28px]" />

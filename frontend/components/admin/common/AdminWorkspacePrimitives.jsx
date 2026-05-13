@@ -34,12 +34,19 @@ export function AdminPageSection({
   eyebrow = "工作区",
 }) {
   return (
-    <SurfacePanel appearance="light" tone={tone} accent={accent} className={className}>
+    <SurfacePanel
+      appearance="light"
+      tone={tone}
+      accent={accent}
+      className={className}
+    >
       {title || description || action ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             {eyebrow ? (
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{eyebrow}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                {eyebrow}
+              </p>
             ) : null}
             {title ? (
               <h2 className="mt-2 text-[1.2rem] font-semibold tracking-tight text-slate-950 sm:text-[1.35rem]">
@@ -47,20 +54,37 @@ export function AdminPageSection({
               </h2>
             ) : null}
             {description ? (
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{description}</p>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                {description}
+              </p>
             ) : null}
           </div>
-          {action ? <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div> : null}
+          {action ? (
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {action}
+            </div>
+          ) : null}
         </div>
       ) : null}
-      <div className={cn(title || description || action ? "mt-5" : "", className ? "" : "")}>
+      <div
+        className={cn(
+          title || description || action ? "mt-5" : "",
+          className ? "" : "",
+        )}
+      >
         {children}
       </div>
     </SurfacePanel>
   );
 }
 
-export function AdminMetricCard({ label, value, detail, tone = "default", className = "" }) {
+export function AdminMetricCard({
+  label,
+  value,
+  detail,
+  tone = "default",
+  className = "",
+}) {
   return (
     <div
       className={cn(
@@ -71,10 +95,16 @@ export function AdminMetricCard({ label, value, detail, tone = "default", classN
         className,
       )}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">运营指标</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+        运营指标
+      </p>
       <p className="mt-2 text-sm font-semibold text-slate-950">{label}</p>
-      <p className="mt-3 text-[1.85rem] font-semibold tracking-tight text-slate-950">{value}</p>
-      {detail ? <p className="mt-2 text-sm leading-6 text-slate-600">{detail}</p> : null}
+      <p className="mt-3 text-[1.85rem] font-semibold tracking-tight text-slate-950">
+        {value}
+      </p>
+      {detail ? (
+        <p className="mt-2 text-sm leading-6 text-slate-600">{detail}</p>
+      ) : null}
     </div>
   );
 }
@@ -93,12 +123,21 @@ export function AdminBadge({ children, tone = "default", className = "" }) {
   );
 }
 
-export function AdminFormField({ label, helperText, children, className = "" }) {
+export function AdminFormField({
+  label,
+  helperText,
+  children,
+  className = "",
+}) {
   return (
     <label className={cn("block space-y-2", className)}>
       <span className="text-sm font-semibold text-slate-700">{label}</span>
       {children}
-      {helperText ? <span className="block text-xs leading-5 text-slate-500">{helperText}</span> : null}
+      {helperText ? (
+        <span className="block text-xs leading-5 text-slate-500">
+          {helperText}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -112,7 +151,9 @@ export function AdminKeyValueList({ items, className = "" }) {
           className="flex items-center justify-between gap-4 border-b border-[color:var(--gush-border)] py-3 last:border-b-0 last:pb-0"
         >
           <span className="text-sm text-slate-500">{item.label}</span>
-          <span className="text-sm font-medium text-slate-950">{item.value}</span>
+          <span className="text-sm font-medium text-slate-950">
+            {item.value}
+          </span>
         </div>
       ))}
     </div>

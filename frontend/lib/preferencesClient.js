@@ -63,24 +63,42 @@ export function applyPreferencesToStorage(preferences = {}) {
       window.localStorage.setItem(LANG_KEY, preferences.language);
     }
     if (typeof preferences.hideAdultHistory === "boolean") {
-      window.localStorage.setItem(HIDE_ADULT_KEY, preferences.hideAdultHistory ? "1" : "0");
+      window.localStorage.setItem(
+        HIDE_ADULT_KEY,
+        preferences.hideAdultHistory ? "1" : "0",
+      );
     }
     if (typeof preferences.displayName === "string") {
       window.localStorage.setItem(DISPLAY_NAME_KEY, preferences.displayName);
     }
     if (typeof preferences.notifyNewEpisode === "boolean") {
-      window.localStorage.setItem(NOTIFY_NEW_KEY, preferences.notifyNewEpisode ? "1" : "0");
+      window.localStorage.setItem(
+        NOTIFY_NEW_KEY,
+        preferences.notifyNewEpisode ? "1" : "0",
+      );
     }
     if (typeof preferences.notifyTtfReady === "boolean") {
-      window.localStorage.setItem(NOTIFY_TTF_KEY, preferences.notifyTtfReady ? "1" : "0");
+      window.localStorage.setItem(
+        NOTIFY_TTF_KEY,
+        preferences.notifyTtfReady ? "1" : "0",
+      );
     }
     if (typeof preferences.notifyPromo === "boolean") {
-      window.localStorage.setItem(NOTIFY_PROMO_KEY, preferences.notifyPromo ? "1" : "0");
+      window.localStorage.setItem(
+        NOTIFY_PROMO_KEY,
+        preferences.notifyPromo ? "1" : "0",
+      );
     }
 
     if (typeof preferences.matureModeEnabled === "boolean") {
-      window.localStorage.setItem(ADULT_MODE_KEY, preferences.matureModeEnabled ? "1" : "0");
-      window.localStorage.setItem(MATURE_HIDDEN_KEY, preferences.matureModeEnabled ? "0" : "1");
+      window.localStorage.setItem(
+        ADULT_MODE_KEY,
+        preferences.matureModeEnabled ? "1" : "0",
+      );
+      window.localStorage.setItem(
+        MATURE_HIDDEN_KEY,
+        preferences.matureModeEnabled ? "0" : "1",
+      );
     }
 
     const verification = normalizeMatureVerificationStatus(
@@ -91,8 +109,14 @@ export function applyPreferencesToStorage(preferences = {}) {
       ADULT_CONFIRMED_KEY,
       verification.verified ? "1" : "0",
     );
-    window.localStorage.setItem(ADULT_RULE_KEY, verification.region || "global");
-    window.localStorage.setItem(MATURE_VERIFICATION_KEY, JSON.stringify(verification));
+    window.localStorage.setItem(
+      ADULT_RULE_KEY,
+      verification.region || "global",
+    );
+    window.localStorage.setItem(
+      MATURE_VERIFICATION_KEY,
+      JSON.stringify(verification),
+    );
     persistStorageValue(MATURE_PROVIDER_KEY, verification.provider);
     persistStorageValue(MATURE_EXPIRES_KEY, verification.expiresAt);
     persistStorageValue(MATURE_REF_KEY, verification.referenceId);

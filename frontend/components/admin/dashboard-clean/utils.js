@@ -106,7 +106,10 @@ function normalizeMetric(metric) {
 
   return {
     total: hasTotal ? safeNumber(source.total) : null,
-    change: rawChange !== undefined && rawChange !== null ? safeNumber(rawChange) : null,
+    change:
+      rawChange !== undefined && rawChange !== null
+        ? safeNumber(rawChange)
+        : null,
     available: hasTotal,
   };
 }
@@ -141,7 +144,11 @@ export function pickArray(payload, keys) {
 }
 
 export function formatTrend(metric) {
-  if (!metric?.available || metric.change === null || !Number.isFinite(metric.change)) {
+  if (
+    !metric?.available ||
+    metric.change === null ||
+    !Number.isFinite(metric.change)
+  ) {
     return "最近 7 天暂无趋势";
   }
 
@@ -150,7 +157,9 @@ export function formatTrend(metric) {
 }
 
 export function formatMetric(metric, formatter = number) {
-  return metric?.available && metric.total !== null ? formatter.format(metric.total) : "--";
+  return metric?.available && metric.total !== null
+    ? formatter.format(metric.total)
+    : "--";
 }
 
 export function relativeTime(value) {
@@ -226,7 +235,8 @@ export function buildInsights(seriesList) {
     .filter((item) => safeText(item?.title))
     .sort(
       (left, right) =>
-        new Date(right?.updatedAt || 0).getTime() - new Date(left?.updatedAt || 0).getTime(),
+        new Date(right?.updatedAt || 0).getTime() -
+        new Date(left?.updatedAt || 0).getTime(),
     )
     .slice(0, 5);
 
@@ -234,12 +244,18 @@ export function buildInsights(seriesList) {
     latestUpdated,
     drafts: series.filter((item) => !item?.isPublished).length,
     published: series.filter((item) => Boolean(item?.isPublished)).length,
-    missingCredits: series.filter((item) => !resolveSeriesCreatorIdentity(item).hasPublicCredit)
-      .length,
-    missingCovers: series.filter((item) => !safeText(item?.coverUrl || item?.coverImage)).length,
+    missingCredits: series.filter(
+      (item) => !resolveSeriesCreatorIdentity(item).hasPublicCredit,
+    ).length,
+    missingCovers: series.filter(
+      (item) => !safeText(item?.coverUrl || item?.coverImage),
+    ).length,
     emptyEpisodes: series.filter(
       (item) =>
-        safeNumber(item?.episodeCount ?? item?._count?.episodes ?? item?.totalEpisodes, 0) === 0,
+        safeNumber(
+          item?.episodeCount ?? item?._count?.episodes ?? item?.totalEpisodes,
+          0,
+        ) === 0,
     ).length,
     readyDrafts: series.filter((item) => {
       const episodeCount = safeNumber(
@@ -266,18 +282,37 @@ export function buildStatCards(stats, insights) {
       detail: `${formatTrend(stats.series)} · 当前目录 ${insights.published} 部已上线`,
       accent: true,
     },
-    { label: "读者账户", value: formatMetric(stats.users), detail: formatTrend(stats.users) },
-    { label: "已支付订单", value: formatMetric(stats.orders), detail: formatTrend(stats.orders) },
-    { label: "累计收入", value: formatMetric(stats.revenue, usd), detail: formatTrend(stats.revenue) },
-    { label: "累计访问", value: formatMetric(stats.views), detail: formatTrend(stats.views) },
-    { label: "评论总量", value: formatMetric(stats.comments), detail: formatTrend(stats.comments) },
+    {
+      label: "读者账户",
+      value: formatMetric(stats.users),
+      detail: formatTrend(stats.users),
+    },
+    {
+      label: "已支付订单",
+      value: formatMetric(stats.orders),
+      detail: formatTrend(stats.orders),
+    },
+    {
+      label: "累计收入",
+      value: formatMetric(stats.revenue, usd),
+      detail: formatTrend(stats.revenue),
+    },
+    {
+      label: "累计访问",
+      value: formatMetric(stats.views),
+      detail: formatTrend(stats.views),
+    },
+    {
+      label: "评论总量",
+      value: formatMetric(stats.comments),
+      detail: formatTrend(stats.comments),
+    },
   ];
 }
 
 export function getSeriesBadge(series) {
   const creatorReady = resolveSeriesCreatorIdentity(series).hasPublicCredit;
   return (
-    resolveSeriesCreatorName(series) ||
-    (creatorReady ? "署名已补" : "待补署名")
+    resolveSeriesCreatorName(series) || (creatorReady ? "署名已补" : "待补署名")
   );
 }

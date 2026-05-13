@@ -1,6 +1,9 @@
 "use client";
 
-import { adminFetchJson, normalizeAdminErrorMessage } from "@/lib/adminApiClient";
+import {
+  adminFetchJson,
+  normalizeAdminErrorMessage,
+} from "@/lib/adminApiClient";
 
 export const MARKETING_TABS = [
   { value: "campaigns", label: "活动目录" },
@@ -63,7 +66,9 @@ export function formatCurrency(value) {
 
 export function formatNumber(value) {
   const amount = Number(value || 0);
-  return new Intl.NumberFormat("zh-CN").format(Number.isFinite(amount) ? amount : 0);
+  return new Intl.NumberFormat("zh-CN").format(
+    Number.isFinite(amount) ? amount : 0,
+  );
 }
 
 export function formatPercent(value) {
@@ -96,7 +101,9 @@ export function getStatusTone(status) {
 }
 
 export function getCampaignMetrics(campaign) {
-  const latest = Array.isArray(campaign?.analytics) ? campaign.analytics[0] : null;
+  const latest = Array.isArray(campaign?.analytics)
+    ? campaign.analytics[0]
+    : null;
   return {
     revenue: Number(latest?.revenue || 0),
     converted: Number(latest?.converted || 0),
@@ -107,7 +114,9 @@ export function getCampaignMetrics(campaign) {
 export async function requestPayload(path, init = {}) {
   const { response, data } = await adminFetchJson(path, init);
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || `请求失败，状态码 ${response.status}。`);
+    throw new Error(
+      data?.message || data?.error || `请求失败，状态码 ${response.status}。`,
+    );
   }
   return data || {};
 }

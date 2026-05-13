@@ -129,7 +129,9 @@ function ContactCard() {
   return (
     <StorefrontInfoCard title="Privacy contact">
       <p className="mt-3 text-sm font-medium text-white/68">
-        <span className="font-black uppercase tracking-[0.08em] text-white">Email:</span>{" "}
+        <span className="font-black uppercase tracking-[0.08em] text-white">
+          Email:
+        </span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
           className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
@@ -139,7 +141,9 @@ function ContactCard() {
       </p>
       {siteConfig.companyAddress ? (
         <p className="mt-3 text-sm font-medium text-white/68">
-          <span className="font-black uppercase tracking-[0.08em] text-white">Address:</span>{" "}
+          <span className="font-black uppercase tracking-[0.08em] text-white">
+            Address:
+          </span>{" "}
           {siteConfig.companyAddress}
         </p>
       ) : null}

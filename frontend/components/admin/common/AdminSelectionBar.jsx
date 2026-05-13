@@ -26,9 +26,15 @@ export function AdminSelectionBar({
           {selectedCount}
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">批量操作</p>
-          <p className="text-sm font-semibold text-slate-900">已选择 {selectedCount} 项</p>
-          <p className="text-xs text-slate-500">批量操作会立即应用到已选内容。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            批量操作
+          </p>
+          <p className="text-sm font-semibold text-slate-900">
+            已选择 {selectedCount} 项
+          </p>
+          <p className="text-xs text-slate-500">
+            批量操作会立即应用到已选内容。
+          </p>
         </div>
       </div>
 

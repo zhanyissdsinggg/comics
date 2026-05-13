@@ -52,8 +52,7 @@ function CommentItem({ comment }) {
           />
           {comment.vipLevel > 0 ? (
             <div className="absolute -bottom-2 -right-2 flex items-center rounded-full border-2 border-[#121212] bg-yellow-500 px-1.5 py-0.5 text-[9px] font-black text-black">
-              <Crown className="mr-0.5 h-2.5 w-2.5" />
-              V{comment.vipLevel}
+              <Crown className="mr-0.5 h-2.5 w-2.5" />V{comment.vipLevel}
             </div>
           ) : null}
         </div>
@@ -117,7 +116,9 @@ function CommentItem({ comment }) {
               aria-label={`Like comment from ${comment.user}`}
               className={cn(
                 "flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95",
-                liked ? palette.primaryText : "text-gray-500 hover:text-gray-300",
+                liked
+                  ? palette.primaryText
+                  : "text-gray-500 hover:text-gray-300",
               )}
             >
               <Heart className={cn("h-4 w-4", liked ? "fill-current" : "")} />
@@ -137,7 +138,10 @@ function CommentItem({ comment }) {
   );
 }
 
-export default function FigmaCommentsSection({ title = "Discussion", seriesTitle }) {
+export default function FigmaCommentsSection({
+  title = "Discussion",
+  seriesTitle,
+}) {
   const { palette } = useFigmaSite();
   const [newComment, setNewComment] = useState("");
   const [isSpoilerTag, setIsSpoilerTag] = useState(false);

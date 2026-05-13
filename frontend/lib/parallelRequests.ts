@@ -12,7 +12,7 @@ export interface ParallelRequestResult<T = unknown> {
 }
 
 export async function parallelRequests<T = unknown>(
-  configs: ParallelRequestConfig<T>[]
+  configs: ParallelRequestConfig<T>[],
 ): Promise<ParallelRequestResult<T>[]> {
   const promises = configs.map(async (config) => {
     try {
@@ -39,16 +39,20 @@ export async function parallelRequests<T = unknown>(
 
 export async function parallelRequests2<T1 = unknown, T2 = unknown>(
   request1: () => Promise<ApiResponse<T1>>,
-  request2: () => Promise<ApiResponse<T2>>
+  request2: () => Promise<ApiResponse<T2>>,
 ): Promise<[ApiResponse<T1>, ApiResponse<T2>]> {
   const [result1, result2] = await Promise.all([request1(), request2()]);
   return [result1, result2];
 }
 
-export async function parallelRequests3<T1 = unknown, T2 = unknown, T3 = unknown>(
+export async function parallelRequests3<
+  T1 = unknown,
+  T2 = unknown,
+  T3 = unknown,
+>(
   request1: () => Promise<ApiResponse<T1>>,
   request2: () => Promise<ApiResponse<T2>>,
-  request3: () => Promise<ApiResponse<T3>>
+  request3: () => Promise<ApiResponse<T3>>,
 ): Promise<[ApiResponse<T1>, ApiResponse<T2>, ApiResponse<T3>]> {
   const [result1, result2, result3] = await Promise.all([
     request1(),

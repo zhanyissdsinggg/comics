@@ -22,7 +22,9 @@ function ensureAnalyticsLoaded() {
       analyticsTrackConversion =
         typeof mod.trackConversion === "function" ? mod.trackConversion : null;
       analyticsPrimeProviders =
-        typeof mod.primeAnalyticsProviders === "function" ? mod.primeAnalyticsProviders : null;
+        typeof mod.primeAnalyticsProviders === "function"
+          ? mod.primeAnalyticsProviders
+          : null;
     })
     .catch(() => undefined)
     .finally(() => {

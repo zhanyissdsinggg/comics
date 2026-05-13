@@ -443,10 +443,7 @@ export default function StorePage({
 
     setRetryPackageId(packageId);
     setErrorMessage(
-      getFriendlyMessage(
-        response.error,
-        response.message || "Top up failed.",
-      ),
+      getFriendlyMessage(response.error, response.message || "Top up failed."),
     );
   };
 
@@ -524,10 +521,8 @@ export default function StorePage({
     ],
   );
 
-  const secondaryButtonClass =
-    `${storefrontSecondaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
-  const primaryButtonClass =
-    `${storefrontPrimaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
+  const secondaryButtonClass = `${storefrontSecondaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
+  const primaryButtonClass = `${storefrontPrimaryButtonClass} min-h-[48px] px-5 py-3 text-[11px] tracking-[0.08em]`;
   const fieldClass =
     "flex-1 rounded-full border-2 border-white/20 bg-[#080808] px-4 py-3 text-xs font-black uppercase tracking-[0.08em] text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]";
   const quietCardClass =
@@ -542,9 +537,7 @@ export default function StorePage({
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Point packs"
-            title={
-              purchaseActionsEnabled ? "Points." : "Points."
-            }
+            title={purchaseActionsEnabled ? "Points." : "Points."}
             description={
               purchaseActionsEnabled
                 ? "Pick a pack."
@@ -649,7 +642,12 @@ export default function StorePage({
           )
         ) : null}
 
-        <SurfacePanel className="space-y-5" appearance="dark" accent="blue" tone="muted">
+        <SurfacePanel
+          className="space-y-5"
+          appearance="dark"
+          accent="blue"
+          tone="muted"
+        >
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
@@ -663,12 +661,12 @@ export default function StorePage({
 
           {!purchaseActionsEnabled ? (
             <div className={quietCardClass}>
-                <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
-                  Point packs unavailable
-                </h3>
-                <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
+              <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
+                Point packs unavailable
+              </h3>
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/75">
                 Point-pack checkout is not available right now.
-                </p>
+              </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -698,9 +696,10 @@ export default function StorePage({
               },
               {
                 label: "Orders",
-                detail: ordersVisible && purchaseActionsEnabled
-                  ? "Past charges are in Orders."
-                  : "Available after launch.",
+                detail:
+                  ordersVisible && purchaseActionsEnabled
+                    ? "Past charges are in Orders."
+                    : "Available after launch.",
               },
               {
                 label: "Help",
@@ -779,9 +778,9 @@ export default function StorePage({
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                  onClick={() => router.push("/rankings?type=ttf&window=all")}
-                  className={secondaryButtonClass}
-                >
+                    onClick={() => router.push("/rankings?type=ttf&window=all")}
+                    className={secondaryButtonClass}
+                  >
                     Trending
                   </button>
                   {membershipVisible ? (
@@ -803,11 +802,11 @@ export default function StorePage({
               accent="blue"
               tone="muted"
             >
-                <div>
-                  <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                    Reading
-                  </h2>
-                </div>
+              <div>
+                <h2 className="font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                  Reading
+                </h2>
+              </div>
               <div className="grid gap-3">
                 <div className={quietCardClass}>
                   <p className="text-sm font-black uppercase tracking-[0.04em] text-white">
@@ -901,7 +900,9 @@ export default function StorePage({
                   </button>
                 </div>
                 {couponMessage ? (
-                  <p className="text-xs font-semibold text-white/80">{couponMessage}</p>
+                  <p className="text-xs font-semibold text-white/80">
+                    {couponMessage}
+                  </p>
                 ) : null}
                 {coupons.length > 0 ? (
                   <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
@@ -1064,9 +1065,7 @@ export default function StorePage({
                     hideAction={purchasePrelaunch}
                     statusLabel=""
                     statusNote=""
-                    ctaLabel={
-                      isSignedIn ? "Get this pack" : "Sign in"
-                    }
+                    ctaLabel={isSignedIn ? "Get this pack" : "Sign in"}
                   />
                 </div>
               ))}

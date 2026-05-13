@@ -75,7 +75,9 @@ export function readTrackingSettingsSnapshot() {
   return snapshot;
 }
 
-export function getGoogleTrackingConfig(snapshot = readTrackingSettingsSnapshot()) {
+export function getGoogleTrackingConfig(
+  snapshot = readTrackingSettingsSnapshot(),
+) {
   const values = isObject(snapshot?.values) ? snapshot.values : {};
   const google = isObject(values.google) ? values.google : {};
 
@@ -85,7 +87,9 @@ export function getGoogleTrackingConfig(snapshot = readTrackingSettingsSnapshot(
   };
 }
 
-export function getSnapTrackingConfig(snapshot = readTrackingSettingsSnapshot()) {
+export function getSnapTrackingConfig(
+  snapshot = readTrackingSettingsSnapshot(),
+) {
   const values = isObject(snapshot?.values) ? snapshot.values : {};
   const snapchat = isObject(values.snapchat) ? values.snapchat : {};
 

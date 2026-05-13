@@ -3,7 +3,10 @@ import { serializeStructuredData } from "../../lib/structuredData";
 export default function StructuredDataScript({ id, data }) {
   const normalizedData = Array.isArray(data) ? data.filter(Boolean) : data;
 
-  if (!normalizedData || (Array.isArray(normalizedData) && normalizedData.length === 0)) {
+  if (
+    !normalizedData ||
+    (Array.isArray(normalizedData) && normalizedData.length === 0)
+  ) {
     return null;
   }
 

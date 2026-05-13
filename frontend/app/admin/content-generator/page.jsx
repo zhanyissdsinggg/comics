@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import AdminShell from '@/components/admin/AdminShell';
+import AdminShell from "@/components/admin/AdminShell";
 import {
   GeneratorFeedback,
   GeneratorFormSection,
   GeneratorResultSection,
   GeneratorSummaryCards,
-} from '@/components/admin/content-generator-workspace/sections';
+} from "@/components/admin/content-generator-workspace/sections";
 import {
   buildGeneratorPayload,
   DEFAULT_FORM,
   parsePositiveInteger,
   readGeneratorErrorMessage,
   validateForm,
-} from '@/components/admin/content-generator-workspace/utils';
-import { adminPost } from '@/lib/adminApiClient';
+} from "@/components/admin/content-generator-workspace/utils";
+import { adminPost } from "@/lib/adminApiClient";
 
 function isAdminTestToolsEnabled() {
-  return process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ADMIN_TOOLS_ENABLED === '1';
+  return (
+    process.env.NODE_ENV !== "production" ||
+    process.env.NEXT_PUBLIC_ADMIN_TOOLS_ENABLED === "1"
+  );
 }
 
 export default function ContentGeneratorPage() {
   const router = useRouter();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [generating, setGenerating] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [result, setResult] = useState(null);
 
   const validationError = useMemo(() => validateForm(form), [form]);
@@ -40,7 +43,10 @@ export default function ContentGeneratorPage() {
 
   if (!isAdminTestToolsEnabled()) {
     return (
-      <AdminShell title="内容生成器（测试工具）" subtitle="当前环境未启用此工具。">
+      <AdminShell
+        title="内容生成器（测试工具）"
+        subtitle="当前环境未启用此工具。"
+      >
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
           <p className="font-semibold text-slate-950">此页面已在生产环境隐藏</p>
           <p className="mt-2">
@@ -62,40 +68,37 @@ export default function ContentGeneratorPage() {
   const generateContent = async () => {
     if (validationError) {
       setResult(null);
-      setFeedback({ type: 'error', message: validationError });
+      setFeedback({ type: "error", message: validationError });
       return;
     }
 
     const payload = buildGeneratorPayload(form);
     setGenerating(true);
-    setFeedback({ type: '', message: '' });
+    setFeedback({ type: "", message: "" });
     setResult(null);
 
     try {
-      const response = await adminPost('/api/admin/generate-content', payload);
+      const response = await adminPost("/api/admin/generate-content", payload);
       if (!response.ok) {
-        throw new Error(response.error || response.message || '内容生成失败。');
+        throw new Error(response.error || response.message || "内容生成失败。");
       }
 
       setResult({ ...(response.data || {}), requestPayload: payload });
       setFeedback({
-        type: 'success',
+        type: "success",
         message: response.data?.runId
           ? `生成完成。任务编号：${response.data.runId}。`
-          : '生成完成。',
+          : "生成完成。",
       });
     } catch (error) {
-      setFeedback({ type: 'error', message: readGeneratorErrorMessage(error) });
+      setFeedback({ type: "error", message: readGeneratorErrorMessage(error) });
     } finally {
       setGenerating(false);
     }
   };
 
   return (
-    <AdminShell
-      title="内容生成器"
-      subtitle="用于批量生成测试内容。"
-    >
+    <AdminShell title="内容生成器" subtitle="用于批量生成测试内容。">
       <div className="space-y-6">
         <GeneratorSummaryCards
           estimatedSeriesTotal={estimatedSeriesTotal}
@@ -105,7 +108,7 @@ export default function ContentGeneratorPage() {
 
         <GeneratorFeedback
           feedback={feedback}
-          onDismiss={() => setFeedback({ type: '', message: '' })}
+          onDismiss={() => setFeedback({ type: "", message: "" })}
         />
 
         <GeneratorFormSection
@@ -114,7 +117,7 @@ export default function ContentGeneratorPage() {
           onGenerate={generateContent}
           generating={generating}
           onReset={() => setForm(DEFAULT_FORM)}
-          onViewSeries={() => router.push('/admin/series')}
+          onViewSeries={() => router.push("/admin/series")}
           previewSeriesPerType={previewSeriesPerType}
           previewMinEpisodes={previewMinEpisodes}
           previewMaxEpisodes={previewMaxEpisodes}

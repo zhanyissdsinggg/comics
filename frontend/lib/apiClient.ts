@@ -1,5 +1,5 @@
 /**
- * 
+ *
  *  */
 
 import { emitToast } from "./toastBus";
@@ -22,7 +22,7 @@ export interface ApiRequestOptions {
   cacheMs?: number;
   bust?: boolean;
   suppressAuthModal?: boolean;
-  dedupeMs?: number; // 
+  dedupeMs?: number; //
   maxRetries?: number;
 }
 
@@ -90,7 +90,11 @@ function isPayloadRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function formatErrorToastMessage(path: string, friendly: string, requestId?: string): string {
+function formatErrorToastMessage(
+  path: string,
+  friendly: string,
+  requestId?: string,
+): string {
   if (path.startsWith("/api/admin") && requestId) {
     return `${friendly} Request ID: ${requestId}`;
   }
@@ -178,9 +182,9 @@ function getCircuitKey(path: string): string {
 }
 
 /**
- * 
- * 
- * 
+ *
+ *
+ *
  */
 function getDedupeKey(path: string, method: string, body?: unknown): string {
   if (!body || method === "GET") {
@@ -294,7 +298,11 @@ function readLocalCache(path: string): ApiResponse | null {
   }
 }
 
-function writeCache(path: string, response: ApiResponse, cacheMs: number): void {
+function writeCache(
+  path: string,
+  response: ApiResponse,
+  cacheMs: number,
+): void {
   if (!cacheMs || cacheMs <= 0) {
     return;
   }
@@ -309,7 +317,11 @@ function writeCache(path: string, response: ApiResponse, cacheMs: number): void 
   }
 }
 
-function writeLocalCache(path: string, response: ApiResponse, cacheMs: number): void {
+function writeLocalCache(
+  path: string,
+  response: ApiResponse,
+  cacheMs: number,
+): void {
   if (!cacheMs || cacheMs <= 0) {
     return;
   }
@@ -322,7 +334,7 @@ function writeLocalCache(path: string, response: ApiResponse, cacheMs: number): 
       JSON.stringify({
         response,
         expiresAt: Date.now() + cacheMs,
-      })
+      }),
     );
   } catch (err) {
     // ignore storage errors
@@ -346,7 +358,11 @@ function invalidateCacheByPrefix(prefix: string): void {
 
   try {
     Object.keys(window.localStorage)
-      .filter((key) => key.startsWith(LOCAL_CACHE_PREFIX) && key.slice(LOCAL_CACHE_PREFIX.length).startsWith(prefix))
+      .filter(
+        (key) =>
+          key.startsWith(LOCAL_CACHE_PREFIX) &&
+          key.slice(LOCAL_CACHE_PREFIX.length).startsWith(prefix),
+      )
       .forEach((key) => {
         window.localStorage.removeItem(key);
         cacheLog.push({
@@ -439,7 +455,7 @@ async function parseJson(response: Response): Promise<unknown> {
 
 async function requestJson(
   path: string,
-  options: ApiRequestOptions & { method: string }
+  options: ApiRequestOptions & { method: string },
 ): Promise<ApiResponse> {
   const baseUrl = getBaseUrl();
   const maxRetries = options?.maxRetries || 3;
@@ -474,11 +490,15 @@ async function requestJson(
         const errorPayload: ApiResponse = {
           ok: false,
           status: response.status,
-          error: readPayloadString(payloadRecord, "error") || response.statusText,
+          error:
+            readPayloadString(payloadRecord, "error") || response.statusText,
           requestId: readPayloadString(payloadRecord, "requestId"),
           ...(payloadRecord || {}),
         };
-        const friendly = getFriendlyMessage(errorPayload.error, errorPayload.message);
+        const friendly = getFriendlyMessage(
+          errorPayload.error,
+          errorPayload.message,
+        );
         if (response.status === 401) {
           if (path.startsWith("/api/admin")) {
             notifyAdminAuthInvalidated();
@@ -536,15 +556,27 @@ async function requestJson(
         path.startsWith("/api/bookmarks") ||
         path.startsWith("/api/missions");
       if (!isSilentNetworkPath) {
-        emitToast({ message: getFriendlyMessage("NETWORK_ERROR", "Network issue. Please try again.") });
+        emitToast({
+          message: getFriendlyMessage(
+            "NETWORK_ERROR",
+            "Network issue. Please try again.",
+          ),
+        });
       }
       if (!path.startsWith("/api/events")) {
-        trackEvent("api_error", { path, status: 0, errorCode: "NETWORK_ERROR" });
+        trackEvent("api_error", {
+          path,
+          status: 0,
+          errorCode: "NETWORK_ERROR",
+        });
       }
       return {
         ok: false,
         status: 0,
-        error: err instanceof Error && err.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR",
+        error:
+          err instanceof Error && err.name === "AbortError"
+            ? "TIMEOUT"
+            : "NETWORK_ERROR",
       };
     }
   }
@@ -555,7 +587,7 @@ export function getApiBaseUrl(): string {
 
 export async function apiGet<T = unknown>(
   path: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const cacheMs = options.cacheMs ?? getDefaultCacheMs(path);
   if (!options.bust && cacheMs > 0) {
@@ -610,7 +642,9 @@ export async function apiGet<T = unknown>(
         if (response.status === 0 || response.status >= 500) {
           recordFailure(path);
           if (attempt < attempts - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+            await new Promise((resolve) =>
+              setTimeout(resolve, 200 * (attempt + 1)),
+            );
             continue;
           }
         }
@@ -656,7 +690,9 @@ export async function apiGet<T = unknown>(
       if (response.status === 0 || response.status >= 500) {
         recordFailure(path);
         if (attempt < attempts - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+          await new Promise((resolve) =>
+            setTimeout(resolve, 200 * (attempt + 1)),
+          );
           continue;
         }
       }
@@ -675,9 +711,9 @@ export async function apiGet<T = unknown>(
 export async function apiPost<T = unknown>(
   path: string,
   body?: unknown,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
-  const dedupeMs = options.dedupeMs ?? 300; // 
+  const dedupeMs = options.dedupeMs ?? 300; //
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "POST", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -725,7 +761,7 @@ export async function apiPost<T = unknown>(
 export async function apiUpload<T = unknown>(
   path: string,
   formData: FormData,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const dedupeMs = options.dedupeMs ?? 300;
   if (dedupeMs > 0) {
@@ -775,9 +811,9 @@ export async function apiUpload<T = unknown>(
 export async function apiPatch<T = unknown>(
   path: string,
   body?: unknown,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
-  const dedupeMs = options.dedupeMs ?? 300; // 
+  const dedupeMs = options.dedupeMs ?? 300; //
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "PATCH", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -825,9 +861,9 @@ export async function apiPatch<T = unknown>(
 export async function apiDelete<T = unknown>(
   path: string,
   body?: unknown,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
-  const dedupeMs = options.dedupeMs ?? 300; // 
+  const dedupeMs = options.dedupeMs ?? 300; //
   if (dedupeMs > 0) {
     const dedupeKey = getDedupeKey(path, "DELETE", body);
     if (inflightRequests.has(dedupeKey)) {
@@ -889,7 +925,3 @@ export function resetCacheStats(): void {
 export function getCacheLog(): CacheLogEntry[] {
   return [...cacheLog];
 }
-
-
-
-

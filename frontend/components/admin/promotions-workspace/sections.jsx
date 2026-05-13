@@ -14,7 +14,12 @@ import {
 } from "@/components/admin/common/AdminWorkspacePrimitives";
 import { Button } from "@/components/ui/button";
 
-import { buildPromotionsMetricCards, formatDate, getStatusLabel, getStatusTone } from "./utils";
+import {
+  buildPromotionsMetricCards,
+  formatDate,
+  getStatusLabel,
+  getStatusTone,
+} from "./utils";
 
 export function PromotionsSummaryCards({ total, activeCount, pausedCount }) {
   const cards = buildPromotionsMetricCards({ total, activeCount, pausedCount });
@@ -64,8 +69,12 @@ export function PromotionsListSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与排序</p>
-          <p className="mt-2 text-sm text-slate-600">先按活动编号或标题定位，再按时间顺序复核还在运行的活动。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与排序
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            先按活动编号或标题定位，再按时间顺序复核还在运行的活动。
+          </p>
           <div className="mt-4">
             <AdminListToolbar
               searchTerm={searchTerm}
@@ -79,10 +88,17 @@ export function PromotionsListSection(props) {
         </div>
 
         <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">批量清理</p>
-          <p className="mt-2 text-sm text-slate-600">停用动作在行内处理，批量区只保留删除，避免把活动状态操作混乱。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            批量清理
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            停用动作在行内处理，批量区只保留删除，避免把活动状态操作混乱。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="destructive"
@@ -117,7 +133,10 @@ export function PromotionsListSection(props) {
                 <th className="px-4 py-4 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedIds.length === promotions.length && promotions.length > 0}
+                    checked={
+                      selectedIds.length === promotions.length &&
+                      promotions.length > 0
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                     aria-label="选择全部活动"
@@ -151,12 +170,18 @@ export function PromotionsListSection(props) {
                       <div className="font-medium text-slate-950">
                         {promotion.title || "未命名活动"}
                       </div>
-                      <div className="mt-1 text-xs text-slate-500">{promotion.id}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {promotion.id}
+                      </div>
                     </td>
                     <td className="px-4 py-4">
-                      <AdminBadge tone={getStatusTone(isActive)}>{getStatusLabel(isActive)}</AdminBadge>
+                      <AdminBadge tone={getStatusTone(isActive)}>
+                        {getStatusLabel(isActive)}
+                      </AdminBadge>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">{formatDate(promotion.createdAt)}</td>
+                    <td className="px-4 py-4 text-slate-600">
+                      {formatDate(promotion.createdAt)}
+                    </td>
                     <td className="px-4 py-4">
                       <Button
                         type="button"
@@ -165,7 +190,11 @@ export function PromotionsListSection(props) {
                         onClick={() => onToggleStatus(promotion.id, isActive)}
                         disabled={isUpdating}
                       >
-                        {isUpdating ? "正在更新..." : isActive ? "暂停" : "启用"}
+                        {isUpdating
+                          ? "正在更新..."
+                          : isActive
+                            ? "暂停"
+                            : "启用"}
                       </Button>
                     </td>
                   </AdminTableRow>

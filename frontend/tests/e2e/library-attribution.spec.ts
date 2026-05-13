@@ -1,5 +1,8 @@
 import { expect, test, type Route } from "@playwright/test";
-import { createPosterPlaceholder, createReaderPagePlaceholder } from "./support/placeholders";
+import {
+  createPosterPlaceholder,
+  createReaderPagePlaceholder,
+} from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 
 const LIBRARY_UI_TIMEOUT_MS = 15000;
@@ -46,8 +49,24 @@ const readerSeriesPayload = {
     genres: ["Fantasy", "Action"],
   },
   episodes: [
-    { id: "series-001e1", seriesId: "series-001", number: 1, title: "Episode 1", pricePts: 0, previewFreePages: 3, ttfEligible: false },
-    { id: "series-001e2", seriesId: "series-001", number: 2, title: "Episode 2", pricePts: 0, previewFreePages: 3, ttfEligible: false },
+    {
+      id: "series-001e1",
+      seriesId: "series-001",
+      number: 1,
+      title: "Episode 1",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
+    {
+      id: "series-001e2",
+      seriesId: "series-001",
+      number: 2,
+      title: "Episode 2",
+      pricePts: 0,
+      previewFreePages: 3,
+      ttfEligible: false,
+    },
   ],
 };
 
@@ -60,9 +79,21 @@ const episodePayload = {
     pricePts: 0,
     previewFreePages: 3,
     pages: [
-      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P1"), w: 800, h: 1200 },
-      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P2"), w: 800, h: 1200 },
-      { url: createReaderPagePlaceholder("Rocket Choir Ep1 P3"), w: 800, h: 1200 },
+      {
+        url: createReaderPagePlaceholder("Rocket Choir Ep1 P1"),
+        w: 800,
+        h: 1200,
+      },
+      {
+        url: createReaderPagePlaceholder("Rocket Choir Ep1 P2"),
+        w: 800,
+        h: 1200,
+      },
+      {
+        url: createReaderPagePlaceholder("Rocket Choir Ep1 P3"),
+        w: 800,
+        h: 1200,
+      },
     ],
     paragraphs: [],
   },
@@ -77,19 +108,29 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Library attribution", () => {
-  test("library resume actions should carry library attribution into the reader", async ({ page }) => {
+  test("library resume actions should carry library attribution into the reader", async ({
+    page,
+  }) => {
     await page.route("**/api/**", async (route) => {
       const requestUrl = new URL(route.request().url());
       const pathname = requestUrl.pathname;
       const searchParams = requestUrl.searchParams;
 
-      if (pathname === "/api/health" || pathname === "/api/health/ready" || pathname === "/api/health/live") {
+      if (
+        pathname === "/api/health" ||
+        pathname === "/api/health/ready" ||
+        pathname === "/api/health/live"
+      ) {
         await fulfillJson(route, { ok: true, dbOk: true });
         return;
       }
 
       if (pathname === "/api/meta/version") {
-        await fulfillJson(route, { name: "gush-backend", version: "0.1.0", commit: "test-commit" });
+        await fulfillJson(route, {
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        });
         return;
       }
 
@@ -99,7 +140,9 @@ test.describe("Library attribution", () => {
       }
 
       if (pathname === "/api/auth/me") {
-        await fulfillJson(route, { user: { id: "user-001", email: "reader@example.com" } });
+        await fulfillJson(route, {
+          user: { id: "user-001", email: "reader@example.com" },
+        });
         return;
       }
 
@@ -153,7 +196,12 @@ test.describe("Library attribution", () => {
 
       if (pathname === "/api/rewards") {
         await fulfillJson(route, {
-          rewards: { checkedInToday: true, streak: 3, makeUpAvailable: false, todayReward: 20 },
+          rewards: {
+            checkedInToday: true,
+            streak: 3,
+            makeUpAvailable: false,
+            todayReward: 20,
+          },
         });
         return;
       }
@@ -165,7 +213,10 @@ test.describe("Library attribution", () => {
 
       if (pathname === "/api/entitlements") {
         await fulfillJson(route, {
-          entitlement: { seriesId: "series-001", unlockedEpisodeIds: ["series-001e1", "series-001e2"] },
+          entitlement: {
+            seriesId: "series-001",
+            unlockedEpisodeIds: ["series-001e1", "series-001e2"],
+          },
         });
         return;
       }
@@ -185,7 +236,10 @@ test.describe("Library attribution", () => {
         return;
       }
 
-      if (pathname === "/api/episode" && searchParams.get("seriesId") === "series-001") {
+      if (
+        pathname === "/api/episode" &&
+        searchParams.get("seriesId") === "series-001"
+      ) {
         await fulfillJson(route, episodePayload);
         return;
       }
@@ -199,10 +253,14 @@ test.describe("Library attribution", () => {
     });
 
     const runtimeIssues = collectRuntimeIssues(page);
-    const response = await page.goto("/library", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/library", {
+      waitUntil: "domcontentloaded",
+    });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Your next read." })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Your next read." }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(page.getByRole("button", { name: "Resume now" })).toBeVisible({
@@ -218,7 +276,9 @@ test.describe("Library attribution", () => {
     await expect(page.getByText("Library | Saved in library")).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Back to library" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Back to library" }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 

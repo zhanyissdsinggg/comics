@@ -58,7 +58,8 @@ export default function CookieConsent() {
     setShowBanner(false);
   };
 
-  if (isAdminRoute || isReaderRoute || useFigmaChrome || !showBanner) return null;
+  if (isAdminRoute || isReaderRoute || useFigmaChrome || !showBanner)
+    return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-3 bottom-[calc(var(--gush-mobile-bottom-nav-height)+0.45rem+env(safe-area-inset-bottom,0px))] z-30 md:inset-x-auto md:bottom-5 md:right-5">
@@ -87,7 +88,8 @@ export default function CookieConsent() {
                 Cookie settings
               </h3>
               <p className="text-xs leading-5 text-white/74 sm:text-sm sm:leading-6">
-                Cookies keep sign-in, reading progress, and basic site preferences working.{" "}
+                Cookies keep sign-in, reading progress, and basic site
+                preferences working.{" "}
                 {useDocumentNavigation ? (
                   <a
                     href="/privacy-policy"

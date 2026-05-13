@@ -82,7 +82,11 @@ export default function AdminStorefrontAuditPage() {
         }
 
         setSeriesList([]);
-        setError(loadError instanceof Error ? loadError.message : "前台巡检数据加载失败。");
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "前台巡检数据加载失败。",
+        );
         setLoading(false);
       }
     }
@@ -94,14 +98,26 @@ export default function AdminStorefrontAuditPage() {
     };
   }, [isAuthenticated, isLoading]);
 
-  const auditedSeries = useMemo(() => createAuditedSeries(seriesList), [seriesList]);
-  const overview = useMemo(() => getAuditOverview(auditedSeries), [auditedSeries]);
+  const auditedSeries = useMemo(
+    () => createAuditedSeries(seriesList),
+    [seriesList],
+  );
+  const overview = useMemo(
+    () => getAuditOverview(auditedSeries),
+    [auditedSeries],
+  );
   const filteredSeries = useMemo(
     () => filterAuditedSeries(auditedSeries, query, quickFilter),
     [auditedSeries, query, quickFilter],
   );
-  const topPriority = useMemo(() => filteredSeries.slice(0, 10), [filteredSeries]);
-  const topGaps = useMemo(() => getTopGaps(overview.missingSummary), [overview.missingSummary]);
+  const topPriority = useMemo(
+    () => filteredSeries.slice(0, 10),
+    [filteredSeries],
+  );
+  const topGaps = useMemo(
+    () => getTopGaps(overview.missingSummary),
+    [overview.missingSummary],
+  );
 
   const handleOpenSeries = (seriesId) => {
     if (!seriesId) {
@@ -154,7 +170,12 @@ export default function AdminStorefrontAuditPage() {
           </div>
         ) : null}
 
-        <SurfacePanel appearance="light" tone="highlight" accent="blue" className="p-0">
+        <SurfacePanel
+          appearance="light"
+          tone="highlight"
+          accent="blue"
+          className="p-0"
+        >
           <div className="grid gap-6 px-5 py-5 sm:px-6 sm:py-6 xl:grid-cols-[minmax(0,1fr)_280px]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -168,8 +189,12 @@ export default function AdminStorefrontAuditPage() {
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <StatusPill tone="blue">读者视角巡检</StatusPill>
-                <StatusPill tone="rose">{overview.publishedRiskCount} 部已上线作品仍有明显缺口</StatusPill>
-                <StatusPill tone="amber">{overview.creatorGapCount} 部作品仍缺公开署名</StatusPill>
+                <StatusPill tone="rose">
+                  {overview.publishedRiskCount} 部已上线作品仍有明显缺口
+                </StatusPill>
+                <StatusPill tone="amber">
+                  {overview.creatorGapCount} 部作品仍缺公开署名
+                </StatusPill>
               </div>
             </div>
 
@@ -181,24 +206,51 @@ export default function AdminStorefrontAuditPage() {
                 {overview.avgScore}
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {overview.readyCount} / {overview.total} 部作品已经满足当前前台基线。
+                {overview.readyCount} / {overview.total}{" "}
+                部作品已经满足当前前台基线。
               </p>
             </div>
           </div>
         </SurfacePanel>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard label="巡检作品数" value={overview.total.toLocaleString()} hint="当前纳入前台巡检的全部作品。" />
-          <MetricCard label="可直接上前台" value={overview.readyCount.toLocaleString()} hint="资料、署名和阅读路径都已达标。" tone="emerald" />
-          <MetricCard label="已上线但仍有缺口" value={overview.publishedRiskCount.toLocaleString()} hint="这些作品已经公开，但页面还不够稳。" tone="rose" />
-          <MetricCard label="接近可发布" value={overview.launchReadyDraftCount.toLocaleString()} hint="只差最后一两项补齐就能上线。" tone="cyan" />
-          <MetricCard label="署名待补" value={overview.creatorGapCount.toLocaleString()} hint="这些作品会直接拖累创作者发现和读者信任。" tone="amber" />
+          <MetricCard
+            label="巡检作品数"
+            value={overview.total.toLocaleString()}
+            hint="当前纳入前台巡检的全部作品。"
+          />
+          <MetricCard
+            label="可直接上前台"
+            value={overview.readyCount.toLocaleString()}
+            hint="资料、署名和阅读路径都已达标。"
+            tone="emerald"
+          />
+          <MetricCard
+            label="已上线但仍有缺口"
+            value={overview.publishedRiskCount.toLocaleString()}
+            hint="这些作品已经公开，但页面还不够稳。"
+            tone="rose"
+          />
+          <MetricCard
+            label="接近可发布"
+            value={overview.launchReadyDraftCount.toLocaleString()}
+            hint="只差最后一两项补齐就能上线。"
+            tone="cyan"
+          />
+          <MetricCard
+            label="署名待补"
+            value={overview.creatorGapCount.toLocaleString()}
+            hint="这些作品会直接拖累创作者发现和读者信任。"
+            tone="amber"
+          />
         </div>
 
         <SurfacePanel appearance="light" accent="blue" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">收口处理队列</h2>
+              <h2 className="text-[1.35rem] font-semibold tracking-tight text-slate-950">
+                收口处理队列
+              </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 先稳住已上线作品，再处理接近可发的草稿。
               </p>

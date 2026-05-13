@@ -9,7 +9,9 @@ test.describe("Critical route rendering", () => {
     test(`should render ${route} without runtime crash`, async ({ page }) => {
       const runtimeIssues = collectRuntimeIssues(page);
 
-      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+      const response = await page.goto(route, {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.ok()).toBeTruthy();
 
       await expect(page.locator("body")).toBeAttached();
@@ -19,7 +21,9 @@ test.describe("Critical route rendering", () => {
           return false;
         }
 
-        return body.childElementCount > 0 || body.textContent?.trim().length > 0;
+        return (
+          body.childElementCount > 0 || body.textContent?.trim().length > 0
+        );
       });
       expect(hasRenderableContent).toBeTruthy();
 

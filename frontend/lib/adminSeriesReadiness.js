@@ -14,9 +14,7 @@ function toNumber(value) {
 
 function normalizeGenres(value) {
   if (Array.isArray(value)) {
-    return value
-      .map((item) => normalizeText(item))
-      .filter(Boolean);
+    return value.map((item) => normalizeText(item)).filter(Boolean);
   }
 
   return normalizeText(value)
@@ -97,7 +95,10 @@ export function getAdminSeriesReadiness(series) {
     },
   ];
 
-  const score = checks.reduce((sum, item) => sum + (item.ok ? item.weight : 0), 0);
+  const score = checks.reduce(
+    (sum, item) => sum + (item.ok ? item.weight : 0),
+    0,
+  );
   const missingItems = checks.filter((item) => !item.ok);
   const topIssues = missingItems.slice(0, 3).map((item) => item.label);
 

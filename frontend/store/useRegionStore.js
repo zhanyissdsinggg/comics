@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { apiGet } from "../lib/apiClient";
 
 const RegionContext = createContext(null);
@@ -51,7 +58,9 @@ export function RegionProvider({ children }) {
 
   const value = useMemo(() => ({ config, loadConfig }), [config, loadConfig]);
 
-  return <RegionContext.Provider value={value}>{children}</RegionContext.Provider>;
+  return (
+    <RegionContext.Provider value={value}>{children}</RegionContext.Provider>
+  );
 }
 
 export function useRegionStore() {

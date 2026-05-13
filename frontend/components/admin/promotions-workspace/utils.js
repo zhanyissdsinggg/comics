@@ -42,7 +42,11 @@ export function getStatusTone(isActive) {
   return isActive ? "success" : "default";
 }
 
-export function buildPromotionsMetricCards({ total, activeCount, pausedCount }) {
+export function buildPromotionsMetricCards({
+  total,
+  activeCount,
+  pausedCount,
+}) {
   return [
     {
       label: "当前活动",

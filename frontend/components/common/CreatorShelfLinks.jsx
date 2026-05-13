@@ -58,7 +58,10 @@ function collectCreators(items, maxCreators) {
   return Array.from(creatorMap.values())
     .sort((left, right) => {
       if (Boolean(right.spotlightTitle) !== Boolean(left.spotlightTitle)) {
-        return Number(Boolean(right.spotlightTitle)) - Number(Boolean(left.spotlightTitle));
+        return (
+          Number(Boolean(right.spotlightTitle)) -
+          Number(Boolean(left.spotlightTitle))
+        );
       }
 
       return left.name.localeCompare(right.name);
@@ -130,9 +133,7 @@ export default function CreatorShelfLinks({
             {label}
           </p>
           {title ? (
-            <h3
-              className="font-display text-lg font-semibold tracking-[-0.04em] text-white sm:text-xl"
-            >
+            <h3 className="font-display text-lg font-semibold tracking-[-0.04em] text-white sm:text-xl">
               {title}
             </h3>
           ) : null}

@@ -69,13 +69,15 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
     [filters],
   );
 
-  const activeFiltersCount = Object.entries(resolvedFilters).filter(([key, value]) => {
-    if (key === "sortBy") {
-      return value !== DEFAULT_FILTERS.sortBy;
-    }
+  const activeFiltersCount = Object.entries(resolvedFilters).filter(
+    ([key, value]) => {
+      if (key === "sortBy") {
+        return value !== DEFAULT_FILTERS.sortBy;
+      }
 
-    return value !== "all";
-  }).length;
+      return value !== "all";
+    },
+  ).length;
 
   const handleFilterChange = (key, value) => {
     onFiltersChange({
@@ -89,11 +91,16 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
   };
 
   const activeSummary = [
-    resolvedFilters.status !== "all" && STATUS_OPTIONS.find((item) => item.value === resolvedFilters.status)?.label,
+    resolvedFilters.status !== "all" &&
+      STATUS_OPTIONS.find((item) => item.value === resolvedFilters.status)
+        ?.label,
     resolvedFilters.publishStatus !== "all" &&
-      PUBLISH_OPTIONS.find((item) => item.value === resolvedFilters.publishStatus)?.label,
+      PUBLISH_OPTIONS.find(
+        (item) => item.value === resolvedFilters.publishStatus,
+      )?.label,
     resolvedFilters.adultContent !== "all" &&
-      ADULT_OPTIONS.find((item) => item.value === resolvedFilters.adultContent)?.label,
+      ADULT_OPTIONS.find((item) => item.value === resolvedFilters.adultContent)
+        ?.label,
     resolvedFilters.sortBy !== DEFAULT_FILTERS.sortBy &&
       SORT_OPTIONS.find((item) => item.value === resolvedFilters.sortBy)?.label,
   ].filter(Boolean);
@@ -116,19 +123,31 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
             {activeFiltersCount}
           </span>
         ) : null}
-        <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={14}
+          className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isOpen ? (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
           <div className="absolute right-0 top-full z-50 mt-2 w-[22rem]">
             <div className="rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(247,247,249,0.94))] p-6 shadow-[0_20px_44px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.02] backdrop-blur-xl">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">筛选工作区</p>
-                  <h3 className="text-base font-semibold text-slate-950">进一步筛选</h3>
-                  <p className="mt-1 text-sm text-slate-500">只留下当前要处理的作品，减少来回翻列表。</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    筛选工作区
+                  </p>
+                  <h3 className="text-base font-semibold text-slate-950">
+                    进一步筛选
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    只留下当前要处理的作品，减少来回翻列表。
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -142,7 +161,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
               </div>
 
               <div className="mb-5 rounded-[22px] border border-[color:var(--gush-border)] bg-white/95 px-4 py-4 shadow-[0_10px_22px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">当前筛选摘要</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  当前筛选摘要
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {activeSummary.length > 0 ? (
                     activeSummary.map((item) => (
@@ -171,7 +192,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                       <FilterChip
                         key={option.value}
                         active={resolvedFilters.status === option.value}
-                        onClick={() => handleFilterChange("status", option.value)}
+                        onClick={() =>
+                          handleFilterChange("status", option.value)
+                        }
                       >
                         {option.label}
                       </FilterChip>
@@ -188,7 +211,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                       <FilterChip
                         key={option.value}
                         active={resolvedFilters.publishStatus === option.value}
-                        onClick={() => handleFilterChange("publishStatus", option.value)}
+                        onClick={() =>
+                          handleFilterChange("publishStatus", option.value)
+                        }
                       >
                         {option.label}
                       </FilterChip>
@@ -205,7 +230,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                       <FilterChip
                         key={option.value}
                         active={resolvedFilters.adultContent === option.value}
-                        onClick={() => handleFilterChange("adultContent", option.value)}
+                        onClick={() =>
+                          handleFilterChange("adultContent", option.value)
+                        }
                       >
                         {option.label}
                       </FilterChip>
@@ -219,7 +246,9 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
                   </label>
                   <select
                     value={resolvedFilters.sortBy}
-                    onChange={(event) => handleFilterChange("sortBy", event.target.value)}
+                    onChange={(event) =>
+                      handleFilterChange("sortBy", event.target.value)
+                    }
                     className="h-11 w-full rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-900 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
                   >
                     {SORT_OPTIONS.map((option) => (
@@ -232,10 +261,19 @@ export default function AdvancedFilters({ filters, onFiltersChange }) {
               </div>
 
               <div className="mt-6 flex items-center gap-2">
-                <Button type="button" variant="secondary" className="flex-1" onClick={handleReset}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={handleReset}
+                >
                   重置
                 </Button>
-                <Button type="button" className="flex-1" onClick={() => setIsOpen(false)}>
+                <Button
+                  type="button"
+                  className="flex-1"
+                  onClick={() => setIsOpen(false)}
+                >
                   应用
                 </Button>
               </div>

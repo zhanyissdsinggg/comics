@@ -23,9 +23,7 @@ export const ConfirmDialog = React.memo(function ConfirmDialog({
       isOpen={isOpen}
       title={title}
       subtitle={
-        isDangerous
-          ? "请再次确认，操作后无法恢复。"
-          : "确认后会立即执行。"
+        isDangerous ? "请再次确认，操作后无法恢复。" : "确认后会立即执行。"
       }
       onClose={onCancel}
       size="sm"

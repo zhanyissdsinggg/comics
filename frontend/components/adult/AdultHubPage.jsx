@@ -247,10 +247,13 @@ export default function AdultHubPage() {
       [...seriesList]
         .sort(
           (left, right) =>
-            Date.parse(right?.updatedAt || 0) - Date.parse(left?.updatedAt || 0),
+            Date.parse(right?.updatedAt || 0) -
+            Date.parse(left?.updatedAt || 0),
         )
         .slice(0, 10)
-        .map((series) => mapAdultItem(series, "Recently updated", "Fresh drop")),
+        .map((series) =>
+          mapAdultItem(series, "Recently updated", "Fresh drop"),
+        ),
     [seriesList],
   );
 
@@ -258,7 +261,12 @@ export default function AdultHubPage() {
     <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
       <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
-          <SurfacePanel appearance="dark" tone="highlight" accent="rose" className="p-0">
+          <SurfacePanel
+            appearance="dark"
+            tone="highlight"
+            accent="rose"
+            className="p-0"
+          >
             <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -291,7 +299,10 @@ export default function AdultHubPage() {
                 >
                   Turn off Mature Mode
                 </button>
-                <Link href="/mature-content" className={storefrontSecondaryButtonClass}>
+                <Link
+                  href="/mature-content"
+                  className={storefrontSecondaryButtonClass}
+                >
                   Mature content settings
                 </Link>
               </div>

@@ -94,8 +94,12 @@ export function SupportQueueSection(props) {
     >
       <div className="mb-6 grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
         <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">查找与筛选</p>
-          <p className="mt-2 text-sm text-slate-600">按主题、用户和状态缩小范围，优先处理最新和未关闭的工单。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            查找与筛选
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            按主题、用户和状态缩小范围，优先处理最新和未关闭的工单。
+          </p>
           <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_220px_220px_auto]">
             <label className="relative">
               <input
@@ -140,10 +144,17 @@ export function SupportQueueSection(props) {
         </div>
 
         <div className="rounded-[26px] border border-[color:var(--gush-border)] bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.035)] ring-1 ring-black/[0.02]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">当前动作</p>
-          <p className="mt-2 text-sm text-slate-600">已选工单的删除动作单独放这里，避免和回复、关单混在一起。</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            当前动作
+          </p>
+          <p className="mt-2 text-sm text-slate-600">
+            已选工单的删除动作单独放这里，避免和回复、关单混在一起。
+          </p>
           <div className="mt-4">
-            <AdminSelectionBar selectedCount={selectedIds.length} onClear={clearSelection}>
+            <AdminSelectionBar
+              selectedCount={selectedIds.length}
+              onClear={clearSelection}
+            >
               <Button
                 type="button"
                 variant="destructive"
@@ -179,7 +190,10 @@ export function SupportQueueSection(props) {
                   <input
                     type="checkbox"
                     aria-label="选择全部工单"
-                    checked={tickets.length > 0 && selectedIds.length === tickets.length}
+                    checked={
+                      tickets.length > 0 &&
+                      selectedIds.length === tickets.length
+                    }
                     onChange={(event) => onSelectAll(event.target.checked)}
                     className={adminCheckboxClassName}
                   />
@@ -206,7 +220,9 @@ export function SupportQueueSection(props) {
                   </td>
                   <td className="px-4 py-4">
                     <div className="space-y-2">
-                      <p className="font-semibold text-slate-950">{ticket.subject || "未命名工单"}</p>
+                      <p className="font-semibold text-slate-950">
+                        {ticket.subject || "未命名工单"}
+                      </p>
                       <p className="text-xs text-slate-500">#{ticket.id}</p>
                       <p className="max-w-xl text-sm leading-6 text-slate-600">
                         {getMessagePreview(ticket.message)}
@@ -214,9 +230,13 @@ export function SupportQueueSection(props) {
                       {ticket.adminReply ? (
                         <div className="rounded-[20px] border border-emerald-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,253,245,0.95))] px-3.5 py-3 text-sm text-emerald-950 shadow-[0_8px_18px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
                           <p className="font-medium">最近回复</p>
-                          <p className="mt-1 leading-6">{getMessagePreview(ticket.adminReply, 160)}</p>
+                          <p className="mt-1 leading-6">
+                            {getMessagePreview(ticket.adminReply, 160)}
+                          </p>
                           <p className="mt-1 text-xs text-emerald-800/80">
-                            {ticket.adminRepliedAt ? formatDateTime(ticket.adminRepliedAt) : "刚刚更新"}
+                            {ticket.adminRepliedAt
+                              ? formatDateTime(ticket.adminRepliedAt)
+                              : "刚刚更新"}
                           </p>
                         </div>
                       ) : null}
@@ -228,7 +248,9 @@ export function SupportQueueSection(props) {
                         <Mail className="h-4 w-4 text-slate-400" />
                         <span>{ticket.userEmail || "未填写邮箱"}</span>
                       </div>
-                      <p className="text-xs text-slate-500">用户编号：{ticket.userId || "-"}</p>
+                      <p className="text-xs text-slate-500">
+                        用户编号：{ticket.userId || "-"}
+                      </p>
                     </div>
                   </td>
                   <td className="px-4 py-4">
@@ -236,8 +258,12 @@ export function SupportQueueSection(props) {
                       {getStatusLabel(ticket.status)}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.createdAt)}</td>
-                  <td className="px-4 py-4 text-slate-600">{formatDateTime(ticket.updatedAt)}</td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDateTime(ticket.createdAt)}
+                  </td>
+                  <td className="px-4 py-4 text-slate-600">
+                    {formatDateTime(ticket.updatedAt)}
+                  </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <Button
@@ -251,7 +277,8 @@ export function SupportQueueSection(props) {
                         {ticket.adminReply ? "更新回复" : "回复"}
                       </Button>
 
-                      {String(ticket.status || "").toLowerCase() !== "closed" ? (
+                      {String(ticket.status || "").toLowerCase() !==
+                      "closed" ? (
                         <Button
                           type="button"
                           variant="ghost"
@@ -311,7 +338,9 @@ export function SupportReplyModal({
           <div className="space-y-3">
             <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 text-sm text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.025)] ring-1 ring-black/[0.015]">
               <p className="font-semibold text-slate-950">原始消息</p>
-              <p className="mt-2 leading-6">{selectedTicket.message || "未附带消息内容。"}</p>
+              <p className="mt-2 leading-6">
+                {selectedTicket.message || "未附带消息内容。"}
+              </p>
             </div>
 
             {selectedTicket.adminReply ? (

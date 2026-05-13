@@ -52,7 +52,9 @@ function normalizePlans(planCatalog = {}) {
         return null;
       }
 
-      const monthlyPoints = Number(plan?.monthlyPoints || plan?.includedPoints || 0);
+      const monthlyPoints = Number(
+        plan?.monthlyPoints || plan?.includedPoints || 0,
+      );
       return {
         id,
         name: String(plan?.name || id).trim(),
@@ -62,8 +64,12 @@ function normalizePlans(planCatalog = {}) {
           String(plan?.badge || "").trim() ||
           (index === 0 ? "Best Intro" : index === 1 ? "Reader Favorite" : ""),
         perks: [
-          monthlyPoints > 0 ? `${monthlyPoints.toLocaleString()} points / month` : null,
-          plan?.discountPct ? `${plan.discountPct}% unlock savings` : "Member pricing",
+          monthlyPoints > 0
+            ? `${monthlyPoints.toLocaleString()} points / month`
+            : null,
+          plan?.discountPct
+            ? `${plan.discountPct}% unlock savings`
+            : "Member pricing",
           "Priority support",
         ].filter(Boolean),
       };
@@ -89,10 +95,15 @@ function StoreContent({
     topup,
     subscribe,
   } = useWalletStore();
-  const normalizedPackages = useMemo(() => normalizePackages(packages), [packages]);
+  const normalizedPackages = useMemo(
+    () => normalizePackages(packages),
+    [packages],
+  );
   const plans = useMemo(() => normalizePlans(planCatalog || {}), [planCatalog]);
   const [selectedPackId, setSelectedPackId] = useState(
-    normalizedPackages.find((item) => item.popular)?.id || normalizedPackages[0]?.id || "",
+    normalizedPackages.find((item) => item.popular)?.id ||
+      normalizedPackages[0]?.id ||
+      "",
   );
   const [busyAction, setBusyAction] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
@@ -102,9 +113,13 @@ function StoreContent({
     normalizedPackages.find((item) => item.id === selectedPackId) ||
     normalizedPackages[0] ||
     null;
-  const displayName = String(user?.email || user?.name || "Reader").split("@")[0];
-  const purchaseActionsEnabled = billingAvailability?.purchaseActionsEnabled === true;
-  const subscriptionActionsEnabled = billingAvailability?.subscriptionActionsEnabled === true;
+  const displayName = String(user?.email || user?.name || "Reader").split(
+    "@",
+  )[0];
+  const purchaseActionsEnabled =
+    billingAvailability?.purchaseActionsEnabled === true;
+  const subscriptionActionsEnabled =
+    billingAvailability?.subscriptionActionsEnabled === true;
   const storePreview = prelaunchStore || !purchaseActionsEnabled;
   const commerceReady = !storePreview && normalizedPackages.length > 0;
   const membershipReady = !storePreview && subscriptionActionsEnabled;
@@ -112,7 +127,9 @@ function StoreContent({
   useEffect(() => {
     if (normalizedPackages.length > 0 && !selectedPackId) {
       setSelectedPackId(
-        normalizedPackages.find((item) => item.popular)?.id || normalizedPackages[0]?.id || "",
+        normalizedPackages.find((item) => item.popular)?.id ||
+          normalizedPackages[0]?.id ||
+          "",
       );
     }
   }, [normalizedPackages, selectedPackId]);
@@ -228,7 +245,9 @@ function StoreContent({
                     }}
                     disabled={
                       !storePreview &&
-                      (!selectedPack || busyAction.startsWith("topup:") || !commerceReady)
+                      (!selectedPack ||
+                        busyAction.startsWith("topup:") ||
+                        !commerceReady)
                     }
                     className={cn(
                       "inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto",
@@ -255,7 +274,9 @@ function StoreContent({
                   </Link>
                 </div>
                 {statusMessage ? (
-                  <p className="mt-4 text-sm font-semibold text-white/78">{statusMessage}</p>
+                  <p className="mt-4 text-sm font-semibold text-white/78">
+                    {statusMessage}
+                  </p>
                 ) : null}
 
                 <div className="mt-5 rounded-[26px] border border-white/10 bg-black/20 p-3.5 lg:hidden">
@@ -274,9 +295,13 @@ function StoreContent({
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
                     <div>
-                      <div className="text-sm font-bold text-white">{displayName}</div>
+                      <div className="text-sm font-bold text-white">
+                        {displayName}
+                      </div>
                       <div className="text-xs text-gray-400">
-                        {subscription?.active ? "Membership active" : "Free reader"}
+                        {subscription?.active
+                          ? "Membership active"
+                          : "Free reader"}
                       </div>
                     </div>
                     <div
@@ -287,7 +312,9 @@ function StoreContent({
                           : "bg-white/10 text-gray-300",
                       )}
                     >
-                      {subscription?.active ? subscription?.planId || "Member" : "Free"}
+                      {subscription?.active
+                        ? subscription?.planId || "Member"
+                        : "Free"}
                     </div>
                   </div>
                 </div>
@@ -313,7 +340,8 @@ function StoreContent({
                     {walletBalance.toLocaleString()}
                   </div>
                   <div className="text-sm text-gray-400">
-                    Paid {paidPts.toLocaleString()} / Bonus {bonusPts.toLocaleString()}
+                    Paid {paidPts.toLocaleString()} / Bonus{" "}
+                    {bonusPts.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -324,9 +352,13 @@ function StoreContent({
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-lg font-bold text-white">{displayName}</div>
+                    <div className="text-lg font-bold text-white">
+                      {displayName}
+                    </div>
                     <div className="text-sm text-gray-400">
-                      {subscription?.active ? "Membership active" : "Free reader"}
+                      {subscription?.active
+                        ? "Membership active"
+                        : "Free reader"}
                     </div>
                   </div>
                   <div
@@ -337,13 +369,16 @@ function StoreContent({
                         : "bg-white/10 text-gray-300",
                     )}
                   >
-                    {subscription?.active ? subscription?.planId || "Member" : "Free"}
+                    {subscription?.active
+                      ? subscription?.planId || "Member"
+                      : "Free"}
                   </div>
                 </div>
                 {subscriptionVoucher ? (
                   <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
                     <Gift className="h-4 w-4" />
-                    Voucher ready: {String(subscriptionVoucher?.code || "Applied")}
+                    Voucher ready:{" "}
+                    {String(subscriptionVoucher?.code || "Applied")}
                   </div>
                 ) : null}
               </div>
@@ -357,7 +392,9 @@ function StoreContent({
                   Point Packs
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                  {storePreview ? "Point packs are on deck" : "Pick a reload pack"}
+                  {storePreview
+                    ? "Point packs are on deck"
+                    : "Pick a reload pack"}
                 </h2>
               </div>
               {!commerceReady ? (
@@ -446,7 +483,9 @@ function StoreContent({
                   Membership
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                  {storePreview ? "Membership options stay visible" : "Plans for heavy readers"}
+                  {storePreview
+                    ? "Membership options stay visible"
+                    : "Plans for heavy readers"}
                 </h2>
               </div>
 
@@ -462,7 +501,9 @@ function StoreContent({
                   >
                     <div className="mb-4 flex min-h-[4.5rem] items-center justify-between gap-3 md:min-h-[5rem]">
                       <div>
-                        <h3 className="text-xl font-black text-white md:text-2xl">{plan.name}</h3>
+                        <h3 className="text-xl font-black text-white md:text-2xl">
+                          {plan.name}
+                        </h3>
                         <p className="mt-1.5 text-sm text-gray-400">
                           {formatUsd(plan.price)} / month
                         </p>
@@ -475,7 +516,10 @@ function StoreContent({
                     </div>
                     <div className="space-y-3">
                       {plan.perks.map((perk) => (
-                        <div key={`${plan.id}-${perk}`} className="flex items-center gap-3 text-sm text-gray-300">
+                        <div
+                          key={`${plan.id}-${perk}`}
+                          className="flex items-center gap-3 text-sm text-gray-300"
+                        >
                           <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                           {perk}
                         </div>
@@ -484,7 +528,9 @@ function StoreContent({
                     <button
                       type="button"
                       onClick={() => handleSubscribe(plan.id)}
-                      disabled={!membershipReady || busyAction === `plan:${plan.id}`}
+                      disabled={
+                        !membershipReady || busyAction === `plan:${plan.id}`
+                      }
                       className={cn(
                         "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black uppercase tracking-[0.18em] text-white transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 md:mt-auto",
                         palette.primaryBg,
@@ -519,7 +565,9 @@ function StoreContent({
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Secure billing</h3>
+                <h3 className="text-base font-black text-white">
+                  Secure billing
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
                   {storePreview
                     ? "Checkout is staged but not open yet. We are keeping the flow visible so the pricing structure stays clear."
@@ -533,7 +581,9 @@ function StoreContent({
                 <Zap className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Immediate unlocks</h3>
+                <h3 className="text-base font-black text-white">
+                  Immediate unlocks
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
                   {storePreview
                     ? "Free chapters and catalog browsing stay live while paid unlocks wait for launch."
@@ -547,7 +597,9 @@ function StoreContent({
                 <Crown className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">Membership layer</h3>
+                <h3 className="text-base font-black text-white">
+                  Membership layer
+                </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
                   {storePreview
                     ? "Membership pricing is visible early so readers can compare plans before billing opens."

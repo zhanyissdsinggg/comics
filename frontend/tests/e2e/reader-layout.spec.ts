@@ -75,9 +75,21 @@ async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
       pricePts,
       previewFreePages: 3,
       pages: [
-        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"), w: 800, h: 1200 },
-        { url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"), w: 800, h: 1200 },
+        {
+          url: createReaderPagePlaceholder("The Last Kingdom Ep1 P1"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("The Last Kingdom Ep1 P2"),
+          w: 800,
+          h: 1200,
+        },
+        {
+          url: createReaderPagePlaceholder("The Last Kingdom Ep1 P3"),
+          w: 800,
+          h: 1200,
+        },
       ],
       paragraphs: [],
     },
@@ -104,7 +116,11 @@ async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ name: "gush-backend", version: "0.1.0", commit: "test-commit" }),
+        body: JSON.stringify({
+          name: "gush-backend",
+          version: "0.1.0",
+          commit: "test-commit",
+        }),
       });
       return;
     }
@@ -133,7 +149,9 @@ async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
         contentType: "application/json",
         body: JSON.stringify({
           isSignedIn: signedIn,
-          user: signedIn ? { id: "reader-001", email: "reader@example.com" } : null,
+          user: signedIn
+            ? { id: "reader-001", email: "reader@example.com" }
+            : null,
         }),
       });
       return;
@@ -242,14 +260,18 @@ test.describe("Reader layout", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const settingsButton = page.getByRole("button", { name: "Reader Settings" }).first();
+    const settingsButton = page
+      .getByRole("button", { name: "Reader Settings" })
+      .first();
     await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
     await expect(settingsButton).toBeVisible();
     await settingsButton.click();
     await expect(page.getByText("Live controls")).toBeVisible();
 
     const layout = await page.evaluate(() => {
-      const wrappers = Array.from(document.querySelectorAll("main [data-index]"));
+      const wrappers = Array.from(
+        document.querySelectorAll("main [data-index]"),
+      );
       return wrappers.map((wrapper) => {
         const element = wrapper as HTMLElement;
         const image = element.querySelector("img") as HTMLImageElement | null;
@@ -279,7 +301,9 @@ test.describe("Reader layout", () => {
     await expectNoRuntimeIssues("/read/series-001/series-001e1", runtimeIssues);
   });
 
-  test("reader actions should save and remove a bookmark without crashing", async ({ page }) => {
+  test("reader actions should save and remove a bookmark without crashing", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
 
@@ -288,7 +312,9 @@ test.describe("Reader layout", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const readerActionsButton = page.getByRole("button", { name: "Reader actions" });
+    const readerActionsButton = page.getByRole("button", {
+      name: "Reader actions",
+    });
     await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
     await expect(readerActionsButton).toBeVisible();
 
@@ -300,10 +326,15 @@ test.describe("Reader layout", () => {
     await page.getByRole("button", { name: /Remove bookmark/i }).click();
     await expect(page.getByText("Bookmark removed")).toBeVisible();
 
-    await expectNoRuntimeIssues("/read/series-001/series-001e1#bookmarks", runtimeIssues);
+    await expectNoRuntimeIssues(
+      "/read/series-001/series-001e1#bookmarks",
+      runtimeIssues,
+    );
   });
 
-  test("locked reader should render the unlock card without crashing", async ({ page }) => {
+  test("locked reader should render the unlock card without crashing", async ({
+    page,
+  }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page, { pricePts: 24 });
 
@@ -313,8 +344,13 @@ test.describe("Reader layout", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(page.getByText(/Unlock the rest of this/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign in to unlock" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Sign in to unlock" }),
+    ).toBeVisible();
 
-    await expectNoRuntimeIssues("/read/series-001/series-001e1#unlock", runtimeIssues);
+    await expectNoRuntimeIssues(
+      "/read/series-001/series-001e1#unlock",
+      runtimeIssues,
+    );
   });
 });

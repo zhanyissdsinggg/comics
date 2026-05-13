@@ -23,7 +23,10 @@ export function isNovelSeries(input) {
   return resolveSeriesType(input) === "novel";
 }
 
-export function getInstallmentLabel(input, { plural = false, short = false } = {}) {
+export function getInstallmentLabel(
+  input,
+  { plural = false, short = false } = {},
+) {
   const isNovel = isNovelSeries(input);
 
   if (short) {
@@ -56,14 +59,22 @@ export function getEntryLabel(input, count) {
 }
 
 export function getLatestEntryLabel(series, latestEntryNumber) {
-  if (latestEntryNumber === null || latestEntryNumber === undefined || latestEntryNumber === "") {
+  if (
+    latestEntryNumber === null ||
+    latestEntryNumber === undefined ||
+    latestEntryNumber === ""
+  ) {
     return "Coming soon";
   }
 
   return `${getEntryLabelSingular(series)} ${latestEntryNumber}`;
 }
 
-export function getSeriesHeroMetadataParts(series, creatorName, latestEntryNumber) {
+export function getSeriesHeroMetadataParts(
+  series,
+  creatorName,
+  latestEntryNumber,
+) {
   const normalizedCreatorName = String(creatorName || "").trim();
   const creatorText = normalizedCreatorName
     ? `By ${normalizedCreatorName}`

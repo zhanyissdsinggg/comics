@@ -360,10 +360,7 @@ export default function SubscribePage({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/comics"
-                className={primaryButtonClass}
-              >
+              <Link href="/comics" className={primaryButtonClass}>
                 Browse Comics
               </Link>
               <Link
@@ -407,9 +404,7 @@ export default function SubscribePage({
               </p>
               <div>
                 <h2 className="font-display text-[1.9rem] font-black uppercase tracking-[-0.05em] text-white">
-                  {subscriptionActionsEnabled
-                    ? "Plans"
-                    : "Plans"}
+                  {subscriptionActionsEnabled ? "Plans" : "Plans"}
                 </h2>
               </div>
             </div>
@@ -454,11 +449,9 @@ export default function SubscribePage({
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                 Plans
               </p>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
-                  {subscriptionActionsEnabled
-                    ? "Monthly plans"
-                    : "Monthly plans"}
-                </h2>
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                {subscriptionActionsEnabled ? "Monthly plans" : "Monthly plans"}
+              </h2>
             </div>
           </div>
 
@@ -555,9 +548,9 @@ export default function SubscribePage({
           <SurfacePanel className="space-y-4" appearance="dark" accent="blue">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="max-w-3xl">
-                    <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-                      {subscriptionActionsEnabled ? "Account" : "Account"}
-                    </p>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
+                  {subscriptionActionsEnabled ? "Account" : "Account"}
+                </p>
                 <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                   Sign in
                 </h2>
@@ -599,7 +592,7 @@ export default function SubscribePage({
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
                 Plans
               </p>
-                <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+              <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
                 All plans
               </h2>
             </div>
@@ -646,8 +639,8 @@ export default function SubscribePage({
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
                             isBest
-                            ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                            : "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                              ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                              : "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
@@ -820,7 +813,9 @@ export default function SubscribePage({
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   <tr>
-                    <td className="py-4 font-semibold text-white/70">Free Reads</td>
+                    <td className="py-4 font-semibold text-white/70">
+                      Free Reads
+                    </td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
@@ -852,7 +847,9 @@ export default function SubscribePage({
                     })}
                   </tr>
                   <tr>
-                    <td className="py-4 font-semibold text-white/70">Points / Month</td>
+                    <td className="py-4 font-semibold text-white/70">
+                      Points / Month
+                    </td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];
@@ -867,7 +864,9 @@ export default function SubscribePage({
                     })}
                   </tr>
                   <tr>
-                    <td className="py-4 font-semibold text-white/70">Savings</td>
+                    <td className="py-4 font-semibold text-white/70">
+                      Savings
+                    </td>
                     {SUBSCRIPTION_OFFERS.map((plan) => {
                       const key = plan.id.replace("subscribe_", "");
                       const perks = planCatalog?.[key];

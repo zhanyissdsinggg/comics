@@ -14,16 +14,27 @@ test.describe("Library reading-state smoke", () => {
     browser,
   }) => {
     const state = createLibraryReadingStateMock();
-    const openedPage = await openLibraryReadingStatePage(browser, state, "signed-in", "/library");
+    const openedPage = await openLibraryReadingStatePage(
+      browser,
+      state,
+      "signed-in",
+      "/library",
+    );
     const { page, runtimeIssues } = openedPage;
 
-    await expect(page.getByRole("button", { name: "Continue Reading" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Continue Reading" }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: "Recent Activity" })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Recent Activity" }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("heading", { name: "Saved Series" })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Saved Series" }),
+    ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 
@@ -31,12 +42,14 @@ test.describe("Library reading-state smoke", () => {
       .getByRole("button", { name: "Continue Reading" })
       .boundingBox();
     expect(continueButtonBox).not.toBeNull();
-    expect((continueButtonBox?.y || 0) + (continueButtonBox?.height || 0)).toBeLessThanOrEqual(
-      MOBILE_DEVICE.viewport.height,
-    );
+    expect(
+      (continueButtonBox?.y || 0) + (continueButtonBox?.height || 0),
+    ).toBeLessThanOrEqual(MOBILE_DEVICE.viewport.height);
 
     await expect(page.getByText("Your shelf is ready.")).toHaveCount(0);
-    await expect(page.locator("#recent-activity")).toContainText("Last read Ep 1");
+    await expect(page.locator("#recent-activity")).toContainText(
+      "Last read Ep 1",
+    );
     await expect(page.locator("#saved-series")).toContainText("Unread");
     await expect(page.locator("#saved-series")).toContainText("Reading");
     await expect(page.locator("#saved-series")).toContainText("Read");

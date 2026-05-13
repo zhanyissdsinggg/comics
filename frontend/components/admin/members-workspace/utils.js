@@ -64,7 +64,13 @@ export function formatDate(value) {
 }
 
 export function formatRole(role) {
-  return ROLE_LABELS[String(role || "").trim().toLowerCase()] || "超级管理员";
+  return (
+    ROLE_LABELS[
+      String(role || "")
+        .trim()
+        .toLowerCase()
+    ] || "超级管理员"
+  );
 }
 
 export function buildPayload(form) {

@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  AlertTriangle,
-  Lock,
-  ShieldAlert,
-  Smartphone,
-} from "lucide-react";
+import { AlertTriangle, Lock, ShieldAlert, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
@@ -24,7 +19,9 @@ function SettingsToggle({ label, description, checked, onClick, accentClass }) {
     >
       <div>
         <h3 className="text-base font-black text-white">{label}</h3>
-        <p className="mt-1 text-sm leading-5 text-gray-400 md:leading-6">{description}</p>
+        <p className="mt-1 text-sm leading-5 text-gray-400 md:leading-6">
+          {description}
+        </p>
       </div>
       <div
         className={cn(
@@ -78,7 +75,8 @@ function SettingsContent() {
               Reading, safety, and account behavior.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-              Adjust how you read, control mature visibility, and keep your device preferences comfortable.
+              Adjust how you read, control mature visibility, and keep your
+              device preferences comfortable.
             </p>
           </section>
 
@@ -94,13 +92,17 @@ function SettingsContent() {
                 <div
                   className={cn(
                     "flex h-11 w-11 items-center justify-center rounded-2xl md:h-12 md:w-12",
-                    isAdultMode ? "bg-red-500/12 text-red-400" : "bg-indigo-500/12 text-indigo-300",
+                    isAdultMode
+                      ? "bg-red-500/12 text-red-400"
+                      : "bg-indigo-500/12 text-indigo-300",
                   )}
                 >
                   <ShieldAlert className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">Content Safety</h2>
+                  <h2 className="text-xl font-black text-white">
+                    Content Safety
+                  </h2>
                   <p className="text-sm text-gray-400">
                     Mature visibility and {legalAge}+ verification.
                   </p>
@@ -150,7 +152,9 @@ function SettingsContent() {
                   <Smartphone className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">Reader Preferences</h2>
+                  <h2 className="text-xl font-black text-white">
+                    Reader Preferences
+                  </h2>
                   <p className="text-sm text-gray-400">
                     Choose the reading behavior that feels best on this device.
                   </p>
@@ -172,9 +176,12 @@ function SettingsContent() {
                     <div className="mx-auto h-8 w-8 rounded-lg bg-gray-600 md:h-14 md:w-12" />
                     <div className="mx-auto mt-1.5 h-6 w-8 rounded-lg bg-gray-700 md:mt-2 md:h-10 md:w-12" />
                   </div>
-                  <h3 className="text-sm font-black text-white md:text-lg">Vertical Scroll</h3>
+                  <h3 className="text-sm font-black text-white md:text-lg">
+                    Vertical Scroll
+                  </h3>
                   <p className="mt-1.5 text-xs leading-5 text-gray-400 md:mt-2 md:text-sm md:leading-6">
-                    Best fit for the long-strip reading flow already used by the comic reader.
+                    Best fit for the long-strip reading flow already used by the
+                    comic reader.
                   </p>
                 </button>
 
@@ -192,9 +199,12 @@ function SettingsContent() {
                     <div className="h-10 w-7 rounded-lg bg-gray-600 md:h-16 md:w-12" />
                     <div className="h-10 w-7 rounded-lg bg-gray-700 md:h-16 md:w-12" />
                   </div>
-                  <h3 className="text-sm font-black text-white md:text-lg">Horizontal Paged</h3>
+                  <h3 className="text-sm font-black text-white md:text-lg">
+                    Horizontal Paged
+                  </h3>
                   <p className="mt-1.5 text-xs leading-5 text-gray-400 md:mt-2 md:text-sm md:leading-6">
-                    Better for page-like reading when the reader supports side-by-side motion.
+                    Better for page-like reading when the reader supports
+                    side-by-side motion.
                   </p>
                 </button>
               </div>
@@ -225,7 +235,8 @@ function SettingsContent() {
                 <div className="flex-1">
                   <h2 className="text-xl font-black text-white">Danger Zone</h2>
                   <p className="mt-2 text-sm leading-5 text-gray-300 md:leading-6">
-                    Need help with account access, billing, or a sensitive request? Support can handle it directly.
+                    Need help with account access, billing, or a sensitive
+                    request? Support can handle it directly.
                   </p>
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                     <button
