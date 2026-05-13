@@ -1,3 +1,5 @@
+import { requireLoginForAdult } from "./adultGateConfig";
+
 export function normalizeAdultParam(value) {
   if (value === "1" || value === 1 || value === true) {
     return "1";
@@ -50,7 +52,6 @@ export function readAdultState() {
 }
 
 export function requestEnableAdult() {
-  const requireLoginForAdult = true;
   const { isSignedIn, adultConfirmed, isAdultMode } = readAdultState();
 
   if (requireLoginForAdult && !isSignedIn) {

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { canReadMatureFromCookieStore } from "./matureContent";
+import { requireLoginForAdult } from "./adultGateConfig";
 
 function normalizeBaseUrl(value) {
   return String(value || "")
@@ -83,7 +84,7 @@ export async function resolveServerAdultGate() {
         String(cookieStore.get("mn_is_signed_in")?.value || "").trim() ===
           "1" || hasServerSessionCookie(cookieStore);
 
-      if (!isSignedIn) {
+      if (requireLoginForAdult && !isSignedIn) {
         return { reason: "NEED_LOGIN" };
       }
       if (!verified) {
@@ -110,7 +111,7 @@ export async function resolveServerAdultGate() {
     String(cookieStore.get("mn_is_signed_in")?.value || "").trim() === "1" ||
     hasServerSessionCookie(cookieStore);
 
-  if (!isSignedIn) {
+  if (requireLoginForAdult && !isSignedIn) {
     return { reason: "NEED_LOGIN" };
   }
 

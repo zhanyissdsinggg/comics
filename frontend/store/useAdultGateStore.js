@@ -29,6 +29,7 @@ import {
   normalizeMatureVerificationStatus,
 } from "../lib/verifyAgeProvider";
 import { trackEvent } from "../lib/trackEvent";
+import { requireLoginForAdult } from "../lib/adultGateConfig";
 
 const AdultGateContext = createContext(null);
 const CONFIRMED_KEY = "mn_adult_confirmed";
@@ -37,8 +38,6 @@ const MODE_KEY = "mn_adult_mode";
 const REGION_KEY = "mn_region";
 const HIDE_ADULT_KEY = "mn_hide_adult_history";
 const ADULT_STATE_UPDATED_AT_KEY = "mn_adult_state_updated_at";
-
-const requireLoginForAdult = true;
 
 function readStorageValue(key, fallback) {
   if (typeof window === "undefined") {

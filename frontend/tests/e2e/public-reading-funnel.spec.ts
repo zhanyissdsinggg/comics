@@ -1296,9 +1296,7 @@ async function mockPublicApi(
           route,
           {
             error: "ADULT_GATED",
-            reason: !signedIn
-              ? "NEED_LOGIN"
-              : !matureConfirmed
+              reason: !matureConfirmed
                 ? "NEED_AGE_CONFIRM"
                 : "NEED_ADULT_MODE",
           },

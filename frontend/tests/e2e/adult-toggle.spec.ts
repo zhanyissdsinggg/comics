@@ -21,14 +21,14 @@ test.describe("Header adult toggle", () => {
     ).toBeVisible();
   });
 
-  test("adult route should redirect signed-out readers to the mature gate", async ({
+  test("adult route should redirect signed-out readers to age confirmation", async ({
     page,
   }) => {
     await page.context().clearCookies();
     await page.goto("/adult", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/adult-gate\?reason=NEED_LOGIN/);
+    await expect(page).toHaveURL(/\/adult-gate\?reason=NEED_AGE_CONFIRM/);
     await expect(
-      page.getByRole("heading", { name: /Sign in to access Mature Mode/i }),
+      page.getByRole("heading", { name: /Confirm your age/i }),
     ).toBeVisible();
   });
 
