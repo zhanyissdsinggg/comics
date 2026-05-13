@@ -34,7 +34,10 @@ export default function ReaderBottomBar({
     >
       <div className="absolute left-0 top-0 h-1 w-full bg-white/10">
         <div
-          className={cn("h-full transition-[width] duration-300", progressClassName)}
+          className={cn(
+            "h-full transition-[width] duration-300",
+            progressClassName,
+          )}
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -44,11 +47,7 @@ export default function ReaderBottomBar({
           isComic ? "max-w-[1120px]" : "max-w-[760px]",
         )}
       >
-        <button
-          type="button"
-          onClick={onPrev}
-          className={navButtonClassName}
-        >
+        <button type="button" onClick={onPrev} className={navButtonClassName}>
           Previous
         </button>
 

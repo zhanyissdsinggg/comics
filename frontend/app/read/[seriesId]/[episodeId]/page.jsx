@@ -176,6 +176,7 @@ export default async function Page({ params }) {
     episodeTitle:
       episodeTitle ||
       `Loading ${getInstallmentLabel(series?.type || episode).toLowerCase()}`,
+    seriesType: String(series?.type || episode?.type || "").trim() || "comic",
     backToSeriesHref: seriesId ? `/series/${seriesId}` : "/",
     previousEpisode:
       previousEpisode && previousEpisode?.id

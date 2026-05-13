@@ -162,9 +162,7 @@ function detectComicReaderContent(episode, seriesType, pages, paragraphs) {
 
 function extractNarrativeParagraphs(episode, paragraphs) {
   if (Array.isArray(paragraphs) && paragraphs.length > 0) {
-    return paragraphs
-      .map((item) => String(item || "").trim())
-      .filter(Boolean);
+    return paragraphs.map((item) => String(item || "").trim()).filter(Boolean);
   }
 
   const contentBlocks = Array.isArray(episode?.contentBlocks)
@@ -660,12 +658,9 @@ function ReaderContent({
     episodeData?.paragraphs,
   );
   const isNovel = detectNovelReaderContent(episodeData, seriesType, paragraphs);
-  const isComic = detectComicReaderContent(
-    episodeData,
-    seriesType,
-    pages,
-    paragraphs,
-  ) && !isNovel;
+  const isComic =
+    detectComicReaderContent(episodeData, seriesType, pages, paragraphs) &&
+    !isNovel;
   const previewCount =
     !unlocked && isComic ? (episodeData?.previewFreePages ?? 3) : null;
   const previewParagraphs =
@@ -763,9 +758,7 @@ function ReaderContent({
       : novelTheme === "dark"
         ? "rounded-[28px] border border-white/10 bg-[#0f1115]"
         : "rounded-[28px] border border-[#e5e7eb] bg-white";
-  const readerMutedClass = isComic
-    ? "text-white/58"
-    : novelMutedClass;
+  const readerMutedClass = isComic ? "text-white/58" : novelMutedClass;
   const readerPanelClass = isComic
     ? "border-white/10 bg-white/[0.04]"
     : novelReaderFrameClass;
@@ -1438,7 +1431,7 @@ function ReaderContent({
                   currentEpisode?.releasedAt ||
                     episodeData?.releasedAt ||
                     seriesData.series.updatedAt,
-                )} {" "}
+                )}{" "}
                 -{" "}
                 {unlocked
                   ? `Full ${installmentLabel.toLowerCase()} is ready.`
@@ -1448,9 +1441,7 @@ function ReaderContent({
               <div
                 className={cn(
                   "mt-5 hidden gap-3",
-                  isComic
-                    ? "hidden"
-                    : "hidden",
+                  isComic ? "hidden" : "hidden",
                 )}
               >
                 <Metric
@@ -1497,7 +1488,6 @@ function ReaderContent({
             </div>
           </div>
         </div>
-
       </section>
 
       {isComic ? (
@@ -1572,9 +1562,7 @@ function ReaderContent({
                     Unlock the rest of this {installmentLabel.toLowerCase()}.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-                    The preview stops at the hand-off point. Open the rest now,
-                    keep your place synced, and roll straight into the next beat
-                    without leaving the reader.
+                    Preview ends here. Unlock the rest to continue.
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -1714,7 +1702,9 @@ function ReaderContent({
             : `${novelBorderClass} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
         )}
         heading={
-          unlocked ? `You finished ${currentInstallmentLabel}` : "Continue the story"
+          unlocked
+            ? `You finished ${currentInstallmentLabel}`
+            : "Continue the story"
         }
         description={
           unlocked
@@ -1755,7 +1745,11 @@ function ReaderContent({
         onPrev={
           prevEpisode
             ? () =>
-                handleNavigateEpisode(prevEpisode, "previous", "end-panel-secondary")
+                handleNavigateEpisode(
+                  prevEpisode,
+                  "previous",
+                  "end-panel-secondary",
+                )
             : () => router.push(backToSeriesHref)
         }
         onBack={() => router.push(backToSeriesHref)}

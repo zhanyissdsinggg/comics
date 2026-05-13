@@ -2,7 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronLeft, Ellipsis, Settings2 } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  ChevronLeft,
+  Ellipsis,
+  Settings2,
+} from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const ShareButton = dynamic(() => import("../common/ShareButton"), {
@@ -103,7 +109,9 @@ export default function ReaderTopBar({
               <button
                 type="button"
                 onClick={onAddBookmark}
-                aria-label={bookmarkActive ? "Remove bookmark" : "Save bookmark"}
+                aria-label={
+                  bookmarkActive ? "Remove bookmark" : "Save bookmark"
+                }
                 className={cn(
                   "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
                   isComic

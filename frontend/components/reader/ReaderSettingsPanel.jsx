@@ -69,16 +69,9 @@ function ToggleRow({ label, description, enabled, onToggle }) {
   );
 }
 
-function RangeField({
-  label,
-  valueLabel,
-  min,
-  max,
-  step,
-  value,
-  onChange,
-}) {
-  const progress = ((Number(value) - Number(min)) / (Number(max) - Number(min))) * 100;
+function RangeField({ label, valueLabel, min, max, step, value, onChange }) {
+  const progress =
+    ((Number(value) - Number(min)) / (Number(max) - Number(min))) * 100;
 
   return (
     <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-4">
@@ -102,7 +95,14 @@ function RangeField({
   );
 }
 
-function ActionRow({ icon: Icon, title, description, onClick, trailing, disabled = false }) {
+function ActionRow({
+  icon: Icon,
+  title,
+  description,
+  onClick,
+  trailing,
+  disabled = false,
+}) {
   return (
     <button
       type="button"
@@ -180,7 +180,11 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
       if (nightMode) {
         onToggleNight?.();
       }
-      if (showLayoutControls && layoutMode === "horizontal" && !disableLayoutToggle) {
+      if (
+        showLayoutControls &&
+        layoutMode === "horizontal" &&
+        !disableLayoutToggle
+      ) {
         onToggleLayout?.();
       }
       if (showTextControls && theme !== "light") {

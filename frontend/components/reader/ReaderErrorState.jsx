@@ -42,7 +42,12 @@ export default function ReaderErrorState({
         >
           We couldn&apos;t load this chapter.
         </h1>
-        <p className={cn("mx-auto mt-4 max-w-md text-sm leading-6", mutedClassName)}>
+        <p
+          className={cn(
+            "mx-auto mt-4 max-w-md text-sm leading-6",
+            mutedClassName,
+          )}
+        >
           Try again in a moment, or head back to the series page and reopen this
           chapter from there.
         </p>

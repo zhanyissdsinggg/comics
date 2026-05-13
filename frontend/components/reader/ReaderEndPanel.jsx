@@ -34,10 +34,7 @@ export default function ReaderEndPanel({
   unlockBusy = false,
 }) {
   return (
-    <section
-      data-testid="reader-end-panel"
-      className="px-4 pb-4 pt-8 md:px-6"
-    >
+    <section data-testid="reader-end-panel" className="px-4 pb-4 pt-8 md:px-6">
       <div className={cn("mx-auto", isComic ? "max-w-5xl" : "max-w-[760px]")}>
         <div className="grid gap-4">
           <div className={shellClassName}>
@@ -52,7 +49,9 @@ export default function ReaderEndPanel({
             >
               {heading}
             </h3>
-            <p className={cn("mt-3 max-w-2xl text-sm leading-6", mutedClassName)}>
+            <p
+              className={cn("mt-3 max-w-2xl text-sm leading-6", mutedClassName)}
+            >
               {description}
             </p>
 
@@ -120,7 +119,9 @@ export default function ReaderEndPanel({
                     "disabled:cursor-wait disabled:opacity-70",
                   )}
                 >
-                  {unlockBusy ? "Unlocking..." : `Unlock with ${currentPricePts} pts`}
+                  {unlockBusy
+                    ? "Unlocking..."
+                    : `Unlock with ${currentPricePts} pts`}
                 </button>
               )}
 
@@ -134,10 +135,18 @@ export default function ReaderEndPanel({
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <button type="button" onClick={onPrev} className={secondaryButtonClassName}>
+              <button
+                type="button"
+                onClick={onPrev}
+                className={secondaryButtonClassName}
+              >
                 Previous chapter
               </button>
-              <button type="button" onClick={onBack} className={secondaryButtonClassName}>
+              <button
+                type="button"
+                onClick={onBack}
+                className={secondaryButtonClassName}
+              >
                 Back to series
               </button>
               <button

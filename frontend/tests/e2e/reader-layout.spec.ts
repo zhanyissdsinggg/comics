@@ -293,7 +293,9 @@ test.describe("Reader layout", () => {
       const firstPage = document.querySelector(
         "main [data-index]",
       ) as HTMLElement | null;
-      const firstImage = firstPage?.querySelector("img") as HTMLImageElement | null;
+      const firstImage = firstPage?.querySelector(
+        "img",
+      ) as HTMLImageElement | null;
       return {
         containerWidth: container?.getBoundingClientRect().width || 0,
         pageWidth: firstPage?.getBoundingClientRect().width || 0,
@@ -399,10 +401,7 @@ test.describe("Reader layout", () => {
     await bookmarkButton.click();
     await expect(page.getByText("Bookmark saved")).toBeVisible();
 
-    await page
-      .getByRole("button", { name: "Remove bookmark" })
-      .first()
-      .click();
+    await page.getByRole("button", { name: "Remove bookmark" }).first().click();
     await expect(page.getByText("Bookmark removed")).toBeVisible();
 
     await expectNoRuntimeIssues(
@@ -593,7 +592,10 @@ test.describe("Reader layout", () => {
 
     const novelRegion = page.getByTestId("novel-reader-content");
     await expect(novelRegion).toBeVisible();
-    await expect(novelRegion).toHaveAttribute("data-reader-theme", /light|sepia|dark/);
+    await expect(novelRegion).toHaveAttribute(
+      "data-reader-theme",
+      /light|sepia|dark/,
+    );
 
     const settingsButton = page.getByRole("button", {
       name: "Reader Settings",
@@ -615,7 +617,9 @@ test.describe("Reader layout", () => {
       const paragraph = document.querySelector(
         "main [data-index='0']",
       ) as HTMLElement | null;
-      const paragraphStyle = paragraph ? window.getComputedStyle(paragraph) : null;
+      const paragraphStyle = paragraph
+        ? window.getComputedStyle(paragraph)
+        : null;
       return {
         containerWidth: container?.getBoundingClientRect().width || 0,
         fontSize: paragraphStyle?.fontSize || "",
@@ -748,10 +752,14 @@ test.describe("Reader layout", () => {
     await expect(endPanel).toBeVisible();
     await expect(endPanel).toContainText("End of chapter");
     await expect(
-      endPanel.getByRole("button", { name: /Next chapter|Back to series/i }).first(),
+      endPanel
+        .getByRole("button", { name: /Next chapter|Back to series/i })
+        .first(),
     ).toBeVisible();
     await expect(
-      endPanel.getByRole("button", { name: /Previous chapter|Back to series/i }).first(),
+      endPanel
+        .getByRole("button", { name: /Previous chapter|Back to series/i })
+        .first(),
     ).toBeVisible();
 
     const order = await page.evaluate(() => {
@@ -799,7 +807,9 @@ test.describe("Reader layout", () => {
     await expect(
       page.getByRole("button", { name: /Previous/i }).first(),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /Next/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Next/i }).first(),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: "Reader Settings" }).first().click();
     await expect(page.getByLabel("Close settings")).toBeVisible();

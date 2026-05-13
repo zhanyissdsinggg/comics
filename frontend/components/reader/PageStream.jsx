@@ -68,24 +68,11 @@ function readPlaceholdPageMeta(url) {
   }
 }
 
-function ReaderEditorialFallback({
-  page,
-  meta,
-  index,
-  isHorizontal = false,
-  seriesType,
-}) {
-  const title = meta?.title || "Story";
-  const installmentLabel = getInstallmentLabel(seriesType);
-  const episodeLabel = meta?.episodeNumber
-    ? `${installmentLabel} ${meta.episodeNumber}`
-    : installmentLabel;
+function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
   const pageLabel = meta?.pageNumber
     ? `Page ${meta.pageNumber}`
-    : `Panel ${index + 1}`;
+    : `Page ${index + 1}`;
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
-  const accentMap = ["#60a5fa", "#34d399", "#f59e0b", "#f472b6"];
-  const accent = accentMap[index % accentMap.length];
 
   return (
     <div
@@ -95,43 +82,30 @@ function ReaderEditorialFallback({
       style={{ aspectRatio }}
       aria-hidden="true"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(96,165,250,0.18),transparent_28%),radial-gradient(circle_at_18%_82%,rgba(52,211,153,0.18),transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]" />
-      <div className="absolute inset-[6%] rounded-[28px] border-2 border-white/10 bg-[#0b0b0b] shadow-[0_30px_80px_rgba(2,6,23,0.55)]" />
-      <div
-        className="absolute left-[10%] top-[9%] rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/80"
-        style={{ backgroundColor: `${accent}33` }}
-      >
-        Story Page
-      </div>
-
-      <div className="absolute left-[10%] right-[10%] top-[15%]">
-        <p className="text-[clamp(1.4rem,3vw,2.35rem)] font-semibold leading-tight text-white">
-          {title}
-        </p>
-        <p className="mt-3 text-sm uppercase tracking-[0.22em] text-white/60">
-          {episodeLabel} / {pageLabel}
-        </p>
-      </div>
-
-      <div className="absolute left-[10%] right-[10%] top-[30%] rounded-[26px] border-2 border-white/10 bg-[#101010] p-5">
-        <div
-          className="h-2.5 w-24 rounded-full"
-          style={{ backgroundColor: accent }}
-        />
-        <div className="mt-5 h-4 w-4/5 rounded-full bg-white/80" />
-        <div className="mt-3 h-3.5 w-full rounded-full bg-white/20" />
-        <div className="mt-2 h-3.5 w-3/4 rounded-full bg-white/20" />
-        <div className="mt-5 inline-flex rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-          Story beat
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,#0b0b0b_0%,#050505_100%)]" />
+      <div className="absolute inset-[7%] rounded-[26px] border border-white/8 bg-white/[0.03]" />
+      <div className="absolute inset-[12%] flex flex-col justify-between">
+        <div className="space-y-3">
+          <div className="h-3 w-24 rounded-full bg-white/10" />
+          <div className="h-4 w-4/5 rounded-full bg-white/12" />
+          <div className="h-4 w-3/5 rounded-full bg-white/[0.08]" />
         </div>
-      </div>
 
-      <div className="absolute left-[10%] top-[56%] h-[18%] w-[35%] rounded-[24px] border border-white/10 bg-[#0d0d0d]" />
-      <div className="absolute right-[10%] top-[56%] h-[18%] w-[35%] rounded-[24px] border border-white/10 bg-[#0d0d0d]" />
-      <div className="absolute left-[10%] right-[10%] bottom-[12%] rounded-[24px] border border-white/10 bg-[#0d0d0d] px-5 py-6">
-        <div className="h-3.5 w-2/5 rounded-full bg-white/80" />
-        <div className="mt-4 h-4 w-full rounded-full bg-white/20" />
-        <div className="mt-2 h-3.5 w-4/5 rounded-full bg-white/20" />
+        <div className="space-y-3 text-center">
+          <p className="text-sm font-semibold text-white/88">
+            Page unavailable
+          </p>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+            {pageLabel}
+          </p>
+          <p className="text-xs text-white/55">Tap to retry</p>
+        </div>
+
+        <div className="space-y-3">
+          <div className="h-3 w-full rounded-full bg-white/[0.08]" />
+          <div className="h-3 w-4/5 rounded-full bg-white/[0.08]" />
+          <div className="h-3 w-2/3 rounded-full bg-white/[0.08]" />
+        </div>
       </div>
     </div>
   );
@@ -456,19 +430,18 @@ export default function PageStream({
                   meta={placeholderMeta}
                   index={index}
                   isHorizontal={isHorizontal}
-                  seriesType={seriesType}
                 />
               ) : errorPages[index] ? (
                 <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
                   <p className="text-base font-semibold text-neutral-100">
-                    Page {index + 1} failed to load
+                    Page unavailable
                   </p>
                   <button
                     type="button"
                     onClick={() => handleRetry(index)}
                     className="rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
                   >
-                    Retry
+                    Tap to retry
                   </button>
                 </div>
               ) : !shouldRenderImage ? (
