@@ -383,7 +383,7 @@ function HomeContent({
 
   return (
     <div className={cn("min-h-screen transition-colors duration-500", palette.rootBg)}>
-      <FigmaChrome searchSuggestions={sortedItems.slice(0, 6)}>
+      <FigmaChrome>
         <div className="relative w-full overflow-hidden bg-black transition-all duration-700">
           <div className="absolute inset-0">
             <img

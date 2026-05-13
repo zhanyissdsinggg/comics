@@ -588,7 +588,7 @@ function SearchContent({
 
   return (
     <div className={cn("min-h-screen pb-20", palette.rootBg)}>
-      <FigmaChrome searchSuggestions={suggestions}>
+      <FigmaChrome>
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <section
             className={cn(

@@ -44,8 +44,6 @@ export function FigmaSiteProvider({
   } = useAdultGateStore();
   const { hydrated: authHydrated, isSignedIn, user } = useAuthStore();
   const [showAgeGate, setShowAgeGate] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false);
   const [contentType, setContentTypeState] = useState(() =>
     normalizeContentType(pathname, initialContentType),
   );
@@ -143,10 +141,6 @@ export function FigmaSiteProvider({
       setShowAgeGate,
       handleAdultToggle,
       confirmAdultMode,
-      showSearch,
-      setShowSearch,
-      searchOverlayOpen,
-      setSearchOverlayOpen,
       openLogin,
       isSignedIn,
       user,
@@ -159,8 +153,6 @@ export function FigmaSiteProvider({
       legalAge,
       contentType,
       showAgeGate,
-      showSearch,
-      searchOverlayOpen,
       isSignedIn,
       user,
     ],
