@@ -1,5 +1,7 @@
 "use client";
 
+// Legacy reader, not used by storefront /read route.
+
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

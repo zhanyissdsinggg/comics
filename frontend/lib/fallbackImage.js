@@ -61,16 +61,8 @@ export function isLegacyPlaceholderUrl(value) {
   return LEGACY_PLACEHOLDER_HOSTS.has(parsed.hostname);
 }
 
-export function readLegacyPlaceholderText(value) {
-  const parsed = toUrl(value);
-  if (!parsed || !LEGACY_PLACEHOLDER_HOSTS.has(parsed.hostname)) {
-    return "";
-  }
-
-  return String(parsed.searchParams.get("text") || "")
-    .replace(/\+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+export function readLegacyPlaceholderText() {
+  return "";
 }
 
 export function isLegacyInlineReaderPlaceholder(value) {
@@ -83,20 +75,6 @@ export function isLegacyInlineReaderPlaceholder(value) {
     LEGACY_INLINE_READER_MARKERS.some((marker) => payload.includes(marker)) ||
     /Episode\s*\d+\s*\|\s*Page\s*\d+/i.test(payload)
   );
-}
-
-export function readLegacyInlineReaderMeta(value) {
-  const payload = readInlineSvgPayload(value);
-  if (!payload || !isLegacyInlineReaderPlaceholder(value)) {
-    return null;
-  }
-
-  const episodeMatch = payload.match(/Episode\s*(\d+)\s*\|\s*Page\s*(\d+)/i);
-
-  return {
-    episodeNumber: episodeMatch?.[1] || "",
-    pageNumber: episodeMatch?.[2] || "",
-  };
 }
 
 export function getFallbackImageUrl({
