@@ -157,8 +157,9 @@ test.describe("Reader fallback assets", () => {
     await expect(page.getByText("Reader Preview").first()).toBeVisible();
     await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
     await expect(page.locator("body")).not.toContainText(
-      /Story preview artwork|Reader fallback|Page preview|Current reader label|Core palette enabled/i,
+      /Story preview artwork|Reader fallback|Page preview|CHAPTER|Current reader label|Core palette enabled/i,
     );
+    await expect(page.getByLabel("Comic page").first()).toBeAttached();
 
     const pageImageSources = await page.evaluate(() =>
       Array.from(document.querySelectorAll("[data-index] img")).map(
