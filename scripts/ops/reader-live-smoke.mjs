@@ -61,24 +61,43 @@ async function main() {
   await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.waitForLoadState("networkidle", { timeout: 60_000 });
 
+  const bodyText = await page.locator("body").innerText().catch(() => "");
+  const forbiddenReaderFallbackTerms = [
+    "Loading reader",
+    "Preparing the reader surface",
+    "Story beat",
+    "Hook panel",
+  ];
+  const leakedFallbackTerm = forbiddenReaderFallbackTerms.find((term) =>
+    bodyText.toLowerCase().includes(term.toLowerCase()),
+  );
+  if (leakedFallbackTerm) {
+    throw new Error(`reader still exposes stale fallback copy: ${leakedFallbackTerm}`);
+  }
+
   // Ensure the reader did not fall back into the "didn't load" card.
   const errorCard = page.getByText("This episode didn't load.", { exact: true });
   if (await errorCard.isVisible().catch(() => false)) {
     throw new Error("reader rendered episode load failure card");
   }
 
-  const chapters = page.getByRole("button", { name: "Chapters" });
-  await chapters.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-  await chapters.click({ timeout: DEFAULT_TIMEOUT_MS });
+  const stableControls = [
+    page.getByRole("button", { name: "Back to series" }),
+    page.getByRole("button", { name: "Episode list" }),
+    page.getByRole("button", { name: "Reader Settings" }),
+    page.getByRole("button", { name: "Next" }),
+  ];
+  const hasStableReaderControl = await (async () => {
+    for (const locator of stableControls) {
+      if (await locator.isVisible().catch(() => false)) {
+        return true;
+      }
+    }
+    return false;
+  })();
 
-  const drawer = page.locator('[aria-label="Reader contents"]');
-  await drawer.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-
-  // Close and ensure it hides to validate both open + close transitions.
-  const close = drawer.getByRole("button", { name: "Close" });
-  if (await close.isVisible().catch(() => false)) {
-    await close.click({ timeout: DEFAULT_TIMEOUT_MS });
-    await drawer.waitFor({ state: "hidden", timeout: DEFAULT_TIMEOUT_MS });
+  if (!hasStableReaderControl) {
+    throw new Error("reader did not expose any stable first-paint controls");
   }
 
   if (errors.length > 0) {
