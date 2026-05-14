@@ -517,14 +517,25 @@ function ReaderContent({
   ]);
 
   useEffect(() => {
-    if (!isSignedIn || !episodeData?.id || modeBlock) {
+    if (
+      !isSignedIn ||
+      !episodeData?.id ||
+      modeBlock ||
+      Number(episodeData?.pricePts || 0) <= 0
+    ) {
       return undefined;
     }
 
     return scheduleIdleTask(() => {
       void loadWallet();
     });
-  }, [episodeData?.id, isSignedIn, loadWallet, modeBlock]);
+  }, [
+    episodeData?.id,
+    episodeData?.pricePts,
+    isSignedIn,
+    loadWallet,
+    modeBlock,
+  ]);
 
   useEffect(() => {
     if (
@@ -1437,54 +1448,6 @@ function ReaderContent({
                   ? `Full ${installmentLabel.toLowerCase()} is ready.`
                   : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
               </p>
-
-              <div
-                className={cn(
-                  "mt-5 hidden gap-3",
-                  isComic ? "hidden" : "hidden",
-                )}
-              >
-                <Metric
-                  label="Installment"
-                  value={currentInstallmentLabel}
-                  hint="Current reader label"
-                />
-                <Metric
-                  label="Reading mode"
-                  value={
-                    isComic
-                      ? layoutModeForView === "horizontal"
-                        ? "Horizontal pages"
-                        : "Vertical scroll"
-                      : "Story text"
-                  }
-                  hint={
-                    nightMode ? "Night mode enabled" : "Core palette enabled"
-                  }
-                />
-                <Metric
-                  label="Access state"
-                  value={
-                    unlocked
-                      ? "Full chapter open"
-                      : `${formatPriceLabel(currentPricePts)} to unlock`
-                  }
-                  hint={
-                    unlocked
-                      ? "No preview cap is active"
-                      : "Preview gate is still active"
-                  }
-                />
-                <Metric
-                  label="Wallet"
-                  value={`${walletBalance} pts`}
-                  hint={
-                    isSignedIn
-                      ? `${paidPts} paid · ${bonusPts} bonus`
-                      : "Sign in to sync points"
-                  }
-                />
-              </div>
             </div>
           </div>
         </div>
