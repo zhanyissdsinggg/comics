@@ -5,6 +5,14 @@ const LEGACY_PLACEHOLDER_HOSTS = new Set([
   "img2.baidu.com",
 ]);
 
+const LEGACY_INLINE_READER_MARKERS = [
+  "Story preview artwork.",
+  "Reader fallback",
+  "Page preview",
+  "Page unavailable",
+  "CHAPTER",
+];
+
 const DEFAULT_BASE_URL = "https://gush.local";
 
 function toUrl(value) {
@@ -22,6 +30,26 @@ function toUrl(value) {
 
 function normalizeBool(value) {
   return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function readInlineSvgPayload(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized.startsWith("data:image/svg+xml")) {
+    return "";
+  }
+
+  const commaIndex = normalized.indexOf(",");
+  if (commaIndex < 0) {
+    return "";
+  }
+
+  const payload = normalized.slice(commaIndex + 1);
+
+  try {
+    return decodeURIComponent(payload);
+  } catch {
+    return payload;
+  }
 }
 
 export function isLegacyPlaceholderUrl(value) {
@@ -43,6 +71,32 @@ export function readLegacyPlaceholderText(value) {
     .replace(/\+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function isLegacyInlineReaderPlaceholder(value) {
+  const payload = readInlineSvgPayload(value);
+  if (!payload) {
+    return false;
+  }
+
+  return (
+    LEGACY_INLINE_READER_MARKERS.some((marker) => payload.includes(marker)) ||
+    /Episode\s*\d+\s*\|\s*Page\s*\d+/i.test(payload)
+  );
+}
+
+export function readLegacyInlineReaderMeta(value) {
+  const payload = readInlineSvgPayload(value);
+  if (!payload || !isLegacyInlineReaderPlaceholder(value)) {
+    return null;
+  }
+
+  const episodeMatch = payload.match(/Episode\s*(\d+)\s*\|\s*Page\s*(\d+)/i);
+
+  return {
+    episodeNumber: episodeMatch?.[1] || "",
+    pageNumber: episodeMatch?.[2] || "",
+  };
 }
 
 export function getFallbackImageUrl({
@@ -95,7 +149,10 @@ export function resolveDisplayImageUrl(value, options = {}) {
     return getFallbackImageUrl(options);
   }
 
-  if (isLegacyPlaceholderUrl(normalized)) {
+  if (
+    isLegacyPlaceholderUrl(normalized) ||
+    isLegacyInlineReaderPlaceholder(normalized)
+  ) {
     return getFallbackImageUrl(options);
   }
 

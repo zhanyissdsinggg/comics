@@ -1,5 +1,6 @@
 import {
   getFallbackImageUrl,
+  isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
   readLegacyPlaceholderText,
 } from "./fallbackImage";
@@ -14,6 +15,13 @@ export function normalizePlaceholdImageUrl(url) {
 
   try {
     const parsed = new URL(url);
+    if (isLegacyInlineReaderPlaceholder(url)) {
+      return getFallbackImageUrl({
+        kind: "reader",
+        adult: false,
+      });
+    }
+
     if (!isLegacyPlaceholderUrl(parsed.toString())) {
       return url;
     }
@@ -58,6 +66,12 @@ export function normalizePlaceholdImageUrl(url) {
       adult: isAdult,
     });
   } catch {
+    if (isLegacyInlineReaderPlaceholder(url)) {
+      return getFallbackImageUrl({
+        kind: "reader",
+        adult: false,
+      });
+    }
     return url;
   }
 }

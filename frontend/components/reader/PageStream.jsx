@@ -4,11 +4,12 @@ import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
 import {
+  isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
+  readLegacyInlineReaderMeta,
   readLegacyPlaceholderText,
 } from "../../lib/fallbackImage";
 import { cn } from "../../lib/utils";
-import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import { trackEvent } from "../../lib/trackEvent";
 
 function pushPerfMetric(name, value) {
@@ -36,6 +37,15 @@ function pushPerfMetric(name, value) {
 function readPlaceholdPageMeta(url) {
   if (!url) {
     return null;
+  }
+
+  const inlineMeta = readLegacyInlineReaderMeta(url);
+  if (inlineMeta) {
+    return {
+      title: "",
+      episodeNumber: inlineMeta.episodeNumber,
+      pageNumber: inlineMeta.pageNumber,
+    };
   }
 
   try {
@@ -114,7 +124,10 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
 function preloadImages(pages, startIndex, count = 3) {
   const next = pages.slice(startIndex, startIndex + count);
   next.forEach((page) => {
-    if (readPlaceholdPageMeta(page.url)) {
+    if (
+      readPlaceholdPageMeta(page.url) ||
+      isLegacyInlineReaderPlaceholder(page.url)
+    ) {
       return;
     }
     // Use the browser's Image constructor for preloading, not next/image component.
