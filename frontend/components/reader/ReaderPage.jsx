@@ -1,6 +1,13 @@
 "use client";
 
-// Legacy reader, not used by storefront /read route.
+// Legacy reader implementation.
+// Storefront /read routes render through:
+// - app/read/[seriesId]/[episodeId]/page.jsx
+// - app/read/[seriesId]/[episodeId]/ReaderPageShell.jsx
+// - app/read/[seriesId]/[episodeId]/ReaderPageRuntime.jsx
+// - components/figma/FigmaReaderPage.jsx
+// Keep this file only for legacy internal references and avoid wiring new
+// storefront behavior back to this component.
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

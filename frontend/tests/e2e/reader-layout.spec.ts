@@ -379,8 +379,10 @@ test.describe("Reader layout", () => {
     );
 
     const comicRegion = page.getByTestId("comic-reader-content");
+    const shellMarker = page.getByTestId("comic-reader-shell-marker");
     const contentMarker = page.getByTestId("comic-reader-ssr-marker");
     await expect(comicRegion).toBeVisible();
+    await expect(shellMarker).toBeAttached();
     await expect(contentMarker).toBeAttached();
     await expect(comicRegion).toHaveCSS("background-color", "rgb(5, 5, 5)");
     await expect(page.locator("main [data-index]").first()).toBeVisible();
@@ -853,8 +855,10 @@ test.describe("Reader layout", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
     const endPanel = page.getByTestId("reader-end-panel");
+    const shellMarker = page.getByTestId("comic-reader-shell-marker");
     const contentMarker = page.getByTestId("comic-reader-ssr-marker");
     await expect(endPanel).toBeVisible();
+    await expect(shellMarker).toBeAttached();
     await expect(contentMarker).toBeAttached();
     await expect(endPanel).toContainText("End of chapter");
     await expect(
@@ -872,6 +876,9 @@ test.describe("Reader layout", () => {
       const lastContent = Array.from(
         document.querySelectorAll("main [data-index]"),
       ).at(-1) as HTMLElement | undefined;
+      const shellMarker = document.querySelector(
+        '[data-testid="comic-reader-shell-marker"]',
+      ) as HTMLElement | null;
       const contentMarker = document.querySelector(
         '[data-testid="comic-reader-ssr-marker"]',
       ) as HTMLElement | null;
@@ -884,6 +891,7 @@ test.describe("Reader layout", () => {
         | HTMLElement
         | undefined;
       return {
+        shellMarkerTop: shellMarker?.getBoundingClientRect().top || 0,
         markerTop: contentMarker?.getBoundingClientRect().top || 0,
         lastContentBottom: lastContent?.getBoundingClientRect().bottom || 0,
         endPanelTop: endPanelNode?.getBoundingClientRect().top || 0,
@@ -891,6 +899,7 @@ test.describe("Reader layout", () => {
       };
     });
 
+    expect(order.shellMarkerTop).toBeLessThan(order.endPanelTop);
     expect(order.markerTop).toBeLessThan(order.endPanelTop);
     expect(order.endPanelTop).toBeGreaterThan(order.lastContentBottom - 200);
     expect(order.commentsTop).toBeGreaterThan(order.endPanelTop);

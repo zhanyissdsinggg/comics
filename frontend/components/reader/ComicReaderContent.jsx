@@ -33,6 +33,9 @@ export default function ComicReaderContent({
           style={{ filter: `brightness(${brightness}%)` }}
           onClick={onToggleChrome}
         >
+          <p className="sr-only" data-testid="comic-reader-shell-marker">
+            Comic reader content starts here before chapter end and comments.
+          </p>
           <PageStream
             pages={pages}
             paragraphs={paragraphs}

@@ -1,3 +1,8 @@
+// Legacy placeholder cleanup normalizer.
+// This only rewrites known old placeholder inputs to local fallback assets.
+// It should not emit new third-party placeholder URLs or rely on legacy text
+// payloads for storefront rendering decisions.
+
 import {
   getFallbackImageUrl,
   isLegacyInlineReaderPlaceholder,

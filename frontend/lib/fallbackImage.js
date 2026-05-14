@@ -1,3 +1,8 @@
+// Legacy placeholder cleanup helpers.
+// These utilities only identify old third-party placeholder hosts or inline
+// reader mock payloads so storefront rendering can swap them to local fallback
+// assets. Do not use them to generate new user-facing placeholder copy.
+
 const LEGACY_PLACEHOLDER_HOSTS = new Set([
   "placehold.co",
   "via.placeholder.com",

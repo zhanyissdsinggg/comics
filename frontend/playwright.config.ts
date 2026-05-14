@@ -1,7 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
+import { join } from "node:path";
 
 const configuredWorkers = Number(process.env.PLAYWRIGHT_WORKERS || 2);
 const usePrebuiltServer = process.env.PLAYWRIGHT_USE_PREBUILT === "1";
+const crossEnvBin = join("node_modules", ".bin", "cross-env.cmd");
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -12,7 +14,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: Number.isFinite(configuredWorkers) && configuredWorkers > 0 ? configuredWorkers : 2,
+  workers:
+    Number.isFinite(configuredWorkers) && configuredWorkers > 0
+      ? configuredWorkers
+      : 2,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://127.0.0.1:4173",
@@ -28,8 +33,8 @@ export default defineConfig({
   ],
   webServer: {
     command: usePrebuiltServer
-      ? "cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1"
-      : "cross-env NEXT_DIST_DIR=.next-playwright npm run build && cross-env NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1",
+      ? `${crossEnvBin} NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1`
+      : `${crossEnvBin} NEXT_DIST_DIR=.next-playwright npm run build && ${crossEnvBin} NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1`,
     env: {
       ...process.env,
       API_BASE_URL: process.env.API_BASE_URL || "http://127.0.0.1:4000",
