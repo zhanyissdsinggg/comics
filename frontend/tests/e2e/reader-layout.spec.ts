@@ -283,6 +283,12 @@ test.describe("Reader layout", () => {
     await expect(body).not.toContainText(
       /Preparing the reader surface|Story beat|Hook panel|Local QA artwork/i,
     );
+    await expect(body).not.toContainText(
+      /Current reader label|Core palette enabled|Access state|Full chapter open|No preview cap is active/i,
+    );
+    await expect(body).not.toContainText(
+      /Reading mode|Wallet|0 pts|Sign in to sync points/i,
+    );
 
     const comicRegion = page.getByTestId("comic-reader-content");
     await expect(comicRegion).toBeVisible();
@@ -434,6 +440,8 @@ test.describe("Reader layout", () => {
     await expect(
       page.getByText(/Preview ends here|Unlock the rest of this/i).first(),
     ).toBeVisible();
+    await expect(page.getByText(/Wallet total/i).first()).toBeVisible();
+    await expect(page.getByText(/\d+\s*pts/i).first()).toBeVisible();
     await expect(
       page
         .getByRole("button", {
