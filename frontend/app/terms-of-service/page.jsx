@@ -109,7 +109,7 @@ if (hasResolvedLegalJurisdiction) {
     paragraphs: [
       `These Terms are governed by the laws of ${siteConfig.governingLaw}, without regard to conflict-of-law rules.`,
       `Any dispute will be resolved in the courts located in ${siteConfig.legalVenue}, unless applicable consumer law gives you rights in another location.`,
-      `Gush Comics is operated by ${siteConfig.companyName}.`,
+      `${siteConfig.siteName} is operated by ${siteConfig.companyName}.`,
     ],
   });
 } else {

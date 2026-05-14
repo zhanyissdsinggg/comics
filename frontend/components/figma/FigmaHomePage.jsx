@@ -707,7 +707,7 @@ function HomeContent({
                 <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                      Curated Grid
+                      Editor's Picks
                     </p>
                     <p className="mt-1 text-sm text-gray-400 md:text-base">
                       Hand-picked picks with stronger shelf presence.
@@ -858,7 +858,7 @@ function HomeContent({
                 <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                      Discovery Shelf
+                      Explore More
                     </p>
                     <p className="mt-1 text-sm text-gray-400 md:text-base">
                       Browse the active rotation without leaving the home feed.
@@ -948,7 +948,7 @@ function HomeContent({
               <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-black/35 px-4 py-3">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Panel Logic
+                    Top Rated
                   </p>
                   <p className="mt-1 text-sm font-semibold text-gray-300">
                     {rankingMetaLabel}

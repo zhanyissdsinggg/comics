@@ -2,7 +2,7 @@
 
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
 import {
   isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
@@ -103,7 +103,7 @@ function preloadImages(pages, startIndex, count = 3) {
     }
     // Use the browser's Image constructor for preloading, not next/image component.
     const img = new window.Image();
-    img.src = normalizePlaceholdImageUrl(page.url);
+    img.src = normalizeLegacyImageUrl(page.url);
   });
 }
 
@@ -387,7 +387,7 @@ export default function PageStream({
       ) : visiblePages.length > 0 ? (
         <>
           <p className="sr-only" data-testid="comic-reader-ssr-marker">
-            Comic pages loading before chapter navigation and comments.
+            Comic page stream placeholder.
           </p>
           {visiblePages.map((page, index) => {
             const placeholderMeta = readPlaceholdPageMeta(page.url);
@@ -478,8 +478,8 @@ export default function PageStream({
                     <NextImage
                       src={
                         reloadKeys[index]
-                          ? `${normalizePlaceholdImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
-                          : normalizePlaceholdImageUrl(page.url)
+                          ? `${normalizeLegacyImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
+                          : normalizeLegacyImageUrl(page.url)
                       }
                       alt="Comic page"
                       width={page.w || 800}

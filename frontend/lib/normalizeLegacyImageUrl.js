@@ -1,7 +1,7 @@
 // Legacy placeholder cleanup normalizer.
-// This only rewrites known old placeholder inputs to local fallback assets.
-// It should not emit new third-party placeholder URLs or rely on legacy text
-// payloads for storefront rendering decisions.
+// These old hosts are only used to identify legacy data and rewrite it to
+// local fallback assets. They must never be emitted again as new fallback
+// outputs for storefront rendering.
 
 import {
   getFallbackImageUrl,
@@ -9,7 +9,7 @@ import {
   isLegacyPlaceholderUrl,
 } from "./fallbackImage";
 
-export function normalizePlaceholdImageUrl(url) {
+export function normalizeLegacyImageUrl(url) {
   if (!url) {
     return url;
   }

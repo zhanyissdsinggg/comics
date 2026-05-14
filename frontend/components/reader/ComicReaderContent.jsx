@@ -34,7 +34,7 @@ export default function ComicReaderContent({
           onClick={onToggleChrome}
         >
           <p className="sr-only" data-testid="comic-reader-shell-marker">
-            Comic reader content starts here before chapter end and comments.
+            Comic reader content region.
           </p>
           <PageStream
             pages={pages}
