@@ -5,6 +5,11 @@
 - Backend API: `https://www.gushcomics.com/api/*`
 - Admin: `https://www.gushcomics.com/admin`
 
+## Deployment Topology
+- Public frontend is deployed on Vercel.
+- Backend/API runtime is deployed on Railway.
+- Release verification must confirm both surfaces are on the same target revision.
+
 ## P1 Trigger Rules
 - Backend error-rate > 1% (5 min window)
 - API p95 > 2000ms (5 min window)
@@ -13,6 +18,14 @@
 
 ## First 10 Minutes Checklist
 1. Confirm active deploy revision and branch.
+   - Frontend identity headers from `GET /`:
+     - `x-gush-frontend-branch`
+     - `x-gush-frontend-revision`
+     - `x-gush-frontend-deployment`
+   - Backend identity from `GET /api/meta/version`:
+     - `commit`
+     - `deploymentId`
+   - Treat frontend/backend revision mismatch as a release or routing incident until resolved.
 2. Run quick probes:
    - `GET /api/meta/version`
    - `GET /api/health/live`
@@ -45,6 +58,13 @@ npm run ops:post-deploy
 npm run ops:reader-live
 npm run ops:admin-ui-live
 npm run ops:oncall-watchdog
+
+# Manual revision parity check
+$frontend = Invoke-WebRequest -Uri 'https://www.gushcomics.com/' -UseBasicParsing -TimeoutSec 20
+$backend = (Invoke-WebRequest -Uri 'https://www.gushcomics.com/api/meta/version' -UseBasicParsing -TimeoutSec 20).Content | ConvertFrom-Json
+Write-Output "frontend_revision=$($frontend.Headers['x-gush-frontend-revision'])"
+Write-Output "frontend_branch=$($frontend.Headers['x-gush-frontend-branch'])"
+Write-Output "backend_commit=$($backend.commit)"
 ```
 
 ## Unified Deploy Gate

@@ -2,6 +2,20 @@
 
 This runbook defines the production-grade acceptance cadence for the Gush frontend + backend stack.
 
+## Deployment Topology Guardrail
+
+Production is split across two platforms:
+
+- frontend public site: Vercel
+- backend/API runtime: Railway
+
+Because of that split, a release is not considered complete until both deployment surfaces report the same target revision:
+
+- frontend: `X-Gush-Frontend-Revision` from `https://www.gushcomics.com/`
+- backend: `commit` from `https://www.gushcomics.com/api/meta/version`
+
+If those values differ, treat the release as incomplete even if one platform shows a healthy deployment.
+
 ## Required Environment Variables
 
 Set these before running any SOP profile:
@@ -25,6 +39,19 @@ npm run ops:deploy-gate:strict:live
 ```
 
 This command auto-targets `https://www.gushcomics.com` for both backend/frontend unless overridden by environment variables.
+
+Before signing off a release, verify revision parity explicitly:
+
+```powershell
+$frontend = Invoke-WebRequest -Uri 'https://www.gushcomics.com/' -UseBasicParsing -TimeoutSec 20
+$backend = (Invoke-WebRequest -Uri 'https://www.gushcomics.com/api/meta/version' -UseBasicParsing -TimeoutSec 20).Content | ConvertFrom-Json
+
+Write-Output "frontend_revision=$($frontend.Headers['x-gush-frontend-revision'])"
+Write-Output "frontend_branch=$($frontend.Headers['x-gush-frontend-branch'])"
+Write-Output "backend_commit=$($backend.commit)"
+```
+
+Expected: frontend revision, frontend branch, and backend commit all match the active release target.
 
 For one-command release readiness (baseline + optional full strict gate):
 

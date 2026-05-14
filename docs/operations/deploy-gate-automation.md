@@ -2,6 +2,37 @@
 
 This project includes script-based deploy verification, production-safe admin session smoke checks, and lightweight load smoke checks.
 
+## Platform Split Guardrail
+
+Production is split across two deployment platforms:
+
+- frontend (`https://www.gushcomics.com`) is served by Vercel
+- backend/API (`https://comics-production-07fa.up.railway.app` and `https://www.gushcomics.com/api/*`) is served by Railway
+
+That means a successful Railway deploy does **not** prove the public Next.js frontend has updated, and a successful Vercel deploy does **not** prove the backend has updated.
+
+For every release, treat these as separate rollout targets and block release signoff until all of the following are true:
+
+- `GET /` returns the expected `X-Gush-Frontend-Revision`
+- `GET /` returns the expected `X-Gush-Frontend-Branch`
+- `GET /api/meta/version` returns the expected backend commit
+- frontend revision and backend commit match the active release target
+
+Recommended quick identity check:
+
+```powershell
+$frontend = Invoke-WebRequest -Uri 'https://www.gushcomics.com/' -UseBasicParsing -TimeoutSec 20
+$backend = (Invoke-WebRequest -Uri 'https://www.gushcomics.com/api/meta/version' -UseBasicParsing -TimeoutSec 20).Content | ConvertFrom-Json
+
+Write-Output "frontend_branch=$($frontend.Headers['x-gush-frontend-branch'])"
+Write-Output "frontend_revision=$($frontend.Headers['x-gush-frontend-revision'])"
+Write-Output "frontend_deployment=$($frontend.Headers['x-gush-frontend-deployment'])"
+Write-Output "backend_commit=$($backend.commit)"
+Write-Output "backend_deployment=$($backend.deploymentId)"
+```
+
+If the frontend revision and backend commit do not match the intended release SHA, stop and fix deployment routing before continuing. Do not assume CDN delay, cache delay, or a single-platform redeploy will resolve a cross-platform mismatch.
+
 ## 1) Recommended Deploy Gate
 
 Use this right after each production deployment:
@@ -20,6 +51,7 @@ What it covers:
 
 - backend health and version endpoints
 - frontend identity headers (`X-Gush-Frontend-Revision`, `X-Gush-Frontend-Repo`, `X-Gush-Frontend-Branch`)
+- frontend/backend release identity parity against the target commit
 - frontend trust-safe route audits (`/`, `/creators`, `/rankings`, `/series/series-008`, `/series/series-012`, `/series/series-005`)
 - optional observability thresholds
 - admin login -> verify -> read-only admin API -> append-only audit delete probe -> logout -> token invalidation
