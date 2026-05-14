@@ -166,12 +166,6 @@ export default function ReaderSkeleton({
             </div>
           </div>
         )}
-
-        <div className="mt-5 px-1">
-          <p className={cn("text-xs font-medium", mutedClassName)}>
-            Preparing the reader surface...
-          </p>
-        </div>
       </div>
     </main>
   );

@@ -28,6 +28,7 @@
     "start:prod": "node dist/main.js",
     "seed": "ts-node --transpile-only prisma/seed.ts",
     "seed:demo": "ts-node --transpile-only scripts/seed-demo.ts",
+    "seed:reader-pages": "ts-node --transpile-only scripts/refresh-reader-mock-pages.ts",
     "lint": "npm run lint:check",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest",

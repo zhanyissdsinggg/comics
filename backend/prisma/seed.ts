@@ -93,7 +93,12 @@ function buildReaderPageDataUrl(options: {
   const safeTitle = escapeXml(title);
   const episodeLabel = `Episode ${episodeNumber}`;
   const pageLabel = `Page ${pageNumber}`;
-  const layoutLabel = pageNumber === 1 ? "Cold open" : pageNumber === 2 ? "Story beat" : "Hook panel";
+  const layoutLabel =
+    pageNumber === 1
+      ? "Page preview"
+      : pageNumber === 2
+        ? "Reader fallback"
+        : "Page unavailable";
 
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" fill="none">
@@ -148,7 +153,10 @@ function buildReaderPageDataUrl(options: {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function buildEpisodePages(series: Pick<SeriesSeed, "title" | "coverTone">, episodeNumber: number) {
+function buildEpisodePages(
+  series: Pick<SeriesSeed, "title" | "coverTone">,
+  episodeNumber: number,
+) {
   return [1, 2, 3].map((pageNumber) => ({
     url: buildReaderPageDataUrl({
       title: series.title,
@@ -171,7 +179,9 @@ function buildNovelParagraphs(seriesTitle: string, episodeNumber: number) {
 }
 
 function normalizeCreatorName(value: string) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function slugifyCreatorName(value: string) {
@@ -202,7 +212,9 @@ function inferCreatorType(name: string): CreatorType {
 }
 
 function buildSeriesAuthor(credits: CreditSeed[]) {
-  return normalizeCreatorName(credits.find((credit) => credit.isPrimary)?.name || credits[0]?.name || "");
+  return normalizeCreatorName(
+    credits.find((credit) => credit.isPrimary)?.name || credits[0]?.name || "",
+  );
 }
 
 const seriesData: SeriesSeed[] = [
@@ -215,7 +227,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-001.jpg",
     coverTone: "#1a1a2e",
     status: "Ongoing",
-    description: "An epic tale of warriors and kingdoms fighting for survival in a world on the brink of collapse.",
+    description:
+      "An epic tale of warriors and kingdoms fighting for survival in a world on the brink of collapse.",
     episodePrice: 3,
     ttfEnabled: true,
     ttfIntervalHours: 24,
@@ -230,7 +243,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-002.jpg",
     coverTone: "#2d1b69",
     status: "Ongoing",
-    description: "A talented musician falls in love with a mysterious woman who only appears at night.",
+    description:
+      "A talented musician falls in love with a mysterious woman who only appears at night.",
     episodePrice: 2,
     ttfEnabled: true,
     ttfIntervalHours: 48,
@@ -248,11 +262,19 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-003.jpg",
     coverTone: "#0d1117",
     status: "Ongoing",
-    description: "A cyber-spy thriller set in a near-future world where technology and humanity are at war.",
+    description:
+      "A cyber-spy thriller set in a near-future world where technology and humanity are at war.",
     episodePrice: 3,
     ttfEnabled: false,
     ttfIntervalHours: 24,
-    credits: [{ name: "Nightglass Studio", role: CreditRole.STUDIO, type: CreatorType.STUDIO, isPrimary: true }],
+    credits: [
+      {
+        name: "Nightglass Studio",
+        role: CreditRole.STUDIO,
+        type: CreatorType.STUDIO,
+        isPrimary: true,
+      },
+    ],
   },
   {
     id: "series-004",
@@ -263,7 +285,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-004.jpg",
     coverTone: "#ff6b9d",
     status: "Completed",
-    description: "A heartwarming story of first love and friendship at a high school known for its cherry blossoms.",
+    description:
+      "A heartwarming story of first love and friendship at a high school known for its cherry blossoms.",
     episodePrice: 0,
     ttfEnabled: false,
     ttfIntervalHours: 24,
@@ -278,7 +301,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-005.jpg",
     coverTone: "#7b2d00",
     status: "Ongoing",
-    description: "A young dragon tamer must fulfill an ancient oath to save the world from eternal darkness.",
+    description:
+      "A young dragon tamer must fulfill an ancient oath to save the world from eternal darkness.",
     episodePrice: 4,
     ttfEnabled: true,
     ttfIntervalHours: 24,
@@ -296,11 +320,14 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-006.jpg",
     coverTone: "#0a0a0a",
     status: "Ongoing",
-    description: "A hardboiled detective navigates the seedy underbelly of a neon-lit cyberpunk city.",
+    description:
+      "A hardboiled detective navigates the seedy underbelly of a neon-lit cyberpunk city.",
     episodePrice: 2,
     ttfEnabled: true,
     ttfIntervalHours: 72,
-    credits: [{ name: "Cole Mercer", role: CreditRole.AUTHOR, isPrimary: true }],
+    credits: [
+      { name: "Cole Mercer", role: CreditRole.AUTHOR, isPrimary: true },
+    ],
   },
   {
     id: "series-007",
@@ -311,11 +338,14 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-007.jpg",
     coverTone: "#4a90d9",
     status: "Ongoing",
-    description: "Life in a small coastal town gets complicated when a mysterious stranger arrives.",
+    description:
+      "Life in a small coastal town gets complicated when a mysterious stranger arrives.",
     episodePrice: 2,
     ttfEnabled: false,
     ttfIntervalHours: 24,
-    credits: [{ name: "Lena Brooks", role: CreditRole.AUTHOR, isPrimary: true }],
+    credits: [
+      { name: "Lena Brooks", role: CreditRole.AUTHOR, isPrimary: true },
+    ],
   },
   {
     id: "series-008",
@@ -326,11 +356,19 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-008.jpg",
     coverTone: "#1f1f1f",
     status: "Ongoing",
-    description: "A disgraced MMA champion fights his way back to the top against all odds.",
+    description:
+      "A disgraced MMA champion fights his way back to the top against all odds.",
     episodePrice: 3,
     ttfEnabled: true,
     ttfIntervalHours: 24,
-    credits: [{ name: "Hammerline Team", role: CreditRole.TEAM, type: CreatorType.TEAM, isPrimary: true }],
+    credits: [
+      {
+        name: "Hammerline Team",
+        role: CreditRole.TEAM,
+        type: CreatorType.TEAM,
+        isPrimary: true,
+      },
+    ],
   },
   {
     id: "series-009",
@@ -341,7 +379,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-009.jpg",
     coverTone: "#1a0533",
     status: "Ongoing",
-    description: "At a magical academy for gifted students, a scholarship girl discovers she may be the chosen one.",
+    description:
+      "At a magical academy for gifted students, a scholarship girl discovers she may be the chosen one.",
     episodePrice: 3,
     ttfEnabled: true,
     ttfIntervalHours: 24,
@@ -359,11 +398,19 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-010.jpg",
     coverTone: "#1a0000",
     status: "Completed",
-    description: "A vampire hunter discovers the line between monster and human is thinner than she thought.",
+    description:
+      "A vampire hunter discovers the line between monster and human is thinner than she thought.",
     episodePrice: 0,
     ttfEnabled: false,
     ttfIntervalHours: 24,
-    credits: [{ name: "Rook Hollow Studio", role: CreditRole.STUDIO, type: CreatorType.STUDIO, isPrimary: true }],
+    credits: [
+      {
+        name: "Rook Hollow Studio",
+        role: CreditRole.STUDIO,
+        type: CreatorType.STUDIO,
+        isPrimary: true,
+      },
+    ],
   },
   {
     id: "series-011",
@@ -374,13 +421,18 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-011.jpg",
     coverTone: "#000033",
     status: "Ongoing",
-    description: "A crew of misfits aboard a salvage ship uncovers an ancient alien conspiracy.",
+    description:
+      "A crew of misfits aboard a salvage ship uncovers an ancient alien conspiracy.",
     episodePrice: 2,
     ttfEnabled: true,
     ttfIntervalHours: 48,
     credits: [
       { name: "Tess Calder", role: CreditRole.AUTHOR, isPrimary: true },
-      { name: "Orbital Forge Team", role: CreditRole.TEAM, type: CreatorType.TEAM },
+      {
+        name: "Orbital Forge Team",
+        role: CreditRole.TEAM,
+        type: CreatorType.TEAM,
+      },
     ],
   },
   {
@@ -392,7 +444,8 @@ const seriesData: SeriesSeed[] = [
     coverUrl: "/mock-covers/series-012.jpg",
     coverTone: "#8b4513",
     status: "Ongoing",
-    description: "Two rivals must work together to survive the untamed frontier and resist their undeniable attraction.",
+    description:
+      "Two rivals must work together to survive the untamed frontier and resist their undeniable attraction.",
     episodePrice: 2,
     ttfEnabled: false,
     ttfIntervalHours: 24,
@@ -417,7 +470,11 @@ const seriesData: SeriesSeed[] = [
     ttfIntervalHours: 24,
     credits: [
       { name: "Iris Vale", role: CreditRole.WRITER, isPrimary: true },
-      { name: "Sable House Studio", role: CreditRole.STUDIO, type: CreatorType.STUDIO },
+      {
+        name: "Sable House Studio",
+        role: CreditRole.STUDIO,
+        type: CreatorType.STUDIO,
+      },
     ],
   },
   {
@@ -434,7 +491,9 @@ const seriesData: SeriesSeed[] = [
     episodePrice: 3,
     ttfEnabled: true,
     ttfIntervalHours: 48,
-    credits: [{ name: "Maren Cross", role: CreditRole.AUTHOR, isPrimary: true }],
+    credits: [
+      { name: "Maren Cross", role: CreditRole.AUTHOR, isPrimary: true },
+    ],
   },
   {
     id: "series-015",
@@ -515,7 +574,12 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             key: "scan_signal",
             label: "Run a deep scan before moving.",
             targetNodeId: "story-solar-wind-node-002",
-            stateEffects: { trust: 1, clues: 1, risk: -1, flags: ["cautious_scan"] },
+            stateEffects: {
+              trust: 1,
+              clues: 1,
+              risk: -1,
+              flags: ["cautious_scan"],
+            },
           },
           {
             id: "story-solar-wind-choice-002",
@@ -529,7 +593,12 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             key: "wake_captain",
             label: "Wake the captain and hold position.",
             targetNodeId: "story-solar-wind-node-004",
-            stateEffects: { affection: 1, trust: 1, risk: -1, flags: ["captain_alerted"] },
+            stateEffects: {
+              affection: 1,
+              trust: 1,
+              risk: -1,
+              flags: ["captain_alerted"],
+            },
           },
         ],
       },
@@ -590,7 +659,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
         key: "captain_bridge",
         title: "Captain on Bridge",
         fallbackText:
-          "The captain arrives in silence, studies the telemetry, and hands command back to you with one line: \"Make the call we can survive.\"",
+          'The captain arrives in silence, studies the telemetry, and hands command back to you with one line: "Make the call we can survive."',
         basePrompt:
           "Write a character-focused paragraph where leadership pressure sharpens the decision.",
         stateEffects: { trust: 1 },
@@ -607,7 +676,11 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             key: "bold_path",
             label: "Commit to the direct beacon approach.",
             targetNodeId: "story-solar-wind-node-003",
-            stateEffects: { affection: 1, risk: 1, flags: ["captain_backed_risk"] },
+            stateEffects: {
+              affection: 1,
+              risk: 1,
+              flags: ["captain_backed_risk"],
+            },
           },
         ],
       },
@@ -729,7 +802,10 @@ async function upsertCreatorCredits(series: SeriesSeed) {
         isPublic: true,
       },
       create: {
-        id: createStableId("credit", `${series.id}:${creatorId}:${credit.role}`),
+        id: createStableId(
+          "credit",
+          `${series.id}:${creatorId}:${credit.role}`,
+        ),
         seriesId: series.id,
         creatorId,
         role: credit.role,
@@ -791,9 +867,14 @@ async function seedEpisodes() {
     const episodeCount = series.status === "Completed" ? 5 : 3;
     for (let number = 1; number <= episodeCount; number += 1) {
       const episodeId = `${series.id}e${number}`;
-      const releasedAt = new Date(Date.now() - (episodeCount - number) * 7 * 24 * 60 * 60 * 1000);
+      const releasedAt = new Date(
+        Date.now() - (episodeCount - number) * 7 * 24 * 60 * 60 * 1000,
+      );
       const pricePts = number === 1 ? 0 : series.episodePrice;
-      const novelParagraphs = series.type === "novel" ? buildNovelParagraphs(series.title, number) : [];
+      const novelParagraphs =
+        series.type === "novel"
+          ? buildNovelParagraphs(series.title, number)
+          : [];
 
       await prisma.episode.upsert({
         where: { id: episodeId },
@@ -805,12 +886,16 @@ async function seedEpisodes() {
           pricePts,
           ttfEligible: series.ttfEnabled,
           ttfReadyAt: series.ttfEnabled
-            ? new Date(releasedAt.getTime() + series.ttfIntervalHours * 60 * 60 * 1000)
+            ? new Date(
+                releasedAt.getTime() + series.ttfIntervalHours * 60 * 60 * 1000,
+              )
             : null,
           previewFreePages: series.type === "comic" ? 3 : 0,
-          pages: series.type === "comic" ? buildEpisodePages(series, number) : [],
+          pages:
+            series.type === "comic" ? buildEpisodePages(series, number) : [],
           paragraphs: novelParagraphs,
-          text: novelParagraphs.length > 0 ? novelParagraphs.join("\n\n") : null,
+          text:
+            novelParagraphs.length > 0 ? novelParagraphs.join("\n\n") : null,
           isDeleted: false,
         },
         create: {
@@ -822,12 +907,16 @@ async function seedEpisodes() {
           pricePts,
           ttfEligible: series.ttfEnabled,
           ttfReadyAt: series.ttfEnabled
-            ? new Date(releasedAt.getTime() + series.ttfIntervalHours * 60 * 60 * 1000)
+            ? new Date(
+                releasedAt.getTime() + series.ttfIntervalHours * 60 * 60 * 1000,
+              )
             : null,
           previewFreePages: series.type === "comic" ? 3 : 0,
-          pages: series.type === "comic" ? buildEpisodePages(series, number) : [],
+          pages:
+            series.type === "comic" ? buildEpisodePages(series, number) : [],
           paragraphs: novelParagraphs,
-          text: novelParagraphs.length > 0 ? novelParagraphs.join("\n\n") : null,
+          text:
+            novelParagraphs.length > 0 ? novelParagraphs.join("\n\n") : null,
           isDeleted: false,
         },
       });
@@ -1026,7 +1115,10 @@ async function seedInteractiveStories() {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "1") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_PROD_SEED !== "1"
+  ) {
     console.error(
       [
         "Refusing to run full seed in production without explicit override.",

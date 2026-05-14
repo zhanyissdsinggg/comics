@@ -280,6 +280,9 @@ test.describe("Reader layout", () => {
     await expect(body).not.toContainText(
       /Reader deck|Live controls|Active reader|Reader console|Quick jumps|Next move|Preview checkpoint/i,
     );
+    await expect(body).not.toContainText(
+      /Preparing the reader surface|Story beat|Hook panel|Local QA artwork/i,
+    );
 
     const comicRegion = page.getByTestId("comic-reader-content");
     await expect(comicRegion).toBeVisible();
@@ -588,6 +591,9 @@ test.describe("Reader layout", () => {
 
     await expect(page.locator("body")).not.toContainText(
       /Reader deck|Live controls|Active reader|Reader console|Quick jumps|Next move|Preview checkpoint/i,
+    );
+    await expect(page.locator("body")).not.toContainText(
+      /Preparing the reader surface|Story beat|Hook panel|Local QA artwork/i,
     );
 
     const novelRegion = page.getByTestId("novel-reader-content");
