@@ -3,6 +3,27 @@ import { createReaderPagePlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
 import { expectNoBasicA11yAuditIssues } from "./support/a11yAudit";
 
+function createLegacyReaderMockPage(label: string): string {
+  const safeLabel = String(label || "Reader page")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" fill="none">
+      <rect width="800" height="1200" fill="#070b14" />
+      <text x="80" y="120" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">CHAPTER</text>
+      <text x="80" y="188" fill="#E5E7EB" font-family="Arial, sans-serif" font-size="42" font-weight="700">${safeLabel}</text>
+      <text x="80" y="252" fill="#94A3B8" font-family="Arial, sans-serif" font-size="20">Episode 1 | Page 1</text>
+      <text x="80" y="1060" fill="#64748B" font-family="Arial, sans-serif" font-size="20">Story preview artwork.</text>
+      <text x="80" y="1110" fill="#64748B" font-family="Arial, sans-serif" font-size="20">Reader fallback</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 const baseSeriesPayload = {
   series: {
     id: "series-001",
@@ -414,6 +435,80 @@ test.describe("Reader layout", () => {
 
     await expectNoRuntimeIssues(
       "/read/series-001/series-001e1#comic-immersive",
+      runtimeIssues,
+    );
+  });
+
+  test("legacy inline comic placeholders should render formal fallback pages instead of reader error copy", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: "series-012",
+      episodeId: "series-012e1",
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: "series-012",
+          title: "Wild Hearts",
+          type: "comic",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: "series-012e1",
+          seriesId: "series-012",
+          title: "Episode 1",
+          type: "comic",
+          pricePts: 0,
+          previewFreePages: 3,
+          pages: [
+            { url: createLegacyReaderMockPage("Wild Hearts"), w: 800, h: 1200 },
+            { url: createLegacyReaderMockPage("Wild Hearts"), w: 800, h: 1200 },
+            { url: createLegacyReaderMockPage("Wild Hearts"), w: 800, h: 1200 },
+          ],
+          paragraphs: [],
+        },
+      },
+    });
+
+    const response = await page.goto("/read/series-012/series-012e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const body = page.locator("body");
+    await expect(body).not.toContainText(
+      /Comic reader content region|Comic page stream placeholder|Page unavailable|Tap to retry/i,
+    );
+    await expect(body).not.toContainText(
+      /Story preview artwork|Reader fallback|Page preview/i,
+    );
+
+    const firstPageImage = page.locator("main [data-index='0'] img").first();
+    await expect(firstPageImage).toBeVisible();
+    await expect(firstPageImage).toHaveAttribute(
+      "src",
+      /\/fallback\/reader-page-default\.svg/,
+    );
+
+    const order = await page.evaluate(() => {
+      const content = document.querySelector(
+        '[data-testid="comic-reader-content"]',
+      ) as HTMLElement | null;
+      const endPanel = document.querySelector(
+        '[data-testid="reader-end-panel"]',
+      ) as HTMLElement | null;
+      return {
+        contentTop: content?.getBoundingClientRect().top || 0,
+        endPanelTop: endPanel?.getBoundingClientRect().top || 0,
+      };
+    });
+
+    expect(order.contentTop).toBeLessThan(order.endPanelTop);
+
+    await expectNoRuntimeIssues(
+      "/read/series-012/series-012e1#legacy-fallback-image",
       runtimeIssues,
     );
   });

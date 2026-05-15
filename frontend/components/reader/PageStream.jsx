@@ -2,6 +2,7 @@
 
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
 import {
   isLegacyInlineReaderPlaceholder,
@@ -52,42 +53,46 @@ function readPlaceholdPageMeta(url) {
 }
 
 function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
-  const pageLabel = `Page ${index + 1}`;
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
+  const fallbackSrc =
+    normalizeLegacyImageUrl(page?.url) ||
+    getFallbackImageUrl({ kind: "reader" });
 
   return (
     <div
-      className={`relative overflow-hidden ${
+      className={`relative overflow-hidden bg-[#050505] ${
         isHorizontal ? "rounded-xl" : "rounded-none"
-      } bg-[#050505]`}
+      }`}
       style={{ aspectRatio }}
-      aria-hidden="true"
+      data-placeholder-kind={
+        meta?.placeholder ? "legacy-reader-page" : "reader-page"
+      }
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,#0b0b0b_0%,#050505_100%)]" />
-      <div className="absolute inset-[7%] rounded-[26px] border border-white/8 bg-white/[0.03]" />
-      <div className="absolute inset-[12%] flex flex-col justify-between">
-        <div className="space-y-3">
-          <div className="h-3 w-24 rounded-full bg-white/10" />
-          <div className="h-4 w-4/5 rounded-full bg-white/12" />
-          <div className="h-4 w-3/5 rounded-full bg-white/[0.08]" />
-        </div>
-
-        <div className="space-y-3 text-center">
-          <p className="text-sm font-semibold text-white/88">
-            Page unavailable
-          </p>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-            {pageLabel}
-          </p>
-          <p className="text-xs text-white/55">Tap to retry</p>
-        </div>
-
-        <div className="space-y-3">
-          <div className="h-3 w-full rounded-full bg-white/[0.08]" />
-          <div className="h-3 w-4/5 rounded-full bg-white/[0.08]" />
-          <div className="h-3 w-2/3 rounded-full bg-white/[0.08]" />
-        </div>
-      </div>
+      <NextImage
+        src={fallbackSrc}
+        alt="Comic page"
+        width={page?.w || 800}
+        height={page?.h || 1200}
+        className={`m-0 w-full p-0 align-top ${
+          isHorizontal ? "block rounded-xl" : "block rounded-none"
+        }`}
+        style={{
+          display: "block",
+          margin: 0,
+          width: "100%",
+          height: "auto",
+          padding: 0,
+          lineHeight: 0,
+          maxWidth: isHorizontal ? undefined : "min(100vw, 960px)",
+        }}
+        priority={index < 2}
+        loading={index < 2 ? "eager" : "lazy"}
+        sizes={
+          isHorizontal
+            ? "(max-width: 768px) 100vw, 90vw"
+            : "(max-width: 768px) 100vw, (max-width: 1200px) 82vw, 960px"
+        }
+      />
     </div>
   );
 }
@@ -386,9 +391,7 @@ export default function PageStream({
         </div>
       ) : visiblePages.length > 0 ? (
         <>
-          <p className="sr-only" data-testid="comic-reader-ssr-marker">
-            Comic page stream placeholder.
-          </p>
+          <span hidden data-testid="comic-reader-ssr-marker" />
           {visiblePages.map((page, index) => {
             const placeholderMeta = readPlaceholdPageMeta(page.url);
             const shouldRenderImage =
