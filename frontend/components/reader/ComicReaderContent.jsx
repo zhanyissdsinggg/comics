@@ -33,9 +33,7 @@ export default function ComicReaderContent({
           style={{ filter: `brightness(${brightness}%)` }}
           onClick={onToggleChrome}
         >
-          <p className="sr-only" data-testid="comic-reader-shell-marker">
-            Comic reader content region.
-          </p>
+          <span hidden data-testid="comic-reader-shell-marker" />
           <PageStream
             pages={pages}
             paragraphs={paragraphs}
