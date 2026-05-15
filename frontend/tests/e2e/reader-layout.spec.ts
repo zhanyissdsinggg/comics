@@ -60,6 +60,19 @@ const LOCKED_TEST_EPISODE_ID = `${LOCKED_TEST_SERIES_ID}e3`;
 const NOVEL_TEST_SERIES_ID = "series-011";
 const NOVEL_TEST_EPISODE_ID = `${NOVEL_TEST_SERIES_ID}e1`;
 const NOVEL_TEST_TITLE = "Solar Wind";
+const CLEAN_FREE_READER_SERIES = [
+  {
+    seriesId: "series-001",
+    episodeId: "series-001e1",
+    title: "The Last Kingdom",
+  },
+  {
+    seriesId: "series-002",
+    episodeId: "series-002e1",
+    title: "Moonlight Sonata",
+  },
+  { seriesId: "series-012", episodeId: "series-012e1", title: "Wild Hearts" },
+];
 const NOVEL_TEST_FIRST_PARAGRAPH =
   "Solar Wind Episode 1 opens with a quiet decision that changes the direction of the story.";
 
@@ -265,6 +278,78 @@ async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
 }
 
 test.describe("Reader layout", () => {
+  for (const scenario of CLEAN_FREE_READER_SERIES) {
+    test(`free reader ${scenario.seriesId} should hide status panel copy and wallet`, async ({
+      page,
+    }) => {
+      const runtimeIssues = collectRuntimeIssues(page);
+      await mockReaderRoutes(page, {
+        seriesId: scenario.seriesId,
+        episodeId: scenario.episodeId,
+        seriesPayload: {
+          series: {
+            ...baseSeriesPayload.series,
+            id: scenario.seriesId,
+            title: scenario.title,
+            type: "comic",
+          },
+        },
+        episodePayload: {
+          episode: {
+            id: scenario.episodeId,
+            seriesId: scenario.seriesId,
+            title: "Episode 1",
+            type: "comic",
+            pricePts: 0,
+            previewFreePages: 3,
+            pages: [
+              {
+                url: createReaderPagePlaceholder(`${scenario.title} Ep1 P1`),
+                w: 800,
+                h: 1200,
+              },
+              {
+                url: createReaderPagePlaceholder(`${scenario.title} Ep1 P2`),
+                w: 800,
+                h: 1200,
+              },
+              {
+                url: createReaderPagePlaceholder(`${scenario.title} Ep1 P3`),
+                w: 800,
+                h: 1200,
+              },
+            ],
+            paragraphs: [],
+          },
+        },
+      });
+
+      const response = await page.goto(
+        `/read/${scenario.seriesId}/${scenario.episodeId}`,
+        {
+          waitUntil: "domcontentloaded",
+        },
+      );
+      expect(response?.ok()).toBeTruthy();
+
+      const body = page.locator("body");
+      await expect(body).not.toContainText(
+        /Current reader label|Core palette enabled|Access state|Full chapter open|No preview cap is active/i,
+      );
+      await expect(body).not.toContainText(
+        /Reading mode|Wallet|0 pts|Sign in to sync points/i,
+      );
+      await expect(body).not.toContainText(
+        /Story preview artwork|Reader fallback|Page preview|Installment/i,
+      );
+
+      await expectNoRuntimeIssues(
+        `/read/${scenario.seriesId}/${scenario.episodeId}#free-clean`,
+        runtimeIssues,
+      );
+    });
+  }
+
   test("comic reader should avoid dashboard copy and keep an immersive image stage", async ({
     page,
   }) => {
@@ -289,9 +374,16 @@ test.describe("Reader layout", () => {
     await expect(body).not.toContainText(
       /Reading mode|Wallet|0 pts|Sign in to sync points/i,
     );
+    await expect(body).not.toContainText(
+      /Story preview artwork|Reader fallback|Page preview/i,
+    );
 
     const comicRegion = page.getByTestId("comic-reader-content");
+    const shellMarker = page.getByTestId("comic-reader-shell-marker");
+    const contentMarker = page.getByTestId("comic-reader-ssr-marker");
     await expect(comicRegion).toBeVisible();
+    await expect(shellMarker).toBeAttached();
+    await expect(contentMarker).toBeAttached();
     await expect(comicRegion).toHaveCSS("background-color", "rgb(5, 5, 5)");
     await expect(page.locator("main [data-index]").first()).toBeVisible();
 
@@ -763,7 +855,11 @@ test.describe("Reader layout", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
     const endPanel = page.getByTestId("reader-end-panel");
+    const shellMarker = page.getByTestId("comic-reader-shell-marker");
+    const contentMarker = page.getByTestId("comic-reader-ssr-marker");
     await expect(endPanel).toBeVisible();
+    await expect(shellMarker).toBeAttached();
+    await expect(contentMarker).toBeAttached();
     await expect(endPanel).toContainText("End of chapter");
     await expect(
       endPanel
@@ -780,6 +876,12 @@ test.describe("Reader layout", () => {
       const lastContent = Array.from(
         document.querySelectorAll("main [data-index]"),
       ).at(-1) as HTMLElement | undefined;
+      const shellMarker = document.querySelector(
+        '[data-testid="comic-reader-shell-marker"]',
+      ) as HTMLElement | null;
+      const contentMarker = document.querySelector(
+        '[data-testid="comic-reader-ssr-marker"]',
+      ) as HTMLElement | null;
       const endPanelNode = document.querySelector(
         '[data-testid="reader-end-panel"]',
       ) as HTMLElement | null;
@@ -789,12 +891,16 @@ test.describe("Reader layout", () => {
         | HTMLElement
         | undefined;
       return {
+        shellMarkerTop: shellMarker?.getBoundingClientRect().top || 0,
+        markerTop: contentMarker?.getBoundingClientRect().top || 0,
         lastContentBottom: lastContent?.getBoundingClientRect().bottom || 0,
         endPanelTop: endPanelNode?.getBoundingClientRect().top || 0,
         commentsTop: commentsHeading?.getBoundingClientRect().top || 0,
       };
     });
 
+    expect(order.shellMarkerTop).toBeLessThan(order.endPanelTop);
+    expect(order.markerTop).toBeLessThan(order.endPanelTop);
     expect(order.endPanelTop).toBeGreaterThan(order.lastContentBottom - 200);
     expect(order.commentsTop).toBeGreaterThan(order.endPanelTop);
 

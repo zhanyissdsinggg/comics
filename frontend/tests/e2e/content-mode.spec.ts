@@ -982,6 +982,11 @@ test.describe("Content mode filtering", () => {
       .click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
     await expectSinglePublicChrome(page);
+    await expect(
+      page.getByRole("link", { name: "Interactive", exact: true }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
   });
 
   test("search zero-result state should render without crashing", async ({
@@ -1008,6 +1013,29 @@ test.describe("Content mode filtering", () => {
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+  });
+
+  test("catalog pages should not expose internal shelf copy", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    for (const routePath of ["/comics", "/novels"]) {
+      const response = await page.goto(routePath, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.ok(), `${routePath} should load`).toBeTruthy();
+      await expect(page.locator("body")).not.toContainText(
+        /Curated Grid|Discovery Shelf|Panel Logic/i,
+      );
+      await expect(page.locator("body")).toContainText(
+        /Editor's Picks|Explore More|Top Rated/i,
+      );
+    }
   });
 
   test("adult reader should stay blocked in normal mode", async ({ page }) => {
@@ -1097,9 +1125,11 @@ test.describe("Content mode filtering", () => {
 
     await page.getByRole("button", { name: "Next" }).first().click();
 
-    await expect(
-      page,
-    ).toHaveURL(new RegExp(`/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_TWO}$`));
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/read/${ADULT_READER_SERIES_ID}/${ADULT_READER_EPISODE_TWO}$`,
+      ),
+    );
     await expect(page.getByText("Midnight Heat").first()).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });

@@ -74,31 +74,13 @@ function toInputJson(value: Record<string, unknown>): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
-function escapeXml(value: string) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
 function buildReaderPageDataUrl(options: {
   title: string;
   episodeNumber: number;
   pageNumber: number;
   tone: string;
 }) {
-  const { title, episodeNumber, pageNumber, tone } = options;
-  const safeTitle = escapeXml(title);
-  const episodeLabel = `Episode ${episodeNumber}`;
-  const pageLabel = `Page ${pageNumber}`;
-  const layoutLabel =
-    pageNumber === 1
-      ? "Page preview"
-      : pageNumber === 2
-        ? "Reader fallback"
-        : "Page unavailable";
+  const { tone } = options;
 
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" fill="none">
@@ -107,18 +89,17 @@ function buildReaderPageDataUrl(options: {
       <circle cx="640" cy="200" r="220" fill="${tone}" opacity="0.18" />
       <circle cx="170" cy="1040" r="280" fill="${tone}" opacity="0.12" />
       <rect x="48" y="48" width="704" height="1104" rx="40" fill="#0b1020" fill-opacity="0.84" stroke="${tone}" stroke-opacity="0.45" />
-      <rect x="80" y="88" width="186" height="34" rx="17" fill="${tone}" fill-opacity="0.22" />
-      <text x="102" y="111" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.8">CHAPTER</text>
-      <text x="80" y="182" fill="#E5E7EB" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">${safeTitle}</text>
-      <text x="80" y="226" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="24">${escapeXml(episodeLabel)} | ${escapeXml(pageLabel)}</text>
+      <rect x="80" y="96" width="220" height="18" rx="9" fill="${tone}" fill-opacity="0.22" />
+      <rect x="80" y="148" width="420" height="18" rx="9" fill="#E5E7EB" fill-opacity="0.18" />
+      <rect x="80" y="180" width="296" height="14" rx="7" fill="#CBD5E1" fill-opacity="0.16" />
 
       <rect x="80" y="286" width="640" height="246" rx="28" fill="#101a31" stroke="${tone}" stroke-opacity="0.36" />
       <rect x="104" y="310" width="180" height="14" rx="7" fill="${tone}" fill-opacity="0.9" />
       <rect x="104" y="346" width="392" height="18" rx="9" fill="#E5E7EB" fill-opacity="0.92" />
       <rect x="104" y="380" width="510" height="14" rx="7" fill="#CBD5E1" fill-opacity="0.45" />
       <rect x="104" y="408" width="474" height="14" rx="7" fill="#CBD5E1" fill-opacity="0.34" />
-      <rect x="104" y="452" width="234" height="40" rx="20" fill="#F8FAFC" />
-      <text x="140" y="478" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">${escapeXml(layoutLabel)}</text>
+      <rect x="104" y="452" width="234" height="12" rx="6" fill="#F8FAFC" fill-opacity="0.82" />
+      <rect x="104" y="478" width="280" height="12" rx="6" fill="#CBD5E1" fill-opacity="0.28" />
 
       <rect x="80" y="572" width="306" height="256" rx="26" fill="#0f172a" stroke="#1e293b" />
       <rect x="414" y="572" width="306" height="256" rx="26" fill="#0f172a" stroke="#1e293b" />
@@ -138,8 +119,7 @@ function buildReaderPageDataUrl(options: {
       <rect x="132" y="914" width="220" height="12" rx="6" fill="${tone}" />
       <rect x="132" y="946" width="466" height="16" rx="8" fill="#E2E8F0" fill-opacity="0.76" />
       <rect x="132" y="978" width="422" height="12" rx="6" fill="#94A3B8" fill-opacity="0.56" />
-
-      <text x="80" y="1112" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="18">Story preview artwork.</text>
+      <rect x="132" y="1006" width="310" height="12" rx="6" fill="#64748B" fill-opacity="0.36" />
 
       <defs>
         <linearGradient id="bg" x1="96" y1="72" x2="704" y2="1128" gradientUnits="userSpaceOnUse">

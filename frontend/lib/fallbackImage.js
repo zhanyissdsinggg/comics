@@ -1,9 +1,23 @@
+// Legacy placeholder cleanup helpers.
+// These utilities only identify old third-party placeholder hosts or inline
+// reader mock payloads so storefront rendering can swap them to local fallback
+// assets. These hosts are not allowed to be emitted again as new fallback
+// outputs. Do not use them to generate new user-facing placeholder copy.
+
 const LEGACY_PLACEHOLDER_HOSTS = new Set([
   "placehold.co",
   "via.placeholder.com",
   "dummyimage.com",
   "img2.baidu.com",
 ]);
+
+const LEGACY_INLINE_READER_MARKERS = [
+  "Story preview artwork.",
+  "Reader fallback",
+  "Page preview",
+  "Page unavailable",
+  "CHAPTER",
+];
 
 const DEFAULT_BASE_URL = "https://gush.local";
 
@@ -24,6 +38,26 @@ function normalizeBool(value) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
+function readInlineSvgPayload(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized.startsWith("data:image/svg+xml")) {
+    return "";
+  }
+
+  const commaIndex = normalized.indexOf(",");
+  if (commaIndex < 0) {
+    return "";
+  }
+
+  const payload = normalized.slice(commaIndex + 1);
+
+  try {
+    return decodeURIComponent(payload);
+  } catch {
+    return payload;
+  }
+}
+
 export function isLegacyPlaceholderUrl(value) {
   const parsed = toUrl(value);
   if (!parsed) {
@@ -33,16 +67,20 @@ export function isLegacyPlaceholderUrl(value) {
   return LEGACY_PLACEHOLDER_HOSTS.has(parsed.hostname);
 }
 
-export function readLegacyPlaceholderText(value) {
-  const parsed = toUrl(value);
-  if (!parsed || !LEGACY_PLACEHOLDER_HOSTS.has(parsed.hostname)) {
-    return "";
+export function readLegacyPlaceholderText() {
+  return "";
+}
+
+export function isLegacyInlineReaderPlaceholder(value) {
+  const payload = readInlineSvgPayload(value);
+  if (!payload) {
+    return false;
   }
 
-  return String(parsed.searchParams.get("text") || "")
-    .replace(/\+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    LEGACY_INLINE_READER_MARKERS.some((marker) => payload.includes(marker)) ||
+    /Episode\s*\d+\s*\|\s*Page\s*\d+/i.test(payload)
+  );
 }
 
 export function getFallbackImageUrl({
@@ -95,7 +133,10 @@ export function resolveDisplayImageUrl(value, options = {}) {
     return getFallbackImageUrl(options);
   }
 
-  if (isLegacyPlaceholderUrl(normalized)) {
+  if (
+    isLegacyPlaceholderUrl(normalized) ||
+    isLegacyInlineReaderPlaceholder(normalized)
+  ) {
     return getFallbackImageUrl(options);
   }
 

@@ -1,48 +1,57 @@
 "use client";
 
+// Legacy reader implementation.
+// Storefront /read routes render through:
+// - app/read/[seriesId]/[episodeId]/page.jsx
+// - app/read/[seriesId]/[episodeId]/ReaderPageShell.jsx
+// - app/read/[seriesId]/[episodeId]/ReaderPageRuntime.jsx
+// - components/figma/FigmaReaderPage.jsx
+// Keep this file only for legacy internal references and avoid wiring new
+// storefront behavior back to this component.
+
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiGet } from "../../lib/apiClient";
-import { trackEvent } from "../../lib/trackEvent";
-import { useEntitlementStore } from "../../store/useEntitlementStore";
-import { useWalletStore } from "../../store/useWalletStore";
-import PageStream from "./PageStream";
-import ReaderTopBar from "./ReaderTopBar";
-import { useProgressStore } from "../../store/useProgressStore";
-import { useRewardsStore } from "../../store/useRewardsStore";
-import { useAdultGateStore } from "../../store/useAdultGateStore";
-import { useBehaviorStore } from "../../store/useBehaviorStore";
-import { useCouponStore } from "../../store/useCouponStore";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useReaderSettingsStore } from "../../store/useReaderSettingsStore";
-import { useBookmarkStore } from "../../store/useBookmarkStore";
-import { useHistoryStore } from "../../store/useHistoryStore";
-import { useAutoSaveProgress } from "../../hooks/useAutoSaveProgress";
+import { apiGet } from "../../../lib/apiClient";
+import { trackEvent } from "../../../lib/trackEvent";
+import { useEntitlementStore } from "../../../store/useEntitlementStore";
+import { useWalletStore } from "../../../store/useWalletStore";
+import PageStream from "../PageStream";
+import ReaderTopBar from "../ReaderTopBar";
+import { useProgressStore } from "../../../store/useProgressStore";
+import { useRewardsStore } from "../../../store/useRewardsStore";
+import { useAdultGateStore } from "../../../store/useAdultGateStore";
+import { useBehaviorStore } from "../../../store/useBehaviorStore";
+import { useCouponStore } from "../../../store/useCouponStore";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { useReaderSettingsStore } from "../../../store/useReaderSettingsStore";
+import { useBookmarkStore } from "../../../store/useBookmarkStore";
+import { useHistoryStore } from "../../../store/useHistoryStore";
+import { useAutoSaveProgress } from "../../../hooks/useAutoSaveProgress";
 import {
   buildPathWithAttribution,
   loadPersistedPaymentAttribution,
   mergePaymentAttribution,
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
-} from "../../lib/paymentAttribution";
-import { focusInteractiveTarget } from "../../lib/focusTarget";
-import { buildSupportPath } from "../../lib/supportRouting";
+} from "../../../lib/paymentAttribution";
+import { focusInteractiveTarget } from "../../../lib/focusTarget";
+import { buildSupportPath } from "../../../lib/supportRouting";
 import {
   consumeCommerceSuccessForPath,
   getCommerceSuccessPresentation,
-} from "../../lib/commerceSuccess";
-import { buildDiscoveryContext } from "../../lib/discoveryContext";
-import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+} from "../../../lib/commerceSuccess";
+import { buildDiscoveryContext } from "../../../lib/discoveryContext";
+import { STOREFRONT_TERMS } from "../../../lib/storefrontCopy";
 import {
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
-} from "../common/StorefrontPagePrimitives";
+} from "../../common/StorefrontPagePrimitives";
 import {
   formatInstallmentLabel,
   formatInstallmentCount,
   getInstallmentLabel,
-} from "../../lib/seriesFormatLabels";
+} from "../../../lib/seriesFormatLabels";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,

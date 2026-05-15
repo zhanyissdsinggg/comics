@@ -2,13 +2,12 @@
 
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
 import {
+  isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
-  readLegacyPlaceholderText,
 } from "../../lib/fallbackImage";
 import { cn } from "../../lib/utils";
-import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import { trackEvent } from "../../lib/trackEvent";
 
 function pushPerfMetric(name, value) {
@@ -38,40 +37,22 @@ function readPlaceholdPageMeta(url) {
     return null;
   }
 
+  if (isLegacyInlineReaderPlaceholder(url)) {
+    return { placeholder: true };
+  }
+
   try {
     const parsed = new URL(url);
-    if (!isLegacyPlaceholderUrl(parsed.toString())) {
-      return null;
-    }
-
-    const rawLabel = readLegacyPlaceholderText(parsed.toString());
-
-    if (!rawLabel) {
-      return null;
-    }
-
-    const episodeMatch = rawLabel.match(/\bEp(?:isode)?\s*(\d+)\b/i);
-    const pageMatch = rawLabel.match(/\bP(?:age)?\s*(\d+)\b/i);
-    const title = rawLabel
-      .replace(/\bEp(?:isode)?\s*\d+\b/gi, "")
-      .replace(/\bP(?:age)?\s*\d+\b/gi, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return {
-      title,
-      episodeNumber: episodeMatch?.[1] || "",
-      pageNumber: pageMatch?.[1] || "",
-    };
+    return isLegacyPlaceholderUrl(parsed.toString())
+      ? { placeholder: true }
+      : null;
   } catch {
     return null;
   }
 }
 
 function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
-  const pageLabel = meta?.pageNumber
-    ? `Page ${meta.pageNumber}`
-    : `Page ${index + 1}`;
+  const pageLabel = `Page ${index + 1}`;
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
 
   return (
@@ -114,12 +95,15 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
 function preloadImages(pages, startIndex, count = 3) {
   const next = pages.slice(startIndex, startIndex + count);
   next.forEach((page) => {
-    if (readPlaceholdPageMeta(page.url)) {
+    if (
+      readPlaceholdPageMeta(page.url) ||
+      isLegacyInlineReaderPlaceholder(page.url)
+    ) {
       return;
     }
     // Use the browser's Image constructor for preloading, not next/image component.
     const img = new window.Image();
-    img.src = normalizePlaceholdImageUrl(page.url);
+    img.src = normalizeLegacyImageUrl(page.url);
   });
 }
 
@@ -401,132 +385,143 @@ export default function PageStream({
           </p>
         </div>
       ) : visiblePages.length > 0 ? (
-        visiblePages.map((page, index) => {
-          const placeholderMeta = readPlaceholdPageMeta(page.url);
-          const shouldRenderImage =
-            Boolean(readyPages[index]) || Boolean(placeholderMeta);
+        <>
+          <p className="sr-only" data-testid="comic-reader-ssr-marker">
+            Comic page stream placeholder.
+          </p>
+          {visiblePages.map((page, index) => {
+            const placeholderMeta = readPlaceholdPageMeta(page.url);
+            const shouldRenderImage =
+              Boolean(readyPages[index]) || Boolean(placeholderMeta);
 
-          return (
-            <div
-              key={page.url}
-              className={`${
-                isHorizontal
-                  ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
-                  : "block m-0 rounded-none border-0 bg-transparent p-0 leading-none"
-              }`}
-              style={
-                isHorizontal
-                  ? {
-                      contentVisibility: "auto",
-                      containIntrinsicSize: "1200px 800px",
+            return (
+              <div
+                key={page.url}
+                className={`${
+                  isHorizontal
+                    ? "flex-none w-full scroll-snap-item rounded-2xl border border-neutral-900 bg-neutral-900/50 p-2"
+                    : "block m-0 rounded-none border-0 bg-transparent p-0 leading-none"
+                }`}
+                style={
+                  isHorizontal
+                    ? {
+                        contentVisibility: "auto",
+                        containIntrinsicSize: "1200px 800px",
+                      }
+                    : { lineHeight: 0, margin: 0, padding: 0 }
+                }
+                data-index={index}
+              >
+                {placeholderMeta ? (
+                  <ReaderEditorialFallback
+                    page={page}
+                    meta={placeholderMeta}
+                    index={index}
+                    isHorizontal={isHorizontal}
+                  />
+                ) : errorPages[index] ? (
+                  <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
+                    <p className="text-base font-semibold text-neutral-100">
+                      Page unavailable
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleRetry(index)}
+                      className="rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                    >
+                      Tap to retry
+                    </button>
+                  </div>
+                ) : !shouldRenderImage ? (
+                  <div
+                    className={`animate-pulse ${
+                      isHorizontal
+                        ? "rounded-xl bg-neutral-800/60"
+                        : "m-0 block rounded-none bg-neutral-800/60 p-0 leading-none"
+                    }`}
+                    style={{
+                      height: 0,
+                      margin: 0,
+                      padding: 0,
+                      paddingTop: `${((page.h || 1200) / (page.w || 800)) * 100}%`,
+                    }}
+                    role="img"
+                    aria-label="Comic page"
+                  />
+                ) : (
+                  <div
+                    className={
+                      isHorizontal
+                        ? "relative overflow-hidden rounded-xl"
+                        : "relative m-0 block overflow-hidden bg-[#050505] p-0 leading-none"
                     }
-                  : { lineHeight: 0, margin: 0, padding: 0 }
-              }
-              data-index={index}
-            >
-              {placeholderMeta ? (
-                <ReaderEditorialFallback
-                  page={page}
-                  meta={placeholderMeta}
-                  index={index}
-                  isHorizontal={isHorizontal}
-                />
-              ) : errorPages[index] ? (
-                <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
-                  <p className="text-base font-semibold text-neutral-100">
-                    Page unavailable
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleRetry(index)}
-                    className="rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                    style={
+                      isHorizontal
+                        ? undefined
+                        : { lineHeight: 0, margin: 0, padding: 0 }
+                    }
                   >
-                    Tap to retry
-                  </button>
-                </div>
-              ) : !shouldRenderImage ? (
-                <div
-                  className={`animate-pulse ${
-                    isHorizontal
-                      ? "rounded-xl bg-neutral-800/60"
-                      : "m-0 block rounded-none bg-neutral-800/60 p-0 leading-none"
-                  }`}
-                  style={{
-                    height: 0,
-                    margin: 0,
-                    padding: 0,
-                    paddingTop: `${((page.h || 1200) / (page.w || 800)) * 100}%`,
-                  }}
-                />
-              ) : (
-                <div
-                  className={
-                    isHorizontal
-                      ? "relative overflow-hidden rounded-xl"
-                      : "relative m-0 block overflow-hidden bg-[#050505] p-0 leading-none"
-                  }
-                  style={
-                    isHorizontal
-                      ? undefined
-                      : { lineHeight: 0, margin: 0, padding: 0 }
-                  }
-                >
-                  {loadingPages[index] !== false ? (
-                    <div
-                      className={`pointer-events-none absolute inset-0 z-[1] animate-pulse ${
-                        isHorizontal
-                          ? "rounded-xl bg-neutral-800/60"
-                          : "m-0 rounded-none bg-neutral-800/60"
+                    {loadingPages[index] !== false ? (
+                      <div
+                        className={`pointer-events-none absolute inset-0 z-[1] animate-pulse ${
+                          isHorizontal
+                            ? "rounded-xl bg-neutral-800/60"
+                            : "m-0 rounded-none bg-neutral-800/60"
+                        }`}
+                        style={{
+                          margin: 0,
+                          padding: 0,
+                          lineHeight: 0,
+                        }}
+                      />
+                    ) : null}
+                    <NextImage
+                      src={
+                        reloadKeys[index]
+                          ? `${normalizeLegacyImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
+                          : normalizeLegacyImageUrl(page.url)
+                      }
+                      alt="Comic page"
+                      width={page.w || 800}
+                      height={page.h || 1200}
+                      className={`m-0 w-full p-0 align-top transition-opacity duration-200 ${
+                        isHorizontal ? "block rounded-xl" : "block rounded-none"
+                      } ${loadingPages[index] !== false ? "opacity-0" : "opacity-100"} ${
+                        isNightMode ? "brightness-90 contrast-105" : ""
                       }`}
                       style={{
+                        display: "block",
                         margin: 0,
+                        maxWidth: isHorizontal
+                          ? undefined
+                          : "min(100vw, 960px)",
+                        width: "100%",
+                        height: "auto",
                         padding: 0,
                         lineHeight: 0,
                       }}
+                      onError={() => handleError(index)}
+                      onLoad={() => handleLoad(index)}
+                      priority={index < Math.min(initialReadyCount, 2)}
+                      loading={
+                        index < Math.min(initialReadyCount, 2)
+                          ? "eager"
+                          : "lazy"
+                      }
+                      quality={qualityOverrides[index] || imageQuality}
+                      sizes={
+                        imageSizes ||
+                        (isHorizontal
+                          ? "(max-width: 768px) 100vw, 90vw"
+                          : "(max-width: 768px) 100vw, (max-width: 1200px) 82vw, 960px")
+                      }
                     />
-                  ) : null}
-                  <NextImage
-                    src={
-                      reloadKeys[index]
-                        ? `${normalizePlaceholdImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
-                        : normalizePlaceholdImageUrl(page.url)
-                    }
-                    alt=""
-                    width={page.w || 800}
-                    height={page.h || 1200}
-                    className={`m-0 w-full p-0 align-top transition-opacity duration-200 ${
-                      isHorizontal ? "block rounded-xl" : "block rounded-none"
-                    } ${loadingPages[index] !== false ? "opacity-0" : "opacity-100"} ${
-                      isNightMode ? "brightness-90 contrast-105" : ""
-                    }`}
-                    style={{
-                      display: "block",
-                      margin: 0,
-                      maxWidth: isHorizontal ? undefined : "min(100vw, 960px)",
-                      width: "100%",
-                      height: "auto",
-                      padding: 0,
-                      lineHeight: 0,
-                    }}
-                    onError={() => handleError(index)}
-                    onLoad={() => handleLoad(index)}
-                    priority={index < Math.min(initialReadyCount, 2)}
-                    loading={
-                      index < Math.min(initialReadyCount, 2) ? "eager" : "lazy"
-                    }
-                    quality={qualityOverrides[index] || imageQuality}
-                    sizes={
-                      imageSizes ||
-                      (isHorizontal
-                        ? "(max-width: 768px) 100vw, 90vw"
-                        : "(max-width: 768px) 100vw, (max-width: 1200px) 82vw, 960px")
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </>
       ) : (
         <article
           className="mx-auto w-full max-w-[42.5rem] pb-8"

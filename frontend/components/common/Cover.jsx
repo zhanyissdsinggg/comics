@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { normalizePlaceholdImageUrl } from "../../lib/normalizePlaceholdImageUrl";
+import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
 import { readLegacyPlaceholderText } from "../../lib/fallbackImage";
 import {
   getCoverArtDirection,
@@ -229,7 +229,7 @@ export default function Cover({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const resolvedUrl = normalizePlaceholdImageUrl(coverUrl);
+  const resolvedUrl = normalizeLegacyImageUrl(coverUrl);
   const placeholdLabel = readPlaceholdLabel(coverUrl);
   const usesMockFallback = isLikelyPlaceholderCover(coverUrl);
   const fallbackLabel = String(label || placeholdLabel || "").trim();
