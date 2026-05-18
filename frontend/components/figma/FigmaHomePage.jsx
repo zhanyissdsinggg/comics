@@ -137,6 +137,21 @@ function uniqueSeriesItems(items = []) {
   });
 }
 
+function excludeSeriesItems(items = [], excludedIds = new Set()) {
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const key = String(item?.id || item?.seriesId || "").trim();
+    return key && !excludedIds.has(key);
+  });
+}
+
+function collectSeriesIds(items = []) {
+  return new Set(
+    (Array.isArray(items) ? items : [])
+      .map((item) => String(item?.id || item?.seriesId || "").trim())
+      .filter(Boolean),
+  );
+}
+
 function HomeContent({
   seriesList = [],
   initialReady = false,
@@ -267,23 +282,49 @@ function HomeContent({
     [sortedItems],
   );
   const shelfSourceItems =
-    contentType === FIGMA_CONTENT_TYPES.NOVELS ? uniqueSortedItems : sortedItems;
+    contentType === FIGMA_CONTENT_TYPES.NOVELS
+      ? uniqueSortedItems
+      : sortedItems;
+  const continueItems = useMemo(
+    () => shelfSourceItems.slice(0, 2),
+    [shelfSourceItems],
+  );
+  const continueItemIds = useMemo(
+    () => collectSeriesIds(continueItems),
+    [continueItems],
+  );
+  const novelShelfPool = useMemo(
+    () => excludeSeriesItems(shelfSourceItems, continueItemIds),
+    [continueItemIds, shelfSourceItems],
+  );
+  const novelEditorialPool =
+    contentType === FIGMA_CONTENT_TYPES.NOVELS && novelShelfPool.length < 3
+      ? []
+      : novelShelfPool;
   const heroItem =
     inferCatalogHero(shelfSourceItems) || inferCatalogHero(modeScopedItems);
   const gridItems =
     contentType === FIGMA_CONTENT_TYPES.NOVELS
-      ? shelfSourceItems.slice(0, 6)
+      ? novelEditorialPool.slice(0, 6)
       : [...shelfSourceItems, ...shelfSourceItems].slice(0, 6);
+  const gridItemIds = useMemo(() => collectSeriesIds(gridItems), [gridItems]);
+  const novelRankingPool = useMemo(
+    () => excludeSeriesItems(novelEditorialPool, gridItemIds),
+    [gridItemIds, novelEditorialPool],
+  );
   const exploreGridItems =
     contentType === FIGMA_CONTENT_TYPES.NOVELS
-      ? shelfSourceItems.slice(0, 12)
+      ? novelEditorialPool.slice(0, 12)
       : [...shelfSourceItems, ...shelfSourceItems, ...shelfSourceItems].slice(
           0,
           12,
         );
-  const rankItems = sortByRating(shelfSourceItems).slice(0, 5);
+  const rankItems = sortByRating(
+    contentType === FIGMA_CONTENT_TYPES.NOVELS
+      ? novelRankingPool
+      : shelfSourceItems,
+  ).slice(0, 5);
   const genreOptions = buildGenreOptions(currentItems);
-  const continueItems = shelfSourceItems.slice(0, 2);
   const continueSectionHasProgress = continueItems.some(
     (item) => item.hasProgress,
   );
@@ -712,123 +753,125 @@ function HomeContent({
               </div>
             </section>
 
-            <section className="mb-10 md:mb-16">
-              <div className="mb-4 flex items-center justify-between md:mb-6">
-                <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white md:text-2xl">
-                  <Sparkles className={cn("h-6 w-6", palette.primaryText)} />
-                  Editor&apos;s Choice
-                </h2>
-              </div>
-
-              <div
-                className={cn(
-                  "overflow-hidden rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4",
-                  palette.surface,
-                  palette.border,
-                )}
-              >
-                <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                      Editor's Picks
-                    </p>
-                    <p className="mt-1 text-sm text-gray-400 md:text-base">
-                      Hand-picked picks with stronger shelf presence.
-                    </p>
-                  </div>
-                  <div className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300 md:block">
-                    Updated hourly
-                  </div>
+            {gridItems.length > 0 ? (
+              <section className="mb-10 md:mb-16">
+                <div className="mb-4 flex items-center justify-between md:mb-6">
+                  <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-white md:text-2xl">
+                    <Sparkles className={cn("h-6 w-6", palette.primaryText)} />
+                    Editor&apos;s Choice
+                  </h2>
                 </div>
 
-                <div className="grid h-auto grid-cols-1 gap-3 md:h-[500px] md:grid-cols-4 md:gap-4">
-                  {gridItems[0] ? (
-                    <Link
-                      href={gridItems[0].detailHref}
-                      className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
-                    >
-                      <img
-                        src={resolveDisplayImageUrl(gridItems[0].coverUrl, {
-                          kind: "cover",
-                          adult: gridItems[0]?.adult || gridItems[0]?.isAdult,
-                        })}
-                        alt={gridItems[0].title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 w-full p-5 md:p-6">
-                        <span
-                          className={cn(
-                            "mb-3 inline-block rounded-md px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white",
-                            palette.primaryBg,
-                          )}
-                        >
-                          Masterpiece
-                        </span>
-                        <h3 className="mb-2 text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
-                          {gridItems[0].title}
-                        </h3>
-                        <p className="line-clamp-2 text-sm text-gray-300 md:max-w-[80%]">
-                          {gridItems[0].description}
-                        </p>
-                      </div>
-                    </Link>
-                  ) : null}
+                <div
+                  className={cn(
+                    "overflow-hidden rounded-[28px] border p-3 shadow-xl md:rounded-[32px] md:p-4",
+                    palette.surface,
+                    palette.border,
+                  )}
+                >
+                  <div className="mb-4 flex items-center justify-between px-1 md:mb-5">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
+                        Editor's Picks
+                      </p>
+                      <p className="mt-1 text-sm text-gray-400 md:text-base">
+                        Hand-picked picks with stronger shelf presence.
+                      </p>
+                    </div>
+                    <div className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300 md:block">
+                      Updated hourly
+                    </div>
+                  </div>
 
-                  {gridItems[1] ? (
-                    <Link
-                      href={gridItems[1].detailHref}
-                      className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
-                    >
-                      <img
-                        src={resolveDisplayImageUrl(gridItems[1].coverUrl, {
-                          kind: "cover",
-                          adult: gridItems[1]?.adult || gridItems[1]?.isAdult,
-                        })}
-                        alt={gridItems[1].title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 w-full p-4 md:p-5">
-                        <span className="mb-2 inline-block rounded-md bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
-                          Trending
-                        </span>
-                        <h3 className="truncate text-lg font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-xl">
-                          {gridItems[1].title}
-                        </h3>
-                      </div>
-                    </Link>
-                  ) : null}
+                  <div className="grid h-auto grid-cols-1 gap-3 md:h-[500px] md:grid-cols-4 md:gap-4">
+                    {gridItems[0] ? (
+                      <Link
+                        href={gridItems[0].detailHref}
+                        className="group relative block h-[260px] overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-2 md:h-full"
+                      >
+                        <img
+                          src={resolveDisplayImageUrl(gridItems[0].coverUrl, {
+                            kind: "cover",
+                            adult: gridItems[0]?.adult || gridItems[0]?.isAdult,
+                          })}
+                          alt={gridItems[0].title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                        <div className="absolute bottom-0 left-0 w-full p-5 md:p-6">
+                          <span
+                            className={cn(
+                              "mb-3 inline-block rounded-md px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-white",
+                              palette.primaryBg,
+                            )}
+                          >
+                            Masterpiece
+                          </span>
+                          <h3 className="mb-2 text-xl font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-3xl">
+                            {gridItems[0].title}
+                          </h3>
+                          <p className="line-clamp-2 text-sm text-gray-300 md:max-w-[80%]">
+                            {gridItems[0].description}
+                          </p>
+                        </div>
+                      </Link>
+                    ) : null}
 
-                  {gridItems.slice(2, 4).map((item) => (
-                    <Link
-                      key={item.id}
-                      href={item.detailHref}
-                      className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
-                    >
-                      <img
-                        src={resolveDisplayImageUrl(item.coverUrl, {
-                          kind: "cover",
-                          adult: item?.adult || item?.isAdult,
-                        })}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
-                      <div className="absolute bottom-0 left-0 w-full p-4">
-                        <h3 className="line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-gray-200">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          {item.rating}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+                    {gridItems[1] ? (
+                      <Link
+                        href={gridItems[1].detailHref}
+                        className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:col-span-2 md:row-span-1 md:h-full"
+                      >
+                        <img
+                          src={resolveDisplayImageUrl(gridItems[1].coverUrl, {
+                            kind: "cover",
+                            adult: gridItems[1]?.adult || gridItems[1]?.isAdult,
+                          })}
+                          alt={gridItems[1].title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                        <div className="absolute bottom-0 left-0 w-full p-4 md:p-5">
+                          <span className="mb-2 inline-block rounded-md bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white backdrop-blur-md">
+                            Trending
+                          </span>
+                          <h3 className="truncate text-lg font-black leading-tight text-white transition-colors group-hover:text-gray-200 md:text-xl">
+                            {gridItems[1].title}
+                          </h3>
+                        </div>
+                      </Link>
+                    ) : null}
+
+                    {gridItems.slice(2, 4).map((item) => (
+                      <Link
+                        key={item.id}
+                        href={item.detailHref}
+                        className="group relative block h-[170px] overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10 transition-all hover:ring-white/30 md:h-full"
+                      >
+                        <img
+                          src={resolveDisplayImageUrl(item.coverUrl, {
+                            kind: "cover",
+                            adult: item?.adult || item?.isAdult,
+                          })}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
+                        <div className="absolute bottom-0 left-0 w-full p-4">
+                          <h3 className="line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-gray-200">
+                            {item.title}
+                          </h3>
+                          <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                            {item.rating}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            ) : null}
 
             <section className="mb-10 md:mb-16">
               <div className="mb-4 flex items-center justify-between md:mb-6">
@@ -893,10 +936,9 @@ function HomeContent({
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 md:gap-5 lg:grid-cols-6">
-                  {(
-                    activeGenre === "All" && activeSort === "Trending"
-                      ? gridItems
-                      : exploreGridItems
+                  {(activeGenre === "All" && activeSort === "Trending"
+                    ? gridItems
+                    : exploreGridItems
                   ).map((item, index) => (
                     <Link
                       key={`${item.id}-${index}`}
@@ -968,90 +1010,92 @@ function HomeContent({
           </div>
 
           <div className="w-full shrink-0 space-y-6 md:space-y-12 xl:w-[350px]">
-            <div
-              className={cn(
-                "rounded-2xl border p-5 md:p-6",
-                palette.surface,
-                palette.border,
-              )}
-            >
-              <div className="mb-5 flex items-center justify-between md:mb-6">
-                <h3 className="flex items-center gap-2 text-lg font-bold text-white md:text-xl">
-                  <Trophy className={cn("h-5 w-5", palette.primaryText)} />
-                  {rankingLabel}
-                </h3>
-              </div>
-
-              <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-black/35 px-4 py-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Top Rated
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-gray-300">
-                    {rankingMetaLabel}
-                  </p>
-                </div>
-                <span
-                  className={cn(
-                    "rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
-                    palette.primarySoft,
-                  )}
-                >
-                  {rankItems.length} picks
-                </span>
-              </div>
-
-              <div className="space-y-3 md:space-y-4">
-                {rankItems.map((item, index) => (
-                  <Link
-                    key={`rank-${item.id}`}
-                    href={item.detailHref}
-                    onClick={() =>
-                      handleStoryClick(item, "top_rated_picks", index + 1)
-                    }
-                    className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-white/5 active:scale-95 md:gap-4 md:p-2"
-                  >
-                    <span
-                      className={cn(
-                        "w-6 text-center text-2xl font-black drop-shadow-sm",
-                        index < 3 ? palette.primaryText : "text-gray-600",
-                      )}
-                    >
-                      {index + 1}
-                    </span>
-                    <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded ring-1 ring-white/10 transition-all group-hover:ring-white/20">
-                      <img
-                        src={resolveDisplayImageUrl(item.coverUrl, {
-                          kind: "cover",
-                          adult: item?.adult || item?.isAdult,
-                        })}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="truncate text-sm font-bold text-white transition-colors group-hover:text-gray-200">
-                        {item.title}
-                      </h4>
-                      <p className="truncate text-xs text-gray-400">
-                        {item.author || item.tags[0] || "Featured pick"}
-                      </p>
-                      <div className="mt-1 flex items-center gap-1 text-xs font-medium text-gray-500">
-                        <History className="h-3 w-3" />
-                        {getRankingItemNote(item)}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <Link
-                href="/rankings"
-                className="mt-5 block w-full rounded-xl border border-white/10 py-2.5 text-center text-sm font-bold text-gray-300 transition-colors hover:bg-white/5 md:mt-6 md:py-3"
+            {rankItems.length > 0 ? (
+              <div
+                className={cn(
+                  "rounded-2xl border p-5 md:p-6",
+                  palette.surface,
+                  palette.border,
+                )}
               >
-                View Full Ranking
-              </Link>
-            </div>
+                <div className="mb-5 flex items-center justify-between md:mb-6">
+                  <h3 className="flex items-center gap-2 text-lg font-bold text-white md:text-xl">
+                    <Trophy className={cn("h-5 w-5", palette.primaryText)} />
+                    {rankingLabel}
+                  </h3>
+                </div>
+
+                <div className="mb-6 flex items-center justify-between rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                      Top Rated
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-gray-300">
+                      {rankingMetaLabel}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
+                      palette.primarySoft,
+                    )}
+                  >
+                    {rankItems.length} picks
+                  </span>
+                </div>
+
+                <div className="space-y-3 md:space-y-4">
+                  {rankItems.map((item, index) => (
+                    <Link
+                      key={`rank-${item.id}`}
+                      href={item.detailHref}
+                      onClick={() =>
+                        handleStoryClick(item, "top_rated_picks", index + 1)
+                      }
+                      className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-white/5 active:scale-95 md:gap-4 md:p-2"
+                    >
+                      <span
+                        className={cn(
+                          "w-6 text-center text-2xl font-black drop-shadow-sm",
+                          index < 3 ? palette.primaryText : "text-gray-600",
+                        )}
+                      >
+                        {index + 1}
+                      </span>
+                      <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded ring-1 ring-white/10 transition-all group-hover:ring-white/20">
+                        <img
+                          src={resolveDisplayImageUrl(item.coverUrl, {
+                            kind: "cover",
+                            adult: item?.adult || item?.isAdult,
+                          })}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-bold text-white transition-colors group-hover:text-gray-200">
+                          {item.title}
+                        </h4>
+                        <p className="truncate text-xs text-gray-400">
+                          {item.author || item.tags[0] || "Featured pick"}
+                        </p>
+                        <div className="mt-1 flex items-center gap-1 text-xs font-medium text-gray-500">
+                          <History className="h-3 w-3" />
+                          {getRankingItemNote(item)}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                <Link
+                  href="/rankings"
+                  className="mt-5 block w-full rounded-xl border border-white/10 py-2.5 text-center text-sm font-bold text-gray-300 transition-colors hover:bg-white/5 md:mt-6 md:py-3"
+                >
+                  View Full Ranking
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       </FigmaChrome>
