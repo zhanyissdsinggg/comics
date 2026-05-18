@@ -1457,6 +1457,9 @@ function ReaderContent({
         <ComicReaderContent
           pages={pages}
           paragraphs={paragraphs}
+          seriesId={seriesData.series.id}
+          seriesTitle={seriesData.series.title}
+          episodeTitle={currentEpisodeTitle}
           previewCount={previewCount}
           previewParagraphs={previewParagraphs}
           layoutMode={layoutModeForView}
@@ -1478,6 +1481,9 @@ function ReaderContent({
         <NovelReaderContent
           pages={pages}
           paragraphs={paragraphs}
+          seriesId={seriesData.series.id}
+          seriesTitle={seriesData.series.title}
+          episodeTitle={currentEpisodeTitle}
           previewCount={previewCount}
           previewParagraphs={previewParagraphs}
           layoutMode={layoutModeForView}

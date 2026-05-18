@@ -10,13 +10,11 @@ import { siteConfig } from "../../lib/siteConfig";
 const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
+  { label: "Interactive", href: "/search?type=interactive" },
+  { label: "Rankings", href: "/rankings" },
+  { label: "Search", href: "/search" },
   { label: "Support", href: "/support" },
 ]
-  .concat(
-    siteConfig.navigation.showRankingsInNav
-      ? [{ label: "Trending", href: "/rankings" }]
-      : [],
-  )
   .concat(
     siteConfig.navigation.showCreatorsInNav
       ? [{ label: "Creators", href: "/creators" }]
@@ -29,13 +27,11 @@ const fullFooterSections = [
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
+      { label: "Interactive", href: "/search?type=interactive" },
+      { label: "Rankings", href: "/rankings" },
+      { label: "Search", href: "/search" },
       { label: "Support", href: "/support" },
     ]
-      .concat(
-        siteConfig.navigation.showRankingsInNav
-          ? [{ label: "Trending", href: "/rankings" }]
-          : [],
-      )
       .concat(
         siteConfig.navigation.showCreatorsInNav
           ? [{ label: "Creators", href: "/creators" }]
@@ -85,15 +81,13 @@ const compactMetaFooterLinks = [
 const homePrimaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
+  { label: "Interactive", href: "/search?type=interactive" },
+  { label: "Rankings", href: "/rankings" },
+  { label: "Search", href: "/search" },
   { label: "Support", href: "/support" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
 ]
-  .concat(
-    siteConfig.navigation.showRankingsInNav
-      ? [{ label: "Trending", href: "/rankings" }]
-      : [],
-  )
   .concat(
     siteConfig.navigation.showCreatorsInNav
       ? [{ label: "Creators", href: "/creators" }]

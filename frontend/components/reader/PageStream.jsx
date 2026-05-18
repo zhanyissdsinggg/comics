@@ -4,6 +4,7 @@ import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getFallbackImageUrl } from "../../lib/fallbackImage";
 import { normalizeLegacyImageUrl } from "../../lib/normalizeLegacyImageUrl";
+import { getApprovedMockComicPageAsset } from "../../lib/readerMockAssets";
 import {
   isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
@@ -52,11 +53,32 @@ function readPlaceholdPageMeta(url) {
   }
 }
 
-function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
+function buildComicPageAlt(seriesTitle, episodeTitle, index) {
+  const safeSeriesTitle = String(seriesTitle || "Series").trim() || "Series";
+  const safeEpisodeTitle =
+    String(episodeTitle || "Episode").trim() || "Episode";
+  return `${safeSeriesTitle} ${safeEpisodeTitle} page ${index + 1}`;
+}
+
+function ReaderEditorialFallback({
+  page,
+  meta,
+  index,
+  isHorizontal = false,
+  seriesId = "",
+  seriesTitle = "",
+  episodeTitle = "",
+}) {
   const aspectRatio = `${page?.w || 800} / ${page?.h || 1200}`;
   const fallbackSrc =
+    getApprovedMockComicPageAsset({
+      seriesId,
+      seriesTitle,
+      pageNumber: index + 1,
+    }) ||
     normalizeLegacyImageUrl(page?.url) ||
     getFallbackImageUrl({ kind: "reader" });
+  const pageAlt = buildComicPageAlt(seriesTitle, episodeTitle, index);
 
   return (
     <div
@@ -70,7 +92,7 @@ function ReaderEditorialFallback({ page, meta, index, isHorizontal = false }) {
     >
       <NextImage
         src={fallbackSrc}
-        alt="Comic page"
+        alt={pageAlt}
         width={page?.w || 800}
         height={page?.h || 1200}
         className={`m-0 w-full p-0 align-top ${
@@ -115,6 +137,9 @@ function preloadImages(pages, startIndex, count = 3) {
 export default function PageStream({
   pages,
   paragraphs,
+  seriesId = "",
+  seriesTitle = "",
+  episodeTitle = "",
   previewCount,
   previewParagraphs,
   prefetchCount = 3,
@@ -421,6 +446,9 @@ export default function PageStream({
                     meta={placeholderMeta}
                     index={index}
                     isHorizontal={isHorizontal}
+                    seriesId={seriesId}
+                    seriesTitle={seriesTitle}
+                    episodeTitle={episodeTitle}
                   />
                 ) : errorPages[index] ? (
                   <div className="flex flex-col items-center gap-3 py-10 text-sm text-neutral-300">
@@ -449,7 +477,11 @@ export default function PageStream({
                       paddingTop: `${((page.h || 1200) / (page.w || 800)) * 100}%`,
                     }}
                     role="img"
-                    aria-label="Comic page"
+                    aria-label={buildComicPageAlt(
+                      seriesTitle,
+                      episodeTitle,
+                      index,
+                    )}
                   />
                 ) : (
                   <div
@@ -484,7 +516,7 @@ export default function PageStream({
                           ? `${normalizeLegacyImageUrl(page.url)}${page.url.includes("?") ? "&" : "?"}retry=${reloadKeys[index]}`
                           : normalizeLegacyImageUrl(page.url)
                       }
-                      alt="Comic page"
+                      alt={buildComicPageAlt(seriesTitle, episodeTitle, index)}
                       width={page.w || 800}
                       height={page.h || 1200}
                       className={`m-0 w-full p-0 align-top transition-opacity duration-200 ${

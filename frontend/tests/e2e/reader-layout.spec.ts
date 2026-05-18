@@ -489,7 +489,11 @@ test.describe("Reader layout", () => {
     await expect(firstPageImage).toBeVisible();
     await expect(firstPageImage).toHaveAttribute(
       "src",
-      /\/fallback\/reader-page-default\.svg/,
+      /\/images\/mock-comics\/series-012\/page-1\.svg/,
+    );
+    await expect(firstPageImage).toHaveAttribute(
+      "alt",
+      /Wild Hearts (Episode|Chapter) 1 page 1/i,
     );
 
     const order = await page.evaluate(() => {
@@ -509,6 +513,73 @@ test.describe("Reader layout", () => {
 
     await expectNoRuntimeIssues(
       "/read/series-012/series-012e1#legacy-fallback-image",
+      runtimeIssues,
+    );
+  });
+
+  test("healthy comic readers should render approved mock comic assets with descriptive alt text", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: "series-001",
+      episodeId: "series-001e1",
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: "series-001",
+          title: "The Last Kingdom",
+          type: "comic",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: "series-001e1",
+          seriesId: "series-001",
+          title: "Episode 1",
+          type: "comic",
+          pricePts: 0,
+          previewFreePages: 3,
+          pages: [
+            {
+              url: "/images/mock-comics/series-001/page-1.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-001/page-2.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-001/page-3.svg",
+              w: 800,
+              h: 1200,
+            },
+          ],
+          paragraphs: [],
+        },
+      },
+    });
+
+    const response = await page.goto("/read/series-001/series-001e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const firstImage = page.locator("main [data-index='0'] img").first();
+    await expect(firstImage).toBeVisible();
+    await expect(firstImage).toHaveAttribute(
+      "src",
+      /\/images\/mock-comics\/series-001\/page-1\.svg/,
+    );
+    await expect(firstImage).toHaveAttribute(
+      "alt",
+      /The Last Kingdom (Episode|Chapter) 1 page 1/i,
+    );
+
+    await expectNoRuntimeIssues(
+      "/read/series-001/series-001e1#approved-mock-assets",
       runtimeIssues,
     );
   });

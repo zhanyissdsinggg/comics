@@ -159,7 +159,7 @@ export default function FigmaCommentsSection({
       <div className="mb-8 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
           <MessageSquare className={cn("h-6 w-6", palette.primaryText)} />
-          {title} (1.2k)
+          {title}
         </h3>
         <button
           type="button"
