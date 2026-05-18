@@ -1,10 +1,15 @@
 import { chromium } from "@playwright/test";
 
-const BASE_URL = process.env.READER_PROD_BASE_URL || "https://www.gushcomics.com";
+const BASE_URL =
+  process.env.READER_PROD_BASE_URL || "https://www.gushcomics.com";
 const TARGETS = [
   {
     route: "/read/series-001/series-001e1",
     label: "The Last Kingdom",
+  },
+  {
+    route: "/read/series-010/series-010e1",
+    label: "Crimson Tide",
   },
   {
     route: "/read/series-012/series-012e1",
@@ -29,27 +34,70 @@ async function assertReaderRoute(page, target) {
   const regionTitle = page.getByRole("heading", { name: target.label });
   await regionTitle.waitFor({ state: "visible", timeout: 30000 });
 
-  const bodyText = await page.locator("body").evaluate((node) => node.innerText || "");
+  const bodyText = await page
+    .locator("body")
+    .evaluate((node) => node.innerText || "");
   for (const text of FORBIDDEN_VISIBLE_TEXT) {
     if (bodyText.includes(text)) {
-      throw new Error(`[${target.route}] still shows forbidden reader text: ${text}`);
+      throw new Error(
+        `[${target.route}] still shows forbidden reader text: ${text}`,
+      );
     }
   }
 
-  const comicImages = page.locator('[data-testid="comic-reader-content"] img[alt="Comic page"]');
+  const comicImages = page.locator('[data-testid="comic-reader-content"] img');
   const visibleImageCount = await comicImages.count();
   if (visibleImageCount < 1) {
-    throw new Error(`[${target.route}] comic reader rendered without visible Comic page images.`);
+    throw new Error(
+      `[${target.route}] comic reader rendered without any comic images.`,
+    );
+  }
+
+  const firstImage = comicImages.first();
+  await firstImage.waitFor({ state: "visible", timeout: 30000 });
+
+  const imageDetails = await page.evaluate(() =>
+    Array.from(
+      document.querySelectorAll('[data-testid="comic-reader-content"] img'),
+    ).map((node) => ({
+      src: node.getAttribute("src") || "",
+      alt: node.getAttribute("alt") || "",
+    })),
+  );
+
+  const hasVisibleApprovedImage = imageDetails.some(
+    (item) =>
+      Boolean(item.src) &&
+      !item.src.includes("/fallback/reader-page-default.svg"),
+  );
+  if (!hasVisibleApprovedImage) {
+    throw new Error(
+      `[${target.route}] comic reader did not render an approved comic image source.`,
+    );
+  }
+
+  const hasSpecificAlt = imageDetails.some((item) =>
+    new RegExp(`^${target.label} (Chapter|Episode) 1 page \\d+$`, "i").test(
+      item.alt,
+    ),
+  );
+  if (!hasSpecificAlt) {
+    throw new Error(
+      `[${target.route}] comic reader images are missing specific alt text for ${target.label}.`,
+    );
   }
 
   const contentBeforeEndPanel = await page.evaluate(() => {
-    const comicContent = document.querySelector('[data-testid="comic-reader-content"]');
+    const comicContent = document.querySelector(
+      '[data-testid="comic-reader-content"]',
+    );
     const endPanel = document.querySelector('[data-testid="reader-end-panel"]');
     if (!comicContent || !endPanel) {
       return false;
     }
     return Boolean(
-      comicContent.compareDocumentPosition(endPanel) & Node.DOCUMENT_POSITION_FOLLOWING,
+      comicContent.compareDocumentPosition(endPanel) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
     );
   });
 

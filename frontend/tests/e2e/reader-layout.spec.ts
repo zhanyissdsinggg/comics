@@ -92,6 +92,11 @@ const CLEAN_FREE_READER_SERIES = [
     episodeId: "series-002e1",
     title: "Moonlight Sonata",
   },
+  {
+    seriesId: "series-010",
+    episodeId: "series-010e1",
+    title: "Crimson Tide",
+  },
   { seriesId: "series-012", episodeId: "series-012e1", title: "Wild Hearts" },
 ];
 const NOVEL_TEST_FIRST_PARAGRAPH =
@@ -580,6 +585,100 @@ test.describe("Reader layout", () => {
 
     await expectNoRuntimeIssues(
       "/read/series-001/series-001e1#approved-mock-assets",
+      runtimeIssues,
+    );
+  });
+
+  test("series-010 comic reader should render approved mock assets instead of error fallback copy", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: "series-010",
+      episodeId: "series-010e1",
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: "series-010",
+          title: "Crimson Tide",
+          type: "comic",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: "series-010e1",
+          seriesId: "series-010",
+          title: "Episode 1",
+          type: "comic",
+          pricePts: 0,
+          previewFreePages: 3,
+          pages: [
+            {
+              url: "/images/mock-comics/series-010/page-1.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-010/page-2.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-010/page-3.svg",
+              w: 800,
+              h: 1200,
+            },
+          ],
+          paragraphs: [],
+        },
+      },
+    });
+
+    const response = await page.goto("/read/series-010/series-010e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const body = page.locator("body");
+    await expect(body).not.toContainText(
+      /Comic reader content region|Comic page stream placeholder|Page unavailable|Tap to retry/i,
+    );
+    await expect(body).not.toContainText(
+      /Story preview artwork|Reader fallback|Page preview/i,
+    );
+
+    const firstImage = page.locator("main [data-index='0'] img").first();
+    await expect(firstImage).toBeVisible();
+    await expect(firstImage).toHaveAttribute(
+      "src",
+      /\/images\/mock-comics\/series-010\/page-1\.svg/,
+    );
+    await expect(firstImage).not.toHaveAttribute(
+      "src",
+      /\/fallback\/reader-page-default\.svg/,
+    );
+    await expect(firstImage).toHaveAttribute(
+      "alt",
+      /Crimson Tide (Episode|Chapter) 1 page 1/i,
+    );
+
+    const order = await page.evaluate(() => {
+      const content = document.querySelector(
+        '[data-testid="comic-reader-content"]',
+      ) as HTMLElement | null;
+      const endPanel = document.querySelector(
+        '[data-testid="reader-end-panel"]',
+      ) as HTMLElement | null;
+      return {
+        contentTop: content?.getBoundingClientRect().top || 0,
+        endPanelTop: endPanel?.getBoundingClientRect().top || 0,
+      };
+    });
+
+    expect(order.contentTop).toBeLessThan(order.endPanelTop);
+
+    await expectNoRuntimeIssues(
+      "/read/series-010/series-010e1#approved-mock-assets",
       runtimeIssues,
     );
   });
