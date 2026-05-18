@@ -6,14 +6,22 @@ const TARGETS = [
   {
     route: "/read/series-001/series-001e1",
     label: "The Last Kingdom",
+    kind: "comic",
   },
   {
     route: "/read/series-010/series-010e1",
     label: "Crimson Tide",
+    kind: "comic",
+  },
+  {
+    route: "/read/series-011/series-011e1",
+    label: "Solar Wind",
+    kind: "novel",
   },
   {
     route: "/read/series-012/series-012e1",
     label: "Wild Hearts",
+    kind: "comic",
   },
 ];
 
@@ -28,9 +36,6 @@ async function assertReaderRoute(page, target) {
   const url = `${BASE_URL}${target.route}`;
   await page.goto(url, { waitUntil: "networkidle" });
 
-  const comicRegion = page.getByTestId("comic-reader-content");
-  await comicRegion.waitFor({ state: "visible", timeout: 30000 });
-
   const regionTitle = page.getByRole("heading", { name: target.label });
   await regionTitle.waitFor({ state: "visible", timeout: 30000 });
 
@@ -44,6 +49,33 @@ async function assertReaderRoute(page, target) {
       );
     }
   }
+
+  if (target.kind === "novel") {
+    const novelRegion = page.getByTestId("novel-reader-content");
+    await novelRegion.waitFor({ state: "visible", timeout: 30000 });
+
+    const paragraphCount = await page.evaluate(() => {
+      const region = document.querySelector(
+        '[data-testid="novel-reader-content"]',
+      );
+      if (!region) {
+        return 0;
+      }
+      return region.querySelectorAll("article p").length;
+    });
+
+    if (paragraphCount < 1) {
+      throw new Error(
+        `[${target.route}] novel reader rendered without visible story paragraphs.`,
+      );
+    }
+
+    console.log(`PASS ${target.route}`);
+    return;
+  }
+
+  const comicRegion = page.getByTestId("comic-reader-content");
+  await comicRegion.waitFor({ state: "visible", timeout: 30000 });
 
   const comicImages = page.locator('[data-testid="comic-reader-content"] img');
   const visibleImageCount = await comicImages.count();
@@ -84,6 +116,15 @@ async function assertReaderRoute(page, target) {
   if (!hasSpecificAlt) {
     throw new Error(
       `[${target.route}] comic reader images are missing specific alt text for ${target.label}.`,
+    );
+  }
+
+  const hasGenericAlt = imageDetails.some(
+    (item) => String(item.alt || "").trim().toLowerCase() === "comic page",
+  );
+  if (hasGenericAlt) {
+    throw new Error(
+      `[${target.route}] comic reader still renders generic \"Comic page\" alt text.`,
     );
   }
 

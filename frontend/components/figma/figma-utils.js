@@ -251,17 +251,17 @@ function buildStatusLabel(series) {
 
 function buildFallbackViews(series, interactive = false) {
   const episodeCount = Math.max(1, Number(series?.episodeCount || 1));
-  const base = interactive ? 8_500 : 14_000;
+  const base = interactive ? 2_400 : 4_800;
   return Math.round(
-    base + episodeCount * 2_600 + seededNumber(series?.id, 0, 24_000, 0),
+    base + episodeCount * 680 + seededNumber(series?.id, 0, 6_800, 0),
   );
 }
 
 function buildFallbackLikes(series) {
   return Math.round(
-    180 +
-      Math.max(1, Number(series?.episodeCount || 1)) * 42 +
-      seededNumber(series?.id, 0, 2_400, 0),
+    36 +
+      Math.max(1, Number(series?.episodeCount || 1)) * 11 +
+      seededNumber(series?.id, 0, 420, 0),
   );
 }
 
@@ -614,67 +614,8 @@ export function formatUsd(value) {
 }
 
 export function buildCommentSeed(seriesTitle = "Story") {
-  const seed = hashString(seriesTitle);
-  const userSets = [
-    ["PanelDrifter", "MintJuno", "WestPier"],
-    ["NightRelay", "SoraVale", "QuietTide"],
-    ["DustBloom", "RainStatic", "FrameRunner"],
-  ];
-  const textSets = [
-    [
-      `The pacing on ${seriesTitle} is sharp without feeling rushed. Easy chapter to keep scrolling through.`,
-      "That turn landed better than I expected once the setup clicked.",
-      "Clean cliffhanger. Just enough to make the next chapter feel earned.",
-    ],
-    [
-      `${seriesTitle} keeps the emotional beats tight. No wasted panels so far.`,
-      "I like that the chapter actually slowed down before the last hit.",
-      "The ending sold me harder than the opening did.",
-    ],
-    [
-      `This chapter of ${seriesTitle} reads smoother than a lot of weekly updates.`,
-      "Small detail, but the setup payoff worked for me here.",
-      "Not flashy, just solid. I would keep reading.",
-    ],
-  ];
-  const selectedUsers = userSets[seed % userSets.length];
-  const selectedTexts = textSets[seed % textSets.length];
-
-  return [
-    {
-      id: 1,
-      user: selectedUsers[0],
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "indigo" }),
-      text: selectedTexts[0],
-      likes: 86 + (seed % 34),
-      date: "3 hours ago",
-      isPinned: true,
-      isSpoiler: false,
-      vipLevel: 1 + (seed % 2),
-    },
-    {
-      id: 2,
-      user: selectedUsers[1],
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "rose" }),
-      text: selectedTexts[1],
-      likes: 24 + (seed % 18),
-      date: "8 hours ago",
-      isPinned: false,
-      isSpoiler: seed % 2 === 0,
-      vipLevel: 0,
-    },
-    {
-      id: 3,
-      user: selectedUsers[2],
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "teal" }),
-      text: selectedTexts[2],
-      likes: 9 + (seed % 11),
-      date: "1 day ago",
-      isPinned: false,
-      isSpoiler: false,
-      vipLevel: seed % 3 === 0 ? 2 : 0,
-    },
-  ];
+  void seriesTitle;
+  return [];
 }
 
 export function buildProfileHistoryItems(historyItems = [], catalogItems = []) {

@@ -582,6 +582,7 @@ test.describe("Reader layout", () => {
       "alt",
       /The Last Kingdom (Episode|Chapter) 1 page 1/i,
     );
+    await expect(firstImage).not.toHaveAttribute("alt", /^Comic page$/i);
 
     await expectNoRuntimeIssues(
       "/read/series-001/series-001e1#approved-mock-assets",
@@ -661,6 +662,7 @@ test.describe("Reader layout", () => {
       "alt",
       /Crimson Tide (Episode|Chapter) 1 page 1/i,
     );
+    await expect(firstImage).not.toHaveAttribute("alt", /^Comic page$/i);
 
     const order = await page.evaluate(() => {
       const content = document.querySelector(
@@ -679,6 +681,60 @@ test.describe("Reader layout", () => {
 
     await expectNoRuntimeIssues(
       "/read/series-010/series-010e1#approved-mock-assets",
+      runtimeIssues,
+    );
+  });
+
+  test("novel reader should keep visible prose for series-011", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: NOVEL_TEST_SERIES_ID,
+      episodeId: NOVEL_TEST_EPISODE_ID,
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: NOVEL_TEST_SERIES_ID,
+          title: NOVEL_TEST_TITLE,
+          type: "novel",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: NOVEL_TEST_EPISODE_ID,
+          seriesId: NOVEL_TEST_SERIES_ID,
+          title: "Episode 1",
+          type: "novel",
+          pricePts: 0,
+          previewFreePages: 0,
+          pages: [],
+          paragraphs: [
+            NOVEL_TEST_FIRST_PARAGRAPH,
+            "The relay hum settles into the cabin while the crew weighs what to risk next.",
+            "By the end of the chapter, the choice feels inevitable instead of forced.",
+          ],
+        },
+      },
+    });
+
+    const response = await page.goto(
+      `/read/${NOVEL_TEST_SERIES_ID}/${NOVEL_TEST_EPISODE_ID}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
+    expect(response?.ok()).toBeTruthy();
+
+    const novelRegion = page.getByTestId("novel-reader-content");
+    await expect(novelRegion).toBeVisible();
+    await expect(novelRegion).toContainText(NOVEL_TEST_FIRST_PARAGRAPH);
+    await expect(page.locator("body")).not.toContainText(
+      /Page unavailable|Tap to retry|Comic page/i,
+    );
+
+    await expectNoRuntimeIssues(
+      `/read/${NOVEL_TEST_SERIES_ID}/${NOVEL_TEST_EPISODE_ID}#novel-visible-prose`,
       runtimeIssues,
     );
   });
