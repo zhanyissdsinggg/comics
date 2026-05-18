@@ -1038,6 +1038,22 @@ test.describe("Content mode filtering", () => {
     }
   });
 
+  test("public footer should expose Interactive, Search, and Rankings links", async ({
+    page,
+  }) => {
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const footer = page.locator('footer[data-site-footer="1"]').first();
+    await expect(
+      footer.getByRole("link", { name: "Interactive" }),
+    ).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Search" })).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: /Rankings|Trending/ }),
+    ).toBeVisible();
+  });
+
   test("adult reader should stay blocked in normal mode", async ({ page }) => {
     const routes = await installContentModeRoutes(page, {
       adultMode: false,

@@ -6,6 +6,9 @@ import { cn } from "../../lib/utils";
 export default function ComicReaderContent({
   pages,
   paragraphs,
+  seriesId,
+  seriesTitle,
+  episodeTitle,
   previewCount,
   previewParagraphs,
   layoutMode,
@@ -37,6 +40,9 @@ export default function ComicReaderContent({
           <PageStream
             pages={pages}
             paragraphs={paragraphs}
+            seriesId={seriesId}
+            seriesTitle={seriesTitle}
+            episodeTitle={episodeTitle}
             previewCount={previewCount}
             previewParagraphs={previewParagraphs}
             layoutMode={layoutMode}

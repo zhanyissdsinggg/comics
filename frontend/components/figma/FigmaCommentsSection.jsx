@@ -15,7 +15,7 @@ import {
   getFallbackImageUrl,
   resolveDisplayImageUrl,
 } from "../../lib/fallbackImage";
-import { buildCommentSeed, cn } from "./figma-utils";
+import { cn } from "./figma-utils";
 import { useFigmaSite } from "./FigmaSiteContext";
 
 function CommentItem({ comment }) {
@@ -148,18 +148,19 @@ function CommentItem({ comment }) {
 export default function FigmaCommentsSection({
   title = "Discussion",
   seriesTitle,
+  comments = [],
 }) {
   const { palette } = useFigmaSite();
   const [newComment, setNewComment] = useState("");
   const [isSpoilerTag, setIsSpoilerTag] = useState(false);
-  const comments = buildCommentSeed(seriesTitle);
+  const normalizedComments = Array.isArray(comments) ? comments : [];
 
   return (
     <div className="mt-12 w-full pb-24">
       <div className="mb-8 flex items-center justify-between">
         <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
           <MessageSquare className={cn("h-6 w-6", palette.primaryText)} />
-          {title} (1.2k)
+          {title}
         </h3>
         <button
           type="button"
@@ -221,20 +222,39 @@ export default function FigmaCommentsSection({
         </div>
       </div>
 
-      <div className="space-y-4">
-        {comments.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} />
-        ))}
-      </div>
-
-      <div className="mt-8 text-center">
-        <button
-          type="button"
-          className="rounded-full border border-gray-800 px-6 py-3 text-sm font-bold text-gray-400 transition-all hover:border-gray-600 hover:text-white active:scale-95"
+      {normalizedComments.length > 0 ? (
+        <div className="space-y-4">
+          {normalizedComments.map((comment) => (
+            <CommentItem key={comment.id} comment={comment} />
+          ))}
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "rounded-2xl border border-dashed p-6 text-center md:p-8",
+            palette.surface,
+            "border-white/10",
+          )}
         >
-          Load More Comments
-        </button>
-      </div>
+          <p className="text-base font-bold text-white">
+            Be the first to comment
+          </p>
+          <p className="mt-2 text-sm text-gray-400">
+            No public discussion is live for {seriesTitle || "this chapter"} yet.
+          </p>
+        </div>
+      )}
+
+      {normalizedComments.length > 0 ? (
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            className="rounded-full border border-gray-800 px-6 py-3 text-sm font-bold text-gray-400 transition-all hover:border-gray-600 hover:text-white active:scale-95"
+          >
+            Load More Comments
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

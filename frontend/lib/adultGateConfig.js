@@ -16,5 +16,5 @@ function readFlag(value, fallback = false) {
 
 export const requireLoginForAdult = readFlag(
   process.env.NEXT_PUBLIC_REQUIRE_LOGIN_FOR_ADULT,
-  false,
+  true,
 );

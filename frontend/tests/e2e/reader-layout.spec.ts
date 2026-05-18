@@ -92,6 +92,11 @@ const CLEAN_FREE_READER_SERIES = [
     episodeId: "series-002e1",
     title: "Moonlight Sonata",
   },
+  {
+    seriesId: "series-010",
+    episodeId: "series-010e1",
+    title: "Crimson Tide",
+  },
   { seriesId: "series-012", episodeId: "series-012e1", title: "Wild Hearts" },
 ];
 const NOVEL_TEST_FIRST_PARAGRAPH =
@@ -489,7 +494,11 @@ test.describe("Reader layout", () => {
     await expect(firstPageImage).toBeVisible();
     await expect(firstPageImage).toHaveAttribute(
       "src",
-      /\/fallback\/reader-page-default\.svg/,
+      /\/images\/mock-comics\/series-012\/page-1\.svg/,
+    );
+    await expect(firstPageImage).toHaveAttribute(
+      "alt",
+      /Wild Hearts (Episode|Chapter) 1 page 1/i,
     );
 
     const order = await page.evaluate(() => {
@@ -509,6 +518,223 @@ test.describe("Reader layout", () => {
 
     await expectNoRuntimeIssues(
       "/read/series-012/series-012e1#legacy-fallback-image",
+      runtimeIssues,
+    );
+  });
+
+  test("healthy comic readers should render approved mock comic assets with descriptive alt text", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: "series-001",
+      episodeId: "series-001e1",
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: "series-001",
+          title: "The Last Kingdom",
+          type: "comic",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: "series-001e1",
+          seriesId: "series-001",
+          title: "Episode 1",
+          type: "comic",
+          pricePts: 0,
+          previewFreePages: 3,
+          pages: [
+            {
+              url: "/images/mock-comics/series-001/page-1.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-001/page-2.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-001/page-3.svg",
+              w: 800,
+              h: 1200,
+            },
+          ],
+          paragraphs: [],
+        },
+      },
+    });
+
+    const response = await page.goto("/read/series-001/series-001e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const firstImage = page.locator("main [data-index='0'] img").first();
+    await expect(firstImage).toBeVisible();
+    await expect(firstImage).toHaveAttribute(
+      "src",
+      /\/images\/mock-comics\/series-001\/page-1\.svg/,
+    );
+    await expect(firstImage).toHaveAttribute(
+      "alt",
+      /The Last Kingdom (Episode|Chapter) 1 page 1/i,
+    );
+    await expect(firstImage).not.toHaveAttribute("alt", /^Comic page$/i);
+
+    await expectNoRuntimeIssues(
+      "/read/series-001/series-001e1#approved-mock-assets",
+      runtimeIssues,
+    );
+  });
+
+  test("series-010 comic reader should render approved mock assets instead of error fallback copy", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: "series-010",
+      episodeId: "series-010e1",
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: "series-010",
+          title: "Crimson Tide",
+          type: "comic",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: "series-010e1",
+          seriesId: "series-010",
+          title: "Episode 1",
+          type: "comic",
+          pricePts: 0,
+          previewFreePages: 3,
+          pages: [
+            {
+              url: "/images/mock-comics/series-010/page-1.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-010/page-2.svg",
+              w: 800,
+              h: 1200,
+            },
+            {
+              url: "/images/mock-comics/series-010/page-3.svg",
+              w: 800,
+              h: 1200,
+            },
+          ],
+          paragraphs: [],
+        },
+      },
+    });
+
+    const response = await page.goto("/read/series-010/series-010e1", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const body = page.locator("body");
+    await expect(body).not.toContainText(
+      /Comic reader content region|Comic page stream placeholder|Page unavailable|Tap to retry/i,
+    );
+    await expect(body).not.toContainText(
+      /Story preview artwork|Reader fallback|Page preview/i,
+    );
+
+    const firstImage = page.locator("main [data-index='0'] img").first();
+    await expect(firstImage).toBeVisible();
+    await expect(firstImage).toHaveAttribute(
+      "src",
+      /\/images\/mock-comics\/series-010\/page-1\.svg/,
+    );
+    await expect(firstImage).not.toHaveAttribute(
+      "src",
+      /\/fallback\/reader-page-default\.svg/,
+    );
+    await expect(firstImage).toHaveAttribute(
+      "alt",
+      /Crimson Tide (Episode|Chapter) 1 page 1/i,
+    );
+    await expect(firstImage).not.toHaveAttribute("alt", /^Comic page$/i);
+
+    const order = await page.evaluate(() => {
+      const content = document.querySelector(
+        '[data-testid="comic-reader-content"]',
+      ) as HTMLElement | null;
+      const endPanel = document.querySelector(
+        '[data-testid="reader-end-panel"]',
+      ) as HTMLElement | null;
+      return {
+        contentTop: content?.getBoundingClientRect().top || 0,
+        endPanelTop: endPanel?.getBoundingClientRect().top || 0,
+      };
+    });
+
+    expect(order.contentTop).toBeLessThan(order.endPanelTop);
+
+    await expectNoRuntimeIssues(
+      "/read/series-010/series-010e1#approved-mock-assets",
+      runtimeIssues,
+    );
+  });
+
+  test("novel reader should keep visible prose for series-011", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockReaderRoutes(page, {
+      seriesId: NOVEL_TEST_SERIES_ID,
+      episodeId: NOVEL_TEST_EPISODE_ID,
+      seriesPayload: {
+        series: {
+          ...baseSeriesPayload.series,
+          id: NOVEL_TEST_SERIES_ID,
+          title: NOVEL_TEST_TITLE,
+          type: "novel",
+        },
+      },
+      episodePayload: {
+        episode: {
+          id: NOVEL_TEST_EPISODE_ID,
+          seriesId: NOVEL_TEST_SERIES_ID,
+          title: "Episode 1",
+          type: "novel",
+          pricePts: 0,
+          previewFreePages: 0,
+          pages: [],
+          paragraphs: [
+            NOVEL_TEST_FIRST_PARAGRAPH,
+            "The relay hum settles into the cabin while the crew weighs what to risk next.",
+            "By the end of the chapter, the choice feels inevitable instead of forced.",
+          ],
+        },
+      },
+    });
+
+    const response = await page.goto(
+      `/read/${NOVEL_TEST_SERIES_ID}/${NOVEL_TEST_EPISODE_ID}`,
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
+    expect(response?.ok()).toBeTruthy();
+
+    const novelRegion = page.getByTestId("novel-reader-content");
+    await expect(novelRegion).toBeVisible();
+    await expect(novelRegion).toContainText(NOVEL_TEST_FIRST_PARAGRAPH);
+    await expect(page.locator("body")).not.toContainText(
+      /Page unavailable|Tap to retry|Comic page/i,
+    );
+
+    await expectNoRuntimeIssues(
+      `/read/${NOVEL_TEST_SERIES_ID}/${NOVEL_TEST_EPISODE_ID}#novel-visible-prose`,
       runtimeIssues,
     );
   });

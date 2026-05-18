@@ -6,6 +6,9 @@ import { cn } from "../../lib/utils";
 export default function NovelReaderContent({
   pages,
   paragraphs,
+  seriesId,
+  seriesTitle,
+  episodeTitle,
   previewCount,
   previewParagraphs,
   layoutMode,
@@ -42,6 +45,9 @@ export default function NovelReaderContent({
           <PageStream
             pages={pages}
             paragraphs={paragraphs}
+            seriesId={seriesId}
+            seriesTitle={seriesTitle}
+            episodeTitle={episodeTitle}
             previewCount={previewCount}
             previewParagraphs={previewParagraphs}
             layoutMode={layoutMode}

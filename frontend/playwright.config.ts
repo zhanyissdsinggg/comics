@@ -44,6 +44,8 @@ export default defineConfig({
         process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:4173",
       NEXT_PUBLIC_SITE_URL:
         process.env.NEXT_PUBLIC_SITE_URL || "http://127.0.0.1:4173",
+      NEXT_PUBLIC_REQUIRE_LOGIN_FOR_ADULT:
+        process.env.NEXT_PUBLIC_REQUIRE_LOGIN_FOR_ADULT || "false",
     },
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,

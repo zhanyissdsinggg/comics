@@ -125,6 +125,18 @@ function getDailyUpdateNote(item) {
   return "Start now";
 }
 
+function uniqueSeriesItems(items = []) {
+  const seen = new Set();
+  return (Array.isArray(items) ? items : []).filter((item) => {
+    const key = String(item?.id || item?.seriesId || "").trim();
+    if (!key || seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 function HomeContent({
   seriesList = [],
   initialReady = false,
@@ -250,17 +262,28 @@ function HomeContent({
   }, [activeSort, filteredByGenre]);
 
   const modeScopedItems = filterContentByMode(currentItems, contentMode);
+  const uniqueSortedItems = useMemo(
+    () => uniqueSeriesItems(sortedItems),
+    [sortedItems],
+  );
+  const shelfSourceItems =
+    contentType === FIGMA_CONTENT_TYPES.NOVELS ? uniqueSortedItems : sortedItems;
   const heroItem =
-    inferCatalogHero(sortedItems) || inferCatalogHero(modeScopedItems);
-  const gridItems = [...sortedItems, ...sortedItems].slice(0, 6);
-  const exploreGridItems = [
-    ...sortedItems,
-    ...sortedItems,
-    ...sortedItems,
-  ].slice(0, 12);
-  const rankItems = sortByRating(sortedItems).slice(0, 5);
+    inferCatalogHero(shelfSourceItems) || inferCatalogHero(modeScopedItems);
+  const gridItems =
+    contentType === FIGMA_CONTENT_TYPES.NOVELS
+      ? shelfSourceItems.slice(0, 6)
+      : [...shelfSourceItems, ...shelfSourceItems].slice(0, 6);
+  const exploreGridItems =
+    contentType === FIGMA_CONTENT_TYPES.NOVELS
+      ? shelfSourceItems.slice(0, 12)
+      : [...shelfSourceItems, ...shelfSourceItems, ...shelfSourceItems].slice(
+          0,
+          12,
+        );
+  const rankItems = sortByRating(shelfSourceItems).slice(0, 5);
   const genreOptions = buildGenreOptions(currentItems);
-  const continueItems = sortedItems.slice(0, 2);
+  const continueItems = shelfSourceItems.slice(0, 2);
   const continueSectionHasProgress = continueItems.some(
     (item) => item.hasProgress,
   );
@@ -870,9 +893,10 @@ function HomeContent({
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 md:gap-5 lg:grid-cols-6">
-                  {(activeGenre === "All" && activeSort === "Trending"
-                    ? gridItems
-                    : exploreGridItems
+                  {(
+                    activeGenre === "All" && activeSort === "Trending"
+                      ? gridItems
+                      : exploreGridItems
                   ).map((item, index) => (
                     <Link
                       key={`${item.id}-${index}`}
@@ -925,6 +949,19 @@ function HomeContent({
                       </div>
                     </Link>
                   ))}
+                  {contentType === FIGMA_CONTENT_TYPES.NOVELS &&
+                  (activeGenre === "All" && activeSort === "Trending"
+                    ? gridItems.length
+                    : exploreGridItems.length) < 3 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-4">
+                      <p className="text-sm font-bold text-white">
+                        Coming Soon
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        More novels will appear here as the shelf fills out.
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </section>

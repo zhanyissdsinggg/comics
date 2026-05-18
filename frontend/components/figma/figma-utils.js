@@ -251,17 +251,17 @@ function buildStatusLabel(series) {
 
 function buildFallbackViews(series, interactive = false) {
   const episodeCount = Math.max(1, Number(series?.episodeCount || 1));
-  const base = interactive ? 1_200_000 : 2_000_000;
+  const base = interactive ? 2_400 : 4_800;
   return Math.round(
-    base + episodeCount * 85_000 + seededNumber(series?.id, 0, 4_000_000, 0),
+    base + episodeCount * 680 + seededNumber(series?.id, 0, 6_800, 0),
   );
 }
 
 function buildFallbackLikes(series) {
   return Math.round(
-    50_000 +
-      Math.max(1, Number(series?.episodeCount || 1)) * 12_000 +
-      seededNumber(series?.id, 0, 800_000, 0),
+    36 +
+      Math.max(1, Number(series?.episodeCount || 1)) * 11 +
+      seededNumber(series?.id, 0, 420, 0),
   );
 }
 
@@ -614,41 +614,8 @@ export function formatUsd(value) {
 }
 
 export function buildCommentSeed(seriesTitle = "Story") {
-  return [
-    {
-      id: 1,
-      user: "NightCrawler99",
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "indigo" }),
-      text: `The pacing on ${seriesTitle} is filthy good. One chapter and suddenly it's 2 a.m. again.`,
-      likes: 1245,
-      date: "2 hours ago",
-      isPinned: true,
-      isSpoiler: false,
-      vipLevel: 3,
-    },
-    {
-      id: 2,
-      user: "SakuraMochi",
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "rose" }),
-      text: "That last turn hits harder if you noticed the setup three chapters back. The author was cooking.",
-      likes: 438,
-      date: "5 hours ago",
-      isPinned: false,
-      isSpoiler: true,
-      vipLevel: 0,
-    },
-    {
-      id: 3,
-      user: "AlexZ_Pro",
-      avatar: getFallbackImageUrl({ kind: "avatar", variant: "teal" }),
-      text: "I was ready to complain and then the cliffhanger slapped me quiet. Fine. Take my points.",
-      likes: 92,
-      date: "1 day ago",
-      isPinned: false,
-      isSpoiler: false,
-      vipLevel: 5,
-    },
-  ];
+  void seriesTitle;
+  return [];
 }
 
 export function buildProfileHistoryItems(historyItems = [], catalogItems = []) {

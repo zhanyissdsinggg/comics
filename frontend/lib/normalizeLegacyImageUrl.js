@@ -8,6 +8,7 @@ import {
   isLegacyInlineReaderPlaceholder,
   isLegacyPlaceholderUrl,
 } from "./fallbackImage";
+import { getApprovedMockComicPageAsset } from "./readerMockAssets";
 
 export function normalizeLegacyImageUrl(url) {
   if (!url) {
@@ -17,10 +18,7 @@ export function normalizeLegacyImageUrl(url) {
   try {
     const parsed = new URL(url);
     if (isLegacyInlineReaderPlaceholder(url)) {
-      return getFallbackImageUrl({
-        kind: "reader",
-        adult: false,
-      });
+      return getApprovedMockComicPageAsset({ pageNumber: 1 });
     }
 
     if (!isLegacyPlaceholderUrl(parsed.toString())) {
@@ -44,10 +42,7 @@ export function normalizeLegacyImageUrl(url) {
     });
   } catch {
     if (isLegacyInlineReaderPlaceholder(url)) {
-      return getFallbackImageUrl({
-        kind: "reader",
-        adult: false,
-      });
+      return getApprovedMockComicPageAsset({ pageNumber: 1 });
     }
     return url;
   }
