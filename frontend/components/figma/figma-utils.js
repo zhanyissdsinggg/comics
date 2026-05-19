@@ -268,8 +268,8 @@ function buildFallbackLikes(series) {
 function buildFallbackRating(series, interactive = false) {
   return seededNumber(
     `${series?.id || "series"}:${interactive ? "interactive" : "base"}`,
-    interactive ? 9.2 : 8.8,
-    9.9,
+    interactive ? 8.7 : 8.2,
+    interactive ? 9.4 : 9.1,
     1,
   );
 }

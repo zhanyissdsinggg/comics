@@ -14,12 +14,11 @@ const primaryFooterLinks = [
   { label: "Rankings", href: "/rankings" },
   { label: "Search", href: "/search" },
   { label: "Support", href: "/support" },
-]
-  .concat(
-    siteConfig.navigation.showCreatorsInNav
-      ? [{ label: "Creators", href: "/creators" }]
-      : [],
-  );
+].concat(
+  siteConfig.navigation.showCreatorsInNav
+    ? [{ label: "Creators", href: "/creators" }]
+    : [],
+);
 
 const fullFooterSections = [
   {
@@ -31,12 +30,11 @@ const fullFooterSections = [
       { label: "Rankings", href: "/rankings" },
       { label: "Search", href: "/search" },
       { label: "Support", href: "/support" },
-    ]
-      .concat(
-        siteConfig.navigation.showCreatorsInNav
-          ? [{ label: "Creators", href: "/creators" }]
-          : [],
-      ),
+    ].concat(
+      siteConfig.navigation.showCreatorsInNav
+        ? [{ label: "Creators", href: "/creators" }]
+        : [],
+    ),
   },
   {
     title: "Account",
@@ -87,12 +85,11 @@ const homePrimaryFooterLinks = [
   { label: "Support", href: "/support" },
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Terms", href: "/terms-of-service" },
-]
-  .concat(
-    siteConfig.navigation.showCreatorsInNav
-      ? [{ label: "Creators", href: "/creators" }]
-      : [],
-  );
+].concat(
+  siteConfig.navigation.showCreatorsInNav
+    ? [{ label: "Creators", href: "/creators" }]
+    : [],
+);
 
 const homeCompactMetaFooterLinks = [];
 
@@ -110,19 +107,38 @@ const socialLinks = [
 
 const footerLegalStatement = `${siteConfig.siteName} is operated by ${siteConfig.companyName}.`;
 
-function normalizeFooterPath(href) {
-  return String(href || "").split("?")[0];
+function buildFooterRouteKey(href) {
+  const normalizedHref = String(href || "").trim();
+  if (!normalizedHref) {
+    return "";
+  }
+
+  const [path, query = ""] = normalizedHref.split("?");
+  const params = new URLSearchParams(query);
+
+  if (path === "/search") {
+    const type = String(params.get("type") || "")
+      .trim()
+      .toLowerCase();
+    if (type === "interactive") {
+      return "/search?type=interactive";
+    }
+  }
+
+  return path;
 }
 
-function filterLinks(links, pathname) {
-  return links.filter((link) => normalizeFooterPath(link.href) !== pathname);
+function filterLinks(links, currentRouteKey) {
+  return links.filter(
+    (link) => buildFooterRouteKey(link.href) !== currentRouteKey,
+  );
 }
 
-function filterSections(sections, pathname) {
+function filterSections(sections, currentRouteKey) {
   return sections
     .map((section) => ({
       ...section,
-      links: filterLinks(section.links, pathname),
+      links: filterLinks(section.links, currentRouteKey),
     }))
     .filter((section) => section.links.length > 0);
 }
@@ -137,13 +153,14 @@ export default function SiteFooter({
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
   const isCompact = variant === "compact";
+  const currentRouteKey = buildFooterRouteKey(pathname);
   const forceDocumentHomeNavigation = shouldUseDocumentNavigation(
     pathname,
     "/",
   );
   const footerPrimaryLinks = filterLinks(
     isHome && isCompact ? homePrimaryFooterLinks : primaryFooterLinks,
-    pathname,
+    currentRouteKey,
   );
   const footerMetaLinks = filterLinks(
     isHome && isCompact
@@ -151,9 +168,9 @@ export default function SiteFooter({
       : isCompact
         ? compactMetaFooterLinks
         : fullMetaFooterLinks,
-    pathname,
+    currentRouteKey,
   );
-  const footerSections = filterSections(fullFooterSections, pathname);
+  const footerSections = filterSections(fullFooterSections, currentRouteKey);
   const footerTagline = taglineOverride ?? siteConfig.tagline;
   const FooterHomeLink = forceDocumentHomeNavigation ? "a" : Link;
   const footerHomeLinkProps = forceDocumentHomeNavigation
