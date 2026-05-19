@@ -12,12 +12,11 @@ import { apiGet, apiPost } from "../lib/apiClient";
 import { setCookie } from "../lib/cookies";
 import {
   applyPreferencesToStorage,
-  readStoredMatureVerification,
+  mergeAdultStateIfNewer,
 } from "../lib/preferencesClient";
 
 const AuthContext = createContext(null);
 const SIGNED_IN_HINT_COOKIE = "mn_is_signed_in";
-const ADULT_STATE_UPDATED_AT_KEY = "mn_adult_state_updated_at";
 
 function resolveAuthState(authResponse) {
   if (!authResponse?.ok) {
@@ -34,45 +33,6 @@ function resolveAuthState(authResponse) {
   return {
     isSignedIn,
     user: isSignedIn ? user : null,
-  };
-}
-
-function readAdultStateUpdatedAt() {
-  if (typeof window === "undefined") {
-    return 0;
-  }
-
-  const fromWindow = Number(window.__mnAdultStateUpdatedAt || 0);
-  if (Number.isFinite(fromWindow) && fromWindow > 0) {
-    return fromWindow;
-  }
-
-  const fromStorage = Number(
-    window.localStorage.getItem(ADULT_STATE_UPDATED_AT_KEY) || 0,
-  );
-  return Number.isFinite(fromStorage) ? fromStorage : 0;
-}
-
-function mergeAdultStateIfNewer(preferences = {}, requestStartedAt = 0) {
-  if (typeof window === "undefined") {
-    return preferences;
-  }
-
-  if (readAdultStateUpdatedAt() <= requestStartedAt) {
-    return preferences;
-  }
-
-  const region =
-    String(preferences?.region || "").trim() ||
-    window.localStorage.getItem("mn_age_rule") ||
-    "global";
-
-  return {
-    ...preferences,
-    hideAdultHistory:
-      window.localStorage.getItem("mn_hide_adult_history") === "1",
-    matureModeEnabled: window.localStorage.getItem("mn_adult_mode") === "1",
-    matureVerification: readStoredMatureVerification(region),
   };
 }
 

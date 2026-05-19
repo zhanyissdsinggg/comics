@@ -23,6 +23,7 @@ const MATURE_REF_KEY = "mn_mature_reference_id";
 const MATURE_VERIFIED_AT_KEY = "mn_mature_verified_at";
 const MATURE_HIDDEN_KEY = "mn_mature_hidden";
 const MATURE_STATUS_COOKIE = "mn_mature_status";
+const ADULT_STATE_UPDATED_AT_KEY = "mn_adult_state_updated_at";
 
 function persistStorageValue(key, value) {
   if (typeof window === "undefined") {
@@ -52,6 +53,44 @@ function buildMatureStatusCookieValue(preferences = {}) {
     matureModeEnabled,
     hideAdultHistory,
   });
+}
+
+function readAdultStateUpdatedAt() {
+  if (typeof window === "undefined") {
+    return 0;
+  }
+
+  const fromWindow = Number(window.__mnAdultStateUpdatedAt || 0);
+  if (Number.isFinite(fromWindow) && fromWindow > 0) {
+    return fromWindow;
+  }
+
+  const fromStorage = Number(
+    window.localStorage.getItem(ADULT_STATE_UPDATED_AT_KEY) || 0,
+  );
+  return Number.isFinite(fromStorage) ? fromStorage : 0;
+}
+
+export function mergeAdultStateIfNewer(preferences = {}, requestStartedAt = 0) {
+  if (typeof window === "undefined") {
+    return preferences;
+  }
+
+  if (readAdultStateUpdatedAt() <= requestStartedAt) {
+    return preferences;
+  }
+
+  const region =
+    String(preferences?.region || "").trim() ||
+    window.localStorage.getItem(ADULT_RULE_KEY) ||
+    "global";
+
+  return {
+    ...preferences,
+    hideAdultHistory: window.localStorage.getItem(HIDE_ADULT_KEY) === "1",
+    matureModeEnabled: window.localStorage.getItem(ADULT_MODE_KEY) === "1",
+    matureVerification: readStoredMatureVerification(region),
+  };
 }
 
 export function applyPreferencesToStorage(preferences = {}) {
