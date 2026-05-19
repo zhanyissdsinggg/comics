@@ -258,14 +258,16 @@ function buildFallbackViews(series, interactive = false) {
     episodeCount,
     interactive ? "interactive" : "default",
   ].join(":");
-  const viewBands = interactive
-    ? [1800, 2400, 3700, 6100, 8900]
-    : [1800, 2400, 3700, 6100, 8900];
-  const bandIndex = hashString(seed) % viewBands.length;
-  const chapterLift = Math.min(episodeCount * 170, interactive ? 1200 : 1800);
-  const jitter = seededNumber(`${seed}:views`, 0, 420, 0);
+  const spread = seededNumber(
+    `${seed}:band`,
+    interactive ? 1_800 : 1_900,
+    interactive ? 7_200 : 9_300,
+    0,
+  );
+  const chapterLift = Math.min(episodeCount * 90, interactive ? 540 : 780);
+  const offset = (hashString(`${seed}:offset`) % 6) * 120;
 
-  return Math.round(viewBands[bandIndex] + chapterLift + jitter);
+  return Math.round(spread + chapterLift + offset);
 }
 
 function buildFallbackLikes(series) {

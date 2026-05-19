@@ -1162,7 +1162,16 @@ test.describe("Content mode filtering", () => {
       .slice(0, 8);
 
     expect(viewLabels.length).toBeGreaterThanOrEqual(4);
-    expect(new Set(viewLabels).size).toBeGreaterThanOrEqual(3);
+    expect(new Set(viewLabels).size).toBe(viewLabels.length);
+
+    const repetitions = Array.from(
+      viewLabels.reduce((accumulator, label) => {
+        accumulator.set(label, (accumulator.get(label) || 0) + 1);
+        return accumulator;
+      }, new Map()),
+    );
+
+    expect(repetitions.filter(([, count]) => Number(count) > 1).length).toBe(0);
   });
 
   test("interactive search footer should keep Search when the current page is interactive search", async ({
