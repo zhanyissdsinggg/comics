@@ -251,10 +251,21 @@ function buildStatusLabel(series) {
 
 function buildFallbackViews(series, interactive = false) {
   const episodeCount = Math.max(1, Number(series?.episodeCount || 1));
-  const base = interactive ? 2_400 : 4_800;
-  return Math.round(
-    base + episodeCount * 680 + seededNumber(series?.id, 0, 6_800, 0),
-  );
+  const seed = [
+    series?.id || "series",
+    series?.title || "untitled",
+    series?.author || "author",
+    episodeCount,
+    interactive ? "interactive" : "default",
+  ].join(":");
+  const viewBands = interactive
+    ? [1800, 2400, 3700, 6100, 8900]
+    : [1800, 2400, 3700, 6100, 8900];
+  const bandIndex = hashString(seed) % viewBands.length;
+  const chapterLift = Math.min(episodeCount * 170, interactive ? 1200 : 1800);
+  const jitter = seededNumber(`${seed}:views`, 0, 420, 0);
+
+  return Math.round(viewBands[bandIndex] + chapterLift + jitter);
 }
 
 function buildFallbackLikes(series) {
