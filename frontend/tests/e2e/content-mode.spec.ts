@@ -1054,6 +1054,70 @@ test.describe("Content mode filtering", () => {
     ).toBeVisible();
   });
 
+  test("search footer should keep Interactive when the current page is plain search", async ({
+    page,
+  }) => {
+    const response = await page.goto("/search", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const footer = page.locator('footer[data-site-footer="1"]').first();
+    await expect(
+      footer.getByRole("link", { name: "Interactive", exact: true }),
+    ).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "Search", exact: true }),
+    ).toHaveCount(0);
+  });
+
+  test("interactive search footer should keep Search when the current page is interactive search", async ({
+    page,
+  }) => {
+    const response = await page.goto("/search?type=interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const footer = page.locator('footer[data-site-footer="1"]').first();
+    await expect(
+      footer.getByRole("link", { name: "Interactive", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      footer.getByRole("link", { name: "Search", exact: true }),
+    ).toBeVisible();
+  });
+
+  test("series footer should keep public discovery links", async ({ page }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page
+      .getByRole("link", { name: /The Last Kingdom/i })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/series\/series-001$/);
+
+    const footer = page.locator('footer[data-site-footer="1"]').first();
+    await expect(
+      footer.getByRole("link", { name: "Interactive", exact: true }),
+    ).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "Rankings", exact: true }),
+    ).toBeVisible();
+    await expect(
+      footer.getByRole("link", { name: "Search", exact: true }),
+    ).toBeVisible();
+  });
+
   test("adult reader should stay blocked in normal mode", async ({ page }) => {
     const routes = await installContentModeRoutes(page, {
       adultMode: false,

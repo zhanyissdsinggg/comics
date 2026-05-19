@@ -1,22 +1,26 @@
 # On-call Runbook (v1)
 
 ## Scope
+
 - Frontend: `https://www.gushcomics.com`
 - Backend API: `https://www.gushcomics.com/api/*`
 - Admin: `https://www.gushcomics.com/admin`
 
 ## Deployment Topology
+
 - Public frontend is deployed on Vercel.
 - Backend/API runtime is deployed on Railway.
 - Release verification must confirm both surfaces are on the same target revision.
 
 ## P1 Trigger Rules
+
 - Backend error-rate > 1% (5 min window)
 - API p95 > 2000ms (5 min window)
 - Admin cannot login or key admin pages unavailable
 - Health probes fail continuously for 3 rounds
 
 ## First 10 Minutes Checklist
+
 1. Confirm active deploy revision and branch.
    - Frontend identity headers from `GET /`:
      - `x-gush-frontend-branch`
@@ -42,6 +46,7 @@
    - degraded route(s) without full outage -> P2
 
 ## Recovery Commands (local)
+
 ```powershell
 cd "c:/Users/86133/Downloads/tappytoon-nextjs"
 
@@ -68,6 +73,11 @@ Write-Output "backend_commit=$($backend.commit)"
 ```
 
 ## Unified Deploy Gate
+
+Production release note:
+
+- Before any formal production release, run `npm run check:release:production` and treat failures as a hard stop.
+
 ```powershell
 # Standard gate (recommended default)
 $env:BACKEND_URL='https://www.gushcomics.com'
@@ -90,6 +100,7 @@ npm run ops:deploy-gate:strict:full
 ```
 
 ### Optional strict modes
+
 ```powershell
 # Enforce advanced health endpoints in post-deploy gate
 $env:OPS_REQUIRE_ADVANCED_HEALTH='1'
@@ -112,6 +123,7 @@ $env:WATCHDOG_FAIL_ON_SEVERITY='P2'
 ```
 
 ## If Admin Runtime Fails
+
 ```powershell
 cd "c:/Users/86133/Downloads/tappytoon-nextjs"
 $env:BACKEND_URL='https://www.gushcomics.com'
@@ -123,6 +135,7 @@ npm run ops:admin-smoke
 ```
 
 Compatibility fallback:
+
 ```powershell
 $env:OPS_ADMIN_KEY='<legacy_admin_key>'
 npm run ops:admin-ui-live
@@ -130,6 +143,7 @@ npm run ops:admin-smoke
 ```
 
 Support write-path verification:
+
 ```powershell
 $env:BACKEND_URL='https://www.gushcomics.com'
 $env:OPS_ADMIN_EMAIL='<admin_email>'
@@ -144,16 +158,19 @@ npm run ops:admin-write-smoke
 ```
 
 ## Known Runtime Notes (as of 2026-04-16)
+
 - `GET /api/meta/observability` is protected and returns `403` without `x-observability-key`.
 - Strict full mode requires backend/CI to share the same `OBSERVABILITY_KEY`.
 - Strict full mode requires admin credentials and treats admin smoke as blocking.
 
 ## Escalation
+
 1. 10 min unresolved P1: trigger rollback.
 2. 20 min unresolved P1: freeze deploys and start incident notes.
 3. 30 min unresolved P1: engage infra + backend owners jointly.
 
 ## Rollback Verification
+
 ```powershell
 cd "c:/Users/86133/Downloads/tappytoon-nextjs"
 $env:BACKEND_URL='https://www.gushcomics.com'
@@ -164,6 +181,7 @@ npm run ops:rollback-verify
 ```
 
 ## Seeding Demo Routes (Production)
+
 Railway's UI may not expose a shell/exec console on all plans. Use Railway CLI to run the demo-only seed safely.
 
 ```powershell
@@ -178,11 +196,13 @@ railway run -- npm --prefix backend run seed:demo
 ```
 
 Verify:
+
 - `GET /api/series/demo-series?adult=0` -> 200
 - `GET /api/episode?seriesId=demo-series&episodeId=demo-episode` -> 200
 - `GET /read/demo-series/demo-episode` -> contents drawer opens
 
 ## Post-incident Record
+
 - Incident start/end time
 - Impacted routes/endpoints
 - User impact
