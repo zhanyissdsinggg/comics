@@ -10,6 +10,7 @@ import {
 import { apiGet, apiPost } from "../lib/apiClient";
 import {
   applyPreferencesToStorage,
+  mergeAdultStateIfNewer,
   readPreferenceFlag,
 } from "../lib/preferencesClient";
 
@@ -34,9 +35,15 @@ export function NotificationsProvider({ children }) {
   const loadNotifications = useCallback(
     async (adultFlag) => {
       const suffix = adultFlag ? `?adult=${adultFlag}` : "";
+      const preferencesRequestStartedAt = Date.now();
       apiGet("/api/preferences").then((prefResponse) => {
         if (prefResponse.ok && prefResponse.data?.preferences) {
-          applyPreferencesToStorage(prefResponse.data.preferences);
+          applyPreferencesToStorage(
+            mergeAdultStateIfNewer(
+              prefResponse.data.preferences,
+              preferencesRequestStartedAt,
+            ),
+          );
         }
       });
       const response = await apiGet(`/api/notifications${suffix}`, {

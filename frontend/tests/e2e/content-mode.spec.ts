@@ -919,6 +919,71 @@ test.describe("Content mode filtering", () => {
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
   });
 
+  test("desktop header toggle should keep adult mode when navigating from home to search", async ({
+    page,
+  }) => {
+    await seedAdultState(page, {
+      signedIn: true,
+      adultConfirmed: true,
+      adultMode: false,
+    });
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: true,
+      signedIn: true,
+    });
+
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+
+    const desktopToggle = page
+      .getByRole("button", { name: /Enter 18\+ mode|18\+/i })
+      .first();
+    await expect(desktopToggle).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await desktopToggle.click();
+
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => window.localStorage.getItem("mn_adult_mode") || "0",
+        ),
+      )
+      .toBe("1");
+
+    await expect(
+      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+
+    await page.goto("/search?q=midnight", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(
+      page.getByRole("button", { name: /Back to normal mode|Normal/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          mode: window.localStorage.getItem("mn_adult_mode") || "0",
+          hasAdultCookie: document.cookie.includes("mn_adult_mode=1"),
+        })),
+      )
+      .toEqual({
+        mode: "1",
+        hasAdultCookie: true,
+      });
+  });
+
   test("mobile bottom nav should switch with the same adult-only catalog rules", async ({
     page,
   }) => {
@@ -1069,6 +1134,35 @@ test.describe("Content mode filtering", () => {
     await expect(
       footer.getByRole("link", { name: "Search", exact: true }),
     ).toHaveCount(0);
+  });
+
+  test("search fallback views should not collapse into repeated seed values", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/search", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const cards = page.locator("article");
+    await expect(cards.first()).toBeVisible({ timeout: UI_TIMEOUT_MS });
+
+    const viewLabels = (await cards.allTextContents())
+      .map((text) => {
+        const match = text.match(/(\d+(?:\.\d+)?[KM])\s+views/i);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean)
+      .slice(0, 8);
+
+    expect(viewLabels.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(viewLabels).size).toBeGreaterThanOrEqual(3);
   });
 
   test("interactive search footer should keep Search when the current page is interactive search", async ({
