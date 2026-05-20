@@ -258,16 +258,22 @@ function buildFallbackViews(series, interactive = false) {
     episodeCount,
     interactive ? "interactive" : "default",
   ].join(":");
-  const spread = seededNumber(
-    `${seed}:band`,
-    interactive ? 1_800 : 1_900,
-    interactive ? 7_200 : 9_300,
+  const curatedBands = interactive
+    ? [1_800, 2_300, 2_900, 3_600, 4_400, 5_300, 6_200]
+    : [1_800, 2_400, 3_100, 3_700, 4_300, 5_200, 6_100, 7_600, 8_900];
+  const band = curatedBands[hashString(`${seed}:band`) % curatedBands.length];
+  const microVariance = seededNumber(
+    `${seed}:variance`,
+    interactive ? 0 : 40,
+    interactive ? 160 : 220,
     0,
   );
-  const chapterLift = Math.min(episodeCount * 90, interactive ? 540 : 780);
-  const offset = (hashString(`${seed}:offset`) % 6) * 120;
+  const chapterLift = Math.min(
+    Math.max(episodeCount - 1, 0) * (interactive ? 22 : 36),
+    interactive ? 120 : 240,
+  );
 
-  return Math.round(spread + chapterLift + offset);
+  return Math.round(band + microVariance + chapterLift);
 }
 
 function buildFallbackLikes(series) {
