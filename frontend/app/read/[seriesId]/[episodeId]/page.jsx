@@ -17,7 +17,9 @@ import {
 } from "../../../../lib/seriesFormatLabels";
 import { siteConfig } from "../../../../lib/siteConfig";
 import { isAdultContent } from "../../../../lib/contentFilters";
-import { buildPublicSeriesStaticParams } from "../../../../lib/publicSeriesCatalog";
+import {
+  isKnownPublicSeriesId,
+} from "../../../../lib/publicSeriesCatalog";
 import {
   logSeriesInvariant,
   validateReaderPayload,
@@ -28,11 +30,6 @@ import ReaderPageShell from "./ReaderPageShell";
 
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
-export async function generateStaticParams() {
-  return buildPublicSeriesStaticParams().flatMap(({ id }) => [
-    { seriesId: id, episodeId: `${id}e1` },
-  ]);
-}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await Promise.resolve(params);
@@ -125,7 +122,10 @@ export default async function Page({ params }) {
     : [];
   const state = readerSeoPayload?.state || "unavailable";
   const isModeBlocked = state === "adult-gated" || state === "mode-mismatch";
-  const isRecoverableShellState = isModeBlocked || state === "unavailable";
+  const isRecoverableShellState =
+    isModeBlocked ||
+    state === "unavailable" ||
+    (state === "not-found" && isKnownPublicSeriesId(seriesId));
   if (
     !isRecoverableShellState &&
     !validateReaderPayload(seriesId, episodeId, { series, episode, episodes })
