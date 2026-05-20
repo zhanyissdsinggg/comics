@@ -1162,6 +1162,7 @@ test.describe("Content mode filtering", () => {
       .slice(0, 8);
 
     expect(viewLabels.length).toBeGreaterThanOrEqual(4);
+    expect(viewLabels).not.toContain("10.2K");
     expect(new Set(viewLabels).size).toBeGreaterThanOrEqual(3);
   });
 
