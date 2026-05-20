@@ -1887,6 +1887,30 @@ test.describe("Public reading funnel", () => {
     );
   });
 
+  test("novels page should fall back to Coming Soon instead of forcing duplicate shelves", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page);
+
+    const response = await page.goto("/novels", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.getByRole("heading", { name: "Solar Wind" })).toBeVisible(
+      {
+        timeout: UI_TIMEOUT_MS,
+      },
+    );
+    await expect(page.locator("main")).toContainText("Neon Nights");
+    await expect(page.locator("main")).toContainText("Coming Soon");
+    await expect(
+      page.getByRole("heading", { name: /Top Rated Novels/i }),
+    ).toHaveCount(0);
+    await expectNoRuntimeIssues("/novels shelf fallback", runtimeIssues);
+  });
+
   test("all real series routes render non-empty SSR detail content", async ({
     page,
   }) => {

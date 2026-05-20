@@ -1,6 +1,6 @@
 export const PUBLIC_SERIES_IDS = Object.freeze(
   Array.from(
-    { length: 12 },
+    { length: 13 },
     (_, index) => `series-${String(index + 1).padStart(3, "0")}`,
   ),
 );

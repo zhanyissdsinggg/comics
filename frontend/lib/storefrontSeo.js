@@ -15,6 +15,7 @@ import {
   isBlockedPublicSeriesIdentifier,
   shouldBlockDemoContentInProduction,
 } from "./publicCatalogVisibility";
+import { isKnownPublicSeriesId } from "./publicSeriesCatalog";
 import {
   CONTENT_MODE_ADULT,
   CONTENT_MODE_NORMAL,
@@ -297,7 +298,9 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
     if (response.status === 404) {
       return {
         payload: null,
-        state: "not-found",
+        state: isKnownPublicSeriesId(normalizedSeriesId)
+          ? "unavailable"
+          : "not-found",
         gateReason: null,
       };
     }

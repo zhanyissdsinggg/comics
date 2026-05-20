@@ -1,9 +1,5 @@
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
 import FigmaSeriesDetailPage from "../../../components/figma/FigmaSeriesDetailPage";
-import { CouponProvider } from "../../../store/useCouponStore";
-import { EntitlementProvider } from "../../../store/useEntitlementStore";
-import { RewardsProvider } from "../../../store/useRewardsStore";
-import { WalletProvider } from "../../../store/useWalletStore";
 import { notFound } from "next/navigation";
 import { buildNoIndexRobots, createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
@@ -16,7 +12,9 @@ import {
   shouldBlockDemoContentInProduction,
 } from "../../../lib/publicCatalogVisibility";
 import { isAdultContent } from "../../../lib/contentFilters";
-import { buildPublicSeriesStaticParams } from "../../../lib/publicSeriesCatalog";
+import {
+  isKnownPublicSeriesId,
+} from "../../../lib/publicSeriesCatalog";
 import {
   logSeriesInvariant,
   shouldForceNotFoundForSeries,
@@ -26,10 +24,6 @@ import { loadSeriesRoutePayload } from "../../../lib/storefrontSeo";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
-
-export async function generateStaticParams() {
-  return buildPublicSeriesStaticParams();
-}
 
 function buildSafeSeriesStructuredData(payload) {
   if (!payload?.series || isAdultContent(payload.series)) {
@@ -135,10 +129,18 @@ export default async function SeriesRoutePage({ params }) {
   }
   const includeAdult = await isServerAdultModeEnabled();
   const routePayload = await loadSeriesRoutePayload(seriesId, { includeAdult });
-  if (routePayload?.state === "not-found") {
+  const isRecoverableShellState =
+    routePayload?.state === "adult-gated" ||
+    routePayload?.state === "mode-mismatch" ||
+    routePayload?.state === "unavailable" ||
+    (routePayload?.state === "not-found" && isKnownPublicSeriesId(seriesId));
+  if (routePayload?.state === "not-found" && !isKnownPublicSeriesId(seriesId)) {
     notFound();
   }
-  if (shouldForceNotFoundForSeries(seriesId, routePayload?.payload || null)) {
+  if (
+    !isRecoverableShellState &&
+    shouldForceNotFoundForSeries(seriesId, routePayload?.payload || null)
+  ) {
     logSeriesInvariant("Series route payload failed validation", {
       seriesId,
       state: routePayload?.state || "unknown",
@@ -163,20 +165,12 @@ export default async function SeriesRoutePage({ params }) {
         id={`series-jsonld-${seriesId}`}
         data={structuredData}
       />
-      <WalletProvider>
-        <RewardsProvider>
-          <EntitlementProvider>
-            <CouponProvider>
-              <FigmaSeriesDetailPage
-                seriesId={seriesId}
-                series={routePayload?.payload?.series || null}
-                episodes={routePayload?.payload?.episodes || []}
-                initialState={routePayload?.state || "unavailable"}
-              />
-            </CouponProvider>
-          </EntitlementProvider>
-        </RewardsProvider>
-      </WalletProvider>
+      <FigmaSeriesDetailPage
+        seriesId={seriesId}
+        series={routePayload?.payload?.series || null}
+        episodes={routePayload?.payload?.episodes || []}
+        initialState={routePayload?.state || "unavailable"}
+      />
     </>
   );
 }
