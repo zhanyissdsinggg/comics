@@ -1,13 +1,17 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" fill="none">
-  <rect width="800" height="1200" fill="#110904"/>
-  <rect x="48" y="48" width="704" height="1104" rx="36" fill="#22150D" stroke="#7C4A2D" stroke-width="4"/>
-  <rect x="84" y="84" width="634" height="446" rx="24" fill="#2C1B11"/>
-  <rect x="84" y="564" width="634" height="550" rx="24" fill="#1A110C"/>
-  <circle cx="614" cy="758" r="126" fill="#FB923C" fill-opacity=".16"/>
-  <circle cx="182" cy="220" r="94" fill="#FFE4B5" fill-opacity=".12"/>
-  <path d="M126 462C220 364 340 332 494 362C572 380 632 414 674 460" stroke="#F59E0B" stroke-width="22" stroke-linecap="round"/>
-  <path d="M130 1026H668L596 900L486 960L414 826L304 906L226 840L130 1026Z" fill="#FFEDD5" fill-opacity=".1"/>
-  <rect x="120" y="610" width="214" height="20" rx="10" fill="#F59E0B" fill-opacity=".8"/>
-  <rect x="120" y="656" width="460" height="22" rx="11" fill="#FFEDD5" fill-opacity=".58"/>
-  <rect x="120" y="700" width="404" height="18" rx="9" fill="#FED7AA" fill-opacity=".28"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" fill="none">
+  <rect width="800" height="1200" fill="#120A05"/>
+  <rect x="46" y="46" width="708" height="1108" rx="34" fill="#24160D" stroke="#8B5A2B" stroke-width="4"/>
+  <rect x="84" y="84" width="632" height="430" rx="24" fill="#2F1C11"/>
+  <rect x="84" y="548" width="632" height="530" rx="24" fill="#1B110B"/>
+  <circle cx="170" cy="194" r="88" fill="#FFF1D6" fill-opacity=".08"/>
+  <circle cx="610" cy="780" r="126" fill="#FB923C" fill-opacity=".16"/>
+  <path d="M118 468C202 348 330 312 494 340C586 356 648 400 682 468" stroke="#F59E0B" stroke-width="22" stroke-linecap="round"/>
+  <rect x="132" y="118" width="222" height="278" rx="22" fill="#7B4A22"/>
+  <rect x="390" y="142" width="186" height="240" rx="22" fill="#A56627"/>
+  <path d="M608 404L660 326" stroke="#FFF7ED" stroke-width="12" stroke-linecap="round" opacity=".24"/>
+  <path d="M126 1020H680L620 928L514 970L426 842L318 934L228 872L126 1020Z" fill="#FFF1D6" fill-opacity=".1"/>
+  <rect x="124" y="608" width="212" height="18" rx="9" fill="#FBBF24" fill-opacity=".82"/>
+  <rect x="124" y="652" width="458" height="20" rx="10" fill="#FFF1D6" fill-opacity=".62"/>
+  <rect x="124" y="694" width="396" height="16" rx="8" fill="#FDE68A" fill-opacity=".28"/>
+  <path d="M512 862L570 790L642 854" stroke="#FED7AA" stroke-width="18" stroke-linecap="round"/>
 </svg>
