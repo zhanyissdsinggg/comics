@@ -169,23 +169,23 @@ test.describe("Search merchandising sync", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: "Try a wider search." }),
+      page.getByRole("heading", { name: "Nothing landed this time." }),
     ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
 
     await expect(
-      page.getByRole("button", { name: /Open Rocket Choir/i }).first(),
+      page.getByRole("heading", { name: "Rocket Choir." }),
     ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: /Open Last Ember Files/i }).first(),
+      page.getByRole("heading", { name: "Last Ember Files." }),
     ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: /Open Soft Launch Kiss/i }).first(),
+      page.getByRole("heading", { name: "Start with Soft Launch Kiss." }),
     ).toBeVisible({
       timeout: SEARCH_UI_TIMEOUT_MS,
     });

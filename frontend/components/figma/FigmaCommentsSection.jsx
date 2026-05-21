@@ -15,10 +15,12 @@ import {
   getFallbackImageUrl,
   resolveDisplayImageUrl,
 } from "../../lib/fallbackImage";
+import { openAuthPrompt } from "../../lib/openAuthPrompt";
 import { cn } from "./figma-utils";
 import { useFigmaSite } from "./FigmaSiteContext";
+import { useAuthStore } from "../../store/useAuthStore";
 
-function CommentItem({ comment }) {
+function CommentItem({ comment, onRequireAuth }) {
   const { palette, isAdultMode } = useFigmaSite();
   const [liked, setLiked] = useState(false);
   const [showSpoiler, setShowSpoiler] = useState(!comment.isSpoiler);
@@ -119,7 +121,12 @@ function CommentItem({ comment }) {
           <div className="mt-2 flex items-center gap-4">
             <button
               type="button"
-              onClick={() => setLiked(!liked)}
+              onClick={() => {
+                if (typeof onRequireAuth === "function" && onRequireAuth()) {
+                  return;
+                }
+                setLiked(!liked);
+              }}
               aria-label={`Like comment from ${comment.user}`}
               className={cn(
                 "flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95",
@@ -133,6 +140,11 @@ function CommentItem({ comment }) {
             </button>
             <button
               type="button"
+              onClick={() => {
+                if (typeof onRequireAuth === "function") {
+                  onRequireAuth();
+                }
+              }}
               className="flex items-center gap-1.5 text-xs font-bold text-gray-500 transition-all hover:text-gray-300 active:scale-95"
             >
               <MessageSquare className="h-4 w-4" />
@@ -151,9 +163,17 @@ export default function FigmaCommentsSection({
   comments = [],
 }) {
   const { palette } = useFigmaSite();
+  const { isSignedIn } = useAuthStore();
   const [newComment, setNewComment] = useState("");
   const [isSpoilerTag, setIsSpoilerTag] = useState(false);
   const normalizedComments = Array.isArray(comments) ? comments : [];
+  const requireAuth = () => {
+    if (isSignedIn) {
+      return false;
+    }
+    openAuthPrompt();
+    return true;
+  };
 
   return (
     <div className="mt-12 w-full pb-24">
@@ -187,6 +207,9 @@ export default function FigmaCommentsSection({
             <textarea
               value={newComment}
               onChange={(event) => setNewComment(event.target.value)}
+              onFocus={() => {
+                requireAuth();
+              }}
               placeholder="What do you think about this chapter?"
               className="min-h-[80px] w-full resize-none border-none bg-transparent text-sm text-white outline-none placeholder:text-gray-600 md:text-base"
             />
@@ -207,6 +230,11 @@ export default function FigmaCommentsSection({
 
               <button
                 type="button"
+                onClick={() => {
+                  if (requireAuth()) {
+                    return;
+                  }
+                }}
                 className={cn(
                   "flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-black text-white shadow-lg transition-all active:scale-95",
                   newComment.length > 0
@@ -214,7 +242,7 @@ export default function FigmaCommentsSection({
                     : "cursor-not-allowed bg-gray-800 text-gray-500",
                 )}
               >
-                Post
+                Comment
                 <Send className="h-4 w-4" />
               </button>
             </div>
@@ -225,7 +253,11 @@ export default function FigmaCommentsSection({
       {normalizedComments.length > 0 ? (
         <div className="space-y-4">
           {normalizedComments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} />
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              onRequireAuth={requireAuth}
+            />
           ))}
         </div>
       ) : (

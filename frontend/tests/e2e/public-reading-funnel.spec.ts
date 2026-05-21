@@ -1518,7 +1518,7 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveText(
-      /Read (Chapter|Episode) 1/i,
+      /Start reading/i,
     );
     await expect(page.getByTestId("home-hero-primary-cta")).toHaveAttribute(
       "href",
@@ -1588,7 +1588,7 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await Promise.all([
       page.waitForURL(/\/account(?:\?|$)/, { timeout: UI_TIMEOUT_MS }),
-      mobileNav.getByRole("link", { name: "Account" }).click(),
+      mobileNav.locator('a[href="/account"]').click(),
     ]);
     await expect(
       page.getByRole("heading", { name: "Account" }).first(),
@@ -1626,9 +1626,12 @@ test.describe("Public reading funnel", () => {
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.getByText(/2 results for "dragon"\./i)).toBeVisible({
+    await expect(page.locator("main")).toContainText('"dragon"', {
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("main")).toContainText(
+      "Best matches across stories, formats, and creator shelves.",
+    );
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
   });
 

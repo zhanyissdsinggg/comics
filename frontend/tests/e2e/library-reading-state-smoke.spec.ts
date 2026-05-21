@@ -23,23 +23,23 @@ test.describe("Library reading-state smoke", () => {
     const { page, runtimeIssues } = openedPage;
 
     await expect(
-      page.getByRole("button", { name: "Continue Reading" }),
+      page.getByRole("button", { name: "Resume now" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("heading", { name: "Recent Activity" }),
+      page.getByRole("heading", { name: "Recent Reads" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("heading", { name: "Saved Series" }),
+      page.locator("#saved-series").getByRole("heading", { name: "Library" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 
     const continueButtonBox = await page
-      .getByRole("button", { name: "Continue Reading" })
+      .getByRole("button", { name: "Resume now" })
       .boundingBox();
     expect(continueButtonBox).not.toBeNull();
     expect(
@@ -56,8 +56,8 @@ test.describe("Library reading-state smoke", () => {
 
     const text = await getPageBodyText(page);
     expect(text).toContain("Continue Reading");
-    expect(text).toContain("Recent Activity");
-    expect(text).toContain("Saved Series");
+    expect(text).toContain("Recent Reads");
+    expect(text).toContain("Library");
     expect(text).toContain("Orbit Testament");
     expect(text).toContain("Paper Moon");
 

@@ -220,7 +220,7 @@ function StoreContent({
                 </div>
                 <h1 className="max-w-xl text-2xl font-black tracking-tight text-white md:max-w-3xl md:text-5xl">
                   {storePreview
-                    ? "Points are coming soon."
+                    ? "Coming soon."
                     : "Power up your next binge session."}
                 </h1>
                 {storePreview ? (
@@ -230,7 +230,7 @@ function StoreContent({
                 ) : null}
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300 md:mt-4 md:text-base md:leading-7">
                   {storePreview
-                    ? "Point packs are not available yet. You can still browse titles, read free chapters, and keep your place in the catalog."
+                    ? "Preview only. Checkout is disabled."
                     : "Buy points for locked episodes, or go member if you want the cleaner long-haul deal. Same storefront, sharper presentation."}
                 </p>
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row md:mt-8">
@@ -238,7 +238,7 @@ function StoreContent({
                     type="button"
                     onClick={() => {
                       if (storePreview) {
-                        router.push("/");
+                        router.push("/comics");
                         return;
                       }
                       void handleTopup();
@@ -265,13 +265,27 @@ function StoreContent({
                         ? "Checkout selected pack"
                         : "Store unavailable"}
                   </button>
-                  <Link
-                    href={storePreview ? "/subscribe" : "/account"}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto"
-                  >
-                    {storePreview ? "View plans" : "View account"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  {!storePreview ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push("/account");
+                      }}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto"
+                    >
+                      View account
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  ) : null}
+                  {storePreview ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/support")}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto"
+                    >
+                      Support
+                    </button>
+                  ) : null}
                 </div>
                 {statusMessage ? (
                   <p className="mt-4 text-sm font-semibold text-white/78">
@@ -393,7 +407,7 @@ function StoreContent({
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
                   {storePreview
-                    ? "Point packs are on deck"
+                    ? "Point packs preview."
                     : "Pick a reload pack"}
                 </h2>
               </div>
@@ -467,7 +481,7 @@ function StoreContent({
                     </div>
                     {storePreview ? (
                       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
-                        Preview only
+                        Preview only. Checkout is disabled.
                       </p>
                     ) : null}
                   </button>
@@ -476,16 +490,14 @@ function StoreContent({
             </div>
           </section>
 
-          {plans.length > 0 ? (
+          {!storePreview && plans.length > 0 ? (
             <section className="mb-10 md:mb-12">
               <div className="mb-5 md:mb-6">
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">
                   Membership
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">
-                  {storePreview
-                    ? "Membership options stay visible"
-                    : "Plans for heavy readers"}
+                  Plans for heavy readers
                 </h2>
               </div>
 

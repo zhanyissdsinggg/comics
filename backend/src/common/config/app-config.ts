@@ -163,9 +163,9 @@ const appConfigSchema = z
     ADMIN_LEGACY_BEARER_ENABLED: z.string().optional().default("0"),
     ADMIN_CONTENT_GENERATOR_ENABLED: z.string().optional().default(""),
     ADMIN_PASSWORD_AUTH_ENABLED: z.string().optional().default("1"),
-    ENABLE_ADMIN_RUNTIME: z.string().optional().default("1"),
+    ENABLE_ADMIN_RUNTIME: z.string().optional().default("0"),
     ENABLE_COMMERCIAL_RUNTIME: z.string().optional().default("1"),
-    ENABLE_OPS_RUNTIME: z.string().optional().default("1"),
+    ENABLE_OPS_RUNTIME: z.string().optional().default("0"),
   })
   .transform((env) => {
     const frontendOrigins = normalizeCsv(env.FRONTEND_ORIGIN);
@@ -243,9 +243,9 @@ const appConfigSchema = z
         backendPublicUrl: normalizeOptional(env.BACKEND_PUBLIC_URL),
       },
       runtime: {
-        adminEnabled: normalizeBoolean(env.ENABLE_ADMIN_RUNTIME, true),
+        adminEnabled: normalizeBoolean(env.ENABLE_ADMIN_RUNTIME, false),
         commercialEnabled: normalizeBoolean(env.ENABLE_COMMERCIAL_RUNTIME, true),
-        opsEnabled: normalizeBoolean(env.ENABLE_OPS_RUNTIME, true),
+        opsEnabled: normalizeBoolean(env.ENABLE_OPS_RUNTIME, false),
       },
     };
   })

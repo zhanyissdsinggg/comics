@@ -20,7 +20,10 @@ export default function AuthRequiredModal() {
     return subscribeAuthRequired((payload) => {
       const source = payload?.source || "";
       const allowAuto =
-        pathname?.startsWith("/series") || pathname?.startsWith("/read");
+        pathname?.startsWith("/series") ||
+        pathname?.startsWith("/read") ||
+        pathname?.startsWith("/library") ||
+        pathname?.startsWith("/interactive");
       const hasSiteHeader =
         typeof document !== "undefined" &&
         Boolean(document.querySelector('[data-site-header="1"]'));
@@ -28,7 +31,7 @@ export default function AuthRequiredModal() {
       if (source === "event" && hasSiteHeader) {
         return;
       }
-      if (!allowAuto && source !== "event") {
+      if (!allowAuto && source !== "event" && source !== "api") {
         return;
       }
       setOpen(true);

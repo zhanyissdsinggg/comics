@@ -68,8 +68,3 @@ export function confirmAge() {
   safeLocalStorageSet("mn_adult_mode", "1");
   return "OK";
 }
-
-export function mockSignIn() {
-  safeLocalStorageSet("mn_signed_in", "1");
-  return "OK";
-}

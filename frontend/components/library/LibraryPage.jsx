@@ -209,6 +209,34 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const openAuthPrompt = useCallback(() => {
     window.dispatchEvent(new CustomEvent("auth:open"));
   }, []);
+  const navigateToHref = useCallback(
+    (href, options = {}) => {
+      if (!href) {
+        return;
+      }
+
+      const commitNavigation = () => {
+        if (options.documentNavigation && typeof window !== "undefined") {
+          window.location.assign(href);
+          return;
+        }
+
+        router.push(href);
+      };
+
+      if (typeof window !== "undefined") {
+        window.setTimeout(commitNavigation, 0);
+        return;
+      }
+
+      if (options.documentNavigation && typeof window !== "undefined") {
+        window.location.assign(href);
+      } else {
+        router.push(href);
+      }
+    },
+    [router],
+  );
   const scrollToSection = useCallback((id) => {
     if (typeof document === "undefined") {
       return;
@@ -822,14 +850,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
     ? resumeSpotlightReadHref
       ? "Your next read."
       : hasLibrarySignals
-        ? "Saved titles and recent reads."
-        : "Save a few titles to get started."
-    : "Save a few titles to get started.";
-  const libraryDeskCopy = viewerSignedIn
-    ? visibleLibraryItems.length > 0
-      ? ""
-      : "Add a few titles."
-    : "";
+        ? "Your shelf."
+        : "Your shelf starts here."
+    : "Your shelf starts here.";
+  const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
+    ? resumeSpotlight?.title || "Continue reading"
+    : "Continue reading";
   const readingSnapshotCardsPanel =
     viewerSignedIn && readingSnapshotCards.length > 0 ? (
       <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -865,7 +891,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
             eyebrow="Library"
-            title="Your library"
+            title={libraryDeskTitle}
             description={signedInHeroDescription}
             secondary={signedOutHeroSecondary}
             stats={libraryStats}
@@ -874,20 +900,20 @@ export default function LibraryPage({ initialSignedIn = false }) {
             actions={
               <>
                 {resumeSpotlightReadHref ? (
-                  <button
-                    type="button"
-                    onClick={() => router.push(resumeSpotlightReadHref)}
+                  <a
+                    href={resumeSpotlightReadHref}
+                    role="button"
                     className={primaryButtonClass}
                   >
-                    Continue Reading
-                  </button>
+                    Resume now
+                  </a>
                 ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => scrollToSection("saved-series")}
                     className={primaryButtonClass}
                   >
-                    Library
+                    View shelf
                   </button>
                 ) : (
                   <Link
@@ -957,7 +983,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                           : "Library"}
                       </p>
                       <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                        {resumeSpotlight?.title || "Your library."}
+                        {resumeSpotlightPanelTitle}
                       </h2>
                       {resumeSpotlightProgressWidth > 0 ? (
                         <div className="mt-5 space-y-2.5">
@@ -979,21 +1005,13 @@ export default function LibraryPage({ initialSignedIn = false }) {
                       ) : null}
 
                       <div className="mt-6 flex flex-wrap gap-2">
-                        {resumeSpotlightReadHref ? (
-                          <button
-                            type="button"
-                            onClick={() => router.push(resumeSpotlightReadHref)}
-                            className={primaryButtonClass}
-                          >
-                            Continue Reading
-                          </button>
-                        ) : visibleLibraryItems.length > 0 ? (
+                        {visibleLibraryItems.length > 0 ? (
                           <button
                             type="button"
                             onClick={() => scrollToSection("saved-series")}
                             className={primaryButtonClass}
                           >
-                            Library
+                            View shelf
                           </button>
                         ) : !resumeSpotlightReadHref ? (
                           <button
@@ -1010,9 +1028,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         {resumeSpotlightSeriesHref ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              router.push(resumeSpotlightSeriesHref)
-                            }
+                            onClick={() => navigateToHref(resumeSpotlightSeriesHref)}
                             className={secondaryButtonClass}
                           >
                             View title
@@ -1045,7 +1061,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         Library
                       </p>
                       <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
-                        Your library
+                        {libraryDeskTitle}
                       </h2>
                       <div className="mt-6 flex flex-wrap gap-2">
                         <button
@@ -1147,7 +1163,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     coverFallbackVariant="minimal-card"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
-                        router.push(
+                        navigateToHref(
                           buildLibraryReadHref(
                             item.seriesId,
                             item.episodeId,
@@ -1158,7 +1174,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         return;
                       }
                       if (item.seriesId) {
-                        router.push(
+                        navigateToHref(
                           buildLibrarySeriesHref(
                             item.seriesId,
                             "LIBRARY_CONTINUE_RAIL",
@@ -1183,7 +1199,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                     coverFallbackVariant="minimal-card"
                     onItemClick={(item) => {
                       if (item.seriesId && item.episodeId) {
-                        router.push(
+                        navigateToHref(
                           buildLibraryReadHref(
                             item.seriesId,
                             item.episodeId,
@@ -1194,7 +1210,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
                         return;
                       }
                       if (item.seriesId) {
-                        router.push(
+                        navigateToHref(
                           buildLibrarySeriesHref(
                             item.seriesId,
                             "LIBRARY_HISTORY_RAIL",
@@ -1258,8 +1274,8 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
               {recommendedItems.length > 0 ? (
                 <Rail
-                  eyebrow="Top Picks"
-                  title="Top Picks"
+                  eyebrow="Recommended"
+                  title="Recommended"
                   railName="recommended"
                   items={recommendedItems}
                   reason={recommendedRailReason}

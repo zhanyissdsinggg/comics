@@ -301,6 +301,57 @@ async function expectNoShellPlaceholderCopy(page: Page): Promise<void> {
   );
 }
 
+async function expectAdultHomeCatalog(page: Page): Promise<void> {
+  await expect(
+    page.getByRole("heading", { name: /After Hours Letters|Midnight Heat/i }).first(),
+  ).toBeVisible({
+    timeout: UI_TIMEOUT_MS,
+  });
+  await expect(page.locator("body")).toContainText(
+    /After Hours Letters|Midnight Heat/i,
+  );
+  await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+  await expect(page.locator("body")).not.toContainText("Velvet Archive");
+}
+
+async function expectAdultCatalogVisible(
+  page: Page,
+  options: {
+    headingPattern?: RegExp;
+    presentTitles?: string[];
+    absentTitles?: string[];
+  } = {},
+): Promise<void> {
+  const presentTitles = options.presentTitles || [
+    "After Hours Letters",
+    "Midnight Heat",
+  ];
+  const absentTitles = options.absentTitles || [
+    "The Last Kingdom",
+    "Velvet Archive",
+  ];
+
+  if (options.headingPattern) {
+    await expect(
+      page.getByRole("heading", { name: options.headingPattern }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+  } else {
+    await expect(page.locator("body")).toContainText(
+      new RegExp(presentTitles.join("|"), "i"),
+    );
+  }
+
+  for (const title of presentTitles) {
+    await expect(page.locator("body")).toContainText(title);
+  }
+
+  for (const title of absentTitles) {
+    await expect(page.locator("body")).not.toContainText(title);
+  }
+}
+
 async function expectSinglePublicChrome(page: Page): Promise<void> {
   await expect(page.locator('header[data-site-header="1"]')).toHaveCount(1);
   await expect(page.locator('footer[data-site-footer="1"]')).toHaveCount(1);
@@ -654,12 +705,7 @@ test.describe("Content mode filtering", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectAdultHomeCatalog(page);
     await expectNoShellPlaceholderCopy(page);
   });
 
@@ -705,16 +751,14 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
+    await expectAdultCatalogVisible(page, {
+      presentTitles: ["Midnight Heat"],
+      absentTitles: ["The Last Kingdom", "Velvet Archive"],
     });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expectNoShellPlaceholderCopy(page);
   });
 
-  test("interactive search fallback should stay normal-only by default", async ({
+  test("interactive route should stay normal-only by default", async ({
     page,
   }) => {
     await installContentModeRoutes(page, {
@@ -723,7 +767,7 @@ test.describe("Content mode filtering", () => {
       signedIn: false,
     });
 
-    const response = await page.goto("/search?format=interactive", {
+    const response = await page.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
@@ -736,7 +780,7 @@ test.describe("Content mode filtering", () => {
     await expect(page.locator("body")).not.toContainText("Vampire Oath");
   });
 
-  test("interactive search fallback should stay adult-only in adult mode", async ({
+  test("interactive route should stay adult-only in adult mode", async ({
     page,
   }) => {
     await seedAdultState(page, {
@@ -750,7 +794,7 @@ test.describe("Content mode filtering", () => {
       signedIn: true,
     });
 
-    const response = await page.goto("/search?format=interactive", {
+    const response = await page.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
@@ -898,25 +942,19 @@ test.describe("Content mode filtering", () => {
       )
       .toBe("1");
 
+    await expectAdultHomeCatalog(page);
     await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
-    await expect(
-      page.getByRole("button", { name: /Back to normal mode|Normal/i }).first(),
+      page
+        .getByRole("button", {
+          name: /Switch to standard mode|Back to normal mode/i,
+        })
+        .first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await page.reload({ waitUntil: "domcontentloaded" });
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectAdultHomeCatalog(page);
   });
 
   test("desktop header toggle should keep adult mode when navigating from home to search", async ({
@@ -950,27 +988,25 @@ test.describe("Content mode filtering", () => {
       )
       .toBe("1");
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expectAdultHomeCatalog(page);
 
     await page.goto("/search?q=midnight", {
       waitUntil: "domcontentloaded",
     });
 
     await expect(
-      page.getByRole("button", { name: /Back to normal mode|Normal/i }).first(),
+      page
+        .getByRole("button", {
+          name: /Switch to standard mode|Back to normal mode/i,
+        })
+        .first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
+    await expectAdultCatalogVisible(page, {
+      presentTitles: ["Midnight Heat"],
+      absentTitles: ["The Last Kingdom", "Velvet Archive"],
     });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect
       .poll(() =>
         page.evaluate(() => ({
@@ -1006,12 +1042,7 @@ test.describe("Content mode filtering", () => {
     await expect(mobileToggle).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await mobileToggle.click();
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expectAdultHomeCatalog(page);
     await expect(mobileToggle).toContainText("Normal");
   });
 
@@ -1042,7 +1073,7 @@ test.describe("Content mode filtering", () => {
       waitUntil: "domcontentloaded",
     });
     await page
-      .getByRole("link", { name: /The Last Kingdom/i })
+      .getByRole("link", { name: /Add to Library/i })
       .first()
       .click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
@@ -1069,12 +1100,16 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /No matches yet/i }),
+      page.getByRole("heading", { name: /Nothing landed this time\./i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByPlaceholder("Search titles, creators, or genres..."),
+      page
+        .getByRole("searchbox", {
+          name: /Search series, creators, or genres/i,
+        })
+        .first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1150,26 +1185,27 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const cards = page.locator("article");
-    await expect(cards.first()).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    const trendingRail = page.getByTestId("search-rail-trending");
+    await expect(trendingRail).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
-    const viewLabels = (await cards.allTextContents())
-      .map((text) => {
-        const match = text.match(/(\d+(?:\.\d+)?[KM])\s+views/i);
-        return match ? match[1] : null;
-      })
+    const titleLinks = trendingRail.getByRole("link");
+    await expect(titleLinks.first()).toBeVisible({ timeout: UI_TIMEOUT_MS });
+
+    const titles = (await titleLinks.allTextContents())
+      .map((text) => text.trim())
       .filter(Boolean)
       .slice(0, 8);
 
-    expect(viewLabels.length).toBeGreaterThanOrEqual(4);
-    expect(viewLabels).not.toContain("10.2K");
-    expect(new Set(viewLabels).size).toBeGreaterThanOrEqual(3);
+    expect(titles.length).toBeGreaterThanOrEqual(2);
+    expect(titles.join(" ")).toContain("The Last Kingdom");
+    expect(titles.join(" ")).toContain("Velvet Archive");
+    expect(new Set(titles).size).toBeGreaterThanOrEqual(2);
   });
 
-  test("interactive search footer should keep Search when the current page is interactive search", async ({
+  test("interactive footer should keep Search when the current page is the interactive route", async ({
     page,
   }) => {
-    const response = await page.goto("/search?type=interactive", {
+    const response = await page.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
@@ -1195,10 +1231,7 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page
-      .getByRole("link", { name: /The Last Kingdom/i })
-      .first()
-      .click();
+    await page.getByRole("link", { name: "Add to Library" }).first().click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
 
     const footer = page.locator('footer[data-site-footer="1"]').first();
@@ -1334,14 +1367,10 @@ test.describe("Content mode filtering", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /Midnight Heat/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expectAdultHomeCatalog(page);
 
     await page
-      .getByRole("button", { name: /Back to normal mode|Normal/i })
+      .getByRole("button", { name: /Switch to standard mode|Back to normal mode/i })
       .first()
       .click();
 

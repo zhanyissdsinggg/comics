@@ -45,6 +45,7 @@ const isOriginMatchedBySuffix = (origin: string, suffixes: string[]): boolean =>
 async function bootstrap(): Promise<void> {
   const appConfig = getAppConfig();
   initSentry();
+  const swaggerEnabled = appConfig.environment !== "production";
 
   const logLevels: LogLevel[] =
     appConfig.environment === "production"
@@ -151,13 +152,15 @@ async function bootstrap(): Promise<void> {
   app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
   app.useGlobalInterceptors(new TimeoutInterceptor());
 
-  const config = new DocumentBuilder()
-    .setTitle("Gush Reading Platform Backend")
-    .setDescription("Production backend for the Gush comics-and-novels reading platform.")
-    .setVersion("1.0.0")
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/docs", app, document);
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle("Gush Reading Platform Backend")
+      .setDescription("Production backend for the Gush comics-and-novels reading platform.")
+      .setVersion("1.0.0")
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup("api/docs", app, document);
+  }
 
   const port = appConfig.server.port;
   await app.listen(port);

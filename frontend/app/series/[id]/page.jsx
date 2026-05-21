@@ -115,8 +115,9 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function SeriesRoutePage({ params }) {
+export default async function SeriesRoutePage({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = await Promise.resolve(searchParams);
   const seriesId = String(resolvedParams?.id || "").trim();
   if (
     shouldBlockDemoContentInProduction() &&
@@ -133,10 +134,7 @@ export default async function SeriesRoutePage({ params }) {
     routePayload?.state === "adult-gated" ||
     routePayload?.state === "mode-mismatch" ||
     routePayload?.state === "unavailable" ||
-    (routePayload?.state === "not-found" && isKnownPublicSeriesId(seriesId));
-  if (routePayload?.state === "not-found" && !isKnownPublicSeriesId(seriesId)) {
-    notFound();
-  }
+    routePayload?.state === "not-found";
   if (
     !isRecoverableShellState &&
     shouldForceNotFoundForSeries(seriesId, routePayload?.payload || null)
@@ -170,6 +168,7 @@ export default async function SeriesRoutePage({ params }) {
         series={routePayload?.payload?.series || null}
         episodes={routePayload?.payload?.episodes || []}
         initialState={routePayload?.state || "unavailable"}
+        initialSearchParams={resolvedSearchParams || null}
       />
     </>
   );

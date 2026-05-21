@@ -1,9 +1,7 @@
-import { BookmarkProvider } from "../../store/useBookmarkStore";
-import { WalletProvider } from "../../store/useWalletStore";
-import FigmaAccountPage from "../../components/figma/FigmaAccountPage";
+import { cookies } from "next/headers";
+import LibraryPage from "../../components/library/LibraryPage";
 import { createPageMetadata } from "../../lib/seo";
-import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
-import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
+import { hasServerSessionCookie } from "../../lib/serverAdultGate";
 
 export const metadata = createPageMetadata({
   title: "Library",
@@ -16,14 +14,10 @@ export const metadata = createPageMetadata({
 });
 
 export default async function Page() {
-  const includeAdult = await isServerAdultModeEnabled();
-  const payload = await loadSeriesCatalogSeoPayload({ includeAdult });
+  const cookieStore = await cookies();
+  const initialSignedIn =
+    cookieStore.get("mn_is_signed_in")?.value === "1" ||
+    hasServerSessionCookie(cookieStore);
 
-  return (
-    <WalletProvider>
-      <BookmarkProvider>
-        <FigmaAccountPage seriesList={payload?.series || []} />
-      </BookmarkProvider>
-    </WalletProvider>
-  );
+  return <LibraryPage initialSignedIn={initialSignedIn} />;
 }
