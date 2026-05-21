@@ -130,10 +130,17 @@ cd frontend
 npm run dev
 npm run lint
 npm run build
+npm run build:e2e
+npm run test:e2e
 npm run smoke:routes
 ```
 
 The storefront is the public product surface. Keep UI experiments inside the existing component system instead of creating parallel one-off components.
+
+Playwright note:
+
+- Browser E2E uses a prebuilt `.next-playwright/` bundle before starting `next start`
+- This avoids Windows file-lock and partial-build failures when Playwright tries to build and boot the app in one step
 
 Storefront and Mature Mode guardrails:
 
@@ -166,6 +173,13 @@ Migration policy:
 Backend runtime details, creator import flow, and cache invalidation notes live in [`backend/README.md`](./backend/README.md).
 
 ## Deployment configuration
+
+Production split:
+
+- Vercel serves the Next.js storefront from `frontend/` only
+- Railway serves the NestJS API from `backend/` only
+- Root `vercel.json` exists so monorepo builds from the repo root still install and build only `frontend/`
+- Use `npm ci` everywhere in CI and deployment automation so the committed `package-lock.json` files stay authoritative
 
 These files are live infrastructure inputs and should not be deleted as "unused":
 

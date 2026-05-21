@@ -180,7 +180,7 @@ test.describe("Storefront CTA flows", () => {
     await expect(
       page
         .getByRole("heading", {
-          name: /Profiles|Creators directory|All creators/i,
+          name: /Creators|Browse creators/i,
         })
         .first(),
     ).toBeVisible({
@@ -188,7 +188,7 @@ test.describe("Storefront CTA flows", () => {
     });
 
     const creatorCta = page
-      .getByRole("link", { name: /Open Mira Dane/i })
+      .getByRole("link", { name: /View Mira Dane/i })
       .first();
     await expect(creatorCta).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
@@ -201,7 +201,7 @@ test.describe("Storefront CTA flows", () => {
 
     const creatorUrl = new URL(page.url());
     expect(creatorUrl.pathname).toMatch(/^\/creators\/.+/);
-    expect(creatorUrl.searchParams.get("entry")).toBe("CREATORS_HUB_FEATURED");
+    expect(creatorUrl.searchParams.get("entry")).toBeNull();
     await expectNoRuntimeIssues("/creators", runtimeIssues);
   });
 
@@ -339,7 +339,7 @@ test.describe("Storefront CTA flows", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /This device, for now\./i }),
+      page.getByRole("heading", { name: /Account/i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -347,7 +347,7 @@ test.describe("Storefront CTA flows", () => {
     await Promise.all([
       page.waitForURL("**/auth/reset", { timeout: UI_TIMEOUT_MS }),
       page
-        .getByRole("button", { name: "Reset password", exact: true })
+        .getByRole("link", { name: "Reset password", exact: true })
         .first()
         .click(),
     ]);
@@ -356,10 +356,13 @@ test.describe("Storefront CTA flows", () => {
     response = await page.goto("/account", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await Promise.all([
-      page.waitForURL("**/subscribe**", { timeout: UI_TIMEOUT_MS }),
-      page.getByRole("button", { name: "Plans", exact: true }).first().click(),
+      page.waitForURL("**/support**", { timeout: UI_TIMEOUT_MS }),
+      page
+        .getByRole("link", { name: "Support", exact: true })
+        .first()
+        .click(),
     ]);
-    expect(new URL(page.url()).pathname).toBe("/subscribe");
+    expect(new URL(page.url()).pathname).toBe("/support");
 
     response = await page.goto("/library", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
@@ -372,17 +375,15 @@ test.describe("Storefront CTA flows", () => {
     });
 
     await Promise.all([
-      page.waitForURL("**/rankings?type=ttf&window=all", {
+      page.waitForURL("**/comics", {
         timeout: UI_TIMEOUT_MS,
       }),
       page
-        .getByRole("button", { name: "First picks", exact: true })
+        .getByRole("link", { name: "Browse free chapters", exact: true })
         .first()
         .click(),
     ]);
-    expect(new URL(page.url()).pathname).toBe("/rankings");
-    expect(new URL(page.url()).searchParams.get("type")).toBe("ttf");
-    expect(new URL(page.url()).searchParams.get("window")).toBe("all");
+    expect(new URL(page.url()).pathname).toBe("/comics");
 
     await expectNoRuntimeIssues(
       "/account + /library guest CTAs",

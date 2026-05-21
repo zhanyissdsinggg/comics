@@ -11,12 +11,12 @@ const frontendRoot = path.resolve(__dirname, "..");
 const buildIdPath = path.join(frontendRoot, ".next", "BUILD_ID");
 
 const ROUTE_SPECS = [
-  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "Crimson Tide" },
-  { path: "/comics", expectedTitle: "Comics", expectedHeading: "Crimson Tide" },
-  { path: "/novels", expectedTitle: "Novels", expectedHeading: "Solar Wind" },
+  { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "" },
+  { path: "/comics", expectedTitle: "Comics", expectedHeading: "Read original comics and novels in one place." },
+  { path: "/novels", expectedTitle: "Novels", expectedHeading: "Read original comics and novels in one place." },
   { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
-  { path: "/search", expectedTitle: "Search Stories", expectedHeading: "Find something worth ruining your sleep schedule for." },
-  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending Stories" },
+  { path: "/search", expectedTitle: "Search Stories", expectedHeading: "Find your next obsession" },
+  { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Featured stories." },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
   { path: "/series/series-004", expectedTitle: "Cherry Blossom High", expectedHeading: "Cherry Blossom High" },
   { path: "/series/series-005", expectedTitle: "Dragon's Oath", expectedHeading: "Dragon's Oath" },
@@ -24,10 +24,10 @@ const ROUTE_SPECS = [
   { path: "/series/series-010", expectedTitle: "Crimson Tide", expectedHeading: "Crimson Tide" },
   { path: "/series/series-011", expectedTitle: "Solar Wind", expectedHeading: "Solar Wind" },
   { path: "/store", expectedTitle: "Points are coming soon", expectedHeading: "Points are coming soon" },
-  { path: "/subscribe", expectedTitle: "Membership is coming soon", expectedHeading: "Membership is coming soon" },
+  { path: "/subscribe", expectedTitle: "Membership is coming soon", expectedHeading: "Coming soon." },
   { path: "/support", expectedTitle: "Support", expectedHeading: "Support" },
-  { path: "/account", expectedTitle: "Account", expectedHeading: "This device, for now." },
-  { path: "/library", expectedTitle: "Library", expectedHeading: "This device, for now." },
+  { path: "/account", expectedTitle: "Account", expectedHeading: "Account" },
+  { path: "/library", expectedTitle: "Library", expectedHeading: "Your shelf starts here." },
   { path: "/orders", expectedTitle: "Orders", expectedHeading: "Sign in to view purchases" },
 ];
 

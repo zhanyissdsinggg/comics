@@ -33,6 +33,7 @@ function PortraitCard({
   coverFallbackVariant = "minimal-card",
   interactionMode = "link",
   showMatureBadge = false,
+  showMetaLine = false,
 }) {
   const metaLine = item.subtitle || item.eyebrow || "";
   const formatStatusLine = formatTitleCardFormatStatus(
@@ -124,9 +125,8 @@ function PortraitCard({
             eyebrow={metaLine}
             badge=""
             genres={[]}
-            seriesType=""
+            seriesType={item?.seriesType || item?.type || ""}
             fallbackVariant={coverFallbackVariant}
-            decorative
             className="h-full w-full transition-transform duration-700 group-hover:scale-[1.045]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/58 via-black/8 to-transparent" />
@@ -194,6 +194,18 @@ function PortraitCard({
             )}
           >
             {hookLine}
+          </p>
+        ) : null}
+
+        {showMetaLine && metaLine ? (
+          <p
+            className={cn(
+              "line-clamp-2 transition-colors",
+              isCompact ? "text-[0.82rem] leading-5" : "text-sm leading-6",
+              "text-white/68 group-hover:text-white/82",
+            )}
+          >
+            {metaLine}
           </p>
         ) : null}
 

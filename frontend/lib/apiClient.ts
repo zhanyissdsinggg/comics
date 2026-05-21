@@ -24,6 +24,7 @@ export interface ApiRequestOptions {
   suppressAuthModal?: boolean;
   dedupeMs?: number; //
   maxRetries?: number;
+  keepalive?: boolean;
 }
 
 export interface CacheStats {
@@ -138,6 +139,14 @@ function trackEvent(event: string, props: Record<string, unknown> = {}): void {
       analyticsTrack(event, props);
     }
   });
+}
+
+function getCurrentReturnTo(): string {
+  if (typeof window === "undefined") {
+    return "/";
+  }
+
+  return `${window.location.pathname}${window.location.search || ""}`;
 }
 
 // ============ Base URL helpers ============
@@ -508,7 +517,11 @@ async function requestJson(
             path.startsWith("/api/admin") ||
             isSilentAuthPath(path);
           if (!suppressAuth) {
-            // emitAuthRequired({ path });
+            emitAuthRequired({
+              path,
+              source: "api",
+              returnTo: getCurrentReturnTo(),
+            });
           }
           return errorPayload;
         }

@@ -19,6 +19,8 @@ export default function ReaderTopBar({
   title,
   episodeLabel,
   subtitle,
+  contextLabel = "",
+  contextActionLabel = "",
   seriesId,
   episodeId,
   onBack,
@@ -64,7 +66,7 @@ export default function ReaderTopBar({
             <button
               type="button"
               onClick={onBack}
-              aria-label="Back"
+              aria-label={contextActionLabel || "Back"}
               className={cn(
                 "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
                 isComic
@@ -83,6 +85,16 @@ export default function ReaderTopBar({
                   )}
                 >
                   {subtitle}
+                </p>
+              ) : null}
+              {contextLabel ? (
+                <p
+                  className={cn(
+                    "mb-1 truncate text-[10px] font-semibold uppercase tracking-[0.18em]",
+                    isComic ? "text-white/72" : "text-[#667085]",
+                  )}
+                >
+                  {contextLabel}
                 </p>
               ) : null}
               <h1
@@ -219,7 +231,7 @@ export default function ReaderTopBar({
 
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-3 py-3 sm:flex-nowrap sm:justify-between sm:px-4">
         <button type="button" onClick={onBack} className={topBarButtonClass}>
-          Back
+          {contextActionLabel || "Back"}
         </button>
 
         <div className="min-w-0 flex-1 text-center sm:flex-none">

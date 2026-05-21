@@ -106,13 +106,32 @@ export function readPaymentAttributionFromSearchParams(searchParams) {
     return null;
   }
 
-  const readValue = (key, fallbackKey) => {
-    if (typeof searchParams.get !== "function") {
+  const readValueFromRecord = (key) => {
+    if (!searchParams || typeof searchParams !== "object") {
       return undefined;
     }
+
+    const rawValue = searchParams[key];
+    if (Array.isArray(rawValue)) {
+      return rawValue.find(
+        (candidate) => typeof candidate === "string" && candidate.trim(),
+      );
+    }
+
+    return typeof rawValue === "string" ? rawValue : undefined;
+  };
+
+  const readValue = (key, fallbackKey) => {
+    if (typeof searchParams.get === "function") {
+      return (
+        searchParams.get(key) ||
+        (fallbackKey ? searchParams.get(fallbackKey) : undefined)
+      );
+    }
+
     return (
-      searchParams.get(key) ||
-      (fallbackKey ? searchParams.get(fallbackKey) : undefined)
+      readValueFromRecord(key) ||
+      (fallbackKey ? readValueFromRecord(fallbackKey) : undefined)
     );
   };
 

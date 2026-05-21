@@ -187,6 +187,7 @@ export default function Rail({
                     showActionLabel={showActionLabel}
                     coverFallbackVariant={coverFallbackVariant}
                     interactionMode={interactionMode}
+                    showMetaLine={railName === "recommended"}
                     onClick={() => onItemClick?.(item, railName || title)}
                   />
                 </div>

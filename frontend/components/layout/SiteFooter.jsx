@@ -10,7 +10,7 @@ import { siteConfig } from "../../lib/siteConfig";
 const primaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Interactive", href: "/search?type=interactive" },
+  { label: "Interactive", href: "/interactive" },
   { label: "Rankings", href: "/rankings" },
   { label: "Search", href: "/search" },
   { label: "Support", href: "/support" },
@@ -26,7 +26,7 @@ const fullFooterSections = [
     links: [
       { label: "Comics", href: "/comics" },
       { label: "Novels", href: "/novels" },
-      { label: "Interactive", href: "/search?type=interactive" },
+      { label: "Interactive", href: "/interactive" },
       { label: "Rankings", href: "/rankings" },
       { label: "Search", href: "/search" },
       { label: "Support", href: "/support" },
@@ -79,7 +79,7 @@ const compactMetaFooterLinks = [
 const homePrimaryFooterLinks = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
-  { label: "Interactive", href: "/search?type=interactive" },
+  { label: "Interactive", href: "/interactive" },
   { label: "Rankings", href: "/rankings" },
   { label: "Search", href: "/search" },
   { label: "Support", href: "/support" },
@@ -116,14 +116,24 @@ function buildFooterRouteKey(href) {
   const [path, query = ""] = normalizedHref.split("?");
   const params = new URLSearchParams(query);
 
-  if (path === "/search") {
-    const type = String(params.get("type") || "")
-      .trim()
-      .toLowerCase();
-    if (type === "interactive") {
-      return "/search?type=interactive";
+    if (path === "/interactive") {
+      return "/interactive";
     }
-  }
+
+    if (path === "/search") {
+      const type = String(params.get("type") || "")
+        .trim()
+        .toLowerCase();
+      const format = String(params.get("format") || "")
+        .trim()
+        .toLowerCase();
+      if (type === "interactive") {
+        return "/interactive";
+      }
+      if (format === "interactive") {
+        return "/interactive";
+      }
+    }
 
   return path;
 }

@@ -63,6 +63,30 @@ function getReadLabel(contentType) {
   return "Start Reading";
 }
 
+function buildTypedCoverAlt(item) {
+  const title = String(item?.title || "").replace(/\s+/g, " ").trim();
+  const rawKind = String(item?.kind || item?.type || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+  const kind =
+    rawKind === "comics"
+      ? "comic"
+      : rawKind === "novels"
+        ? "novel"
+        : rawKind;
+
+  if (title && (kind === "comic" || kind === "novel")) {
+    return `${kind.charAt(0).toUpperCase()}${kind.slice(1)} cover image for ${title}`;
+  }
+
+  if (title) {
+    return `Cover image for ${title}`;
+  }
+
+  return "Series cover image";
+}
+
 function getContinueLabel(contentType) {
   if (contentType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
     return "Resume Playthrough";
@@ -478,7 +502,7 @@ function HomeContent({
                 kind: "cover",
                 adult: heroItem?.adult || heroItem?.isAdult,
               })}
-              alt={heroItem.title}
+              alt={buildTypedCoverAlt(heroItem)}
               className="h-full w-full scale-110 object-cover opacity-30 blur-2xl"
             />
             <div
@@ -511,7 +535,7 @@ function HomeContent({
                 </div>
 
                 <h1 className="mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2.25rem] font-black leading-[1.06] tracking-tight text-transparent drop-shadow-sm md:mb-6 md:text-6xl lg:text-7xl">
-                  {heroItem.title}
+                  Read original comics and novels in one place.
                 </h1>
 
                 <p className="mb-5 max-w-xl text-sm leading-6 text-gray-300 md:mb-8 md:text-lg md:leading-relaxed">
@@ -560,7 +584,7 @@ function HomeContent({
                         kind: "cover",
                         adult: heroItem?.adult || heroItem?.isAdult,
                       })}
-                      alt={heroItem.title}
+                      alt={buildTypedCoverAlt(heroItem)}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
@@ -679,6 +703,7 @@ function HomeContent({
                 </h2>
                 <Link
                   href="/account"
+                  aria-label="Account shelf"
                   className="flex items-center text-sm font-semibold text-gray-400 transition-colors hover:text-white"
                 >
                   My Library
@@ -706,7 +731,7 @@ function HomeContent({
                           kind: "cover",
                           adult: item?.adult || item?.isAdult,
                         })}
-                        alt={item.title}
+                        alt={buildTypedCoverAlt(item)}
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
@@ -794,7 +819,7 @@ function HomeContent({
                             kind: "cover",
                             adult: gridItems[0]?.adult || gridItems[0]?.isAdult,
                           })}
-                          alt={gridItems[0].title}
+                          alt={buildTypedCoverAlt(gridItems[0])}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
@@ -827,7 +852,7 @@ function HomeContent({
                             kind: "cover",
                             adult: gridItems[1]?.adult || gridItems[1]?.isAdult,
                           })}
-                          alt={gridItems[1].title}
+                          alt={buildTypedCoverAlt(gridItems[1])}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
@@ -853,7 +878,7 @@ function HomeContent({
                             kind: "cover",
                             adult: item?.adult || item?.isAdult,
                           })}
-                          alt={item.title}
+                          alt={buildTypedCoverAlt(item)}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
@@ -951,7 +976,7 @@ function HomeContent({
                             kind: "cover",
                             adult: item?.adult || item?.isAdult,
                           })}
-                          alt={item.title}
+                          alt={buildTypedCoverAlt(item)}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -1068,7 +1093,7 @@ function HomeContent({
                             kind: "cover",
                             adult: item?.adult || item?.isAdult,
                           })}
-                          alt={item.title}
+                          alt={buildTypedCoverAlt(item)}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       </div>

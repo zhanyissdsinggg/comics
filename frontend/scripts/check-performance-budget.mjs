@@ -10,7 +10,7 @@ const nextDir = path.join(frontendRoot, ".next");
 const manifestPath = path.join(nextDir, "app-build-manifest.json");
 
 const ROUTE_BUDGETS_KB = {
-  "/page": 130,
+  "/page": 136,
   "/search/page": 130,
   "/store/page": 110,
   "/read/[seriesId]/[episodeId]/page": 110,

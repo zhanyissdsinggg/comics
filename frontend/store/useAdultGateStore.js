@@ -15,6 +15,7 @@ import { useAuthStore } from "./useAuthStore";
 import { apiPost, invalidateApiCacheByPrefix } from "../lib/apiClient";
 import {
   applyPreferencesToStorage,
+  PREFERENCES_STORAGE_SYNC_EVENT,
   readStoredMatureVerification,
 } from "../lib/preferencesClient";
 import {
@@ -71,6 +72,9 @@ function createOptimisticVerification(ruleKey) {
 
 export function AdultGateProvider({ children, initialAdultState = null }) {
   const { hydrated: authHydrated, isSignedIn } = useAuthStore();
+  const trustedInitialAdultState =
+    initialAdultState?.adultConfirmed === true &&
+    initialAdultState?.isAdultMode === true;
   const [adultConfirmed, setAdultConfirmed] = useState(
     initialAdultState?.adultConfirmed === true,
   );
@@ -81,10 +85,45 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
     initialAdultState?.isAdultMode === true,
   );
   const [matureVerification, setMatureVerification] = useState(
-    readStoredMatureVerification("global"),
+    normalizeMatureVerificationStatus(
+      initialAdultState?.adultConfirmed === true
+        ? {
+            verified: true,
+            provider: "server-session",
+            region: normalizeRuleKey(initialAdultState?.ageRuleKey || "global"),
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: null,
+          }
+        : null,
+      normalizeRuleKey(initialAdultState?.ageRuleKey || "global"),
+    ),
   );
   const [hydrated, setHydrated] = useState(false);
   const restoredModeRef = useRef("");
+  const trustedInitialStateRef = useRef(
+    initialAdultState?.adultConfirmed === true &&
+      initialAdultState?.isAdultMode === true
+      ? {
+          confirmed: true,
+          ruleKey: normalizeRuleKey(initialAdultState?.ageRuleKey || "global"),
+          mode: true,
+          verification: normalizeMatureVerificationStatus(
+            {
+              verified: true,
+              provider: "server-session",
+              region: normalizeRuleKey(
+                initialAdultState?.ageRuleKey || "global",
+              ),
+              expiresAt: null,
+              referenceId: null,
+              verifiedAt: null,
+            },
+            normalizeRuleKey(initialAdultState?.ageRuleKey || "global"),
+          ),
+        }
+      : null,
+  );
 
   const clearCatalogModeCache = useCallback(() => {
     invalidateApiCacheByPrefix("/api/series");
@@ -95,21 +134,33 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
   }, []);
 
   const syncAdultPreferences = useCallback(
-    (nextState) => {
+    async (nextState) => {
       if (!authHydrated || !isSignedIn) {
-        return;
+        return null;
       }
 
-      void apiPost("/api/preferences", {
-        preferences: {
-          region: nextState.region,
-          hideAdultHistory:
-            typeof window !== "undefined" &&
-            window.localStorage.getItem(HIDE_ADULT_KEY) === "1",
-          matureModeEnabled: nextState.isAdultMode,
-          matureVerification: nextState.matureVerification,
+      const response = await apiPost(
+        "/api/preferences",
+        {
+          preferences: {
+            region: nextState.region,
+            hideAdultHistory:
+              typeof window !== "undefined" &&
+              window.localStorage.getItem(HIDE_ADULT_KEY) === "1",
+            matureModeEnabled: nextState.isAdultMode,
+            matureVerification: nextState.matureVerification,
+          },
         },
-      });
+        {
+          keepalive: true,
+        },
+      );
+
+      if (response.ok && response.data?.preferences) {
+        applyPreferencesToStorage(response.data.preferences);
+      }
+
+      return response;
     },
     [authHydrated, isSignedIn],
   );
@@ -160,17 +211,42 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       });
 
       if (sync) {
-        syncAdultPreferences({
+        return syncAdultPreferences({
           region: normalizedRule,
           isAdultMode: Boolean(mode),
           matureVerification: normalizedVerification,
         });
       }
+
+      return Promise.resolve(null);
     },
     [syncAdultPreferences],
   );
 
   useEffect(() => {
+    if (!authHydrated) {
+      const initialRule = normalizeRuleKey(initialAdultState?.ageRuleKey || "global");
+      applyAdultState({
+        confirmed: initialAdultState?.adultConfirmed === true,
+        ruleKey: initialRule,
+        mode: initialAdultState?.isAdultMode === true,
+        verification:
+          initialAdultState?.adultConfirmed === true
+            ? {
+                verified: true,
+                provider: "server-session",
+                region: initialRule,
+                expiresAt: null,
+                referenceId: null,
+                verifiedAt: null,
+              }
+            : null,
+        sync: false,
+      });
+      setHydrated(true);
+      return;
+    }
+
     const confirmed = readStorageValue(CONFIRMED_KEY, "0") === "1";
     const regionRule = readRegionRule();
     const storedRule = readStorageValue(RULE_KEY, regionRule);
@@ -178,13 +254,17 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
     const mode = readStorageValue(MODE_KEY, "0") === "1";
     const verification = readStoredMatureVerification(rule);
     const verificationActive = isMatureVerificationActive(verification, rule);
+    const allowRestoredAdultState =
+      (isSignedIn || trustedInitialAdultState) && verificationActive;
     const restoredMode =
-      mode && verificationActive ? CONTENT_MODE_ADULT : CONTENT_MODE_NORMAL;
+      mode && allowRestoredAdultState ? CONTENT_MODE_ADULT : CONTENT_MODE_NORMAL;
     applyAdultState({
-      confirmed: confirmed && verificationActive,
+      confirmed: confirmed && allowRestoredAdultState,
       ruleKey: rule,
-      mode: mode && verificationActive,
-      verification,
+      mode: mode && allowRestoredAdultState,
+      verification: allowRestoredAdultState
+        ? verification
+        : normalizeMatureVerificationStatus(null, rule),
       sync: false,
     });
     if (restoredModeRef.current !== restoredMode) {
@@ -195,7 +275,69 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       });
     }
     setHydrated(true);
-  }, [applyAdultState]);
+  }, [
+    applyAdultState,
+    authHydrated,
+    initialAdultState,
+    isSignedIn,
+    trustedInitialAdultState,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const handlePreferencesSync = (event) => {
+      const nextPreferences = event?.detail?.preferences;
+      if (!nextPreferences || typeof nextPreferences !== "object") {
+        return;
+      }
+
+      const nextRule = normalizeRuleKey(
+        nextPreferences.region || readRegionRule(),
+      );
+      const nextVerification = normalizeMatureVerificationStatus(
+        nextPreferences.matureVerification,
+        nextRule,
+      );
+      const nextVerified = isMatureVerificationActive(
+        nextVerification,
+        nextRule,
+      );
+      const nextMode =
+        nextVerified && nextPreferences.matureModeEnabled === true;
+
+      trustedInitialStateRef.current = nextVerified
+        ? {
+            confirmed: true,
+            ruleKey: nextRule,
+            mode: nextMode,
+            verification: nextVerification,
+          }
+        : null;
+
+      setAdultConfirmed(nextVerified);
+      setAgeRuleKey(nextRule);
+      setIsAdultMode(nextMode);
+      setMatureVerification(
+        nextVerified
+          ? nextVerification
+          : normalizeMatureVerificationStatus(null, nextRule),
+      );
+    };
+
+    window.addEventListener(
+      PREFERENCES_STORAGE_SYNC_EVENT,
+      handlePreferencesSync,
+    );
+    return () => {
+      window.removeEventListener(
+        PREFERENCES_STORAGE_SYNC_EVENT,
+        handlePreferencesSync,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     if (!hydrated || !authHydrated) {
@@ -208,14 +350,29 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       verification,
       regionRule,
     );
+    const trustedInitialState = trustedInitialStateRef.current;
+    const allowPersistedAdultState =
+      (isSignedIn && verificationActive) || Boolean(trustedInitialState);
     const confirmed =
-      readStorageValue(CONFIRMED_KEY, "0") === "1" && verificationActive;
-    const mode = readStorageValue(MODE_KEY, "0") === "1" && verificationActive;
+      readStorageValue(CONFIRMED_KEY, "0") === "1" && allowPersistedAdultState;
+    const mode =
+      readStorageValue(MODE_KEY, "0") === "1" && allowPersistedAdultState;
+    const effectiveVerification =
+      verificationActive && isSignedIn
+        ? verification
+        : trustedInitialState?.verification || normalizeMatureVerificationStatus(null, regionRule);
+    const effectiveConfirmed =
+      trustedInitialState?.confirmed === true ? true : confirmed;
+    const effectiveMode = trustedInitialState?.mode === true ? true : mode;
 
-    setAdultConfirmed(confirmed);
+    setAdultConfirmed(effectiveConfirmed);
     setAgeRuleKey(regionRule);
-    setIsAdultMode(mode);
-    setMatureVerification(verification);
+    setIsAdultMode(effectiveMode);
+    setMatureVerification(
+      allowPersistedAdultState
+        ? effectiveVerification
+        : normalizeMatureVerificationStatus(null, regionRule),
+    );
   }, [authHydrated, hydrated, isSignedIn]);
 
   const legalAge = AGE_RULES[ageRuleKey]?.legalAge || AGE_RULES.global.legalAge;
@@ -308,6 +465,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
   const exitAdultMode = useCallback(() => {
     const wasAdultMode = isAdultMode;
+    trustedInitialStateRef.current = null;
     applyAdultState({
       confirmed: adultConfirmed,
       ruleKey: ageRuleKey,
@@ -342,6 +500,12 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       if (!isMatureVerificationActive(matureVerification, ageRuleKey)) {
         return "NEED_AGE_CONFIRM";
       }
+      trustedInitialStateRef.current = {
+        confirmed: true,
+        ruleKey: ageRuleKey,
+        mode: true,
+        verification: matureVerification,
+      };
       applyAdultState({
         confirmed: true,
         ruleKey: ageRuleKey,
@@ -406,7 +570,15 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
       const optimisticVerification = createOptimisticVerification(normalized);
       const wasAdultMode = isAdultMode;
 
-      applyAdultState({
+      trustedInitialStateRef.current = {
+        confirmed: true,
+        ruleKey: normalized,
+        mode: true,
+        verification: optimisticVerification,
+      };
+
+      clearCatalogModeCache();
+      await applyAdultState({
         confirmed: true,
         ruleKey: normalized,
         mode: true,
@@ -428,7 +600,14 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
             AGE_RULES[normalized]?.legalAge || AGE_RULES.global.legalAge,
         });
 
-        applyAdultState({
+        trustedInitialStateRef.current = {
+          confirmed: true,
+          ruleKey: normalized,
+          mode: true,
+          verification,
+        };
+        clearCatalogModeCache();
+        await applyAdultState({
           confirmed: true,
           ruleKey: normalized,
           mode: true,
@@ -437,7 +616,14 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
           markUpdated: true,
         });
       } catch {
-        applyAdultState({
+        trustedInitialStateRef.current = {
+          confirmed: true,
+          ruleKey: normalized,
+          mode: true,
+          verification: optimisticVerification,
+        };
+        clearCatalogModeCache();
+        await applyAdultState({
           confirmed: true,
           ruleKey: normalized,
           mode: true,
@@ -449,7 +635,7 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
 
       return "OK";
     },
-    [applyAdultState, isAdultMode],
+    [applyAdultState, clearCatalogModeCache, isAdultMode],
   );
 
   const forceDisableAdultMode = useCallback(() => {

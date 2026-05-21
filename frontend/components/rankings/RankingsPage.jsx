@@ -31,7 +31,7 @@ import {
 const VIEWS = [
   {
     id: "featured",
-    label: "Trending",
+    label: "Featured",
     description: "The stories readers are opening most this week.",
   },
   {
@@ -113,6 +113,13 @@ function getSeriesMeta(series) {
     genres: formatTitleCardGenres(series?.genres, { limit: 3 }),
     creator: formatTitleCardCreator(creatorName),
   };
+}
+
+function getRankingsCoverSeriesType(series) {
+  return String(series?.type || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function sortFeaturedSeries(seriesList = []) {
@@ -346,7 +353,7 @@ export default function RankingsPage({
     "rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2.5 text-sm font-semibold text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.2)] transition-transform hover:-translate-y-0.5";
   const secondaryButtonClass =
     "rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-transform hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
-  const heroTitle = "Trending Stories";
+  const heroTitle = "Featured stories.";
   const heroDescription = isAdultMode
     ? "Adult-only stories readers are opening most right now."
     : "The stories readers are opening most this week.";
@@ -372,6 +379,24 @@ export default function RankingsPage({
             onDismiss={() => setCommerceNotice(null)}
           />
         ) : null}
+
+        <section className="flex flex-wrap gap-2">
+          {VIEWS.map((view) => {
+            const isActive = view.id === activeView.id;
+            return (
+              <button
+                key={view.id}
+                type="button"
+                onClick={() => router.push(`/rankings?view=${view.id}`)}
+                className={
+                  isActive ? primaryButtonClass : secondaryButtonClass
+                }
+              >
+                {view.label}
+              </button>
+            );
+          })}
+        </section>
 
         {loading ? (
           <RankingsLoadingState />
@@ -440,8 +465,7 @@ export default function RankingsPage({
                       eyebrow=""
                       badge=""
                       genres={[]}
-                      seriesType=""
-                      decorative
+                      seriesType={getRankingsCoverSeriesType(leadEntry)}
                       fallbackVariant="minimal-card"
                       className="mx-auto aspect-[3/4] w-full max-w-[220px] rounded-[24px] transition-transform duration-500 group-hover:scale-[1.02] lg:mx-0"
                     />
@@ -501,8 +525,7 @@ export default function RankingsPage({
                           eyebrow=""
                           badge=""
                           genres={[]}
-                          seriesType=""
-                          decorative
+                          seriesType={getRankingsCoverSeriesType(series)}
                           fallbackVariant="minimal-card"
                           className="mt-4 aspect-[3/4] w-full rounded-[20px] transition-transform duration-500 group-hover:scale-[1.015]"
                         />
@@ -563,8 +586,7 @@ export default function RankingsPage({
                             eyebrow=""
                             badge=""
                             genres={[]}
-                            seriesType=""
-                            decorative
+                            seriesType={getRankingsCoverSeriesType(series)}
                             fallbackVariant="minimal-card"
                             className="aspect-[3/4] w-[4.5rem] flex-shrink-0 rounded-[16px]"
                           />

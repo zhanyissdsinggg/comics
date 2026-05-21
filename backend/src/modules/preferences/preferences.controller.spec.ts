@@ -51,6 +51,15 @@ describe("PreferencesController", () => {
         language: "en",
         hideAdultHistory: false,
         displayName: "",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
       },
     });
   });
@@ -80,6 +89,15 @@ describe("PreferencesController", () => {
         language: "ko",
         hideAdultHistory: false,
         displayName: "QA Reader",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
       },
     });
   });
@@ -105,6 +123,15 @@ describe("PreferencesController", () => {
         language: "en",
         hideAdultHistory: true,
         displayName: "",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "us",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
       },
     });
   });
@@ -120,6 +147,15 @@ describe("PreferencesController", () => {
         language: "en",
         hideAdultHistory: true,
         displayName: "QA Save Test",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
       }),
     });
 
@@ -147,6 +183,15 @@ describe("PreferencesController", () => {
           language: "en",
           hideAdultHistory: true,
           displayName: "QA Save Test",
+          matureModeEnabled: false,
+          matureVerification: {
+            verified: false,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: null,
+          },
         }),
       },
       create: {
@@ -159,6 +204,15 @@ describe("PreferencesController", () => {
           language: "en",
           hideAdultHistory: true,
           displayName: "QA Save Test",
+          matureModeEnabled: false,
+          matureVerification: {
+            verified: false,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: null,
+            verifiedAt: null,
+          },
         }),
       },
     });
@@ -171,6 +225,15 @@ describe("PreferencesController", () => {
         language: "en",
         hideAdultHistory: true,
         displayName: "QA Save Test",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
       },
     });
   });

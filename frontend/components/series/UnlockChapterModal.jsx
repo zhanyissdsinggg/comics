@@ -172,7 +172,7 @@ function getPrimaryButtonLabel({ isSignedIn, insufficient, busyAction }) {
     return "Sign in";
   }
   if (insufficient) {
-    return "Get points";
+    return "Get More Points";
   }
   return "Unlock";
 }

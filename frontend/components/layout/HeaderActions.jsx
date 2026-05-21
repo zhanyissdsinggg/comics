@@ -36,14 +36,10 @@ export default function HeaderActions({
   const { unreadCount } = useNotificationsStore();
   const adultToggleLabel = isAdultMode ? "Normal" : `${legalAge}+`;
   const adultToggleAriaLabel = isAdultMode
-    ? "Back to normal mode"
-    : `Enter ${legalAge}+ mode`;
+    ? "Switch to standard mode"
+    : `Switch to ${legalAge}+ mode`;
   const walletTotal = paidPts + bonusPts;
-  const showWallet =
-    hydrated &&
-    isSignedIn &&
-    variant !== "home" &&
-    siteConfig.monetization.pointPacksEnabled;
+  const showWallet = hydrated && isSignedIn && variant !== "home";
   const iconButtonClass = ICON_BUTTON_CLASS;
 
   return (

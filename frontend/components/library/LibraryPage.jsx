@@ -25,6 +25,7 @@ import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useWalletStore } from "../../store/useWalletStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { parallelRequests2 } from "../../lib/parallelRequests";
 import { getLibraryReturnCandidates } from "../../lib/homeMerchandising";
@@ -174,9 +175,13 @@ function getReadingState({
   return { label: "Unread", badge: "" };
 }
 
-export default function LibraryPage({ initialSignedIn = false }) {
+export default function LibraryPage({
+  initialSignedIn = false,
+  initialAdultMode = false,
+}) {
   const router = useRouter();
   const { hydrated, isSignedIn } = useAuthStore();
+  const { hydrated: adultHydrated, contentMode } = useAdultGateStore();
   const { bySeriesId, loadProgress } = useProgressStore();
   const { bookmarksBySeries } = useBookmarkStore();
   const { followedSeriesIds, loadFollowed } = useFollowStore();
@@ -203,6 +208,12 @@ export default function LibraryPage({ initialSignedIn = false }) {
   const [initialLoading, setInitialLoading] = useState(initialSignedIn);
   const [commerceNotice, setCommerceNotice] = useState(null);
   const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
+  const adultFlag =
+    adultHydrated && contentMode === "adult"
+      ? "1"
+      : initialAdultMode
+        ? "1"
+        : "0";
   const showStale = useStaleNotice(seriesResponse);
   const showHomepageSlotsStale = useStaleNotice(homepageSlotsResponse);
   const { shouldRetry } = useRetryPolicy();
@@ -396,7 +407,6 @@ export default function LibraryPage({ initialSignedIn = false }) {
   ]);
 
   useEffect(() => {
-    const adultFlag = "0";
     parallelRequests2(
       () => apiGet(`/api/series?adult=${adultFlag}`, { cacheMs: 30000 }),
       () =>
@@ -459,7 +469,7 @@ export default function LibraryPage({ initialSignedIn = false }) {
 
       setInitialLoading(false);
     });
-  }, [shouldRetry]);
+  }, [adultFlag, shouldRetry]);
 
   const handleCheckIn = async () => {
     setCheckinWorking(true);

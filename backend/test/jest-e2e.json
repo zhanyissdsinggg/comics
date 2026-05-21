@@ -3,6 +3,9 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "moduleNameMapper": {
+    "^bcrypt$": "<rootDir>/mocks/bcrypt.ts"
+  },
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   }

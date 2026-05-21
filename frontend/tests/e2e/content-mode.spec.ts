@@ -1,3 +1,4 @@
+import http, { type Server } from "node:http";
 import { expect, test, type Page, type Route } from "@playwright/test";
 import {
   createBannerPlaceholder,
@@ -185,6 +186,180 @@ const ADULT_EPISODE_PAYLOADS = {
   },
 };
 
+const mockBackendState = {
+  signedIn: false,
+  matureConfirmed: false,
+  matureModeEnabled: false,
+};
+
+function jsonServerResponse(
+  response: http.ServerResponse,
+  status: number,
+  body: unknown,
+): void {
+  response.statusCode = status;
+  response.setHeader("Content-Type", "application/json");
+  response.end(JSON.stringify(body));
+}
+
+function createContentModeMockBackendServer() {
+  return http.createServer((request, response) => {
+    if (!request.url) {
+      jsonServerResponse(response, 404, { error: "NOT_FOUND" });
+      return;
+    }
+
+    const url = new URL(request.url, "http://127.0.0.1:4000");
+    const pathname = url.pathname;
+    const adultFlag = url.searchParams.get("adult") === "1";
+    const cookieHeader = String(request.headers.cookie || "");
+    const hasSession = /(?:^|;\s*)mn_session=[^;]+(?:;|$)/.test(cookieHeader);
+    const signedIn = hasSession && mockBackendState.signedIn;
+    const matureVerified = signedIn && mockBackendState.matureConfirmed;
+    const matureModeEnabled = signedIn && mockBackendState.matureModeEnabled;
+    const activeCatalog = adultFlag
+      ? [ADULT_SERIES, ADULT_NOVEL]
+      : [NORMAL_SERIES, NORMAL_NOVEL];
+
+    if (pathname === "/api/auth/me") {
+      jsonServerResponse(response, 200, {
+        isSignedIn: signedIn,
+        user: signedIn
+          ? {
+              id: "reader-001",
+              email: "reader@example.com",
+            }
+          : null,
+      });
+      return;
+    }
+
+    if (pathname === "/api/preferences") {
+      jsonServerResponse(response, 200, {
+        preferences: {
+          region: "global",
+          language: "en",
+          hideAdultHistory: !matureModeEnabled,
+          matureModeEnabled,
+          matureVerification: matureVerified
+            ? {
+                verified: true,
+                provider: "content-mode-mock",
+                region: "global",
+                expiresAt: null,
+                referenceId: null,
+                verifiedAt: "2026-05-10T12:00:00.000Z",
+              }
+            : null,
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/series") {
+      jsonServerResponse(response, 200, { series: activeCatalog });
+      return;
+    }
+
+    if (pathname === `/api/series/${ADULT_READER_SERIES_ID}`) {
+      if (!adultFlag) {
+        jsonServerResponse(
+          response,
+          403,
+          { error: "ADULT_GATED", reason: "NEED_AGE_CONFIRM" },
+        );
+        return;
+      }
+
+      jsonServerResponse(response, 200, ADULT_SERIES_DETAIL);
+      return;
+    }
+
+    if (pathname === "/api/series/series-001") {
+      jsonServerResponse(response, 200, NORMAL_SERIES_DETAIL);
+      return;
+    }
+
+    if (pathname === "/api/rankings") {
+      jsonServerResponse(response, 200, { rankings: activeCatalog });
+      return;
+    }
+
+    if (pathname === "/api/recommendations/homepage") {
+      jsonServerResponse(response, 200, {
+        slots: [
+          {
+            id: "slot-home-breakout",
+            slot: "home-breakout",
+            seriesIds: [activeCatalog[0].id],
+          },
+          {
+            id: "slot-home-free-start",
+            slot: "home-free-start",
+            seriesIds: [activeCatalog[0].id],
+          },
+        ],
+      });
+      return;
+    }
+
+    if (pathname === "/api/search/hot" || pathname === "/api/search/keywords") {
+      jsonServerResponse(response, 200, {
+        keywords: adultFlag
+          ? [{ keyword: "midnight", label: "midnight", value: "midnight" }]
+          : [{ keyword: "kingdom", label: "kingdom", value: "kingdom" }],
+      });
+      return;
+    }
+
+    if (pathname === "/api/search") {
+      const query = String(url.searchParams.get("q") || "")
+        .trim()
+        .toLowerCase();
+      const results = activeCatalog.filter((item) =>
+        !query ? true : item.title.toLowerCase().includes(query),
+      );
+      jsonServerResponse(response, 200, {
+        results,
+        total: results.length,
+        page: 1,
+        pageSize: 48,
+      });
+      return;
+    }
+
+    if (pathname === "/api/episode") {
+      const seriesId = String(url.searchParams.get("seriesId") || "").trim();
+      const episodeId = String(url.searchParams.get("episodeId") || "").trim();
+
+      if (seriesId === ADULT_READER_SERIES_ID) {
+        if (!adultFlag) {
+          jsonServerResponse(
+            response,
+            403,
+            { error: "ADULT_GATED", reason: "NEED_AGE_CONFIRM" },
+          );
+          return;
+        }
+
+        jsonServerResponse(
+          response,
+          200,
+          ADULT_EPISODE_PAYLOADS[
+            episodeId as keyof typeof ADULT_EPISODE_PAYLOADS
+          ] || ADULT_EPISODE_PAYLOADS[ADULT_READER_EPISODE_ONE],
+        );
+        return;
+      }
+
+      jsonServerResponse(response, 404, { error: "NOT_FOUND" });
+      return;
+    }
+
+    jsonServerResponse(response, 404, { error: "NOT_FOUND" });
+  });
+}
+
 async function fulfillJson(
   route: Route,
   body: unknown,
@@ -265,6 +440,11 @@ async function seedAdultState(
     {
       name: "mn_is_signed_in",
       value: signedIn ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_session",
+      value: signedIn ? "reader-session" : "",
       url: "http://127.0.0.1:4173",
     },
     {
@@ -369,17 +549,19 @@ async function installContentModeRoutes(
   getAdultEpisodeRequests: () => string[];
 }> {
   const adultEpisodeRequests: string[] = [];
-  let matureModeEnabled = options.adultMode;
-  let matureConfirmed = options.adultConfirmed ?? options.adultMode;
-  let signedIn = options.signedIn ?? options.adultMode;
+  mockBackendState.matureModeEnabled = options.adultMode;
+  mockBackendState.matureConfirmed = options.adultConfirmed ?? options.adultMode;
+  mockBackendState.signedIn = options.signedIn ?? options.adultMode;
 
   const buildVerification = () => ({
-    verified: matureConfirmed,
+    verified: mockBackendState.matureConfirmed,
     provider: "local-gate",
     region: "global",
     expiresAt: null,
     referenceId: null,
-    verifiedAt: matureConfirmed ? "2026-05-10T12:00:00.000Z" : null,
+    verifiedAt: mockBackendState.matureConfirmed
+      ? "2026-05-10T12:00:00.000Z"
+      : null,
   });
 
   await page.route("**/api/**", async (route) => {
@@ -420,8 +602,8 @@ async function installContentModeRoutes(
 
     if (pathname === "/api/auth/me") {
       await fulfillJson(route, {
-        isSignedIn: signedIn,
-        user: signedIn
+        isSignedIn: mockBackendState.signedIn,
+        user: mockBackendState.signedIn
           ? {
               id: "reader-001",
               email: "reader@example.com",
@@ -442,13 +624,14 @@ async function installContentModeRoutes(
 
         const nextPreferences = payload?.preferences || {};
         if (typeof nextPreferences.matureModeEnabled === "boolean") {
-          matureModeEnabled = nextPreferences.matureModeEnabled;
+          mockBackendState.matureModeEnabled =
+            nextPreferences.matureModeEnabled;
         }
         if (
           nextPreferences.matureVerification &&
           typeof nextPreferences.matureVerification === "object"
         ) {
-          matureConfirmed =
+          mockBackendState.matureConfirmed =
             nextPreferences.matureVerification.verified === true;
         }
 
@@ -458,7 +641,7 @@ async function installContentModeRoutes(
             region: "global",
             language: "en",
             hideAdultHistory: false,
-            matureModeEnabled,
+            matureModeEnabled: mockBackendState.matureModeEnabled,
             matureVerification: buildVerification(),
           },
         });
@@ -470,7 +653,7 @@ async function installContentModeRoutes(
           region: "global",
           language: "en",
           hideAdultHistory: false,
-          matureModeEnabled,
+          matureModeEnabled: mockBackendState.matureModeEnabled,
           matureVerification: buildVerification(),
         },
       });
@@ -634,6 +817,34 @@ async function installContentModeRoutes(
 }
 
 test.describe("Content mode filtering", () => {
+  test.describe.configure({ mode: "serial" });
+  let mockBackend: Server | undefined;
+
+  test.beforeAll(async () => {
+    mockBackend = createContentModeMockBackendServer();
+    await new Promise<void>((resolve, reject) => {
+      mockBackend?.once("error", reject);
+      mockBackend?.listen(4000, "127.0.0.1", () => resolve());
+    });
+  });
+
+  test.afterAll(async () => {
+    await new Promise<void>((resolve, reject) => {
+      if (!mockBackend) {
+        resolve();
+        return;
+      }
+
+      mockBackend.close((error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
+    });
+  });
+
   test("the default experience should start in normal mode", async ({
     page,
   }) => {
@@ -778,6 +989,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Vampire Oath");
+    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
   });
 
   test("interactive route should stay adult-only in adult mode", async ({
@@ -805,6 +1017,79 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Neon Heir");
+    await expect(page.locator("body")).not.toContainText("Midnight Heat");
+  });
+
+  test("forged mature cookies without session should not unlock adult SSR content", async ({
+    page,
+  }) => {
+    await seedAdultState(page, {
+      signedIn: false,
+      adultConfirmed: true,
+      adultMode: true,
+    });
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    let response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Midnight Heat");
+    await expect(page.locator("body")).not.toContainText("After Hours Letters");
+
+    response = await page.goto("/search?q=midnight", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Midnight Heat");
+
+    response = await page.goto("/rankings", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Midnight Heat");
+
+    response = await page.goto("/library", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("body")).not.toContainText("Midnight Heat");
+  });
+
+  test("search interactive aliases should stay interactive-only", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    let response = await page.goto("/search?type=interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expect(page.locator("body")).not.toContainText("Velvet Archive");
+
+    response = await page.goto("/search?format=interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expect(page.locator("body")).not.toContainText("Velvet Archive");
   });
 
   test("rankings should stay on the normal catalog by default", async ({

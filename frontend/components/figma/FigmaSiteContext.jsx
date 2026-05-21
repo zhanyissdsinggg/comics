@@ -106,7 +106,7 @@ export function FigmaSiteProvider({
     }
 
     if (nextType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
-      router.push("/search?format=interactive");
+      router.push("/interactive");
       return;
     }
 
