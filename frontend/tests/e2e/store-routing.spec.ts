@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Store routing", () => {
-  test("store upsell should preserve the store source path when opening membership", async ({
+  test("prelaunch store should hide membership upsell and keep browse/support routes visible", async ({
     page,
   }) => {
     const response = await page.goto("/store", {
@@ -15,24 +15,27 @@ test.describe("Store routing", () => {
       }),
     ).toBeVisible();
 
-    const upsellButton = page
-      .getByRole("button", { name: "Plans", exact: true })
+    await expect(
+      page.getByRole("button", { name: "Plans", exact: true }),
+    ).toHaveCount(0);
+
+    const browseButton = page
+      .getByRole("button", { name: "Browse free chapters", exact: true })
       .first();
+    await expect(browseButton).toBeVisible();
+    await browseButton.click();
+    await expect(page).toHaveURL(/\/comics(?:\?|$)/);
 
-    await expect(upsellButton).toBeVisible();
-    await Promise.all([
-      page.waitForURL(
-        (url) =>
-          url.pathname === "/subscribe" &&
-          url.searchParams.get("entry") === "STORE_UPSELL",
-      ),
-      upsellButton.click(),
-    ]);
+    const storeResponse = await page.goto("/store", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(storeResponse?.ok()).toBeTruthy();
 
-    const nextUrl = new URL(page.url());
-    expect(nextUrl.pathname).toBe("/subscribe");
-    expect(nextUrl.searchParams.get("entry")).toBe("STORE_UPSELL");
-    expect(nextUrl.searchParams.get("sourcePath")).toBe("/store");
-    expect(nextUrl.searchParams.get("returnTo")).toBe("/");
+    const supportButton = page
+      .getByRole("button", { name: "Support", exact: true })
+      .first();
+    await expect(supportButton).toBeVisible();
+    await supportButton.click();
+    await expect(page).toHaveURL(/\/support(?:\?|$)/);
   });
 });

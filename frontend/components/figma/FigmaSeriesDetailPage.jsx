@@ -20,16 +20,43 @@ import {
   matchesContentMode,
 } from "../../lib/contentFilters";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
+import { getEpisodeAccessState } from "../../lib/episodeAccessState";
+import { openAuthPrompt } from "../../lib/openAuthPrompt";
+import { readPaymentAttributionFromSearchParams } from "../../lib/paymentAttribution";
+import { buildReaderPath } from "../../lib/readerRoutes";
+import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
+import { useAuthStore } from "../../store/useAuthStore";
+import { useEntitlementStore } from "../../store/useEntitlementStore";
+import { useFollowStore } from "../../store/useFollowStore";
+import { useWalletStore } from "../../store/useWalletStore";
+import SeriesArrivalPanel from "../series/SeriesArrivalPanel";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
 import FigmaCommentsSection from "./FigmaCommentsSection";
+import UnlockChapterModal from "../series/UnlockChapterModal";
 import {
   FIGMA_CONTENT_TYPES,
-  buildChapterItems,
   buildFigmaCatalog,
   buildFigmaSeriesItem,
   cn,
 } from "./figma-utils";
+
+function buildCoverAltText(label, seriesType = "") {
+  const normalizedLabel = String(label || "").replace(/\s+/g, " ").trim();
+  const normalizedType = String(seriesType || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+  if (normalizedLabel) {
+    if (normalizedType === "comic" || normalizedType === "novel") {
+      return `${normalizedType.charAt(0).toUpperCase()}${normalizedType.slice(1)} cover image for ${normalizedLabel}`;
+    }
+    return `Cover image for ${normalizedLabel}`;
+  }
+
+  return "Series cover image";
+}
 
 function ModeBlockedState({
   palette,
@@ -74,10 +101,21 @@ function SeriesDetailContent({
   initialSeries,
   initialEpisodes,
   initialState = "ready",
+  initialSearchParams = null,
 }) {
   const router = useRouter();
   const { palette, contentMode, isAdultMode, handleAdultToggle } =
     useFigmaSite();
+  const { isSignedIn } = useAuthStore();
+  const { followedSeriesIds, follow, unfollow, loadFollowed } = useFollowStore();
+  const { bySeriesId, loadEntitlement } = useEntitlementStore();
+  const {
+    paidPts,
+    bonusPts,
+    subscription,
+    subscriptionUsage,
+    loadWallet,
+  } = useWalletStore();
   const [payload, setPayload] = useState(() =>
     initialSeries
       ? {
@@ -105,6 +143,26 @@ function SeriesDetailContent({
     return null;
   });
   const requestRef = useRef(0);
+  const isFollowing = followedSeriesIds.includes(seriesId);
+  const [unlockModalState, setUnlockModalState] = useState(null);
+  const discoveryAttribution = useMemo(
+    () => readPaymentAttributionFromSearchParams(initialSearchParams),
+    [initialSearchParams],
+  );
+  const entitlement = bySeriesId[seriesId] || {
+    seriesId,
+    unlockedEpisodeIds: [],
+  };
+  const walletBalance = Number(paidPts || 0) + Number(bonusPts || 0);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      return;
+    }
+    void loadFollowed();
+    void loadWallet();
+    void loadEntitlement(seriesId);
+  }, [isSignedIn, loadEntitlement, loadFollowed, loadWallet, seriesId]);
 
   useEffect(() => {
     let active = true;
@@ -184,10 +242,41 @@ function SeriesDetailContent({
     return mapped;
   }, [payload?.episodes, payload?.series]);
 
-  const chapterItems = useMemo(
-    () => buildChapterItems(payload?.series, payload?.episodes),
-    [payload?.episodes, payload?.series],
-  );
+  const chapterItems = useMemo(() => {
+    const episodes = Array.isArray(payload?.episodes) ? payload.episodes : [];
+    if (episodes.length === 0) {
+      return [];
+    }
+
+    return [...episodes]
+      .sort((left, right) => {
+        const rightNumber = Number(right?.number || 0);
+        const leftNumber = Number(left?.number || 0);
+        if (rightNumber !== leftNumber) {
+          return rightNumber - leftNumber;
+        }
+
+        const rightTime = new Date(right?.releasedAt || 0).getTime() || 0;
+        const leftTime = new Date(left?.releasedAt || 0).getTime() || 0;
+        return rightTime - leftTime;
+      })
+      .map((episode) => ({
+        id: String(episode?.id || "").trim(),
+        title:
+          String(episode?.title || "").trim() ||
+          getInstallmentLabel(payload?.series?.type || payload?.series) +
+            ` ${episode?.number || 1}`,
+        date: episode?.releasedAt
+          ? new Intl.DateTimeFormat("en-US", {
+              month: "short",
+              day: "numeric",
+            }).format(new Date(episode.releasedAt))
+          : "Today",
+        views: "100K",
+        number: Number(episode?.number || 0) || 1,
+        rawEpisode: episode,
+      }));
+  }, [payload?.episodes, payload?.series]);
 
   const isInteractive = detailItem?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE;
   const isNovel = detailItem?.kind === FIGMA_CONTENT_TYPES.NOVELS;
@@ -198,7 +287,33 @@ function SeriesDetailContent({
       : "Chapters";
   const readLabel = isInteractive
     ? "Start Playing"
-    : detailItem.readLabel || "Start reading";
+    : detailItem?.readLabel || "Start reading";
+  const handleRequireAuth = (source) => {
+    if (isSignedIn) {
+      return false;
+    }
+    void source;
+    openAuthPrompt();
+    return true;
+  };
+  const handleLibraryToggle = async () => {
+    if (handleRequireAuth("follow")) {
+      return;
+    }
+    if (isFollowing) {
+      await unfollow(seriesId);
+      return;
+    }
+    await follow(seriesId);
+  };
+  const coverAltText = buildCoverAltText(
+    detailItem?.title,
+    payload?.series?.type,
+  );
+  const coverImageUrl = resolveDisplayImageUrl(detailItem?.coverUrl, {
+    kind: "cover",
+    adult: detailItem?.adult || detailItem?.isAdult,
+  });
 
   if (loading && !detailItem) {
     return (
@@ -318,15 +433,17 @@ function SeriesDetailContent({
     <div className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
         <div className="relative h-[300px] w-full bg-black min-[420px]:h-[320px] sm:h-[390px] md:h-[520px]">
-          <div className="absolute inset-0">
-            <img
-              src={resolveDisplayImageUrl(detailItem.coverUrl, {
-                kind: "cover",
-                adult: detailItem?.adult || detailItem?.isAdult,
-              })}
-              alt={detailItem.title}
-              className="h-full w-full scale-110 object-cover opacity-20 blur-xl"
-            />
+            <div className="absolute inset-0">
+              <div
+                aria-hidden="true"
+                className="h-full w-full scale-110 object-cover opacity-20 blur-xl"
+                style={{
+                  backgroundImage: `url("${coverImageUrl}")`,
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: "cover",
+                }}
+              />
             <div
               className={cn(
                 "absolute inset-0 bg-gradient-to-t from-5% to-transparent",
@@ -338,11 +455,8 @@ function SeriesDetailContent({
           <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-5 md:px-8 md:pb-10">
             <div className="flex w-full flex-col items-start gap-3.5 md:flex-row md:items-start md:gap-8">
               <img
-                src={resolveDisplayImageUrl(detailItem.coverUrl, {
-                  kind: "cover",
-                  adult: detailItem?.adult || detailItem?.isAdult,
-                })}
-                alt={detailItem.title}
+                src={coverImageUrl}
+                alt={coverAltText}
                 className="w-28 shrink-0 self-end translate-y-3 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-32 min-[420px]:translate-y-5 md:w-64 md:self-auto md:translate-y-24"
               />
 
@@ -396,16 +510,22 @@ function SeriesDetailContent({
                   <div className="flex items-center gap-2.5">
                     <button
                       type="button"
+                      onClick={handleLibraryToggle}
+                      aria-label={
+                        isFollowing ? "Remove from library" : "Add to Library"
+                      }
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
+                        "flex min-h-[46px] items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold shadow-lg transition-all hover:bg-white/10 active:scale-95 md:min-h-[48px] md:px-5",
                         palette.surface,
                         palette.border,
                       )}
                     >
                       <BookmarkPlus className="h-5 w-5" />
+                      <span>{isFollowing ? "Saved" : "Add to Library"}</span>
                     </button>
                     <button
                       type="button"
+                      aria-label={`Share ${detailItem.title}`}
                       className={cn(
                         "flex h-10 w-10 items-center justify-center rounded-xl border shadow-lg transition-all hover:bg-white/10 active:scale-95 md:h-12 md:w-12",
                         palette.surface,
@@ -465,6 +585,11 @@ function SeriesDetailContent({
           </div>
 
           <div className="order-1 flex-1 md:order-2">
+            <SeriesArrivalPanel
+              series={payload?.series || detailItem?.raw || null}
+              attribution={discoveryAttribution}
+              className="mt-0"
+            />
             <div
               className={cn(
                 "rounded-[26px] border p-4 shadow-xl md:rounded-[30px] md:p-6",
@@ -491,9 +616,83 @@ function SeriesDetailContent({
               </div>
 
               <div className="space-y-3">
-                {chapterItems.map((chapter, index) => (
-                  <Link
+                {chapterItems.map((chapter, index) => {
+                  const accessState = chapter.rawEpisode
+                    ? getEpisodeAccessState({
+                        episode: chapter.rawEpisode,
+                        unlocked: entitlement.unlockedEpisodeIds.includes(
+                          chapter.rawEpisode.id,
+                        ),
+                        subscription,
+                        subscriptionUsage,
+                        coupons: [],
+                        nowMs: Date.now(),
+                        fallbackPrice: chapter.rawEpisode.pricePts,
+                      })
+                    : null;
+                  const isLocked =
+                    accessState?.actionKind === "unlock" ||
+                    accessState?.actionKind === "locked";
+
+                  return isLocked ? (
+                    <div
+                      key={chapter.id || `${detailItem.id}-${index}`}
+                      id={`episode-${chapter.id}`}
+                      className={cn(
+                        "group flex flex-col items-start gap-3 rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between md:p-4",
+                      )}
+                    >
+                      <div className="flex min-w-0 items-center gap-3 md:gap-4">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
+                          {String(index + 1).padStart(2, "0")}
+                        </div>
+                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
+                          <div
+                            aria-hidden="true"
+                            className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
+                            style={{
+                              backgroundImage: `url("${coverImageUrl}")`,
+                              backgroundPosition: "center",
+                              backgroundRepeat: "no-repeat",
+                              backgroundSize: "cover",
+                            }}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="line-clamp-2 text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
+                            {chapter.title}
+                          </h4>
+                          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
+                            {chapter.date}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (handleRequireAuth("unlock")) {
+                            return;
+                          }
+                          setUnlockModalState({
+                            episodeId: chapter.rawEpisode.id,
+                            installmentNumber: chapter.rawEpisode.number,
+                            pricePts: accessState?.effectivePrice || 0,
+                            view: "confirm",
+                          });
+                        }}
+                        className={cn(
+                          "inline-flex min-h-[44px] items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-white/10 active:scale-95",
+                          palette.surface,
+                          palette.border,
+                        )}
+                      >
+                        Unlock with Points
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
                     key={chapter.id || `${detailItem.id}-${index}`}
+                    id={`episode-${chapter.id}`}
                     href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
                     className={cn(
                       "group flex flex-col items-start gap-3 rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between md:p-4",
@@ -503,15 +702,17 @@ function SeriesDetailContent({
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
                         {String(index + 1).padStart(2, "0")}
                       </div>
-                      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
-                        <img
-                          src={resolveDisplayImageUrl(detailItem.coverUrl, {
-                            kind: "cover",
-                            adult: detailItem?.adult || detailItem?.isAdult,
-                          })}
-                          alt={detailItem.title}
-                          className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
-                        />
+                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
+                          <div
+                            aria-hidden="true"
+                            className="h-full w-full object-cover opacity-50 transition-transform duration-500 group-hover:scale-110"
+                            style={{
+                              backgroundImage: `url("${coverImageUrl}")`,
+                              backgroundPosition: "center",
+                              backgroundRepeat: "no-repeat",
+                              backgroundSize: "cover",
+                            }}
+                          />
                         <div className="absolute inset-0 flex items-center justify-center">
                           <PlayCircle
                             className={cn(
@@ -536,8 +737,9 @@ function SeriesDetailContent({
                         Reads
                       </div>
                     </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -545,6 +747,34 @@ function SeriesDetailContent({
           </div>
         </div>
       </FigmaChrome>
+      <UnlockChapterModal
+        open={Boolean(unlockModalState)}
+        installmentNumber={unlockModalState?.installmentNumber}
+        seriesType={payload?.series?.type || detailItem?.raw?.type || "comic"}
+        pricePts={unlockModalState?.pricePts || 0}
+        walletBalance={walletBalance}
+        shortfallPts={Math.max(
+          0,
+          Number(unlockModalState?.pricePts || 0) - walletBalance,
+        )}
+        isSignedIn={isSignedIn}
+        view={unlockModalState?.view || "confirm"}
+        busyAction=""
+        onViewChange={(nextView) =>
+          setUnlockModalState((current) =>
+            current
+              ? {
+                  ...current,
+                  view: nextView,
+                }
+              : current,
+          )
+        }
+        onConfirmUnlock={() => {}}
+        onBuyPack={() => {}}
+        onOpenStore={() => router.push("/store")}
+        onClose={() => setUnlockModalState(null)}
+      />
     </div>
   );
 }
@@ -555,6 +785,7 @@ export default function FigmaSeriesDetailPage({
   episodes = [],
   initialContentType = FIGMA_CONTENT_TYPES.COMICS,
   initialState = "ready",
+  initialSearchParams = null,
 }) {
   const catalog = buildFigmaCatalog(series ? [series] : []);
   const detailKind =
@@ -569,6 +800,7 @@ export default function FigmaSeriesDetailPage({
         initialSeries={series}
         initialEpisodes={episodes}
         initialState={initialState}
+        initialSearchParams={initialSearchParams}
       />
     </FigmaSiteProvider>
   );

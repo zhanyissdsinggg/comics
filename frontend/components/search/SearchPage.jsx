@@ -41,6 +41,7 @@ import {
   filterBlockedPublicSeries,
   filterBlockedPublicTextList,
 } from "../../lib/publicCatalogVisibility";
+import { getContentModeQueryParam } from "../../lib/contentFilters";
 import { buildEditorialCardHook } from "../../lib/editorialHooks";
 import { isMatureGenreValue, isMatureTitle } from "../../lib/matureContent";
 
@@ -159,7 +160,8 @@ function normalizeKeywordItem(item, index = 0) {
   };
 }
 
-function normalizeKeywordList(items) {
+function normalizeKeywordList(items, options = {}) {
+  const includeMature = options.includeMature === true;
   if (!Array.isArray(items)) {
     return [];
   }
@@ -170,13 +172,17 @@ function normalizeKeywordList(items) {
       (item) =>
         item &&
         ![item.label, item.value, item.hint, item.badge, item.title].some(
-          (value) => isPublicSearchBlockedLabel(value),
+          (value) => isPublicSearchBlockedLabel(value, { includeMature }),
         ),
     )
     .filter(Boolean);
 }
 
-function isPublicSearchBlockedLabel(value) {
+function isPublicSearchBlockedLabel(value, options = {}) {
+  if (options.includeMature === true) {
+    return false;
+  }
+
   const normalized = String(value || "")
     .trim()
     .toLowerCase();
@@ -189,15 +195,20 @@ function isPublicSearchBlockedLabel(value) {
   );
 }
 
-function sanitizeSeriesList(items) {
-  return filterBlockedPublicSeries(items).filter(
-    (item) => !isMatureTitle(item),
-  );
+function sanitizeSeriesList(items, options = {}) {
+  const includeMature = options.includeMature === true;
+  const visibleItems = filterBlockedPublicSeries(items);
+  if (includeMature) {
+    return visibleItems;
+  }
+
+  return visibleItems.filter((item) => !isMatureTitle(item));
 }
 
-function sanitizeSuggestionList(items) {
+function sanitizeSuggestionList(items, options = {}) {
+  const includeMature = options.includeMature === true;
   return filterBlockedPublicTextList(items).filter(
-    (item) => !isPublicSearchBlockedLabel(item),
+    (item) => !isPublicSearchBlockedLabel(item, { includeMature }),
   );
 }
 
@@ -300,7 +311,8 @@ export default function SearchPage() {
   const [total, setTotal] = useState(0);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [commerceNotice, setCommerceNotice] = useState(null);
-  const { forceDisableAdultMode } = useAdultGateStore();
+  const { contentMode, forceDisableAdultMode, isAdultMode } =
+    useAdultGateStore();
   const { behavior } = useBehaviorStore();
   const { bySeriesId: progressMap } = useProgressStore();
   const { isSignedIn } = useAuthStore();
@@ -325,7 +337,8 @@ export default function SearchPage() {
   const genre = searchParams.get("genre") || "";
   const sort = normalizeSortParam(searchParams.get("sort") || "relevance");
   const page = Math.max(1, Number(searchParams.get("page") || 1));
-  const adultFlag = "0";
+  const adultFlag = getContentModeQueryParam(contentMode);
+  const includeMature = contentMode === "adult";
   const searchPath = useMemo(() => {
     const params = searchParams.toString();
     return params ? `/search?${params}` : "/search";
@@ -385,7 +398,9 @@ export default function SearchPage() {
       }
 
       setError("");
-      setResults(sanitizeSeriesList(response.data?.results || []));
+      setResults(
+        sanitizeSeriesList(response.data?.results || [], { includeMature }),
+      );
       setTotal(response.data?.total || 0);
       return true;
     };
@@ -427,7 +442,13 @@ export default function SearchPage() {
         clearTimeout(retryTimer);
       }
     };
-  }, [forceDisableAdultMode, queryString, retrySearchTick, shouldRetry]);
+  }, [
+    forceDisableAdultMode,
+    includeMature,
+    queryString,
+    retrySearchTick,
+    shouldRetry,
+  ]);
 
   useEffect(() => {
     const requestId = surfaceRequestRef.current + 1;
@@ -440,7 +461,9 @@ export default function SearchPage() {
         return false;
       }
       if (response.ok) {
-        setKeywords(normalizeKeywordList(response.data?.keywords));
+        setKeywords(
+          normalizeKeywordList(response.data?.keywords, { includeMature }),
+        );
         return true;
       }
       if (response.error === "ADULT_GATED") {
@@ -455,7 +478,9 @@ export default function SearchPage() {
         return false;
       }
       if (response.ok) {
-        setHotKeywords(normalizeKeywordList(response.data?.keywords));
+        setHotKeywords(
+          normalizeKeywordList(response.data?.keywords, { includeMature }),
+        );
         return true;
       }
       if (response.error === "ADULT_GATED") {
@@ -517,7 +542,7 @@ export default function SearchPage() {
         });
       }
     });
-  }, [adultFlag, forceDisableAdultMode, hotWindow, query]);
+  }, [adultFlag, forceDisableAdultMode, hotWindow, includeMature, query]);
 
   useEffect(() => {
     const requestId = catalogRequestRef.current + 1;
@@ -535,7 +560,9 @@ export default function SearchPage() {
 
       setCatalogResponse(response);
       if (response.ok) {
-        setCatalog(sanitizeSeriesList(response.data?.series || []));
+        setCatalog(
+          sanitizeSeriesList(response.data?.series || [], { includeMature }),
+        );
         return true;
       }
 
@@ -618,7 +645,13 @@ export default function SearchPage() {
         clearTimeout(retryTimer);
       }
     };
-  }, [adultFlag, forceDisableAdultMode, shouldRetry, shouldLoadRecoCatalog]);
+  }, [
+    adultFlag,
+    forceDisableAdultMode,
+    includeMature,
+    shouldRetry,
+    shouldLoadRecoCatalog,
+  ]);
 
   useEffect(() => {
     const requestId = suggestRequestRef.current + 1;
@@ -640,7 +673,9 @@ export default function SearchPage() {
         }
         if (response.ok) {
           setSuggestions(
-            sanitizeSuggestionList(response.data?.suggestions || []),
+            sanitizeSuggestionList(response.data?.suggestions || [], {
+              includeMature,
+            }),
           );
         } else if (response.error === "ADULT_GATED") {
           forceDisableAdultMode();
@@ -650,7 +685,7 @@ export default function SearchPage() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [adultFlag, forceDisableAdultMode, query]);
+  }, [adultFlag, forceDisableAdultMode, includeMature, query]);
 
   useEffect(() => {
     if (!query) {
@@ -673,8 +708,8 @@ export default function SearchPage() {
 
   const reco = useMemo(
     () =>
-      recommendRails(catalog, behavior, progressMap, { isAdultMode: false }),
-    [catalog, behavior, progressMap],
+      recommendRails(catalog, behavior, progressMap, { isAdultMode }),
+    [catalog, behavior, isAdultMode, progressMap],
   );
   const editorialSnapshot = useMemo(
     () => getHomeEditorialSnapshot(catalog, { homepageSlots }),
@@ -966,7 +1001,7 @@ export default function SearchPage() {
             <div className="rounded-[28px] border border-white/10 bg-[rgba(8,7,14,0.42)] p-4 shadow-[0_20px_50px_rgba(8,6,20,0.28)] backdrop-blur-xl sm:p-5">
               <SearchBar
                 variant="home"
-                placeholder="Search titles, creators, or genres"
+                placeholder="Search titles"
                 showShortcut={false}
                 initialValue={query}
               />
@@ -1045,9 +1080,7 @@ export default function SearchPage() {
                       eyebrow=""
                       badge={getSearchSeriesBadge(leadSearchResult)}
                       genres={leadSearchResult.genres}
-                      // Avoid duplicating the exact same accessible cover name when the lead result
-                      // is also present in the grid below (Playwright strict-mode role queries).
-                      seriesType=""
+                      seriesType={leadSearchResult.type}
                       className="aspect-[3/4] w-full"
                       sizes="88px"
                     />
@@ -1453,6 +1486,7 @@ export default function SearchPage() {
                             tone={series.coverTone}
                             coverUrl={series.coverUrl}
                             label={series.title}
+                            altText={`Search result cover image for ${series.title}`}
                             eyebrow=""
                             badge={getSearchSeriesBadge(series)}
                             genres={series.genres}

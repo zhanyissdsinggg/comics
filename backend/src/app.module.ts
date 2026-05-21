@@ -24,8 +24,8 @@ const isRuntimeEnabled = (rawValue: string | undefined, fallback = true): boolea
 
 const optionalRuntimeImports = [
   ...(isRuntimeEnabled(process.env.ENABLE_COMMERCIAL_RUNTIME, true) ? [CommercialRuntimeModule] : []),
-  ...(isRuntimeEnabled(process.env.ENABLE_OPS_RUNTIME, true) ? [OpsRuntimeModule] : []),
-  ...(isRuntimeEnabled(process.env.ENABLE_ADMIN_RUNTIME, true) ? [AdminRuntimeModule] : []),
+  ...(isRuntimeEnabled(process.env.ENABLE_OPS_RUNTIME, false) ? [OpsRuntimeModule] : []),
+  ...(isRuntimeEnabled(process.env.ENABLE_ADMIN_RUNTIME, false) ? [AdminRuntimeModule] : []),
 ];
 
 @Module({

@@ -30,6 +30,7 @@
     "seed:demo": "ts-node --transpile-only scripts/seed-demo.ts",
     "seed:reader-pages": "ts-node --transpile-only scripts/refresh-reader-mock-pages.ts",
     "lint": "npm run lint:check",
+    "check:all": "npm run lint && npm run typecheck && npm run build && npm run test -- --runInBand --passWithNoTests && npm run test:e2e && npm run test:integration",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",

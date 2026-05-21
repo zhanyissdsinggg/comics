@@ -79,7 +79,7 @@ jobs:
 
       - name: Install frontend dependencies
         if: ${{ steps.resolve.outputs.profile == 'daily' }}
-        run: npm install --prefix frontend --no-audit --no-fund
+        run: npm ci --prefix frontend
 
       - name: Install Playwright Chromium
         if: ${{ steps.resolve.outputs.profile == 'daily' }}

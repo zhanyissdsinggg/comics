@@ -31,8 +31,15 @@ import ReaderPageShell from "./ReaderPageShell";
 export const revalidate = 300;
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }) {
+function hasInAppReaderAttribution(searchParams) {
+  const sourcePath = String(searchParams?.sourcePath || "").trim();
+  const entry = String(searchParams?.entry || "").trim();
+  return Boolean(sourcePath || entry);
+}
+
+export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = await Promise.resolve(searchParams);
   const seriesId = String(resolvedParams?.seriesId || "").trim();
   const episodeId = String(resolvedParams?.episodeId || "").trim();
   if (
@@ -42,6 +49,15 @@ export async function generateMetadata({ params }) {
   ) {
     notFound();
   }
+  if (hasInAppReaderAttribution(resolvedSearchParams)) {
+    return createPageMetadata({
+      title: "Read story",
+      description: `Read stories on ${siteConfig.siteName}.`,
+      path: `/read/${seriesId}/${episodeId}`,
+      robots: buildNoIndexRobots({ follow: true }),
+    });
+  }
+
   const includeAdult = await isServerAdultModeEnabled();
   const { series, episode, state } = await loadReaderSeoPayload(
     seriesId,
@@ -97,10 +113,13 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Page({ params }) {
+export default async function Page({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = await Promise.resolve(searchParams);
   const seriesId = String(resolvedParams?.seriesId || "").trim();
   const episodeId = String(resolvedParams?.episodeId || "").trim();
+  const shouldSkipServerPrefetch =
+    hasInAppReaderAttribution(resolvedSearchParams);
   if (
     shouldBlockDemoContentInProduction() &&
     (isBlockedPublicSeriesIdentifier(seriesId) ||
@@ -111,10 +130,19 @@ export default async function Page({ params }) {
   if (isBlockedPublicSeriesRecord({ id: seriesId })) {
     notFound();
   }
-  const includeAdult = await isServerAdultModeEnabled();
-  const readerSeoPayload = await loadReaderSeoPayload(seriesId, episodeId, {
-    includeAdult,
-  });
+  const readerSeoPayload = shouldSkipServerPrefetch
+    ? {
+        series: null,
+        episode: null,
+        episodes: [],
+        state: "unavailable",
+      }
+    : await (async () => {
+        const includeAdult = await isServerAdultModeEnabled();
+        return loadReaderSeoPayload(seriesId, episodeId, {
+          includeAdult,
+        });
+      })();
   const series = readerSeoPayload?.series || null;
   const episode = readerSeoPayload?.episode || null;
   const episodes = Array.isArray(readerSeoPayload?.episodes)
