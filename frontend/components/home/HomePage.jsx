@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Plus } from "lucide-react";
 import { HomeDataProvider, useHomeData } from "./HomeDataProvider";
-import PortraitCard from "./PortraitCard";
 import { apiGet } from "../../lib/apiClient";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
@@ -27,6 +26,8 @@ import {
   formatInstallmentLabel,
   getStartReadingLabel,
 } from "../../lib/seriesFormatLabels";
+import { getContentModeQueryParam } from "../../lib/contentFilters";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 import {
   formatTitleCardCreator,
   formatTitleCardFormatStatus,
@@ -36,6 +37,7 @@ import {
 const LoginPrompt = dynamic(() => import("../auth/LoginPrompt"), {
   ssr: false,
 });
+const PortraitCard = dynamic(() => import("./PortraitCard"));
 
 const VIBE_OPTIONS = [
   "Heartbreak",
@@ -169,6 +171,24 @@ function buildCoverAltText(series) {
   return "Series cover";
 }
 
+function buildTypedCoverAltText(series) {
+  const title = String(series?.title || "").replace(/\s+/g, " ").trim();
+  const type = String(series?.type || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+  if (title && (type === "comic" || type === "novel")) {
+    return `${type.charAt(0).toUpperCase()}${type.slice(1)} cover image for ${title}`;
+  }
+
+  if (title) {
+    return `Cover image for ${title}`;
+  }
+
+  return "Series cover image";
+}
+
 function buildSectionItems(
   seriesList,
   section,
@@ -196,6 +216,31 @@ function buildSectionItems(
   }
 
   return ranked.slice(0, limit);
+}
+
+function buildSlotSectionItems(seriesList, homepageSlots, slotName, limit = 6) {
+  const visibleCatalog = sanitizeHomepageSeriesList(seriesList);
+  const slotSeriesIds = (Array.isArray(homepageSlots) ? homepageSlots : [])
+    .find(
+      (slot) =>
+        String(slot?.slot || slot?.name || slot?.id || "")
+          .trim()
+          .toLowerCase() === String(slotName || "").trim().toLowerCase(),
+    )
+    ?.seriesIds;
+
+  if (!Array.isArray(slotSeriesIds) || slotSeriesIds.length === 0) {
+    return [];
+  }
+
+  const byId = new Map(
+    visibleCatalog.map((series) => [String(series?.id || "").trim(), series]),
+  );
+
+  return slotSeriesIds
+    .map((seriesId) => byId.get(String(seriesId || "").trim()))
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 function inferFirstEpisodeId(series) {
@@ -276,51 +321,100 @@ function createCanonicalHomeView(
     safeSeriesList[0] ||
     null;
 
-  const trendingSeed = [
-    ...heroCandidates,
-    editorialSnapshot.breakoutPick,
-    ...(Array.isArray(editorialSnapshot.safeCatalog)
-      ? editorialSnapshot.safeCatalog
-      : []),
-    ...safeSeriesList,
-  ];
-  const trendingExcludedIds = new Set(
-    [String(featuredSeries?.id || "").trim()].filter(Boolean),
-  );
-  const trendingItems = buildSectionItems(
-    trendingSeed,
-    "trending",
-    trendingExcludedIds,
+  const featuredSeriesId = String(featuredSeries?.id || "").trim();
+  const breakoutSlotItems = buildSlotSectionItems(
+    safeSeriesList,
+    homepageSlots,
+    "home-breakout",
     6,
   );
+  const slotReservedIds = new Set(
+    [
+      ...buildSlotSectionItems(safeSeriesList, homepageSlots, "home-free-start", 6),
+      ...buildSlotSectionItems(safeSeriesList, homepageSlots, "home-binge-ready", 4),
+    ]
+      .map((series) => String(series?.id || "").trim())
+      .filter(Boolean),
+  );
+  const breakoutCandidates = dedupeSeries(
+    [
+      ...breakoutSlotItems,
+      editorialSnapshot.breakoutPick,
+      ...heroCandidates,
+      ...safeSeriesList,
+    ].filter(Boolean),
+  );
+  const trendingItems = breakoutCandidates
+    .filter((series) => {
+      const seriesId = String(series?.id || "").trim();
+      return (
+        seriesId &&
+        seriesId !== featuredSeriesId &&
+        !slotReservedIds.has(seriesId)
+      );
+    })
+    .slice(0, 6);
 
-  const newUpdatesExcludedIds = new Set(
-    [featuredSeries?.id, ...trendingItems.map((item) => item.id)]
+  const assignedSectionIds = new Set(
+    [featuredSeriesId, ...trendingItems.map((item) => item.id)]
       .map((value) => String(value || "").trim())
       .filter(Boolean),
   );
-  const newUpdateItems = buildSectionItems(
+  const slotDrivenUpdates = buildSlotSectionItems(
+    safeSeriesList,
+    homepageSlots,
+    "home-free-start",
+    6,
+  );
+  const completedReservedIds = new Set(
+    buildSlotSectionItems(safeSeriesList, homepageSlots, "home-binge-ready", 4)
+      .map((series) => String(series?.id || "").trim())
+      .filter(Boolean),
+  );
+  const fallbackUpdates = buildSectionItems(
     safeSeriesList,
     "updates",
-    newUpdatesExcludedIds,
+    assignedSectionIds,
     6,
   );
-
-  const completedExcludedIds = new Set(
-    [
-      featuredSeries?.id,
-      ...trendingItems.map((item) => item.id),
-      ...newUpdateItems.map((item) => item.id),
-    ]
-      .map((value) => String(value || "").trim())
-      .filter(Boolean),
+  const newUpdateItems = dedupeSeries([
+    ...slotDrivenUpdates,
+    ...fallbackUpdates,
+  ])
+    .filter((series) => {
+      const seriesId = String(series?.id || "").trim();
+      return (
+        seriesId &&
+        !assignedSectionIds.has(seriesId) &&
+        !completedReservedIds.has(seriesId)
+      );
+    })
+    .slice(0, 6);
+  newUpdateItems.forEach((series) =>
+    assignedSectionIds.add(String(series?.id || "").trim()),
   );
-  const completedItems = buildSectionItems(
+
+  const slotDrivenCompleted = buildSlotSectionItems(
     safeSeriesList,
-    "completed",
-    completedExcludedIds,
+    homepageSlots,
+    "home-binge-ready",
     4,
   );
+  const fallbackCompleted = buildSectionItems(
+    safeSeriesList,
+    "completed",
+    assignedSectionIds,
+    4,
+  );
+  const completedItems = dedupeSeries([
+    ...slotDrivenCompleted,
+    ...fallbackCompleted,
+  ])
+    .filter((series) => {
+      const seriesId = String(series?.id || "").trim();
+      return seriesId && !assignedSectionIds.has(seriesId);
+    })
+    .slice(0, 4);
 
   return {
     featuredSeries,
@@ -568,6 +662,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
   const secondaryHref = hasFeaturedSeries
     ? `/series/${encodeURIComponent(featuredSeries.id)}`
     : "/library";
+  const heroHeading = "Read original comics and novels in one place.";
 
   return (
     <section className="relative min-h-[78vh] overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(19,15,24,0.98)_0%,rgba(14,12,19,0.96)_44%,rgba(20,16,27,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:min-h-[620px] sm:p-6 lg:p-8">
@@ -577,6 +672,9 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
           <div className="space-y-3">
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/62">
               TODAY&apos;S OBSESSION
+            </p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">
+              {heroHeading}
             </p>
             <h1 className="max-w-[12ch] font-display text-[2.9rem] font-semibold leading-[0.88] tracking-[-0.07em] text-[var(--gush-ink-strong)] sm:text-[4rem] lg:text-[4.6rem]">
               {title}
@@ -640,7 +738,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
                     kind: "cover",
                     adult: featuredSeries?.adult || featuredSeries?.isAdult,
                   })}
-                  alt={buildCoverAltText(featuredSeries)}
+                  alt={buildTypedCoverAltText(featuredSeries)}
                   fill
                   sizes="(max-width: 1024px) 260px, 320px"
                   className="object-cover"
@@ -672,6 +770,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
 
 function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
   const router = useRouter();
+  const { contentMode } = useAdultGateStore();
   const { loading, seriesList, homepageSlots } = useHomeData();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const initialFeaturedSeriesId = String(
@@ -752,7 +851,10 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
     }
 
     let cancelled = false;
-    apiGet(`/api/series/${featuredSeriesId}?adult=0`, { cacheMs: 60000 })
+    apiGet(
+      `/api/series/${featuredSeriesId}?adult=${getContentModeQueryParam(contentMode)}`,
+      { cacheMs: 60000 },
+    )
       .then((response) => {
         if (cancelled || !response?.ok) {
           return;
@@ -775,7 +877,7 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
     return () => {
       cancelled = true;
     };
-  }, [canonicalHomeView.featuredSeries, featuredReadHref]);
+  }, [canonicalHomeView.featuredSeries, contentMode, featuredReadHref]);
 
   const { featuredSeries, trendingItems, newUpdateItems, completedItems } =
     canonicalHomeView;
@@ -879,11 +981,22 @@ export default function HomePage({
   initialSearchParams = {},
   initialHomeData = null,
 }) {
+  const { contentMode } = useAdultGateStore();
+  const initialPayloadMode = String(initialHomeData?.contentMode || "").trim();
+  const canReuseInitialHomeData =
+    initialHomeData && initialPayloadMode === contentMode;
+  const effectiveInitialHomeData = canReuseInitialHomeData
+    ? initialHomeData
+    : null;
+
   return (
-    <HomeDataProvider initialData={initialHomeData}>
+    <HomeDataProvider
+      key={`home-data:${contentMode}:${canReuseInitialHomeData ? "seeded" : "client"}`}
+      initialData={effectiveInitialHomeData}
+    >
       <HomeContent
         initialSearchParams={initialSearchParams}
-        initialHomeData={initialHomeData}
+        initialHomeData={effectiveInitialHomeData}
       />
     </HomeDataProvider>
   );

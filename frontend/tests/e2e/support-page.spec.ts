@@ -40,7 +40,7 @@ test.describe("Support page", () => {
       page.getByText("We'll reply in 1-2 business days."),
     ).toBeVisible();
 
-    await page.selectOption("#support-topic", "billing");
+    await page.locator("label", { hasText: "Billing" }).click();
     await page.fill("#support-email", "reader@example.com");
     await expect(page.locator("#support-subject")).toHaveValue("Billing issue");
     await page.fill(
@@ -92,7 +92,7 @@ test.describe("Support page", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page.selectOption("#support-topic", "technical");
+    await page.locator("label", { hasText: "Reader issue" }).click();
     await page.fill("#support-email", "reader@example.com");
     await page.fill("#support-subject", "Reader won't load");
     await page.fill("#support-message", "Chapter 12 freezes on open.");

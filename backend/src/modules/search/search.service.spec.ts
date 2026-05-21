@@ -112,7 +112,7 @@ describe("SearchService", () => {
     expect(result.total).toBe(1);
     expect(result.results.map((item) => item.id)).toEqual(["series-1"]);
     expect(cacheService.set).toHaveBeenCalledWith(
-      expect.stringContaining("search:results:standard:romance"),
+      expect.stringContaining("search:results:v2:standard:romance"),
       expect.objectContaining({
         total: 1,
       }),

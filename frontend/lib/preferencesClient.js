@@ -24,6 +24,7 @@ const MATURE_VERIFIED_AT_KEY = "mn_mature_verified_at";
 const MATURE_HIDDEN_KEY = "mn_mature_hidden";
 const MATURE_STATUS_COOKIE = "mn_mature_status";
 const ADULT_STATE_UPDATED_AT_KEY = "mn_adult_state_updated_at";
+export const PREFERENCES_STORAGE_SYNC_EVENT = "mn-preferences-storage-sync";
 
 function persistStorageValue(key, value) {
   if (typeof window === "undefined") {
@@ -72,25 +73,8 @@ function readAdultStateUpdatedAt() {
 }
 
 export function mergeAdultStateIfNewer(preferences = {}, requestStartedAt = 0) {
-  if (typeof window === "undefined") {
-    return preferences;
-  }
-
-  if (readAdultStateUpdatedAt() <= requestStartedAt) {
-    return preferences;
-  }
-
-  const region =
-    String(preferences?.region || "").trim() ||
-    window.localStorage.getItem(ADULT_RULE_KEY) ||
-    "global";
-
-  return {
-    ...preferences,
-    hideAdultHistory: window.localStorage.getItem(HIDE_ADULT_KEY) === "1",
-    matureModeEnabled: window.localStorage.getItem(ADULT_MODE_KEY) === "1",
-    matureVerification: readStoredMatureVerification(region),
-  };
+  void requestStartedAt;
+  return preferences;
 }
 
 export function applyPreferencesToStorage(preferences = {}) {
@@ -194,6 +178,20 @@ export function applyPreferencesToStorage(preferences = {}) {
       matureVerification: verification,
     }),
   );
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent(PREFERENCES_STORAGE_SYNC_EVENT, {
+        detail: {
+          preferences: {
+            ...preferences,
+            matureModeEnabled: preferences.matureModeEnabled === true,
+            matureVerification: verification,
+          },
+        },
+      }),
+    );
+  }
 }
 
 export function readPreferenceFlag(key, fallback = true) {

@@ -9,6 +9,9 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
   testRegex: '.*\\.spec\\.ts$',
+  moduleNameMapper: {
+    '^bcrypt$': '<rootDir>/../test/mocks/bcrypt.ts',
+  },
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },

@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { apiDelete, apiGet, apiPost } from "../lib/apiClient";
+import { emitAuthRequired } from "../lib/authBus";
 import { normalizeReadingPercent } from "../lib/readingPercent";
 import { useAuthStore } from "./useAuthStore";
 
@@ -82,6 +83,10 @@ export function BookmarkProvider({ children }) {
 
   const addBookmark = useCallback(
     (seriesId, entry) => {
+      if (!isSignedIn) {
+        emitAuthRequired({ source: "bookmark" });
+        return null;
+      }
       const normalizedPercent = normalizeReadingPercent(entry.percent);
       const bookmark = {
         id: createBookmarkId(),
@@ -98,9 +103,7 @@ export function BookmarkProvider({ children }) {
         writeBookmarks(next);
         return next;
       });
-      if (isSignedIn) {
-        apiPost("/api/bookmarks", { seriesId, bookmark });
-      }
+      apiPost("/api/bookmarks", { seriesId, bookmark });
       return bookmark;
     },
     [isSignedIn],
@@ -108,6 +111,10 @@ export function BookmarkProvider({ children }) {
 
   const removeBookmark = useCallback(
     (seriesId, bookmarkId) => {
+      if (!isSignedIn) {
+        emitAuthRequired({ source: "bookmark" });
+        return;
+      }
       setBookmarksBySeries((prev) => {
         const list = Array.isArray(prev[seriesId]) ? prev[seriesId] : [];
         const nextList = list.filter((item) => item.id !== bookmarkId);
@@ -115,9 +122,7 @@ export function BookmarkProvider({ children }) {
         writeBookmarks(next);
         return next;
       });
-      if (isSignedIn) {
-        apiDelete("/api/bookmarks", { seriesId, bookmarkId });
-      }
+      apiDelete("/api/bookmarks", { seriesId, bookmarkId });
     },
     [isSignedIn],
   );

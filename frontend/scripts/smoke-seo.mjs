@@ -174,6 +174,47 @@ function createMockBackendServer() {
     const url = new URL(request.url, "http://127.0.0.1");
     const { pathname } = url;
     const adultFlag = url.searchParams.get("adult") === "1";
+    const cookieHeader = String(request.headers.cookie || "");
+    const signedIn =
+      /(?:^|;\s*)mn_session=[^;]+(?:;|$)/.test(cookieHeader) ||
+      /(?:^|;\s*)mn_is_signed_in=1(?:;|$)/.test(cookieHeader);
+    const matureVerified = /(?:^|;\s*)mn_adult_confirmed=1(?:;|$)/.test(cookieHeader);
+    const matureModeEnabled = /(?:^|;\s*)mn_adult_mode=1(?:;|$)/.test(cookieHeader);
+
+    if (pathname === "/api/auth/me") {
+      jsonResponse(response, 200, {
+        isSignedIn: signedIn,
+        user: signedIn
+          ? {
+              id: "reader-seo-smoke",
+              email: "reader@example.com",
+            }
+          : null,
+      });
+      return;
+    }
+
+    if (pathname === "/api/preferences") {
+      jsonResponse(response, 200, {
+        preferences: {
+          region: "global",
+          language: "en",
+          hideAdultHistory: !matureModeEnabled,
+          matureModeEnabled,
+          matureVerification: matureVerified
+            ? {
+                verified: true,
+                provider: "seo-smoke",
+                region: "global",
+                expiresAt: null,
+                referenceId: null,
+                verifiedAt: "2026-05-10T12:00:00.000Z",
+              }
+            : null,
+        },
+      });
+      return;
+    }
 
     if (pathname === "/api/series") {
       jsonResponse(response, 200, {
@@ -609,7 +650,8 @@ async function run() {
     });
   });
 
-  const adultCookies = "mn_is_signed_in=1; mn_adult_confirmed=1; mn_adult_mode=1";
+  const adultCookies =
+    "mn_session=seo-smoke-session; mn_is_signed_in=1; mn_adult_confirmed=1; mn_adult_mode=1";
 
   try {
     await Promise.race([waitForServer(baseUrl), childExit]);

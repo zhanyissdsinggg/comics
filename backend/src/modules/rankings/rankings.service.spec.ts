@@ -77,14 +77,36 @@ describe("RankingsService", () => {
 
     const result = await service.list("top", false);
 
-    expect(prisma.series.findMany).toHaveBeenCalledWith({
-      where: { adult: false, isPublished: true },
-      orderBy: [{ follows: { _count: "desc" } }, { updatedAt: "desc" }],
-      take: 50,
-      select: expect.any(Object),
-    });
+    expect(prisma.series.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ adult: false, isPublished: true }),
+            expect.objectContaining({
+              NOT: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.objectContaining({
+                    in: expect.arrayContaining(["demo-series", "fixture-series"]),
+                  }),
+                }),
+              ]),
+            }),
+          ]),
+        }),
+        orderBy: [{ follows: { _count: "desc" } }, { updatedAt: "desc" }],
+        take: 50,
+        select: expect.objectContaining({
+          id: true,
+          title: true,
+        }),
+      }),
+    );
     expect(result.map((item) => item.id)).toEqual(["series-1"]);
-    expect(cacheService.set).toHaveBeenCalledWith("rankings:popular:standard", expect.any(Array), 180);
+    expect(cacheService.set).toHaveBeenCalledWith(
+      "rankings:popular:standard:v2",
+      expect.any(Array),
+      180,
+    );
   });
 
   it("returns cached rankings without hitting Prisma", async () => {

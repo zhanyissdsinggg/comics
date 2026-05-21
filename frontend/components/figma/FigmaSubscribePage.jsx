@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -50,6 +51,7 @@ const PLAN_PREVIEWS = [
 ];
 
 function SubscribeContent() {
+  const router = useRouter();
   const { palette, isAdultMode } = useFigmaSite();
 
   return (
@@ -76,12 +78,10 @@ function SubscribeContent() {
                   Membership Preview
                 </div>
                 <h1 className="max-w-xl text-[1.9rem] font-black tracking-tight text-white md:max-w-3xl md:text-5xl">
-                  Membership is coming soon.
+                  Coming soon.
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300 md:mt-4 md:text-base md:leading-7">
-                  The subscription layer is still being staged, but the
-                  structure is ready: recurring plans, chapter savings, and a
-                  cleaner lane for heavy readers.
+                  Preview only. Checkout is disabled.
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2.5 sm:flex-row md:mt-8 md:gap-3">
@@ -95,12 +95,13 @@ function SubscribeContent() {
                     Buy points instead
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <Link
-                    href="/"
+                  <button
+                    type="button"
+                    onClick={() => router.push("/support")}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto md:py-3.5"
                   >
-                    Browse free stories
-                  </Link>
+                    Support
+                  </button>
                 </div>
 
                 <div className="mt-4 grid gap-2.5 sm:grid-cols-3 md:mt-5 md:gap-3">

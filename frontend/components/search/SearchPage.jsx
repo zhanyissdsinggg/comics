@@ -332,7 +332,13 @@ export default function SearchPage() {
   const { shouldRetry } = useRetryPolicy();
 
   const query = searchParams.get("q") || searchParams.get("query") || "";
-  const type = searchParams.get("type") || "";
+  const rawType = searchParams.get("type") || "";
+  const format = searchParams.get("format") || "";
+  const normalizedFormat = String(format || "")
+    .trim()
+    .toLowerCase();
+  const type =
+    rawType || (normalizedFormat === "interactive" ? "interactive" : "");
   const status = searchParams.get("status") || "";
   const genre = searchParams.get("genre") || "";
   const sort = normalizeSortParam(searchParams.get("sort") || "relevance");

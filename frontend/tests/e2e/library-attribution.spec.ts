@@ -267,11 +267,13 @@ test.describe("Library attribution", () => {
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: "Resume now" }).click();
-    await page.waitForURL(
-      /\/read\/series-001\/series-001e1\?entry=LIBRARY_RESUME_SPOTLIGHT&campaignId=resume_spotlight&sourcePath=%2Flibrary/,
-      { timeout: LIBRARY_UI_TIMEOUT_MS },
-    );
+    await Promise.all([
+      page.waitForURL(
+        /\/read\/series-001\/series-001e1\?entry=LIBRARY_RESUME_SPOTLIGHT&campaignId=resume_spotlight&sourcePath=%2Flibrary/,
+        { timeout: LIBRARY_UI_TIMEOUT_MS },
+      ),
+      page.getByRole("button", { name: "Resume now" }).click(),
+    ]);
 
     await expect(page.getByText("Library | Saved in library")).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,

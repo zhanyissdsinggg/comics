@@ -98,10 +98,10 @@ function formatRelativeTime(value) {
 
 function formatProgressLabel(series, currentInstallment, totalInstallments) {
   if (currentInstallment > 0 && totalInstallments > 0) {
-    return `${formatInstallmentLabel(series, currentInstallment)} of ${totalInstallments}`;
+    return `Read ${formatInstallmentLabel(series, currentInstallment)} of ${totalInstallments}`;
   }
   if (currentInstallment > 0) {
-    return formatInstallmentLabel(series, currentInstallment);
+    return `Read ${formatInstallmentLabel(series, currentInstallment)}`;
   }
   return "Start reading";
 }
@@ -114,7 +114,7 @@ function formatBookmarkSummary(count) {
 function formatUnlockedSummary(series, count, latestChapter) {
   const total = Number(count || 0);
   if (latestChapter > 0) {
-    return `${formatInstallmentCount(series, total)} unlocked up to ${formatInstallmentLabel(series, latestChapter)}`;
+    return `${formatInstallmentCount(series, total)} unlocked - up to ${formatInstallmentLabel(series, latestChapter)}`;
   }
   return `${formatInstallmentCount(series, total)} unlocked`;
 }
@@ -441,9 +441,9 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
               : "Bookmarked",
             primaryLine:
               followedSeriesIds.includes(seriesId) && bookmarks.length > 0
-                ? `In your library with ${formatBookmarkSummary(bookmarks.length)}`
+                ? `Saved to your shelf with ${formatBookmarkSummary(bookmarks.length)}`
                 : followedSeriesIds.includes(seriesId)
-                  ? "In your library"
+                  ? "Saved to your shelf"
                   : formatBookmarkSummary(bookmarks.length),
             summary: latestBookmark?.label || series.status || "",
             updatedLabel: formatRelativeTime(

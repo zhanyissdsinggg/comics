@@ -98,11 +98,24 @@ describe("SeriesService", () => {
 
     expect(prisma.series.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { isPublished: true, adult: false },
+        where: expect.objectContaining({
+          AND: expect.arrayContaining([
+            expect.objectContaining({ isPublished: true, adult: false }),
+            expect.objectContaining({
+              NOT: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.objectContaining({
+                    in: expect.arrayContaining(["demo-series", "fixture-series"]),
+                  }),
+                }),
+              ]),
+            }),
+          ]),
+        }),
       }),
     );
     expect(cacheService.set).toHaveBeenCalledWith(
-      "series:list:standard",
+      "series:list:standard:v2",
       expect.any(Array),
       expect.any(Number),
     );

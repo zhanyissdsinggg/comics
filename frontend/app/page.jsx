@@ -1,5 +1,5 @@
 import StructuredDataScript from "../components/common/StructuredDataScript";
-import FigmaHomePage from "../components/figma/FigmaHomePage";
+import HomePage from "../components/home/HomePage";
 import { buildNoIndexRobots, createPageMetadata } from "../lib/seo";
 import {
   buildOrganizationStructuredData,
@@ -20,7 +20,7 @@ export async function generateMetadata() {
   });
 }
 
-export default async function Page() {
+export default async function Page({ searchParams }) {
   const includeAdult = await isServerAdultModeEnabled();
   const initialHomeData = await loadHomepageSeoPayload({ includeAdult });
   const structuredData = [
@@ -34,9 +34,9 @@ export default async function Page() {
   return (
     <>
       <StructuredDataScript id="home-jsonld" data={structuredData} />
-      <FigmaHomePage
-        seriesList={initialHomeData?.seriesList || []}
-        initialReady={initialHomeData?.ready}
+      <HomePage
+        initialSearchParams={(await searchParams) || {}}
+        initialHomeData={initialHomeData}
       />
     </>
   );

@@ -7,9 +7,14 @@ import ErrorBoundary from "../common/ErrorBoundary";
 import ThemeProvider from "../common/ThemeProvider";
 import { AuthProvider } from "../../store/useAuthStore";
 import { AdultGateProvider } from "../../store/useAdultGateStore";
+import { BookmarkProvider } from "../../store/useBookmarkStore";
+import { CouponProvider } from "../../store/useCouponStore";
+import { EntitlementProvider } from "../../store/useEntitlementStore";
 import { ProgressProvider } from "../../store/useProgressStore";
 import { FollowProvider } from "../../store/useFollowStore";
 import { NotificationsProvider } from "../../store/useNotificationsStore";
+import { RewardsProvider } from "../../store/useRewardsStore";
+import { WalletProvider } from "../../store/useWalletStore";
 import { BehaviorProvider } from "../../store/useBehaviorStore";
 import {
   BrandingProvider,
@@ -113,18 +118,28 @@ export default function AppProviders({ children, initialAdultState = null }) {
                   <ToastContainer />
                   {!isAdminRoute ? <AuthRequiredModal /> : null}
                   <ProgressProvider>
-                    <FollowProvider>
-                      <NotificationsProvider>
-                        <BehaviorProvider>
-                          <HistoryProvider>
-                            {shouldShowPublicChrome ? <PublicHeader /> : null}
-                            {children}
-                            {shouldShowPublicChrome ? <PublicFooter /> : null}
-                            <PWAInstallPrompt />
-                          </HistoryProvider>
-                        </BehaviorProvider>
-                      </NotificationsProvider>
-                    </FollowProvider>
+                    <WalletProvider>
+                      <RewardsProvider>
+                        <EntitlementProvider>
+                          <CouponProvider>
+                            <BookmarkProvider>
+                              <FollowProvider>
+                                <NotificationsProvider>
+                                  <BehaviorProvider>
+                                    <HistoryProvider>
+                                      {shouldShowPublicChrome ? <PublicHeader /> : null}
+                                      {children}
+                                      {shouldShowPublicChrome ? <PublicFooter /> : null}
+                                      <PWAInstallPrompt />
+                                    </HistoryProvider>
+                                  </BehaviorProvider>
+                                </NotificationsProvider>
+                              </FollowProvider>
+                            </BookmarkProvider>
+                          </CouponProvider>
+                        </EntitlementProvider>
+                      </RewardsProvider>
+                    </WalletProvider>
                   </ProgressProvider>
                 </RegionProvider>
               </BrandingProvider>

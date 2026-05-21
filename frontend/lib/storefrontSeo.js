@@ -29,7 +29,7 @@ import {
 } from "./contentFilters";
 
 export const SEO_REVALIDATE_SECONDS = 300;
-const SEO_FETCH_TIMEOUT_MS = 15000;
+const SEO_FETCH_TIMEOUT_MS = 1500;
 
 function resolveSeoContentMode(options = {}) {
   return deriveContentModeFromAdultFlag(options?.includeAdult === true);
@@ -465,6 +465,7 @@ export const loadHomepageSeoPayload = cache(async (options = {}) => {
   }
 
   return {
+    contentMode,
     seriesList,
     hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
     homepageSlots,

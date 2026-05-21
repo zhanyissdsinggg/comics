@@ -758,10 +758,14 @@ export default function AccountPage({ initialSignedIn = false }) {
             appearance="dark"
             accent="cyan"
             eyebrow="Account"
-            title="Account"
+            title={
+              viewerSignedIn
+                ? "Keep your next read closer than the settings."
+                : "Account"
+            }
             description={
               viewerSignedIn
-                ? "Reading, orders, security"
+                ? "Reading, orders, security, and your saved shelf in one place."
                 : "Sign in to save progress and favorites."
             }
             secondary=""

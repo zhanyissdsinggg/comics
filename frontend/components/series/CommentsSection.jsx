@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ShareButton from "../common/ShareButton";
 import LoginGateModal from "../layout/LoginGateModal";
 import { apiGet, apiPost } from "../../lib/apiClient";
+import { emitAuthRequired } from "../../lib/authBus";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import {
@@ -138,6 +139,7 @@ export default function CommentsSection({
 
   const handleSubmit = async () => {
     if (!isSignedIn) {
+      emitAuthRequired({ source: "comment" });
       setActiveModal(true);
       return;
     }
@@ -158,6 +160,7 @@ export default function CommentsSection({
 
   const handleLike = async (commentId) => {
     if (!isSignedIn) {
+      emitAuthRequired({ source: "comment_like" });
       setActiveModal(true);
       return;
     }
@@ -177,6 +180,7 @@ export default function CommentsSection({
 
   const handleReply = async (commentId) => {
     if (!isSignedIn) {
+      emitAuthRequired({ source: "comment_reply" });
       setActiveModal(true);
       return;
     }
@@ -243,6 +247,7 @@ export default function CommentsSection({
   const focusComposer = useCallback(
     (seedText = "") => {
       if (!isSignedIn) {
+        emitAuthRequired({ source: "comment_focus" });
         setActiveModal(true);
         return;
       }

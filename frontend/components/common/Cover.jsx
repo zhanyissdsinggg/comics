@@ -226,6 +226,7 @@ export default function Cover({
   fallbackVariant = "default",
   sizes = "(max-width: 768px) 160px, 240px",
   decorative = false,
+  altText: customAltText = "",
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -240,7 +241,9 @@ export default function Cover({
     badge,
     eyebrow,
   });
-  const altText = buildCoverAltText(fallbackLabel, seriesType);
+  const altText =
+    String(customAltText || "").trim() ||
+    buildCoverAltText(fallbackLabel, seriesType);
 
   if (placeholdLabel || usesMockFallback) {
     return (

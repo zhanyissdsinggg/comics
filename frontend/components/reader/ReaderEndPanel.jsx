@@ -89,9 +89,10 @@ export default function ReaderEndPanel({
                 <button
                   type="button"
                   onClick={onPrimaryAction}
+                  aria-label={hasNextEpisode ? "Continue reading" : "Back to series"}
                   className={primaryButtonClassName}
                 >
-                  {hasNextEpisode ? "Next chapter" : "Back to series"}
+                  {hasNextEpisode ? "Continue reading" : "Back to series"}
                 </button>
               ) : !isSignedIn ? (
                 <button

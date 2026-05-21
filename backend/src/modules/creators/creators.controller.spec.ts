@@ -2,12 +2,14 @@ import { ValidationPipe } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import request = require("supertest");
+import { PrismaService } from "../../common/prisma/prisma.service";
 import { CreatorsController } from "./creators.controller";
 import { CreatorsService } from "./creators.service";
 
 describe("CreatorsController", () => {
   let app: INestApplication | undefined;
   let creatorsService: Record<string, jest.Mock>;
+  let prisma: { userPreference: { findUnique: jest.Mock } };
 
   beforeEach(async () => {
     creatorsService = {
@@ -21,6 +23,11 @@ describe("CreatorsController", () => {
         series: [],
       }),
     };
+    prisma = {
+      userPreference: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+    };
 
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [CreatorsController],
@@ -28,6 +35,10 @@ describe("CreatorsController", () => {
         {
           provide: CreatorsService,
           useValue: creatorsService,
+        },
+        {
+          provide: PrismaService,
+          useValue: prisma,
         },
       ],
     }).compile();

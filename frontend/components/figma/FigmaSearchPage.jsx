@@ -59,6 +59,14 @@ const FALLBACK_KEYWORDS = [
   "Horror",
   "School Life",
 ];
+const INTERACTIVE_FALLBACK_KEYWORDS = [
+  "Choices",
+  "Branching",
+  "Sci-Fi",
+  "Romance",
+  "Thriller",
+  "Horror",
+];
 
 function normalizeHotKeywords(keywords = []) {
   return (Array.isArray(keywords) ? keywords : [])
@@ -227,12 +235,15 @@ function SearchContent({
   initialResults = [],
   initialHotKeywords = [],
   initialReady = false,
+  interactiveOnly = false,
 }) {
   const { palette, isAdultMode, contentMode } = useFigmaSite();
   const normalizedInitialQuery = String(initialQuery || "").trim();
   const [query, setQuery] = useState(initialQuery);
   const [activeFormat, setActiveFormat] = useState(
-    normalizeInitialFormat(initialFormat),
+    interactiveOnly
+      ? SEARCH_FORMATS.INTERACTIVE
+      : normalizeInitialFormat(initialFormat),
   );
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeSort, setActiveSort] = useState("RELEVANCE");
@@ -241,9 +252,13 @@ function SearchContent({
   );
   const [hotKeywords, setHotKeywords] = useState(() => {
     const keywords = normalizeHotKeywords(initialHotKeywords);
-    return keywords.length > 0 ? keywords : FALLBACK_KEYWORDS;
+    return keywords.length > 0
+      ? keywords
+      : interactiveOnly
+        ? INTERACTIVE_FALLBACK_KEYWORDS
+        : FALLBACK_KEYWORDS;
   });
-  const [loading, setLoading] = useState(!initialReady);
+  const [loading, setLoading] = useState(!interactiveOnly && !initialReady);
   const [error, setError] = useState("");
   const [resolvedQuery, setResolvedQuery] = useState(normalizedInitialQuery);
   const deferredQuery = useDeferredValue(query);
@@ -260,6 +275,23 @@ function SearchContent({
       }),
     [contentMode, normalizedInitialQuery],
   );
+  const formatOptions = useMemo(
+    () =>
+      interactiveOnly
+        ? FORMAT_OPTIONS.filter(
+            (option) => option.key === SEARCH_FORMATS.INTERACTIVE,
+          )
+        : FORMAT_OPTIONS,
+    [interactiveOnly],
+  );
+
+  useEffect(() => {
+    if (!interactiveOnly || activeFormat === SEARCH_FORMATS.INTERACTIVE) {
+      return;
+    }
+
+    setActiveFormat(SEARCH_FORMATS.INTERACTIVE);
+  }, [activeFormat, interactiveOnly]);
 
   useEffect(() => {
     if (searchOpenTrackedRef.current) {
@@ -278,6 +310,14 @@ function SearchContent({
 
     async function loadSearchResults() {
       const normalizedQuery = deferredQuery.trim();
+      if (interactiveOnly) {
+        setRemoteItems([]);
+        setResolvedQuery(normalizedQuery);
+        setLoading(false);
+        setError("");
+        return;
+      }
+
       const adultFlag = getContentModeQueryParam(contentMode);
       const requestKey = JSON.stringify({
         q: normalizedQuery,
@@ -328,9 +368,16 @@ function SearchContent({
     return () => {
       active = false;
     };
-  }, [contentMode, deferredQuery, initialReady, initialRequestKey]);
+  }, [contentMode, deferredQuery, initialReady, initialRequestKey, interactiveOnly]);
 
   useEffect(() => {
+    if (interactiveOnly) {
+      setHotKeywords((current) =>
+        current.length > 0 ? current : INTERACTIVE_FALLBACK_KEYWORDS,
+      );
+      return undefined;
+    }
+
     let active = true;
 
     apiGet(
@@ -357,11 +404,11 @@ function SearchContent({
     return () => {
       active = false;
     };
-  }, [contentMode]);
+  }, [contentMode, interactiveOnly]);
 
   const visibleRemoteItems = useMemo(
-    () => filterContentByMode(remoteItems, contentMode),
-    [contentMode, remoteItems],
+    () => (interactiveOnly ? [] : filterContentByMode(remoteItems, contentMode)),
+    [contentMode, interactiveOnly, remoteItems],
   );
 
   const interactiveItems = useMemo(
@@ -380,19 +427,29 @@ function SearchContent({
 
   const formatCounts = useMemo(
     () => ({
-      all: visibleRemoteItems.length + interactiveQueryItems.length,
-      comics: visibleRemoteItems.filter(
-        (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
-      ).length,
-      novels: visibleRemoteItems.filter(
-        (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
-      ).length,
+      all: interactiveOnly
+        ? interactiveQueryItems.length
+        : visibleRemoteItems.length + interactiveQueryItems.length,
+      comics: interactiveOnly
+        ? 0
+        : visibleRemoteItems.filter(
+            (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
+          ).length,
+      novels: interactiveOnly
+        ? 0
+        : visibleRemoteItems.filter(
+            (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
+          ).length,
       interactive: interactiveQueryItems.length,
     }),
-    [interactiveQueryItems, visibleRemoteItems],
+    [interactiveOnly, interactiveQueryItems, visibleRemoteItems],
   );
 
   const formatFilteredItems = useMemo(() => {
+    if (interactiveOnly) {
+      return interactiveQueryItems;
+    }
+
     if (activeFormat === SEARCH_FORMATS.INTERACTIVE) {
       return interactiveQueryItems;
     }
@@ -410,7 +467,7 @@ function SearchContent({
     }
 
     return [...visibleRemoteItems, ...interactiveQueryItems];
-  }, [activeFormat, interactiveQueryItems, visibleRemoteItems]);
+  }, [activeFormat, interactiveOnly, interactiveQueryItems, visibleRemoteItems]);
 
   const genreOptions = useMemo(
     () => buildGenreOptions(formatFilteredItems),
@@ -560,6 +617,9 @@ function SearchContent({
   }, [contentMode, loading, sortedItems]);
 
   const handleFormatSelect = (nextFormat) => {
+    if (interactiveOnly) {
+      return;
+    }
     setActiveFormat(nextFormat);
   };
 
@@ -684,7 +744,7 @@ function SearchContent({
               </div>
 
               <div className="mt-6 hidden gap-4 xl:grid xl:grid-cols-4">
-                {FORMAT_OPTIONS.map((option) => {
+                {formatOptions.map((option) => {
                   const Icon = option.icon;
                   const count =
                     option.key === SEARCH_FORMATS.ALL
@@ -863,7 +923,7 @@ function SearchContent({
               </div>
 
               <div className="mb-3 flex gap-2 overflow-x-auto pb-1 xl:hidden">
-                {FORMAT_OPTIONS.map((option) => {
+                {formatOptions.map((option) => {
                   const Icon = option.icon;
                   const count =
                     option.key === SEARCH_FORMATS.ALL
@@ -973,19 +1033,23 @@ export default function FigmaSearchPage({
   initialResults = [],
   initialHotKeywords = [],
   initialReady = false,
+  interactiveOnly = false,
 }) {
   const normalizedFormat = normalizeInitialFormat(initialFormat);
 
   return (
     <FigmaSiteProvider
-      initialContentType={resolveProviderContentType(normalizedFormat)}
+      initialContentType={resolveProviderContentType(
+        interactiveOnly ? SEARCH_FORMATS.INTERACTIVE : normalizedFormat,
+      )}
     >
       <SearchContent
         initialQuery={initialQuery}
-        initialFormat={normalizedFormat}
+        initialFormat={interactiveOnly ? SEARCH_FORMATS.INTERACTIVE : normalizedFormat}
         initialResults={initialResults}
         initialHotKeywords={initialHotKeywords}
         initialReady={initialReady}
+        interactiveOnly={interactiveOnly}
       />
     </FigmaSiteProvider>
   );

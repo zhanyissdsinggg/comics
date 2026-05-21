@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Lock } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
@@ -33,6 +33,14 @@ import {
   getContentModeQueryParam,
   matchesContentMode,
 } from "../../lib/contentFilters";
+import { buildDiscoveryContext } from "../../lib/discoveryContext";
+import {
+  buildPathWithAttribution,
+  loadPersistedPaymentAttribution,
+  mergePaymentAttribution,
+  persistPaymentAttribution,
+  readPaymentAttributionFromSearchParams,
+} from "../../lib/paymentAttribution";
 import { cn, isAdultContent } from "./figma-utils";
 
 function createIdempotencyKey() {
@@ -286,6 +294,7 @@ function ReaderContent({
   initialReaderPayload = null,
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const previewEndRef = useRef(null);
   const endRef = useRef(null);
   const commentsRef = useRef(null);
@@ -366,7 +375,12 @@ function ReaderContent({
   const [toast, setToast] = useState("");
   const [hasReachedPreviewEnd, setHasReachedPreviewEnd] = useState(false);
   const [hasReachedChapterEnd, setHasReachedChapterEnd] = useState(false);
+  const [activeAttribution, setActiveAttribution] = useState(null);
   const entitlement = bySeriesId[seriesId] || { unlockedEpisodeIds: [] };
+  const routeAttribution = useMemo(
+    () => readPaymentAttributionFromSearchParams(searchParams),
+    [searchParams],
+  );
 
   useEffect(() => {
     let active = true;
@@ -802,6 +816,30 @@ function ReaderContent({
     }),
     [contentMode, episodeId, seriesId, seriesIsAdult, seriesType, unlocked],
   );
+  const discoveryContext = useMemo(
+    () =>
+      buildDiscoveryContext(seriesData?.series, activeAttribution, {
+        allowReaderEntry: true,
+      }),
+    [activeAttribution, seriesData?.series],
+  );
+
+  useEffect(() => {
+    if (!routeAttribution) {
+      setActiveAttribution(null);
+      return;
+    }
+
+    const persistedAttribution = loadPersistedPaymentAttribution();
+    const nextAttribution = mergePaymentAttribution(
+      persistedAttribution,
+      routeAttribution,
+    );
+    setActiveAttribution(nextAttribution);
+    if (nextAttribution) {
+      persistPaymentAttribution(nextAttribution);
+    }
+  }, [routeAttribution]);
 
   const handleEnterAdultReader = useCallback(async () => {
     trackEvent("adult_gate_confirm", {
@@ -858,11 +896,17 @@ function ReaderContent({
           targetEpisodeId: targetEpisode.id,
         },
       );
-      router.push(
-        `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`,
-      );
+      const nextReaderHref = activeAttribution
+        ? buildPathWithAttribution(
+            `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`,
+            activeAttribution,
+          )
+        : `/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(targetEpisode.id)}`;
+
+      router.push(nextReaderHref);
     },
     [
+      activeAttribution,
       backToSeriesHref,
       contentMode,
       readerAnalyticsPayload,
@@ -891,9 +935,13 @@ function ReaderContent({
       label: `${currentInstallmentLabel} - ${Math.round(percent * 100)}%`,
     });
 
+    if (!bookmark?.id) {
+      return;
+    }
+
     trackEvent("bookmark_add", {
       ...readerAnalyticsPayload,
-      bookmarkId: bookmark?.id,
+      bookmarkId: bookmark.id,
       percent: Math.round(percent * 100),
       pageIndex: activeIndex,
     });
@@ -1333,9 +1381,17 @@ function ReaderContent({
           variant="minimal"
           isComic={isComic}
           title={seriesData.series.title}
+          contextLabel={
+            discoveryContext
+              ? `${discoveryContext.returnTitle} | ${discoveryContext.laneValue}`
+              : ""
+          }
+          contextActionLabel={discoveryContext?.returnLabel || ""}
           subtitle={currentInstallmentLabel}
           episodeLabel={currentEpisodeTitle}
-          onBack={() => router.back()}
+          onBack={() =>
+            router.push(discoveryContext?.sourcePath || backToSeriesHref)
+          }
           onAddBookmark={handleBookmarkToggle}
           onOpenSettings={() => setSettingsOpen((value) => !value)}
           bookmarkActive={Boolean(currentBookmark)}

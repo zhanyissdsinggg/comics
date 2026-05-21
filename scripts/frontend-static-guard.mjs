@@ -8,7 +8,15 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
 const frontendRoot = path.join(repoRoot, "frontend");
 
-const ignoredDirs = new Set(["node_modules", ".next", "dist", "coverage", "test-results"]);
+const ignoredDirs = new Set([
+  "node_modules",
+  ".next",
+  ".next-playwright",
+  "dist",
+  "coverage",
+  "test-results",
+  "playwright-report",
+]);
 const codeExtPattern = /\.(js|jsx|ts|tsx)$/;
 const dynamicTailwindPattern = /\b(?:bg|text|border|from|to|ring|stroke|fill)-\$\{/;
 const adminSurfacePathPattern = /^frontend\/(?:app|components)\/admin\//;

@@ -6,9 +6,11 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { apiGet } from "../../lib/apiClient";
+import { getContentModeQueryParam } from "../../lib/contentFilters";
 import { parallelRequests3 } from "../../lib/parallelRequests";
 import { useRetryPolicy } from "../../hooks/useRetryPolicy";
 import { useStaleNotice } from "../../hooks/useStaleNotice";
+import { useAdultGateStore } from "../../store/useAdultGateStore";
 
 const HomeDataContext = createContext(null);
 
@@ -22,6 +24,7 @@ export function useHomeData() {
 
 export function HomeDataProvider({ children, initialData = null }) {
   const { shouldRetry } = useRetryPolicy();
+  const { contentMode } = useAdultGateStore();
   const requestRef = useRef(0);
   const initialSeriesList = Array.isArray(initialData?.seriesList)
     ? initialData.seriesList
@@ -46,7 +49,7 @@ export function HomeDataProvider({ children, initialData = null }) {
   useEffect(() => {
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
-    const adultFlag = "0";
+    const adultFlag = getContentModeQueryParam(contentMode);
     if (!hasInitialData) {
       setLoading(true);
     }
@@ -154,7 +157,7 @@ export function HomeDataProvider({ children, initialData = null }) {
           setLoading(false);
         }
       });
-  }, [hasInitialData, hotWindow, shouldRetry]);
+  }, [contentMode, hasInitialData, hotWindow, shouldRetry]);
 
   return (
     <HomeDataContext.Provider

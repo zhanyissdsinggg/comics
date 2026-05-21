@@ -804,7 +804,7 @@ test.describe("Reader layout", () => {
     page,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
-    await mockReaderRoutes(page);
+    await mockReaderRoutes(page, { signedIn: true });
 
     const response = await page.goto("/read/series-001/series-001e1", {
       waitUntil: "domcontentloaded",
