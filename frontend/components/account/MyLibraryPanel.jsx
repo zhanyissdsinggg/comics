@@ -24,6 +24,7 @@ import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { normalizeReadingPercent } from "../../lib/readingPercent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useBookmarkStore } from "../../store/useBookmarkStore";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useHistoryStore } from "../../store/useHistoryStore";
@@ -267,21 +268,24 @@ function PanelSkeleton() {
 
 export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
   const router = useRouter();
+  const { hydrated, isSignedIn } = useAuthStore();
   const { contentMode } = useAdultGateStore();
   const { bySeriesId: progressMap, loadProgress } = useProgressStore();
   const { items: historyItems, loadHistory } = useHistoryStore();
   const { bookmarksBySeries } = useBookmarkStore();
   const { followedSeriesIds, loadFollowed } = useFollowStore();
+  const trustedViewerSignedIn = hydrated && isSignedIn;
+  const showSignedInShell = trustedViewerSignedIn || (!hydrated && viewerSignedIn);
   const [activeTab, setActiveTab] = useState("continue");
   const [seriesList, setSeriesList] = useState([]);
   const [entitlements, setEntitlements] = useState([]);
-  const [loading, setLoading] = useState(viewerSignedIn);
+  const [loading, setLoading] = useState(showSignedInShell);
 
   useEffect(() => {
-    if (!viewerSignedIn) {
+    if (!trustedViewerSignedIn) {
       setSeriesList([]);
       setEntitlements([]);
-      setLoading(false);
+      setLoading(showSignedInShell);
       return;
     }
 
@@ -327,7 +331,14 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
     return () => {
       cancelled = true;
     };
-  }, [contentMode, loadFollowed, loadHistory, loadProgress, viewerSignedIn]);
+  }, [
+    contentMode,
+    loadFollowed,
+    loadHistory,
+    loadProgress,
+    showSignedInShell,
+    trustedViewerSignedIn,
+  ]);
 
   const seriesById = useMemo(
     () => new Map(seriesList.map((series) => [series.id, series])),
@@ -620,7 +631,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
           </h2>
         </div>
 
-        {viewerSignedIn ? (
+        {showSignedInShell ? (
           <button
             type="button"
             onClick={() => router.push("/library")}
@@ -631,7 +642,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
         ) : null}
       </div>
 
-      {!viewerSignedIn ? (
+      {!showSignedInShell ? (
         <div className="rounded-[28px] border-2 border-white/15 bg-black p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>

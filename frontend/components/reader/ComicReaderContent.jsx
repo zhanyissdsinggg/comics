@@ -36,7 +36,11 @@ export default function ComicReaderContent({
           style={{ filter: `brightness(${brightness}%)` }}
           onClick={onToggleChrome}
         >
-          <span hidden data-testid="comic-reader-shell-marker" />
+          <div
+            aria-hidden="true"
+            data-testid="comic-reader-shell-marker"
+            className="block h-px w-full opacity-0"
+          />
           <PageStream
             pages={pages}
             paragraphs={paragraphs}

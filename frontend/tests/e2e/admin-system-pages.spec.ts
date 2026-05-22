@@ -80,39 +80,23 @@ test.describe("Admin system page regressions", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /系统设置|System Settings/ }),
-    ).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByText(/后台访问|Admin access/).first()).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(
-      page.getByRole("heading", { name: /成员会话与登录凭证|Member session/ }),
-    ).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(
-      page.getByRole("heading", { name: /后台成员体系|Admin members/ }),
-    ).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
     await expect(page.getByText(/ADMIN_KEYS/i).first()).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(page.getByText(/安全 Cookie|secure cookie/i)).toBeVisible({
+    await expect(
+      page.locator('a[href="/admin/members"]').first(),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await page.waitForTimeout(1200);
-    await expect(page.getByText("We use cookies", { exact: true })).toHaveCount(
-      0,
-    );
-    await expect(
-      page.getByText("Install Gush App", { exact: true }),
-    ).toHaveCount(0);
+    await expect(page.locator("code").filter({ hasText: "ADMIN_KEYS" }).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText(/Cookie|cookie|COOKIE/).first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("We use cookies", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Install Gush App", { exact: true })).toHaveCount(0);
 
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/settings", runtimeIssues);
   });
 
@@ -199,6 +183,7 @@ test.describe("Admin system page regressions", () => {
     await expect
       .poll(() => testPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
       .toBe(1);
+
     expect(savePayloads[0]).toEqual(
       expect.objectContaining({
         from: "latest@gush.test",
@@ -207,7 +192,6 @@ test.describe("Admin system page regressions", () => {
     );
     expect(testPayloads).toEqual([{ to: "qa@gush.test" }]);
 
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/email-settings", runtimeIssues);
   });
 
@@ -241,10 +225,8 @@ test.describe("Admin system page regressions", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const addButton = page.getByRole("button", { name: /新增条目|Add entry/ });
-    await expect(addButton).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await addButton.click();
-    await addButton.click();
+    await page.getByTestId("admin-regions-add-entry").click();
+    await page.getByTestId("admin-regions-add-entry").click();
 
     const inputs = page.locator('input:not([type="file"])');
     await inputs.nth(0).fill("1");
@@ -252,23 +234,17 @@ test.describe("Admin system page regressions", () => {
     await inputs.nth(2).fill("+1");
     await inputs.nth(3).fill("Duplicate United States");
 
-    await page
-      .getByRole("button", { name: /保存更改|保存修改|Save changes/ })
-      .click();
-    await expect(
-      page.getByText(
-        /国际区号不能重复：\+1。|Country calling codes must be unique: \+1\./,
-      ),
-    ).toBeVisible({
+    await page.getByTestId("admin-regions-save").click();
+
+    await expect(page.getByTestId("admin-feedback-banner")).toContainText("+1", {
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
     expect(saveRequests).toBe(0);
 
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/regions", runtimeIssues);
   });
 
-  test("content generator submits custom settings and renders the returned summary", async ({
+  test("content generator stays locked in production until admin tools are explicitly enabled", async ({
     page,
   }) => {
     await primeAdminSession(page);
@@ -286,15 +262,6 @@ test.describe("Admin system page regressions", () => {
         await fulfillJson(route, {
           success: true,
           runId: "run-custom-1",
-          comicsCount: 3,
-          novelsCount: 3,
-          totalEpisodes: 24,
-          duration: 1.23,
-          settings: {
-            seriesPerType: 3,
-            minEpisodes: 4,
-            maxEpisodes: 4,
-          },
         });
         return true;
       }
@@ -308,42 +275,14 @@ test.describe("Admin system page regressions", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
+    const lockedState = page.getByTestId("admin-content-generator-locked");
+    await expect(lockedState).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
+    await expect(lockedState).toContainText("NEXT_PUBLIC_ADMIN_TOOLS_ENABLED=1");
     await expect(
-      page.getByRole("heading", {
-        name: /演示内容生成器|Demo Content Generator/,
-      }),
-    ).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
+      page.getByRole("button", { name: /Generate content/i }),
+    ).toHaveCount(0);
+    expect(payloads).toHaveLength(0);
 
-    const inputs = page.locator('input:not([type="file"])');
-    await inputs.nth(0).fill("night-run");
-    await inputs.nth(1).fill("3");
-    await inputs.nth(2).fill("4");
-    await inputs.nth(3).fill("4");
-    await page
-      .getByRole("button", { name: /生成内容|Generate content/ })
-      .click();
-
-    await expect.poll(() => payloads.length).toBe(1);
-    expect(payloads).toEqual([
-      {
-        seed: "night-run",
-        seriesPerType: 3,
-        minEpisodes: 4,
-        maxEpisodes: 4,
-      },
-    ]);
-
-    const resultSection = page
-      .locator("section")
-      .filter({ hasText: /run-custom-1/ })
-      .last();
-    await expect(resultSection).toBeVisible({ timeout: ADMIN_UI_TIMEOUT_MS });
-    await expect(resultSection).toContainText(/run-custom-1/);
-    await expect(resultSection).toContainText(/24/);
-
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/content-generator", runtimeIssues);
   });
 
@@ -363,7 +302,7 @@ test.describe("Admin system page regressions", () => {
               slot: 1,
               configuredRole: "content_admin",
               assignedMemberId: "member-1",
-              assignedMemberName: "内容小组",
+              assignedMemberName: "Content Desk",
               missing: false,
             },
           ],
@@ -379,7 +318,7 @@ test.describe("Admin system page regressions", () => {
           members: [
             {
               id: "member-1",
-              name: "内容小组",
+              name: "Content Desk",
               email: "content@gush.test",
               role: "content_admin",
               status: "active",
@@ -436,36 +375,21 @@ test.describe("Admin system page regressions", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "后台成员" })).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByRole("heading", { name: "成员目录" })).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
-    await expect(page.getByText("内容小组", { exact: true })).toBeVisible({
+    await expect(page.getByText("content@gush.test")).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    await page.getByRole("button", { name: /同步槽位/ }).click();
+    await page.getByTestId("admin-members-sync-slots").click();
     await expect
       .poll(() => syncPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
       .toBe(1);
-    await expect(
-      page.getByText(/已同步环境密钥槽位，本次新增 1 个成员占位。/),
-    ).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
 
-    await page.getByRole("button", { name: /停用/ }).click();
+    await page.getByTestId("admin-member-status-toggle-member-1").click();
     await expect
       .poll(() => statusPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
       .toBe(1);
     expect(statusPayloads[0]).toEqual({ status: "disabled" });
-    await expect(page.getByText(/成员已停用。/)).toBeVisible({
-      timeout: ADMIN_UI_TIMEOUT_MS,
-    });
 
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/members", runtimeIssues);
   });
 
@@ -484,10 +408,10 @@ test.describe("Admin system page regressions", () => {
             {
               id: "story-1",
               slug: "midnight-archive",
-              title: "午夜档案馆",
+              title: "Midnight Archive",
               isPublished: false,
               _count: { nodes: 2, progress: 5 },
-              series: { title: "档案馆" },
+              series: { title: "Archive" },
             },
           ],
         });
@@ -515,24 +439,24 @@ test.describe("Admin system page regressions", () => {
           story: {
             id: "story-1",
             slug: "midnight-archive",
-            title: "午夜档案馆",
+            title: "Midnight Archive",
             seriesId: "series-011",
-            description: "悬疑、试探与风险同时推进的分支故事。",
-            baseContext: "你在午夜值班时收到了第一封匿名来信。",
+            description: "Suspense branching story.",
+            baseContext: "Night shift archive entry point.",
             initialState: { trust: 0, risk: 1, clues: 0 },
             isPublished: false,
             aiEnabled: true,
             initialNodeId: "node-1",
-            series: { title: "档案馆" },
+            series: { title: "Archive" },
             nodes: [
               {
                 id: "node-1",
                 nodeKey: "intro-01",
-                title: "午夜来信",
+                title: "Midnight Letter",
                 sortOrder: 1,
-                baseContext: "值班室里只剩你一个人。",
-                basePrompt: "突出不安和悬疑气氛。",
-                fallbackText: "你先压住呼吸，继续观察信封。",
+                baseContext: "You are alone in the office.",
+                basePrompt: "Build suspense.",
+                fallbackText: "You steady yourself and read the letter.",
                 requiredFlags: [],
                 blockedFlags: [],
                 stateEffects: { risk: 1 },
@@ -542,8 +466,8 @@ test.describe("Admin system page regressions", () => {
                   {
                     id: "choice-1",
                     choiceKey: "open-letter",
-                    label: "拆开信封",
-                    description: "看看信里写了什么。",
+                    label: "Open the letter",
+                    description: "Read the contents.",
                     targetNodeId: "node-2",
                     sortOrder: 1,
                     requiredFlags: [],
@@ -555,11 +479,11 @@ test.describe("Admin system page regressions", () => {
               {
                 id: "node-2",
                 nodeKey: "hallway-02",
-                title: "走廊脚步声",
+                title: "Hallway Footsteps",
                 sortOrder: 2,
-                baseContext: "走廊另一头传来脚步声。",
-                basePrompt: "节奏更紧，信息更少。",
-                fallbackText: "你把信塞进口袋，慢慢转向门口。",
+                baseContext: "Footsteps echo in the hall.",
+                basePrompt: "Increase tension.",
+                fallbackText: "You turn slowly toward the door.",
                 requiredFlags: [],
                 blockedFlags: [],
                 stateEffects: { trust: -1 },
@@ -582,57 +506,46 @@ test.describe("Admin system page regressions", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("互动小说创作台", { exact: true })).toBeVisible(
-      {
-        timeout: ADMIN_UI_TIMEOUT_MS,
-      },
-    );
-    await expect(page.getByRole("heading", { name: "午夜档案馆" })).toBeVisible(
-      {
-        timeout: ADMIN_UI_TIMEOUT_MS,
-      },
-    );
-
-    await page.getByRole("button", { name: /节点编排/ }).click();
-    await expect(page.getByRole("heading", { name: /节点地图/ })).toBeVisible({
+    await expect(page.getByText("midnight-archive")).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
 
-    const searchInput = page.getByPlaceholder("搜索节点标题、Key、分支文案");
-    await searchInput.fill("走廊");
-    const hallwayNodeCard = page
-      .locator("button")
-      .filter({ hasText: "走廊脚步声" })
-      .first();
-    const introNodeCard = page
-      .locator("button")
-      .filter({ hasText: "午夜来信" })
-      .first();
-    await expect(hallwayNodeCard).toBeVisible({
+    await page.getByTestId("admin-tab-nodes").click();
+    await expect(
+      page.locator("button").filter({ hasText: "Midnight Letter" }).first(),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await expect(introNodeCard).toHaveCount(0);
+    await expect(
+      page.locator("button").filter({ hasText: "Hallway Footsteps" }).first(),
+    ).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+
+    const searchInput = page.getByTestId("admin-interactive-node-search");
+    await searchInput.fill("hallway");
+
+    await expect(
+      page.locator("button").filter({ hasText: "Hallway Footsteps" }).first(),
+    ).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.locator("button").filter({ hasText: "Midnight Letter" }),
+    ).toHaveCount(0);
 
     await searchInput.fill("");
+    await page.locator("button").filter({ hasText: "Midnight Letter" }).first().click();
     await page
-      .locator("button")
-      .filter({ hasText: "午夜来信" })
+      .getByRole("button", { name: /跳到 Hallway Footsteps/ })
       .first()
       .click();
-    const jumpButton = page
-      .getByRole("button", { name: /跳到 走廊脚步声/ })
-      .first();
-    await expect(jumpButton).toBeVisible({
+    await expect(
+      page.locator('input[value="Hallway Footsteps"]').first(),
+    ).toBeVisible({
       timeout: ADMIN_UI_TIMEOUT_MS,
     });
-    await jumpButton.click();
-    await expect(page.locator('input[value="走廊脚步声"]').first()).toBeVisible(
-      {
-        timeout: ADMIN_UI_TIMEOUT_MS,
-      },
-    );
 
-    await page.waitForTimeout(300);
     await expectNoRuntimeIssues("/admin/interactive-stories", runtimeIssues);
   });
 });

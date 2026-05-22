@@ -22,6 +22,7 @@ export function AdminFeedbackBanner({
 
   return (
     <div
+      data-testid="admin-feedback-banner"
       className={`flex items-start justify-between gap-3 rounded-[24px] border px-4 py-3 text-sm shadow-[0_12px_28px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02] ${tone} ${className}`.trim()}
     >
       <div className="flex min-w-0 items-start gap-3">

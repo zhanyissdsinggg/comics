@@ -73,8 +73,29 @@ function readAdultStateUpdatedAt() {
 }
 
 export function mergeAdultStateIfNewer(preferences = {}, requestStartedAt = 0) {
-  void requestStartedAt;
-  return preferences;
+  const normalizedRequestStartedAt = Number(requestStartedAt || 0);
+  const updatedAt = readAdultStateUpdatedAt();
+
+  if (!updatedAt || updatedAt <= normalizedRequestStartedAt) {
+    return preferences;
+  }
+
+  if (typeof window === "undefined") {
+    return preferences;
+  }
+
+  const region =
+    window.localStorage.getItem(ADULT_RULE_KEY) ||
+    preferences.region ||
+    "global";
+
+  return {
+    ...preferences,
+    region,
+    hideAdultHistory: window.localStorage.getItem(HIDE_ADULT_KEY) === "1",
+    matureModeEnabled: window.localStorage.getItem(ADULT_MODE_KEY) === "1",
+    matureVerification: readStoredMatureVerification(region),
+  };
 }
 
 export function applyPreferencesToStorage(preferences = {}) {

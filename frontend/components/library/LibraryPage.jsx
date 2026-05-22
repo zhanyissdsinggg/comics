@@ -207,7 +207,7 @@ export default function LibraryPage({
   const [showCollectionManager, setShowCollectionManager] = useState(false);
   const [initialLoading, setInitialLoading] = useState(initialSignedIn);
   const [commerceNotice, setCommerceNotice] = useState(null);
-  const viewerSignedIn = hydrated ? isSignedIn : initialSignedIn;
+  const viewerSignedIn = hydrated && isSignedIn;
   const adultFlag =
     adultHydrated && contentMode === "adult"
       ? "1"
@@ -390,20 +390,20 @@ export default function LibraryPage({
   }, []);
 
   useEffect(() => {
-    loadProgress();
-    loadHistory();
     if (viewerSignedIn) {
+      loadProgress();
+      loadHistory();
       loadRewards();
       loadMissions();
       loadFollowed();
     }
   }, [
     viewerSignedIn,
+    loadHistory,
     loadFollowed,
     loadMissions,
-    loadRewards,
     loadProgress,
-    loadHistory,
+    loadRewards,
   ]);
 
   useEffect(() => {
@@ -687,10 +687,13 @@ export default function LibraryPage({
   );
   const showLibraryStale = showStale || showHomepageSlotsStale;
   const hasLibrarySignals =
-    continueRailItems.length > 0 ||
-    historyRail.length > 0 ||
-    visibleLibraryItems.length > 0;
-  const resumeSpotlight = continueRailItems[0] || historyRail[0] || null;
+    viewerSignedIn &&
+    (continueRailItems.length > 0 ||
+      historyRail.length > 0 ||
+      visibleLibraryItems.length > 0);
+  const resumeSpotlight = viewerSignedIn
+    ? continueRailItems[0] || historyRail[0] || null
+    : null;
   const resumeSpotlightReadHref =
     resumeSpotlight?.seriesId && resumeSpotlight?.episodeId
       ? buildLibraryReadHref(
@@ -853,16 +856,14 @@ export default function LibraryPage({
       : "Save a few titles to get started."
     : "Sign in to save progress and favorites.";
   const signedOutHeroSecondary =
-    !viewerSignedIn && continueRailItems.length > 0
-      ? "Local progress stays on this device until you sign in."
-      : "";
+    "";
   const libraryDeskTitle = viewerSignedIn
     ? resumeSpotlightReadHref
       ? "Your next read."
       : hasLibrarySignals
         ? "Your shelf."
         : "Your shelf starts here."
-    : "Your shelf starts here.";
+    : "Your library";
   const resumeSpotlightPanelTitle = resumeSpotlight?.seriesId
     ? resumeSpotlight?.title || "Continue reading"
     : "Continue reading";

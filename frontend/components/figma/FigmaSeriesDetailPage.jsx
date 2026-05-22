@@ -15,16 +15,21 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import {
+  canAccessInContentMode,
   getContentModeQueryParam,
   isAdultContent,
   matchesContentMode,
 } from "../../lib/contentFilters";
+import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 import { openAuthPrompt } from "../../lib/openAuthPrompt";
 import { readPaymentAttributionFromSearchParams } from "../../lib/paymentAttribution";
 import { buildReaderPath } from "../../lib/readerRoutes";
-import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
+import {
+  getInstallmentLabel,
+  getSeriesHeroMetadataParts,
+} from "../../lib/seriesFormatLabels";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useEntitlementStore } from "../../store/useEntitlementStore";
 import { useFollowStore } from "../../store/useFollowStore";
@@ -67,11 +72,11 @@ function ModeBlockedState({
   onBack,
 }) {
   return (
-    <div className={cn("min-h-screen", palette.rootBg)}>
+    <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <main className="flex min-h-[78vh] flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="flex min-h-[78vh] flex-col items-center justify-center px-4 py-20 text-center">
           <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-          <h1 className="mb-4 text-3xl font-black text-white">{title}</h1>
+          <h2 className="mb-4 text-3xl font-black text-white">{title}</h2>
           <p className="mb-8 max-w-md text-gray-400">{description}</p>
           <button
             type="button"
@@ -90,9 +95,9 @@ function ModeBlockedState({
           >
             Go Back
           </button>
-        </main>
+        </div>
       </FigmaChrome>
-    </div>
+    </main>
   );
 }
 
@@ -170,7 +175,7 @@ function SeriesDetailContent({
     requestRef.current = requestId;
     const adultFlag = getContentModeQueryParam(contentMode);
 
-    if (!payload?.series || !matchesContentMode(payload.series, contentMode)) {
+    if (!payload?.series || !canAccessInContentMode(payload.series, contentMode)) {
       setLoading(true);
     }
 
@@ -198,7 +203,7 @@ function SeriesDetailContent({
           return;
         }
 
-        if (!matchesContentMode(response.data.series, contentMode)) {
+        if (!canAccessInContentMode(response.data.series, contentMode)) {
           setPayload(null);
           setError(
             isAdultContent(response.data.series)
@@ -310,6 +315,14 @@ function SeriesDetailContent({
     detailItem?.title,
     payload?.series?.type,
   );
+  const creatorIdentity = resolveSeriesCreatorIdentity(payload?.series || null);
+  const creatorHref = creatorIdentity?.href || "";
+  const creatorLabel = creatorIdentity?.displayName || detailItem?.author || "";
+  const heroMetadata = getSeriesHeroMetadataParts(
+    payload?.series || detailItem?.raw || null,
+    creatorLabel,
+    payload?.series?.episodeCount || chapterItems.length || "",
+  );
   const coverImageUrl = resolveDisplayImageUrl(detailItem?.coverUrl, {
     kind: "cover",
     adult: detailItem?.adult || detailItem?.isAdult,
@@ -317,9 +330,9 @@ function SeriesDetailContent({
 
   if (loading && !detailItem) {
     return (
-      <div className={cn("min-h-screen", palette.rootBg)}>
+      <main className={cn("min-h-screen", palette.rootBg)}>
         <FigmaChrome>
-          <main className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
+          <div className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
             <div
               className={cn(
                 "w-full rounded-3xl border p-10 text-center shadow-2xl",
@@ -334,9 +347,9 @@ function SeriesDetailContent({
                 Refreshing the correct catalog for this mode.
               </p>
             </div>
-          </main>
+          </div>
         </FigmaChrome>
-      </div>
+      </main>
     );
   }
 
@@ -345,7 +358,7 @@ function SeriesDetailContent({
       <ModeBlockedState
         palette={palette}
         title="Age Restricted Content"
-        description="This title is marked 18+ and needs mature mode enabled before we show it."
+        description="18+ access is required for this title. Enable mature mode after a verified sign-in before we show it."
         ctaLabel="Verify Age Now"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
@@ -368,9 +381,9 @@ function SeriesDetailContent({
 
   if (!detailItem) {
     return (
-      <div className={cn("min-h-screen", palette.rootBg)}>
+      <main className={cn("min-h-screen", palette.rootBg)}>
         <FigmaChrome>
-          <main className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
+          <div className="mx-auto flex min-h-[72vh] max-w-[960px] items-center justify-center px-4 py-24">
             <div
               className={cn(
                 "w-full rounded-3xl border p-10 text-center shadow-2xl",
@@ -389,22 +402,22 @@ function SeriesDetailContent({
                   : "This title is missing or not ready for public view yet."}
               </p>
             </div>
-          </main>
+          </div>
         </FigmaChrome>
-      </div>
+      </main>
     );
   }
 
   if (
     detailItem &&
-    !matchesContentMode(detailItem, contentMode) &&
+    !canAccessInContentMode(detailItem, contentMode) &&
     isAdultContent(detailItem)
   ) {
     return (
       <ModeBlockedState
         palette={palette}
         title="Age Restricted Content"
-        description="This title is marked 18+ and needs mature mode enabled before we show it."
+        description="18+ access is required for this title. Enable mature mode after a verified sign-in before we show it."
         ctaLabel="Verify Age Now"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
@@ -414,7 +427,7 @@ function SeriesDetailContent({
 
   if (
     detailItem &&
-    !matchesContentMode(detailItem, contentMode) &&
+    !canAccessInContentMode(detailItem, contentMode) &&
     !isAdultContent(detailItem)
   ) {
     return (
@@ -430,7 +443,7 @@ function SeriesDetailContent({
   }
 
   return (
-    <div className={cn("min-h-screen", palette.rootBg)}>
+    <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
         <div className="relative h-[300px] w-full bg-black min-[420px]:h-[320px] sm:h-[390px] md:h-[520px]">
             <div className="absolute inset-0">
@@ -477,11 +490,37 @@ function SeriesDetailContent({
                 <h1 className="mb-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[1.75rem] font-black leading-none tracking-tight text-transparent drop-shadow-sm md:mb-2 md:text-5xl">
                   {detailItem.title}
                 </h1>
-                <p className="mb-3 text-sm font-medium text-gray-300 md:mb-4 md:text-lg">
-                  {detailItem.author}
-                </p>
+                <div className="mb-3 text-sm font-medium text-gray-300 md:mb-4 md:text-lg">
+                  {creatorHref ? (
+                    <Link
+                      href={creatorHref}
+                      data-testid="series-creator-link"
+                      className="transition-colors hover:text-white"
+                    >
+                      {creatorLabel}
+                    </Link>
+                  ) : (
+                    <p>{creatorLabel}</p>
+                  )}
+                </div>
 
                 <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:mb-6 md:gap-6 md:text-sm">
+                  <div
+                    data-testid="series-hero-metadata"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 md:text-sm"
+                  >
+                    {heroMetadata.creatorText ? (
+                      <span>{heroMetadata.creatorText}</span>
+                    ) : null}
+                    {heroMetadata.separator ? (
+                      <span aria-hidden="true" className="text-gray-500">
+                        {heroMetadata.separator}
+                      </span>
+                    ) : null}
+                    {heroMetadata.latestText ? (
+                      <span>{heroMetadata.latestText}</span>
+                    ) : null}
+                  </div>
                   <span className="flex items-center gap-1 text-yellow-500">
                     <Star className="h-4 w-4 fill-current" />
                     {detailItem.rating} Rating
@@ -499,6 +538,7 @@ function SeriesDetailContent({
                 <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center md:gap-4">
                   <Link
                     href={detailItem.readHref}
+                    data-testid="series-primary-action"
                     className={cn(
                       "flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all hover:scale-105 active:scale-95 sm:min-h-[48px] sm:w-auto sm:justify-start sm:whitespace-nowrap md:min-h-[52px] md:px-8 md:py-3.5 md:text-base",
                       palette.primaryBg,
@@ -690,18 +730,20 @@ function SeriesDetailContent({
                       </button>
                     </div>
                   ) : (
-                    <Link
-                    key={chapter.id || `${detailItem.id}-${index}`}
-                    id={`episode-${chapter.id}`}
-                    href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
-                    className={cn(
-                      "group flex flex-col items-start gap-3 rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between md:p-4",
-                    )}
-                  >
-                    <div className="flex min-w-0 items-center gap-3 md:gap-4">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
-                        {String(index + 1).padStart(2, "0")}
-                      </div>
+                    <div
+                      key={chapter.id || `${detailItem.id}-${index}`}
+                      id={`episode-${chapter.id}`}
+                    >
+                      <Link
+                        href={`/read/${encodeURIComponent(detailItem.id)}/${encodeURIComponent(chapter.id)}`}
+                        className={cn(
+                          "group flex flex-col items-start gap-3 rounded-2xl border border-white/5 bg-black/15 p-3 transition-all hover:border-gray-700 hover:bg-white/[0.03] active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between md:p-4",
+                        )}
+                      >
+                        <div className="flex min-w-0 items-center gap-3 md:gap-4">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-black text-gray-300 md:h-9 md:w-9">
+                            {String(index + 1).padStart(2, "0")}
+                          </div>
                         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black ring-1 ring-white/10 transition-all group-hover:ring-white/30 md:h-12 md:w-12">
                           <div
                             aria-hidden="true"
@@ -721,23 +763,24 @@ function SeriesDetailContent({
                             )}
                           />
                         </div>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="line-clamp-2 text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
+                            {chapter.title}
+                          </h4>
+                          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
+                            {chapter.date}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="line-clamp-2 text-sm font-bold text-white transition-colors group-hover:text-gray-200 md:text-base">
-                          {chapter.title}
-                        </h4>
-                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
-                          {chapter.date}
-                        </p>
+                      <div className="text-left text-xs font-semibold text-gray-400 transition-colors group-hover:text-white sm:text-right md:text-sm">
+                        <div>{chapter.views}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                          Reads
+                        </div>
                       </div>
+                      </Link>
                     </div>
-                    <div className="text-left text-xs font-semibold text-gray-400 transition-colors group-hover:text-white sm:text-right md:text-sm">
-                      <div>{chapter.views}</div>
-                      <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                        Reads
-                      </div>
-                    </div>
-                    </Link>
                   );
                 })}
               </div>
@@ -775,7 +818,7 @@ function SeriesDetailContent({
         onOpenStore={() => router.push("/store")}
         onClose={() => setUnlockModalState(null)}
       />
-    </div>
+    </main>
   );
 }
 

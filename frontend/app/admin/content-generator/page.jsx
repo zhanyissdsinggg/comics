@@ -47,7 +47,10 @@ export default function ContentGeneratorPage() {
         title="内容生成器（测试工具）"
         subtitle="当前环境未启用此工具。"
       >
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]">
+        <div
+          data-testid="admin-content-generator-locked"
+          className="rounded-[24px] border border-[color:var(--gush-border)] bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_12px_28px_rgba(15,23,42,0.032)] ring-1 ring-black/[0.02]"
+        >
           <p className="font-semibold text-slate-950">此页面已在生产环境隐藏</p>
           <p className="mt-2">
             这是一个用于批量生成测试内容的内部工具。若确实需要启用，请设置环境变量

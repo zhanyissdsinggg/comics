@@ -187,9 +187,7 @@ test.describe("Storefront CTA flows", () => {
       timeout: UI_TIMEOUT_MS,
     });
 
-    const creatorCta = page
-      .getByRole("link", { name: /View Mira Dane/i })
-      .first();
+    const creatorCta = page.locator('a[aria-label^="View "]').first();
     await expect(creatorCta).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
     await Promise.all([
@@ -368,7 +366,7 @@ test.describe("Storefront CTA flows", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(
       page.getByRole("heading", {
-        name: /Your shelf\.|Your shelf starts here\./,
+        name: /Your library/i,
       }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,

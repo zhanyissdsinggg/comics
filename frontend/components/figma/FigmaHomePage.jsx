@@ -16,8 +16,14 @@ import {
 } from "lucide-react";
 import { apiGet } from "../../lib/apiClient";
 import { getContentModeQueryParam } from "../../lib/contentFilters";
+import { resolveSeriesCreatorName } from "../../lib/creatorIdentity";
 import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { trackEvent } from "../../lib/trackEvent";
+import {
+  formatTitleCardCreator,
+  formatTitleCardFormatStatus,
+  formatTitleCardGenres,
+} from "../../lib/titleCardText";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaChrome from "./FigmaChrome";
 import {
@@ -124,6 +130,16 @@ function getRankingMetaLabel(contentType) {
   return "Ranked by reader rating";
 }
 
+function getCatalogHeading(contentType) {
+  if (contentType === FIGMA_CONTENT_TYPES.NOVELS) {
+    return "Novels";
+  }
+  if (contentType === FIGMA_CONTENT_TYPES.INTERACTIVE) {
+    return "Interactive";
+  }
+  return "Comics";
+}
+
 function getRankingItemNote(item) {
   if (item?.status === "END") {
     return "Completed series";
@@ -181,7 +197,7 @@ function HomeContent({
   initialReady = false,
   catalogSource = FIGMA_CATALOG_SOURCES.SERIES,
 }) {
-  const { palette, contentMode, contentType } = useFigmaSite();
+  const { palette, contentMode, contentType, pathname } = useFigmaSite();
   const [activeDay, setActiveDay] = useState("WED");
   const [activeGenre, setActiveGenre] = useState("All");
   const [activeSort, setActiveSort] = useState("Trending");
@@ -197,6 +213,12 @@ function HomeContent({
   const initialRequestHandledRef = useRef(false);
   const homeViewTrackedRef = useRef(false);
   const impressionKeysRef = useRef(new Set());
+  const initialRenderableItems = useMemo(() => {
+    const initialCatalog = buildFigmaCatalog(
+      Array.isArray(seriesList) ? seriesList : [],
+    );
+    return buildDisplayItems(contentType, initialCatalog, contentMode);
+  }, [contentMode, contentType, seriesList]);
   const initialRequestKey = useMemo(
     () =>
       JSON.stringify({
@@ -222,7 +244,8 @@ function HomeContent({
     const reuseInitialPayload =
       !initialRequestHandledRef.current &&
       initialReady &&
-      requestKey === initialRequestKey;
+      requestKey === initialRequestKey &&
+      initialRenderableItems.length > 0;
 
     initialRequestHandledRef.current = true;
 
@@ -271,7 +294,13 @@ function HomeContent({
     return () => {
       active = false;
     };
-  }, [contentMode, initialReady, initialRequestKey, normalizedCatalogSource]);
+  }, [
+    contentMode,
+    initialReady,
+    initialRenderableItems.length,
+    initialRequestKey,
+    normalizedCatalogSource,
+  ]);
 
   const catalog = useMemo(() => buildFigmaCatalog(catalogSeed), [catalogSeed]);
   const currentItems = useMemo(
@@ -336,13 +365,25 @@ function HomeContent({
     () => excludeSeriesItems(novelEditorialPool, gridItemIds),
     [gridItemIds, novelEditorialPool],
   );
+  const novelExplorePool = useMemo(
+    () =>
+      contentType === FIGMA_CONTENT_TYPES.NOVELS &&
+      novelEditorialPool.length === 0
+        ? novelShelfPool
+        : novelEditorialPool,
+    [contentType, novelEditorialPool, novelShelfPool],
+  );
   const exploreGridItems =
     contentType === FIGMA_CONTENT_TYPES.NOVELS
-      ? novelEditorialPool.slice(0, 12)
+      ? novelExplorePool.slice(0, 12)
       : [...shelfSourceItems, ...shelfSourceItems, ...shelfSourceItems].slice(
           0,
           12,
         );
+  const defaultExploreItems =
+    contentType === FIGMA_CONTENT_TYPES.NOVELS && gridItems.length === 0
+      ? exploreGridItems
+      : gridItems;
   const rankItems = sortByRating(
     contentType === FIGMA_CONTENT_TYPES.NOVELS
       ? novelRankingPool
@@ -358,6 +399,29 @@ function HomeContent({
   const updatesLabel = getUpdateLabel(contentType);
   const rankingLabel = getRankingLabel(contentType);
   const rankingMetaLabel = getRankingMetaLabel(contentType);
+  const catalogHeading = getCatalogHeading(contentType);
+  const shouldUseCatalogHeading =
+    pathname === "/comics" ||
+    pathname === "/novels" ||
+    pathname === "/interactive";
+  const heroHeadingTag = shouldUseCatalogHeading ? "h2" : "h1";
+  const HeroHeadingTag = heroHeadingTag;
+  const heroMeta = useMemo(() => {
+    const series = heroItem?.raw || null;
+    const creatorName = resolveSeriesCreatorName(series) || heroItem?.author || "";
+
+    return {
+      formatStatus: formatTitleCardFormatStatus(
+        series?.type ||
+          (contentType === FIGMA_CONTENT_TYPES.NOVELS ? "novel" : "comic"),
+        series?.status || "",
+      ),
+      genres: formatTitleCardGenres(series?.genres || heroItem?.genres, {
+        limit: 3,
+      }),
+      creator: formatTitleCardCreator(creatorName),
+    };
+  }, [contentType, heroItem]);
   const continueSectionTitle = continueSectionHasProgress
     ? continueLabel
     : getReadLabel(contentType);
@@ -462,9 +526,9 @@ function HomeContent({
 
   if (!heroItem) {
     return (
-      <div className={cn("min-h-screen", palette.rootBg)}>
+      <main className={cn("min-h-screen", palette.rootBg)}>
         <FigmaChrome>
-          <main className="mx-auto flex min-h-[70vh] max-w-[960px] items-center justify-center px-4 py-24">
+          <div className="mx-auto flex min-h-[70vh] max-w-[960px] items-center justify-center px-4 py-24">
             <div
               className={cn(
                 "w-full rounded-3xl border p-10 text-center shadow-2xl",
@@ -481,14 +545,14 @@ function HomeContent({
                   : "The catalog is empty right now. Once stories land, this front page will show them here."}
               </p>
             </div>
-          </main>
+          </div>
         </FigmaChrome>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div
+    <main
       className={cn(
         "min-h-screen transition-colors duration-500",
         palette.rootBg,
@@ -516,6 +580,11 @@ function HomeContent({
           <div className="relative mx-auto flex max-w-[1600px] justify-center px-4 py-8 md:px-8 md:py-18 lg:py-22">
             <div className="flex w-full max-w-6xl flex-col items-center justify-center gap-5 md:flex-row md:gap-10 lg:gap-24">
               <div className="order-2 max-w-2xl flex-1 md:order-1">
+                {shouldUseCatalogHeading ? (
+                  <h1 className="mb-3 text-sm font-black uppercase tracking-[0.32em] text-[#ffe500] md:mb-4">
+                    {catalogHeading}
+                  </h1>
+                ) : null}
                 <div className="mb-3 flex flex-wrap gap-2 md:mb-6">
                   {heroItem.tags.map((tag) => (
                     <span
@@ -534,13 +603,31 @@ function HomeContent({
                   </span>
                 </div>
 
-                <h1 className="mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2.25rem] font-black leading-[1.06] tracking-tight text-transparent drop-shadow-sm md:mb-6 md:text-6xl lg:text-7xl">
+                <HeroHeadingTag className="mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2.25rem] font-black leading-[1.06] tracking-tight text-transparent drop-shadow-sm md:mb-6 md:text-6xl lg:text-7xl">
                   Read original comics and novels in one place.
-                </h1>
+                </HeroHeadingTag>
 
                 <p className="mb-5 max-w-xl text-sm leading-6 text-gray-300 md:mb-8 md:text-lg md:leading-relaxed">
                   {heroItem.description}
                 </p>
+
+                <div className="mb-5 space-y-2 md:mb-8">
+                  {heroMeta.formatStatus ? (
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 md:text-xs">
+                      {heroMeta.formatStatus}
+                    </p>
+                  ) : null}
+                  {heroMeta.genres ? (
+                    <p className="text-sm font-medium text-gray-300 md:text-base">
+                      {heroMeta.genres}
+                    </p>
+                  ) : null}
+                  {heroMeta.creator ? (
+                    <p className="text-sm font-medium text-gray-400 md:text-base">
+                      {heroMeta.creator}
+                    </p>
+                  ) : null}
+                </div>
 
                 <div className="flex flex-wrap items-stretch gap-3 sm:items-center sm:gap-4">
                   <Link
@@ -962,7 +1049,7 @@ function HomeContent({
 
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 md:gap-5 lg:grid-cols-6">
                   {(activeGenre === "All" && activeSort === "Trending"
-                    ? gridItems
+                    ? defaultExploreItems
                     : exploreGridItems
                   ).map((item, index) => (
                     <Link
@@ -1018,7 +1105,7 @@ function HomeContent({
                   ))}
                   {contentType === FIGMA_CONTENT_TYPES.NOVELS &&
                   (activeGenre === "All" && activeSort === "Trending"
-                    ? gridItems.length
+                    ? defaultExploreItems.length
                     : exploreGridItems.length) < 3 ? (
                     <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-4">
                       <p className="text-sm font-bold text-white">
@@ -1124,7 +1211,7 @@ function HomeContent({
           </div>
         </div>
       </FigmaChrome>
-    </div>
+    </main>
   );
 }
 

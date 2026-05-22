@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { apiGet, apiPost } from "../lib/apiClient";
+import { emitAuthRequired } from "../lib/authBus";
 import { normalizeReadingPercent } from "../lib/readingPercent";
 import { useAuthStore } from "./useAuthStore";
 
@@ -70,6 +71,10 @@ export function ProgressProvider({ children }) {
     if (typeof window === "undefined") {
       return;
     }
+    if (!isSignedIn) {
+      setBySeriesId({});
+      return;
+    }
     const keys = Object.keys(window.localStorage).filter((key) =>
       key.startsWith("mn_progress_"),
     );
@@ -82,7 +87,7 @@ export function ProgressProvider({ children }) {
       }
     });
     setBySeriesId(next);
-  }, []);
+  }, [isSignedIn]);
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -114,13 +119,21 @@ export function ProgressProvider({ children }) {
   }, [isSignedIn]);
 
   const setProgress = useCallback(
-    (seriesId, episodeId, percent) => {
+    (seriesId, episodeId, percent, options = {}) => {
       const normalizedPercent = normalizeReadingPercent(percent);
       const payload = {
         lastEpisodeId: episodeId,
         percent: normalizedPercent,
         updatedAt: Date.now(),
       };
+
+      if (!isSignedIn) {
+        if (options.requireAuth === true) {
+          emitAuthRequired({ source: "progress" });
+        }
+        return;
+      }
+
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
           getProgressKey(seriesId),
@@ -128,10 +141,6 @@ export function ProgressProvider({ children }) {
         );
       }
       setBySeriesId((prev) => ({ ...prev, [seriesId]: payload }));
-
-      if (!isSignedIn) {
-        return;
-      }
 
       pendingRef.current[seriesId] = payload;
       if (timerRef.current) {
@@ -155,8 +164,9 @@ export function ProgressProvider({ children }) {
 
   const loadProgress = useCallback(async () => {
     if (!isSignedIn) {
+      setBySeriesId({});
       setLoaded(true);
-      return { ok: true, data: { progress: bySeriesId } };
+      return { ok: false, status: 401, error: "UNAUTHENTICATED" };
     }
 
     const response = await apiGet("/api/progress", { suppressAuthModal: true });
@@ -165,7 +175,7 @@ export function ProgressProvider({ children }) {
     }
     setLoaded(true);
     return response;
-  }, [bySeriesId, isSignedIn]);
+  }, [isSignedIn]);
 
   const getProgress = useCallback(
     (seriesId) => bySeriesId[seriesId] || null,

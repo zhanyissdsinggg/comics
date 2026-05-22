@@ -264,10 +264,10 @@ function getCreatorResultsLabel(role, genre) {
     }
 
     if (role === "studio-team") {
-      return `${genre} studios and teams`;
+      return `${genre} studios + teams`;
     }
 
-    return `${genre} voices`;
+    return `${genre} profiles`;
   }
 
   if (role === "creator") {
@@ -275,7 +275,7 @@ function getCreatorResultsLabel(role, genre) {
   }
 
   if (role === "studio-team") {
-    return "Studios and teams";
+    return "Studios + Teams";
   }
 
   return "All creators";
@@ -288,10 +288,10 @@ function getCreatorResultsTitle(role, genre) {
     }
 
     if (role === "studio-team") {
-      return `${genre} studios and teams`;
+      return `${genre} studios + teams`;
     }
 
-    return `${genre} voices`;
+    return `${genre} profiles`;
   }
 
   if (role === "creator") {
@@ -299,10 +299,15 @@ function getCreatorResultsTitle(role, genre) {
   }
 
   if (role === "studio-team") {
-    return "Studios and teams";
+    return "Studios + Teams";
   }
 
   return "Browse creators";
+}
+
+function formatCreatorMatchCount(count) {
+  const safeCount = Math.max(0, Number(count || 0));
+  return safeCount === 1 ? "1 match" : `${safeCount} matches`;
 }
 
 function buildCreatorsFilterHref({ role, genre }) {
@@ -465,6 +470,9 @@ export default function CreatorsHubPage({
     !normalizedQuery && activeRole === "all" && activeGenre === "All";
   const creatorResultsLabel = getCreatorResultsLabel(activeRole, activeGenre);
   const creatorResultsTitle = getCreatorResultsTitle(activeRole, activeGenre);
+  const creatorResultsCountLabel = formatCreatorMatchCount(
+    filteredCreators.length,
+  );
 
   if (loading) {
     return <CreatorsHubSkeleton />;
@@ -666,6 +674,9 @@ export default function CreatorsHubPage({
                 >
                   {creatorResultsTitle}
                 </h2>
+                <p className="mt-2 text-sm font-medium text-white/56">
+                  {creatorResultsCountLabel}
+                </p>
               </div>
               <p className="text-sm leading-6 text-white/56">
                 Follow the voice that feels closest to your mood.

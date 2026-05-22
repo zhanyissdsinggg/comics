@@ -416,7 +416,11 @@ export default function PageStream({
         </div>
       ) : visiblePages.length > 0 ? (
         <>
-          <span hidden data-testid="comic-reader-ssr-marker" />
+          <div
+            aria-hidden="true"
+            data-testid="comic-reader-ssr-marker"
+            className="block h-px w-full opacity-0"
+          />
           {visiblePages.map((page, index) => {
             const placeholderMeta = readPlaceholdPageMeta(page.url);
             const shouldRenderImage =

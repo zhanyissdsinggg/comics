@@ -102,6 +102,14 @@ const CLEAN_FREE_READER_SERIES = [
 const NOVEL_TEST_FIRST_PARAGRAPH =
   "Solar Wind Episode 1 opens with a quiet decision that changes the direction of the story.";
 
+function buildReaderTestUrl(
+  seriesId: string,
+  episodeId: string,
+  marker: string,
+): string {
+  return `/read/${seriesId}/${episodeId}?entry=${encodeURIComponent(marker)}`;
+}
+
 async function mockReaderRoutes(page, options: ReaderMockOptions = {}) {
   const pricePts = Number(options.pricePts ?? 0);
   const signedIn = options.signedIn ?? false;
@@ -382,9 +390,16 @@ test.describe("Reader layout", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl(
+        "series-001",
+        "series-001e1",
+        "comic-immersive-layout-test",
+      ),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const body = page.locator("body");
@@ -477,9 +492,16 @@ test.describe("Reader layout", () => {
       },
     });
 
-    const response = await page.goto("/read/series-012/series-012e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl(
+        "series-012",
+        "series-012e1",
+        "legacy-fallback-image",
+      ),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const body = page.locator("body");
@@ -567,9 +589,16 @@ test.describe("Reader layout", () => {
       },
     });
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl(
+        "series-001",
+        "series-001e1",
+        "approved-mock-assets",
+      ),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const firstImage = page.locator("main [data-index='0'] img").first();
@@ -635,9 +664,16 @@ test.describe("Reader layout", () => {
       },
     });
 
-    const response = await page.goto("/read/series-010/series-010e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl(
+        "series-010",
+        "series-010e1",
+        "series-010-approved-assets",
+      ),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const body = page.locator("body");
@@ -747,9 +783,16 @@ test.describe("Reader layout", () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl(
+        "series-001",
+        "series-001e1",
+        "mobile-reader-layout",
+      ),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const topBarHeading = page.getByRole("heading", {
@@ -806,9 +849,12 @@ test.describe("Reader layout", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page, { signedIn: true });
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl("series-001", "series-001e1", "bookmark-actions"),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     const topBarHeading = page.getByRole("heading", {
@@ -1136,9 +1182,12 @@ test.describe("Reader layout", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl("series-001", "series-001e1", "comic-settings"),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await page.getByRole("button", { name: "Reader Settings" }).first().click();
@@ -1168,9 +1217,12 @@ test.describe("Reader layout", () => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockReaderRoutes(page);
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl("series-001", "series-001e1", "end-panel-order"),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -1211,12 +1263,18 @@ test.describe("Reader layout", () => {
       ).find((node) => node.textContent?.includes("Join the discussion")) as
         | HTMLElement
         | undefined;
+      const documentTop = window.scrollY;
       return {
-        shellMarkerTop: shellMarker?.getBoundingClientRect().top || 0,
-        markerTop: contentMarker?.getBoundingClientRect().top || 0,
-        lastContentBottom: lastContent?.getBoundingClientRect().bottom || 0,
-        endPanelTop: endPanelNode?.getBoundingClientRect().top || 0,
-        commentsTop: commentsHeading?.getBoundingClientRect().top || 0,
+        shellMarkerTop:
+          (shellMarker?.getBoundingClientRect().top || 0) + documentTop,
+        markerTop:
+          (contentMarker?.getBoundingClientRect().top || 0) + documentTop,
+        lastContentBottom:
+          (lastContent?.getBoundingClientRect().bottom || 0) + documentTop,
+        endPanelTop:
+          (endPanelNode?.getBoundingClientRect().top || 0) + documentTop,
+        commentsTop:
+          (commentsHeading?.getBoundingClientRect().top || 0) + documentTop,
       };
     });
 
@@ -1234,9 +1292,12 @@ test.describe("Reader layout", () => {
   test("reader controls should expose accessible names", async ({ page }) => {
     await mockReaderRoutes(page);
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      buildReaderTestUrl("series-001", "series-001e1", "reader-controls-a11y"),
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
     await expect(

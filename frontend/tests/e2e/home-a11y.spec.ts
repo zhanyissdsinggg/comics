@@ -233,9 +233,7 @@ test.describe("Home accessibility", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", {
-        name: "Read original comics and novels in one place.",
-      }),
+      page.getByText("Read original comics and novels in one place.").first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
@@ -360,7 +358,13 @@ test.describe("Home accessibility", () => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
 
-    const libraryTab = page.getByRole("link", { name: "Library" });
+    const bottomNav = page.getByRole("navigation", {
+      name: "Mobile bottom navigation",
+    });
+    const libraryTab = bottomNav.getByRole("link", {
+      name: "Library",
+      exact: true,
+    });
     await expect(libraryTab).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
     await tabToAndExpectVisibleFocus(page, libraryTab, {
       label: "Mobile Library bottom tab",

@@ -161,14 +161,14 @@ function buildCoverAltText(series) {
     .toLowerCase();
 
   if (title && (type === "comic" || type === "novel")) {
-    return `${type.charAt(0).toUpperCase()}${type.slice(1)} cover for ${title}`;
+    return `${type.charAt(0).toUpperCase()}${type.slice(1)} cover image for ${title}`;
   }
 
   if (title) {
-    return `Cover for ${title}`;
+    return `Cover image for ${title}`;
   }
 
-  return "Series cover";
+  return "Series cover image";
 }
 
 function buildTypedCoverAltText(series) {

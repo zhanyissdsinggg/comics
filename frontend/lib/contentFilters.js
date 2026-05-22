@@ -227,6 +227,15 @@ export function matchesContentMode(item, contentMode) {
     : isNormalContent(item);
 }
 
+export function canAccessInContentMode(item, contentMode) {
+  const normalizedMode = normalizeContentMode(contentMode);
+  if (normalizedMode === CONTENT_MODE_ADULT) {
+    return true;
+  }
+
+  return isNormalContent(item);
+}
+
 export function filterContentByMode(items, contentMode) {
   const list = Array.isArray(items) ? items : [];
   return list.filter((item) => matchesContentMode(item, contentMode));

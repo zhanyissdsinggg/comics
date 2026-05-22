@@ -1,7 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 import { join } from "node:path";
+import { TEST_BACKEND_BASE_URL } from "./tests/e2e/support/mockBackendConfig";
 
-const configuredWorkers = Number(process.env.PLAYWRIGHT_WORKERS || 2);
+const configuredWorkers = Number(process.env.PLAYWRIGHT_WORKERS || 1);
 const usePrebuiltServer = process.env.PLAYWRIGHT_USE_PREBUILT === "1";
 const crossEnvBin = join("node_modules", ".bin", "cross-env.cmd");
 
@@ -17,7 +18,7 @@ export default defineConfig({
   workers:
     Number.isFinite(configuredWorkers) && configuredWorkers > 0
       ? configuredWorkers
-      : 2,
+      : 1,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: "http://127.0.0.1:4173",
@@ -37,9 +38,9 @@ export default defineConfig({
       : `${crossEnvBin} NEXT_DIST_DIR=.next-playwright npm run build && ${crossEnvBin} NEXT_DIST_DIR=.next-playwright npx next start -p 4173 -H 127.0.0.1`,
     env: {
       ...process.env,
-      API_BASE_URL: process.env.API_BASE_URL || "http://127.0.0.1:4000",
+      API_BASE_URL: process.env.API_BASE_URL || TEST_BACKEND_BASE_URL,
       NEXT_PUBLIC_API_BASE_URL:
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000",
+        process.env.NEXT_PUBLIC_API_BASE_URL || TEST_BACKEND_BASE_URL,
       NEXT_PUBLIC_BASE_URL:
         process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:4173",
       NEXT_PUBLIC_SITE_URL:
@@ -48,7 +49,7 @@ export default defineConfig({
         process.env.NEXT_PUBLIC_REQUIRE_LOGIN_FOR_ADULT || "false",
     },
     url: "http://127.0.0.1:4173",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: usePrebuiltServer ? 60000 : 180000,
   },
 });

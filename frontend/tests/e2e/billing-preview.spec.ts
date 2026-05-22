@@ -137,7 +137,7 @@ test.describe("Billing prelaunch states", () => {
       timeout: BILLING_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Support" }).first(),
+      page.getByRole("link", { name: "Contact Support" }).first(),
     ).toBeVisible({
       timeout: BILLING_UI_TIMEOUT_MS,
     });

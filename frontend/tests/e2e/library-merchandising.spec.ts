@@ -236,7 +236,7 @@ test.describe("Library merchandising", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: /Your shelf\.|Your shelf starts here\./,
+        name: /Your library/i,
       }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,

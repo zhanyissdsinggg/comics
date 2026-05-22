@@ -22,6 +22,7 @@ import {
   deriveContentModeFromAdultFlag,
 } from "./contentMode";
 import {
+  canAccessInContentMode,
   filterContentByMode,
   getContentModeQueryParam,
   isAdultContent,
@@ -50,13 +51,27 @@ function getSeoApiBaseUrl() {
   );
 }
 
+function shouldBypassSeoFetchCache(baseUrl = getSeoApiBaseUrl()) {
+  try {
+    const parsed = new URL(baseUrl);
+    return (
+      (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") &&
+      parsed.port === "4100"
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function fetchSeoApiJson(path, requestId) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), SEO_FETCH_TIMEOUT_MS);
+  const baseUrl = getSeoApiBaseUrl();
+  const bypassCache = shouldBypassSeoFetchCache(baseUrl);
 
   try {
-    const response = await fetch(`${getSeoApiBaseUrl()}${path}`, {
-      next: { revalidate: SEO_REVALIDATE_SECONDS },
+    const response = await fetch(`${baseUrl}${path}`, {
+      ...(bypassCache ? { cache: "no-store" } : { next: { revalidate: SEO_REVALIDATE_SECONDS } }),
       signal: controller.signal,
       headers: requestId
         ? {
@@ -166,7 +181,7 @@ export const loadReaderSeoPayload = cache(
       };
     }
 
-    if (!matchesContentMode(series, contentMode)) {
+    if (!canAccessInContentMode(series, contentMode)) {
       return {
         series,
         episode: null,
@@ -219,7 +234,7 @@ export const loadReaderSeoPayload = cache(
           adult: isAdultContent(series),
         };
 
-    if (!matchesContentMode(safeEpisode, contentMode)) {
+    if (!canAccessInContentMode(safeEpisode, contentMode)) {
       return {
         series,
         episode: null,
@@ -273,6 +288,8 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
     const normalizedSeriesId = String(seriesId || "")
       .trim()
       .toLowerCase();
+    const baseUrl = getSeoApiBaseUrl();
+    const bypassCache = shouldBypassSeoFetchCache(baseUrl);
     if (
       shouldBlockDemoContentInProduction() &&
       isBlockedPublicSeriesIdentifier(normalizedSeriesId)
@@ -285,9 +302,9 @@ export const loadSeriesRoutePayload = cache(async (seriesId, options = {}) => {
     }
 
     const response = await fetch(
-      `${getSeoApiBaseUrl()}/api/series/${encodeURIComponent(seriesId)}?adult=${getContentModeQueryParam(contentMode)}`,
+      `${baseUrl}/api/series/${encodeURIComponent(seriesId)}?adult=${getContentModeQueryParam(contentMode)}`,
       {
-        next: { revalidate: SEO_REVALIDATE_SECONDS },
+        ...(bypassCache ? { cache: "no-store" } : { next: { revalidate: SEO_REVALIDATE_SECONDS } }),
         signal: AbortSignal.timeout(SEO_FETCH_TIMEOUT_MS),
         headers: {
           "x-gush-seo": "series-metadata",
@@ -485,12 +502,27 @@ export const loadSearchSeoPayload = cache(async (query = "", options = {}) => {
   const normalizedQuery = String(query || "").trim();
   const contentMode = resolveSeoContentMode(options);
   const params = new URLSearchParams({
-    pageSize: "48",
+    pageSize: String(options?.pageSize || 48),
     adult: getContentModeQueryParam(contentMode),
   });
 
   if (normalizedQuery) {
     params.set("q", normalizedQuery);
+  }
+  if (String(options?.type || "").trim()) {
+    params.set("type", String(options.type).trim());
+  }
+  if (String(options?.status || "").trim()) {
+    params.set("status", String(options.status).trim());
+  }
+  if (String(options?.genre || "").trim()) {
+    params.set("genre", String(options.genre).trim());
+  }
+  if (String(options?.sort || "").trim()) {
+    params.set("sort", String(options.sort).trim());
+  }
+  if (String(options?.page || "").trim()) {
+    params.set("page", String(options.page).trim());
   }
 
   const [searchPayload, hotPayload] = await Promise.all([
@@ -506,6 +538,9 @@ export const loadSearchSeoPayload = cache(async (query = "", options = {}) => {
       Array.isArray(searchPayload?.results) ? searchPayload.results : [],
       contentMode,
     ),
+    total: Number(searchPayload?.total || 0),
+    page: Number(searchPayload?.page || 1),
+    pageSize: Number(searchPayload?.pageSize || params.get("pageSize") || 48),
     hotKeywords: Array.isArray(hotPayload?.keywords) ? hotPayload.keywords : [],
     ready: Boolean(searchPayload),
   };
