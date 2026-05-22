@@ -164,7 +164,12 @@ function getHighlightPackageId(packages, preferredPackageId) {
   return packages[1]?.id || packages[0]?.id || "";
 }
 
-function getPrimaryButtonLabel({ isSignedIn, insufficient, busyAction }) {
+function getPrimaryButtonLabel({
+  isSignedIn,
+  insufficient,
+  busyAction,
+  previewOnlyTopup,
+}) {
   if (busyAction === "unlock") {
     return "Unlocking...";
   }
@@ -172,7 +177,7 @@ function getPrimaryButtonLabel({ isSignedIn, insufficient, busyAction }) {
     return "Sign in";
   }
   if (insufficient) {
-    return "Get More Points";
+    return previewOnlyTopup ? "Store Preview" : "Get More Points";
   }
   return "Unlock";
 }
@@ -187,6 +192,7 @@ export default function UnlockChapterModal({
   isSignedIn = false,
   view = "confirm",
   busyAction = "",
+  checkoutEnabled = true,
   preferredPackageId = "",
   onViewChange,
   onConfirmUnlock,
@@ -211,6 +217,7 @@ export default function UnlockChapterModal({
     packages,
     preferredPackageId,
   );
+  const previewOnlyTopup = checkoutEnabled !== true;
   const installmentLabel = getInstallmentLabel(seriesType);
   const installmentSuffix = installmentNumber ? ` ${installmentNumber}` : "";
   const installmentLabelLower = installmentLabel.toLowerCase();
@@ -218,6 +225,7 @@ export default function UnlockChapterModal({
     isSignedIn,
     insufficient,
     busyAction,
+    previewOnlyTopup,
   });
 
   useEffect(() => {
@@ -280,6 +288,10 @@ export default function UnlockChapterModal({
     }
 
     if (insufficient) {
+      if (previewOnlyTopup) {
+        onOpenStore?.();
+        return;
+      }
       onViewChange?.("packs");
       return;
     }
@@ -315,7 +327,9 @@ export default function UnlockChapterModal({
                 </p>
                 <p className="mt-3 text-sm text-white/70">
                   {view === "packs"
-                    ? "Pick a pack."
+                    ? previewOnlyTopup
+                      ? "Point packs stay in preview while checkout is disabled."
+                      : "Pick a pack."
                     : "Unlock stays on this account after checkout."}
                 </p>
               </div>
@@ -425,8 +439,9 @@ export default function UnlockChapterModal({
                     Get points
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-white/72">
-                    Add a pack to unlock {installmentLabel}
-                    {installmentSuffix}.
+                    {previewOnlyTopup
+                      ? "Point packs are preview-only while checkout stays off."
+                      : `Add a pack to unlock ${installmentLabel}${installmentSuffix}.`}
                   </p>
                 </div>
                 <button
@@ -443,10 +458,12 @@ export default function UnlockChapterModal({
               <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/74 shadow-[0_18px_40px_rgba(8,6,20,0.22)]">
                 <div className="flex items-center justify-between gap-3">
                   <span>
-                    Need {formatUSNumber(computedShortfall)} more points
+                    {previewOnlyTopup
+                      ? "Point packs are not live yet"
+                      : `Need ${formatUSNumber(computedShortfall)} more points`}
                   </span>
                   <span className="rounded-full border border-amber-200/18 bg-amber-300/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">
-                    Secure checkout
+                    {previewOnlyTopup ? "Preview only" : "Secure checkout"}
                   </span>
                 </div>
               </div>
@@ -493,13 +510,21 @@ export default function UnlockChapterModal({
 
                         <button
                           type="button"
-                          onClick={() => onBuyPack?.(pkg.id)}
+                          onClick={() => {
+                            if (previewOnlyTopup) {
+                              onOpenStore?.();
+                              return;
+                            }
+                            onBuyPack?.(pkg.id);
+                          }}
                           disabled={Boolean(busyAction)}
                           className={`min-h-[42px] px-4 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
                         >
                           {busyAction === currentPackAction
                             ? "Buying..."
-                            : "Buy"}
+                            : previewOnlyTopup
+                              ? "Preview"
+                              : "Buy"}
                         </button>
                       </div>
                     </div>
@@ -517,7 +542,9 @@ export default function UnlockChapterModal({
                       Checkout
                     </p>
                     <p className="mt-1 text-xs leading-6 text-white/62">
-                      {packagesUsingFallback
+                      {previewOnlyTopup
+                        ? "Checkout is disabled in this environment. Open the store preview instead."
+                        : packagesUsingFallback
                         ? "Showing current pack defaults."
                         : "USD pricing. Points land on this account after purchase."}
                     </p>

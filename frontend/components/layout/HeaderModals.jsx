@@ -73,13 +73,18 @@ export default function HeaderModals({
     return response;
   };
 
-  const handleAgeConfirm = (ruleKey) => {
+  const handleAgeConfirm = async (ruleKey) => {
     const resolvedRuleKey = ruleKey || ageRuleKey;
     trackEvent("adult_gate_confirm", {
       source: "header",
       ruleKey: resolvedRuleKey,
     });
-    confirmAge(resolvedRuleKey);
+    const status = await confirmAge(resolvedRuleKey);
+    if (status === "NEED_LOGIN") {
+      onModalClose("age");
+      onModalClose("login", true);
+      return;
+    }
     onModalClose("age");
   };
 

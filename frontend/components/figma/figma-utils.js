@@ -216,6 +216,9 @@ export function normalizeSeriesKind(value, interactive = false) {
   const normalized = String(value || "")
     .trim()
     .toLowerCase();
+  if (normalized === "interactive") {
+    return FIGMA_CONTENT_TYPES.INTERACTIVE;
+  }
   if (normalized === "novel") {
     return FIGMA_CONTENT_TYPES.NOVELS;
   }
@@ -508,7 +511,9 @@ export function buildFigmaCatalog(seriesList = [], options = {}) {
   const novels = items.filter(
     (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
   );
-  const interactive = buildInteractiveFallbackCatalog();
+  const interactive = items.filter(
+    (item) => item.kind === FIGMA_CONTENT_TYPES.INTERACTIVE,
+  );
 
   return {
     items,

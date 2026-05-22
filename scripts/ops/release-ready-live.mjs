@@ -68,6 +68,7 @@ function createReportBase(input) {
     requireFull: input.requireFull,
     hasObservabilityKey: input.hasObs,
     hasAdminCredentials: input.hasAdmin,
+    preflight: { status: "pending", error: null },
     baseline: { status: "pending", error: null },
     full: { status: "pending", error: null },
     verdict: "pending",
@@ -92,11 +93,15 @@ function writeReportFiles(report) {
     `- requireFull: ${report.requireFull ? "yes" : "no"}`,
     `- hasObservabilityKey: ${report.hasObservabilityKey ? "yes" : "no"}`,
     `- hasAdminCredentials: ${report.hasAdminCredentials ? "yes" : "no"}`,
+    `- preflight: ${report.preflight.status}`,
     `- baseline: ${report.baseline.status}`,
     `- full: ${report.full.status}`,
     `- verdict: ${report.verdict}`,
   ];
 
+  if (report.preflight.error) {
+    lines.push(`- preflightError: ${report.preflight.error}`);
+  }
   if (report.baseline.error) {
     lines.push(`- baselineError: ${report.baseline.error}`);
   }
@@ -170,6 +175,17 @@ async function main() {
   console.log(`[release-ready] retryTimes=${retryTimes}`);
   console.log(`[release-ready] requireFull=${requireFull ? "yes" : "no"}`);
   console.log(`[release-ready] hardRequireFullPrereqs=${hardRequireFullPrereqs ? "yes" : "no"}`);
+
+  try {
+    await runWithRetry("ops:release:preflight", env, retryTimes);
+    report.preflight.status = "pass";
+  } catch (error) {
+    report.preflight.status = "fail";
+    report.preflight.error = error instanceof Error ? error.message : String(error);
+    report.verdict = "fail";
+    writeReportFiles(report);
+    throw error;
+  }
 
   try {
     await runWithRetry("ops:deploy-gate:strict:live", env, retryTimes);

@@ -23,6 +23,7 @@ import {
 const PUBLIC_MENU_LINKS = [
   { label: "Comics", href: "/comics" },
   { label: "Novels", href: "/novels" },
+  { label: "Interactive", href: "/interactive" },
   { label: "Search", href: "/search" },
 ]
   .concat(

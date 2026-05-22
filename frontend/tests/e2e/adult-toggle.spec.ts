@@ -4,6 +4,7 @@ import {
   TEST_BACKEND_BASE_URL,
   TEST_BACKEND_PORT,
 } from "./support/mockBackendConfig";
+import { TEST_FRONTEND_BASE_URL } from "./support/testBaseUrl";
 
 const mockBackendState = {
   signedIn: false,
@@ -307,22 +308,22 @@ async function seedAdultState(
     {
       name: "mn_session",
       value: sessionValue,
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_confirmed",
       value: adultConfirmed ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_mode",
       value: adultMode ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_age_rule",
       value: "global",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
   ];
 
@@ -330,7 +331,7 @@ async function seedAdultState(
     cookies.push({
       name: "mn_is_signed_in",
       value: signedIn ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     });
   }
 
@@ -338,7 +339,7 @@ async function seedAdultState(
     cookies.push({
       name: "mn_mature_status",
       value: matureStatus,
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     });
   }
 

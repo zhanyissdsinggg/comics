@@ -52,6 +52,7 @@ import {
   formatInstallmentCount,
   getInstallmentLabel,
 } from "../../../lib/seriesFormatLabels";
+import { siteConfig } from "../../../lib/siteConfig";
 
 const EndOfEpisodeOverlay = dynamic(() => import("./EndOfEpisodeOverlay"), {
   ssr: false,
@@ -2042,6 +2043,7 @@ export default function ReaderPage({ seriesId, episodeId }) {
           isSignedIn={isSignedIn}
           view={modalState?.view}
           busyAction={unlockModalBusy}
+          checkoutEnabled={siteConfig.monetization.checkoutEnabled === true}
           preferredPackageId={offerDecision?.recommendedTopupOffer?.id}
           onViewChange={(nextView) =>
             setModalState((current) =>

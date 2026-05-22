@@ -257,7 +257,27 @@ test.describe("Auth-required UX", () => {
       }
 
       if (pathname === "/api/search") {
-        await fulfillJson(route, { results: [], total: 0, page: 1, pageSize: 48 });
+        await fulfillJson(route, {
+          results: [
+            {
+              id: "series-011",
+              title: "Solar Wind",
+              author: "Signal Drift Studio",
+              type: "interactive",
+              status: "Ongoing",
+              adult: false,
+              description: "A branching relay-field thriller.",
+              coverUrl: "/mock-covers/series-011.jpg",
+              bannerUrl: "/mock-covers/series-011.jpg",
+              genres: ["Sci-Fi", "Choices", "Interactive"],
+              latestEpisodeId: "series-011e3",
+              episodeCount: 3,
+            },
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 48,
+        });
         return;
       }
 
@@ -281,6 +301,9 @@ test.describe("Auth-required UX", () => {
 
     await expect(
       page.getByRole("button", { name: /Interactive/i }).first(),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(page).toHaveURL(/\/interactive$/);
   });

@@ -18,7 +18,6 @@ export default function MatureCatalogState({
     ageRuleKey,
     legalAge,
     isAdultMode,
-    enableAdultMode,
     confirmAge,
   } = useAdultGateStore();
   const [activeModal, setActiveModal] = useState(null);
@@ -33,18 +32,14 @@ export default function MatureCatalogState({
 
     if (!canAccessMature) {
       setActiveModal("age");
-      return;
-    }
-
-    if (!isAdultMode) {
-      enableAdultMode();
     }
   };
 
-  const handleAgeConfirm = () => {
-    confirmAge(ageRuleKey);
-    if (!isAdultMode) {
-      enableAdultMode();
+  const handleAgeConfirm = async () => {
+    const status = await confirmAge(ageRuleKey);
+    if (status !== "OK") {
+      setActiveModal(null);
+      return;
     }
     setActiveModal(null);
   };

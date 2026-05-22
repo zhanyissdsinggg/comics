@@ -42,6 +42,7 @@ import {
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
+import { siteConfig } from "../../lib/siteConfig";
 import { cn, isAdultContent } from "./figma-utils";
 
 function createIdempotencyKey() {
@@ -382,6 +383,7 @@ function ReaderContent({
     () => readPaymentAttributionFromSearchParams(searchParams),
     [searchParams],
   );
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
 
   useEffect(() => {
     let active = true;
@@ -1017,6 +1019,10 @@ function ReaderContent({
     }
 
     if (shortfallPts > 0) {
+      if (!checkoutEnabled) {
+        router.push("/store");
+        return;
+      }
       router.push("/store");
       return;
     }
@@ -1065,6 +1071,7 @@ function ReaderContent({
     router,
     seriesId,
     shortfallPts,
+    checkoutEnabled,
     unlockEpisode,
   ]);
 

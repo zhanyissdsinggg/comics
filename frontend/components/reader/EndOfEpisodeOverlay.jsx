@@ -3,6 +3,7 @@
 import useCountdown from "../../hooks/useCountdown";
 import { OFFERS } from "../../lib/offers/catalog";
 import { STOREFRONT_TERMS } from "../../lib/storefrontCopy";
+import { siteConfig } from "../../lib/siteConfig";
 import { getInstallmentLabel } from "../../lib/seriesFormatLabels";
 import ShareButton from "../common/ShareButton";
 import {
@@ -145,15 +146,17 @@ export default function EndOfEpisodeOverlay({
     (packPricing?.discountPct ? `${packPricing.discountPct}% off` : "");
   const subscriptionNote = `Free reads plus lower ${installmentLabelLower} prices.`;
   const upsellBadge = showSubscribe ? "Best" : "";
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
+  const previewOnlyMode = !checkoutEnabled && !nextUnlocked;
   const nextEpisodeStatusLabel = nextUnlocked
     ? "Ready now"
     : showTtf && isReady
       ? "Free now"
       : showTtf && !isReady
         ? `Free in ${formatted || "--:--:--"}`
-        : singlePrice === 0
-          ? "Free"
-          : formatPointsLabel(singlePrice);
+          : singlePrice === 0
+            ? "Free"
+            : formatPointsLabel(singlePrice);
 
   const handlePrimary = () => {
     const primaryId = showPackPrimary ? packOfferId : "unlock_single";
@@ -179,6 +182,12 @@ export default function EndOfEpisodeOverlay({
     : storefrontPrimaryButtonClass;
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
+  const previewPrimaryLabel = showSubscribe
+    ? "Membership preview"
+    : "Store preview";
+  const previewSecondaryLabel = showSubscribe
+    ? "Store preview"
+    : "Membership preview";
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
@@ -306,7 +315,7 @@ export default function EndOfEpisodeOverlay({
                     onClick={handlePrimary}
                     className={`w-full px-4 py-2 text-sm ${primaryButtonClass}`}
                   >
-                    {primaryLabel}
+                    {previewOnlyMode ? previewPrimaryLabel : primaryLabel}
                   </button>
 
                   {showPackPrimary && packSavingsText ? (
@@ -321,13 +330,15 @@ export default function EndOfEpisodeOverlay({
                     <>
                       <button
                         type="button"
-                        onClick={() => {
+                        onClick={previewOnlyMode ? handleSecondary : () => {
                           onOfferClick?.("subscribe_basic");
                           onSubscribe();
                         }}
                         className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
-                        {STOREFRONT_TERMS.compareMembership}
+                        {previewOnlyMode
+                          ? previewSecondaryLabel
+                          : STOREFRONT_TERMS.compareMembership}
                         {upsellBadge ? (
                           <span
                             className={`ml-2 text-[10px] font-black uppercase tracking-[0.08em] ${accentTextClass}`}
@@ -347,7 +358,9 @@ export default function EndOfEpisodeOverlay({
                         onClick={handleSecondary}
                         className={`w-full px-4 py-2 text-sm ${secondaryButtonClass}`}
                       >
-                        {secondaryLabel}
+                        {previewOnlyMode
+                          ? previewSecondaryLabel
+                          : secondaryLabel}
                       </button>
                       {packNote ? (
                         <p className="text-xs font-semibold leading-5 text-white/70">

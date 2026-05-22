@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import process from "node:process";
+import { execFileSync } from "node:child_process";
 
 function requireEnv(name) {
   const value = String(process.env[name] || "").trim();
@@ -7,6 +8,19 @@ function requireEnv(name) {
     throw new Error(`${name} is required for strict full deploy gate`);
   }
   return value;
+}
+
+function readGitValue(args) {
+  try {
+    return String(
+      execFileSync("git", args, {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }),
+    ).trim();
+  } catch {
+    return "";
+  }
 }
 
 function run(command, args, env) {
@@ -31,6 +45,14 @@ async function main() {
   const backendUrl = requireEnv("BACKEND_URL");
   const frontendUrl = requireEnv("FRONTEND_URL");
   const observabilityKey = requireEnv("OBSERVABILITY_KEY");
+  const originMainCommit =
+    readGitValue(["rev-parse", "origin/main"]) || readGitValue(["rev-parse", "main"]);
+  const originRemoteUrl = readGitValue(["remote", "get-url", "origin"]);
+  const expectedRepo = originRemoteUrl
+    .replace(/^git@github\.com:/i, "")
+    .replace(/^https:\/\/github\.com\//i, "")
+    .replace(/\.git$/i, "")
+    .trim();
   const adminEmail = String(process.env.OPS_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim();
   const adminPassword = String(process.env.OPS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "").trim();
   const adminKey = String(process.env.OPS_ADMIN_KEY || process.env.ADMIN_KEY || "").trim();
@@ -47,6 +69,12 @@ async function main() {
     BACKEND_URL: backendUrl,
     FRONTEND_URL: frontendUrl,
     OBSERVABILITY_KEY: observabilityKey,
+    EXPECT_FRONTEND_COMMIT:
+      String(process.env.EXPECT_FRONTEND_COMMIT || "").trim() || originMainCommit,
+    EXPECT_FRONTEND_BRANCH:
+      String(process.env.EXPECT_FRONTEND_BRANCH || "").trim() || "main",
+    EXPECT_FRONTEND_REPO:
+      String(process.env.EXPECT_FRONTEND_REPO || "").trim() || expectedRepo,
     ...(adminEmail && adminPassword
       ? {
           OPS_ADMIN_EMAIL: adminEmail,

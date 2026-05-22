@@ -63,6 +63,18 @@ async function run() {
   }
 
   await runStep("post-deploy", npmCommand, npmArgs("ops:post-deploy"), env);
+  await runStep(
+    "production-interactive-smoke",
+    npmCommand,
+    npmArgs("ops:smoke:production:interactive"),
+    env,
+  );
+  await runStep(
+    "production-adult-gate-smoke",
+    npmCommand,
+    npmArgs("ops:smoke:production:adult-gate"),
+    env,
+  );
   await runStep("reader-live-smoke", npmCommand, npmArgs("ops:reader-live"), env);
   await runStep("security-baseline", npmCommand, npmArgs("ops:security-baseline"), env);
   await runStep("watchdog", npmCommand, npmArgs("ops:oncall-watchdog"), env);

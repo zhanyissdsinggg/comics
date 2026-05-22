@@ -47,6 +47,8 @@ const DEFAULT_PREFERENCES: PreferencePayload = {
   matureVerification: DEFAULT_MATURE_VERIFICATION,
 };
 
+const SERVICE_MANAGED_MATURE_PROVIDER = "local-gate";
+
 function isPreferenceRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -136,6 +138,43 @@ function normalizePreferencePayload(value: unknown): PreferencePayload {
   };
 }
 
+function buildServerManagedMatureVerification(
+  region: string,
+  current?: MatureVerificationPayload | null,
+): MatureVerificationPayload {
+  const normalizedRegion = String(region || "").trim() || DEFAULT_PREFERENCES.region;
+  const fallback = current || DEFAULT_MATURE_VERIFICATION;
+
+  return {
+    verified: fallback.verified === true,
+    provider:
+      typeof fallback.provider === "string" && fallback.provider.trim()
+        ? fallback.provider.trim()
+        : SERVICE_MANAGED_MATURE_PROVIDER,
+    region:
+      typeof fallback.region === "string" && fallback.region.trim()
+        ? fallback.region.trim()
+        : normalizedRegion,
+    expiresAt: normalizeOptionalString(fallback.expiresAt),
+    referenceId: normalizeOptionalString(fallback.referenceId),
+    verifiedAt: normalizeOptionalString(fallback.verifiedAt),
+  };
+}
+
+function mergeUserEditablePreferences(
+  currentPreferences: PreferencePayload,
+  incomingPreferences: PreferencePayload,
+): PreferencePayload {
+  return {
+    ...currentPreferences,
+    ...incomingPreferences,
+    matureVerification: buildServerManagedMatureVerification(
+      incomingPreferences.region || currentPreferences.region,
+      currentPreferences.matureVerification,
+    ),
+  };
+}
+
 @Controller("preferences")
 export class PreferencesController {
   constructor(private readonly prisma: PrismaService) {}
@@ -172,13 +211,59 @@ export class PreferencesController {
       existing?.payload || existing?.settings,
     );
     const incomingPreferences = normalizePreferencePayload(body?.preferences);
+    const payload = mergeUserEditablePreferences(
+      currentPreferences,
+      incomingPreferences,
+    );
+    const serializedPayload = stringifyStoredJson(payload);
+    const saved = await this.prisma.userPreference.upsert({
+      where: { userId },
+      update: { payload: serializedPayload },
+      create: { userId, payload: serializedPayload },
+    });
+
+    return {
+      preferences: normalizePreferencePayload(saved.payload),
+    };
+  }
+
+  @Post("mature/confirm")
+  async confirmMatureAccess(
+    @Body() body: Record<string, unknown>,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const existing = await this.prisma.userPreference.findUnique({ where: { userId } });
+    const currentPreferences = normalizePreferencePayload(
+      existing?.payload || existing?.settings,
+    );
+    const requestedRegion = String(body?.region || currentPreferences.region || "")
+      .trim()
+      .toLowerCase();
+    const region = requestedRegion || DEFAULT_PREFERENCES.region;
+    const verifiedAt = new Date().toISOString();
+    const matureVerification: MatureVerificationPayload = {
+      verified: true,
+      provider: SERVICE_MANAGED_MATURE_PROVIDER,
+      region,
+      expiresAt: null,
+      referenceId: null,
+      verifiedAt,
+    };
     const payload: PreferencePayload = {
       ...currentPreferences,
-      ...incomingPreferences,
-      matureVerification: {
-        ...currentPreferences.matureVerification,
-        ...incomingPreferences.matureVerification,
-      },
+      region,
+      matureModeEnabled:
+        typeof body?.matureModeEnabled === "boolean"
+          ? body.matureModeEnabled === true
+          : true,
+      matureVerification,
     };
     const serializedPayload = stringifyStoredJson(payload);
     const saved = await this.prisma.userPreference.upsert({

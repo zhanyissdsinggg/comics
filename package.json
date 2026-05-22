@@ -43,6 +43,7 @@
     "ops:release:ready-live": "node scripts/ops/release-ready-live.mjs",
     "ops:release:ready-live:full": "node scripts/ops/release-ready-live-full.mjs",
     "ops:release:ready-live:full:required": "node scripts/ops/release-ready-live-full-required.mjs",
+    "ops:release:preflight": "node scripts/ops/release-preflight.mjs",
     "ops:release:summary": "node scripts/ops/release-summary.mjs",
     "ops:release:brief": "node scripts/ops/release-brief.mjs",
     "ops:release:dashboard": "node scripts/ops/release-dashboard.mjs",
@@ -58,6 +59,8 @@
     "ops:sop:deploy": "node scripts/ops/sop-runner.mjs deploy",
     "ops:sop:weekly": "node scripts/ops/sop-runner.mjs weekly",
     "ops:workflow:watch": "node scripts/ops/watch-workflow-run.mjs",
-    "ops:public-ui-live": "node scripts/ops/public-ui-live-smoke.mjs"
+    "ops:public-ui-live": "node scripts/ops/public-ui-live-smoke.mjs",
+    "ops:smoke:production:interactive": "npm --prefix frontend run smoke:production:interactive",
+    "ops:smoke:production:adult-gate": "npm --prefix frontend run smoke:production:adult-gate"
   }
 }

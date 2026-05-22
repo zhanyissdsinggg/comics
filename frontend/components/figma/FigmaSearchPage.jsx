@@ -256,9 +256,9 @@ function SearchContent({
       ? keywords
       : interactiveOnly
         ? INTERACTIVE_FALLBACK_KEYWORDS
-        : FALLBACK_KEYWORDS;
+      : FALLBACK_KEYWORDS;
   });
-  const [loading, setLoading] = useState(!interactiveOnly && !initialReady);
+  const [loading, setLoading] = useState(!initialReady);
   const [error, setError] = useState("");
   const [resolvedQuery, setResolvedQuery] = useState(normalizedInitialQuery);
   const deferredQuery = useDeferredValue(query);
@@ -272,8 +272,9 @@ function SearchContent({
       JSON.stringify({
         q: normalizedInitialQuery,
         adult: getContentModeQueryParam(contentMode),
+        type: interactiveOnly ? SEARCH_FORMATS.INTERACTIVE.toLowerCase() : "",
       }),
-    [contentMode, normalizedInitialQuery],
+    [contentMode, interactiveOnly, normalizedInitialQuery],
   );
   const formatOptions = useMemo(
     () =>
@@ -310,18 +311,11 @@ function SearchContent({
 
     async function loadSearchResults() {
       const normalizedQuery = deferredQuery.trim();
-      if (interactiveOnly) {
-        setRemoteItems([]);
-        setResolvedQuery(normalizedQuery);
-        setLoading(false);
-        setError("");
-        return;
-      }
-
       const adultFlag = getContentModeQueryParam(contentMode);
       const requestKey = JSON.stringify({
         q: normalizedQuery,
         adult: adultFlag,
+        type: interactiveOnly ? SEARCH_FORMATS.INTERACTIVE.toLowerCase() : "",
       });
       const reuseInitialPayload =
         !hydratedRequestHandledRef.current &&
@@ -339,6 +333,9 @@ function SearchContent({
       if (normalizedQuery) {
         params.set("q", normalizedQuery);
       }
+      if (interactiveOnly) {
+        params.set("type", "interactive");
+      }
       params.set("pageSize", "48");
       params.set("adult", adultFlag);
 
@@ -352,7 +349,7 @@ function SearchContent({
 
       if (!response.ok) {
         setRemoteItems([]);
-        setError("Search failed to load.");
+        setError(interactiveOnly ? "Interactive stories failed to load." : "Search failed to load.");
         setResolvedQuery(normalizedQuery);
         setLoading(false);
         return;
@@ -407,13 +404,28 @@ function SearchContent({
   }, [contentMode, interactiveOnly]);
 
   const visibleRemoteItems = useMemo(
-    () => (interactiveOnly ? [] : filterContentByMode(remoteItems, contentMode)),
-    [contentMode, interactiveOnly, remoteItems],
+    () => filterContentByMode(remoteItems, contentMode),
+    [contentMode, remoteItems],
+  );
+  const visibleStandardItems = useMemo(
+    () =>
+      visibleRemoteItems.filter(
+        (item) => item.kind !== FIGMA_CONTENT_TYPES.INTERACTIVE,
+      ),
+    [visibleRemoteItems],
   );
 
   const interactiveItems = useMemo(
-    () => filterContentByMode(buildInteractiveFallbackCatalog(), contentMode),
-    [contentMode],
+    () =>
+      filterContentByMode(
+        interactiveOnly && visibleRemoteItems.length === 0 && error
+          ? buildInteractiveFallbackCatalog()
+          : visibleRemoteItems.filter(
+              (item) => item.kind === FIGMA_CONTENT_TYPES.INTERACTIVE,
+            ),
+        contentMode,
+      ),
+    [contentMode, error, interactiveOnly, visibleRemoteItems],
   );
 
   const effectiveCatalogQuery = loading ? resolvedQuery : deferredQuery.trim();
@@ -429,20 +441,20 @@ function SearchContent({
     () => ({
       all: interactiveOnly
         ? interactiveQueryItems.length
-        : visibleRemoteItems.length + interactiveQueryItems.length,
+        : visibleStandardItems.length + interactiveQueryItems.length,
       comics: interactiveOnly
         ? 0
-        : visibleRemoteItems.filter(
+        : visibleStandardItems.filter(
             (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
           ).length,
       novels: interactiveOnly
         ? 0
-        : visibleRemoteItems.filter(
+        : visibleStandardItems.filter(
             (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
           ).length,
       interactive: interactiveQueryItems.length,
     }),
-    [interactiveOnly, interactiveQueryItems, visibleRemoteItems],
+    [interactiveOnly, interactiveQueryItems, visibleStandardItems],
   );
 
   const formatFilteredItems = useMemo(() => {
@@ -455,19 +467,19 @@ function SearchContent({
     }
 
     if (activeFormat === SEARCH_FORMATS.COMICS) {
-      return visibleRemoteItems.filter(
+      return visibleStandardItems.filter(
         (item) => item.kind === FIGMA_CONTENT_TYPES.COMICS,
       );
     }
 
     if (activeFormat === SEARCH_FORMATS.NOVELS) {
-      return visibleRemoteItems.filter(
+      return visibleStandardItems.filter(
         (item) => item.kind === FIGMA_CONTENT_TYPES.NOVELS,
       );
     }
 
-    return [...visibleRemoteItems, ...interactiveQueryItems];
-  }, [activeFormat, interactiveOnly, interactiveQueryItems, visibleRemoteItems]);
+    return [...visibleStandardItems, ...interactiveQueryItems];
+  }, [activeFormat, interactiveOnly, interactiveQueryItems, visibleStandardItems]);
 
   const genreOptions = useMemo(
     () => buildGenreOptions(formatFilteredItems),
@@ -693,8 +705,9 @@ function SearchContent({
                 Find something worth ruining your sleep schedule for.
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:mt-4 md:text-base md:leading-7">
-                Real catalog search for comics and novels, plus interactive
-                picks in one place.
+                {interactiveOnly
+                  ? "Real catalog search for interactive stories only."
+                  : "Real catalog search for comics and novels, plus interactive picks in one place."}
               </p>
 
               <form
@@ -903,7 +916,7 @@ function SearchContent({
               ) : null}
             </aside>
 
-            <section className="order-1 xl:order-2">
+            <section className="order-1 xl:order-2" data-search-scope={interactiveOnly ? "interactive-only" : "all-formats"}>
               <div className="mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.22em] text-gray-500">

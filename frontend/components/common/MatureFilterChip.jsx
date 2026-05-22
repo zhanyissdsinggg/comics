@@ -29,7 +29,6 @@ export default function MatureFilterChip({
     ageRuleKey,
     legalAge,
     isAdultMode,
-    enableAdultMode,
     confirmAge,
   } = useAdultGateStore();
   const [activeModal, setActiveModal] = useState(null);
@@ -58,10 +57,6 @@ export default function MatureFilterChip({
       return;
     }
 
-    if (!isAdultMode) {
-      enableAdultMode();
-    }
-
     navigateViaHandler({ bypassGate: true });
   };
 
@@ -82,19 +77,16 @@ export default function MatureFilterChip({
       return response;
     }
 
-    if (!isAdultMode) {
-      enableAdultMode();
-    }
-
     setActiveModal(null);
     navigateViaHandler({ bypassGate: true });
     return response;
   };
 
-  const handleAgeConfirm = () => {
-    confirmAge(ageRuleKey);
-    if (!isAdultMode) {
-      enableAdultMode();
+  const handleAgeConfirm = async () => {
+    const status = await confirmAge(ageRuleKey);
+    if (status !== "OK") {
+      setActiveModal(status === "NEED_LOGIN" ? "login" : null);
+      return;
     }
     setActiveModal(null);
     navigateViaHandler({ bypassGate: true });
@@ -129,6 +121,7 @@ export default function MatureFilterChip({
           onClick={handleClick}
           className={sharedClassName}
           aria-pressed={active}
+          data-testid="mature-filter-chip"
         >
           {label}
         </Link>

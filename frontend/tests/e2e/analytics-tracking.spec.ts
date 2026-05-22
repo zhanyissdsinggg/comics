@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createReaderPagePlaceholder } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
+import { TEST_FRONTEND_BASE_URL } from "./support/testBaseUrl";
 
 type CapturedEvent = {
   event: string;
@@ -553,7 +554,7 @@ test.describe("Analytics tracking", () => {
       {
         name: "mn_is_signed_in",
         value: "1",
-        url: "http://127.0.0.1:4173",
+        url: TEST_FRONTEND_BASE_URL,
       },
     ]);
 

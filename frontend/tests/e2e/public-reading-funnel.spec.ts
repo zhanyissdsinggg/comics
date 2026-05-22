@@ -10,6 +10,7 @@ import {
   TEST_BACKEND_BASE_URL,
   TEST_BACKEND_PORT,
 } from "./support/mockBackendConfig";
+import { TEST_FRONTEND_BASE_URL } from "./support/testBaseUrl";
 
 const UI_TIMEOUT_MS = 15000;
 const LEGAL_ENTITY_NAME = "Targaryen technology Co., Limited";
@@ -1226,27 +1227,27 @@ async function mockPublicApi(
     {
       name: "mn_is_signed_in",
       value: signedIn ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_session",
       value: signedIn ? "reader-session" : "",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_confirmed",
       value: matureConfirmed ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_mode",
       value: matureModeEnabled ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_age_rule",
       value: "global",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
   ]);
 

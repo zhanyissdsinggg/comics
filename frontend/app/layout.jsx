@@ -13,6 +13,21 @@ const CookieConsent = dynamic(
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const defaultTitle = `${siteConfig.siteName} | Comics, novels, and interactive stories`;
+const BUILD_REVISION =
+  process.env.NEXT_PUBLIC_COMMIT_SHA ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.GITHUB_SHA ||
+  "";
+const BUILD_BRANCH =
+  process.env.NEXT_PUBLIC_COMMIT_BRANCH ||
+  process.env.VERCEL_GIT_COMMIT_REF ||
+  process.env.GITHUB_REF_NAME ||
+  "";
+const BUILD_DEPLOYMENT =
+  process.env.NEXT_PUBLIC_DEPLOYMENT_URL ||
+  process.env.VERCEL_URL ||
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+  "";
 
 export const metadata = {
   title: {
@@ -69,6 +84,11 @@ export const metadata = {
       "max-snippet": -1,
     },
   },
+  other: {
+    "gush-build-revision": BUILD_REVISION || "unknown",
+    "gush-build-branch": BUILD_BRANCH || "unknown",
+    "gush-build-deployment": BUILD_DEPLOYMENT || "unknown",
+  },
 };
 
 export default async function RootLayout({ children }) {
@@ -77,6 +97,12 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning className="font-sans dark">
       <body className="min-h-screen font-sans antialiased">
+        <div
+          hidden
+          data-build-revision={BUILD_REVISION || "unknown"}
+          data-build-branch={BUILD_BRANCH || "unknown"}
+          data-build-deployment={BUILD_DEPLOYMENT || "unknown"}
+        />
         {GOOGLE_CLIENT_ID ? (
           <Script
             src="https://accounts.google.com/gsi/client"

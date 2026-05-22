@@ -155,7 +155,15 @@ export function FigmaSiteProvider({
   };
 
   const confirmAdultMode = async () => {
-    await confirmAge();
+    const status = await confirmAge();
+    if (status === "NEED_LOGIN") {
+      setShowAgeGate(false);
+      openLogin("login");
+      return;
+    }
+    if (status !== "OK") {
+      return;
+    }
     setShowAgeGate(false);
   };
 

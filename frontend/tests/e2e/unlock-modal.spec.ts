@@ -59,7 +59,7 @@ async function fulfillJson(route: Route, body: unknown): Promise<void> {
 }
 
 test.describe("Unlock chapter modal", () => {
-  test("series episode lock should open the new unlock modal and reveal USD point packs when balance is low", async ({
+  test("series episode lock should route low-balance readers into the store preview when checkout is disabled", async ({
     page,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
@@ -232,7 +232,7 @@ test.describe("Unlock chapter modal", () => {
       name: "Close unlock modal",
     });
     const primaryButton = dialog.getByRole("button", {
-      name: "Get More Points",
+      name: "Store Preview",
     });
 
     await expect(dialog).toHaveAttribute("aria-modal", "true");
@@ -253,11 +253,21 @@ test.describe("Unlock chapter modal", () => {
 
     await primaryButton.dispatchEvent("click");
 
-    await expect(dialog.getByText("$4.99 for 55 Points")).toBeVisible();
-    await expect(dialog.getByText("$9.99 for 115 Points")).toBeVisible();
-    await expect(dialog.getByText("$18.99 for 240 Points")).toBeVisible();
+    await expect(page).toHaveURL(/\/store(?:\?|$)/);
     await expect(
-      dialog.getByRole("button", { name: "Buy" }).first(),
+      page.getByRole("heading", { name: "Coming soon.", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Point packs preview.",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Preview only. Checkout is disabled."),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Browse free chapters", exact: true }),
     ).toBeVisible();
     await expectNoBasicA11yAuditIssues(page, "/series/series-locked");
     await expectNoRuntimeIssues("/series/series-locked", runtimeIssues);
