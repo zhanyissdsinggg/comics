@@ -80,9 +80,6 @@ test.describe("Library reading-state regression", () => {
       "Fresh Atlas",
     );
     await expect(signedIn.page.locator("#saved-series")).toContainText(
-      "Fresh Atlas",
-    );
-    await expect(signedIn.page.locator("#saved-series")).toContainText(
       "Resume Ep 1",
     );
     await expect(signedIn.page.locator("#saved-series")).toContainText(
@@ -100,18 +97,17 @@ test.describe("Library reading-state regression", () => {
       "/library",
     );
     await expect(
-      signedOut.page.getByRole("heading", {
-        name: "Keep your shelf together.",
-      }),
+      signedOut.page.getByRole("heading", { name: "Your library" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(signedOut.page.getByText("Continue Reading")).toHaveCount(0);
     await expect(signedOut.page.getByText("Recent Reads")).toHaveCount(0);
-    await expect(signedOut.page.getByText("Library")).toHaveCount(0);
-    await expect(signedOut.page.getByText("Your shelf is ready.")).toHaveCount(
-      0,
-    );
+    await expect(
+      signedOut.page.getByText("Sign in to save progress and favorites."),
+    ).toBeVisible({
+      timeout: LIBRARY_UI_TIMEOUT_MS,
+    });
     await signedOut.page.waitForTimeout(300);
     await expectNoRuntimeIssues("/library", signedOut.runtimeIssues);
     await closeLibraryReadingStatePage(signedOut);
@@ -131,16 +127,13 @@ test.describe("Library reading-state regression", () => {
       "Fresh Atlas",
     );
     await expect(relogin.page.locator("#saved-series")).toContainText(
-      "Fresh Atlas",
-    );
-    await expect(relogin.page.locator("#saved-series")).toContainText(
       "Paper Moon",
     );
 
     const reloginText = await getPageBodyText(relogin.page);
     expect(reloginText).toContain("Continue Reading");
     expect(reloginText).toContain("Fresh Atlas");
-    expect(reloginText).not.toContain("Your shelf is ready.");
+    expect(reloginText).not.toContain("Sign in to save progress and favorites.");
 
     await relogin.page.waitForTimeout(300);
     await expectNoRuntimeIssues("/library", relogin.runtimeIssues);

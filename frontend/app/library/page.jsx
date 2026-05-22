@@ -1,10 +1,7 @@
 import { cookies } from "next/headers";
 import LibraryPage from "../../components/library/LibraryPage";
 import { createPageMetadata } from "../../lib/seo";
-import {
-  hasServerSessionCookie,
-  isServerAdultModeEnabled,
-} from "../../lib/serverAdultGate";
+import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 
 export const metadata = createPageMetadata({
   title: "Library",
@@ -18,9 +15,7 @@ export const metadata = createPageMetadata({
 
 export default async function Page() {
   const cookieStore = await cookies();
-  const initialSignedIn =
-    cookieStore.get("mn_is_signed_in")?.value === "1" ||
-    hasServerSessionCookie(cookieStore);
+  const initialSignedIn = cookieStore.get("mn_is_signed_in")?.value === "1";
   const initialAdultMode = await isServerAdultModeEnabled();
 
   return (

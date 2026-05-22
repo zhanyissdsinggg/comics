@@ -105,7 +105,7 @@ const socialLinks = [
   { label: "Twitter", href: siteConfig.twitterUrl },
 ].filter((item) => item.href);
 
-const footerLegalStatement = `${siteConfig.siteName} is operated by ${siteConfig.companyName}.`;
+const footerLegalStatement = `Gush Comics is operated by ${siteConfig.companyName}.`;
 
 function buildFooterRouteKey(href) {
   const normalizedHref = String(href || "").trim();

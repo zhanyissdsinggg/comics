@@ -353,10 +353,12 @@ export default function RankingsPage({
     "rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,#ff4f9a_0%,#ff76ad_100%)] px-4 py-2.5 text-sm font-semibold text-[#1a0e16] shadow-[0_18px_36px_rgba(255,79,154,0.2)] transition-transform hover:-translate-y-0.5";
   const secondaryButtonClass =
     "rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-transform hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.08)]";
-  const heroTitle = "Featured stories.";
+  const heroTitle = "Trending";
   const heroDescription = isAdultMode
     ? "Adult-only stories readers are opening most right now."
     : "The stories readers are opening most this week.";
+  const heroSecondary =
+    curatedSeries.length > 0 ? `${curatedSeries.length} titles` : "";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
@@ -366,11 +368,14 @@ export default function RankingsPage({
             eyebrow=""
             title={heroTitle}
             description={heroDescription}
-            secondary=""
+            secondary={heroSecondary}
             className="min-h-full"
             appearance="dark"
             accent="rose"
           />
+          <h2 className="mt-4 text-sm font-semibold uppercase tracking-[0.24em] text-white/60">
+            Featured stories.
+          </h2>
         </section>
 
         {commerceNotice ? (

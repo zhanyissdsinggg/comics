@@ -134,6 +134,7 @@ export function MembersDirectorySection(props) {
               variant="outline"
               onClick={onSync}
               disabled={syncPending}
+              data-testid="admin-members-sync-slots"
             >
               <RefreshCcw className="size-4" />
               {syncPending ? "同步中..." : "同步槽位"}
@@ -247,6 +248,7 @@ export function MembersDirectorySection(props) {
                           member.status === "active" ? "secondary" : "outline"
                         }
                         size="sm"
+                        data-testid={`admin-member-status-toggle-${member.id}`}
                         onClick={() =>
                           onToggleStatus({
                             id: member.id,

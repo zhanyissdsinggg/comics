@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -51,7 +50,6 @@ const PLAN_PREVIEWS = [
 ];
 
 function SubscribeContent() {
-  const router = useRouter();
   const { palette, isAdultMode } = useFigmaSite();
 
   return (
@@ -84,7 +82,13 @@ function SubscribeContent() {
                   Preview only. Checkout is disabled.
                 </p>
 
-                <div className="mt-4 flex flex-col gap-2.5 sm:flex-row md:mt-8 md:gap-3">
+                <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap md:mt-8 md:gap-3">
+                  <Link
+                    href="/comics"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto md:py-3.5"
+                  >
+                    Browse Comics
+                  </Link>
                   <Link
                     href="/store"
                     className={cn(
@@ -95,13 +99,12 @@ function SubscribeContent() {
                     Buy points instead
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/support")}
+                  <Link
+                    href="/support"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10 sm:w-auto md:py-3.5"
                   >
-                    Support
-                  </button>
+                    Contact Support
+                  </Link>
                 </div>
 
                 <div className="mt-4 grid gap-2.5 sm:grid-cols-3 md:mt-5 md:gap-3">

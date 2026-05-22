@@ -341,7 +341,12 @@ export default function AdminRegionsPage() {
             <Button type="button" variant="outline" onClick={handleExport}>
               导出配置
             </Button>
-            <Button type="button" onClick={handleSave} disabled={saving}>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              data-testid="admin-regions-save"
+            >
               {saving ? "保存中..." : "保存更改"}
             </Button>
           </div>
@@ -358,7 +363,12 @@ export default function AdminRegionsPage() {
                   每一条只保留区号和显示名称。
                 </p>
               </div>
-              <Button type="button" variant="outline" onClick={addCode}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addCode}
+                data-testid="admin-regions-add-entry"
+              >
                 新增条目
               </Button>
             </div>

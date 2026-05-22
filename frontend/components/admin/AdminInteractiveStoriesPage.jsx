@@ -2265,6 +2265,7 @@ function InteractiveStoryNodesTab({
                 <input
                   value={nodeQuery}
                   onChange={(event) => setNodeQuery(event.target.value)}
+                  data-testid="admin-interactive-node-search"
                   placeholder="搜索节点标题、Key、分支文案"
                   className={cn(adminInputClassName, "pl-11")}
                 />

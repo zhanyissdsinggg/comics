@@ -1,10 +1,14 @@
-import FigmaSearchPage from "../../components/figma/FigmaSearchPage";
-import SearchPageShell from "./SearchPageShell";
+import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
+import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
+import { loadSearchSeoPayload } from "../../lib/storefrontSeo";
+
+const SearchPage = dynamic(() => import("../../components/search/SearchPage"));
 
 export const metadata = createPageMetadata({
-  title: "Search Stories",
-  description: "Browse stories, creators, and formats on Gush.",
+  title: "Search Comics & Novels",
+  description: "Find your next obsession across stories, creators, and formats on Gush.",
   path: "/search",
   robots: buildNoIndexRobots({ follow: true }),
 });
@@ -22,20 +26,54 @@ function isInteractiveSearchRoute(searchParams = {}) {
 
 export default async function Page({ searchParams }) {
   const resolvedSearchParams = (await searchParams) || {};
+  const initialQuery = String(
+    resolvedSearchParams.q || resolvedSearchParams.query || "",
+  ).trim();
+  const initialType = String(resolvedSearchParams.type || "").trim().toLowerCase();
+  const initialFormat = String(
+    resolvedSearchParams.format || resolvedSearchParams.type || "",
+  )
+    .trim()
+    .toLowerCase();
+  const seoType =
+    initialType ||
+    (initialFormat === "comic" || initialFormat === "novel"
+      ? initialFormat
+      : "");
+
   if (isInteractiveSearchRoute(resolvedSearchParams)) {
-    return (
-      <FigmaSearchPage
-        initialQuery={String(
-          resolvedSearchParams.q || resolvedSearchParams.query || "",
-        ).trim()}
-        initialFormat="interactive"
-        initialResults={[]}
-        initialHotKeywords={[]}
-        initialReady
-        interactiveOnly
-      />
-    );
+    const redirectParams = new URLSearchParams();
+    if (initialQuery) {
+      redirectParams.set("q", initialQuery);
+    }
+    const redirectSuffix = redirectParams.toString();
+    redirect(redirectSuffix ? `/interactive?${redirectSuffix}` : "/interactive");
   }
 
-  return <SearchPageShell />;
+  const includeAdult = await isServerAdultModeEnabled();
+  const searchPayload = await loadSearchSeoPayload(initialQuery, {
+    includeAdult,
+    type: seoType,
+    status: String(resolvedSearchParams.status || "").trim(),
+    genre: String(resolvedSearchParams.genre || "").trim(),
+    sort: String(resolvedSearchParams.sort || "").trim(),
+    page: String(resolvedSearchParams.page || "").trim(),
+  });
+
+  return (
+    <SearchPage
+      initialQuery={initialQuery}
+      initialType={initialType}
+      initialFormat={initialFormat}
+      initialStatus={String(resolvedSearchParams.status || "").trim()}
+      initialGenre={String(resolvedSearchParams.genre || "").trim()}
+      initialSort={String(resolvedSearchParams.sort || "").trim()}
+      initialPage={String(resolvedSearchParams.page || "").trim()}
+      initialIncludeAdult={includeAdult}
+      initialResults={searchPayload.results || []}
+      initialTotal={Number(searchPayload.total || 0)}
+      initialHotKeywords={searchPayload.hotKeywords || []}
+      initialReady={searchPayload.ready === true}
+    />
+  );
 }

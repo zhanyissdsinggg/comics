@@ -118,6 +118,25 @@ export async function readServerAdultGateState() {
     String(cookieStore.get("mn_age_rule")?.value || "global")
       .trim()
       .toLowerCase() || "global";
+  if (!hasServerSessionCookie(cookieStore)) {
+    return {
+      adultConfirmed: false,
+      isAdultMode: false,
+      ageRuleKey,
+    };
+  }
+
+  const authPayload = await fetchServerApiJson("/api/auth/me", cookieStore);
+  const isSignedIn =
+    authPayload?.isSignedIn === true || Boolean(authPayload?.user?.id);
+  if (!isSignedIn) {
+    return {
+      adultConfirmed: false,
+      isAdultMode: false,
+      ageRuleKey,
+    };
+  }
+
   const preferencesPayload = await fetchServerApiJson("/api/preferences", cookieStore);
   const preferences = preferencesPayload?.preferences || {};
   const verified = isVerifiedMatureStatus(preferences.matureVerification || null);

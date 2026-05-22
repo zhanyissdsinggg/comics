@@ -6,6 +6,10 @@ import {
   createReaderPagePlaceholder,
 } from "./support/placeholders";
 import { collectRuntimeIssues, expectNoRuntimeIssues } from "./support/runtime";
+import {
+  TEST_BACKEND_BASE_URL,
+  TEST_BACKEND_PORT,
+} from "./support/mockBackendConfig";
 
 const UI_TIMEOUT_MS = 15000;
 const LEGAL_ENTITY_NAME = "Targaryen technology Co., Limited";
@@ -1088,6 +1092,13 @@ function jsonResponse(
   response.end(JSON.stringify(body));
 }
 
+const mockBackendState = {
+  signedIn: false,
+  matureConfirmed: false,
+  matureModeEnabled: false,
+  hideAdultHistory: false,
+};
+
 function createMockBackendServer() {
   return http.createServer((request, response) => {
     if (!request.url) {
@@ -1095,8 +1106,50 @@ function createMockBackendServer() {
       return;
     }
 
-    const url = new URL(request.url, "http://127.0.0.1:4000");
+    const url = new URL(request.url, TEST_BACKEND_BASE_URL);
     const { pathname, searchParams } = url;
+    const cookieHeader = String(request.headers.cookie || "");
+    const hasSession = /(?:^|;\s*)mn_session=[^;]+(?:;|$)/.test(cookieHeader);
+    const signedIn = hasSession && mockBackendState.signedIn;
+    const matureConfirmed = signedIn && mockBackendState.matureConfirmed;
+    const matureModeEnabled = signedIn && mockBackendState.matureModeEnabled;
+
+    if (pathname === "/api/auth/me") {
+      jsonResponse(response, 200, {
+        isSignedIn: signedIn,
+        user: signedIn
+          ? {
+              id: "reader-001",
+              email: "reader@example.com",
+              displayName: "Reader One",
+            }
+          : null,
+      });
+      return;
+    }
+
+    if (pathname === "/api/preferences") {
+      jsonResponse(response, 200, {
+        preferences: {
+          adult: false,
+          autoplay: false,
+          region: "global",
+          hideAdultHistory: mockBackendState.hideAdultHistory,
+          matureModeEnabled,
+          matureVerification: matureConfirmed
+            ? {
+                verified: true,
+                provider: "mock-backend",
+                region: "global",
+                expiresAt: null,
+                referenceId: null,
+                verifiedAt: "2026-04-24T12:00:00.000Z",
+              }
+            : null,
+        },
+      });
+      return;
+    }
 
     if (pathname === "/api/series") {
       const adult = searchParams.get("adult") || "0";
@@ -1113,6 +1166,16 @@ function createMockBackendServer() {
         jsonResponse(response, 404, { error: "NOT_FOUND" });
         return;
       }
+      if (
+        payload.series?.adult &&
+        (!signedIn || !matureConfirmed || !matureModeEnabled)
+      ) {
+        jsonResponse(response, 403, {
+          error: "ADULT_GATED",
+          reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+        });
+        return;
+      }
       jsonResponse(response, 200, payload);
       return;
     }
@@ -1120,6 +1183,16 @@ function createMockBackendServer() {
     if (pathname === "/api/episode") {
       const seriesId = searchParams.get("seriesId") || "series-001";
       const episodeId = searchParams.get("episodeId") || `${seriesId}e1`;
+      const series = CATALOG.find(
+        (candidate) => String(candidate.id || "").trim() === String(seriesId).trim(),
+      );
+      if (series?.adult && (!signedIn || !matureConfirmed || !matureModeEnabled)) {
+        jsonResponse(response, 403, {
+          error: "ADULT_GATED",
+          reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+        });
+        return;
+      }
       jsonResponse(response, 200, buildEpisodePayload(seriesId, episodeId));
       return;
     }
@@ -1144,10 +1217,20 @@ async function mockPublicApi(
     hideAdultHistory = false,
   } = options;
 
+  mockBackendState.signedIn = signedIn;
+  mockBackendState.matureConfirmed = matureConfirmed;
+  mockBackendState.matureModeEnabled = matureModeEnabled;
+  mockBackendState.hideAdultHistory = hideAdultHistory;
+
   await page.context().addCookies([
     {
       name: "mn_is_signed_in",
       value: signedIn ? "1" : "0",
+      url: "http://127.0.0.1:4173",
+    },
+    {
+      name: "mn_session",
+      value: signedIn ? "reader-session" : "",
       url: "http://127.0.0.1:4173",
     },
     {
@@ -1185,6 +1268,7 @@ async function mockPublicApi(
       );
       window.localStorage.setItem("mn_region", "global");
       document.cookie = `mn_is_signed_in=${signedIn ? "1" : "0"}; path=/`;
+      document.cookie = `mn_session=${signedIn ? "reader-session" : ""}; path=/`;
       document.cookie = `mn_adult_confirmed=${matureConfirmed ? "1" : "0"}; path=/`;
       document.cookie = `mn_adult_mode=${matureModeEnabled ? "1" : "0"}; path=/`;
       document.cookie = "mn_age_rule=global; path=/";
@@ -1482,14 +1566,8 @@ test.describe("Public reading funnel", () => {
   test.beforeAll(async () => {
     mockBackend = createMockBackendServer();
     await new Promise<void>((resolve, reject) => {
-      mockBackend?.once("error", (error: NodeJS.ErrnoException) => {
-        if (error?.code === "EADDRINUSE") {
-          resolve();
-          return;
-        }
-        reject(error);
-      });
-      mockBackend?.listen(4000, "127.0.0.1", () => resolve());
+      mockBackend?.once("error", reject);
+      mockBackend?.listen(TEST_BACKEND_PORT, "127.0.0.1", () => resolve());
     });
   });
 
@@ -1685,9 +1763,9 @@ test.describe("Public reading funnel", () => {
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page, {
-      signedIn: true,
-      matureConfirmed: true,
-      matureModeEnabled: true,
+      signedIn: false,
+      matureConfirmed: false,
+      matureModeEnabled: false,
     });
 
     let response = await page.goto("/comics", {
@@ -1721,7 +1799,7 @@ test.describe("Public reading funnel", () => {
       "/search?format=novel",
     ]) {
       const filterCheckPage = await browser.newPage();
-      await mockPublicApi(filterCheckPage, { signedIn: true });
+      await mockPublicApi(filterCheckPage, { signedIn: false });
       response = await filterCheckPage.goto(routePath, {
         waitUntil: "domcontentloaded",
       });
@@ -3100,23 +3178,6 @@ test.describe("Public reading funnel", () => {
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     let adultCatalogRequestCount = 0;
-    await page.context().addCookies([
-      {
-        name: "mn_is_signed_in",
-        value: "1",
-        url: "http://127.0.0.1:4173",
-      },
-      {
-        name: "mn_adult_confirmed",
-        value: "1",
-        url: "http://127.0.0.1:4173",
-      },
-      {
-        name: "mn_adult_mode",
-        value: "1",
-        url: "http://127.0.0.1:4173",
-      },
-    ]);
     await mockPublicApi(page, {
       signedIn: true,
       matureConfirmed: true,

@@ -30,6 +30,7 @@ import ReaderErrorState from "../reader/ReaderErrorState";
 import { FigmaSiteProvider, useFigmaSite } from "./FigmaSiteContext";
 import FigmaCommentsSection from "./FigmaCommentsSection";
 import {
+  canAccessInContentMode,
   getContentModeQueryParam,
   matchesContentMode,
 } from "../../lib/contentFilters";
@@ -399,8 +400,8 @@ function ReaderContent({
         String(initialSeriesData?.series?.id || "") ===
           String(seriesId || "") &&
         String(initialEpisodeData?.id || "") === String(episodeId || "") &&
-        matchesContentMode(initialSeriesData?.series, contentMode) &&
-        matchesContentMode(initialEpisodeData, contentMode);
+        canAccessInContentMode(initialSeriesData?.series, contentMode) &&
+        canAccessInContentMode(initialEpisodeData, contentMode);
 
       if (hasSeededReaderPayload) {
         historyLoggedRef.current = false;
@@ -448,7 +449,7 @@ function ReaderContent({
         return;
       }
 
-      if (!matchesContentMode(nextSeriesData?.series, contentMode)) {
+      if (!canAccessInContentMode(nextSeriesData?.series, contentMode)) {
         setEpisodeData(null);
         setModeBlock(nextIsAdultSeries ? "adult" : "normal");
         setLoading(false);
@@ -484,7 +485,7 @@ function ReaderContent({
         nextIsAdultSeries,
       );
 
-      if (!matchesContentMode(nextEpisode, contentMode)) {
+      if (!canAccessInContentMode(nextEpisode, contentMode)) {
         setEpisodeData(null);
         setModeBlock(nextIsAdultSeries ? "adult" : "normal");
         setLoading(false);
@@ -515,7 +516,7 @@ function ReaderContent({
       !seriesId ||
       modeBlock ||
       !seriesData?.series ||
-      !matchesContentMode(seriesData.series, contentMode)
+      !canAccessInContentMode(seriesData.series, contentMode)
     ) {
       return;
     }
@@ -877,7 +878,7 @@ function ReaderContent({
       }
 
       const safeTarget = withFallbackAdultFlag(targetEpisode, seriesIsAdult);
-      if (!matchesContentMode(safeTarget, contentMode)) {
+      if (!canAccessInContentMode(safeTarget, contentMode)) {
         setToast(
           contentMode === "adult"
             ? "Switch back to normal mode to open this chapter."

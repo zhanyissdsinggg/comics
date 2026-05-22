@@ -7,6 +7,7 @@ import {
   deriveContentModeFromAdultFlag,
 } from "../../lib/contentMode";
 import { filterContentByMode, isAdultContent } from "../../lib/contentFilters";
+import { isMatureGenreValue } from "../../lib/matureContent";
 import {
   formatInstallmentLabel,
   getStartReadingLabel,
@@ -762,7 +763,12 @@ export function buildGenreOptions(items = []) {
   (Array.isArray(items) ? items : []).forEach((item) => {
     normalizeGenres(item?.genres)
       .slice(0, 3)
-      .forEach((genre) => genres.add(toTitleCase(genre)));
+      .forEach((genre) => {
+        if (isMatureGenreValue(genre)) {
+          return;
+        }
+        genres.add(toTitleCase(genre));
+      });
   });
   return Array.from(genres).slice(0, 10);
 }

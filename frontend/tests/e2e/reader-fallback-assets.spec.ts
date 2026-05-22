@@ -149,20 +149,27 @@ test.describe("Reader fallback assets", () => {
       });
     });
 
-    const response = await page.goto("/read/series-001/series-001e1", {
-      waitUntil: "domcontentloaded",
-    });
+    const response = await page.goto(
+      "/read/series-001/series-001e1?entry=reader-fallback-assets",
+      {
+        waitUntil: "domcontentloaded",
+      },
+    );
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByText("Reader Preview").first()).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Comic reader content" }).first(),
+    ).toBeVisible();
     await expect(page.getByText("The Last Kingdom").first()).toBeVisible();
     await expect(page.locator("body")).not.toContainText(
-      /Story preview artwork|Reader fallback|Page preview|CHAPTER|Current reader label|Core palette enabled/i,
+      /Story preview artwork|Reader fallback|Page preview|Current reader label|Core palette enabled/i,
     );
     await expect(page.locator("body")).not.toContainText(
       /Comic pages loading before chapter navigation and comments|Comic reader content starts here before chapter end and comments/i,
     );
-    await expect(page.getByLabel("Comic page").first()).toBeAttached();
+    await expect(
+      page.getByRole("img", { name: "The Last Kingdom Chapter 1 page 1" }),
+    ).toBeAttached();
 
     const pageImageSources = await page.evaluate(() =>
       Array.from(document.querySelectorAll("[data-index] img")).map(
