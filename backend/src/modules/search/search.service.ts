@@ -29,6 +29,7 @@ type SearchSeriesRow = {
   id: string;
   title: string;
   type: string;
+  author?: string | null;
   description: string | null;
   coverUrl: string | null;
   coverTone: string | null;
@@ -44,6 +45,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 48;
 const SEARCH_RESULTS_TTL_SECONDS = 120;
+const INTERACTIVE_SEARCH_TYPE = "interactive";
 
 function parsePositiveInt(
   value: number | string | undefined,
@@ -83,6 +85,17 @@ function normalizeStatus(value: string): string {
     return "hiatus";
   }
   return normalized;
+}
+
+function splitRequestedTypes(requestedTypes: string[]) {
+  const normalized = requestedTypes.map((item) => normalizeText(item));
+  const wantsInteractive = normalized.includes(INTERACTIVE_SEARCH_TYPE);
+  const seriesTypes = normalized.filter((item) => item !== INTERACTIVE_SEARCH_TYPE);
+
+  return {
+    wantsInteractive,
+    seriesTypes,
+  };
 }
 
 function buildSearchResultsCacheKey(input: {
@@ -253,10 +266,31 @@ export class SearchService {
     if (!input.adult) {
       clauses.push(Prisma.sql`s."adult" = false`);
     }
+    const { wantsInteractive, seriesTypes } = splitRequestedTypes(
+      input.requestedTypes,
+    );
+
     if (input.requestedTypes.length > 0) {
-      clauses.push(
-        Prisma.sql`LOWER(s."type") IN (${Prisma.join(input.requestedTypes)})`,
-      );
+      const typeClauses: Prisma.Sql[] = [];
+      if (seriesTypes.length > 0) {
+        typeClauses.push(
+          Prisma.sql`LOWER(s."type") IN (${Prisma.join(seriesTypes)})`,
+        );
+      }
+      if (wantsInteractive) {
+        typeClauses.push(
+          Prisma.sql`EXISTS (
+            SELECT 1
+            FROM "interactive_stories" story
+            WHERE story."seriesId" = s."id"
+              AND story."isPublished" = true
+          )`,
+        );
+      }
+
+      if (typeClauses.length > 0) {
+        clauses.push(Prisma.sql`(${Prisma.join(typeClauses, " OR ")})`);
+      }
     }
     if (input.requestedStatuses.length > 0) {
       clauses.push(
@@ -313,6 +347,19 @@ export class SearchService {
     const whereSql = this.buildFilterSql(input);
     const orderSql = this.buildSortSql(input.sort, input.query);
     const offset = (input.page - 1) * input.pageSize;
+    const { wantsInteractive, seriesTypes } = splitRequestedTypes(
+      input.requestedTypes,
+    );
+    const interactiveTypeSql = wantsInteractive
+      ? Prisma.sql`
+          CASE
+            WHEN story."id" IS NOT NULL
+              AND ${seriesTypes.length === 0 ? Prisma.sql`true` : Prisma.sql`LOWER(s."type") NOT IN (${Prisma.join(seriesTypes)})`}
+            THEN ${INTERACTIVE_SEARCH_TYPE}
+            ELSE s."type"
+          END AS "type"
+        `
+      : Prisma.sql`s."type" AS "type"`;
 
     const [rows, totals] = await Promise.all([
       this.prisma.$queryRaw<SearchSeriesRow[]>(
@@ -320,7 +367,8 @@ export class SearchService {
           SELECT
             s."id",
             s."title",
-            s."type",
+            ${interactiveTypeSql},
+            s."author",
             s."description",
             s."coverUrl",
             s."coverTone",
@@ -331,6 +379,9 @@ export class SearchService {
             s."updatedAt",
             s."latestEpisodeId"
           FROM "series" s
+          LEFT JOIN "interactive_stories" story
+            ON story."seriesId" = s."id"
+            AND story."isPublished" = true
           LEFT JOIN (
             SELECT "seriesId", COUNT(*)::int AS followers
             FROM "follows"
@@ -351,6 +402,9 @@ export class SearchService {
         Prisma.sql`
           SELECT COUNT(*)::bigint AS total
           FROM "series" s
+          LEFT JOIN "interactive_stories" story
+            ON story."seriesId" = s."id"
+            AND story."isPublished" = true
           ${whereSql}
         `,
       ),

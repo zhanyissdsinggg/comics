@@ -19,6 +19,7 @@ import { useBehaviorStore } from "../../store/useBehaviorStore";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 import { buildReaderPath } from "../../lib/readerRoutes";
+import { siteConfig } from "../../lib/siteConfig";
 import {
   formatInstallmentLabel,
   isDefaultInstallmentTitle,
@@ -94,6 +95,7 @@ function EpisodeRow({
       ? window.localStorage.getItem("mn_has_purchased") !== "1"
       : true;
   const userId = typeof window !== "undefined" ? getOrCreateUserId() : "guest";
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
 
   const bucketMap = useMemo(() => {
     const map = {
@@ -174,6 +176,8 @@ function EpisodeRow({
     ],
   );
   const effectivePrice = accessState.effectivePrice;
+  const commercePreviewOnly =
+    !checkoutEnabled && accessState.kind === "points";
   const hasCustomEpisodeTitle =
     Boolean(episode?.title) &&
     !isDefaultInstallmentTitle(episode.title, {
@@ -207,7 +211,9 @@ function EpisodeRow({
   const rowHelperText = accessState.rowHelperText || "";
   const supportDetail = progressMetaLabel
     ? ""
-    : accessState.kind === "preview"
+    : commercePreviewOnly
+      ? "Preview only"
+      : accessState.kind === "preview"
       ? accessState.supportLabel || ""
       : accessState.kind === "points"
         ? accessState.supportLabel ||
@@ -218,6 +224,12 @@ function EpisodeRow({
   const isLastReadEpisode = progress?.lastEpisodeId === episode?.id;
   const helperLabel =
     isLastReadEpisode && progressMetaLabel ? progressMetaLabel : supportDetail;
+  const displayActionKind = commercePreviewOnly
+    ? "locked"
+    : accessState.actionKind;
+  const displayActionLabel = commercePreviewOnly
+    ? "Preview only"
+    : accessState.actionLabel;
 
   useEffect(() => {
     if (modalState?.type !== "UNLOCK" || modalState?.view !== "packs") {
@@ -356,25 +368,26 @@ function EpisodeRow({
       return;
     }
 
-    if (
-      accessState.actionKind === "read" ||
-      accessState.actionKind === "preview"
-    ) {
+    if (commercePreviewOnly) {
+      return;
+    }
+
+    if (displayActionKind === "read" || displayActionKind === "preview") {
       onRead(seriesId, episode?.id);
       return;
     }
 
-    if (accessState.actionKind === "claim") {
+    if (displayActionKind === "claim") {
       await handleClaimAccess();
       return;
     }
 
-    if (accessState.actionKind === "unlock") {
+    if (displayActionKind === "unlock") {
       openUnlockModal();
       return;
     }
 
-    if (accessState.actionKind === "locked") {
+    if (displayActionKind === "locked") {
       return;
     }
 
@@ -382,18 +395,18 @@ function EpisodeRow({
   };
 
   const actionClassName =
-    accessState.actionKind === "claim" ||
-    accessState.actionKind === "read" ||
-    accessState.actionKind === "preview"
+    displayActionKind === "claim" ||
+    displayActionKind === "read" ||
+    displayActionKind === "preview"
       ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontPrimaryButtonClass}`
-      : accessState.actionKind === "locked"
+      : displayActionKind === "locked"
         ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
-        : accessState.actionKind === "subscribe"
+        : displayActionKind === "subscribe"
           ? `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`
           : `min-h-[46px] w-full px-5 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[172px] ${storefrontSecondaryButtonClass}`;
   const readHref = buildReaderPath(seriesId, episode?.id);
   const isDirectReadLink =
-    accessState.actionKind === "read" || accessState.actionKind === "preview";
+    displayActionKind === "read" || displayActionKind === "preview";
 
   const actionNode = isDirectReadLink ? (
     <Link
@@ -402,17 +415,17 @@ function EpisodeRow({
       className={`inline-flex items-center justify-center ${actionClassName}`}
       style={{ willChange: "transform" }}
     >
-      {accessState.actionLabel}
+      {displayActionLabel}
     </Link>
   ) : (
     <button
       type="button"
       onClick={handlePrimaryAction}
-      disabled={isWorking || accessState.actionKind === "locked"}
+      disabled={isWorking || displayActionKind === "locked"}
       className={actionClassName}
       style={{ willChange: "transform" }}
     >
-      {accessState.actionLabel}
+      {displayActionLabel}
     </button>
   );
   const showStateBadge =
@@ -506,6 +519,7 @@ function EpisodeRow({
         isSignedIn={isSignedIn}
         view={modalState?.view}
         busyAction={busyAction}
+        checkoutEnabled={checkoutEnabled}
         preferredPackageId={recommendedTopup?.id}
         onViewChange={(nextView) =>
           setModalState((current) =>
@@ -519,6 +533,23 @@ function EpisodeRow({
         }
         onConfirmUnlock={handleUnlockAccess}
         onBuyPack={async (packageId) => {
+          if (!checkoutEnabled) {
+            router.push(
+              buildPathWithAttribution(
+                "/store",
+                {
+                  entryPoint: "UNLOCK_MODAL",
+                  sourcePath: `/series/${seriesId}`,
+                  sourceSeriesId: seriesId,
+                  sourceEpisodeId: episode?.id,
+                  returnTo: `/series/${seriesId}`,
+                },
+                { focus: "auto" },
+              ),
+            );
+            setModalState(null);
+            return;
+          }
           setBusyAction(`topup:${packageId}`);
           trackEvent("offer_click", {
             offerId: `points_pack_${packageId}`,

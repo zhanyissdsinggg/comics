@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, Share2 } from "lucide-react";
+import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "../../lib/utils";
 
 export default function ReaderEndPanel({
@@ -33,6 +34,7 @@ export default function ReaderEndPanel({
   onUnlock,
   unlockBusy = false,
 }) {
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
   return (
     <section data-testid="reader-end-panel" className="px-4 pb-4 pt-8 md:px-6">
       <div className={cn("mx-auto", isComic ? "max-w-5xl" : "max-w-[760px]")}>
@@ -102,13 +104,21 @@ export default function ReaderEndPanel({
                 >
                   Sign in to unlock
                 </button>
+              ) : !checkoutEnabled && currentPricePts > 0 ? (
+                <button
+                  type="button"
+                  onClick={onOpenStore}
+                  className={primaryButtonClassName}
+                >
+                  Store preview
+                </button>
               ) : shortfallPts > 0 ? (
                 <button
                   type="button"
                   onClick={onOpenStore}
                   className={primaryButtonClassName}
                 >
-                  Get more points
+                  {checkoutEnabled ? "Get more points" : "Store preview"}
                 </button>
               ) : (
                 <button

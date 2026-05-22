@@ -22,6 +22,7 @@ function normalizeArray(value) {
 
 function buildSummary(releaseReport, watchdogReport) {
   const releaseVerdict = String(releaseReport?.verdict || "unknown");
+  const releasePreflight = String(releaseReport?.preflight?.status || "unknown");
   const releaseBaseline = String(releaseReport?.baseline?.status || "unknown");
   const releaseFull = String(releaseReport?.full?.status || "unknown");
   const releaseMode = String(releaseReport?.mode || (releaseReport?.requireFull ? "strict" : "fast"));
@@ -37,6 +38,9 @@ function buildSummary(releaseReport, watchdogReport) {
 
   if (releaseVerdict !== "pass") {
     blockers.push(`release gate verdict=${releaseVerdict}`);
+  }
+  if (releasePreflight !== "pass") {
+    blockers.push(`release preflight=${releasePreflight}`);
   }
   if (watchdogStatus === "breach" || watchdogSeverity === "P1" || watchdogSeverity === "P2") {
     blockers.push(`watchdog severity=${watchdogSeverity} status=${watchdogStatus}`);
@@ -57,6 +61,7 @@ function buildSummary(releaseReport, watchdogReport) {
     verdict: releaseReady ? "READY" : "NOT_READY",
     release: {
       verdict: releaseVerdict,
+      preflight: releasePreflight,
       baseline: releaseBaseline,
       full: releaseFull,
       mode: releaseMode,
@@ -88,6 +93,7 @@ function toMarkdown(summary) {
     `- mode: ${summary.release.mode}`,
     `- fullGatePolicy: ${summary.release.fullGatePolicy}`,
     `- thresholdTier: ${summary.release.thresholdTier}`,
+    `- preflight: ${summary.release.preflight}`,
     `- baseline: ${summary.release.baseline}`,
     `- full: ${summary.release.full}`,
     `- watchdog: severity=${summary.watchdog.severity}, status=${summary.watchdog.status}`,

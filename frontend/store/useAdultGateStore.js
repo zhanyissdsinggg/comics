@@ -26,7 +26,6 @@ import {
 } from "../lib/contentMode";
 import {
   isMatureVerificationActive,
-  localGateAgeProvider,
   normalizeMatureVerificationStatus,
 } from "../lib/verifyAgeProvider";
 import { trackEvent } from "../lib/trackEvent";
@@ -58,16 +57,26 @@ function readRegionRule() {
   return normalizeRuleKey(window.localStorage.getItem(REGION_KEY) || "global");
 }
 
-function createOptimisticVerification(ruleKey) {
-  const now = new Date().toISOString();
-  return {
-    verified: true,
-    provider: "local-gate",
-    region: normalizeRuleKey(ruleKey || "global"),
-    expiresAt: null,
-    referenceId: null,
-    verifiedAt: now,
-  };
+async function confirmServerManagedMatureAccess({
+  region,
+  isAdultMode,
+}) {
+  const response = await apiPost(
+    "/api/preferences/mature/confirm",
+    {
+      region,
+      matureModeEnabled: isAdultMode,
+    },
+    {
+      keepalive: true,
+    },
+  );
+
+  if (response.ok && response.data?.preferences) {
+    applyPreferencesToStorage(response.data.preferences);
+  }
+
+  return response;
 }
 
 export function AdultGateProvider({ children, initialAdultState = null }) {
@@ -567,75 +576,52 @@ export function AdultGateProvider({ children, initialAdultState = null }) {
   const confirmAge = useCallback(
     async (ruleKey) => {
       const normalized = normalizeRuleKey(ruleKey || readRegionRule());
-      const optimisticVerification = createOptimisticVerification(normalized);
-      const wasAdultMode = isAdultMode;
+      if (!authHydrated || !isSignedIn) {
+        return "NEED_LOGIN";
+      }
 
-      trustedInitialStateRef.current = {
-        confirmed: true,
-        ruleKey: normalized,
-        mode: true,
-        verification: optimisticVerification,
-      };
+      try {
+        const serverResponse = await confirmServerManagedMatureAccess({
+          region: normalized,
+          isAdultMode: true,
+        });
+        const serverVerification =
+          serverResponse.data?.preferences?.matureVerification;
+        if (!serverResponse.ok || serverVerification?.verified !== true) {
+          throw new Error("SERVER_MATURE_CONFIRM_FAILED");
+        }
+        const verification = normalizeMatureVerificationStatus(
+          serverVerification,
+          normalized,
+        );
 
-      clearCatalogModeCache();
-      await applyAdultState({
-        confirmed: true,
-        ruleKey: normalized,
-        mode: true,
-        verification: optimisticVerification,
-        sync: true,
-        markUpdated: true,
-      });
-      if (!wasAdultMode) {
+        trustedInitialStateRef.current = {
+          confirmed: true,
+          ruleKey: normalized,
+          mode: true,
+          verification,
+        };
+        clearCatalogModeCache();
+        await applyAdultState({
+          confirmed: true,
+          ruleKey: normalized,
+          mode: true,
+          verification,
+          sync: false,
+          markUpdated: true,
+        });
         trackEvent("content_mode_enter_adult", {
           contentMode: CONTENT_MODE_ADULT,
           ruleKey: normalized,
         });
-      }
-
-      try {
-        const verification = await localGateAgeProvider.verify({
-          region: normalized,
-          legalAge:
-            AGE_RULES[normalized]?.legalAge || AGE_RULES.global.legalAge,
-        });
-
-        trustedInitialStateRef.current = {
-          confirmed: true,
-          ruleKey: normalized,
-          mode: true,
-          verification,
-        };
-        clearCatalogModeCache();
-        await applyAdultState({
-          confirmed: true,
-          ruleKey: normalized,
-          mode: true,
-          verification,
-          sync: true,
-          markUpdated: true,
-        });
       } catch {
-        trustedInitialStateRef.current = {
-          confirmed: true,
-          ruleKey: normalized,
-          mode: true,
-          verification: optimisticVerification,
-        };
-        clearCatalogModeCache();
-        await applyAdultState({
-          confirmed: true,
-          ruleKey: normalized,
-          mode: true,
-          verification: optimisticVerification,
-          sync: true,
-          markUpdated: true,
-        });
+        trustedInitialStateRef.current = null;
+        return "NEED_AGE_CONFIRM";
       }
 
       return "OK";
     },
-    [applyAdultState, clearCatalogModeCache, isAdultMode],
+    [applyAdultState, authHydrated, clearCatalogModeCache, isSignedIn],
   );
 
   const forceDisableAdultMode = useCallback(() => {

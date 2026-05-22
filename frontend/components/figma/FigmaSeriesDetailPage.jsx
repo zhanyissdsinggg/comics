@@ -26,6 +26,7 @@ import { getEpisodeAccessState } from "../../lib/episodeAccessState";
 import { openAuthPrompt } from "../../lib/openAuthPrompt";
 import { readPaymentAttributionFromSearchParams } from "../../lib/paymentAttribution";
 import { buildReaderPath } from "../../lib/readerRoutes";
+import { siteConfig } from "../../lib/siteConfig";
 import {
   getInstallmentLabel,
   getSeriesHeroMetadataParts,
@@ -803,6 +804,7 @@ function SeriesDetailContent({
         isSignedIn={isSignedIn}
         view={unlockModalState?.view || "confirm"}
         busyAction=""
+        checkoutEnabled={siteConfig.monetization.checkoutEnabled === true}
         onViewChange={(nextView) =>
           setUnlockModalState((current) =>
             current

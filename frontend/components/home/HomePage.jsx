@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -510,15 +509,15 @@ function HomeSection({
               >
                 <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-[var(--gush-card)]">
                   {series?.coverUrl ? (
-                    <Image
+                    <img
                       src={resolveDisplayImageUrl(series.coverUrl, {
                         kind: "cover",
                         adult: series?.adult || series?.isAdult,
                       })}
                       alt={buildCoverAltText(series)}
-                      fill
-                      sizes="64px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                     />
                   ) : (
                     <div className="h-full w-full bg-[linear-gradient(180deg,#251f2f,#17131d)]" />
@@ -733,16 +732,16 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
             <div className="absolute inset-3 rotate-[5deg] rounded-[30px] border border-white/8 bg-[rgba(255,79,154,0.06)]" />
             <div className="relative aspect-[3/4] overflow-hidden rounded-[30px] border border-white/12 bg-[rgba(255,255,255,0.08)] shadow-[0_24px_60px_rgba(0,0,0,0.42)]">
               {featuredSeries?.coverUrl ? (
-                <Image
+                <img
                   src={resolveDisplayImageUrl(featuredSeries.coverUrl, {
                     kind: "cover",
                     adult: featuredSeries?.adult || featuredSeries?.isAdult,
                   })}
                   alt={buildTypedCoverAltText(featuredSeries)}
-                  fill
-                  sizes="(max-width: 1024px) 260px, 320px"
-                  className="object-cover"
-                  priority
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <div className="flex h-full w-full items-end bg-[linear-gradient(180deg,#251f2f,#17131d)] p-5">

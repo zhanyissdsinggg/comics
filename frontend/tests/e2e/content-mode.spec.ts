@@ -9,6 +9,7 @@ import {
   TEST_BACKEND_BASE_URL,
   TEST_BACKEND_PORT,
 } from "./support/mockBackendConfig";
+import { TEST_FRONTEND_BASE_URL } from "./support/testBaseUrl";
 
 const UI_TIMEOUT_MS = 15_000;
 const ADULT_READER_SERIES_ID = "series-013";
@@ -63,6 +64,41 @@ const NORMAL_NOVEL = {
   episodeCount: 4,
   latestEpisodeId: "series-101e4",
   updatedAt: "2026-04-16T08:00:00.000Z",
+};
+
+const INTERACTIVE_SERIES = {
+  id: "series-011",
+  title: "Solar Wind",
+  author: "Signal Drift Studio",
+  type: "interactive",
+  status: "Ongoing",
+  adult: false,
+  description: "A branching relay-field thriller.",
+  coverUrl: createPosterPlaceholder("Solar Wind"),
+  bannerUrl: createBannerPlaceholder("Solar Wind"),
+  genres: ["Sci-Fi", "Choices", "Interactive"],
+  episodeCount: 3,
+  latestEpisodeId: "series-011e3",
+  updatedAt: "2026-04-21T08:00:00.000Z",
+};
+
+const ADULT_INTERACTIVE_SERIES = {
+  id: "series-014",
+  title: "Vampire Oath",
+  author: "Crimson Thread",
+  type: "interactive",
+  status: "Ongoing",
+  adult: true,
+  description: "A mature-only branching manor thriller.",
+  coverUrl: createPosterPlaceholder("Vampire Oath"),
+  bannerUrl: createBannerPlaceholder("Vampire Oath"),
+  genres: ["Horror", "Romance", "Interactive", "Mature"],
+  episodeCount: 2,
+  latestEpisodeId: "series-014e2",
+  updatedAt: "2026-04-22T08:00:00.000Z",
+  badge: "18+",
+  badges: ["Adults Only"],
+  tags: ["Mature"],
 };
 
 const ADULT_NOVEL = {
@@ -223,8 +259,8 @@ function createContentModeMockBackendServer() {
     const matureVerified = signedIn && mockBackendState.matureConfirmed;
     const matureModeEnabled = signedIn && mockBackendState.matureModeEnabled;
     const activeCatalog = adultFlag
-      ? [ADULT_SERIES, ADULT_NOVEL]
-      : [NORMAL_SERIES, NORMAL_NOVEL];
+      ? [ADULT_SERIES, ADULT_NOVEL, ADULT_INTERACTIVE_SERIES]
+      : [NORMAL_SERIES, NORMAL_NOVEL, INTERACTIVE_SERIES];
 
     if (pathname === "/api/auth/me") {
       jsonServerResponse(response, 200, {
@@ -321,7 +357,14 @@ function createContentModeMockBackendServer() {
       const query = String(url.searchParams.get("q") || "")
         .trim()
         .toLowerCase();
-      const results = activeCatalog.filter((item) =>
+      const requestedType = String(url.searchParams.get("type") || "")
+        .trim()
+        .toLowerCase();
+      const typeFilteredCatalog =
+        requestedType === "interactive"
+          ? activeCatalog.filter((item) => item.type === "interactive")
+          : activeCatalog;
+      const results = typeFilteredCatalog.filter((item) =>
         !query ? true : item.title.toLowerCase().includes(query),
       );
       jsonServerResponse(response, 200, {
@@ -448,37 +491,37 @@ async function seedAdultState(
     {
       name: "mn_is_signed_in",
       value: signedIn ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_session",
       value: signedIn ? "reader-session" : forgedSessionCookie,
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_confirmed",
       value: adultConfirmed ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_adult_mode",
       value: adultMode ? "1" : "0",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_mature_status",
       value: matureStatus,
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_age_rule",
       value: "global",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
     {
       name: "mn_region",
       value: "global",
-      url: "http://127.0.0.1:4173",
+      url: TEST_FRONTEND_BASE_URL,
     },
   ]);
 }
@@ -491,12 +534,17 @@ async function expectNoShellPlaceholderCopy(page: Page): Promise<void> {
 
 async function expectAdultHomeCatalog(page: Page): Promise<void> {
   await expect(
-    page.getByRole("heading", { name: /After Hours Letters|Midnight Heat/i }).first(),
+    page
+      .getByRole(
+        "heading",
+        { name: /After Hours Letters|Midnight Heat|Vampire Oath/i },
+      )
+      .first(),
   ).toBeVisible({
     timeout: UI_TIMEOUT_MS,
   });
   await expect(page.locator("body")).toContainText(
-    /After Hours Letters|Midnight Heat/i,
+    /After Hours Letters|Midnight Heat|Vampire Oath/i,
   );
   await expect(page.locator("body")).not.toContainText("The Last Kingdom");
   await expect(page.locator("body")).not.toContainText("Velvet Archive");
@@ -576,9 +624,9 @@ async function installContentModeRoutes(
     const requestUrl = new URL(route.request().url());
     const pathname = requestUrl.pathname;
     const adultFlag = requestUrl.searchParams.get("adult") === "1";
-    const activeCatalog = adultFlag
-      ? [ADULT_SERIES, ADULT_NOVEL]
-      : [NORMAL_SERIES, NORMAL_NOVEL];
+  const activeCatalog = adultFlag
+      ? [ADULT_SERIES, ADULT_NOVEL, ADULT_INTERACTIVE_SERIES]
+      : [NORMAL_SERIES, NORMAL_NOVEL, INTERACTIVE_SERIES];
 
     if (
       pathname === "/api/health" ||
@@ -728,7 +776,18 @@ async function installContentModeRoutes(
       const query = String(requestUrl.searchParams.get("q") || "")
         .trim()
         .toLowerCase();
-      const results = activeCatalog.filter((item) =>
+      const requestedType = String(requestUrl.searchParams.get("type") || "")
+        .trim()
+        .toLowerCase();
+      const typeFilteredCatalog =
+        requestedType === "interactive"
+          ? activeCatalog.filter((item) => item.type === "interactive")
+          : requestedType === "novel" || requestedType === "novels"
+            ? activeCatalog.filter((item) => item.type === "novel")
+            : requestedType === "comic" || requestedType === "comics"
+              ? activeCatalog.filter((item) => item.type === "comic")
+              : activeCatalog;
+      const results = typeFilteredCatalog.filter((item) =>
         !query ? true : item.title.toLowerCase().includes(query),
       );
       await fulfillJson(route, {
@@ -744,7 +803,18 @@ async function installContentModeRoutes(
       const query = String(requestUrl.searchParams.get("q") || "")
         .trim()
         .toLowerCase();
-      const suggestions = activeCatalog
+      const requestedType = String(requestUrl.searchParams.get("type") || "")
+        .trim()
+        .toLowerCase();
+      const typeFilteredCatalog =
+        requestedType === "interactive"
+          ? activeCatalog.filter((item) => item.type === "interactive")
+          : requestedType === "novel" || requestedType === "novels"
+            ? activeCatalog.filter((item) => item.type === "novel")
+            : requestedType === "comic" || requestedType === "comics"
+              ? activeCatalog.filter((item) => item.type === "comic")
+              : activeCatalog;
+      const suggestions = typeFilteredCatalog
         .map((item) => item.title)
         .filter((title) => title.toLowerCase().includes(query));
       await fulfillJson(route, { suggestions });
@@ -991,12 +1061,13 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("Vampire Oath");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expect(page.locator("body")).not.toContainText("All Formats");
   });
 
   test("interactive route should stay adult-only in adult mode", async ({
@@ -1023,8 +1094,9 @@ test.describe("Content mode filtering", () => {
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.locator("body")).not.toContainText("Neon Heir");
+    await expect(page.locator("body")).not.toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
+    await expect(page.locator("body")).not.toContainText("All Formats");
   });
 
   test("forged mature cookies without session should not unlock adult SSR content", async ({
@@ -1103,37 +1175,42 @@ test.describe("Content mode filtering", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
+    await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
     await expect(
-      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
+    await expect(page.locator("body")).not.toContainText("All Formats");
 
     response = await page.goto("/search?format=interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
+    await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
     await expect(
-      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
+    await expect(page.locator("body")).not.toContainText("All Formats");
 
     response = await page.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
     await expect(
-      page.getByRole("heading", { name: /Neon Heir/i }).first(),
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
+    await expect(page.locator("body")).not.toContainText("All Formats");
   });
 
   test("rankings should stay on the normal catalog by default", async ({
@@ -1546,6 +1623,39 @@ test.describe("Content mode filtering", () => {
     await expect(
       footer.getByRole("link", { name: "Search", exact: true }),
     ).toBeVisible();
+  });
+
+  test("mobile header menu should expose Interactive and route to /interactive", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByRole("button", { name: /menu/i }).first().click();
+    const interactiveLink = page
+      .getByRole("link", { name: "Interactive", exact: true })
+      .first();
+    await expect(interactiveLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(interactiveLink).toHaveAttribute("href", "/interactive");
+
+    await interactiveLink.click();
+    await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
+    await expect(
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("The Last Kingdom");
+    await expect(page.locator("body")).not.toContainText("Velvet Archive");
   });
 
   test("series footer should keep public discovery links", async ({ page }) => {

@@ -16,6 +16,7 @@ import {
   mergePaymentAttribution,
   persistPaymentAttribution,
 } from "../lib/paymentAttribution";
+import { siteConfig } from "../lib/siteConfig";
 import { getTopupPackage } from "../lib/topupCatalog";
 import { trackEvent } from "../lib/trackEvent";
 import { useAuthStore } from "./useAuthStore";
@@ -180,6 +181,13 @@ export function WalletProvider({ children }) {
         persistPaymentAttribution(attribution);
       }
 
+      if (
+        siteConfig.monetization.checkoutEnabled !== true ||
+        siteConfig.monetization.membershipEnabled !== true
+      ) {
+        return { ok: false, status: 503, error: "SUBSCRIPTION_DISABLED" };
+      }
+
       if (!isSignedIn) {
         openAuthModal();
         return { ok: false, status: 401, error: "UNAUTHENTICATED" };
@@ -251,6 +259,13 @@ export function WalletProvider({ children }) {
 
       if (attribution) {
         persistPaymentAttribution(attribution);
+      }
+
+      if (
+        siteConfig.monetization.checkoutEnabled !== true ||
+        siteConfig.monetization.pointPacksEnabled !== true
+      ) {
+        return { ok: false, status: 503, error: "CHECKOUT_DISABLED" };
       }
 
       if (!isSignedIn) {

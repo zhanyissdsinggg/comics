@@ -37,7 +37,7 @@ function buildBrief(summary) {
     `- Frontend: ${release.frontendUrl || "n/a"}`,
     `- Mode: ${release.mode || "unknown"} (fullGatePolicy=${release.fullGatePolicy || "unknown"})`,
     `- Threshold tier: ${release.thresholdTier || "unknown"}`,
-    `- Release gate: ${release.verdict || "unknown"} (baseline=${release.baseline || "unknown"}, full=${release.full || "unknown"})`,
+    `- Release gate: ${release.verdict || "unknown"} (preflight=${release.preflight || "unknown"}, baseline=${release.baseline || "unknown"}, full=${release.full || "unknown"})`,
     `- Watchdog: severity=${watchdog.severity || "unknown"}, status=${watchdog.status || "unknown"}`,
     "",
     "## Blockers",

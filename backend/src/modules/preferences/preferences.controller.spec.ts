@@ -238,10 +238,167 @@ describe("PreferencesController", () => {
     });
   });
 
+  it("ignores client attempts to self-verify mature access through preferences save", async () => {
+    mockedGetUserIdFromRequest.mockReturnValue("user-1");
+    prisma.userPreference.findUnique.mockResolvedValue({
+      payload: JSON.stringify({
+        region: "global",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
+      }),
+    });
+    prisma.userPreference.upsert.mockResolvedValue({
+      payload: JSON.stringify({
+        notifyNewEpisode: true,
+        notifyTtfReady: true,
+        notifyPromo: true,
+        region: "global",
+        language: "en",
+        hideAdultHistory: false,
+        displayName: "",
+        matureModeEnabled: true,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
+      }),
+    });
+
+    const result = await controller.save(
+      {
+        preferences: {
+          matureModeEnabled: true,
+          matureVerification: {
+            verified: true,
+            provider: "local-gate",
+            region: "global",
+            expiresAt: null,
+            referenceId: "forged",
+            verifiedAt: "2026-05-22T09:00:00.000Z",
+          },
+        },
+      },
+      {} as never,
+      res as never,
+    );
+
+    const upsertPayload = JSON.parse(
+      prisma.userPreference.upsert.mock.calls[0][0].update.payload,
+    );
+    expect(upsertPayload.matureModeEnabled).toBe(true);
+    expect(upsertPayload.matureVerification).toEqual({
+      verified: false,
+      provider: "local-gate",
+      region: "global",
+      expiresAt: null,
+      referenceId: null,
+      verifiedAt: null,
+    });
+    expect(result).toEqual({
+      preferences: expect.objectContaining({
+        matureModeEnabled: true,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
+      }),
+    });
+  });
+
+  it("stores service-managed mature verification through the confirm endpoint", async () => {
+    mockedGetUserIdFromRequest.mockReturnValue("user-1");
+    prisma.userPreference.findUnique.mockResolvedValue({
+      payload: JSON.stringify({
+        region: "global",
+        matureModeEnabled: false,
+        matureVerification: {
+          verified: false,
+          provider: "local-gate",
+          region: "global",
+          expiresAt: null,
+          referenceId: null,
+          verifiedAt: null,
+        },
+      }),
+    });
+    prisma.userPreference.upsert.mockImplementation(async ({ update }) => ({
+      payload: update.payload,
+    }));
+
+    const result = await controller.confirmMatureAccess(
+      {
+        region: "us",
+        matureModeEnabled: true,
+      },
+      {} as never,
+      res as never,
+    );
+
+    const upsertPayload = JSON.parse(
+      prisma.userPreference.upsert.mock.calls[0][0].update.payload,
+    );
+    expect(upsertPayload.region).toBe("us");
+    expect(upsertPayload.matureModeEnabled).toBe(true);
+    expect(upsertPayload.matureVerification).toEqual(
+      expect.objectContaining({
+        verified: true,
+        provider: "local-gate",
+        region: "us",
+        expiresAt: null,
+        referenceId: null,
+      }),
+    );
+    expect(typeof upsertPayload.matureVerification.verifiedAt).toBe("string");
+    expect(result).toEqual({
+      preferences: expect.objectContaining({
+        region: "us",
+        matureModeEnabled: true,
+        matureVerification: expect.objectContaining({
+          verified: true,
+          provider: "local-gate",
+          region: "us",
+        }),
+      }),
+    });
+  });
+
   it("rejects unauthenticated saves instead of writing guest junk", async () => {
     mockedGetUserIdFromRequest.mockReturnValue(null);
 
     const result = await controller.save({ preferences: {} }, {} as never, res as never);
+
+    expect(prisma.userPreference.upsert).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(result).toEqual(
+      expect.objectContaining({
+        error: "UNAUTHENTICATED",
+      }),
+    );
+  });
+
+  it("rejects unauthenticated mature confirm requests", async () => {
+    mockedGetUserIdFromRequest.mockReturnValue(null);
+
+    const result = await controller.confirmMatureAccess(
+      { region: "global" },
+      {} as never,
+      res as never,
+    );
 
     expect(prisma.userPreference.upsert).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);

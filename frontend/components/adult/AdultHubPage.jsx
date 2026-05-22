@@ -126,7 +126,14 @@ export default function AdultHubPage() {
 
   const handleAgeConfirm = async (ruleKey) => {
     trackEvent("adult_gate_confirm", { source: "adult-hub", ruleKey });
-    await confirmAge(ruleKey);
+    const status = await confirmAge(ruleKey);
+    if (status === "NEED_LOGIN") {
+      setActiveModal("login");
+      return;
+    }
+    if (status !== "OK") {
+      return;
+    }
     setActiveModal(null);
     trackEvent("adult_gate_enabled", { source: "adult-hub" });
   };

@@ -41,6 +41,7 @@ import {
 import { resolveSeriesCreatorIdentity } from "../../lib/creatorIdentity";
 import { getSeriesPrimaryReadAction } from "../../lib/episodeAccessState";
 import { buildReaderPath } from "../../lib/readerRoutes";
+import { siteConfig } from "../../lib/siteConfig";
 
 const seriesPageShellClass =
   "min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(43,28,56,0.48)_0%,rgba(19,16,27,0.96)_34%,#0f0d13_100%)] text-white";
@@ -711,6 +712,22 @@ export default function SeriesPage({
 
     return buildReaderPath(seriesId, primaryReadAction.episodeId);
   }, [primaryReadAction, seriesId]);
+  const checkoutEnabled = siteConfig.monetization.checkoutEnabled === true;
+  const primaryActionLabel = useMemo(() => {
+    if (!primaryReadAction) {
+      return "";
+    }
+    if (checkoutEnabled) {
+      return primaryReadAction.label || "";
+    }
+    if (
+      primaryReadAction.actionKind === "unlock" ||
+      primaryReadAction.actionKind === "subscribe"
+    ) {
+      return "Preview only";
+    }
+    return primaryReadAction.label || "";
+  }, [checkoutEnabled, primaryReadAction]);
   const handleSeriesPrimaryLinkClick = useCallback(() => {
     if (!primaryReadAction?.episodeId) {
       return;
@@ -723,6 +740,14 @@ export default function SeriesPage({
     }
 
     const targetEpisodeId = primaryReadAction.episodeId;
+    if (
+      !checkoutEnabled &&
+      (primaryReadAction.actionKind === "unlock" ||
+        primaryReadAction.actionKind === "subscribe")
+    ) {
+      handleOpenStore();
+      return;
+    }
     if (!targetEpisodeId) {
       if (primaryReadAction.actionKind === "subscribe") {
         handleSubscribe(seriesId, null);
@@ -785,6 +810,7 @@ export default function SeriesPage({
     handleRead,
     handleSubscribe,
     handleUnlock,
+    checkoutEnabled,
     primaryReadAction,
     seriesId,
   ]);
@@ -998,7 +1024,7 @@ export default function SeriesPage({
                 : null
           }
           primaryActionHref={primaryReadHref}
-          primaryActionLabelOverride={primaryReadAction?.label || ""}
+          primaryActionLabelOverride={primaryActionLabel}
           onFollowToggle={handleFollowToggle}
           isFollowing={isFollowing}
           desktopPrimaryActionRef={desktopPrimaryActionRef}

@@ -174,6 +174,65 @@ describe("SearchService", () => {
     );
   });
 
+  it("supports interactive search results from published interactive stories", async () => {
+    prisma.$queryRaw
+      .mockResolvedValueOnce([
+        {
+          id: "series-011",
+          title: "Solar Wind",
+          author: "Signal Drift Studio",
+          type: "interactive",
+          description: "A branching relay-field thriller.",
+          coverUrl: null,
+          coverTone: null,
+          adult: false,
+          genres: ["Sci-Fi", "Choices", "Interactive"],
+          status: "Ongoing",
+          createdAt: new Date("2026-01-05T00:00:00.000Z"),
+          updatedAt: new Date("2026-03-05T00:00:00.000Z"),
+          latestEpisodeId: "series-011e3",
+        },
+      ])
+      .mockResolvedValueOnce([{ total: BigInt(1) }]);
+    (loadSeriesAnalytics as jest.Mock).mockResolvedValueOnce(
+      new Map([
+        [
+          "series-011",
+          {
+            episodeCount: 3,
+            latestEpisodeId: "series-011e3",
+            latestEpisodeNumber: 3,
+            followers: 12,
+            views: 88,
+          },
+        ],
+      ]),
+    );
+
+    const result = await service.search({
+      type: "interactive",
+      adult: false,
+      sort: "latest",
+      page: 1,
+      pageSize: 48,
+    });
+
+    expect(result.total).toBe(1);
+    expect(result.results).toEqual([
+      expect.objectContaining({
+        id: "series-011",
+        type: "interactive",
+      }),
+    ]);
+    expect(cacheService.set).toHaveBeenCalledWith(
+      expect.stringContaining("interactive"),
+      expect.objectContaining({
+        total: 1,
+      }),
+      120,
+    );
+  });
+
   it("invalidates hot and search result caches when a query is logged", async () => {
     await service.log("user-1", "romance");
 

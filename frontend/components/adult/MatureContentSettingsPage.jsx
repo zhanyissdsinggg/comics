@@ -144,7 +144,14 @@ export default function MatureContentSettingsPage() {
   }, [isAdultMode, openAuthPrompt, requestAdultToggle, viewerSignedIn]);
 
   const handleAgeConfirm = useCallback(async () => {
-    await confirmAge(ageRuleKey);
+    const status = await confirmAge(ageRuleKey);
+    if (status !== "OK") {
+      setActiveModal(null);
+      if (status === "NEED_LOGIN") {
+        openAuthPrompt();
+      }
+      return;
+    }
     setActiveModal(null);
     setFeedback(
       "Age verification saved. Mature Mode is now on for this device.",

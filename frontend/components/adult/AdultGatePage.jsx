@@ -47,7 +47,6 @@ export default function AdultGatePage() {
   const { isSignedIn, signIn } = useAuthStore();
   const {
     confirmAge,
-    enableAdultMode,
     ageRuleKey,
     legalAge,
     requestAdultToggle,
@@ -86,15 +85,32 @@ export default function AdultGatePage() {
 
   const handleAgeConfirm = async (ruleKey) => {
     trackEvent("adult_gate_confirm", { reason, ruleKey });
-    await confirmAge(ruleKey);
+    const status = await confirmAge(ruleKey);
+    if (status === "NEED_LOGIN") {
+      setActiveModal("login");
+      return;
+    }
+    if (status !== "OK") {
+      return;
+    }
     trackEvent("adult_gate_enabled", { reason });
     router.replace(returnTo);
   };
 
   const handleEnableAdult = () => {
-    trackEvent("adult_gate_enabled", { reason });
-    enableAdultMode();
-    router.replace(returnTo);
+    const status = requestAdultToggle(true);
+    if (status === "NEED_LOGIN") {
+      setActiveModal("login");
+      return;
+    }
+    if (status === "NEED_AGE_CONFIRM") {
+      setActiveModal("age");
+      return;
+    }
+    if (status === "OK") {
+      trackEvent("adult_gate_enabled", { reason });
+      router.replace(returnTo);
+    }
   };
 
   const handleOpen = () => {
