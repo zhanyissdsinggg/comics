@@ -9,6 +9,7 @@ frontend/.next-playwright/
 dist/
 build/
 out/
+backend/public/uploads/interactive-panels/
 
 # Environment files
 .env
@@ -35,6 +36,7 @@ yarn-error.log*
 .spec-workflow/
 .codex-logs/
 coverage/
+frontend/.cache/
 test-results/
 frontend/test-results/
 frontend/playwright-report/

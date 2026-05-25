@@ -31,7 +31,7 @@ export function AdminPageSection({
   accent = "blue",
   className = "",
   tone = "default",
-  eyebrow = "工作区",
+  eyebrow = "Workspace",
 }) {
   return (
     <SurfacePanel
@@ -96,7 +96,7 @@ export function AdminMetricCard({
       )}
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-        运营指标
+        Workspace Metric
       </p>
       <p className="mt-2 text-sm font-semibold text-slate-950">{label}</p>
       <p className="mt-3 text-[1.85rem] font-semibold tracking-tight text-slate-950">

@@ -548,4 +548,577 @@ test.describe("Admin system page regressions", () => {
 
     await expectNoRuntimeIssues("/admin/interactive-stories", runtimeIssues);
   });
+
+  test("interactive stories AI assist flow can generate, approve, and attach a draft branch", async ({
+    page,
+  }) => {
+    await primeAdminSession(page);
+
+    const generatedNode = {
+      id: "node-ai-1",
+      storyId: "story-1",
+      nodeKey: "midnight-archive-intro-open-letter-ai-draft-01",
+      title: "Signal Under Glass",
+      body: "A low tone rolls through the archive shelves as the glass case answers your touch.",
+      imageUrl: null,
+      endingType: null,
+      orderIndex: 2,
+      baseContext: "A low tone rolls through the archive shelves as the glass case answers your touch.",
+      basePrompt: "Keep tension high and teen-safe.",
+      fallbackText: "The archive answers with a low metallic hum.",
+      requiredFlags: [],
+      blockedFlags: [],
+      stateEffects: {},
+      sortOrder: 2,
+      isEnding: false,
+      aiEnabled: true,
+      generatedByAI: true,
+      reviewStatus: "pending_review",
+      editorNotes: "AI draft generated from admin assist.",
+      choices: [
+        {
+          id: "choice-ai-1",
+          nodeId: "node-ai-1",
+          targetNodeId: null,
+          choiceKey: "ai-choice-1",
+          label: "Trace the reply to its source.",
+          description: "Follow the strongest signal first.",
+          requiresPremium: false,
+          requiresTokens: 0,
+          orderIndex: 0,
+          requiredFlags: [],
+          blockedFlags: [],
+          stateEffects: {},
+          sortOrder: 0,
+        },
+        {
+          id: "choice-ai-2",
+          nodeId: "node-ai-1",
+          targetNodeId: null,
+          choiceKey: "ai-choice-2",
+          label: "Seal the cabinet and step back.",
+          description: "Play safe before it escalates.",
+          requiresPremium: false,
+          requiresTokens: 0,
+          orderIndex: 1,
+          requiredFlags: [],
+          blockedFlags: [],
+          stateEffects: {},
+          sortOrder: 1,
+        },
+      ],
+    };
+
+    const storyState = {
+      story: {
+        id: "story-1",
+        slug: "midnight-archive",
+        title: "Midnight Archive",
+        seriesId: "series-011",
+        description: "Suspense branching story.",
+        baseContext: "Night shift archive entry point.",
+        initialState: { trust: 0, risk: 1, clues: 0 },
+        isPublished: false,
+        aiEnabled: true,
+        initialNodeId: "node-1",
+        series: { title: "Archive" },
+        generationLogs: [] as Array<Record<string, unknown>>,
+        nodes: [
+          {
+            id: "node-1",
+            storyId: "story-1",
+            nodeKey: "intro-01",
+            title: "Midnight Letter",
+            body: "A sealed letter waits under the desk lamp.",
+            imageUrl: null,
+            endingType: null,
+            orderIndex: 1,
+            baseContext: "You are alone in the office.",
+            basePrompt: "Build suspense.",
+            fallbackText: "You steady yourself and read the letter.",
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { risk: 1 },
+            sortOrder: 1,
+            isEnding: false,
+            aiEnabled: true,
+            generatedByAI: false,
+            reviewStatus: "approved",
+            editorNotes: "",
+            choices: [
+              {
+                id: "choice-1",
+                nodeId: "node-1",
+                targetNodeId: "node-2",
+                choiceKey: "open-letter",
+                label: "Open the letter",
+                description: "Read the contents.",
+                requiresPremium: false,
+                requiresTokens: 0,
+                orderIndex: 1,
+                requiredFlags: [],
+                blockedFlags: [],
+                stateEffects: { clues: 1 },
+                sortOrder: 1,
+              },
+            ],
+          },
+          {
+            id: "node-2",
+            storyId: "story-1",
+            nodeKey: "hallway-02",
+            title: "Hallway Footsteps",
+            body: "Footsteps echo in the hall.",
+            imageUrl: null,
+            endingType: null,
+            orderIndex: 2,
+            baseContext: "Footsteps echo in the hall.",
+            basePrompt: "Increase tension.",
+            fallbackText: "You turn slowly toward the door.",
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { trust: -1 },
+            sortOrder: 2,
+            isEnding: false,
+            aiEnabled: true,
+            generatedByAI: false,
+            reviewStatus: "approved",
+            editorNotes: "",
+            choices: [],
+          },
+        ],
+      },
+    };
+
+    const validationPayload = {
+      validation: {
+        ok: true,
+        errors: 0,
+        warnings: 0,
+        issues: { errors: [], warnings: [] },
+      },
+    };
+
+    const generatePayloads: Record<string, unknown>[] = [];
+    const reviewPayloads: Record<string, unknown>[] = [];
+    const attachPayloads: Record<string, unknown>[] = [];
+
+    function currentStoryDetail() {
+      return JSON.parse(JSON.stringify(storyState));
+    }
+
+    await installAdminApiMocks(page, async (route, url) => {
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories") &&
+        route.request().method() === "GET"
+      ) {
+        await fulfillJson(route, {
+          stories: [
+            {
+              id: "story-1",
+              slug: "midnight-archive",
+              title: "Midnight Archive",
+              isPublished: false,
+              _count: {
+                nodes: storyState.story.nodes.length,
+                progress: 5,
+              },
+              series: { title: "Archive" },
+            },
+          ],
+        });
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/story-1/validation")
+      ) {
+        await fulfillJson(route, validationPayload);
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/story-1") &&
+        route.request().method() === "GET"
+      ) {
+        await fulfillJson(route, currentStoryDetail());
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/story-1/generate-node") &&
+        route.request().method() === "POST"
+      ) {
+        const payload = JSON.parse(
+          route.request().postData() || "{}",
+        ) as Record<string, unknown>;
+        generatePayloads.push(payload);
+
+        storyState.story.nodes.splice(1, 0, generatedNode);
+        storyState.story.generationLogs.unshift({
+          id: "log-ai-1",
+          nodeId: "node-ai-1",
+          choiceId: "choice-1",
+          status: "success",
+          contentMode: "normal",
+          generationType: "admin_next_node_draft",
+          provider: "openai",
+          model: "gpt-5.4-mini",
+          prompt: "prompt",
+          response: "{\"title\":\"Signal Under Glass\"}",
+          responseJson: {
+            title: "Signal Under Glass",
+          },
+          safetyNotes: "Teen-safe tension and mystery only.",
+          reviewStatus: "pending_review",
+          errorMessage: null,
+          latencyMs: 420,
+          node: {
+            id: "node-ai-1",
+            nodeKey: generatedNode.nodeKey,
+            title: generatedNode.title,
+          },
+          choice: {
+            id: "choice-1",
+            nodeId: "node-1",
+            choiceKey: "open-letter",
+            label: "Open the letter",
+            node: {
+              id: "node-1",
+              nodeKey: "intro-01",
+              title: "Midnight Letter",
+            },
+          },
+        });
+
+        await fulfillJson(
+          route,
+          {
+            generatedNode: {
+              id: "node-ai-1",
+              reviewStatus: "pending_review",
+            },
+            linkedToChoice: false,
+          },
+          201,
+        );
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/nodes/node-ai-1") &&
+        route.request().method() === "PATCH"
+      ) {
+        const payload = JSON.parse(
+          route.request().postData() || "{}",
+        ) as Record<string, unknown>;
+        reviewPayloads.push(payload);
+
+        const node = storyState.story.nodes.find((item) => item.id === "node-ai-1");
+        if (node) {
+          node.reviewStatus = "approved";
+        }
+        const log = storyState.story.generationLogs.find(
+          (item) => item.nodeId === "node-ai-1",
+        );
+        if (log) {
+          log.reviewStatus = "approved";
+        }
+
+        await fulfillJson(route, {
+          node: {
+            id: "node-ai-1",
+            reviewStatus: "approved",
+          },
+        });
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/choices/choice-1") &&
+        route.request().method() === "PATCH"
+      ) {
+        const payload = JSON.parse(
+          route.request().postData() || "{}",
+        ) as Record<string, unknown>;
+        attachPayloads.push(payload);
+
+        const introNode = storyState.story.nodes.find((item) => item.id === "node-1");
+        const introChoice = introNode?.choices?.find((item) => item.id === "choice-1");
+        if (introChoice) {
+          introChoice.targetNodeId = "node-ai-1";
+        }
+
+        await fulfillJson(route, {
+          choice: {
+            id: "choice-1",
+            targetNodeId: "node-ai-1",
+          },
+        });
+        return true;
+      }
+
+      return false;
+    });
+
+    const runtimeIssues = collectRuntimeIssues(page);
+    const response = await page.goto("/admin/interactive-stories", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByTestId("admin-tab-nodes").click();
+    await page.locator("button").filter({ hasText: "Midnight Letter" }).first().click();
+
+    await page
+      .locator("button")
+      .filter({ hasText: "Generate Next Node" })
+      .first()
+      .click();
+
+    await expect
+      .poll(() => generatePayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
+      .toBe(1);
+    expect(generatePayloads[0]).toEqual({
+      input: expect.objectContaining({
+        fromNodeId: "node-1",
+        choiceId: "choice-1",
+      }),
+    });
+
+    await expect(page.getByText("Signal Under Glass").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("pending_review").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+
+    await page.locator('select').filter({ has: page.locator('option[value="approved"]') }).first().selectOption("approved");
+    await page
+      .locator("button")
+      .filter({ hasText: "保存节点" })
+      .first()
+      .click();
+
+    await expect
+      .poll(() => reviewPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
+      .toBe(1);
+    expect(reviewPayloads[0]).toEqual({
+      node: expect.objectContaining({
+        reviewStatus: "approved",
+      }),
+    });
+
+    const bindButtons = page
+      .locator("button")
+      .filter({ hasText: /^绑定分支$/ });
+    await bindButtons.first().click();
+
+    await expect
+      .poll(() => attachPayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
+      .toBe(1);
+    expect(attachPayloads[0]).toEqual({
+      choice: expect.objectContaining({
+        targetNodeId: "node-ai-1",
+      }),
+    });
+
+    await expect(
+      page.locator("button").filter({ hasText: "Midnight Letter" }).first(),
+    ).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Open the letter").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expect(page.getByText("Signal Under Glass").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+
+    await expectNoRuntimeIssues("/admin/interactive-stories", runtimeIssues);
+  });
+
+  test("interactive panel review can override final image url before approve", async ({
+    page,
+  }) => {
+    await primeAdminSession(page);
+
+    const panelApprovePayloads: Record<string, unknown>[] = [];
+    const storyState = {
+      story: {
+        id: "story-1",
+        slug: "midnight-archive",
+        title: "Midnight Archive",
+        seriesId: "series-011",
+        description: "Suspense branching story.",
+        baseContext: "Night shift archive entry point.",
+        initialState: { trust: 0, risk: 1, clues: 0 },
+        isPublished: false,
+        aiEnabled: true,
+        initialNodeId: "node-1",
+        series: { title: "Archive" },
+        generationLogs: [],
+        nodes: [
+          {
+            id: "node-1",
+            storyId: "story-1",
+            nodeKey: "intro-01",
+            title: "Midnight Letter",
+            body: "A sealed letter waits under the desk lamp.",
+            imageUrl: null,
+            endingType: null,
+            orderIndex: 1,
+            baseContext: "You are alone in the office.",
+            basePrompt: "Build suspense.",
+            fallbackText: "You steady yourself and read the letter.",
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { risk: 1 },
+            sortOrder: 1,
+            isEnding: false,
+            aiEnabled: true,
+            generatedByAI: false,
+            reviewStatus: "approved",
+            editorNotes: "",
+            panels: [
+              {
+                id: "panel-1",
+                storyId: "story-1",
+                nodeId: "node-1",
+                panelNumber: 1,
+                promptJson: {
+                  panelNumber: 1,
+                  character: "Courier lead",
+                  scene: "Archive desk",
+                  camera: "Medium close-up",
+                  emotion: "Uneasy focus",
+                  action: "Breaking the wax seal",
+                  style: "American YA suspense comic",
+                  dialogue: "The seal is warmer than it should be.",
+                },
+                imageUrl: "https://cdn.gush.test/draft/panel-1.png",
+                finalImageUrl: null,
+                dialogue: "The seal is warmer than it should be.",
+                reviewStatus: "pending_review",
+                provider: "openai",
+                model: "gpt-image-1",
+                seed: 42,
+              },
+            ],
+            choices: [],
+          },
+        ],
+      },
+    };
+
+    function currentStoryDetail() {
+      return JSON.parse(JSON.stringify(storyState));
+    }
+
+    await installAdminApiMocks(page, async (route, url) => {
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories") &&
+        route.request().method() === "GET"
+      ) {
+        await fulfillJson(route, {
+          stories: [
+            {
+              id: "story-1",
+              slug: "midnight-archive",
+              title: "Midnight Archive",
+              isPublished: false,
+              _count: {
+                nodes: storyState.story.nodes.length,
+                progress: 2,
+              },
+              series: { title: "Archive" },
+            },
+          ],
+        });
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/story-1/validation")
+      ) {
+        await fulfillJson(route, {
+          validation: {
+            ok: true,
+            errors: 0,
+            warnings: 0,
+            issues: { errors: [], warnings: [] },
+          },
+        });
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-stories/story-1") &&
+        route.request().method() === "GET"
+      ) {
+        await fulfillJson(route, currentStoryDetail());
+        return true;
+      }
+
+      if (
+        url.pathname.endsWith("/api/admin/interactive-panels/panel-1/approve") &&
+        route.request().method() === "POST"
+      ) {
+        const payload = JSON.parse(
+          route.request().postData() || "{}",
+        ) as Record<string, unknown>;
+        panelApprovePayloads.push(payload);
+
+        storyState.story.nodes[0].panels[0].reviewStatus = "approved";
+        storyState.story.nodes[0].panels[0].finalImageUrl =
+          String(
+            (payload.panel as Record<string, unknown> | undefined)
+              ?.finalImageUrl || "",
+          ) || "https://cdn.gush.test/draft/panel-1.png";
+
+        await fulfillJson(route, {
+          panel: {
+            id: "panel-1",
+            reviewStatus: "approved",
+            finalImageUrl: storyState.story.nodes[0].panels[0].finalImageUrl,
+          },
+        });
+        return true;
+      }
+
+      return false;
+    });
+
+    const runtimeIssues = collectRuntimeIssues(page);
+    const response = await page.goto("/admin/interactive-stories", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await page.getByTestId("admin-tab-nodes").click();
+    await page.locator("button").filter({ hasText: "Midnight Letter" }).first().click();
+
+    const finalUrlInput = page.getByTestId("admin-panel-final-url-panel-1");
+    await expect(finalUrlInput).toHaveValue(
+      "https://cdn.gush.test/draft/panel-1.png",
+      { timeout: ADMIN_UI_TIMEOUT_MS },
+    );
+    await finalUrlInput.fill("https://cdn.gush.test/final/panel-1-approved.png");
+
+    await page.getByTestId("admin-panel-approve-panel-1").click();
+
+    await expect
+      .poll(() => panelApprovePayloads.length, { timeout: ADMIN_UI_TIMEOUT_MS })
+      .toBe(1);
+    expect(panelApprovePayloads[0]).toEqual({
+      panel: {
+        finalImageUrl: "https://cdn.gush.test/final/panel-1-approved.png",
+      },
+    });
+
+    await expect(page.getByText("approved").first()).toBeVisible({
+      timeout: ADMIN_UI_TIMEOUT_MS,
+    });
+    await expectNoRuntimeIssues("/admin/interactive-stories", runtimeIssues);
+  });
 });

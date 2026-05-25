@@ -121,6 +121,11 @@ model InteractiveStory {
   slug          String   @unique
   title         String
   description   String?
+  coverImage    String?
+  genre         String?
+  targetAudience String?
+  contentMode   String   @default("normal")
+  status        String   @default("draft")
   baseContext   String?
   initialNodeId String?
   initialState  Json     @default("{}")
@@ -131,6 +136,7 @@ model InteractiveStory {
 
   series         Series?               @relation("SeriesInteractiveStory", fields: [seriesId], references: [id], onDelete: SetNull)
   nodes          InteractiveStoryNode[]
+  panels         InteractivePanel[]
   progress       UserStoryProgress[]
   state          UserStoryState[]
   choiceLogs     UserStoryChoiceLog[]
@@ -145,6 +151,10 @@ model InteractiveStoryNode {
   storyId       String
   nodeKey       String
   title         String
+  body          String?
+  imageUrl      String?
+  endingType    String?
+  orderIndex    Int      @default(0)
   baseContext   String?
   basePrompt    String?
   fallbackText  String?
@@ -154,12 +164,16 @@ model InteractiveStoryNode {
   sortOrder     Int      @default(0)
   isEnding      Boolean  @default(false)
   aiEnabled     Boolean  @default(true)
+  generatedByAI Boolean  @default(false)
+  reviewStatus  String   @default("approved")
+  editorNotes   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   story          InteractiveStory      @relation(fields: [storyId], references: [id], onDelete: Cascade)
   choices        InteractiveStoryChoice[] @relation("InteractiveNodeChoices")
   targetedBy     InteractiveStoryChoice[] @relation("InteractiveChoiceTargets")
+  panels         InteractivePanel[]
   progress       UserStoryProgress[]   @relation("InteractiveNodeProgress")
   choiceLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceNodeLogs")
   targetLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceTargetLogs")
@@ -177,6 +191,9 @@ model InteractiveStoryChoice {
   choiceKey     String
   label         String
   description   String?
+  requiresPremium Boolean @default(false)
+  requiresTokens Int      @default(0)
+  orderIndex    Int      @default(0)
   requiredFlags String[] @default([])
   blockedFlags  String[] @default([])
   stateEffects  Json     @default("{}")
@@ -202,6 +219,8 @@ model UserStoryProgress {
   storyId           String
   currentNodeId     String
   lastChoiceId      String?
+  pathJson          Json      @default("[]")
+  choicesJson       Json      @default("[]")
   lastChoiceAt      DateTime?
   lastGeneratedText String?
   createdAt         DateTime  @default(now())
@@ -263,10 +282,15 @@ model StoryGenerationLog {
   nodeId       String
   choiceId     String?
   status       String
+  contentMode  String?
+  generationType String?
   provider     String
   model        String?
   prompt       String
   response     String?
+  responseJson Json?
+  safetyNotes  String?
+  reviewStatus String?
   errorMessage String?
   latencyMs    Int?
   createdAt    DateTime  @default(now())
@@ -279,7 +303,33 @@ model StoryGenerationLog {
   @@index([storyId, createdAt])
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  @@index([contentMode, generationType, createdAt])
   @@map("story_generation_logs")
+}
+
+model InteractivePanel {
+  id            String   @id @default(cuid())
+  storyId       String
+  nodeId        String
+  panelNumber   Int
+  promptJson    Json     @default("{}")
+  imageUrl      String?
+  finalImageUrl String?
+  dialogue      String?
+  reviewStatus  String   @default("draft")
+  provider      String?
+  model         String?
+  seed          Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  story         InteractiveStory     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  node          InteractiveStoryNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([nodeId, panelNumber])
+  @@index([storyId, nodeId, panelNumber])
+  @@index([storyId, reviewStatus, createdAt])
+  @@map("interactive_panels")
 }
 
 model Creator {

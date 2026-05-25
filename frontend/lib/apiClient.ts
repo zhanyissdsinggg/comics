@@ -439,6 +439,9 @@ function invalidateCacheForWrite(path: string): void {
   if (path.startsWith("/api/admin/series")) {
     invalidateCacheByPrefix("/api/series");
   }
+  if (path.startsWith("/api/admin/interactive-stories")) {
+    invalidateCacheByPrefix("/api/admin/interactive-stories");
+  }
   if (path.startsWith("/api/ratings")) {
     invalidateCacheByPrefix("/api/series");
   }

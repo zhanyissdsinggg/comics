@@ -256,6 +256,26 @@ test.describe("Auth-required UX", () => {
         return;
       }
 
+      if (pathname === "/api/interactive-stories") {
+        await fulfillJson(route, {
+          stories: [
+            {
+              id: "interactive-011",
+              slug: "solar-wind",
+              title: "Solar Wind",
+              description: "A branching relay-field thriller.",
+              coverImage: "/mock-covers/series-011.jpg",
+              genre: "Sci-Fi",
+              contentMode: "normal",
+              status: "published",
+              nodeCount: 3,
+              endingCount: 2,
+            },
+          ],
+        });
+        return;
+      }
+
       if (pathname === "/api/search") {
         await fulfillJson(route, {
           results: [
@@ -300,11 +320,9 @@ test.describe("Auth-required UX", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("button", { name: /Interactive/i }).first(),
+      page.getByRole("heading", { name: /Pick the branch\. Own the fallout\./i }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
-    await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
-    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page).toHaveURL(/\/interactive$/);
   });
 });

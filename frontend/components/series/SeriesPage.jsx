@@ -194,6 +194,7 @@ export default function SeriesPage({
     ageRuleKey,
     legalAge,
     isAdultMode,
+    contentMode,
     requestAdultToggle,
     confirmAge: confirmAdultAge,
     forceDisableAdultMode,
@@ -438,17 +439,14 @@ export default function SeriesPage({
   ]);
 
   useEffect(() => {
-    const seriesType = String(data?.series?.type || "")
-      .trim()
-      .toLowerCase();
-    if (!data?.series?.id || seriesType !== "novel") {
+    if (!data?.series?.id) {
       setInteractiveStory(null);
       return;
     }
 
     let cancelled = false;
     apiGet(
-      `/api/interactive-stories/by-series/${encodeURIComponent(seriesId)}`,
+      `/api/interactive-stories/by-series/${encodeURIComponent(seriesId)}?adult=${contentMode === "adult" ? "1" : "0"}`,
       {
         suppressAuthModal: true,
         cacheMs: 30_000,
@@ -473,7 +471,7 @@ export default function SeriesPage({
     return () => {
       cancelled = true;
     };
-  }, [data?.series?.id, data?.series?.type, seriesId]);
+  }, [contentMode, data?.series?.id, seriesId]);
 
   useEffect(() => {
     if (error === "ADULT_GATED") {
@@ -1057,7 +1055,9 @@ export default function SeriesPage({
                 type="button"
                 onClick={() =>
                   router.push(
-                    `/series/${encodeURIComponent(seriesId)}/interactive`,
+                    interactiveStory?.slug
+                      ? `/interactive/${encodeURIComponent(interactiveStory.slug)}`
+                      : `/series/${encodeURIComponent(seriesId)}/interactive`,
                   )
                 }
                 className={storefrontSecondaryButtonClass}

@@ -3,6 +3,7 @@ import type {
   InteractiveStory,
   InteractiveStoryChoice,
   InteractiveStoryNode,
+  InteractivePanel,
   Prisma,
 } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -10,10 +11,13 @@ import { InteractiveAiService } from "./interactive-ai.service";
 
 type StoryState = Record<string, unknown>;
 
+type ContentMode = "normal" | "adult";
+
 type StoryWithGraph = InteractiveStory & {
   nodes: Array<
     InteractiveStoryNode & {
       choices: InteractiveStoryChoice[];
+      panels: InteractivePanel[];
     }
   >;
 };
@@ -23,15 +27,27 @@ type StoryChoiceView = {
   key: string;
   label: string;
   description: string;
+  requiresPremium: boolean;
+  requiresTokens: number;
 };
 
 type StoryNodeView = {
   id: string;
   key: string;
   title: string;
-  content: string;
+  body: string;
+  imageUrl: string;
+  panels: StoryPanelView[];
   isEnding: boolean;
+  endingType: string;
   choices: StoryChoiceView[];
+};
+
+type StoryPanelView = {
+  id: string;
+  panelNumber: number;
+  imageUrl: string;
+  dialogue: string;
 };
 
 type StoryProgressView = {
@@ -41,14 +57,48 @@ type StoryProgressView = {
     slug: string;
     title: string;
     description: string;
+    coverImage: string;
+    genre: string;
+    contentMode: ContentMode;
+    status: string;
   };
   state: StoryState;
   flags: string[];
+  path: string[];
+  choices: string[];
   node: StoryNodeView;
+};
+
+type StoryListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  coverImage: string;
+  genre: string;
+  contentMode: ContentMode;
+  status: string;
+  seriesId: string | null;
+  updatedAt: Date;
 };
 
 function normalizeText(value: unknown): string {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function normalizeNullableText(value: unknown): string | null {
+  const normalized = normalizeText(value);
+  return normalized || null;
+}
+
+function normalizeContentMode(value: unknown): ContentMode {
+  return String(value || "").trim().toLowerCase() === "adult"
+    ? "adult"
+    : "normal";
+}
+
+function isApprovedReviewStatus(value: unknown): boolean {
+  return normalizeText(value).toLowerCase() === "approved";
 }
 
 function parseState(value: Prisma.JsonValue | null | undefined): StoryState {
@@ -58,17 +108,22 @@ function parseState(value: Prisma.JsonValue | null | undefined): StoryState {
   return { ...(value as Record<string, unknown>) };
 }
 
-function toInputJson(value: StoryState): Prisma.InputJsonValue {
-  return value as Prisma.InputJsonValue;
-}
-
 function parseStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value
-    .map((item) => normalizeText(item))
-    .filter(Boolean);
+  return value.map((item) => normalizeText(item)).filter(Boolean);
+}
+
+function parseJsonStringArray(value: Prisma.JsonValue | null | undefined): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.map((item) => normalizeText(item)).filter(Boolean);
+}
+
+function toInputJson(value: StoryState | string[]): Prisma.InputJsonValue {
+  return value as Prisma.InputJsonValue;
 }
 
 function mergeFlags(
@@ -85,7 +140,10 @@ function mergeFlags(
   return [...merged].filter(Boolean);
 }
 
-function applyEffects(baseState: StoryState, effectsJson: Prisma.JsonValue | null | undefined): StoryState {
+function applyEffects(
+  baseState: StoryState,
+  effectsJson: Prisma.JsonValue | null | undefined,
+): StoryState {
   const nextState: StoryState = { ...baseState };
   if (!effectsJson || typeof effectsJson !== "object" || Array.isArray(effectsJson)) {
     return nextState;
@@ -94,7 +152,11 @@ function applyEffects(baseState: StoryState, effectsJson: Prisma.JsonValue | nul
   const effects = effectsJson as Record<string, unknown>;
   for (const [key, rawValue] of Object.entries(effects)) {
     if (key === "flags") {
-      const mergedFlags = mergeFlags(nextState, parseStringArray(nextState.flags), parseStringArray(rawValue));
+      const mergedFlags = mergeFlags(
+        nextState,
+        parseStringArray(nextState.flags),
+        parseStringArray(rawValue),
+      );
       nextState.flags = mergedFlags;
       continue;
     }
@@ -119,23 +181,17 @@ export class InteractiveStoriesService {
     private readonly interactiveAiService: InteractiveAiService,
   ) {}
 
-  private async findStoryGraph(storyId: string): Promise<StoryWithGraph | null> {
-    return this.prisma.interactiveStory.findFirst({
-      where: {
-        id: storyId,
-        isPublished: true,
-      },
-      include: {
-        nodes: {
-          orderBy: { sortOrder: "asc" },
-          include: {
-            choices: {
-              orderBy: { sortOrder: "asc" },
-            },
-          },
-        },
-      },
-    }) as Promise<StoryWithGraph | null>;
+  private publicWhere(contentMode: ContentMode): Prisma.InteractiveStoryWhereInput {
+    return {
+      contentMode,
+      OR: [{ status: "published" }, { isPublished: true }],
+    };
+  }
+
+  private publicNodeWhere(): Prisma.InteractiveStoryNodeWhereInput {
+    return {
+      reviewStatus: "approved",
+    };
   }
 
   private buildNodeByIdMap(story: StoryWithGraph) {
@@ -149,17 +205,21 @@ export class InteractiveStoriesService {
   private getStartNode(story: StoryWithGraph) {
     if (story.initialNodeId) {
       const found = story.nodes.find((node) => node.id === story.initialNodeId);
-      if (found) {
+      if (found && isApprovedReviewStatus(found.reviewStatus)) {
         return found;
       }
     }
-    return story.nodes[0] || null;
+    return story.nodes.find((node) => isApprovedReviewStatus(node.reviewStatus)) || null;
   }
 
-  private isChoiceAvailable(
-    choice: InteractiveStoryChoice,
-    flags: string[],
-  ): boolean {
+  private isPublicNode(node: InteractiveStoryNode | null | undefined): boolean {
+    if (!node) {
+      return false;
+    }
+    return isApprovedReviewStatus(node.reviewStatus);
+  }
+
+  private isChoiceAvailable(choice: InteractiveStoryChoice, flags: string[]): boolean {
     const currentFlags = new Set(flags.map((item) => normalizeText(item)));
     const required = parseStringArray(choice.requiredFlags);
     const blocked = parseStringArray(choice.blockedFlags);
@@ -170,36 +230,70 @@ export class InteractiveStoriesService {
     return !blocked.some((flag) => currentFlags.has(flag));
   }
 
-  private toChoiceView(
-    choices: InteractiveStoryChoice[],
-    flags: string[],
-    choiceLabelOverrides: Record<string, string> = {},
-  ): StoryChoiceView[] {
+  private toChoiceView(choices: InteractiveStoryChoice[], flags: string[]): StoryChoiceView[] {
     return choices
       .filter((choice) => this.isChoiceAvailable(choice, flags))
-      .slice(0, 4)
+      .slice(0, 3)
       .map((choice) => ({
         id: choice.id,
-        key: choice.choiceKey,
-        label: normalizeText(choiceLabelOverrides[choice.id] || choice.label),
+        key: normalizeText(choice.choiceKey),
+        label: normalizeText(choice.label),
         description: normalizeText(choice.description),
+        requiresPremium: Boolean(choice.requiresPremium),
+        requiresTokens: Number(choice.requiresTokens || 0),
       }));
   }
 
-  private toNodeContent(node: InteractiveStoryNode, generatedText: string | null): string {
-    const generated = normalizeText(generatedText);
-    if (generated) {
-      return generated;
+  private toNodeBody(node: InteractiveStoryNode, generatedText: string | null) {
+    const fromGenerated = normalizeText(generatedText);
+    if (fromGenerated) {
+      return fromGenerated;
     }
-    const fallback = normalizeText(node.fallbackText);
-    if (fallback) {
-      return fallback;
+
+    const fromBody = normalizeText(node.body);
+    if (fromBody) {
+      return fromBody;
     }
-    const base = normalizeText(node.baseContext);
-    if (base) {
-      return base;
+
+    const fromFallback = normalizeText(node.fallbackText);
+    if (fromFallback) {
+      return fromFallback;
     }
+
+    const fromContext = normalizeText(node.baseContext);
+    if (fromContext) {
+      return fromContext;
+    }
+
     return "The story continues.";
+  }
+
+  private toPanelView(panels: InteractivePanel[]): StoryPanelView[] {
+    return panels
+      .filter((panel) => normalizeText(panel.reviewStatus).toLowerCase() === "approved")
+      .map((panel) => ({
+        id: panel.id,
+        panelNumber: Number(panel.panelNumber || 0),
+        imageUrl: normalizeText(panel.finalImageUrl || panel.imageUrl),
+        dialogue: normalizeText(panel.dialogue),
+      }))
+      .filter((panel) => panel.imageUrl)
+      .sort((left, right) => left.panelNumber - right.panelNumber)
+      .slice(0, 3);
+  }
+
+  private toStorySummary(story: InteractiveStory) {
+    return {
+      id: story.id,
+      seriesId: story.seriesId,
+      slug: normalizeText(story.slug),
+      title: normalizeText(story.title),
+      description: normalizeText(story.description),
+      coverImage: normalizeText(story.coverImage),
+      genre: normalizeText(story.genre),
+      contentMode: normalizeContentMode(story.contentMode),
+      status: normalizeText(story.status || (story.isPublished ? "published" : "draft")) || "draft",
+    };
   }
 
   private toProgressView(
@@ -207,31 +301,146 @@ export class InteractiveStoriesService {
     node: StoryWithGraph["nodes"][number],
     state: StoryState,
     flags: string[],
+    path: string[],
+    choices: string[],
     generatedText: string | null,
-    choiceLabelOverrides: Record<string, string> = {},
   ): StoryProgressView {
     return {
-      story: {
-        id: story.id,
-        seriesId: story.seriesId,
-        slug: story.slug,
-        title: story.title,
-        description: normalizeText(story.description),
-      },
+      story: this.toStorySummary(story),
       state,
       flags,
+      path,
+      choices,
       node: {
         id: node.id,
-        key: node.nodeKey,
-        title: node.title,
-        content: this.toNodeContent(node, generatedText),
+        key: normalizeText(node.nodeKey),
+        title: normalizeText(node.title),
+        body: this.toNodeBody(node, generatedText),
+        imageUrl: normalizeText(node.imageUrl),
+        panels: this.toPanelView(node.panels || []),
         isEnding: Boolean(node.isEnding),
-        choices: this.toChoiceView(node.choices, flags, choiceLabelOverrides),
+        endingType: normalizeText(node.endingType),
+        choices: this.toChoiceView(node.choices, flags),
       },
     };
   }
 
-  async getStoryBySeries(seriesId: string) {
+  private async findStoryGraphById(
+    storyId: string,
+    contentMode?: ContentMode,
+  ): Promise<StoryWithGraph | null> {
+    const normalizedStoryId = normalizeText(storyId);
+    if (!normalizedStoryId) {
+      return null;
+    }
+
+    const where: Prisma.InteractiveStoryWhereInput = {
+      id: normalizedStoryId,
+      ...(contentMode ? this.publicWhere(contentMode) : {}),
+    };
+
+    return this.prisma.interactiveStory.findFirst({
+      where,
+      include: {
+        nodes: {
+          where: this.publicNodeWhere(),
+          orderBy: [{ orderIndex: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+          include: {
+            choices: {
+              orderBy: [{ orderIndex: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+            },
+            panels: {
+              where: {
+                reviewStatus: "approved",
+              },
+              orderBy: [{ panelNumber: "asc" }, { createdAt: "asc" }],
+            },
+          },
+        },
+      },
+    }) as Promise<StoryWithGraph | null>;
+  }
+
+  private async findStoryGraphBySlug(
+    slug: string,
+    contentMode: ContentMode,
+  ): Promise<StoryWithGraph | null> {
+    const normalizedSlug = normalizeText(slug);
+    if (!normalizedSlug) {
+      return null;
+    }
+
+    return this.prisma.interactiveStory.findFirst({
+      where: {
+        slug: normalizedSlug,
+        ...this.publicWhere(contentMode),
+      },
+      include: {
+        nodes: {
+          where: this.publicNodeWhere(),
+          orderBy: [{ orderIndex: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+          include: {
+            choices: {
+              orderBy: [{ orderIndex: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+            },
+            panels: {
+              where: {
+                reviewStatus: "approved",
+              },
+              orderBy: [{ panelNumber: "asc" }, { createdAt: "asc" }],
+            },
+          },
+        },
+      },
+    }) as Promise<StoryWithGraph | null>;
+  }
+
+  async listStories(contentMode: ContentMode, query = ""): Promise<StoryListItem[]> {
+    const normalizedQuery = normalizeText(query).toLowerCase();
+    const stories = await this.prisma.interactiveStory.findMany({
+      where: {
+        ...this.publicWhere(contentMode),
+        ...(normalizedQuery
+          ? {
+              OR: [
+                { title: { contains: normalizedQuery, mode: "insensitive" } },
+                { slug: { contains: normalizedQuery, mode: "insensitive" } },
+                { description: { contains: normalizedQuery, mode: "insensitive" } },
+                { genre: { contains: normalizedQuery, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        coverImage: true,
+        genre: true,
+        contentMode: true,
+        status: true,
+        seriesId: true,
+        updatedAt: true,
+      },
+    });
+
+    return stories.map((story) => ({
+      id: story.id,
+      slug: normalizeText(story.slug),
+      title: normalizeText(story.title),
+      description: normalizeText(story.description),
+      coverImage: normalizeText(story.coverImage),
+      genre: normalizeText(story.genre),
+      contentMode: normalizeContentMode(story.contentMode),
+      status: normalizeText(story.status) || "draft",
+      seriesId: story.seriesId,
+      updatedAt: story.updatedAt,
+    }));
+  }
+
+  async getStoryBySeries(seriesId: string, contentMode?: ContentMode) {
     const normalizedSeriesId = normalizeText(seriesId);
     if (!normalizedSeriesId) {
       return null;
@@ -240,13 +449,17 @@ export class InteractiveStoriesService {
     const story = await this.prisma.interactiveStory.findFirst({
       where: {
         seriesId: normalizedSeriesId,
-        isPublished: true,
+        ...(contentMode ? this.publicWhere(contentMode) : { OR: [{ status: "published" }, { isPublished: true }] }),
       },
       select: {
         id: true,
         slug: true,
         title: true,
         description: true,
+        coverImage: true,
+        genre: true,
+        contentMode: true,
+        status: true,
         seriesId: true,
       },
     });
@@ -257,47 +470,48 @@ export class InteractiveStoriesService {
 
     return {
       id: story.id,
-      slug: story.slug,
-      title: story.title,
+      slug: normalizeText(story.slug),
+      title: normalizeText(story.title),
       description: normalizeText(story.description),
+      coverImage: normalizeText(story.coverImage),
+      genre: normalizeText(story.genre),
+      contentMode: normalizeContentMode(story.contentMode),
+      status: normalizeText(story.status) || "draft",
       seriesId: story.seriesId,
     };
   }
 
-  async getStory(storyId: string) {
-    const normalizedStoryId = normalizeText(storyId);
-    if (!normalizedStoryId) {
-      return null;
-    }
-    const story = await this.prisma.interactiveStory.findFirst({
-      where: {
-        id: normalizedStoryId,
-        isPublished: true,
-      },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        baseContext: true,
-        seriesId: true,
-      },
-    });
+  async getStoryBySlug(slug: string, contentMode: ContentMode) {
+    const story = await this.findStoryGraphBySlug(slug, contentMode);
     if (!story) {
       return null;
     }
+
+    const startNode = this.getStartNode(story);
     return {
-      id: story.id,
-      slug: story.slug,
-      title: story.title,
-      description: normalizeText(story.description),
-      baseContext: normalizeText(story.baseContext),
-      seriesId: story.seriesId,
+      ...this.toStorySummary(story),
+      startNodeKey: normalizeText(startNode?.nodeKey),
+      nodeCount: Array.isArray(story.nodes) ? story.nodes.length : 0,
+      endingCount: Array.isArray(story.nodes)
+        ? story.nodes.filter((node) => node.isEnding).length
+        : 0,
     };
   }
 
-  async getOrInitProgress(storyId: string, userId: string): Promise<StoryProgressView | null> {
-    const story = await this.findStoryGraph(storyId);
+  async getStory(storyId: string, contentMode?: ContentMode) {
+    const story = await this.findStoryGraphById(storyId, contentMode);
+    if (!story) {
+      return null;
+    }
+    return this.toStorySummary(story);
+  }
+
+  async getOrInitProgress(
+    storyId: string,
+    userId: string,
+    contentMode?: ContentMode,
+  ): Promise<StoryProgressView | null> {
+    const story = await this.findStoryGraphById(storyId, contentMode);
     if (!story || story.nodes.length === 0) {
       return null;
     }
@@ -330,6 +544,8 @@ export class InteractiveStoriesService {
     let progress = progressRow;
     let state = parseState(stateRow?.state || story.initialState);
     let flags = mergeFlags(state, parseStringArray(stateRow?.flags || []));
+    const path = parseJsonStringArray(progressRow?.pathJson || []);
+    const choices = parseJsonStringArray(progressRow?.choicesJson || []);
     state.flags = flags;
 
     if (!progress) {
@@ -338,7 +554,9 @@ export class InteractiveStoriesService {
           userId,
           storyId: story.id,
           currentNodeId: startNode.id,
-          lastGeneratedText: normalizeText(startNode.fallbackText || startNode.baseContext),
+          pathJson: [startNode.id] as unknown as Prisma.InputJsonValue,
+          choicesJson: [] as unknown as Prisma.InputJsonValue,
+          lastGeneratedText: normalizeText(startNode.body || startNode.fallbackText || startNode.baseContext),
         },
       });
     }
@@ -355,26 +573,44 @@ export class InteractiveStoriesService {
     }
 
     const currentNode = nodeById.get(progress.currentNodeId) || startNode;
+    if (!this.isPublicNode(currentNode)) {
+      return null;
+    }
+    const resolvedPath = parseJsonStringArray(progress.pathJson || []);
+    const nextPath = resolvedPath.length > 0 ? resolvedPath : [currentNode.id];
+    const nextChoices = parseJsonStringArray(progress.choicesJson || []);
+
     return this.toProgressView(
       story,
       currentNode,
       state,
       flags,
+      nextPath,
+      nextChoices,
       progress.lastGeneratedText || null,
     );
+  }
+
+  async getOrInitProgressBySlug(slug: string, userId: string, contentMode: ContentMode) {
+    const story = await this.findStoryGraphBySlug(slug, contentMode);
+    if (!story) {
+      return null;
+    }
+    return this.getOrInitProgress(story.id, userId, contentMode);
   }
 
   async submitChoice(
     storyId: string,
     userId: string,
     choiceId: string,
+    contentMode?: ContentMode,
   ): Promise<StoryProgressView | null> {
     const normalizedChoiceId = normalizeText(choiceId);
     if (!normalizedChoiceId) {
       return null;
     }
 
-    const story = await this.findStoryGraph(storyId);
+    const story = await this.findStoryGraphById(storyId, contentMode);
     if (!story || story.nodes.length === 0) {
       return null;
     }
@@ -410,16 +646,19 @@ export class InteractiveStoriesService {
       storyId: story.id,
       currentNodeId: startNode.id,
       lastChoiceId: null,
+      pathJson: [startNode.id],
+      choicesJson: [],
       lastChoiceAt: null,
-      lastGeneratedText: normalizeText(startNode.fallbackText || startNode.baseContext),
+      lastGeneratedText: normalizeText(startNode.body || startNode.fallbackText || startNode.baseContext),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const currentNode = nodeById.get(progress.currentNodeId) || startNode;
-    const selectedChoice = currentNode.choices.find(
-      (choice) => choice.id === normalizedChoiceId,
-    );
+    if (!this.isPublicNode(currentNode)) {
+      return null;
+    }
+    const selectedChoice = currentNode.choices.find((choice) => choice.id === normalizedChoiceId);
     if (!selectedChoice) {
       return null;
     }
@@ -437,7 +676,7 @@ export class InteractiveStoriesService {
     }
 
     const nextNode = nodeById.get(selectedChoice.targetNodeId);
-    if (!nextNode) {
+    if (!nextNode || !this.isPublicNode(nextNode)) {
       return null;
     }
 
@@ -460,9 +699,9 @@ export class InteractiveStoriesService {
       node: {
         id: nextNode.id,
         title: nextNode.title,
-        baseContext: normalizeText(nextNode.baseContext),
+        baseContext: normalizeText(nextNode.baseContext || nextNode.body),
         basePrompt: normalizeText(nextNode.basePrompt),
-        fallbackText: normalizeText(nextNode.fallbackText),
+        fallbackText: normalizeText(nextNode.body || nextNode.fallbackText),
       },
       selectedChoice: {
         id: selectedChoice.id,
@@ -470,11 +709,19 @@ export class InteractiveStoriesService {
         label: selectedChoice.label,
       },
       state: nextState,
-      choices: visibleNextChoices,
+      choices: visibleNextChoices.map((choice) => ({
+        id: choice.id,
+        key: choice.key,
+        label: choice.label,
+      })),
     });
 
-    const generatedText = normalizeText(aiResult.content);
+    const generatedText = normalizeText(aiResult.content) || normalizeText(nextNode.body || nextNode.fallbackText || nextNode.baseContext);
     const timestamp = new Date();
+    const previousPath = parseJsonStringArray(progress.pathJson || []);
+    const previousChoices = parseJsonStringArray(progress.choicesJson || []);
+    const nextPath = [...(previousPath.length > 0 ? previousPath : [currentNode.id]), nextNode.id];
+    const nextChoicesPath = [...previousChoices, selectedChoice.id];
 
     await this.prisma.$transaction(async (tx) => {
       await tx.userStoryProgress.upsert({
@@ -487,6 +734,8 @@ export class InteractiveStoriesService {
         update: {
           currentNodeId: nextNode.id,
           lastChoiceId: selectedChoice.id,
+          pathJson: nextPath as unknown as Prisma.InputJsonValue,
+          choicesJson: nextChoicesPath as unknown as Prisma.InputJsonValue,
           lastChoiceAt: timestamp,
           lastGeneratedText: generatedText,
           updatedAt: timestamp,
@@ -496,6 +745,8 @@ export class InteractiveStoriesService {
           storyId: story.id,
           currentNodeId: nextNode.id,
           lastChoiceId: selectedChoice.id,
+          pathJson: nextPath as unknown as Prisma.InputJsonValue,
+          choicesJson: nextChoicesPath as unknown as Prisma.InputJsonValue,
           lastChoiceAt: timestamp,
           lastGeneratedText: generatedText,
           createdAt: timestamp,
@@ -561,8 +812,22 @@ export class InteractiveStoriesService {
       nextNode,
       nextState,
       nextFlags,
+      nextPath,
+      nextChoicesPath,
       generatedText,
-      aiResult.choiceLabelOverrides,
     );
+  }
+
+  async submitChoiceBySlug(
+    slug: string,
+    userId: string,
+    choiceId: string,
+    contentMode: ContentMode,
+  ) {
+    const story = await this.findStoryGraphBySlug(slug, contentMode);
+    if (!story) {
+      return null;
+    }
+    return this.submitChoice(story.id, userId, choiceId, contentMode);
   }
 }

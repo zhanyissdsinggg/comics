@@ -1436,6 +1436,367 @@ async function mockPublicApi(
       return;
     }
 
+    if (pathname === "/api/interactive-stories") {
+      const adult = searchParams.get("adult") === "1";
+      if (adult && (!signedIn || !matureConfirmed || !matureModeEnabled)) {
+        await fulfillJson(
+          route,
+          {
+            error: "ADULT_GATED",
+            reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+          },
+          403,
+        );
+        return;
+      }
+
+      await fulfillJson(route, {
+        stories: adult
+          ? [
+              {
+                id: "interactive-018",
+                slug: "velvet-after-dark",
+                title: "Velvet After Dark",
+                description: "A locked-room interactive noir for mature readers.",
+                coverImage: createPosterPlaceholder("Velvet After Dark"),
+                genre: "Noir",
+                contentMode: "adult",
+                status: "published",
+                nodeCount: 3,
+                endingCount: 2,
+              },
+            ]
+          : [
+              {
+                id: "interactive-011",
+                slug: "solar-wind",
+                title: "Solar Wind",
+                description: "A branching relay-field thriller.",
+                coverImage: createPosterPlaceholder("Solar Wind"),
+                genre: "Sci-Fi",
+                contentMode: "normal",
+                status: "published",
+                nodeCount: 4,
+                endingCount: 2,
+              },
+            ],
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/solar-wind") {
+      if (searchParams.get("adult") === "1") {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      await fulfillJson(route, {
+        story: {
+          id: "interactive-011",
+          slug: "solar-wind",
+          title: "Solar Wind",
+          description: "A branching relay-field thriller.",
+          coverImage: createPosterPlaceholder("Solar Wind"),
+          genre: "Sci-Fi",
+          contentMode: "normal",
+          status: "published",
+          nodeCount: 2,
+          endingCount: 1,
+          startNodeKey: "signal-arrival",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/velvet-after-dark") {
+      const adult = searchParams.get("adult") === "1";
+      if (!adult) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      if (!signedIn || !matureConfirmed || !matureModeEnabled) {
+        await fulfillJson(
+          route,
+          {
+            error: "ADULT_GATED",
+            reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+          },
+          403,
+        );
+        return;
+      }
+
+      await fulfillJson(route, {
+        story: {
+          id: "interactive-018",
+          slug: "velvet-after-dark",
+          title: "Velvet After Dark",
+          description: "A locked-room interactive noir for mature readers.",
+          coverImage: createPosterPlaceholder("Velvet After Dark"),
+          genre: "Noir",
+          contentMode: "adult",
+          status: "published",
+          nodeCount: 2,
+          endingCount: 1,
+          startNodeKey: "lounge-arrival",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/solar-wind/current") {
+      if (searchParams.get("adult") === "1") {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-011",
+            slug: "solar-wind",
+            title: "Solar Wind",
+            description: "A branching relay-field thriller.",
+            contentMode: "normal",
+            genre: "Sci-Fi",
+          },
+          node: {
+            id: "node-1",
+            title: "Signal Arrival",
+            body: "You stand before the relay spine and wait for the first pulse.",
+            isEnding: false,
+            panels: [
+              {
+                id: "panel-1",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Relay Pulse"),
+                dialogue: "The relay is alive. Keep your breathing even.",
+              },
+              {
+                id: "panel-2",
+                panelNumber: 2,
+                imageUrl: createReaderPagePlaceholder("Core Approach"),
+                dialogue: "One more step and the chamber answers.",
+              },
+            ],
+            choices: [
+              {
+                id: "choice-1",
+                label: "Approach the relay core",
+                description: "Keep moving and follow the signal.",
+                requiresPremium: false,
+                requiresTokens: 0,
+              },
+            ],
+          },
+          path: ["Signal Arrival"],
+          state: {
+            trust: 1,
+            signal: 2,
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/velvet-after-dark/current") {
+      const adult = searchParams.get("adult") === "1";
+      if (!adult) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (!matureConfirmed || !matureModeEnabled) {
+        await fulfillJson(
+          route,
+          {
+            error: "ADULT_GATED",
+            reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+          },
+          403,
+        );
+        return;
+      }
+
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-018",
+            slug: "velvet-after-dark",
+            title: "Velvet After Dark",
+            description: "A locked-room interactive noir for mature readers.",
+            contentMode: "adult",
+            genre: "Noir",
+          },
+          node: {
+            id: "adult-node-1",
+            title: "Lounge Arrival",
+            body: "The velvet curtains close behind you, and every glance in the room feels intentional.",
+            isEnding: false,
+            panels: [
+              {
+                id: "adult-panel-1",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Velvet Lounge"),
+                dialogue: "Everyone here is waiting for the next move.",
+              },
+            ],
+            choices: [
+              {
+                id: "adult-choice-1",
+                label: "Cross the lounge",
+                description: "Keep your composure and step deeper into the room.",
+                requiresPremium: false,
+                requiresTokens: 0,
+              },
+            ],
+          },
+          path: ["Lounge Arrival"],
+          state: {
+            nerve: 2,
+            suspicion: 1,
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/solar-wind/choose") {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      let choiceId = searchParams.get("choiceId") || "";
+      if (!choiceId) {
+        try {
+          const payload = route.request().postDataJSON() as
+            | { choiceId?: string }
+            | undefined;
+          choiceId = String(payload?.choiceId || "");
+        } catch {
+          choiceId = "";
+        }
+      }
+      if (choiceId !== "choice-1") {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-011",
+            slug: "solar-wind",
+            title: "Solar Wind",
+            description: "A branching relay-field thriller.",
+            contentMode: "normal",
+            genre: "Sci-Fi",
+          },
+          node: {
+            id: "node-2",
+            title: "Relay Chamber",
+            body: "The chamber seals behind you, and the relay answers with a final clean tone.",
+            isEnding: true,
+            endingType: "Good Ending",
+            panels: [
+              {
+                id: "panel-3",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Relay Ending"),
+                dialogue: "It finally syncs. No static. No noise.",
+              },
+            ],
+            choices: [],
+          },
+          path: ["Signal Arrival", "Relay Chamber"],
+          state: {
+            trust: 2,
+            signal: 3,
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/velvet-after-dark/choose") {
+      const adult = searchParams.get("adult") === "1";
+      if (!adult) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (!matureConfirmed || !matureModeEnabled) {
+        await fulfillJson(
+          route,
+          {
+            error: "ADULT_GATED",
+            reason: !matureConfirmed ? "NEED_AGE_CONFIRM" : "NEED_ADULT_MODE",
+          },
+          403,
+        );
+        return;
+      }
+
+      let choiceId = searchParams.get("choiceId") || "";
+      if (!choiceId) {
+        try {
+          const payload = route.request().postDataJSON() as
+            | { choiceId?: string }
+            | undefined;
+          choiceId = String(payload?.choiceId || "");
+        } catch {
+          choiceId = "";
+        }
+      }
+      if (choiceId !== "adult-choice-1") {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-018",
+            slug: "velvet-after-dark",
+            title: "Velvet After Dark",
+            description: "A locked-room interactive noir for mature readers.",
+            contentMode: "adult",
+            genre: "Noir",
+          },
+          node: {
+            id: "adult-node-2",
+            title: "Private Booth",
+            body: "Inside the booth, the conversation drops to a hush and the real negotiation begins.",
+            isEnding: true,
+            endingType: "Noir Ending",
+            panels: [
+              {
+                id: "adult-panel-2",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Private Booth"),
+                dialogue: "No more spectators. Just leverage.",
+              },
+            ],
+            choices: [],
+          },
+          path: ["Lounge Arrival", "Private Booth"],
+          state: {
+            nerve: 3,
+            suspicion: 2,
+          },
+        },
+      });
+      return;
+    }
+
     if (pathname === "/api/search") {
       const results = filterCatalog(searchParams);
       await fulfillJson(route, {
@@ -3260,5 +3621,250 @@ test.describe("Public reading funnel", () => {
     }
 
     await expectNoRuntimeIssues("public-banned-copy-crawl", runtimeIssues);
+  });
+
+  test("interactive story play route only exposes approved public nodes", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, { signedIn: true });
+
+    let response = await page.goto("/interactive/solar-wind", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(
+      page.getByRole("heading", { name: "Solar Wind" }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).not.toContainText("pending_review");
+    await expect(page.locator("body")).not.toContainText("draft");
+
+    const startButton = page.getByRole("link", { name: /Start Playing/i });
+    await expect(startButton).toHaveAttribute(
+      "href",
+      "/interactive/solar-wind/play",
+    );
+
+    await Promise.all([
+      page.waitForURL("**/interactive/solar-wind/play", {
+        timeout: UI_TIMEOUT_MS,
+      }),
+      startButton.click(),
+    ]);
+
+    await expect(
+      page.getByRole("heading", { name: /Solar Wind/i }).first(),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("body")).toContainText("Signal Arrival");
+    await expect(page.locator("body")).toContainText("Approach the relay core");
+    await expect(page.locator("body")).toContainText(
+      "The relay is alive. Keep your breathing even.",
+    );
+    await expect(page.locator("body")).toContainText(
+      "One more step and the chamber answers.",
+    );
+    await expect(page.locator("body")).toContainText("Panel 1");
+    await expect(page.locator("body")).toContainText("Panel 2");
+    await expect(page.locator("body")).not.toContainText("pending_review");
+    await expect(page.locator("body")).not.toContainText("draft");
+    await expect(page.locator("body")).not.toContainText("Signal Under Glass");
+
+    const choiceButton = page.getByRole("button", {
+      name: /Approach the relay core/i,
+    });
+    await expect(choiceButton).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await choiceButton.click();
+
+    await expect(page.locator("body")).toContainText("Relay Chamber");
+    await expect(page.locator("body")).toContainText("Ending");
+    await expect(page.locator("body")).toContainText(
+      "It finally syncs. No static. No noise.",
+    );
+    await expect(page.locator("body")).not.toContainText("pending_review");
+    await expect(page.locator("body")).not.toContainText("draft");
+    await expect(page.locator("body")).not.toContainText("Signal Under Glass");
+    await expectNoRuntimeIssues(
+      "/interactive/solar-wind -> /interactive/solar-wind/play",
+      runtimeIssues,
+    );
+  });
+
+  test("interactive hub only shows normal-mode stories in normal mode", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Solar Wind");
+    await expect(page.locator("body")).not.toContainText("Velvet After Dark");
+    await expectNoRuntimeIssues("/interactive normal-mode hub", runtimeIssues);
+  });
+
+  test("interactive hub only shows adult-mode stories in adult mode", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
+    });
+
+    const response = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Velvet After Dark");
+    await expect(page.locator("body")).not.toContainText("Solar Wind");
+    await expectNoRuntimeIssues("/interactive adult-mode hub", runtimeIssues);
+  });
+
+  test("interactive detail route blocks adult stories in normal mode", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/interactive/velvet-after-dark", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText(
+      "This story isn't available in the current mode.",
+    );
+    await expect(page.locator("body")).not.toContainText("Velvet After Dark");
+    await expectNoRuntimeIssues(
+      "/interactive/velvet-after-dark normal-mode blocked",
+      runtimeIssues,
+    );
+  });
+
+  test("interactive adult story loads only after adult mode is enabled", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
+    });
+
+    const response = await page.goto("/interactive/velvet-after-dark/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Velvet After Dark");
+    await expect(page.locator("body")).toContainText("Lounge Arrival");
+    await expect(page.locator("body")).toContainText("Cross the lounge");
+    await expect(page.locator("body")).not.toContainText("pending_review");
+    await expect(page.locator("body")).not.toContainText("draft");
+    await expectNoRuntimeIssues(
+      "/interactive/velvet-after-dark/play adult-only",
+      runtimeIssues,
+    );
+  });
+
+  test("interactive play route keeps story context and sign-in CTA when progress requires auth", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, { signedIn: false });
+
+    const response = await page.goto("/interactive/solar-wind/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Solar Wind");
+    await expect(page.locator("body")).toContainText("Sign in to save your route.");
+    const gateButton = page.getByTestId("interactive-story-gate-signin");
+    await expect(gateButton).toBeVisible();
+    await gateButton.click();
+
+    await expect(page.getByRole("dialog")).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("dialog")).toContainText("Sign in");
+    await expectNoRuntimeIssues(
+      "/interactive/solar-wind/play signed-out gate",
+      runtimeIssues,
+    );
+  });
+
+  test("interactive adult play route stays non-discoverable in normal mode", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/interactive/velvet-after-dark/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText(
+      "This interactive story isn't available right now.",
+    );
+    await expect(page.locator("body")).not.toContainText("Velvet After Dark");
+    await expectNoRuntimeIssues(
+      "/interactive/velvet-after-dark/play normal-mode hidden",
+      runtimeIssues,
+    );
+  });
+
+  test("interactive play route reloads the latest public node when a choice is no longer available", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, { signedIn: true });
+
+    await page.route("**/api/interactive-stories/slug/solar-wind/choose**", async (route) => {
+      await fulfillJson(route, { error: "INVALID_REQUEST" }, 400);
+    });
+
+    const response = await page.goto("/interactive/solar-wind/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Signal Arrival");
+    await expect(page.locator("body")).toContainText("Approach the relay core");
+
+    await page.getByRole("button", { name: /Approach the relay core/i }).click();
+
+    await expect(page.locator("body")).toContainText("Signal Arrival");
+    await expect(page.locator("body")).toContainText("Approach the relay core");
+    await expect(page.locator("body")).not.toContainText("Relay Chamber");
+    await expect(page.locator("body")).not.toContainText("pending_review");
+    await expect(page.locator("body")).not.toContainText("draft");
+    await expectNoRuntimeIssues(
+      "/interactive/solar-wind/play recovers after unavailable choice",
+      runtimeIssues,
+    );
   });
 });

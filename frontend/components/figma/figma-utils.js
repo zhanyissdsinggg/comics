@@ -40,7 +40,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     status: "HOT",
     adult: false,
     interactive: true,
-    routeHref: "/series/series-011/interactive",
+    routeHref: "/interactive/solar-wind-first-contact",
   },
   {
     id: "interactive-neon-heir",
@@ -56,7 +56,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     status: "NEW",
     adult: false,
     interactive: true,
-    routeHref: "/series/interactive-neon-heir/interactive",
+    routeHref: "/interactive/interactive-neon-heir",
   },
   {
     id: "interactive-vampire-oath",
@@ -72,7 +72,7 @@ const INTERACTIVE_FALLBACK_ITEMS = [
     status: "UP",
     adult: true,
     interactive: true,
-    routeHref: "/series/interactive-vampire-oath/interactive",
+    routeHref: "/interactive/interactive-vampire-oath",
   },
 ];
 
@@ -411,8 +411,8 @@ export function buildFigmaSeriesItem(series, options = {}) {
   const description = String(series?.description || "").trim();
   const interactiveHref = interactive
     ? String(series?.routeHref || series?.interactiveHref || "").trim() ||
-      `/series/${encodeURIComponent(seriesId)}/interactive`
-    : `/series/${encodeURIComponent(seriesId)}/interactive`;
+      `/interactive/${encodeURIComponent(String(series?.slug || seriesId).trim())}`
+    : `/interactive/${encodeURIComponent(String(series?.slug || seriesId).trim())}`;
   const detailHref = interactive
     ? interactiveHref
     : `/series/${encodeURIComponent(seriesId)}`;

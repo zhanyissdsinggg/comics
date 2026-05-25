@@ -1,96 +1,126 @@
 # Interactive Story Launch Checklist
 
-Use this checklist before publishing an interactive story to production.
+Use this checklist before publishing one interactive story to staging or production.
+
+This checklist is story-specific. For the full release checklist that covers migrations,
+environment variables, AI review, panel review, deploy gates, and rollback, use:
+
+- [interactive-story-production-release-checklist.md](./interactive-story-production-release-checklist.md)
 
 Scope:
 
 - story graph validity
-- admin workflow safety
-- user read-path correctness
+- public read-path safety
+- review-state safety
+- mode isolation
 - AI fallback resilience
 
-## 1) Content Graph Integrity
+## 1. Content Graph Integrity
 
 - Story has a non-empty `slug` and `title`.
 - Story has at least one node.
 - `initialNodeId` points to an existing node.
 - Every non-ending node has at least one choice.
-- Every choice target points to an existing node (or is intentionally empty and approved).
+- Every required public choice target points to an existing node.
 - No duplicated `nodeKey` inside one story.
 - No duplicated `choiceKey` inside one node.
 
 How to verify:
 
-- Open `/admin/interactive-stories`
-- Select story
-- Run `健康检查`
-- Result must show:
-  - `错误 0`
-  - Warnings reviewed and explicitly accepted
+1. Open `/admin/interactive-stories`.
+2. Select the target story.
+3. Run validation from the admin workspace.
+4. Confirm the result shows:
+   - `Errors 0`
+   - warnings reviewed and explicitly accepted
 
-## 2) Publish Gate Validation
+## 2. Review and Publish Gate
 
-- Attempt publish in admin UI.
-- If blocked, fix all validation errors first.
-- Publish succeeds only after graph passes.
+- Story status is intentionally set for the release target.
+- Public nodes are `approved`.
+- Draft or `pending_review` AI nodes are not exposed through public reading routes.
+- Draft or rejected panel assets are not exposed to public readers.
+
+How to verify:
+
+1. In admin, confirm each public-facing node is approved.
+2. Confirm generated AI nodes still waiting for review are not attached to public branches unless approved.
+3. Attempt publish in admin.
+4. If blocked, fix all validation errors first.
 
 Expected:
 
-- `POST /api/admin/interactive-stories/:id/publish` returns 200.
-- Story `isPublished=true` in admin list.
+- `POST /api/admin/interactive-stories/:id/publish` returns `200`.
+- Story `isPublished=true` in the admin list.
 
-## 3) Frontend Read-Path Smoke
+## 3. Frontend Read-Path Smoke
 
-- Open series page with interactive story entry.
-- Enter interactive mode.
-- Confirm initial segment loads.
-- Confirm 2-4 choices render.
+- Open the public story detail route.
+- Confirm the expected title, description, and cover render.
+- Enter play mode.
+- Confirm the initial node loads.
+- Confirm 2-3 reader choices render where expected.
 - Click one choice and verify:
-  - text changes
+  - node text changes
   - next choices update
   - no crash
-- Refresh page and confirm progress resumes from last node.
+- Refresh the page and confirm progress resumes correctly for signed-in users.
 
-## 4) AI Degrade Safety
+## 4. Content Mode Isolation
 
-- Temporarily disable AI key in staging or set model unreachable.
-- Submit one choice.
-- Confirm fallback text is returned and UI stays usable.
+- `normal` mode only shows `contentMode=normal` interactive stories.
+- `adult` mode only shows `contentMode=adult` interactive stories.
+- A `normal` session cannot discover or play adult stories.
+- An `adult` session cannot accidentally read `normal`-only interactive content if the product requirement is strict separation.
+
+How to verify:
+
+1. Test `/interactive` in normal mode.
+2. Test `/interactive` in adult mode.
+3. Test `/interactive/[slug]` for both a normal story and an adult story.
+4. Test `/interactive/[slug]/play` for both modes.
+
+Expected:
+
+- wrong-mode access is blocked or non-discoverable
+- no adult metadata leaks into normal mode
+
+## 5. AI Degrade Safety
+
+- Disable the AI key in staging, or point the model to an unreachable target.
+- Submit one story choice that relies on generated continuation.
+- Confirm fallback text is returned and the UI stays usable.
 - Re-enable AI and verify normal generation recovers.
 
 Expected:
 
 - no frontend white screen
 - API still returns a valid progress payload
-- generation log records `fallback` or `skipped`
+- generation log records a failure, fallback, or skipped path
 
-## 5) Import / Export Safety
+## 6. Import / Export Safety
 
 - Export one known-good story JSON.
-- Re-import into staging using `replace` mode.
+- Re-import it in staging using the intended mode.
 - Run validation again.
-- Confirm node and choice counts match expected values.
+- Confirm node and choice counts match expectations.
 
 Recommended baseline template:
 
-- `docs/operations/interactive-story-import-template.json`
+- [interactive-story-import-template.json](./interactive-story-import-template.json)
 
-## 6) Operational Logging and Audit
-
-- Confirm generation logs are being written for test choices.
-- Confirm admin action is traceable via normal admin audit logs.
-- Confirm no unexpected 5xx in backend logs during create/update/publish flow.
-
-## 7) Release Sign-off
+## 7. Release Sign-off
 
 Record this before go-live:
 
 - Story slug:
+- Content mode:
 - Admin operator:
 - Validation result:
 - Publish result:
 - Frontend smoke result:
+- Mode-isolation result:
 - AI fallback result:
 - Import/export roundtrip result:
 - Open risks:
-- Approved for production: yes/no
+- Approved for release: yes/no

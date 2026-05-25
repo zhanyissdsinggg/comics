@@ -721,6 +721,194 @@ async function installContentModeRoutes(
       return;
     }
 
+    if (pathname === "/api/interactive-stories") {
+      const stories = adultFlag
+        ? [
+            {
+              id: "interactive-014",
+              slug: "vampire-oath",
+              title: "Vampire Oath",
+              description: "A mature-only branching manor thriller.",
+              coverImage: createPosterPlaceholder("Vampire Oath"),
+              genre: "Horror",
+              contentMode: "adult",
+              status: "published",
+              nodeCount: 4,
+              endingCount: 2,
+            },
+          ]
+        : [
+            {
+              id: "interactive-011",
+              slug: "solar-wind",
+              title: "Solar Wind",
+              description: "A branching relay-field thriller.",
+              coverImage: createPosterPlaceholder("Solar Wind"),
+              genre: "Sci-Fi",
+              contentMode: "normal",
+              status: "published",
+              nodeCount: 4,
+              endingCount: 2,
+            },
+          ];
+      await fulfillJson(route, { stories });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/solar-wind") {
+      if (adultFlag) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        story: {
+          id: "interactive-011",
+          slug: "solar-wind",
+          title: "Solar Wind",
+          description: "A branching relay-field thriller.",
+          coverImage: createPosterPlaceholder("Solar Wind"),
+          genre: "Sci-Fi",
+          contentMode: "normal",
+          status: "published",
+          nodeCount: 3,
+          endingCount: 2,
+          startNodeKey: "signal-arrival",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/vampire-oath") {
+      if (!adultFlag) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        story: {
+          id: "interactive-014",
+          slug: "vampire-oath",
+          title: "Vampire Oath",
+          description: "A mature-only branching manor thriller.",
+          coverImage: createPosterPlaceholder("Vampire Oath"),
+          genre: "Horror",
+          contentMode: "adult",
+          status: "published",
+          nodeCount: 4,
+          endingCount: 2,
+          startNodeKey: "crimson-vow",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/solar-wind/current") {
+      if (!mockBackendState.signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (adultFlag) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-011",
+            slug: "solar-wind",
+            title: "Solar Wind",
+            description: "A branching relay-field thriller.",
+            contentMode: "normal",
+            genre: "Sci-Fi",
+          },
+          node: {
+            id: "node-normal-1",
+            title: "Signal Arrival",
+            body: "You stand before the relay spine and wait for the first pulse.",
+            isEnding: false,
+            panels: [
+              {
+                id: "panel-normal-1",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Solar Wind Panel"),
+                dialogue: "The relay is alive. Keep your breathing even.",
+              },
+            ],
+            choices: [
+              {
+                id: "choice-normal-1",
+                label: "Approach the relay core",
+                description: "Keep moving and follow the signal.",
+                requiresPremium: false,
+                requiresTokens: 0,
+              },
+            ],
+          },
+          path: ["Signal Arrival"],
+          state: {
+            trust: 1,
+            signal: 2,
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/vampire-oath/current") {
+      if (!mockBackendState.signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (!adultFlag) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+
+      await fulfillJson(route, {
+        progress: {
+          story: {
+            id: "interactive-014",
+            slug: "vampire-oath",
+            title: "Vampire Oath",
+            description: "A mature-only branching manor thriller.",
+            contentMode: "adult",
+            genre: "Horror",
+          },
+          node: {
+            id: "node-adult-1",
+            title: "Crimson Vow",
+            body: "The manor doors close and every promise starts tasting dangerous.",
+            isEnding: false,
+            panels: [
+              {
+                id: "panel-adult-1",
+                panelNumber: 1,
+                imageUrl: createReaderPagePlaceholder("Vampire Oath Panel"),
+                dialogue: "The house remembers every oath you break.",
+              },
+            ],
+            choices: [
+              {
+                id: "choice-adult-1",
+                label: "Step deeper into the manor",
+                description: "Follow the vow into the dark wing.",
+                requiresPremium: false,
+                requiresTokens: 0,
+              },
+            ],
+          },
+          path: ["Crimson Vow"],
+          state: {
+            hunger: 2,
+            suspicion: 1,
+          },
+        },
+      });
+      return;
+    }
+
     if (pathname === `/api/series/${ADULT_READER_SERIES_ID}`) {
       if (!adultFlag) {
         await fulfillJson(
@@ -1060,11 +1248,7 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("Vampire Oath");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("All Formats");
@@ -1089,14 +1273,110 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("heading", { name: /Vampire Oath/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(page.locator("body")).toContainText("Vampire Oath");
     await expect(page.locator("body")).not.toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("Midnight Heat");
     await expect(page.locator("body")).not.toContainText("All Formats");
+  });
+
+  test("interactive detail route should block adult stories in normal mode", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/interactive/vampire-oath", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText(
+      "This story isn't available in the current mode.",
+    );
+    await expect(page.locator("body")).not.toContainText("Start Playing");
+    await expect(page.locator("body")).not.toContainText("Crimson Vow");
+  });
+
+  test("interactive detail route should block normal stories in adult mode", async ({
+    page,
+  }) => {
+    await seedAdultState(page, {
+      signedIn: true,
+      adultConfirmed: true,
+      adultMode: true,
+    });
+    await installContentModeRoutes(page, {
+      adultMode: true,
+      adultConfirmed: true,
+      signedIn: true,
+    });
+
+    const response = await page.goto("/interactive/solar-wind", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText(
+      "This story isn't available in the current mode.",
+    );
+    await expect(page.locator("body")).not.toContainText("Signal Arrival");
+    await expect(page.locator("body")).not.toContainText("Approach the relay core");
+  });
+
+  test("interactive play route should keep normal node content out of adult mode", async ({
+    page,
+  }) => {
+    await seedAdultState(page, {
+      signedIn: true,
+      adultConfirmed: true,
+      adultMode: true,
+    });
+    await installContentModeRoutes(page, {
+      adultMode: true,
+      adultConfirmed: true,
+      signedIn: true,
+    });
+
+    const response = await page.goto("/interactive/vampire-oath/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Crimson Vow");
+    await expect(page.locator("body")).toContainText(
+      "The house remembers every oath you break.",
+    );
+    await expect(page.locator("body")).not.toContainText("Signal Arrival");
+    await expect(page.locator("body")).not.toContainText(
+      "The relay is alive. Keep your breathing even.",
+    );
+  });
+
+  test("interactive play route should keep adult node content out of normal mode", async ({
+    page,
+  }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: true,
+    });
+
+    const response = await page.goto("/interactive/solar-wind/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator("body")).toContainText("Signal Arrival");
+    await expect(page.locator("body")).toContainText(
+      "The relay is alive. Keep your breathing even.",
+    );
+    await expect(page.locator("body")).not.toContainText("Crimson Vow");
+    await expect(page.locator("body")).not.toContainText(
+      "The house remembers every oath you break.",
+    );
   });
 
   test("forged mature cookies without session should not unlock adult SSR content", async ({
@@ -1177,10 +1457,11 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
     await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
+      page.getByRole("heading", { name: /Pick the branch\. Own the fallout\./i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
     await expect(page.locator("body")).not.toContainText("All Formats");
@@ -1190,11 +1471,7 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
     await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
-    await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
     await expect(page.locator("body")).not.toContainText("All Formats");
@@ -1203,11 +1480,7 @@ test.describe("Content mode filtering", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
-    ).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
     await expect(page.locator("body")).not.toContainText("All Formats");
@@ -1611,6 +1884,12 @@ test.describe("Content mode filtering", () => {
   test("interactive footer should keep Search when the current page is the interactive route", async ({
     page,
   }) => {
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
     const response = await page.goto("/interactive", {
       waitUntil: "domcontentloaded",
     });
@@ -1650,10 +1929,11 @@ test.describe("Content mode filtering", () => {
     await interactiveLink.click();
     await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
     await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
+      page.getByRole("heading", { name: /Pick the branch\. Own the fallout\./i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(page.locator("body")).toContainText("Solar Wind");
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
   });

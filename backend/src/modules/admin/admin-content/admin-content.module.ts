@@ -12,6 +12,8 @@ import { AdminPromotionsController } from "./controllers/admin-promotions.contro
 import { AdminContentGeneratorController } from "./controllers/admin-content-generator.controller";
 import { AdminCreatorsService } from "./services/admin-creators.service";
 import { AdminInteractiveStoriesController } from "../controllers/admin-interactive-stories.controller";
+import { AdminInteractivePanelsController } from "../controllers/admin-interactive-panels.controller";
+import { InteractiveAiService } from "../../interactive-stories/interactive-ai.service";
 
 @Module({
   imports: [AdminAuthModule],
@@ -25,8 +27,14 @@ import { AdminInteractiveStoriesController } from "../controllers/admin-interact
     AdminPromotionsController,
     AdminContentGeneratorController,
     AdminInteractiveStoriesController,
+    AdminInteractivePanelsController,
   ],
-  providers: [AdminRecommendationService, AdminCreatorsService, PrismaService],
+  providers: [
+    AdminRecommendationService,
+    AdminCreatorsService,
+    PrismaService,
+    InteractiveAiService,
+  ],
   exports: [AdminRecommendationService, AdminCreatorsService],
 })
 export class AdminContentModule {}
