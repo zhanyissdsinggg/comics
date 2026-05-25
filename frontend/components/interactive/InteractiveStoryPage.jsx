@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiGet, apiPost } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -50,7 +50,7 @@ function getLockedCopy(choice) {
     return "";
   }
   if (choice.lockedReason === "PREMIUM_REQUIRED") {
-    return choice.unlockLabel || "Premium choice";
+    return choice.unlockLabel || "Premium required";
   }
   if (choice.lockedReason === "TOKENS_REQUIRED") {
     return choice.unlockLabel || `${Number(choice.requiresTokens || 0)} tokens`;
@@ -58,28 +58,73 @@ function getLockedCopy(choice) {
   return choice.unlockLabel || "Locked";
 }
 
+function getRouteDepth(progress) {
+  return Number(progress?.path?.length || progress?.currentDepth || 0);
+}
+
+function getAnalyticsPayload({
+  story,
+  progress,
+  choice = null,
+  contentMode,
+  sourceSection,
+}) {
+  const node = progress?.node || null;
+  return {
+    storyId: story?.id || progress?.story?.id || undefined,
+    slug: story?.slug || progress?.story?.slug || undefined,
+    nodeId: node?.id || undefined,
+    choiceId: choice?.id || undefined,
+    contentMode,
+    routeDepth: getRouteDepth(progress),
+    isEnding: Boolean(node?.isEnding),
+    sourceSection,
+  };
+}
+
+function LoadingShell() {
+  return (
+    <main className="min-h-screen overflow-hidden bg-black text-white">
+      <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
+        <div className="grid gap-4">
+          <SurfacePanel tone="muted" accent="cyan" appearance="dark" className="min-h-[200px]" />
+          <SurfacePanel tone="muted" accent="blue" appearance="dark" className="min-h-[220px]" />
+          <SurfacePanel tone="muted" accent="amber" appearance="dark" className="min-h-[240px]" />
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function InteractiveStoryPage({
   storySlug,
   storyId = "",
   seriesId = "",
   mode = "play",
+  initialStory = null,
+  initialProgress = null,
+  initialContentMode = "normal",
 }) {
-  const [loading, setLoading] = useState(mode !== "play");
-  const [story, setStory] = useState(null);
-  const [progress, setProgress] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [story, setStory] = useState(initialStory);
+  const [progress, setProgress] = useState(initialProgress);
   const [error, setError] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
   const [submittingChoiceId, setSubmittingChoiceId] = useState("");
+  const [unlockingChoiceId, setUnlockingChoiceId] = useState("");
   const [degradedNotice, setDegradedNotice] = useState("");
+  const [hasTrackedChoiceView, setHasTrackedChoiceView] = useState(false);
+  const [hasTrackedStart, setHasTrackedStart] = useState(Boolean(initialProgress));
   const { hydrated, isSignedIn } = useAuthStore();
   const { contentMode } = useAdultGateStore();
+  const storyBodyRef = useRef(null);
 
   const normalizedSlug = normalizeText(storySlug);
+  const resolvedContentMode = normalizeText(contentMode || initialContentMode || "normal").toLowerCase();
 
   const loadStory = useCallback(async () => {
     if (!normalizedSlug) {
       setError("Invalid story.");
-      setLoading(false);
       return null;
     }
     const response = await apiGet(
@@ -92,7 +137,6 @@ export default function InteractiveStoryPage({
     if (!response.ok || !response.data?.story) {
       setStory(null);
       setError("Interactive story isn't available.");
-      setLoading(false);
       return null;
     }
     setStory(response.data.story);
@@ -102,7 +146,7 @@ export default function InteractiveStoryPage({
 
   const loadProgress = useCallback(async () => {
     if (!normalizedSlug) {
-      return;
+      return null;
     }
     const response = await apiGet(
       `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}/current`,
@@ -116,22 +160,27 @@ export default function InteractiveStoryPage({
       setProgress(response.data.progress);
       setAuthRequired(false);
       setError("");
-      return;
+      return response.data.progress;
     }
 
     if (response.status === 401) {
       setAuthRequired(true);
-      setError("Sign in to keep going.");
-      return;
+      setProgress(null);
+      if (mode === "play") {
+        setError("Sign in to keep going.");
+      }
+      return null;
     }
 
     if (response.status === 404) {
+      setProgress(null);
       setError("Interactive story isn't available.");
-      return;
+      return null;
     }
 
     setError("Couldn't load your progress.");
-  }, [normalizedSlug]);
+    return null;
+  }, [mode, normalizedSlug]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -140,60 +189,195 @@ export default function InteractiveStoryPage({
 
     let active = true;
     async function bootstrap() {
-      if (mode !== "play") {
-        setLoading(true);
-        const result = await loadStory();
-        if (!active) {
-          return;
-        }
-        if (result) {
-          setLoading(false);
-        }
+      setLoading(!initialStory || (mode === "play" && !initialProgress));
+      setError("");
+      setDegradedNotice("");
+
+      const storyPayload = initialStory || (await loadStory());
+      if (!active || !storyPayload) {
+        setLoading(false);
         return;
       }
 
-      setLoading(true);
-      setError("");
-      setDegradedNotice("");
-      const result = await loadStory();
-      if (!active || !result) {
-        return;
+      if (mode === "play" && !initialProgress) {
+        await loadProgress();
       }
-      await loadProgress();
-      if (!active) {
-        return;
+
+      if (active) {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     void bootstrap();
     return () => {
       active = false;
     };
-  }, [hydrated, isSignedIn, loadProgress, loadStory, mode]);
+  }, [hydrated, initialProgress, initialStory, loadProgress, loadStory, mode]);
 
   useEffect(() => {
-    if (!story?.id) {
+    if (!story?.id && !progress?.story?.id) {
       return;
     }
     trackEvent("interactive_story_view", {
-      storyId: story.id || storyId || undefined,
-      storySlug: normalizedSlug || undefined,
-      seriesId: seriesId || story.seriesId || undefined,
-      contentMode,
-      sourceSection: mode === "play" ? "interactive_play" : "interactive_detail",
+      ...getAnalyticsPayload({
+        story,
+        progress,
+        contentMode: resolvedContentMode,
+        sourceSection: mode === "play" ? "interactive_play" : "interactive_detail",
+      }),
+      seriesId: seriesId || story?.seriesId || progress?.story?.seriesId || undefined,
     });
-  }, [contentMode, mode, normalizedSlug, seriesId, story?.id, story?.seriesId, storyId]);
+  }, [mode, progress, resolvedContentMode, seriesId, story]);
+
+  useEffect(() => {
+    if (mode !== "play" || !progress?.node || hasTrackedChoiceView) {
+      return;
+    }
+    if (progress.node.isEnding) {
+      trackEvent("interactive_ending_reached", {
+        ...getAnalyticsPayload({
+          story,
+          progress,
+          contentMode: resolvedContentMode,
+          sourceSection: "interactive_play",
+        }),
+      });
+      return;
+    }
+
+    trackEvent("interactive_choice_view", {
+      ...getAnalyticsPayload({
+        story,
+        progress,
+        contentMode: resolvedContentMode,
+        sourceSection: "interactive_play",
+      }),
+      visibleChoices: Array.isArray(progress?.node?.choices) ? progress.node.choices.length : 0,
+    });
+    setHasTrackedChoiceView(true);
+  }, [hasTrackedChoiceView, mode, progress, resolvedContentMode, story]);
+
+  useEffect(() => {
+    setHasTrackedChoiceView(false);
+  }, [progress?.node?.id]);
+
+  useEffect(() => {
+    if (mode !== "play" || !progress?.node?.id || hasTrackedStart) {
+      return;
+    }
+    trackEvent("interactive_story_start", {
+      ...getAnalyticsPayload({
+        story,
+        progress,
+        contentMode: resolvedContentMode,
+        sourceSection: "interactive_play",
+      }),
+    });
+    setHasTrackedStart(true);
+  }, [hasTrackedStart, mode, progress, resolvedContentMode, story]);
+
+  useEffect(() => {
+    if (!storyBodyRef.current) {
+      return;
+    }
+    storyBodyRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [progress?.node?.id]);
+
+  const handleUnlock = useCallback(
+    async (choice) => {
+      if (!story?.slug || !choice?.id) {
+        return;
+      }
+
+      setUnlockingChoiceId(choice.id);
+      setError("");
+      setDegradedNotice("");
+      const response = await apiPost(
+        `/api/interactive-stories/slug/${encodeURIComponent(story.slug)}/unlock-choice`,
+        {
+          choiceId: choice.id,
+          idempotencyKey: createIdempotencyKey(),
+        },
+        { timeoutMs: 15000 },
+      );
+      setUnlockingChoiceId("");
+
+      if (response.ok && response.data?.progress) {
+        setProgress(response.data.progress);
+        trackEvent("interactive_choice_unlock", {
+          ...getAnalyticsPayload({
+            story,
+            progress: response.data.progress,
+            choice,
+            contentMode: resolvedContentMode,
+            sourceSection: "interactive_play",
+          }),
+        });
+        return;
+      }
+
+      if (response.status === 401) {
+        setAuthRequired(true);
+        openAuthModal();
+        return;
+      }
+
+      if (response.status === 403) {
+        trackEvent("interactive_choice_locked", {
+          ...getAnalyticsPayload({
+            story,
+            progress,
+            choice,
+            contentMode: resolvedContentMode,
+            sourceSection: "interactive_play",
+          }),
+          reason: response.data?.reason || choice.lockedReason || "LOCKED",
+        });
+        setDegradedNotice("That choice is still locked for this account.");
+        await loadProgress();
+        return;
+      }
+
+      setDegradedNotice("Couldn't unlock that route right now.");
+    },
+    [loadProgress, progress, resolvedContentMode, story],
+  );
 
   const handleChoose = useCallback(
     async (choice) => {
-      if (!story?.slug || !choice?.id || choice.locked) {
+      if (!story?.slug || !choice?.id || submittingChoiceId || unlockingChoiceId) {
+        return;
+      }
+
+      if (choice.locked) {
+        trackEvent("interactive_choice_locked", {
+          ...getAnalyticsPayload({
+            story,
+            progress,
+            choice,
+            contentMode: resolvedContentMode,
+            sourceSection: "interactive_play",
+          }),
+          reason: choice.lockedReason || "LOCKED",
+        });
         return;
       }
 
       setSubmittingChoiceId(choice.id);
       setError("");
       setDegradedNotice("");
+      trackEvent("interactive_choice_click", {
+        ...getAnalyticsPayload({
+          story,
+          progress,
+          choice,
+          contentMode: resolvedContentMode,
+          sourceSection: "interactive_play",
+        }),
+      });
 
       const response = await apiPost(
         `/api/interactive-stories/slug/${encodeURIComponent(story.slug)}/choose`,
@@ -218,14 +402,18 @@ export default function InteractiveStoryPage({
         return;
       }
 
-      if (response.status === 403 && response.data?.reason === "CHOICE_LOCKED") {
+      if (response.status === 403) {
         setDegradedNotice("That choice is locked right now.");
         await loadProgress();
         return;
       }
 
       if (response.status === 409) {
-        setDegradedNotice("Choice already submitted. Synced your latest node.");
+        setDegradedNotice(
+          response.data?.reason === "TARGET_NODE_NOT_AVAILABLE"
+            ? "That branch isn't approved for readers yet."
+            : "Synced your latest node.",
+        );
         await loadProgress();
         return;
       }
@@ -238,61 +426,126 @@ export default function InteractiveStoryPage({
 
       setError("Couldn't continue right now. Try again.");
     },
-    [loadProgress, story?.slug],
+    [loadProgress, progress, resolvedContentMode, story, submittingChoiceId, unlockingChoiceId],
   );
 
-  const storyStateRows = useMemo(
-    () => toStateRows(progress?.state),
-    [progress?.state],
-  );
+  const handleRestart = useCallback(async () => {
+    if (!story?.slug || submittingChoiceId || unlockingChoiceId) {
+      return;
+    }
+    const response = await apiPost(
+      `/api/interactive-stories/slug/${encodeURIComponent(story.slug)}/restart`,
+      {},
+      { timeoutMs: 15000 },
+    );
+    if (response.ok && response.data?.progress) {
+      setProgress(response.data.progress);
+      setDegradedNotice("");
+      trackEvent("interactive_restart", {
+        ...getAnalyticsPayload({
+          story,
+          progress: response.data.progress,
+          contentMode: resolvedContentMode,
+          sourceSection: "interactive_play",
+        }),
+      });
+      return;
+    }
+    if (response.status === 401) {
+      setAuthRequired(true);
+      openAuthModal();
+      return;
+    }
+    setDegradedNotice("Couldn't restart right now.");
+  }, [progress, resolvedContentMode, story, submittingChoiceId, unlockingChoiceId]);
+
+  const storyStateRows = useMemo(() => toStateRows(progress?.state), [progress?.state]);
   const node = progress?.node || null;
   const storyTitle = normalizeText(story?.title || progress?.story?.title || "Interactive");
   const storyDescription = normalizeText(story?.description || progress?.story?.description);
   const isEnding = Boolean(node?.isEnding);
+  const path = Array.isArray(progress?.path) ? progress.path : [];
+  const routeDepth = Math.max(1, getRouteDepth(progress));
+  const continueLabel = progress?.node?.id ? "Resume story" : "Start story";
+  const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
+  const playHref = `${detailHref}/play`;
 
   if (loading) {
-    return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
-        <div className="mx-auto max-w-[1320px] px-4 py-8 md:px-8 md:py-10">
-          <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-            <p className="text-sm font-semibold text-white/75">Loading</p>
-          </SurfacePanel>
-        </div>
-      </main>
-    );
+    return <LoadingShell />;
   }
 
   if (mode !== "play") {
     return (
       <main className="min-h-screen overflow-hidden bg-black text-white">
         <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
-          <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-              Interactive Story
-            </p>
-            <h1 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em] text-white">
-              {storyTitle}
-            </h1>
-            {storyDescription ? (
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/80">
-                {storyDescription}
-              </p>
-            ) : null}
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href={`/interactive/${encodeURIComponent(normalizedSlug)}/play`}
-                className={storefrontPrimaryButtonClass}
-              >
-                Start story
-              </Link>
-              {seriesId || story?.seriesId ? (
-                <Link
-                  href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
-                  className={storefrontSecondaryButtonClass}
-                >
-                  View series
-                </Link>
-              ) : null}
+          <SurfacePanel tone="highlight" accent="cyan" appearance="dark">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                  Interactive Story
+                </p>
+                <h1 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em] text-white">
+                  {storyTitle}
+                </h1>
+                {storyDescription ? (
+                  <p className="mt-4 max-w-3xl text-sm leading-7 text-white/80">
+                    {storyDescription}
+                  </p>
+                ) : null}
+                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
+                  <span className="rounded-full border border-white/10 px-3 py-2">
+                    {normalizeText(story?.contentMode || "NORMAL")}
+                  </span>
+                  {Array.isArray(story?.genre)
+                    ? story.genre.slice(0, 3).map((item) => (
+                        <span key={item} className="rounded-full border border-white/10 px-3 py-2">
+                          {normalizeText(item)}
+                        </span>
+                      ))
+                    : null}
+                </div>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href={playHref} className={storefrontPrimaryButtonClass}>
+                    {continueLabel}
+                  </Link>
+                  {seriesId || story?.seriesId ? (
+                    <Link
+                      href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
+                      className={storefrontSecondaryButtonClass}
+                    >
+                      View series
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+              <div className="grid gap-3">
+                <SurfacePanel tone="muted" accent="rose" appearance="dark">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                    Endings
+                  </div>
+                  <div className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">
+                    {Number(story?.endingsCount || 0)}
+                  </div>
+                </SurfacePanel>
+                <SurfacePanel tone="muted" accent="blue" appearance="dark">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                    Choices
+                  </div>
+                  <div className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">
+                    {Number(story?.choicesCount || 0)}
+                  </div>
+                </SurfacePanel>
+                <SurfacePanel tone="muted" accent="amber" appearance="dark">
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                    Progress
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-white/80">
+                    {progress?.node?.title
+                      ? `Current node: ${normalizeText(progress.node.title)}`
+                      : "No active progress yet."}
+                  </div>
+                </SurfacePanel>
+              </div>
             </div>
           </SurfacePanel>
         </div>
@@ -302,7 +555,7 @@ export default function InteractiveStoryPage({
 
   return (
     <main className="min-h-screen overflow-hidden bg-black text-white">
-      <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
+      <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
         <SurfacePanel tone="muted" accent="cyan" appearance="dark">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -313,14 +566,14 @@ export default function InteractiveStoryPage({
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 text-sm font-semibold text-white/80">
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/78">
                   {storyDescription}
                 </p>
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
-                href={`/interactive/${encodeURIComponent(normalizedSlug)}`}
+                href={detailHref}
                 className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
               >
                 Story
@@ -338,7 +591,7 @@ export default function InteractiveStoryPage({
         </SurfacePanel>
 
         {error ? (
-          <SurfacePanel tone="muted" accent="pink" appearance="dark" className="text-white">
+          <SurfacePanel tone="danger" accent="rose" appearance="dark" className="text-white">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span>{error}</span>
               {authRequired ? (
@@ -355,72 +608,99 @@ export default function InteractiveStoryPage({
         ) : null}
 
         {degradedNotice ? (
-          <SurfacePanel tone="muted" accent="yellow" appearance="dark">
+          <SurfacePanel tone="warning" accent="amber" appearance="dark">
             {degradedNotice}
           </SurfacePanel>
         ) : null}
 
-        {node ? (
-          <>
-            <SurfacePanel tone="muted" accent={isEnding ? "pink" : "cyan"} appearance="dark">
-              {isEnding ? (
-                <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                  Ending
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-4">
+            <div ref={storyBodyRef} className="scroll-mt-24">
+              <SurfacePanel tone="muted" accent={isEnding ? "rose" : "cyan"} appearance="dark">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  {isEnding ? (
+                    <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                      Ending
+                    </div>
+                  ) : null}
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                    {normalizeText(node?.title || "Current Node")}
+                  </p>
                 </div>
-              ) : null}
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                {normalizeText(node.title || "Current Node")}
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
+                  Depth {routeDepth}
+                </div>
+              </div>
+
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#67e8f9_0%,#fda4af_100%)] transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(18, routeDepth * 18))}%` }}
+                />
+              </div>
+
+              <p className="mt-5 whitespace-pre-line text-[15px] leading-8 text-white/85 transition-opacity duration-300">
+                {normalizeText(node?.content)}
               </p>
-              <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-white/85 transition-opacity duration-300">
-                {normalizeText(node.content)}
-              </p>
+
               {isEnding ? (
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    href={`/interactive/${encodeURIComponent(normalizedSlug)}/play`}
+                  <button
+                    type="button"
+                    onClick={handleRestart}
                     className={storefrontPrimaryButtonClass}
                   >
                     Restart
-                  </Link>
-                  <Link
-                    href={`/interactive/${encodeURIComponent(normalizedSlug)}`}
-                    className={storefrontSecondaryButtonClass}
-                  >
+                  </button>
+                  <Link href={detailHref} className={storefrontSecondaryButtonClass}>
                     Try another path
                   </Link>
                 </div>
               ) : null}
-            </SurfacePanel>
+              </SurfacePanel>
+            </div>
 
             {!isEnding ? (
-              <SurfacePanel tone="muted" accent="yellow" appearance="dark">
-                <h2 className="text-base font-black uppercase tracking-[0.01em] text-white">
-                  Choices
-                </h2>
+              <SurfacePanel tone="muted" accent="amber" appearance="dark">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-base font-black uppercase tracking-[0.01em] text-white">
+                    Choices
+                  </h2>
+                  <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
+                    1 tap protected
+                  </div>
+                </div>
                 <div className="mt-4 grid gap-3">
-                  {(node.choices || []).map((choice) => {
+                  {(node?.choices || []).map((choice) => {
+                    const choosing = submittingChoiceId === choice.id;
+                    const unlocking = unlockingChoiceId === choice.id;
                     const disabled =
                       Boolean(submittingChoiceId) ||
+                      Boolean(unlockingChoiceId) ||
                       authRequired ||
-                      Boolean(choice.locked);
-                    const busy = submittingChoiceId === choice.id;
+                      choosing ||
+                      unlocking;
                     const lockCopy = getLockedCopy(choice);
 
                     return (
-                      <button
+                      <div
                         key={choice.id}
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => handleChoose(choice)}
                         className={[
-                          "w-full rounded-[22px] border-2 border-black bg-[#0b0b0b] px-4 py-3 text-left text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
-                          disabled ? "opacity-60" : "",
-                          choice.locked ? "border-white/30 bg-[#111111]" : "",
+                          "rounded-[24px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out",
+                          choice.locked ? "border-white/25 bg-[#111111]" : "",
+                          choosing || unlocking ? "translate-x-0.5 translate-y-0.5" : "",
                         ].join(" ")}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div>{busy ? "Loading..." : normalizeText(choice.label)}</div>
+                            <div className="text-sm font-black text-white">
+                              {choosing
+                                ? "Loading..."
+                                : unlocking
+                                  ? "Unlocking..."
+                                  : normalizeText(choice.label)}
+                            </div>
                             {choice.description ? (
                               <div className="mt-1 text-xs leading-5 text-white/65">
                                 {normalizeText(choice.description)}
@@ -433,23 +713,81 @@ export default function InteractiveStoryPage({
                             </span>
                           ) : null}
                         </div>
-                      </button>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            aria-label={normalizeText(choice.label)}
+                            disabled={disabled || Boolean(choice.locked)}
+                            onClick={() => handleChoose(choice)}
+                            className={[
+                              storefrontPrimaryButtonClass,
+                              "h-11 px-5 text-[11px] tracking-[0.08em]",
+                              disabled || choice.locked ? "opacity-60" : "",
+                            ].join(" ")}
+                          >
+                            {choice.locked ? "Locked route" : "Choose"}
+                          </button>
+                          {choice.locked ? (
+                            <button
+                              type="button"
+                              aria-label={`Unlock ${normalizeText(choice.label)}`}
+                              disabled={disabled}
+                              onClick={() => handleUnlock(choice)}
+                              className={[
+                                storefrontSecondaryButtonClass,
+                                "h-11 px-5 text-[11px] tracking-[0.08em]",
+                                disabled ? "opacity-60" : "",
+                              ].join(" ")}
+                            >
+                              Unlock
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
               </SurfacePanel>
             ) : null}
+          </div>
+
+          <div className="grid gap-4">
+            <SurfacePanel tone="muted" accent="blue" appearance="dark">
+              <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+                Route so far
+              </h3>
+              <div className="mt-3 grid gap-2">
+                {path.map((item, index) => (
+                  <div
+                    key={`${item.nodeId}-${index}`}
+                    className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3"
+                  >
+                    <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/50">
+                      Step {index + 1}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {normalizeText(item.title)}
+                    </div>
+                  </div>
+                ))}
+                {path.length === 0 ? (
+                  <div className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/65">
+                    Start the route to see your path.
+                  </div>
+                ) : null}
+              </div>
+            </SurfacePanel>
 
             {storyStateRows.length > 0 ? (
-              <SurfacePanel tone="muted" accent="blue" appearance="dark">
+              <SurfacePanel tone="muted" accent="rose" appearance="dark">
                 <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
                   State
                 </h3>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid gap-2">
                   {storyStateRows.map((item) => (
                     <div
                       key={item.key}
-                      className="rounded-[20px] border-2 border-black bg-[#0b0b0b] px-3 py-2 text-sm text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                      className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm text-white"
                     >
                       <span className="font-black uppercase tracking-[0.08em] text-white/80">
                         {item.key}
@@ -460,8 +798,32 @@ export default function InteractiveStoryPage({
                 </div>
               </SurfacePanel>
             ) : null}
-          </>
-        ) : null}
+
+            <SurfacePanel tone="muted" accent="amber" appearance="dark">
+              <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+                Replay
+              </h3>
+              <div className="mt-3 text-sm leading-6 text-white/75">
+                Endings reached: {Number(progress?.endingsReached || 0)}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleRestart}
+                  className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
+                >
+                  Restart now
+                </button>
+                <Link
+                  href={detailHref}
+                  className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
+                >
+                  Story detail
+                </Link>
+              </div>
+            </SurfacePanel>
+          </div>
+        </section>
       </div>
     </main>
   );

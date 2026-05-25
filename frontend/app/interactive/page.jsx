@@ -1,4 +1,8 @@
 import InteractiveLandingPage from "../../components/interactive/InteractiveLandingPage";
+import {
+  getInteractiveServerAccess,
+  getInteractiveStoriesServer,
+} from "../../lib/interactiveServerApi";
 import { createPageMetadata } from "../../lib/seo";
 import { buildInteractiveLandingRobots } from "../../lib/interactiveSeo";
 
@@ -9,6 +13,16 @@ export const metadata = createPageMetadata({
   robots: buildInteractiveLandingRobots(),
 });
 
-export default function InteractiveLandingRoute() {
-  return <InteractiveLandingPage />;
+export default async function InteractiveLandingRoute() {
+  const [access, stories] = await Promise.all([
+    getInteractiveServerAccess(),
+    getInteractiveStoriesServer(),
+  ]);
+
+  return (
+    <InteractiveLandingPage
+      initialStories={stories}
+      initialContentMode={access.contentMode}
+    />
+  );
 }

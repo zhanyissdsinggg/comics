@@ -30,6 +30,7 @@ type StoryNodeInput = {
   baseContext?: string | null;
   fallbackText?: string | null;
   isEnding?: boolean;
+  reviewStatus?: string | null;
   choices?: StoryChoiceInput[];
 };
 
@@ -57,6 +58,14 @@ function normalizeText(value: unknown): string {
 
 function normalizeLower(value: unknown): string {
   return normalizeText(value).toLowerCase();
+}
+
+function normalizeReviewStatus(value: unknown): "draft" | "pending_review" | "approved" | "rejected" {
+  const normalized = normalizeLower(value);
+  if (normalized === "draft") return "draft";
+  if (normalized === "pending_review") return "pending_review";
+  if (normalized === "rejected") return "rejected";
+  return "approved";
 }
 
 function pushIssue(
@@ -112,6 +121,7 @@ export function validateInteractiveStoryGraph(
   const nodeIdSet = new Set<string>();
   const nodeKeySet = new Set<string>();
   const nodeById = new Map<string, StoryNodeInput>();
+  const nodeReviewStatusById = new Map<string, string>();
   const reachableNodeIds = new Set<string>();
   const adjacency = new Map<string, string[]>();
 
@@ -139,6 +149,7 @@ export function validateInteractiveStoryGraph(
     if (nodeId) {
       nodeIdSet.add(nodeId);
       nodeById.set(nodeId, node);
+      nodeReviewStatusById.set(nodeId, normalizeReviewStatus(node?.reviewStatus));
       adjacency.set(nodeId, []);
     }
 
@@ -170,6 +181,12 @@ export function validateInteractiveStoryGraph(
       code: "INITIAL_NODE_NOT_FOUND",
       severity: "error",
       message: "initialNodeId does not exist in story nodes",
+    });
+  } else if (nodeReviewStatusById.get(initialNodeId) !== "approved") {
+    pushIssue(issues, {
+      code: "INITIAL_NODE_NOT_APPROVED",
+      severity: "error",
+      message: "initialNodeId must point to an approved node",
     });
   }
 
@@ -233,6 +250,16 @@ export function validateInteractiveStoryGraph(
         continue;
       }
 
+      if (nodeReviewStatusById.get(targetNodeId) !== "approved") {
+        pushIssue(issues, {
+          code: "CHOICE_TARGET_UNAPPROVED_NODE",
+          severity: "error",
+          message: `Choice target node is not approved: ${nodeKey}.${choiceKey || "unknown"}`,
+          nodeKey: nodeKey || undefined,
+          choiceKey: choiceKey || undefined,
+        });
+      }
+
       if (nodeId) {
         adjacency.get(nodeId)?.push(targetNodeId);
       }
@@ -271,6 +298,15 @@ export function validateInteractiveStoryGraph(
   }
 
   for (const [nodeId, node] of nodeById.entries()) {
+    if (nodeReviewStatusById.get(nodeId) !== "approved") {
+      pushIssue(issues, {
+        code: "PUBLISHED_STORY_HAS_UNAPPROVED_NODE",
+        severity: "error",
+        message: `Published story includes unapproved node: ${normalizeText(node?.nodeKey) || nodeId}`,
+        nodeKey: normalizeText(node?.nodeKey) || undefined,
+      });
+    }
+
     if (!reachableNodeIds.has(nodeId)) {
       pushIssue(issues, {
         code: "NODE_UNREACHABLE",

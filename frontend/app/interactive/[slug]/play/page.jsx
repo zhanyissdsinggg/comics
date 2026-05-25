@@ -1,4 +1,9 @@
 import InteractiveStoryPage from "../../../../components/interactive/InteractiveStoryPage";
+import {
+  getInteractiveProgressServer,
+  getInteractiveServerAccess,
+  getInteractiveStoryServer,
+} from "../../../../lib/interactiveServerApi";
 import { createPageMetadata } from "../../../../lib/seo";
 import { buildInteractiveLandingRobots } from "../../../../lib/interactiveSeo";
 
@@ -17,10 +22,18 @@ export async function generateMetadata({ params }) {
 export default async function InteractiveStoryPlayPage({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
+  const [story, progress, access] = await Promise.all([
+    getInteractiveStoryServer(slug),
+    getInteractiveProgressServer(slug),
+    getInteractiveServerAccess(),
+  ]);
 
   return (
     <InteractiveStoryPage
       storySlug={slug}
+      initialStory={story}
+      initialProgress={progress}
+      initialContentMode={access.contentMode}
       mode="play"
     />
   );

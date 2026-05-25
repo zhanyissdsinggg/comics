@@ -57,8 +57,17 @@ type ParsedPayload = {
   safety_notes?: unknown;
 };
 
+type SafetyClassifierResult = {
+  ok: boolean;
+  safe: boolean;
+  reason: string;
+  notes: string;
+};
+
 const NORMAL_FORBIDDEN_REGEX =
   /\b(explicit|porn|erotic|smut|sexual|nsfw|nude|fetish|orgasm|seduce|seduction|bedroom|graphic violence|gore|minor)\b/i;
+const GENERIC_FORBIDDEN_REGEX =
+  /\b(sexualized minors|child porn|rape|incest|bestiality)\b/i;
 
 function normalizeText(value: unknown): string {
   return String(value || "").replace(/\s+/g, " ").trim();
@@ -68,13 +77,13 @@ function truncateText(value: string, maxLength: number): string {
   return value.length > maxLength ? value.slice(0, maxLength) : value;
 }
 
-function parseJsonObject(raw: string): ParsedPayload | null {
+function parseJsonObject(raw: string): Record<string, unknown> | null {
   try {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       return null;
     }
-    return parsed as ParsedPayload;
+    return parsed as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -95,6 +104,26 @@ function normalizeChoices(value: unknown): DraftChoice[] {
     .filter((item) => item.label);
 }
 
+function getSafetyRules(contentMode: "NORMAL" | "ADULT") {
+  if (contentMode === "NORMAL") {
+    return [
+      "Target audience is US teens.",
+      "Teen-safe only.",
+      "Do not include explicit sexual content.",
+      "Do not include sexualized minors.",
+      "Do not include adult framing or adult innuendo.",
+      "Do not include graphic violence or gore.",
+    ];
+  }
+
+  return [
+    "Maintain internal continuity.",
+    "Do not include sexualized minors.",
+    "Do not include illegal exploitation.",
+    "Do not include disallowed extreme graphic violence.",
+  ];
+}
+
 @Injectable()
 export class InteractiveAiService {
   private buildPrompt(input: GenerateDraftNodeInput): string {
@@ -102,23 +131,7 @@ export class InteractiveAiService {
       .slice(-5)
       .map((node, index) => `${index + 1}. ${node.title}: ${truncateText(node.body, 240)}`)
       .join("\n");
-
-    const safetyRules =
-      input.story.contentMode === "NORMAL"
-        ? [
-            "Target audience is US teens.",
-            "Teen-safe only.",
-            "Do not include explicit sexual content.",
-            "Do not include sexualized minors.",
-            "Do not include adult framing or adult innuendo.",
-            "Do not include graphic violence or gore.",
-          ]
-        : [
-            "Maintain internal continuity.",
-            "Do not include sexualized minors.",
-            "Do not include illegal exploitation.",
-            "Do not include disallowed extreme graphic violence.",
-          ];
+    const safetyRules = getSafetyRules(input.story.contentMode);
 
     return [
       "You generate the next branching draft node for an interactive fiction editor.",
@@ -149,34 +162,56 @@ export class InteractiveAiService {
     ].join("\n");
   }
 
-  private validateDraft(
+  private buildClassifierPrompt(
     input: GenerateDraftNodeInput,
-    parsed: ParsedPayload | null,
+    draft: NonNullable<GenerateDraftNodeOutput["draft"]>,
+  ) {
+    return [
+      "You are a strict safety classifier for interactive fiction drafts.",
+      "Return JSON only.",
+      `Content mode: ${input.story.contentMode}`,
+      `Target audience: ${input.story.targetAudience}`,
+      `Safety rules: ${getSafetyRules(input.story.contentMode).join(" | ")}`,
+      `Draft title: ${draft.title}`,
+      `Draft body: ${draft.body}`,
+      `Draft choices: ${draft.choices.map((choice) => `${choice.label} :: ${choice.description}`).join(" || ")}`,
+      "Classify whether the draft is safe for this content mode and audience.",
+      'Return {"safe": true|false, "reason": "short-code", "notes": "short explanation"}',
+    ].join("\n");
+  }
+
+  private validateDraftShape(
+    input: GenerateDraftNodeInput,
+    parsed: Record<string, unknown> | null,
   ): { ok: boolean; draft: GenerateDraftNodeOutput["draft"]; error: string | null } {
     if (!parsed) {
       return { ok: false, draft: null, error: "invalid-json" };
     }
 
-    const title = truncateText(normalizeText(parsed.title), 120);
-    const body = truncateText(normalizeText(parsed.body), 4000);
-    const choices = normalizeChoices(parsed.choices).slice(0, 3);
-    const safetyNotes = truncateText(normalizeText(parsed.safety_notes), 400);
+    const payload = parsed as ParsedPayload;
+    const title = truncateText(normalizeText(payload.title), 120);
+    const body = truncateText(normalizeText(payload.body), 4000);
+    const choices = normalizeChoices(payload.choices).slice(0, 3);
+    const safetyNotes = truncateText(normalizeText(payload.safety_notes), 400);
 
     if (!title || !body) {
       return { ok: false, draft: null, error: "missing-title-or-body" };
     }
-
+    if (body.length < 120) {
+      return { ok: false, draft: null, error: "body-too-short" };
+    }
     if (choices.length < 2 || choices.length > 3) {
       return { ok: false, draft: null, error: "invalid-choice-count" };
     }
 
-    if (input.story.contentMode === "NORMAL") {
-      const combined = `${title}\n${body}\n${choices
-        .map((item) => `${item.label} ${item.description}`)
-        .join("\n")}\n${safetyNotes}`;
-      if (NORMAL_FORBIDDEN_REGEX.test(combined)) {
-        return { ok: false, draft: null, error: "normal-mode-safety-rejected" };
-      }
+    const combined = `${title}\n${body}\n${choices
+      .map((item) => `${item.label} ${item.description}`)
+      .join("\n")}\n${safetyNotes}`;
+    if (GENERIC_FORBIDDEN_REGEX.test(combined)) {
+      return { ok: false, draft: null, error: "generic-safety-rejected" };
+    }
+    if (input.story.contentMode === "NORMAL" && NORMAL_FORBIDDEN_REGEX.test(combined)) {
+      return { ok: false, draft: null, error: "normal-mode-safety-rejected" };
     }
 
     return {
@@ -188,6 +223,122 @@ export class InteractiveAiService {
         choices,
         safetyNotes,
       },
+    };
+  }
+
+  private async callOpenAiJson(params: {
+    prompt: string;
+    system: string;
+    model: string;
+    apiKey: string;
+    baseUrl: string;
+    timeoutMs: number;
+  }) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), params.timeoutMs);
+    const startedAt = Date.now();
+    try {
+      const response = await fetch(
+        `${params.baseUrl.replace(/\/+$/, "")}/chat/completions`,
+        {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${params.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: params.model,
+            temperature: 0.2,
+            response_format: { type: "json_object" },
+            messages: [
+              {
+                role: "system",
+                content: params.system,
+              },
+              {
+                role: "user",
+                content: params.prompt,
+              },
+            ],
+          }),
+        },
+      );
+
+      const raw = await response.text();
+      const latencyMs = Date.now() - startedAt;
+      if (!response.ok) {
+        return {
+          ok: false as const,
+          raw,
+          latencyMs,
+          error: `openai-http-${response.status}`,
+        };
+      }
+
+      const parsedOuter = parseJsonObject(raw);
+      const messageContent = String(
+        parsedOuter?.choices && Array.isArray(parsedOuter.choices)
+          ? (parsedOuter.choices[0] as { message?: { content?: unknown } })?.message?.content || ""
+          : "",
+      );
+
+      return {
+        ok: true as const,
+        raw: messageContent || raw,
+        latencyMs,
+        error: null,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        ok: false as const,
+        raw: "",
+        latencyMs: Date.now() - startedAt,
+        error: message.slice(0, 180),
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private async classifyDraftSafety(params: {
+    input: GenerateDraftNodeInput;
+    draft: NonNullable<GenerateDraftNodeOutput["draft"]>;
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    timeoutMs: number;
+  }): Promise<SafetyClassifierResult> {
+    const prompt = this.buildClassifierPrompt(params.input, params.draft);
+    const response = await this.callOpenAiJson({
+      prompt,
+      system:
+        "You are a strict JSON safety classifier. Be conservative. If content may violate rules, mark unsafe.",
+      model: params.model,
+      apiKey: params.apiKey,
+      baseUrl: params.baseUrl,
+      timeoutMs: Math.min(params.timeoutMs, 8000),
+    });
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        safe: false,
+        reason: response.error || "classifier-failed",
+        notes: "Classifier request failed.",
+      };
+    }
+
+    const parsed = parseJsonObject(response.raw);
+    const safe = parsed?.safe === true;
+    const reason = truncateText(normalizeText(parsed?.reason), 120) || "classifier-rejected";
+    const notes = truncateText(normalizeText(parsed?.notes), 240) || "Classifier rejected the draft.";
+    return {
+      ok: true,
+      safe,
+      reason,
+      notes,
     };
   }
 
@@ -228,102 +379,90 @@ export class InteractiveAiService {
       };
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), appConfig.ai.timeoutMs);
-    const startedAt = Date.now();
+    const draftResponse = await this.callOpenAiJson({
+      prompt,
+      system:
+        "You are an interactive fiction drafting assistant. Follow content-mode safety rules exactly and output strict JSON.",
+      model,
+      apiKey,
+      baseUrl: appConfig.ai.openaiBaseUrl,
+      timeoutMs: appConfig.ai.timeoutMs,
+    });
 
-    try {
-      const response = await fetch(
-        `${String(appConfig.ai.openaiBaseUrl || "https://api.openai.com/v1").replace(/\/+$/, "")}/chat/completions`,
-        {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model,
-            temperature: 0.7,
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are an interactive fiction drafting assistant. Follow content-mode safety rules exactly and output strict JSON.",
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-          }),
-        },
-      );
-
-      const raw = await response.text();
-      const latencyMs = Date.now() - startedAt;
-      if (!response.ok) {
-        return {
-          ok: false,
-          status: "fallback",
-          provider,
-          model,
-          prompt,
-          rawResponse: raw.slice(0, 4000),
-          errorMessage: `openai-http-${response.status}`,
-          latencyMs,
-          draft: null,
-        };
-      }
-
-      const parsedOuter = parseJsonObject(raw);
-      const messageContent = String(
-        parsedOuter?.choices && Array.isArray(parsedOuter.choices)
-          ? (parsedOuter.choices[0] as { message?: { content?: unknown } })?.message?.content || ""
-          : "",
-      );
-      const validated = this.validateDraft(input, parseJsonObject(messageContent));
-      if (!validated.ok) {
-        return {
-          ok: false,
-          status: "rejected",
-          provider,
-          model,
-          prompt,
-          rawResponse: messageContent.slice(0, 4000) || raw.slice(0, 4000),
-          errorMessage: validated.error,
-          latencyMs,
-          draft: null,
-        };
-      }
-
-      return {
-        ok: true,
-        status: "success",
-        provider,
-        model,
-        prompt,
-        rawResponse: messageContent.slice(0, 4000),
-        errorMessage: null,
-        latencyMs,
-        draft: validated.draft,
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+    if (!draftResponse.ok) {
       return {
         ok: false,
         status: "fallback",
         provider,
         model,
         prompt,
-        rawResponse: "",
-        errorMessage: message.slice(0, 180),
-        latencyMs: Date.now() - startedAt,
+        rawResponse: draftResponse.raw.slice(0, 4000),
+        errorMessage: draftResponse.error,
+        latencyMs: draftResponse.latencyMs,
         draft: null,
       };
-    } finally {
-      clearTimeout(timeout);
     }
+
+    const validated = this.validateDraftShape(input, parseJsonObject(draftResponse.raw));
+    if (!validated.ok || !validated.draft) {
+      return {
+        ok: false,
+        status: "rejected",
+        provider,
+        model,
+        prompt,
+        rawResponse: draftResponse.raw.slice(0, 4000),
+        errorMessage: validated.error,
+        latencyMs: draftResponse.latencyMs,
+        draft: null,
+      };
+    }
+
+    const classifier = await this.classifyDraftSafety({
+      input,
+      draft: validated.draft,
+      apiKey,
+      baseUrl: appConfig.ai.openaiBaseUrl,
+      model,
+      timeoutMs: appConfig.ai.timeoutMs,
+    });
+
+    if (!classifier.ok || !classifier.safe) {
+      return {
+        ok: false,
+        status: "rejected",
+        provider,
+        model,
+        prompt,
+        rawResponse: draftResponse.raw.slice(0, 4000),
+        errorMessage: classifier.reason,
+        latencyMs: draftResponse.latencyMs,
+        draft: {
+          ...validated.draft,
+          safetyNotes: truncateText(
+            normalizeText(`${validated.draft.safetyNotes} ${classifier.notes}`),
+            400,
+          ),
+        },
+      };
+    }
+
+    return {
+      ok: true,
+      status: "success",
+      provider,
+      model,
+      prompt,
+      rawResponse: draftResponse.raw.slice(0, 4000),
+      errorMessage: null,
+      latencyMs: draftResponse.latencyMs,
+      draft: {
+        ...validated.draft,
+        safetyNotes: truncateText(
+          normalizeText(`${validated.draft.safetyNotes} ${classifier.notes}`),
+          400,
+        ),
+      },
+    };
   }
 }

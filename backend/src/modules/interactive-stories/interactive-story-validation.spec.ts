@@ -12,6 +12,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-1",
           nodeKey: "start",
           isEnding: false,
+          reviewStatus: "approved",
           choices: [
             { choiceKey: "left", targetNodeId: "node-2" },
             { choiceKey: "right", targetNodeId: "node-2" },
@@ -21,6 +22,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-2",
           nodeKey: "ending",
           isEnding: true,
+          reviewStatus: "approved",
           choices: [],
         },
       ],
@@ -41,6 +43,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-1",
           nodeKey: "start",
           isEnding: false,
+          reviewStatus: "approved",
           choices: [
             { choiceKey: "left", targetNodeId: null },
             { choiceKey: "right", targetNodeId: "node-404" },
@@ -66,12 +69,14 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-1",
           nodeKey: "start",
           isEnding: false,
+          reviewStatus: "approved",
           choices: [{ choiceKey: "only", targetNodeId: "node-2" }],
         },
         {
           id: "node-2",
           nodeKey: "ending",
           isEnding: true,
+          reviewStatus: "approved",
           choices: [],
         },
       ],
@@ -91,6 +96,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-1",
           nodeKey: "start",
           isEnding: false,
+          reviewStatus: "approved",
           choices: [
             { choiceKey: "left", targetNodeId: "node-2" },
             { choiceKey: "right", targetNodeId: "node-2" },
@@ -100,6 +106,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-2",
           nodeKey: "bad-ending",
           isEnding: true,
+          reviewStatus: "approved",
           choices: [{ choiceKey: "continue", targetNodeId: "node-1" }],
         },
       ],
@@ -122,6 +129,7 @@ describe("validateInteractiveStoryGraph", () => {
           nodeKey: "start",
           title: "Explicit setup",
           isEnding: false,
+          reviewStatus: "approved",
           choices: [
             { choiceKey: "left", label: "Adult route", targetNodeId: "node-2" },
             { choiceKey: "right", targetNodeId: "node-2" },
@@ -131,6 +139,7 @@ describe("validateInteractiveStoryGraph", () => {
           id: "node-2",
           nodeKey: "ending",
           isEnding: true,
+          reviewStatus: "approved",
           choices: [],
         },
       ],
@@ -140,5 +149,41 @@ describe("validateInteractiveStoryGraph", () => {
     expect(result.issues.some((issue) => issue.code === "NORMAL_STORY_ADULT_CONTENT")).toBe(true);
     expect(result.issues.some((issue) => issue.code === "NORMAL_NODE_ADULT_CONTENT")).toBe(true);
     expect(result.issues.some((issue) => issue.code === "NORMAL_CHOICE_ADULT_CONTENT")).toBe(true);
+  });
+
+  it("fails when initial node or choice target is not approved", () => {
+    const result = validateInteractiveStoryGraph({
+      id: "story-1",
+      contentMode: "NORMAL",
+      initialNodeId: "node-1",
+      series: { adult: false },
+      nodes: [
+        {
+          id: "node-1",
+          nodeKey: "start",
+          isEnding: false,
+          reviewStatus: "draft",
+          choices: [
+            { choiceKey: "left", targetNodeId: "node-2" },
+            { choiceKey: "right", targetNodeId: "node-2" },
+          ],
+        },
+        {
+          id: "node-2",
+          nodeKey: "ending",
+          isEnding: true,
+          reviewStatus: "pending_review",
+          choices: [],
+        },
+      ],
+    });
+
+    expect(result.issues.some((issue) => issue.code === "INITIAL_NODE_NOT_APPROVED")).toBe(true);
+    expect(
+      result.issues.some((issue) => issue.code === "PUBLISHED_STORY_HAS_UNAPPROVED_NODE"),
+    ).toBe(true);
+    expect(
+      result.issues.some((issue) => issue.code === "CHOICE_TARGET_UNAPPROVED_NODE"),
+    ).toBe(true);
   });
 });

@@ -37,6 +37,10 @@ const INTERACTIVE_STORIES = [
     description: "A teen mystery where every clue changes who you trust next.",
     seriesId: "series-011",
     contentMode: "NORMAL",
+    genre: ["Mystery", "Teen Thriller"],
+    endingsCount: 3,
+    choicesCount: 7,
+    nodeCount: 4,
   },
   {
     id: "story-adult-001",
@@ -45,6 +49,10 @@ const INTERACTIVE_STORIES = [
     description: "Adult-mode branching thriller kept out of normal mode surfaces.",
     seriesId: "series-012",
     contentMode: "ADULT",
+    genre: ["Thriller"],
+    endingsCount: 2,
+    choicesCount: 5,
+    nodeCount: 3,
   },
 ] as const;
 
@@ -1217,6 +1225,142 @@ function createMockBackendServer() {
       return;
     }
 
+    if (pathname === "/api/interactive-stories") {
+      const stories = INTERACTIVE_STORIES.filter((story) =>
+        matureConfirmed && matureModeEnabled
+          ? story.contentMode === "ADULT"
+          : story.contentMode === "NORMAL",
+      );
+      jsonResponse(response, 200, { stories });
+      return;
+    }
+
+    if (pathname.startsWith("/api/interactive-stories/by-series/")) {
+      jsonResponse(response, 200, { story: null });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/midnight-archive") {
+      jsonResponse(response, 200, {
+        story: {
+          ...INTERACTIVE_STORIES[0],
+          baseContext: "A teen mystery where the archive shifts with each route.",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/after-dark-protocol") {
+      if (!signedIn || !matureConfirmed || !matureModeEnabled) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
+      jsonResponse(response, 200, {
+        story: {
+          ...INTERACTIVE_STORIES[1],
+          baseContext: "Adult mode only.",
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/midnight-archive/current") {
+      if (!signedIn) {
+        jsonResponse(response, 401, { error: "UNAUTHENTICATED" });
+        return;
+      }
+      const currentNodeId = "node-midnight-1";
+      jsonResponse(response, 200, {
+        progress: {
+          story: INTERACTIVE_STORIES[0],
+          state: { trust: 0, clues: 1, risk: 0, pathNodeIds: [currentNodeId], endingsReached: [] },
+          flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: currentNodeId,
+              nodeKey: "start-hall",
+              title: "The Hall Goes Quiet",
+              isEnding: false,
+            },
+          ],
+          node: {
+            id: currentNodeId,
+            key: "start-hall",
+            title: "The Hall Goes Quiet",
+            content:
+              "The archive room clicks shut behind you. One note points upstairs. One points to the locked radio cabinet.",
+            isEnding: false,
+            choices: [
+              {
+                id: "choice-midnight-open",
+                key: "go-upstairs",
+                label: "Follow the upstairs note",
+                description: "Push forward before the hallway cameras loop again.",
+                requiresPremium: false,
+                requiresTokens: 0,
+                unlockLabel: null,
+                locked: false,
+                lockedReason: null,
+                unlocked: false,
+              },
+              {
+                id: "choice-midnight-locked",
+                key: "unlock-cabinet",
+                label: "Crack the radio cabinet",
+                description: "A premium branch with a cleaner clue trail.",
+                requiresPremium: true,
+                requiresTokens: 0,
+                unlockLabel: "Premium choice",
+                locked: true,
+                lockedReason: "PREMIUM_REQUIRED",
+                unlocked: false,
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/after-dark-protocol/current") {
+      if (!signedIn) {
+        jsonResponse(response, 401, { error: "UNAUTHENTICATED" });
+        return;
+      }
+      if (!matureConfirmed || !matureModeEnabled) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
+      jsonResponse(response, 200, {
+        progress: {
+          story: INTERACTIVE_STORIES[1],
+          state: { trust: 0, pathNodeIds: ["node-adult-1"], endingsReached: [] },
+          flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: "node-adult-1",
+              nodeKey: "adult-start",
+              title: "After Dark",
+              isEnding: false,
+            },
+          ],
+          node: {
+            id: "node-adult-1",
+            key: "adult-start",
+            title: "After Dark",
+            content: "Adult mode only.",
+            isEnding: false,
+            choices: [],
+          },
+        },
+      });
+      return;
+    }
+
     jsonResponse(response, 404, { error: "NOT_FOUND" });
   });
 }
@@ -1473,7 +1617,10 @@ async function mockPublicApi(
 
     if (pathname === "/api/interactive-stories/slug/midnight-archive") {
       await fulfillJson(route, {
-        story: INTERACTIVE_STORIES[0],
+        story: {
+          ...INTERACTIVE_STORIES[0],
+          baseContext: "A teen mystery where the archive shifts with each route.",
+        },
       });
       return;
     }
@@ -1484,7 +1631,10 @@ async function mockPublicApi(
         return;
       }
       await fulfillJson(route, {
-        story: INTERACTIVE_STORIES[1],
+        story: {
+          ...INTERACTIVE_STORIES[1],
+          baseContext: "Adult mode only.",
+        },
       });
       return;
     }
@@ -1500,8 +1650,24 @@ async function mockPublicApi(
         currentNodeId === "node-midnight-ending"
           ? {
               story: INTERACTIVE_STORIES[0],
-              state: { trust: 2, clues: 1, risk: 0 },
+              state: { trust: 2, clues: 1, risk: 0, pathNodeIds: interactiveProgressState.visited, endingsReached: ["node-midnight-ending"] },
               flags: [],
+              currentDepth: interactiveProgressState.visited.length,
+              endingsReached: 1,
+              path: [
+                {
+                  nodeId: "node-midnight-1",
+                  nodeKey: "start-hall",
+                  title: "The Hall Goes Quiet",
+                  isEnding: false,
+                },
+                {
+                  nodeId: "node-midnight-ending",
+                  nodeKey: "ending-rooftop",
+                  title: "Rooftop Ending",
+                  isEnding: true,
+                },
+              ],
               node: {
                 id: "node-midnight-ending",
                 key: "ending-rooftop",
@@ -1514,8 +1680,18 @@ async function mockPublicApi(
             }
           : {
               story: INTERACTIVE_STORIES[0],
-              state: { trust: 0, clues: 1, risk: 0 },
+              state: { trust: 0, clues: 1, risk: 0, pathNodeIds: ["node-midnight-1"], endingsReached: [] },
               flags: [],
+              currentDepth: 1,
+              endingsReached: 0,
+              path: [
+                {
+                  nodeId: "node-midnight-1",
+                  nodeKey: "start-hall",
+                  title: "The Hall Goes Quiet",
+                  isEnding: false,
+                },
+              ],
               node: {
                 id: "node-midnight-1",
                 key: "start-hall",
@@ -1534,6 +1710,7 @@ async function mockPublicApi(
                     unlockLabel: null,
                     locked: false,
                     lockedReason: null,
+                    unlocked: false,
                   },
                   {
                     id: "choice-midnight-locked",
@@ -1545,6 +1722,7 @@ async function mockPublicApi(
                     unlockLabel: "Premium choice",
                     locked: true,
                     lockedReason: "PREMIUM_REQUIRED",
+                    unlocked: false,
                   },
                 ],
               },
@@ -1566,8 +1744,18 @@ async function mockPublicApi(
       await fulfillJson(route, {
         progress: {
           story: INTERACTIVE_STORIES[1],
-          state: { trust: 0 },
+          state: { trust: 0, pathNodeIds: ["node-adult-1"], endingsReached: [] },
           flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: "node-adult-1",
+              nodeKey: "adult-start",
+              title: "After Dark",
+              isEnding: false,
+            },
+          ],
           node: {
             id: "node-adult-1",
             key: "adult-start",
@@ -1613,8 +1801,24 @@ async function mockPublicApi(
       await fulfillJson(route, {
         progress: {
           story: INTERACTIVE_STORIES[0],
-          state: { trust: 2, clues: 1, risk: 0 },
+          state: { trust: 2, clues: 1, risk: 0, pathNodeIds: interactiveProgressState.visited, endingsReached: ["node-midnight-ending"] },
           flags: [],
+          currentDepth: interactiveProgressState.visited.length,
+          endingsReached: 1,
+          path: [
+            {
+              nodeId: "node-midnight-1",
+              nodeKey: "start-hall",
+              title: "The Hall Goes Quiet",
+              isEnding: false,
+            },
+            {
+              nodeId: "node-midnight-ending",
+              nodeKey: "ending-rooftop",
+              title: "Rooftop Ending",
+              isEnding: true,
+            },
+          ],
           node: {
             id: "node-midnight-ending",
             key: "ending-rooftop",
@@ -1626,6 +1830,87 @@ async function mockPublicApi(
           },
         },
       });
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/midnight-archive/restart" &&
+      route.request().method() === "POST"
+    ) {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      interactiveProgressState.currentNodeId = "node-midnight-1";
+      interactiveProgressState.visited = ["node-midnight-1"];
+      interactiveProgressState.duplicateTriggered = false;
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[0],
+          state: { trust: 0, clues: 1, risk: 0, pathNodeIds: ["node-midnight-1"], endingsReached: [] },
+          flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: "node-midnight-1",
+              nodeKey: "start-hall",
+              title: "The Hall Goes Quiet",
+              isEnding: false,
+            },
+          ],
+          node: {
+            id: "node-midnight-1",
+            key: "start-hall",
+            title: "The Hall Goes Quiet",
+            content:
+              "The archive room clicks shut behind you. One note points upstairs. One points to the locked radio cabinet.",
+            isEnding: false,
+            choices: [
+              {
+                id: "choice-midnight-open",
+                key: "go-upstairs",
+                label: "Follow the upstairs note",
+                description: "Push forward before the hallway cameras loop again.",
+                requiresPremium: false,
+                requiresTokens: 0,
+                unlockLabel: null,
+                locked: false,
+                lockedReason: null,
+                unlocked: false,
+              },
+              {
+                id: "choice-midnight-locked",
+                key: "unlock-cabinet",
+                label: "Crack the radio cabinet",
+                description: "A premium branch with a cleaner clue trail.",
+                requiresPremium: true,
+                requiresTokens: 0,
+                unlockLabel: "Premium choice",
+                locked: true,
+                lockedReason: "PREMIUM_REQUIRED",
+                unlocked: false,
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/midnight-archive/unlock-choice" &&
+      route.request().method() === "POST"
+    ) {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      await fulfillJson(
+        route,
+        { error: "FORBIDDEN", reason: "PREMIUM_REQUIRED" },
+        403,
+      );
       return;
     }
 
@@ -1924,8 +2209,10 @@ test.describe("Public reading funnel", () => {
     await expect(
       page.getByRole("heading", { name: /Pick a route\. Wear the consequences\./i }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(page.locator("body")).not.toContainText(/^Loading$/);
     await expect(page.locator("main")).toContainText("Midnight Archive");
     await expect(page.locator("main")).not.toContainText("After Dark Protocol");
+    await expect(page.locator("[data-testid='interactive-story-grid']")).toContainText("3 endings");
 
     response = await page.goto("/interactive/midnight-archive", {
       waitUntil: "domcontentloaded",
@@ -1935,8 +2222,10 @@ test.describe("Public reading funnel", () => {
       page.getByRole("heading", { name: "Midnight Archive" }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(
-      page.getByRole("link", { name: /Start story/i }),
+      page.getByRole("link", { name: /Start story|Resume story/i }),
     ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
+    await expect(page.locator("main")).toContainText("Mystery");
+    await expect(page.locator("main")).toContainText("7");
 
     response = await page.goto("/interactive/midnight-archive/play", {
       waitUntil: "domcontentloaded",
@@ -1944,16 +2233,19 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
     await expect(page.locator("main")).toContainText("Choices");
+    await expect(page.locator("main")).toContainText("Route so far");
+    await expect(page.locator("main")).toContainText("Depth 1");
 
     const unlockedChoice = page.getByRole("button", {
       name: /Follow the upstairs note/i,
     });
     const lockedChoice = page.getByRole("button", {
-      name: /Crack the radio cabinet/i,
+      name: "Crack the radio cabinet",
+      exact: true,
     });
     await expect(unlockedChoice).toBeEnabled();
     await expect(lockedChoice).toBeDisabled();
-    await expect(lockedChoice).toContainText("Premium choice");
+    await expect(page.locator("main")).toContainText("Premium choice");
 
     await expectNoRuntimeIssues("interactive-normal-routes", runtimeIssues);
   });
@@ -1983,9 +2275,7 @@ test.describe("Public reading funnel", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("main")).toContainText("Ending");
-    await expect(
-      page.getByRole("link", { name: /Restart/i }),
-    ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
+    await expect(page.getByRole("button", { name: /Restart/i }).first()).toBeVisible();
 
     await expectNoRuntimeIssues("interactive-choice-submit", runtimeIssues);
   });

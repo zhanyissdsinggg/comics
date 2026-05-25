@@ -166,28 +166,123 @@ export class InteractiveStoriesController {
     );
 
     if (!result.ok) {
-      if (result.reason === "CHOICE_LOCKED") {
+      if (result.reason === "PREMIUM_REQUIRED" || result.reason === "TOKENS_REQUIRED") {
         res.status(403);
         return buildError(ERROR_CODES.FORBIDDEN, {
           message: "Choice is locked",
-          reason: "CHOICE_LOCKED",
+          reason: result.reason,
         });
       }
-      if (result.reason === "DUPLICATE_SUBMIT") {
+      if (result.reason === "TARGET_NODE_NOT_AVAILABLE") {
         res.status(409);
         return buildError(ERROR_CODES.INVALID_REQUEST, {
-          message: "Duplicate choice submission",
-          reason: "DUPLICATE_SUBMIT",
+          message: "Target node is not available",
+          reason: result.reason,
         });
       }
 
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {
         message: "Invalid or unavailable choice for current node",
+        reason: result.reason,
       });
     }
 
-    return { progress: result.progress };
+    return { progress: result.progress, replay: Boolean(result.replay) };
+  }
+
+  @Post("slug/:slug/restart")
+  async restartBySlug(
+    @Param("slug") slug: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedSlug = normalizeText(slug);
+    if (!normalizedSlug) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "slug is required",
+      });
+    }
+
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const access = await this.buildAccessContext(req);
+    const progress = await this.interactiveStoriesService.restartProgress(
+      normalizedSlug,
+      userId,
+      access,
+    );
+    if (!progress) {
+      res.status(404);
+      return buildError(ERROR_CODES.NOT_FOUND);
+    }
+    return { progress };
+  }
+
+  @Post("slug/:slug/unlock-choice")
+  async unlockChoiceBySlug(
+    @Param("slug") slug: string,
+    @Body() body: { choiceId?: string; idempotencyKey?: string },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedSlug = normalizeText(slug);
+    const normalizedChoiceId = normalizeText(body?.choiceId);
+    if (!normalizedSlug || !normalizedChoiceId) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "slug and choiceId are required",
+      });
+    }
+
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const access = await this.buildAccessContext(req);
+    const result = await this.interactiveStoriesService.unlockChoice(
+      {
+        storySlug: normalizedSlug,
+        userId,
+        choiceId: normalizedChoiceId,
+        idempotencyKey: normalizeText(body?.idempotencyKey || req.headers["idempotency-key"] || ""),
+      },
+      access,
+    );
+
+    if (!result.ok) {
+      if (result.reason === "PREMIUM_REQUIRED" || result.reason === "TOKENS_REQUIRED") {
+        res.status(403);
+        return buildError(ERROR_CODES.FORBIDDEN, {
+          message: "Choice unlock blocked",
+          reason: result.reason,
+        });
+      }
+      if (result.reason === "TARGET_NODE_NOT_AVAILABLE") {
+        res.status(409);
+        return buildError(ERROR_CODES.INVALID_REQUEST, {
+          message: "Target node is not available",
+          reason: result.reason,
+        });
+      }
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "Invalid or unavailable choice for current node",
+        reason: result.reason,
+      });
+    }
+
+    return {
+      progress: result.progress,
+      unlockedChoiceId: result.unlockedChoiceId,
+    };
   }
 
   @Get(":storyId")
@@ -291,5 +386,31 @@ export class InteractiveStoriesController {
     }
 
     return this.submitChoiceBySlug(story.slug, body, req, res);
+  }
+
+  @Post(":storyId/restart")
+  async restartLegacy(
+    @Param("storyId") storyId: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedStoryId = normalizeText(storyId);
+    if (!normalizedStoryId) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "storyId is required",
+      });
+    }
+
+    const story = await this.prisma.interactiveStory.findUnique({
+      where: { id: normalizedStoryId },
+      select: { slug: true },
+    });
+    if (!story?.slug) {
+      res.status(404);
+      return buildError(ERROR_CODES.NOT_FOUND);
+    }
+
+    return this.restartBySlug(story.slug, req, res);
   }
 }

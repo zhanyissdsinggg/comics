@@ -146,7 +146,12 @@ export const ANALYTICS_EVENTS = [
   "bookmark_remove",
   "interactive_story_start",
   "interactive_choice_view",
-  "interactive_choice_select",
+  "interactive_choice_click",
+  "interactive_choice_locked",
+  "interactive_choice_unlock",
+  "interactive_ending_reached",
+  "interactive_restart",
+  "interactive_resume",
   "interactive_story_complete",
   "signup_start",
   "signup_complete",
@@ -187,6 +192,7 @@ const LEGACY_EVENT_ALIASES = {
   topup_success: "purchase_success",
   topup_fail: "purchase_failed",
   offer_purchase_success: "purchase_success",
+  interactive_choice_select: "interactive_choice_click",
 };
 
 const ANALYTICS_EVENT_SET = new Set([

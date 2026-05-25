@@ -71,6 +71,7 @@ model User {
   storyState     UserStoryState[] @relation("UserStoryState")
   storyChoiceLogs UserStoryChoiceLog[] @relation("UserStoryChoiceLogs")
   storyGenerationLogs StoryGenerationLog[] @relation("UserStoryGenerationLogs")
+  interactiveChoiceUnlocks UserInteractiveChoiceUnlock[] @relation("UserInteractiveChoiceUnlocks")
 
   @@index([createdAt])
   @@map("users")
@@ -142,6 +143,7 @@ model InteractiveStory {
   state          UserStoryState[]
   choiceLogs     UserStoryChoiceLog[]
   generationLogs StoryGenerationLog[]
+  unlocks        UserInteractiveChoiceUnlock[]
 
   @@index([contentMode, isPublished, updatedAt])
   @@map("interactive_stories")
@@ -202,6 +204,7 @@ model InteractiveStoryChoice {
   lastProgressEntries UserStoryProgress[] @relation("InteractiveProgressLastChoice")
   choiceLogs     UserStoryChoiceLog[]  @relation("InteractiveChoiceLogs")
   generationLogs StoryGenerationLog[]  @relation("InteractiveChoiceGenerationLogs")
+  unlocks        UserInteractiveChoiceUnlock[] @relation("InteractiveChoiceUnlockChoice")
 
   @@unique([nodeId, choiceKey])
   @@index([nodeId, sortOrder])
@@ -294,6 +297,25 @@ model StoryGenerationLog {
   @@index([userId, createdAt])
   @@index([status, createdAt])
   @@map("story_generation_logs")
+}
+
+model UserInteractiveChoiceUnlock {
+  id         String   @id @default(cuid())
+  userId     String
+  storyId    String
+  choiceId   String
+  unlockType String
+  tokensPaid Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User                   @relation("UserInteractiveChoiceUnlocks", fields: [userId], references: [id], onDelete: Cascade)
+  story  InteractiveStory       @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  choice InteractiveStoryChoice @relation("InteractiveChoiceUnlockChoice", fields: [choiceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, choiceId])
+  @@index([userId, storyId, createdAt])
+  @@map("user_interactive_choice_unlocks")
 }
 
 model Creator {

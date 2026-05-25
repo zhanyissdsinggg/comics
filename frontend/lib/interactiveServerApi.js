@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { isServerAdultModeEnabled } from "./serverAdultGate";
 
 function normalizeBaseUrl(value) {
   return String(value || "")
@@ -38,4 +39,39 @@ export async function apiGetServer(path) {
   } catch {
     return null;
   }
+}
+
+export async function getInteractiveServerAccess() {
+  const includeAdult = await isServerAdultModeEnabled();
+  return {
+    includeAdult,
+    contentMode: includeAdult ? "adult" : "normal",
+  };
+}
+
+export async function getInteractiveStoriesServer() {
+  const payload = await apiGetServer("/api/interactive-stories");
+  return Array.isArray(payload?.stories) ? payload.stories : [];
+}
+
+export async function getInteractiveStoryServer(slug) {
+  const normalizedSlug = String(slug || "").trim();
+  if (!normalizedSlug) {
+    return null;
+  }
+  const payload = await apiGetServer(
+    `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}`,
+  );
+  return payload?.story || null;
+}
+
+export async function getInteractiveProgressServer(slug) {
+  const normalizedSlug = String(slug || "").trim();
+  if (!normalizedSlug) {
+    return null;
+  }
+  const payload = await apiGetServer(
+    `/api/interactive-stories/slug/${encodeURIComponent(normalizedSlug)}/current`,
+  );
+  return payload?.progress || null;
 }
