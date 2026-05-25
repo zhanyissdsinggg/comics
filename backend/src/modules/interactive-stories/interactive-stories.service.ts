@@ -267,8 +267,15 @@ function applyEffects(
   return nextState;
 }
 
-function buildLegacyKey(userId: string, requestKey: string) {
-  return `interactive:${userId}:${requestKey}`;
+function buildScopedKey(scope: ChoiceScope) {
+  return [
+    scope.operation,
+    scope.userId,
+    scope.storyId,
+    scope.fromNodeId,
+    scope.choiceId,
+    scope.requestKey,
+  ].join(":");
 }
 
 @Injectable()
@@ -283,7 +290,7 @@ export class InteractiveStoriesService {
   }
 
   private buildStoryFromSnapshot(record: any): StoryWithGraph | null {
-    const raw = record?.publishedSnapshot;
+    const raw = record?.publishedSnapshots?.[0]?.snapshotJson || null;
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
       return null;
     }
@@ -394,7 +401,16 @@ export class InteractiveStoriesService {
         isPublished: true,
         publishedVersion: true,
         aiEnabled: true,
-        publishedSnapshot: true,
+        publishedSnapshots: {
+          where: { isActive: true },
+          orderBy: [{ version: "desc" }],
+          take: 1,
+          select: {
+            snapshotJson: true,
+            version: true,
+            publishedAt: true,
+          },
+        },
         series: {
           select: {
             id: true,
@@ -696,7 +712,16 @@ export class InteractiveStoriesService {
         isPublished: true,
         publishedVersion: true,
         aiEnabled: true,
-        publishedSnapshot: true,
+        publishedSnapshots: {
+          where: { isActive: true },
+          orderBy: [{ version: "desc" }],
+          take: 1,
+          select: {
+            snapshotJson: true,
+            version: true,
+            publishedAt: true,
+          },
+        },
         series: {
           select: {
             id: true,
@@ -1062,16 +1087,48 @@ export class InteractiveStoriesService {
         return null;
       }
     }
+    return null;
+  }
 
-    const legacy = await this.prisma.idempotencyKey.findUnique({
-      where: { key: buildLegacyKey(scope.userId, scope.requestKey) },
-      select: { response: true, expiresAt: true },
-    });
-    if (!legacy || legacy.expiresAt.getTime() <= now) {
+  private async readChoiceReplayByRequest(params: {
+    userId: string;
+    storyId: string;
+    choiceId: string;
+    requestKey: string;
+  }) {
+    const requestKey = normalizeText(params.requestKey);
+    const choiceId = normalizeText(params.choiceId);
+    if (!requestKey || !choiceId) {
       return null;
     }
+
+    const record = (await this.prisma.idempotencyKey.findFirst({
+      where: {
+        operation: "interactive_choice_submit",
+        userId: params.userId,
+        storyId: params.storyId,
+        choiceId,
+        requestKey,
+        state: "completed",
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: [{ createdAt: "desc" }],
+      select: {
+        body: true,
+        response: true,
+      },
+    })) as any;
+
+    if (!record) {
+      return null;
+    }
+
+    if (record.body && typeof record.body === "object" && !Array.isArray(record.body)) {
+      return (record.body as Record<string, any>)?.progress || null;
+    }
+
     try {
-      return JSON.parse(String(legacy.response || "{}"))?.progress || null;
+      return JSON.parse(String(record.response || "{}"))?.progress || null;
     } catch {
       return null;
     }
@@ -1367,6 +1424,21 @@ export class InteractiveStoriesService {
     | { ok: true; progress: StoryProgressView; replay?: boolean }
     | { ok: false; reason: ChoiceResultReason }
   > {
+    const replayStory = this.ensureSeriesCompatibility(
+      await this.findStoryGraphBySlug(normalizeText(input.storySlug), access),
+    );
+    if (replayStory) {
+      const replay = await this.readChoiceReplayByRequest({
+        userId: input.userId,
+        storyId: replayStory.id,
+        choiceId: input.choiceId,
+        requestKey: normalizeText(input.idempotencyKey),
+      });
+      if (replay) {
+        return { ok: true, progress: replay, replay: true };
+      }
+    }
+
     const resolved = await this.resolveChoice(input, access);
     if (!resolved.ok) {
       return resolved;
@@ -1433,6 +1505,7 @@ export class InteractiveStoriesService {
               return { ok: false as const, reason: "INVALID_CHOICE" as const };
             }
           }
+          return { ok: false as const, reason: "INVALID_CHOICE" as const };
         } else {
           await tx.idempotencyKey.upsert({
             where: {
@@ -1450,7 +1523,7 @@ export class InteractiveStoriesService {
               expiresAt: new Date(Date.now() + 10 * 60 * 1000),
             },
             create: {
-              key: buildLegacyKey(scope.userId, scope.requestKey),
+              scopedKey: buildScopedKey(scope),
               userId: scope.userId,
               operation: scope.operation,
               storyId: scope.storyId,

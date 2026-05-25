@@ -30,6 +30,7 @@ function getContinueMap(progressList) {
 export default function InteractiveLandingPage({
   initialStories = [],
   initialContentMode = "normal",
+  showLaunchChecklist = false,
 }) {
   const [stories] = useState(() => normalizeStories(initialStories));
   const [continueMap, setContinueMap] = useState(() => new Map());
@@ -88,6 +89,10 @@ export default function InteractiveLandingPage({
   }, [initialContentMode, stories.length]);
 
   const featuredStories = useMemo(() => stories.slice(0, 3), [stories]);
+  const totalEndings = useMemo(
+    () => stories.reduce((sum, item) => sum + Number(item?.endingsCount || 0), 0),
+    [stories],
+  );
   const filteredStories = useMemo(() => {
     if (activeFilter === "shortest") {
       return [...stories].sort(
@@ -157,34 +162,53 @@ export default function InteractiveLandingPage({
           <SurfacePanel tone="muted" accent="amber" appearance="dark" className="flex flex-col justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/70">
-                Launch checklist
+                {showLaunchChecklist ? "Launch checklist" : "What to expect"}
               </p>
-              <div className="mt-4 grid gap-3 text-sm text-white/80">
-                <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                    Mode
+              {showLaunchChecklist ? (
+                <div className="mt-4 grid gap-3 text-sm text-white/80">
+                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      Mode
+                    </div>
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                      {initialContentMode === "adult" ? "Adult mode" : "Normal mode"}
+                    </div>
                   </div>
-                  <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
-                    {initialContentMode === "adult" ? "Adult mode" : "Normal mode"}
+                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      Published stories
+                    </div>
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                      {stories.length}
+                    </div>
+                  </div>
+                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      Replay factor
+                    </div>
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                      {totalEndings} endings
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                    Published stories
-                  </div>
-                  <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
-                    {stories.length}
+              ) : (
+                <div className="mt-4 space-y-3 text-sm leading-7 text-white/78">
+                  <p>
+                    Start in normal mode, pick a route, and carry your choices all the way to a real ending.
+                  </p>
+                  <p>
+                    Locked routes can open with premium access or tokens when a story supports them.
+                  </p>
+                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      Live today
+                    </div>
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                      {stories.length} stories, {totalEndings} endings
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                    Replay factor
-                  </div>
-                  <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
-                    {stories.reduce((sum, item) => sum + Number(item?.endingsCount || 0), 0)} endings
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </SurfacePanel>
         </section>
@@ -274,7 +298,9 @@ export default function InteractiveLandingPage({
           })}
           {filteredStories.length === 0 ? (
             <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
-              No interactive stories are published yet.
+              {showLaunchChecklist
+                ? "No interactive stories are published yet."
+                : "Interactive stories are almost ready. Check back soon for the first live routes."}
             </div>
           ) : null}
         </section>

@@ -18,11 +18,21 @@ export default async function InteractiveLandingRoute() {
     getInteractiveServerAccess(),
     getInteractiveStoriesServer(),
   ]);
+  const deploymentEnv = String(
+    process.env.VERCEL_ENV ||
+      process.env.NEXT_PUBLIC_DEPLOY_ENV ||
+      process.env.NODE_ENV ||
+      "",
+  )
+    .trim()
+    .toLowerCase();
+  const showLaunchChecklist = deploymentEnv !== "production";
 
   return (
     <InteractiveLandingPage
       initialStories={stories}
       initialContentMode={access.contentMode}
+      showLaunchChecklist={showLaunchChecklist}
     />
   );
 }

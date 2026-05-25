@@ -229,9 +229,9 @@ export class AuthController {
     const token = randomBytes(24).toString("hex");
     const key = `${prefix}:${token}`;
     await this.prisma.idempotencyKey.upsert({
-      where: { key },
+      where: { scopedKey: key },
       create: {
-        key,
+        scopedKey: key,
         response: JSON.stringify(payload),
         expiresAt: new Date(Date.now() + ttlSeconds * 1000),
       },
@@ -250,13 +250,15 @@ export class AuthController {
     }
 
     const key = `${prefix}:${normalized}`;
-    const record = await this.prisma.idempotencyKey.findUnique({ where: { key } });
+    const record = await this.prisma.idempotencyKey.findUnique({ where: { scopedKey: key } });
     if (!record) {
       return null;
     }
 
     if (record.expiresAt.getTime() <= Date.now()) {
-      await this.prisma.idempotencyKey.delete({ where: { key } }).catch(() => undefined);
+      await this.prisma.idempotencyKey
+        .delete({ where: { scopedKey: key } })
+        .catch(() => undefined);
       return null;
     }
 
@@ -278,7 +280,9 @@ export class AuthController {
     }
 
     const key = `${prefix}:${String(token || "").trim()}`;
-    await this.prisma.idempotencyKey.delete({ where: { key } }).catch(() => undefined);
+    await this.prisma.idempotencyKey
+      .delete({ where: { scopedKey: key } })
+      .catch(() => undefined);
     return payload;
   }
 
@@ -865,9 +869,9 @@ export class AuthController {
     const code = String(randomInt(100000, 1000000));
     const key = `otp:${email}`;
     await this.prisma.idempotencyKey.upsert({
-      where: { key },
+      where: { scopedKey: key },
       create: {
-        key,
+        scopedKey: key,
         response: JSON.stringify({ email, code, channel, phone }),
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       },
@@ -910,10 +914,14 @@ export class AuthController {
     }
 
     const key = `otp:${email}`;
-    const record = await this.prisma.idempotencyKey.findUnique({ where: { key } });
+    const record = await this.prisma.idempotencyKey.findUnique({
+      where: { scopedKey: key },
+    });
     if (!record || record.expiresAt.getTime() <= Date.now()) {
       if (record) {
-        await this.prisma.idempotencyKey.delete({ where: { key } }).catch(() => undefined);
+        await this.prisma.idempotencyKey
+          .delete({ where: { scopedKey: key } })
+          .catch(() => undefined);
       }
       throw new BadRequestException("OTP failed.");
     }
@@ -929,7 +937,9 @@ export class AuthController {
       throw new BadRequestException("OTP failed.");
     }
 
-    await this.prisma.idempotencyKey.delete({ where: { key } }).catch(() => undefined);
+    await this.prisma.idempotencyKey
+      .delete({ where: { scopedKey: key } })
+      .catch(() => undefined);
 
     const user = await this.prisma.user.upsert({
       where: { email },

@@ -26,9 +26,10 @@ export async function getIdempotencyRecord(prisma: any, userId: string, key: str
   if (!userId || !key) {
     return null;
   }
+  const scopedKey = `${userId}:${key}`;
   const redis = await getRedis();
   if (redis) {
-    const raw = await redis.get(`idem:${userId}:${key}`);
+    const raw = await redis.get(`idem:${scopedKey}`);
     if (!raw) {
       return null;
     }
@@ -41,7 +42,7 @@ export async function getIdempotencyRecord(prisma: any, userId: string, key: str
   }
   if (prisma?.idempotencyKey) {
     const record = await prisma.idempotencyKey.findUnique({
-      where: { userId_key: { userId, key } },
+      where: { scopedKey },
     });
     if (!record) {
       return null;
@@ -55,24 +56,31 @@ export async function setIdempotencyRecord(prisma: any, userId: string, key: str
   if (!userId || !key) {
     return;
   }
+  const scopedKey = `${userId}:${key}`;
   const redis = await getRedis();
   if (redis) {
     const payload = JSON.stringify({
       status: value?.status || 200,
       body: value?.body || null,
     });
-    await redis.set(`idem:${userId}:${key}`, payload, "EX", IDEMPOTENCY_TTL_SEC);
+    await redis.set(`idem:${scopedKey}`, payload, "EX", IDEMPOTENCY_TTL_SEC);
     return;
   }
   if (prisma?.idempotencyKey) {
     await prisma.idempotencyKey.upsert({
-      where: { userId_key: { userId, key } },
-      update: { status: value?.status || 200, body: value?.body || null },
-      create: {
+      where: { scopedKey },
+      update: {
         userId,
-        key,
         status: value?.status || 200,
         body: value?.body || null,
+        expiresAt: new Date(Date.now() + IDEMPOTENCY_TTL_SEC * 1000),
+      },
+      create: {
+        scopedKey,
+        userId,
+        status: value?.status || 200,
+        body: value?.body || null,
+        expiresAt: new Date(Date.now() + IDEMPOTENCY_TTL_SEC * 1000),
       },
     });
     return;

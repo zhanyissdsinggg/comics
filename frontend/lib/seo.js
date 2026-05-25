@@ -58,6 +58,7 @@ export function createPageMetadata({
   title,
   description,
   path = "/",
+  canonicalPath = undefined,
   image = null,
   openGraphType = "website",
   robots = undefined,
@@ -73,12 +74,12 @@ export function createPageMetadata({
     description: summary,
     ...(robots ? { robots } : {}),
     alternates: {
-      canonical: absoluteUrl(path),
+      canonical: absoluteUrl(canonicalPath || path),
     },
     openGraph: {
       title: pageTitle,
       description: summary,
-      url: absoluteUrl(path),
+      url: absoluteUrl(canonicalPath || path),
       siteName: siteConfig.companyName,
       type: openGraphType,
       locale: "en_US",

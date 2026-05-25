@@ -9,13 +9,13 @@ export async function generateMetadata({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
   const story = await getInteractiveStoryServer(slug);
+  const genreText =
+    Array.isArray(story?.genre) && story.genre.length > 0
+      ? `${story.genre.join(", ")} interactive story on Gush.`
+      : "Read a branching interactive story on Gush.";
   return createPageMetadata({
     title: story?.title || "Interactive Story",
-    description:
-      story?.description ||
-      (Array.isArray(story?.genre) && story.genre.length > 0
-        ? `${story.genre.join(", ")} interactive story on Gush.`
-        : "Read a branching interactive story on Gush."),
+    description: story?.description || genreText,
     path: `/interactive/${slug}`,
     robots: buildInteractiveLandingRobots(),
   });

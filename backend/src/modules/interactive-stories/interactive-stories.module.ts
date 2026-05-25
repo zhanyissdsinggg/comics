@@ -6,6 +6,6 @@ import { InteractiveStoriesService } from "./interactive-stories.service";
 @Module({
   controllers: [InteractiveStoriesController],
   providers: [InteractiveStoriesService, InteractiveAiService],
-  exports: [InteractiveStoriesService],
+  exports: [InteractiveStoriesService, InteractiveAiService],
 })
 export class InteractiveStoriesModule {}

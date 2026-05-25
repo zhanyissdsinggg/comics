@@ -95,7 +95,7 @@ const emptyChoice = () => ({
   label: "",
   description: "",
   targetNodeId: "",
-  requiresPremium: false,
+  unlockPolicy: "FREE",
   requiresTokens: 0,
   unlockLabel: "",
   sortOrder: 0,
@@ -103,6 +103,14 @@ const emptyChoice = () => ({
   blockedFlagsText: "",
   stateEffectsText: "",
 });
+
+const UNLOCK_POLICY_OPTIONS = [
+  { value: "FREE", label: "Free" },
+  { value: "PREMIUM_ONLY", label: "Members Only" },
+  { value: "TOKENS_ONLY", label: "Tokens Only" },
+  { value: "PREMIUM_OR_TOKENS", label: "Premium or Tokens" },
+  { value: "PREMIUM_AND_TOKENS", label: "Premium + Tokens" },
+];
 
 function msg(resp, fallback) {
   return String(
@@ -170,6 +178,52 @@ function parseJsonText(value, label) {
 function normalizeInteger(value, fallback = 0) {
   const parsed = Number.parseInt(String(value ?? fallback), 10);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function deriveChoiceCommerce(form) {
+  const unlockPolicy = String(form?.unlockPolicy || "FREE")
+    .trim()
+    .toUpperCase();
+  const requestedTokens = Math.max(0, normalizeInteger(form?.requiresTokens, 0));
+  const tokenPolicy =
+    unlockPolicy === "TOKENS_ONLY" ||
+    unlockPolicy === "PREMIUM_OR_TOKENS" ||
+    unlockPolicy === "PREMIUM_AND_TOKENS";
+  const premiumPolicy =
+    unlockPolicy === "PREMIUM_ONLY" ||
+    unlockPolicy === "PREMIUM_OR_TOKENS" ||
+    unlockPolicy === "PREMIUM_AND_TOKENS";
+
+  if (tokenPolicy && requestedTokens <= 0) {
+    throw new Error("当前解锁策略要求 Tokens 数量大于 0");
+  }
+
+  return {
+    unlockPolicy:
+      UNLOCK_POLICY_OPTIONS.find((option) => option.value === unlockPolicy)?.value || "FREE",
+    requiresPremium: premiumPolicy,
+    requiresTokens: tokenPolicy ? requestedTokens : 0,
+  };
+}
+
+function getDerivedUnlockLabel(form) {
+  try {
+    const commerce = deriveChoiceCommerce(form);
+    switch (commerce.unlockPolicy) {
+      case "PREMIUM_ONLY":
+        return "Members Only";
+      case "TOKENS_ONLY":
+        return `Unlock for ${commerce.requiresTokens} Tokens`;
+      case "PREMIUM_OR_TOKENS":
+        return `Premium or ${commerce.requiresTokens} Tokens`;
+      case "PREMIUM_AND_TOKENS":
+        return `Premium + ${commerce.requiresTokens} Tokens`;
+      default:
+        return "Free";
+    }
+  } catch {
+    return "Unlock policy pending";
+  }
 }
 
 function summarizeStateKeys(stateText) {
@@ -302,7 +356,7 @@ function mapChoiceToForm(choice) {
     label: choice?.label || "",
     description: choice?.description || "",
     targetNodeId: choice?.targetNodeId || "",
-    requiresPremium: Boolean(choice?.requiresPremium),
+    unlockPolicy: choice?.unlockPolicy || "FREE",
     requiresTokens: Number(choice?.requiresTokens || 0),
     unlockLabel: choice?.unlockLabel || "",
     sortOrder: Number(choice?.sortOrder || 0),
@@ -801,14 +855,16 @@ export default function AdminInteractiveStoriesPage() {
   }
 
   function buildChoicePayload(form) {
+    const commerce = deriveChoiceCommerce(form);
     return {
       choiceKey: form.choiceKey,
       label: form.label,
       description: form.description || null,
       targetNodeId: form.targetNodeId || null,
-      requiresPremium: Boolean(form.requiresPremium),
-      requiresTokens: normalizeInteger(form.requiresTokens),
-      unlockLabel: form.unlockLabel || null,
+      unlockPolicy: commerce.unlockPolicy,
+      requiresPremium: commerce.requiresPremium,
+      requiresTokens: commerce.requiresTokens,
+      unlockLabel: form.unlockLabel || getDerivedUnlockLabel(form),
       sortOrder: normalizeInteger(form.sortOrder),
       requiredFlags: parseStringList(form.requiredFlagsText),
       blockedFlags: parseStringList(form.blockedFlagsText),
@@ -3421,6 +3477,58 @@ function InteractiveStoryNodesTab({
                           </AdminFormField>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
+                          <AdminFormField label="Unlock policy">
+                            <select
+                              value={form.unlockPolicy || "FREE"}
+                              onChange={(event) =>
+                                setChoiceForms((current) => ({
+                                  ...current,
+                                  [choice.id]: {
+                                    ...form,
+                                    unlockPolicy: event.target.value,
+                                    requiresTokens:
+                                      event.target.value === "FREE" ||
+                                      event.target.value === "PREMIUM_ONLY"
+                                        ? 0
+                                        : form.requiresTokens,
+                                  },
+                                }))
+                              }
+                              className={adminSelectClassName}
+                            >
+                              {UNLOCK_POLICY_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </AdminFormField>
+                          <AdminFormField label="Token amount">
+                            <input
+                              type="number"
+                              min="0"
+                              value={form.requiresTokens}
+                              disabled={
+                                form.unlockPolicy === "FREE" ||
+                                form.unlockPolicy === "PREMIUM_ONLY"
+                              }
+                              onChange={(event) =>
+                                setChoiceForms((current) => ({
+                                  ...current,
+                                  [choice.id]: {
+                                    ...form,
+                                    requiresTokens: event.target.value,
+                                  },
+                                }))
+                              }
+                              className={adminInputClassName}
+                            />
+                          </AdminFormField>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          派生结果：{getDerivedUnlockLabel(form)}
+                        </p>
+                        <div className="grid gap-4 md:grid-cols-2">
                           <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                             <input
                               type="checkbox"
@@ -3673,6 +3781,69 @@ function InteractiveStoryNodesTab({
                         />
                       </AdminFormField>
                     </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <AdminFormField label="Unlock policy">
+                        <select
+                          value={
+                            (newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .unlockPolicy || "FREE"
+                          }
+                          onChange={(event) =>
+                            setNewChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: {
+                                ...(current[selectedNode.id] || emptyChoice()),
+                                unlockPolicy: event.target.value,
+                                requiresTokens:
+                                  event.target.value === "FREE" ||
+                                  event.target.value === "PREMIUM_ONLY"
+                                    ? 0
+                                    : (current[selectedNode.id] || emptyChoice()).requiresTokens,
+                              },
+                            }))
+                          }
+                          className={adminSelectClassName}
+                        >
+                          {UNLOCK_POLICY_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </AdminFormField>
+                      <AdminFormField label="Token amount">
+                        <input
+                          type="number"
+                          min="0"
+                          value={
+                            (newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .requiresTokens
+                          }
+                          disabled={
+                            ((newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .unlockPolicy || "FREE") === "FREE" ||
+                            ((newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .unlockPolicy || "FREE") === "PREMIUM_ONLY"
+                          }
+                          onChange={(event) =>
+                            setNewChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: {
+                                ...(current[selectedNode.id] || emptyChoice()),
+                                requiresTokens: event.target.value,
+                              },
+                            }))
+                          }
+                          className={adminInputClassName}
+                        />
+                      </AdminFormField>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      派生结果：
+                      {getDerivedUnlockLabel(
+                        newChoiceByNode[selectedNode.id] || emptyChoice(),
+                      )}
+                    </p>
                     <div className="grid gap-4 md:grid-cols-2">
                       <label className="inline-flex items-center gap-2 text-sm text-slate-700">
                         <input

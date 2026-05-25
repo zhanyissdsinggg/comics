@@ -114,7 +114,14 @@ function createPublishedSnapshotFixture(overrides: Record<string, unknown> = {})
     isPublished: true,
     publishedVersion: 1,
     aiEnabled: true,
-    publishedSnapshot,
+    publishedSnapshots: [
+      {
+        snapshotJson: publishedSnapshot,
+        version: 1,
+        publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+        isActive: true,
+      },
+    ],
     series: {
       id: "series-011",
       title: "Solar Wind Series",
@@ -163,6 +170,7 @@ describe("InteractiveStoriesService", () => {
       },
       idempotencyKey: {
         findUnique: jest.fn().mockResolvedValue(null),
+        findFirst: jest.fn().mockResolvedValue(null),
         upsert: jest.fn(),
         update: jest.fn(),
       },
@@ -181,6 +189,7 @@ describe("InteractiveStoriesService", () => {
           },
           idempotencyKey: {
             findUnique: prisma.idempotencyKey.findUnique,
+            findFirst: prisma.idempotencyKey.findFirst,
             upsert: prisma.idempotencyKey.upsert,
             update: prisma.idempotencyKey.update,
           },
@@ -246,10 +255,13 @@ describe("InteractiveStoriesService", () => {
 
     let scopedRecord: Record<string, any> | null = null;
     prisma.idempotencyKey.findUnique.mockImplementation(async ({ where }: any) => {
-      if (where?.key) {
-        return null;
-      }
       return scopedRecord;
+    });
+    prisma.idempotencyKey.findFirst.mockImplementation(async () => {
+      if (scopedRecord?.state === "completed") {
+        return scopedRecord;
+      }
+      return null;
     });
     prisma.idempotencyKey.upsert.mockImplementation(async ({ create, update }: any) => {
       scopedRecord = {
@@ -306,28 +318,42 @@ describe("InteractiveStoriesService", () => {
         createPublishedSnapshotFixture({
           id: "story-1",
           slug: "story-a",
-          publishedSnapshot: {
-            ...createPublishedSnapshotFixture().publishedSnapshot,
-            story: {
-              ...createPublishedSnapshotFixture().publishedSnapshot.story,
-              id: "story-1",
-              slug: "story-a",
+          publishedSnapshots: [
+            {
+              snapshotJson: {
+                ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson,
+                story: {
+                  ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson.story,
+                  id: "story-1",
+                  slug: "story-a",
+                },
+              },
+              version: 1,
+              publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+              isActive: true,
             },
-          },
+          ],
         }),
       )
       .mockResolvedValueOnce(
         createPublishedSnapshotFixture({
           id: "story-2",
           slug: "story-b",
-          publishedSnapshot: {
-            ...createPublishedSnapshotFixture().publishedSnapshot,
-            story: {
-              ...createPublishedSnapshotFixture().publishedSnapshot.story,
-              id: "story-2",
-              slug: "story-b",
+          publishedSnapshots: [
+            {
+              snapshotJson: {
+                ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson,
+                story: {
+                  ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson.story,
+                  id: "story-2",
+                  slug: "story-b",
+                },
+              },
+              version: 1,
+              publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+              isActive: true,
             },
-          },
+          ],
         }),
       );
     prisma.userStoryProgress.findUnique.mockResolvedValue({
@@ -369,30 +395,108 @@ describe("InteractiveStoriesService", () => {
     );
   });
 
+  it("replays the first completed response even after progress moved past the original node", async () => {
+    prisma.interactiveStory.findFirst.mockResolvedValue(createPublishedSnapshotFixture());
+    prisma.userStoryProgress.findUnique.mockResolvedValue({
+      currentNodeId: "node-2",
+      lastGeneratedText: "Fallback next text.",
+    });
+    prisma.userStoryState.findUnique.mockResolvedValue({
+      state: {
+        trust: 1,
+        clues: 1,
+        flags: ["scan_selected"],
+        pathNodeIds: ["node-1", "node-2"],
+        endingsReached: ["node-2"],
+      },
+      flags: ["scan_selected"],
+    });
+    prisma.idempotencyKey.findFirst.mockResolvedValue({
+      body: {
+        progress: {
+          story: {
+            id: "story-1",
+            slug: "solar-wind-first-contact",
+            title: "Solar Wind",
+            description: "Interactive branch.",
+            contentMode: "NORMAL",
+            seriesId: "series-011",
+          },
+          node: {
+            id: "node-2",
+            key: "scan_results",
+            title: "Scan Results",
+            content: "Fallback next text.",
+            isEnding: true,
+            reviewStatus: "approved",
+            choices: [],
+          },
+          path: [],
+          flags: ["scan_selected"],
+          state: {},
+          currentDepth: 2,
+          endingsReached: 1,
+        },
+      },
+      response: null,
+    });
+
+    const result = await service.submitChoice(
+      {
+        storySlug: "solar-wind-first-contact",
+        userId: "user-1",
+        choiceId: "choice-1",
+        idempotencyKey: "idem-after-progress",
+      },
+      { includeAdult: false },
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.replay).toBe(true);
+      expect(result.progress.node.id).toBe("node-2");
+    }
+    expect(prisma.userStoryProgress.upsert).not.toHaveBeenCalled();
+  });
+
   it("uses bulk progress without initializing guest-like per-story current calls", async () => {
     prisma.interactiveStory.findFirst
       .mockResolvedValueOnce(
         createPublishedSnapshotFixture({
           slug: "story-a",
-          publishedSnapshot: {
-            ...createPublishedSnapshotFixture().publishedSnapshot,
-            story: {
-              ...createPublishedSnapshotFixture().publishedSnapshot.story,
-              slug: "story-a",
+          publishedSnapshots: [
+            {
+              snapshotJson: {
+                ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson,
+                story: {
+                  ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson.story,
+                  slug: "story-a",
+                },
+              },
+              version: 1,
+              publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+              isActive: true,
             },
-          },
+          ],
         }),
       )
       .mockResolvedValueOnce(
         createPublishedSnapshotFixture({
           slug: "story-b",
-          publishedSnapshot: {
-            ...createPublishedSnapshotFixture().publishedSnapshot,
-            story: {
-              ...createPublishedSnapshotFixture().publishedSnapshot.story,
-              slug: "story-b",
+          publishedSnapshots: [
+            {
+              snapshotJson: {
+                ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson,
+                story: {
+                  ...createPublishedSnapshotFixture().publishedSnapshots[0].snapshotJson.story,
+                  slug: "story-b",
+                },
+              },
+              version: 1,
+              publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+              isActive: true,
             },
-          },
+          ],
         }),
       );
     prisma.userStoryProgress.findMany.mockResolvedValue([
@@ -416,5 +520,72 @@ describe("InteractiveStoriesService", () => {
 
     expect(progress).toHaveLength(2);
     expect(progress[0].story.slug).toBe("story-a");
+  });
+
+  it("does not charge tokens twice when the choice is already unlocked", async () => {
+    prisma.interactiveStory.findFirst.mockResolvedValue(createPublishedSnapshotFixture());
+    prisma.userStoryProgress.findUnique.mockResolvedValue({
+      currentNodeId: "node-1",
+      lastGeneratedText: "Fallback start text.",
+    });
+    prisma.userStoryState.findUnique.mockResolvedValue({
+      state: { trust: 0, clues: 0, flags: [] },
+      flags: [],
+    });
+    prisma.userInteractiveChoiceUnlock.findMany.mockResolvedValue([{ choiceId: "choice-token" }]);
+
+    const result = await service.submitChoice(
+      {
+        storySlug: "solar-wind-first-contact",
+        userId: "user-1",
+        choiceId: "choice-token",
+        idempotencyKey: "unlocked-choice",
+      },
+      { includeAdult: false },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(prisma.wallet.upsert).not.toHaveBeenCalled();
+    expect(prisma.userInteractiveChoiceUnlock.create).not.toHaveBeenCalled();
+  });
+
+  it("rolls back token charge side effects when progress update fails", async () => {
+    prisma.interactiveStory.findFirst.mockResolvedValue(createPublishedSnapshotFixture());
+    prisma.userStoryProgress.findUnique.mockResolvedValue({
+      currentNodeId: "node-1",
+      lastGeneratedText: "Fallback start text.",
+    });
+    prisma.userStoryState.findUnique.mockResolvedValue({
+      state: { trust: 0, clues: 0, flags: [] },
+      flags: [],
+    });
+    prisma.wallet.findUnique.mockResolvedValue({
+      userId: "user-1",
+      paidPts: 50,
+      bonusPts: 0,
+      plan: "free",
+    });
+    prisma.wallet.upsert.mockResolvedValue({
+      userId: "user-1",
+      paidPts: 20,
+      bonusPts: 0,
+      plan: "free",
+    });
+    prisma.userStoryProgress.upsert.mockRejectedValue(new Error("progress update failed"));
+
+    await expect(
+      service.submitChoice(
+        {
+          storySlug: "solar-wind-first-contact",
+          userId: "user-1",
+          choiceId: "choice-token",
+          idempotencyKey: "rollback-choice",
+        },
+        { includeAdult: false },
+      ),
+    ).rejects.toThrow("progress update failed");
+
+    expect(prisma.wallet.upsert).toHaveBeenCalledTimes(1);
+    expect(prisma.userInteractiveChoiceUnlock.create).toHaveBeenCalledTimes(1);
   });
 });

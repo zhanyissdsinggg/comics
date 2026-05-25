@@ -136,13 +136,12 @@ model InteractiveStory {
   title         String
   description   String?
   baseContext   String?
-  contentMode   InteractiveContentMode @default(NORMAL)
+  contentMode   String   @default("NORMAL")
   targetAudience String? @default("US teens")
   initialNodeId String?
   initialState  Json     @default("{}")
   isPublished   Boolean  @default(false)
   publishedVersion Int   @default(0)
-  publishedSnapshot Json?
   publishedAt   DateTime?
   aiEnabled     Boolean  @default(true)
   createdAt     DateTime @default(now())
@@ -155,9 +154,29 @@ model InteractiveStory {
   choiceLogs     UserStoryChoiceLog[]
   generationLogs StoryGenerationLog[]
   unlocks        UserInteractiveChoiceUnlock[]
+  publishedSnapshots InteractiveStoryPublishedSnapshot[]
 
   @@index([contentMode, isPublished, updatedAt])
   @@map("interactive_stories")
+}
+
+model InteractiveStoryPublishedSnapshot {
+  id           String   @id @default(cuid())
+  storyId      String
+  version      Int
+  snapshotJson Json
+  checksum     String
+  publishedBy  String?
+  publishedAt  DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  story InteractiveStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, version])
+  @@index([storyId, isActive, publishedAt])
+  @@index([storyId, isActive, version])
+  @@map("interactive_story_published_snapshots")
 }
 
 model InteractiveStoryNode {
@@ -200,7 +219,7 @@ model InteractiveStoryChoice {
   choiceKey     String
   label         String
   description   String?
-  unlockPolicy  InteractiveUnlockPolicy @default(FREE)
+  unlockPolicy  String   @default("FREE")
   requiresPremium Boolean @default(false)
   requiresTokens Int      @default(0)
   unlockLabel    String?
@@ -924,7 +943,7 @@ model TrackingConfig {
 
 model IdempotencyKey {
   id        String   @id @default(cuid())
-  key       String   @unique
+  scopedKey String   @unique
   userId    String?
   operation String?
   storyId   String?
@@ -938,7 +957,6 @@ model IdempotencyKey {
   createdAt DateTime @default(now())
   expiresAt DateTime
 
-  @@unique([userId, key])
   @@unique([operation, userId, storyId, fromNodeId, choiceId, requestKey])
   @@index([operation, userId, storyId, fromNodeId, choiceId])
   @@map("idempotency_keys")

@@ -16,6 +16,7 @@ export async function generateMetadata({ params }) {
     title: `${story?.title || "Interactive Story"} Play`,
     description: story?.description || "Play through a branching interactive story on Gush.",
     path: `/interactive/${slug}/play`,
+    canonicalPath: `/interactive/${slug}`,
     robots: buildNoIndexRobots({ follow: true }),
   });
 }

@@ -42,11 +42,13 @@ type SeriesSeed = {
 
 type InteractiveStorySeed = {
   id: string;
-  seriesId: string;
+  seriesId: string | null;
   slug: string;
   title: string;
   description: string;
   baseContext: string;
+  contentMode?: "NORMAL" | "ADULT";
+  targetAudience?: string;
   initialState: Record<string, unknown>;
   nodes: Array<{
     id: string;
@@ -63,6 +65,14 @@ type InteractiveStorySeed = {
       key: string;
       label: string;
       targetNodeId: string;
+      unlockPolicy?:
+        | "FREE"
+        | "PREMIUM_ONLY"
+        | "TOKENS_ONLY"
+        | "PREMIUM_OR_TOKENS"
+        | "PREMIUM_AND_TOKENS";
+      requiresTokens?: number;
+      unlockLabel?: string;
       stateEffects?: Record<string, unknown>;
       requiredFlags?: string[];
       blockedFlags?: string[];
@@ -477,6 +487,8 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
     title: "Solar Wind: First Contact",
     description:
       "A structured interactive branch set in the Solar Wind universe.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
     baseContext:
       "You are on the salvage ship Solar Wind. The crew is entering a dark relay field where an unknown signal wakes ancient systems.",
     initialState: {
@@ -676,7 +688,345 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
       },
     ],
   },
+  {
+    id: "story-locker-letter-001",
+    seriesId: null,
+    slug: "the-locker-letter",
+    title: "The Locker Letter",
+    description:
+      "A teen mystery about a folded letter, a missing lunch break, and the one hallway rumor you probably should not trust.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
+    baseContext:
+      "It is fifth period at Briar Hill High. You open your locker and a sealed letter drops into your hand with your name written in blue ink.",
+    initialState: {
+      trust: 0,
+      clues: 0,
+      courage: 0,
+      flags: [],
+    },
+    nodes: [
+      {
+        id: "story-locker-letter-node-001",
+        key: "locker_start",
+        title: "A Letter in the Locker",
+        fallbackText:
+          "Between algebra and lunch, a folded letter slides out of your locker. It says to meet behind the auditorium before the final bell, and not to tell Maya.",
+        basePrompt:
+          "Write a sharp YA school mystery opening focused on tension, not melodrama.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-001",
+            key: "show_maya",
+            label: "Show the letter to Maya",
+            targetNodeId: "story-locker-letter-node-002",
+            stateEffects: { trust: 1, flags: ["maya_in_loop"] },
+          },
+          {
+            id: "story-locker-letter-choice-002",
+            key: "inspect_letter",
+            label: "Inspect the envelope alone",
+            targetNodeId: "story-locker-letter-node-003",
+            stateEffects: { clues: 1, flags: ["checked_handwriting"] },
+          },
+          {
+            id: "story-locker-letter-choice-003",
+            key: "follow_note_now",
+            label: "Skip lunch and follow the note now",
+            targetNodeId: "story-locker-letter-node-004",
+            stateEffects: { courage: 1, flags: ["went_early"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-002",
+        key: "maya_reads_it",
+        title: "Maya Reads First",
+        fallbackText:
+          "Maya reads the letter twice, then points out a cafeteria stamp on the back. She says whoever wrote it handled it near the vending machines after second period.",
+        basePrompt:
+          "Write a clue-forward scene with best-friend energy and clear stakes.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-004",
+            key: "check_cafeteria",
+            label: "Check the cafeteria trash bins",
+            targetNodeId: "story-locker-letter-node-005",
+            stateEffects: { clues: 1, flags: ["cafeteria_checked"] },
+          },
+          {
+            id: "story-locker-letter-choice-005",
+            key: "borrow_maya_pass",
+            label: "Use Maya's hall pass route",
+            targetNodeId: "story-locker-letter-node-006",
+            unlockPolicy: "PREMIUM_ONLY",
+            unlockLabel: "Members Only",
+            stateEffects: { trust: 1, courage: 1, flags: ["premium_pass"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-003",
+        key: "letter_marks",
+        title: "Indent Marks",
+        fallbackText:
+          "Under the hallway light, the paper shows pressure marks from a previous page. You can barely make out the words stage door and 3:40.",
+        basePrompt:
+          "Write a detail-oriented clue scene with tactile paper evidence.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-006",
+            key: "ask_stage_crew",
+            label: "Ask the stage crew captain",
+            targetNodeId: "story-locker-letter-node-005",
+            stateEffects: { clues: 1, flags: ["crew_contact"] },
+          },
+          {
+            id: "story-locker-letter-choice-007",
+            key: "buy_print_token",
+            label: "Print the indent scan in the library",
+            targetNodeId: "story-locker-letter-node-007",
+            unlockPolicy: "TOKENS_ONLY",
+            requiresTokens: 15,
+            unlockLabel: "Unlock for 15 Tokens",
+            stateEffects: { clues: 2, flags: ["scan_printed"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-004",
+        key: "behind_auditorium_early",
+        title: "Too Early Behind the Auditorium",
+        fallbackText:
+          "You reach the service path early enough to hear two students arguing through the prop shed wall. One of them says the letter was only supposed to scare you.",
+        basePrompt:
+          "Write an eavesdropping scene that reveals motive without fully solving the mystery.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-008",
+            key: "step_out_now",
+            label: "Step out and confront them",
+            targetNodeId: "story-locker-letter-node-008",
+            stateEffects: { courage: 1, flags: ["direct_confrontation"] },
+          },
+          {
+            id: "story-locker-letter-choice-009",
+            key: "record_names",
+            label: "Stay hidden and catch the names",
+            targetNodeId: "story-locker-letter-node-007",
+            stateEffects: { clues: 1, flags: ["heard_names"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-005",
+        key: "cafeteria_receipt",
+        title: "Receipt Under the Machine",
+        fallbackText:
+          "A crumpled snack receipt under the vending machine has the exact time stamp Maya guessed. On the back is the first half of another note in the same blue ink.",
+        basePrompt:
+          "Write a mid-story discovery that points toward a human motive rather than a grand conspiracy.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-010",
+            key: "meet_sender_calmly",
+            label: "Take the new note and meet the sender calmly",
+            targetNodeId: "story-locker-letter-node-009",
+            stateEffects: { trust: 1, clues: 1, flags: ["calm_meet"] },
+          },
+          {
+            id: "story-locker-letter-choice-011",
+            key: "report_to_counselor",
+            label: "Bring everything to the counselor first",
+            targetNodeId: "story-locker-letter-node-010",
+            stateEffects: { clues: 1, flags: ["adult_help"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-006",
+        key: "premium_rooftop_view",
+        title: "The Rooftop Hall Pass",
+        fallbackText:
+          "The premium route gets you above the courtyard with a clear view of the stage door. You spot Rowan passing something small to the stage crew captain before the bell.",
+        basePrompt:
+          "Write a clean premium branch that delivers sharper observation, not darker content.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-012",
+            key: "follow_rowan",
+            label: "Follow Rowan after the bell",
+            targetNodeId: "story-locker-letter-node-009",
+            stateEffects: { clues: 2, flags: ["rowan_seen"] },
+          },
+          {
+            id: "story-locker-letter-choice-013",
+            key: "tell_maya_everything",
+            label: "Tell Maya everything before class ends",
+            targetNodeId: "story-locker-letter-node-010",
+            stateEffects: { trust: 2, flags: ["full_confession"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-007",
+        key: "names_on_record",
+        title: "The Names Line Up",
+        fallbackText:
+          "The clues converge on Rowan and Tessa, but not for the reason you expected. The letter was part apology, part confession, and it was never supposed to become hallway theater.",
+        basePrompt:
+          "Write a reveal node that makes teen emotions legible and grounded.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-014",
+            key: "go_to_stage_door",
+            label: "Go to the stage door anyway",
+            targetNodeId: "story-locker-letter-node-009",
+            stateEffects: { courage: 1, flags: ["went_to_door"] },
+          },
+          {
+            id: "story-locker-letter-choice-015",
+            key: "cool_it_down",
+            label: "Defuse the rumor before the meeting",
+            targetNodeId: "story-locker-letter-node-010",
+            stateEffects: { trust: 1, flags: ["rumor_defused"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-008",
+        key: "caught_listening",
+        title: "Caught Listening",
+        fallbackText:
+          "Your shoes scrape the pavement and both voices cut off. One student bolts. The other turns around with the same blue pen clipped to their hoodie pocket.",
+        basePrompt:
+          "Write a confrontation that pivots quickly into emotional clarity.",
+        choices: [
+          {
+            id: "story-locker-letter-choice-016",
+            key: "hear_them_out",
+            label: "Hear them out",
+            targetNodeId: "story-locker-letter-node-009",
+            stateEffects: { trust: 1, flags: ["heard_them_out"] },
+          },
+          {
+            id: "story-locker-letter-choice-017",
+            key: "walk_away_clean",
+            label: "Walk away and end the rumor",
+            targetNodeId: "story-locker-letter-node-010",
+            stateEffects: { courage: 1, flags: ["walked_away"] },
+          },
+        ],
+      },
+      {
+        id: "story-locker-letter-node-009",
+        key: "ending_stage_door",
+        title: "Ending: Stage Door Truth",
+        fallbackText:
+          "Behind the stage door, the truth comes out: the letter was meant to confess a stolen audition file and ask for your help returning it before anyone else got blamed. You choose honesty, and the rumor dies before it can harden into something worse.",
+        basePrompt:
+          "Write a satisfying teen-safe ending where honesty resolves the main conflict.",
+        isEnding: true,
+        choices: [],
+      },
+      {
+        id: "story-locker-letter-node-010",
+        key: "ending_hallway_reset",
+        title: "Ending: Hallway Reset",
+        fallbackText:
+          "You never get the full dramatic confession, but you do stop the damage. By the final bell, the note is no longer a weapon, just a clumsy mistake between students who needed to talk like actual people.",
+        basePrompt:
+          "Write a softer ending focused on harm reduction and emotional maturity.",
+        isEnding: true,
+        choices: [],
+      },
+    ],
+  },
 ];
+
+function deriveSeedChoiceCommerce(choice: InteractiveStorySeed["nodes"][number]["choices"][number]) {
+  const unlockPolicy = String(choice.unlockPolicy || "FREE").trim().toUpperCase();
+  const requiresTokens = Math.max(0, Number(choice.requiresTokens || 0));
+  const requiresPremium =
+    unlockPolicy === "PREMIUM_ONLY" ||
+    unlockPolicy === "PREMIUM_OR_TOKENS" ||
+    unlockPolicy === "PREMIUM_AND_TOKENS";
+  return {
+    unlockPolicy,
+    requiresPremium,
+    requiresTokens:
+      unlockPolicy === "TOKENS_ONLY" ||
+      unlockPolicy === "PREMIUM_OR_TOKENS" ||
+      unlockPolicy === "PREMIUM_AND_TOKENS"
+        ? requiresTokens
+        : 0,
+    unlockLabel: choice.unlockLabel || null,
+  };
+}
+
+function buildPublishedSnapshotForSeed(story: InteractiveStorySeed) {
+  return {
+    story: {
+      id: story.id,
+      slug: story.slug,
+      title: story.title,
+      description: story.description,
+      baseContext: story.baseContext,
+      contentMode: story.contentMode || "NORMAL",
+      targetAudience: story.targetAudience || "US teens",
+      seriesId: story.seriesId,
+      initialNodeId: story.nodes[0]?.id || null,
+      initialState: story.initialState,
+      publishedVersion: 1,
+      publishedAt: new Date().toISOString(),
+    },
+    series: story.seriesId
+      ? {
+          id: story.seriesId,
+          title:
+            seriesData.find((series) => series.id === story.seriesId)?.title || story.title,
+          adult: Boolean(
+            seriesData.find((series) => series.id === story.seriesId)?.adult,
+          ),
+          coverUrl:
+            seriesData.find((series) => series.id === story.seriesId)?.coverUrl || null,
+          genres:
+            seriesData.find((series) => series.id === story.seriesId)?.genres || [],
+        }
+      : null,
+    nodes: story.nodes.map((node, nodeIndex) => ({
+      id: node.id,
+      storyId: story.id,
+      nodeKey: node.key,
+      title: node.title,
+      baseContext: node.fallbackText,
+      basePrompt: node.basePrompt,
+      fallbackText: node.fallbackText,
+      generatedByAI: false,
+      reviewStatus: "approved",
+      editorNotes: null,
+      requiredFlags: node.requiredFlags || [],
+      blockedFlags: node.blockedFlags || [],
+      stateEffects: node.stateEffects || {},
+      sortOrder: nodeIndex,
+      isEnding: Boolean(node.isEnding),
+      aiEnabled: true,
+      choices: (node.choices || []).map((choice, choiceIndex) => ({
+        id: choice.id,
+        nodeId: node.id,
+        targetNodeId: choice.targetNodeId,
+        choiceKey: choice.key,
+        label: choice.label,
+        description: null,
+        ...deriveSeedChoiceCommerce(choice),
+        requiredFlags: choice.requiredFlags || [],
+        blockedFlags: choice.blockedFlags || [],
+        stateEffects: choice.stateEffects || {},
+        sortOrder: choiceIndex,
+      })),
+    })),
+  };
+}
 
 async function upsertCreatorCredits(series: SeriesSeed) {
   await prisma.seriesCredit.deleteMany({
@@ -937,21 +1287,29 @@ async function seedInteractiveStories() {
         title: story.title,
         description: story.description,
         baseContext: story.baseContext,
+        contentMode: (story.contentMode || "NORMAL") as any,
+        targetAudience: story.targetAudience || "US teens",
         initialNodeId: initialNode?.id || null,
         initialState: toInputJson(story.initialState),
         isPublished: true,
+        publishedVersion: 1,
+        publishedAt: new Date(),
         aiEnabled: true,
       },
       create: {
         id: story.id,
-        seriesId: story.seriesId,
+        seriesId: story.seriesId || null,
         slug: story.slug,
         title: story.title,
         description: story.description,
         baseContext: story.baseContext,
+        contentMode: (story.contentMode || "NORMAL") as any,
+        targetAudience: story.targetAudience || "US teens",
         initialNodeId: initialNode?.id || null,
         initialState: toInputJson(story.initialState),
         isPublished: true,
+        publishedVersion: 1,
+        publishedAt: new Date(),
         aiEnabled: true,
       },
     });
@@ -1009,6 +1367,10 @@ async function seedInteractiveStories() {
             targetNodeId: choice.targetNodeId,
             label: choice.label,
             description: null,
+            unlockPolicy: deriveSeedChoiceCommerce(choice).unlockPolicy as any,
+            requiresPremium: deriveSeedChoiceCommerce(choice).requiresPremium,
+            requiresTokens: deriveSeedChoiceCommerce(choice).requiresTokens,
+            unlockLabel: deriveSeedChoiceCommerce(choice).unlockLabel,
             requiredFlags: choice.requiredFlags || [],
             blockedFlags: choice.blockedFlags || [],
             stateEffects: toInputJson(choice.stateEffects || {}),
@@ -1021,6 +1383,10 @@ async function seedInteractiveStories() {
             choiceKey: choice.key,
             label: choice.label,
             description: null,
+            unlockPolicy: deriveSeedChoiceCommerce(choice).unlockPolicy as any,
+            requiresPremium: deriveSeedChoiceCommerce(choice).requiresPremium,
+            requiresTokens: deriveSeedChoiceCommerce(choice).requiresTokens,
+            unlockLabel: deriveSeedChoiceCommerce(choice).unlockLabel,
             requiredFlags: choice.requiredFlags || [],
             blockedFlags: choice.blockedFlags || [],
             stateEffects: toInputJson(choice.stateEffects || {}),
@@ -1034,6 +1400,40 @@ async function seedInteractiveStories() {
       where: { id: story.id },
       data: {
         initialNodeId: initialNode?.id || null,
+        publishedVersion: 1,
+        publishedAt: new Date(),
+      },
+    });
+
+    const snapshotPayload = buildPublishedSnapshotForSeed(story);
+    await prisma.interactiveStoryPublishedSnapshot.updateMany({
+      where: { storyId: story.id, isActive: true },
+      data: { isActive: false },
+    });
+    await prisma.interactiveStoryPublishedSnapshot.upsert({
+      where: {
+        storyId_version: {
+          storyId: story.id,
+          version: 1,
+        },
+      },
+      update: {
+        snapshotJson: snapshotPayload as Prisma.InputJsonValue,
+        checksum: createHash("sha256")
+          .update(JSON.stringify(snapshotPayload))
+          .digest("hex"),
+        publishedAt: new Date(),
+        isActive: true,
+      },
+      create: {
+        storyId: story.id,
+        version: 1,
+        snapshotJson: snapshotPayload as Prisma.InputJsonValue,
+        checksum: createHash("sha256")
+          .update(JSON.stringify(snapshotPayload))
+          .digest("hex"),
+        publishedAt: new Date(),
+        isActive: true,
       },
     });
 

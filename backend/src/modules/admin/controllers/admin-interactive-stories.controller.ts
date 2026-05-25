@@ -13,6 +13,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import { createHash } from "crypto";
 import type { Prisma } from "@prisma/client";
 import type { Request } from "express";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
@@ -62,7 +63,6 @@ type AdminChoiceInput = {
   description?: string | null;
   targetNodeId?: string | null;
   unlockPolicy?: string | null;
-  requiresPremium?: boolean;
   requiresTokens?: number;
   unlockLabel?: string | null;
   requiredFlags?: string[];
@@ -127,6 +127,8 @@ const STORY_DETAIL_SELECT = {
   ...STORY_LIST_SELECT,
   baseContext: true,
   initialState: true,
+  publishedVersion: true,
+  publishedAt: true,
   nodes: {
     orderBy: { sortOrder: "asc" as const },
     select: {
@@ -224,9 +226,7 @@ function normalizeReviewStatus(value: unknown): "draft" | "pending_review" | "ap
 
 function normalizeUnlockPolicy(
   value: unknown,
-  fallbackRequiresPremium = false,
-  fallbackRequiresTokens = 0,
-):
+): 
   | "FREE"
   | "PREMIUM_ONLY"
   | "TOKENS_ONLY"
@@ -238,16 +238,46 @@ function normalizeUnlockPolicy(
   if (normalized === "TOKENS_ONLY") return "TOKENS_ONLY";
   if (normalized === "PREMIUM_OR_TOKENS") return "PREMIUM_OR_TOKENS";
   if (normalized === "PREMIUM_AND_TOKENS") return "PREMIUM_AND_TOKENS";
-  if (fallbackRequiresPremium && Number(fallbackRequiresTokens || 0) > 0) {
-    return "PREMIUM_OR_TOKENS";
+  return "PREMIUM_OR_TOKENS";
+}
+
+function deriveChoiceCommerceFields(
+  unlockPolicyRaw: unknown,
+  requiresTokensRaw: unknown,
+) {
+  const unlockPolicy = normalizeUnlockPolicy(unlockPolicyRaw);
+  const requestedTokens = Math.max(0, Number(requiresTokensRaw || 0));
+  const requiresTokens =
+    unlockPolicy === "TOKENS_ONLY" ||
+    unlockPolicy === "PREMIUM_OR_TOKENS" ||
+    unlockPolicy === "PREMIUM_AND_TOKENS"
+      ? requestedTokens
+      : 0;
+  const requiresPremium =
+    unlockPolicy === "PREMIUM_ONLY" ||
+    unlockPolicy === "PREMIUM_OR_TOKENS" ||
+    unlockPolicy === "PREMIUM_AND_TOKENS";
+
+  if (
+    (unlockPolicy === "TOKENS_ONLY" ||
+      unlockPolicy === "PREMIUM_OR_TOKENS" ||
+      unlockPolicy === "PREMIUM_AND_TOKENS") &&
+    requiresTokens <= 0
+  ) {
+    throw new BadRequestException("Token-based unlockPolicy requires requiresTokens > 0");
   }
-  if (fallbackRequiresPremium) {
-    return "PREMIUM_ONLY";
-  }
-  if (Number(fallbackRequiresTokens || 0) > 0) {
-    return "TOKENS_ONLY";
-  }
-  return "FREE";
+
+  return {
+    unlockPolicy,
+    requiresPremium,
+    requiresTokens,
+  };
+}
+
+function buildSnapshotChecksum(snapshot: unknown) {
+  return createHash("sha256")
+    .update(JSON.stringify(snapshot || {}))
+    .digest("hex");
 }
 
 @Controller("admin/interactive-stories")
@@ -371,8 +401,7 @@ export class AdminInteractiveStoriesController {
     }
   }
 
-  private buildPublishedSnapshot(story: any) {
-    const publishedAt = new Date().toISOString();
+  private buildPublishedSnapshot(story: any, publishedVersion: number, publishedAtIso: string) {
     return {
       story: {
         id: story.id,
@@ -385,8 +414,8 @@ export class AdminInteractiveStoriesController {
         seriesId: story.seriesId,
         initialNodeId: story.initialNodeId,
         initialState: story.initialState,
-        publishedVersion: Number(story.publishedVersion || 0) + 1,
-        publishedAt,
+        publishedVersion,
+        publishedAt: publishedAtIso,
       },
       series: story.series || null,
       nodes: Array.isArray(story.nodes)
@@ -592,8 +621,10 @@ export class AdminInteractiveStoriesController {
     }
 
     const targetNodeId = normalizeNullableText(input?.targetNodeId);
-    const requiresPremium = Boolean(input?.requiresPremium);
-    const requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
+    const commerce = deriveChoiceCommerceFields(
+      input?.unlockPolicy,
+      input?.requiresTokens,
+    );
 
     return {
       node: { connect: { id: nodeId } },
@@ -601,13 +632,9 @@ export class AdminInteractiveStoriesController {
       choiceKey,
       label,
       description: normalizeNullableText(input?.description),
-      unlockPolicy: normalizeUnlockPolicy(
-        input?.unlockPolicy,
-        requiresPremium,
-        requiresTokens,
-      ) as any,
-      requiresPremium,
-      requiresTokens,
+      unlockPolicy: commerce.unlockPolicy as any,
+      requiresPremium: commerce.requiresPremium,
+      requiresTokens: commerce.requiresTokens,
       unlockLabel: normalizeNullableText(input?.unlockLabel),
       requiredFlags: normalizeStringArray(input?.requiredFlags),
       blockedFlags: normalizeStringArray(input?.blockedFlags),
@@ -620,8 +647,10 @@ export class AdminInteractiveStoriesController {
 
   private toChoiceUpdateData(input: AdminChoiceInput): Prisma.InteractiveStoryChoiceUpdateInput {
     const data: Prisma.InteractiveStoryChoiceUpdateInput = {};
-    const requiresPremium = Boolean(input?.requiresPremium);
-    const requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
+    const commerce = deriveChoiceCommerceFields(
+      input?.unlockPolicy,
+      input?.requiresTokens,
+    );
     if (Object.prototype.hasOwnProperty.call(input || {}, "choiceKey")) {
       const choiceKey = normalizeText(input?.choiceKey);
       if (!choiceKey) {
@@ -639,19 +668,9 @@ export class AdminInteractiveStoriesController {
     if (Object.prototype.hasOwnProperty.call(input || {}, "description")) {
       data.description = normalizeNullableText(input?.description);
     }
-    if (Object.prototype.hasOwnProperty.call(input || {}, "requiresPremium")) {
-      data.requiresPremium = requiresPremium;
-    }
-    if (Object.prototype.hasOwnProperty.call(input || {}, "requiresTokens")) {
-      data.requiresTokens = requiresTokens;
-    }
-    if (Object.prototype.hasOwnProperty.call(input || {}, "unlockPolicy")) {
-      (data as any).unlockPolicy = normalizeUnlockPolicy(
-        input?.unlockPolicy,
-        requiresPremium,
-        requiresTokens,
-      );
-    }
+    data.requiresPremium = commerce.requiresPremium;
+    data.requiresTokens = commerce.requiresTokens;
+    (data as any).unlockPolicy = commerce.unlockPolicy;
     if (Object.prototype.hasOwnProperty.call(input || {}, "unlockLabel")) {
       data.unlockLabel = normalizeNullableText(input?.unlockLabel);
     }
@@ -888,13 +907,10 @@ export class AdminInteractiveStoriesController {
               choiceKey,
               label,
               description: normalizeNullableText(choice?.description),
-              unlockPolicy: normalizeUnlockPolicy(
+              ...deriveChoiceCommerceFields(
                 choice?.unlockPolicy,
-                Boolean(choice?.requiresPremium),
-                Math.max(0, Number(choice?.requiresTokens || 0)),
-              ) as any,
-              requiresPremium: Boolean(choice?.requiresPremium),
-              requiresTokens: Math.max(0, Number(choice?.requiresTokens || 0)),
+                choice?.requiresTokens,
+              ),
               unlockLabel: normalizeNullableText(choice?.unlockLabel),
               requiredFlags: normalizeStringArray(choice?.requiredFlags),
               blockedFlags: normalizeStringArray(choice?.blockedFlags),
@@ -1349,21 +1365,53 @@ export class AdminInteractiveStoriesController {
     }
 
     const snapshotSource = publish ? await this.loadStoryWithGraph(storyId) : null;
+    const publishedAt = new Date();
+    const nextVersion = Number(snapshotSource?.publishedVersion || 0) + 1;
+    const publishedAtIso = publishedAt.toISOString();
+    const snapshotPayload =
+      publish && snapshotSource
+        ? this.buildPublishedSnapshot(snapshotSource, nextVersion, publishedAtIso)
+        : null;
+    const checksum = snapshotPayload ? buildSnapshotChecksum(snapshotPayload) : null;
     const publishData: Prisma.InteractiveStoryUpdateInput = publish
       ? {
           isPublished: true,
-          publishedVersion: { increment: 1 },
-          publishedAt: new Date(),
-          publishedSnapshot: this.buildPublishedSnapshot(snapshotSource) as Prisma.InputJsonValue,
+          publishedVersion: nextVersion,
+          publishedAt,
         }
       : {
           isPublished: false,
         };
 
-    const story = await this.prisma.interactiveStory.update({
-      where: { id: storyId },
-      data: publishData,
-      select: STORY_DETAIL_SELECT,
+    const story = await this.prisma.$transaction(async (tx) => {
+      if (publish) {
+        await tx.interactiveStoryPublishedSnapshot.updateMany({
+          where: { storyId, isActive: true },
+          data: { isActive: false },
+        });
+      }
+
+      const updatedStory = await tx.interactiveStory.update({
+        where: { id: storyId },
+        data: publishData,
+        select: STORY_DETAIL_SELECT,
+      });
+
+      if (publish && snapshotPayload && checksum) {
+        await tx.interactiveStoryPublishedSnapshot.create({
+          data: {
+            storyId,
+            version: nextVersion,
+            snapshotJson: snapshotPayload as Prisma.InputJsonValue,
+            checksum,
+            publishedBy: null,
+            publishedAt,
+            isActive: true,
+          },
+        });
+      }
+
+      return updatedStory;
     });
     await this.invalidateSeriesContent([story.seriesId, existing.seriesId]);
     return { story };

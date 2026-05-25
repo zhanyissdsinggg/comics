@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { InteractiveAiService } from "../../interactive-stories/interactive-ai.service";
+import { InteractiveStoriesModule } from "../../interactive-stories/interactive-stories.module";
 import { AdminAuthModule } from "../admin-auth/admin-auth.module";
 import { AdminRecommendationService } from "./services/admin-recommendation.service";
 import { AdminSeriesController } from "../controllers/admin-series.controller";
@@ -14,7 +16,7 @@ import { AdminCreatorsService } from "./services/admin-creators.service";
 import { AdminInteractiveStoriesController } from "../controllers/admin-interactive-stories.controller";
 
 @Module({
-  imports: [AdminAuthModule],
+  imports: [AdminAuthModule, InteractiveStoriesModule],
   controllers: [
     AdminSeriesController,
     AdminCreatorsController,
@@ -26,7 +28,12 @@ import { AdminInteractiveStoriesController } from "../controllers/admin-interact
     AdminContentGeneratorController,
     AdminInteractiveStoriesController,
   ],
-  providers: [AdminRecommendationService, AdminCreatorsService, PrismaService],
+  providers: [
+    AdminRecommendationService,
+    AdminCreatorsService,
+    PrismaService,
+    InteractiveAiService,
+  ],
   exports: [AdminRecommendationService, AdminCreatorsService],
 })
 export class AdminContentModule {}

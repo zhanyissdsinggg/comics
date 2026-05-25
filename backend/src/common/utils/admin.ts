@@ -3,27 +3,41 @@ import { getAppConfig } from "../config/app-config";
 import { logger } from "../logger/winston.init";
 import { getAdminKeysFromEnv, validateAdminKeyFormat } from "./admin-security";
 
-const ADMIN_KEYS = getAdminKeysFromEnv();
-const adminConfig = getAppConfig().admin;
+let validatedAdminKeys: string[] | null = null;
+let validationLogged = false;
 
-if (!ADMIN_KEYS.length && !adminConfig.passwordAuthEnabled) {
-  logger.error("Fatal: ADMIN_KEY or ADMIN_KEYS is not configured.");
-  logger.error("Set at least one admin key. Example: ADMIN_KEYS=key1,key2");
-  process.exit(1);
-}
+function resolveValidatedAdminKeys(): string[] {
+  if (validatedAdminKeys) {
+    return validatedAdminKeys;
+  }
 
-const invalidKeys = ADMIN_KEYS.filter((key) => !validateAdminKeyFormat(key));
-if (invalidKeys.length) {
-  logger.error("Fatal: one or more admin keys do not meet security requirements.");
-  logger.error("Each key must be >=16 chars and include upper/lower case letters, digits, and symbols.");
-  process.exit(1);
-}
+  const adminKeys = getAdminKeysFromEnv();
+  const adminConfig = getAppConfig().admin;
 
-if (ADMIN_KEYS.length) {
-  logger.info(`Admin key validation passed. Loaded ${ADMIN_KEYS.length} admin key(s).`);
+  if (!adminKeys.length && !adminConfig.passwordAuthEnabled) {
+    logger.error("Fatal: ADMIN_KEY or ADMIN_KEYS is not configured.");
+    logger.error("Set at least one admin key. Example: ADMIN_KEYS=key1,key2");
+    process.exit(1);
+  }
+
+  const invalidKeys = adminKeys.filter((key) => !validateAdminKeyFormat(key));
+  if (invalidKeys.length) {
+    logger.error("Fatal: one or more admin keys do not meet security requirements.");
+    logger.error("Each key must be >=16 chars and include upper/lower case letters, digits, and symbols.");
+    process.exit(1);
+  }
+
+  if (adminKeys.length && !validationLogged) {
+    logger.info(`Admin key validation passed. Loaded ${adminKeys.length} admin key(s).`);
+    validationLogged = true;
+  }
+
+  validatedAdminKeys = adminKeys;
+  return validatedAdminKeys;
 }
 
 export function isAdminAuthorized(req: Request, _body?: any) {
+  const adminKeys = resolveValidatedAdminKeys();
   const user = (req as any).user;
   if (user && user.role === "admin") {
     return true;
@@ -39,5 +53,5 @@ export function isAdminAuthorized(req: Request, _body?: any) {
     return false;
   }
 
-  return ADMIN_KEYS.includes(bearer);
+  return adminKeys.includes(bearer);
 }

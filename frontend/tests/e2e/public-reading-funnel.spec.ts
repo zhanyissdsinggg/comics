@@ -2324,10 +2324,12 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     const html = await page.content();
-    expect(html).toContain("No interactive stories are published yet.");
+    expect(html).toContain(
+      "Interactive stories are almost ready. Check back soon for the first live routes.",
+    );
     expect(html).not.toContain(">Loading<");
     await expect(page.locator("main")).toContainText(
-      "No interactive stories are published yet.",
+      "Interactive stories are almost ready. Check back soon for the first live routes.",
     );
     await expectNoRuntimeIssues("interactive-empty-state", runtimeIssues);
   });
