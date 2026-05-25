@@ -31,6 +31,14 @@ enum InteractiveContentMode {
   ADULT
 }
 
+enum InteractiveUnlockPolicy {
+  FREE
+  PREMIUM_ONLY
+  TOKENS_ONLY
+  PREMIUM_OR_TOKENS
+  PREMIUM_AND_TOKENS
+}
+
 model User {
   id             String         @id @default(cuid())
   email          String         @unique
@@ -133,6 +141,9 @@ model InteractiveStory {
   initialNodeId String?
   initialState  Json     @default("{}")
   isPublished   Boolean  @default(false)
+  publishedVersion Int   @default(0)
+  publishedSnapshot Json?
+  publishedAt   DateTime?
   aiEnabled     Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -189,6 +200,7 @@ model InteractiveStoryChoice {
   choiceKey     String
   label         String
   description   String?
+  unlockPolicy  InteractiveUnlockPolicy @default(FREE)
   requiresPremium Boolean @default(false)
   requiresTokens Int      @default(0)
   unlockLabel    String?
@@ -913,10 +925,22 @@ model TrackingConfig {
 model IdempotencyKey {
   id        String   @id @default(cuid())
   key       String   @unique
+  userId    String?
+  operation String?
+  storyId   String?
+  fromNodeId String?
+  choiceId  String?
+  requestKey String?
+  state     String   @default("completed")
+  status    Int?
+  body      Json?
   response  String?
   createdAt DateTime @default(now())
   expiresAt DateTime
 
+  @@unique([userId, key])
+  @@unique([operation, userId, storyId, fromNodeId, choiceId, requestKey])
+  @@index([operation, userId, storyId, fromNodeId, choiceId])
   @@map("idempotency_keys")
 }
 

@@ -8,9 +8,14 @@ import { buildInteractiveLandingRobots } from "../../../lib/interactiveSeo";
 export async function generateMetadata({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
+  const story = await getInteractiveStoryServer(slug);
   return createPageMetadata({
-    title: "Interactive Story",
-    description: "Read a branching interactive story on Gush.",
+    title: story?.title || "Interactive Story",
+    description:
+      story?.description ||
+      (Array.isArray(story?.genre) && story.genre.length > 0
+        ? `${story.genre.join(", ")} interactive story on Gush.`
+        : "Read a branching interactive story on Gush."),
     path: `/interactive/${slug}`,
     robots: buildInteractiveLandingRobots(),
   });

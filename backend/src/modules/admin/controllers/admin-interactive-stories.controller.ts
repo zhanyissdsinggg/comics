@@ -61,6 +61,7 @@ type AdminChoiceInput = {
   label?: string;
   description?: string | null;
   targetNodeId?: string | null;
+  unlockPolicy?: string | null;
   requiresPremium?: boolean;
   requiresTokens?: number;
   unlockLabel?: string | null;
@@ -156,6 +157,7 @@ const STORY_DETAIL_SELECT = {
           choiceKey: true,
           label: true,
           description: true,
+          unlockPolicy: true,
           requiresPremium: true,
           requiresTokens: true,
           unlockLabel: true,
@@ -218,6 +220,34 @@ function normalizeReviewStatus(value: unknown): "draft" | "pending_review" | "ap
   if (normalized === "pending_review") return "pending_review";
   if (normalized === "rejected") return "rejected";
   return "approved";
+}
+
+function normalizeUnlockPolicy(
+  value: unknown,
+  fallbackRequiresPremium = false,
+  fallbackRequiresTokens = 0,
+):
+  | "FREE"
+  | "PREMIUM_ONLY"
+  | "TOKENS_ONLY"
+  | "PREMIUM_OR_TOKENS"
+  | "PREMIUM_AND_TOKENS" {
+  const normalized = String(value || "").trim().toUpperCase();
+  if (normalized === "FREE") return "FREE";
+  if (normalized === "PREMIUM_ONLY") return "PREMIUM_ONLY";
+  if (normalized === "TOKENS_ONLY") return "TOKENS_ONLY";
+  if (normalized === "PREMIUM_OR_TOKENS") return "PREMIUM_OR_TOKENS";
+  if (normalized === "PREMIUM_AND_TOKENS") return "PREMIUM_AND_TOKENS";
+  if (fallbackRequiresPremium && Number(fallbackRequiresTokens || 0) > 0) {
+    return "PREMIUM_OR_TOKENS";
+  }
+  if (fallbackRequiresPremium) {
+    return "PREMIUM_ONLY";
+  }
+  if (Number(fallbackRequiresTokens || 0) > 0) {
+    return "TOKENS_ONLY";
+  }
+  return "FREE";
 }
 
 @Controller("admin/interactive-stories")
@@ -339,6 +369,69 @@ export class AdminInteractiveStoriesController {
         validation,
       });
     }
+  }
+
+  private buildPublishedSnapshot(story: any) {
+    const publishedAt = new Date().toISOString();
+    return {
+      story: {
+        id: story.id,
+        slug: story.slug,
+        title: story.title,
+        description: story.description,
+        baseContext: story.baseContext,
+        contentMode: story.contentMode,
+        targetAudience: story.targetAudience,
+        seriesId: story.seriesId,
+        initialNodeId: story.initialNodeId,
+        initialState: story.initialState,
+        publishedVersion: Number(story.publishedVersion || 0) + 1,
+        publishedAt,
+      },
+      series: story.series || null,
+      nodes: Array.isArray(story.nodes)
+        ? story.nodes.map((node: any) => ({
+            id: node.id,
+            storyId: node.storyId,
+            nodeKey: node.nodeKey,
+            title: node.title,
+            baseContext: node.baseContext,
+            basePrompt: node.basePrompt,
+            fallbackText: node.fallbackText,
+            generatedByAI: node.generatedByAI,
+            reviewStatus: node.reviewStatus,
+            editorNotes: node.editorNotes,
+            requiredFlags: node.requiredFlags,
+            blockedFlags: node.blockedFlags,
+            stateEffects: node.stateEffects,
+            sortOrder: node.sortOrder,
+            isEnding: node.isEnding,
+            aiEnabled: node.aiEnabled,
+            createdAt: node.createdAt,
+            updatedAt: node.updatedAt,
+            choices: Array.isArray(node.choices)
+              ? node.choices.map((choice: any) => ({
+                  id: choice.id,
+                  nodeId: choice.nodeId,
+                  targetNodeId: choice.targetNodeId,
+                  choiceKey: choice.choiceKey,
+                  label: choice.label,
+                  description: choice.description,
+                  unlockPolicy: choice.unlockPolicy,
+                  requiresPremium: choice.requiresPremium,
+                  requiresTokens: choice.requiresTokens,
+                  unlockLabel: choice.unlockLabel,
+                  requiredFlags: choice.requiredFlags,
+                  blockedFlags: choice.blockedFlags,
+                  stateEffects: choice.stateEffects,
+                  sortOrder: choice.sortOrder,
+                  createdAt: choice.createdAt,
+                  updatedAt: choice.updatedAt,
+                }))
+              : [],
+          }))
+        : [],
+    };
   }
 
   private toStoryCreateData(input: AdminStoryInput): Prisma.InteractiveStoryCreateInput {
@@ -499,6 +592,8 @@ export class AdminInteractiveStoriesController {
     }
 
     const targetNodeId = normalizeNullableText(input?.targetNodeId);
+    const requiresPremium = Boolean(input?.requiresPremium);
+    const requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
 
     return {
       node: { connect: { id: nodeId } },
@@ -506,8 +601,13 @@ export class AdminInteractiveStoriesController {
       choiceKey,
       label,
       description: normalizeNullableText(input?.description),
-      requiresPremium: Boolean(input?.requiresPremium),
-      requiresTokens: Math.max(0, Number(input?.requiresTokens || 0)),
+      unlockPolicy: normalizeUnlockPolicy(
+        input?.unlockPolicy,
+        requiresPremium,
+        requiresTokens,
+      ) as any,
+      requiresPremium,
+      requiresTokens,
       unlockLabel: normalizeNullableText(input?.unlockLabel),
       requiredFlags: normalizeStringArray(input?.requiredFlags),
       blockedFlags: normalizeStringArray(input?.blockedFlags),
@@ -520,6 +620,8 @@ export class AdminInteractiveStoriesController {
 
   private toChoiceUpdateData(input: AdminChoiceInput): Prisma.InteractiveStoryChoiceUpdateInput {
     const data: Prisma.InteractiveStoryChoiceUpdateInput = {};
+    const requiresPremium = Boolean(input?.requiresPremium);
+    const requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
     if (Object.prototype.hasOwnProperty.call(input || {}, "choiceKey")) {
       const choiceKey = normalizeText(input?.choiceKey);
       if (!choiceKey) {
@@ -538,10 +640,17 @@ export class AdminInteractiveStoriesController {
       data.description = normalizeNullableText(input?.description);
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "requiresPremium")) {
-      data.requiresPremium = Boolean(input?.requiresPremium);
+      data.requiresPremium = requiresPremium;
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "requiresTokens")) {
-      data.requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
+      data.requiresTokens = requiresTokens;
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "unlockPolicy")) {
+      (data as any).unlockPolicy = normalizeUnlockPolicy(
+        input?.unlockPolicy,
+        requiresPremium,
+        requiresTokens,
+      );
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "unlockLabel")) {
       data.unlockLabel = normalizeNullableText(input?.unlockLabel);
@@ -779,6 +888,11 @@ export class AdminInteractiveStoriesController {
               choiceKey,
               label,
               description: normalizeNullableText(choice?.description),
+              unlockPolicy: normalizeUnlockPolicy(
+                choice?.unlockPolicy,
+                Boolean(choice?.requiresPremium),
+                Math.max(0, Number(choice?.requiresTokens || 0)),
+              ) as any,
               requiresPremium: Boolean(choice?.requiresPremium),
               requiresTokens: Math.max(0, Number(choice?.requiresTokens || 0)),
               unlockLabel: normalizeNullableText(choice?.unlockLabel),
@@ -861,6 +975,7 @@ export class AdminInteractiveStoriesController {
           choiceKey: choice.choiceKey,
           label: choice.label,
           description: choice.description,
+          unlockPolicy: choice.unlockPolicy,
           requiresPremium: choice.requiresPremium,
           requiresTokens: choice.requiresTokens,
           unlockLabel: choice.unlockLabel,
@@ -1233,9 +1348,21 @@ export class AdminInteractiveStoriesController {
       await this.assertPublishReady(storyId);
     }
 
+    const snapshotSource = publish ? await this.loadStoryWithGraph(storyId) : null;
+    const publishData: Prisma.InteractiveStoryUpdateInput = publish
+      ? {
+          isPublished: true,
+          publishedVersion: { increment: 1 },
+          publishedAt: new Date(),
+          publishedSnapshot: this.buildPublishedSnapshot(snapshotSource) as Prisma.InputJsonValue,
+        }
+      : {
+          isPublished: false,
+        };
+
     const story = await this.prisma.interactiveStory.update({
       where: { id: storyId },
-      data: { isPublished: publish },
+      data: publishData,
       select: STORY_DETAIL_SELECT,
     });
     await this.invalidateSeriesContent([story.seriesId, existing.seriesId]);

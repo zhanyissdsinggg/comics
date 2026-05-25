@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { apiGet } from "../../lib/apiClient";
 import { trackEvent } from "../../lib/trackEvent";
+import { useAuthStore } from "../../store/useAuthStore";
 import SurfacePanel from "../common/SurfacePanel";
 
 function normalizeText(value) {
@@ -33,29 +34,32 @@ export default function InteractiveLandingPage({
   const [stories] = useState(() => normalizeStories(initialStories));
   const [continueMap, setContinueMap] = useState(() => new Map());
   const [activeFilter, setActiveFilter] = useState("all");
+  const { hydrated, isSignedIn } = useAuthStore();
 
   useEffect(() => {
+    if (!hydrated) {
+      return undefined;
+    }
+    if (!isSignedIn || stories.length === 0) {
+      setContinueMap(new Map());
+      return undefined;
+    }
+
     let cancelled = false;
-    Promise.all(
-      stories.slice(0, 12).map(async (story) => {
-        const slug = normalizeText(story?.slug);
-        if (!slug) {
-          return null;
-        }
-        const response = await apiGet(
-          `/api/interactive-stories/slug/${encodeURIComponent(slug)}/current`,
-          {
-            suppressAuthModal: true,
-            cacheMs: 0,
-            bust: true,
-          },
-        );
-        return response.ok && response.data?.progress ? response.data.progress : null;
-      }),
-    )
+    const slugs = stories
+      .slice(0, 24)
+      .map((story) => normalizeText(story?.slug))
+      .filter(Boolean);
+
+    apiGet(`/api/interactive-stories/progress/bulk?slugs=${encodeURIComponent(slugs.join(","))}`, {
+      suppressAuthModal: true,
+      cacheMs: 0,
+      bust: true,
+    })
       .then((items) => {
         if (!cancelled) {
-          setContinueMap(getContinueMap(items.filter(Boolean)));
+          const progressList = Array.isArray(items?.data?.progress) ? items.data.progress : [];
+          setContinueMap(getContinueMap(progressList));
         }
       })
       .catch(() => {
@@ -67,7 +71,7 @@ export default function InteractiveLandingPage({
     return () => {
       cancelled = true;
     };
-  }, [stories]);
+  }, [hydrated, isSignedIn, stories]);
 
   useEffect(() => {
     trackEvent("interactive_story_view", {
@@ -270,7 +274,7 @@ export default function InteractiveLandingPage({
           })}
           {filteredStories.length === 0 ? (
             <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
-              No interactive stories are published for this content mode yet.
+              No interactive stories are published yet.
             </div>
           ) : null}
         </section>

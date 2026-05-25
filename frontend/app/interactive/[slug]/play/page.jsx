@@ -5,17 +5,18 @@ import {
   getInteractiveStoryServer,
 } from "../../../../lib/interactiveServerApi";
 import { createPageMetadata } from "../../../../lib/seo";
-import { buildInteractiveLandingRobots } from "../../../../lib/interactiveSeo";
+import { buildNoIndexRobots } from "../../../../lib/seo";
 
 export async function generateMetadata({ params }) {
   const resolved = await Promise.resolve(params);
   const slug = String(resolved?.slug || "").trim();
+  const story = await getInteractiveStoryServer(slug);
 
   return createPageMetadata({
-    title: "Interactive Story Play",
-    description: "Play through a branching interactive story on Gush.",
+    title: `${story?.title || "Interactive Story"} Play`,
+    description: story?.description || "Play through a branching interactive story on Gush.",
     path: `/interactive/${slug}/play`,
-    robots: buildInteractiveLandingRobots(),
+    robots: buildNoIndexRobots({ follow: true }),
   });
 }
 

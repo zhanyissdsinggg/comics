@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { isServerAdultModeEnabled } from "./serverAdultGate";
 
 function normalizeBaseUrl(value) {
@@ -8,12 +8,27 @@ function normalizeBaseUrl(value) {
 }
 
 function getBaseUrl() {
-  return normalizeBaseUrl(
+  const configuredBaseUrl = normalizeBaseUrl(
     process.env.API_BASE_URL ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      "http://127.0.0.1:4000",
+      process.env.NEXT_PUBLIC_BASE_URL,
   );
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
+  const headerStore = headers();
+  const forwardedHost = normalizeBaseUrl(
+    headerStore.get("x-forwarded-host") || headerStore.get("host") || "",
+  );
+  const forwardedProto = normalizeBaseUrl(
+    headerStore.get("x-forwarded-proto") || "https",
+  );
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  return "http://127.0.0.1:4000";
 }
 
 function buildCookieHeader(cookieStore) {

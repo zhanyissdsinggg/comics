@@ -49,11 +49,25 @@ function getLockedCopy(choice) {
   if (!choice?.locked) {
     return "";
   }
+  const tokens = Number(choice?.requiresTokens || 0);
+  const policy = normalizeText(choice?.unlockPolicy || "").toUpperCase();
+  if (policy === "PREMIUM_ONLY") {
+    return choice.unlockLabel || "Members Only";
+  }
+  if (policy === "TOKENS_ONLY") {
+    return choice.unlockLabel || `Unlock for ${tokens} Tokens`;
+  }
+  if (policy === "PREMIUM_OR_TOKENS") {
+    return choice.unlockLabel || `Premium or ${tokens} Tokens`;
+  }
+  if (policy === "PREMIUM_AND_TOKENS") {
+    return choice.unlockLabel || `Premium + ${tokens} Tokens`;
+  }
   if (choice.lockedReason === "PREMIUM_REQUIRED") {
-    return choice.unlockLabel || "Premium required";
+    return choice.unlockLabel || "Members Only";
   }
   if (choice.lockedReason === "TOKENS_REQUIRED") {
-    return choice.unlockLabel || `${Number(choice.requiresTokens || 0)} tokens`;
+    return choice.unlockLabel || `Unlock for ${tokens} Tokens`;
   }
   return choice.unlockLabel || "Locked";
 }

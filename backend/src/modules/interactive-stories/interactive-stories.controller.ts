@@ -132,6 +132,34 @@ export class InteractiveStoriesController {
     return { progress };
   }
 
+  @Get("progress/bulk")
+  async getBulkProgress(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const slugQuery = req.query?.slugs;
+    const slugs = Array.isArray(slugQuery)
+      ? slugQuery.map((item) => normalizeText(String(item || ""))).filter(Boolean)
+      : String(slugQuery || "")
+          .split(",")
+          .map((item) => normalizeText(item))
+          .filter(Boolean);
+
+    const access = await this.buildAccessContext(req);
+    const progress = await this.interactiveStoriesService.getBulkProgress(
+      slugs,
+      userId,
+      access,
+    );
+    return { progress };
+  }
+
   @Post("slug/:slug/choose")
   async submitChoiceBySlug(
     @Param("slug") slug: string,

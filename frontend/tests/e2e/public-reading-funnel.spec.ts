@@ -1125,6 +1125,7 @@ const mockBackendState = {
   matureConfirmed: false,
   matureModeEnabled: false,
   hideAdultHistory: false,
+  interactiveStories: [...INTERACTIVE_STORIES] as Array<Record<string, unknown>>,
 };
 
 function createMockBackendServer() {
@@ -1226,7 +1227,7 @@ function createMockBackendServer() {
     }
 
     if (pathname === "/api/interactive-stories") {
-      const stories = INTERACTIVE_STORIES.filter((story) =>
+      const stories = mockBackendState.interactiveStories.filter((story) =>
         matureConfirmed && matureModeEnabled
           ? story.contentMode === "ADULT"
           : story.contentMode === "NORMAL",
@@ -1241,9 +1242,16 @@ function createMockBackendServer() {
     }
 
     if (pathname === "/api/interactive-stories/slug/midnight-archive") {
+      const story = mockBackendState.interactiveStories.find(
+        (item) => item.slug === "midnight-archive",
+      );
+      if (!story) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
       jsonResponse(response, 200, {
         story: {
-          ...INTERACTIVE_STORIES[0],
+          ...story,
           baseContext: "A teen mystery where the archive shifts with each route.",
         },
       });
@@ -1255,9 +1263,16 @@ function createMockBackendServer() {
         jsonResponse(response, 404, { error: "NOT_FOUND" });
         return;
       }
+      const story = mockBackendState.interactiveStories.find(
+        (item) => item.slug === "after-dark-protocol",
+      );
+      if (!story) {
+        jsonResponse(response, 404, { error: "NOT_FOUND" });
+        return;
+      }
       jsonResponse(response, 200, {
         story: {
-          ...INTERACTIVE_STORIES[1],
+          ...story,
           baseContext: "Adult mode only.",
         },
       });
@@ -1372,6 +1387,7 @@ async function mockPublicApi(
     matureConfirmed?: boolean;
     matureModeEnabled?: boolean;
     hideAdultHistory?: boolean;
+    interactiveStories?: Array<Record<string, unknown>>;
   } = {},
 ) {
   const {
@@ -1379,12 +1395,16 @@ async function mockPublicApi(
     matureConfirmed = false,
     matureModeEnabled = false,
     hideAdultHistory = false,
+    interactiveStories = INTERACTIVE_STORIES,
   } = options;
 
   mockBackendState.signedIn = signedIn;
   mockBackendState.matureConfirmed = matureConfirmed;
   mockBackendState.matureModeEnabled = matureModeEnabled;
   mockBackendState.hideAdultHistory = hideAdultHistory;
+  mockBackendState.interactiveStories = interactiveStories.map((story) => ({
+    ...story,
+  }));
 
   await page.context().addCookies([
     {
@@ -1601,12 +1621,47 @@ async function mockPublicApi(
     }
 
     if (pathname === "/api/interactive-stories") {
-      const stories = INTERACTIVE_STORIES.filter((story) =>
+      const stories = interactiveStories.filter((story) =>
         matureConfirmed && matureModeEnabled
           ? story.contentMode === "ADULT"
           : story.contentMode === "NORMAL",
       );
       await fulfillJson(route, { stories });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/progress/bulk") {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      await fulfillJson(route, {
+        progress: [
+          {
+            story: interactiveStories[0],
+            state: { trust: 0, clues: 1, risk: 0, pathNodeIds: ["node-midnight-1"], endingsReached: [] },
+            flags: [],
+            currentDepth: 1,
+            endingsReached: 0,
+            path: [
+              {
+                nodeId: "node-midnight-1",
+                nodeKey: "start-hall",
+                title: "The Hall Goes Quiet",
+                isEnding: false,
+              },
+            ],
+            node: {
+              id: "node-midnight-1",
+              key: "start-hall",
+              title: "The Hall Goes Quiet",
+              content: "The archive room clicks shut behind you.",
+              isEnding: false,
+              choices: [],
+            },
+          },
+        ],
+      });
       return;
     }
 
@@ -2206,6 +2261,9 @@ test.describe("Public reading funnel", () => {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
+    const html = await page.content();
+    expect(html).toContain("Midnight Archive");
+    expect(html).not.toContain(">Loading<");
     await expect(
       page.getByRole("heading", { name: /Pick a route\. Wear the consequences\./i }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
@@ -2248,6 +2306,30 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Premium choice");
 
     await expectNoRuntimeIssues("interactive-normal-routes", runtimeIssues);
+  });
+
+  test("interactive landing renders empty state instead of loading when no stories are published", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: false,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+      interactiveStories: [],
+    });
+
+    const response = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    const html = await page.content();
+    expect(html).toContain("No interactive stories are published yet.");
+    expect(html).not.toContain(">Loading<");
+    await expect(page.locator("main")).toContainText(
+      "No interactive stories are published yet.",
+    );
+    await expectNoRuntimeIssues("interactive-empty-state", runtimeIssues);
   });
 
   test("interactive play disables repeated choice clicks and advances to ending", async ({
