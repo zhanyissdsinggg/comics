@@ -1,161 +1,230 @@
 import { Injectable } from "@nestjs/common";
 import { getAppConfig } from "../../common/config/app-config";
 
-type AiChoice = {
-  id: string;
-  key: string;
+type DraftChoice = {
   label: string;
+  description: string;
 };
 
-type GenerateInput = {
+export type GenerateDraftNodeInput = {
   story: {
     id: string;
     title: string;
+    genre: string[];
+    targetAudience: string;
+    contentMode: "NORMAL" | "ADULT";
     baseContext: string;
   };
-  node: {
+  currentNode: {
     id: string;
     title: string;
-    baseContext: string;
-    basePrompt: string;
-    fallbackText: string;
+    body: string;
+    aiEnabled: boolean;
   };
   selectedChoice: {
     id: string;
-    key: string;
     label: string;
-  } | null;
-  state: Record<string, unknown>;
-  choices: AiChoice[];
+    description: string;
+  };
+  previousNodes: Array<{
+    title: string;
+    body: string;
+  }>;
+  desiredLength: number;
 };
 
-export type GenerateOutput = {
-  content: string;
-  choiceLabelOverrides: Record<string, string>;
-  status: "success" | "fallback" | "skipped";
+export type GenerateDraftNodeOutput = {
+  ok: boolean;
+  status: "success" | "rejected" | "fallback";
   provider: string;
   model: string;
   prompt: string;
   rawResponse: string;
   errorMessage: string | null;
   latencyMs: number | null;
+  draft: {
+    title: string;
+    body: string;
+    choices: DraftChoice[];
+    safetyNotes: string;
+  } | null;
 };
 
-type ParsedAiPayload = {
-  content?: unknown;
-  choiceLabelOverrides?: unknown;
+type ParsedPayload = {
+  title?: unknown;
+  body?: unknown;
   choices?: unknown;
+  safety_notes?: unknown;
 };
+
+const NORMAL_FORBIDDEN_REGEX =
+  /\b(explicit|porn|erotic|smut|sexual|nsfw|nude|fetish|orgasm|seduce|seduction|bedroom|graphic violence|gore|minor)\b/i;
+
+function normalizeText(value: unknown): string {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function truncateText(value: string, maxLength: number): string {
+  return value.length > maxLength ? value.slice(0, maxLength) : value;
+}
+
+function parseJsonObject(raw: string): ParsedPayload | null {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    return parsed as ParsedPayload;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeChoices(value: unknown): DraftChoice[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((item) => ({
+      label: truncateText(normalizeText((item as { label?: unknown })?.label), 80),
+      description: truncateText(
+        normalizeText((item as { description?: unknown })?.description),
+        160,
+      ),
+    }))
+    .filter((item) => item.label);
+}
 
 @Injectable()
 export class InteractiveAiService {
-  private buildPrompt(input: GenerateInput): string {
-    const stateJson = JSON.stringify(input.state || {});
-    const choicesJson = JSON.stringify(
-      input.choices.map((choice) => ({
-        id: choice.id,
-        key: choice.key,
-        label: choice.label,
-      })),
-    );
-    const selectedChoice = input.selectedChoice
-      ? `${input.selectedChoice.label} (${input.selectedChoice.key})`
-      : "none";
+  private buildPrompt(input: GenerateDraftNodeInput): string {
+    const previousPathSummary = input.previousNodes
+      .slice(-5)
+      .map((node, index) => `${index + 1}. ${node.title}: ${truncateText(node.body, 240)}`)
+      .join("\n");
+
+    const safetyRules =
+      input.story.contentMode === "NORMAL"
+        ? [
+            "Target audience is US teens.",
+            "Teen-safe only.",
+            "Do not include explicit sexual content.",
+            "Do not include sexualized minors.",
+            "Do not include adult framing or adult innuendo.",
+            "Do not include graphic violence or gore.",
+          ]
+        : [
+            "Maintain internal continuity.",
+            "Do not include sexualized minors.",
+            "Do not include illegal exploitation.",
+            "Do not include disallowed extreme graphic violence.",
+          ];
 
     return [
-      "You are writing one segment for an interactive fiction system.",
-      "Do not break canon, do not introduce unrelated subplots, and keep continuity strict.",
+      "You generate the next branching draft node for an interactive fiction editor.",
+      "This is admin-only draft assistance. Do not publish language. Do not mention review workflow.",
       "",
       `Story title: ${input.story.title}`,
+      `Genre: ${input.story.genre.join(", ") || "Unknown"}`,
+      `Target audience: ${input.story.targetAudience}`,
+      `Content mode: ${input.story.contentMode}`,
       `Story context: ${input.story.baseContext}`,
-      `Current node title: ${input.node.title}`,
-      `Current node context: ${input.node.baseContext}`,
-      `Current node writing hint: ${input.node.basePrompt}`,
-      `Selected choice: ${selectedChoice}`,
-      `Current state JSON: ${stateJson}`,
-      `Available next choices JSON: ${choicesJson}`,
+      `Current node title: ${input.currentNode.title}`,
+      `Current node body: ${input.currentNode.body}`,
+      `Selected choice: ${input.selectedChoice.label}`,
+      `Selected choice description: ${input.selectedChoice.description}`,
+      `Previous path summary:\n${previousPathSummary || "No previous nodes supplied."}`,
+      `Desired length: around ${Math.max(120, input.desiredLength)} words`,
+      `Safety rules:\n- ${safetyRules.join("\n- ")}`,
       "",
-      "Output JSON only, no markdown:",
-      '{',
-      '  "content": "2-4 sentences, concise and vivid. Keep it under 120 words.",',
-      '  "choiceLabelOverrides": {',
-      '    "<choice-id>": "optional rewritten label, keep meaning unchanged"',
-      "  }",
+      "Output valid JSON only with this exact shape:",
+      "{",
+      '  "title": "string",',
+      '  "body": "string",',
+      '  "choices": [',
+      '    { "label": "string", "description": "string" }',
+      "  ],",
+      '  "safety_notes": "string"',
       "}",
     ].join("\n");
   }
 
-  private normalizeChoiceOverrides(
-    value: unknown,
-    allowedChoiceIds: Set<string>,
-  ): Record<string, string> {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return {};
+  private validateDraft(
+    input: GenerateDraftNodeInput,
+    parsed: ParsedPayload | null,
+  ): { ok: boolean; draft: GenerateDraftNodeOutput["draft"]; error: string | null } {
+    if (!parsed) {
+      return { ok: false, draft: null, error: "invalid-json" };
     }
 
-    const result: Record<string, string> = {};
-    for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
-      if (!allowedChoiceIds.has(key)) {
-        continue;
-      }
-      const text = String(raw || "").replace(/\s+/g, " ").trim();
-      if (!text) {
-        continue;
-      }
-      result[key] = text.slice(0, 80);
+    const title = truncateText(normalizeText(parsed.title), 120);
+    const body = truncateText(normalizeText(parsed.body), 4000);
+    const choices = normalizeChoices(parsed.choices).slice(0, 3);
+    const safetyNotes = truncateText(normalizeText(parsed.safety_notes), 400);
+
+    if (!title || !body) {
+      return { ok: false, draft: null, error: "missing-title-or-body" };
     }
-    return result;
+
+    if (choices.length < 2 || choices.length > 3) {
+      return { ok: false, draft: null, error: "invalid-choice-count" };
+    }
+
+    if (input.story.contentMode === "NORMAL") {
+      const combined = `${title}\n${body}\n${choices
+        .map((item) => `${item.label} ${item.description}`)
+        .join("\n")}\n${safetyNotes}`;
+      if (NORMAL_FORBIDDEN_REGEX.test(combined)) {
+        return { ok: false, draft: null, error: "normal-mode-safety-rejected" };
+      }
+    }
+
+    return {
+      ok: true,
+      error: null,
+      draft: {
+        title,
+        body,
+        choices,
+        safetyNotes,
+      },
+    };
   }
 
-  private parseJsonPayload(raw: string): ParsedAiPayload | null {
-    try {
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        return null;
-      }
-      return parsed as ParsedAiPayload;
-    } catch {
-      return null;
-    }
-  }
-
-  async generateSegment(input: GenerateInput): Promise<GenerateOutput> {
+  async generateDraftNode(
+    input: GenerateDraftNodeInput,
+  ): Promise<GenerateDraftNodeOutput> {
     const appConfig = getAppConfig();
-    const fallbackContent =
-      String(input.node.fallbackText || "").trim() ||
-      String(input.node.baseContext || "").trim() ||
-      "The story advances, and the next decision appears.";
-    const prompt = this.buildPrompt(input);
     const provider = "openai";
     const model = appConfig.ai.openaiModel;
-    const allowedChoiceIds = new Set(input.choices.map((choice) => choice.id));
+    const prompt = this.buildPrompt(input);
 
     if (!appConfig.ai.enabled) {
       return {
-        content: fallbackContent,
-        choiceLabelOverrides: {},
-        status: "skipped",
+        ok: false,
+        status: "fallback",
         provider,
         model,
         prompt,
         rawResponse: "",
         errorMessage: "interactive-ai-disabled",
         latencyMs: null,
+        draft: null,
       };
     }
 
     const apiKey = String(appConfig.ai.openaiApiKey || "").trim();
     if (!apiKey) {
       return {
-        content: fallbackContent,
-        choiceLabelOverrides: {},
-        status: "skipped",
+        ok: false,
+        status: "fallback",
         provider,
         model,
         prompt,
         rawResponse: "",
         errorMessage: "missing-openai-api-key",
         latencyMs: null,
+        draft: null,
       };
     }
 
@@ -181,7 +250,7 @@ export class InteractiveAiService {
               {
                 role: "system",
                 content:
-                  "You are a constrained interactive fiction writer. Respect state, structure, and continuity.",
+                  "You are an interactive fiction drafting assistant. Follow content-mode safety rules exactly and output strict JSON.",
               },
               {
                 role: "user",
@@ -196,62 +265,54 @@ export class InteractiveAiService {
       const latencyMs = Date.now() - startedAt;
       if (!response.ok) {
         return {
-          content: fallbackContent,
-          choiceLabelOverrides: {},
+          ok: false,
           status: "fallback",
           provider,
           model,
           prompt,
-          rawResponse: raw.slice(0, 2000),
+          rawResponse: raw.slice(0, 4000),
           errorMessage: `openai-http-${response.status}`,
           latencyMs,
+          draft: null,
         };
       }
 
-      const parsedOuter = this.parseJsonPayload(raw);
+      const parsedOuter = parseJsonObject(raw);
       const messageContent = String(
         parsedOuter?.choices && Array.isArray(parsedOuter.choices)
           ? (parsedOuter.choices[0] as { message?: { content?: unknown } })?.message?.content || ""
           : "",
       );
-      const parsed = this.parseJsonPayload(messageContent);
-      const content = String(parsed?.content || "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      if (!content) {
+      const validated = this.validateDraft(input, parseJsonObject(messageContent));
+      if (!validated.ok) {
         return {
-          content: fallbackContent,
-          choiceLabelOverrides: {},
-          status: "fallback",
+          ok: false,
+          status: "rejected",
           provider,
           model,
           prompt,
-          rawResponse: messageContent.slice(0, 2000) || raw.slice(0, 2000),
-          errorMessage: "empty-content",
+          rawResponse: messageContent.slice(0, 4000) || raw.slice(0, 4000),
+          errorMessage: validated.error,
           latencyMs,
+          draft: null,
         };
       }
 
       return {
-        content,
-        choiceLabelOverrides: this.normalizeChoiceOverrides(
-          parsed?.choiceLabelOverrides,
-          allowedChoiceIds,
-        ),
+        ok: true,
         status: "success",
         provider,
         model,
         prompt,
-        rawResponse: messageContent.slice(0, 2000),
+        rawResponse: messageContent.slice(0, 4000),
         errorMessage: null,
         latencyMs,
+        draft: validated.draft,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return {
-        content: fallbackContent,
-        choiceLabelOverrides: {},
+        ok: false,
         status: "fallback",
         provider,
         model,
@@ -259,6 +320,7 @@ export class InteractiveAiService {
         rawResponse: "",
         errorMessage: message.slice(0, 180),
         latencyMs: Date.now() - startedAt,
+        draft: null,
       };
     } finally {
       clearTimeout(timeout);

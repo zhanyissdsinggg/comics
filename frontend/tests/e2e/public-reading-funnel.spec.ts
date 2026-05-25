@@ -29,6 +29,25 @@ const BANNED_STRINGS = [
   "placeholder",
 ] as const;
 
+const INTERACTIVE_STORIES = [
+  {
+    id: "story-normal-001",
+    slug: "midnight-archive",
+    title: "Midnight Archive",
+    description: "A teen mystery where every clue changes who you trust next.",
+    seriesId: "series-011",
+    contentMode: "NORMAL",
+  },
+  {
+    id: "story-adult-001",
+    slug: "after-dark-protocol",
+    title: "After Dark Protocol",
+    description: "Adult-mode branching thriller kept out of normal mode surfaces.",
+    seriesId: "series-012",
+    contentMode: "ADULT",
+  },
+] as const;
+
 const CATALOG = [
   {
     id: "series-001",
@@ -1287,6 +1306,12 @@ async function mockPublicApi(
     window.localStorage.setItem("cookie_consent", "accepted");
   });
 
+  const interactiveProgressState = {
+    currentNodeId: "node-midnight-1",
+    visited: ["node-midnight-1"],
+    duplicateTriggered: false,
+  };
+
   await page.route("**/api/**", async (route) => {
     const requestUrl = new URL(route.request().url());
     const pathname = requestUrl.pathname;
@@ -1431,8 +1456,176 @@ async function mockPublicApi(
       return;
     }
 
+    if (pathname === "/api/interactive-stories") {
+      const stories = INTERACTIVE_STORIES.filter((story) =>
+        matureConfirmed && matureModeEnabled
+          ? story.contentMode === "ADULT"
+          : story.contentMode === "NORMAL",
+      );
+      await fulfillJson(route, { stories });
+      return;
+    }
+
     if (pathname.startsWith("/api/interactive-stories/by-series/")) {
       await fulfillJson(route, { story: null });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/midnight-archive") {
+      await fulfillJson(route, {
+        story: INTERACTIVE_STORIES[0],
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/after-dark-protocol") {
+      if (!signedIn || !matureConfirmed || !matureModeEnabled) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      await fulfillJson(route, {
+        story: INTERACTIVE_STORIES[1],
+      });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/midnight-archive/current") {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+
+      const currentNodeId = interactiveProgressState.currentNodeId;
+      const progress =
+        currentNodeId === "node-midnight-ending"
+          ? {
+              story: INTERACTIVE_STORIES[0],
+              state: { trust: 2, clues: 1, risk: 0 },
+              flags: [],
+              node: {
+                id: "node-midnight-ending",
+                key: "ending-rooftop",
+                title: "Rooftop Ending",
+                content:
+                  "You carry the archive to the rooftop and finally see who was telling the truth.",
+                isEnding: true,
+                choices: [],
+              },
+            }
+          : {
+              story: INTERACTIVE_STORIES[0],
+              state: { trust: 0, clues: 1, risk: 0 },
+              flags: [],
+              node: {
+                id: "node-midnight-1",
+                key: "start-hall",
+                title: "The Hall Goes Quiet",
+                content:
+                  "The archive room clicks shut behind you. One note points upstairs. One points to the locked radio cabinet.",
+                isEnding: false,
+                choices: [
+                  {
+                    id: "choice-midnight-open",
+                    key: "go-upstairs",
+                    label: "Follow the upstairs note",
+                    description: "Push forward before the hallway cameras loop again.",
+                    requiresPremium: false,
+                    requiresTokens: 0,
+                    unlockLabel: null,
+                    locked: false,
+                    lockedReason: null,
+                  },
+                  {
+                    id: "choice-midnight-locked",
+                    key: "unlock-cabinet",
+                    label: "Crack the radio cabinet",
+                    description: "A premium branch with a cleaner clue trail.",
+                    requiresPremium: true,
+                    requiresTokens: 0,
+                    unlockLabel: "Premium choice",
+                    locked: true,
+                    lockedReason: "PREMIUM_REQUIRED",
+                  },
+                ],
+              },
+            };
+
+      await fulfillJson(route, { progress });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/after-dark-protocol/current") {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (!matureConfirmed || !matureModeEnabled) {
+        await fulfillJson(route, { error: "NOT_FOUND" }, 404);
+        return;
+      }
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[1],
+          state: { trust: 0 },
+          flags: [],
+          node: {
+            id: "node-adult-1",
+            key: "adult-start",
+            title: "After Dark",
+            content: "Adult mode only.",
+            isEnding: false,
+            choices: [],
+          },
+        },
+      });
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/midnight-archive/choose" &&
+      route.request().method() === "POST"
+    ) {
+      const payload = route.request().postDataJSON?.() || {};
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (payload.choiceId === "choice-midnight-locked") {
+        await fulfillJson(
+          route,
+          { error: "FORBIDDEN", reason: "CHOICE_LOCKED" },
+          403,
+        );
+        return;
+      }
+      if (interactiveProgressState.duplicateTriggered) {
+        await fulfillJson(
+          route,
+          { error: "INVALID_REQUEST", reason: "DUPLICATE_SUBMIT" },
+          409,
+        );
+        return;
+      }
+
+      interactiveProgressState.duplicateTriggered = true;
+      interactiveProgressState.currentNodeId = "node-midnight-ending";
+      interactiveProgressState.visited.push("node-midnight-ending");
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[0],
+          state: { trust: 2, clues: 1, risk: 0 },
+          flags: [],
+          node: {
+            id: "node-midnight-ending",
+            key: "ending-rooftop",
+            title: "Rooftop Ending",
+            content:
+              "You carry the archive to the rooftop and finally see who was telling the truth.",
+            isEnding: true,
+            choices: [],
+          },
+        },
+      });
       return;
     }
 
@@ -1712,6 +1905,133 @@ test.describe("Public reading funnel", () => {
       "Best matches across stories, formats, and creator shelves.",
     );
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
+  });
+
+  test("interactive landing, detail, and play routes work in normal mode", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    let response = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { name: /Pick a route\. Wear the consequences\./i }),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(page.locator("main")).toContainText("Midnight Archive");
+    await expect(page.locator("main")).not.toContainText("After Dark Protocol");
+
+    response = await page.goto("/interactive/midnight-archive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole("heading", { name: "Midnight Archive" }),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("link", { name: /Start story/i }),
+    ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
+
+    response = await page.goto("/interactive/midnight-archive/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
+    await expect(page.locator("main")).toContainText("Choices");
+
+    const unlockedChoice = page.getByRole("button", {
+      name: /Follow the upstairs note/i,
+    });
+    const lockedChoice = page.getByRole("button", {
+      name: /Crack the radio cabinet/i,
+    });
+    await expect(unlockedChoice).toBeEnabled();
+    await expect(lockedChoice).toBeDisabled();
+    await expect(lockedChoice).toContainText("Premium choice");
+
+    await expectNoRuntimeIssues("interactive-normal-routes", runtimeIssues);
+  });
+
+  test("interactive play disables repeated choice clicks and advances to ending", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/interactive/midnight-archive/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const unlockedChoice = page.getByRole("button", {
+      name: /Follow the upstairs note/i,
+    });
+    await expect(unlockedChoice).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await unlockedChoice.click();
+    await expect(unlockedChoice).toHaveCount(0);
+    await expect(page.locator("main")).toContainText("Rooftop Ending", {
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).toContainText("Ending");
+    await expect(
+      page.getByRole("link", { name: /Restart/i }),
+    ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
+
+    await expectNoRuntimeIssues("interactive-choice-submit", runtimeIssues);
+  });
+
+  test("interactive adult stories stay hidden outside adult mode", async ({
+    page,
+    browser,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    let response = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).not.toContainText("After Dark Protocol");
+
+    response = await page.goto("/interactive/after-dark-protocol", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).not.toContainText("After Dark Protocol");
+    await expect(page.locator("main")).toContainText("Interactive Story");
+
+    const adultPage = await browser.newPage();
+    const adultRuntimeIssues = collectRuntimeIssues(adultPage);
+    await mockPublicApi(adultPage, {
+      signedIn: true,
+      matureConfirmed: true,
+      matureModeEnabled: true,
+    });
+
+    response = await adultPage.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(adultPage.locator("main")).toContainText("After Dark Protocol");
+    await expect(adultPage.locator("main")).not.toContainText("Midnight Archive");
+
+    await expectNoRuntimeIssues("interactive-adult-hidden", runtimeIssues);
+    await expectNoRuntimeIssues("interactive-adult-visible", adultRuntimeIssues);
+    await adultPage.close();
   });
 
   test("search filters change result sets from URL params", async ({

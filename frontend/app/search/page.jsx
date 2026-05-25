@@ -46,6 +46,9 @@ export default async function Page({ searchParams }) {
     if (initialQuery) {
       redirectParams.set("q", initialQuery);
     }
+    if (String(resolvedSearchParams.mode || "").trim()) {
+      redirectParams.set("mode", String(resolvedSearchParams.mode).trim());
+    }
     const redirectSuffix = redirectParams.toString();
     redirect(redirectSuffix ? `/interactive?${redirectSuffix}` : "/interactive");
   }

@@ -63,6 +63,8 @@ const NODE_FILTERS = [
 const emptyStory = () => ({
   slug: "",
   title: "",
+  contentMode: "NORMAL",
+  targetAudience: "US teens",
   seriesId: "",
   description: "",
   baseContext: "",
@@ -78,6 +80,9 @@ const emptyNode = () => ({
   baseContext: "",
   basePrompt: "",
   fallbackText: "",
+  generatedByAI: false,
+  reviewStatus: "approved",
+  editorNotes: "",
   requiredFlagsText: "",
   blockedFlagsText: "",
   stateEffectsText: "",
@@ -90,6 +95,9 @@ const emptyChoice = () => ({
   label: "",
   description: "",
   targetNodeId: "",
+  requiresPremium: false,
+  requiresTokens: 0,
+  unlockLabel: "",
   sortOrder: 0,
   requiredFlagsText: "",
   blockedFlagsText: "",
@@ -258,6 +266,8 @@ function mapStoryToForm(next) {
   return {
     slug: next?.slug || "",
     title: next?.title || "",
+    contentMode: next?.contentMode || "NORMAL",
+    targetAudience: next?.targetAudience || "US teens",
     seriesId: next?.seriesId || "",
     description: next?.description || "",
     baseContext: next?.baseContext || "",
@@ -275,6 +285,9 @@ function mapNodeToForm(node) {
     baseContext: node?.baseContext || "",
     basePrompt: node?.basePrompt || "",
     fallbackText: node?.fallbackText || "",
+    generatedByAI: Boolean(node?.generatedByAI),
+    reviewStatus: node?.reviewStatus || "approved",
+    editorNotes: node?.editorNotes || "",
     requiredFlagsText: formatStringList(node?.requiredFlags),
     blockedFlagsText: formatStringList(node?.blockedFlags),
     stateEffectsText: formatJson(node?.stateEffects),
@@ -289,6 +302,9 @@ function mapChoiceToForm(choice) {
     label: choice?.label || "",
     description: choice?.description || "",
     targetNodeId: choice?.targetNodeId || "",
+    requiresPremium: Boolean(choice?.requiresPremium),
+    requiresTokens: Number(choice?.requiresTokens || 0),
+    unlockLabel: choice?.unlockLabel || "",
     sortOrder: Number(choice?.sortOrder || 0),
     requiredFlagsText: formatStringList(choice?.requiredFlags),
     blockedFlagsText: formatStringList(choice?.blockedFlags),
@@ -436,6 +452,8 @@ export default function AdminInteractiveStoriesPage() {
   const [nodeQuery, setNodeQuery] = useState("");
   const [nodeFilterMode, setNodeFilterMode] = useState("all");
   const [nodeDraft, setNodeDraft] = useState(emptyNode);
+  const [generateLength, setGenerateLength] = useState(220);
+  const [generateChoiceByNode, setGenerateChoiceByNode] = useState({});
   const [nodeForms, setNodeForms] = useState({});
   const [choiceForms, setChoiceForms] = useState({});
   const [newChoiceByNode, setNewChoiceByNode] = useState({});
@@ -697,6 +715,16 @@ export default function AdminInteractiveStoriesPage() {
       setNodeForms(nextNodeForms);
       setChoiceForms(nextChoiceForms);
       setNewChoiceByNode(nextChoiceDrafts);
+      setGenerateChoiceByNode((current) => {
+        const nextMap = {};
+        for (const node of next?.nodes || []) {
+          nextMap[node.id] =
+            current[node.id] ||
+            node?.choices?.[0]?.id ||
+            "";
+        }
+        return nextMap;
+      });
       setSelectedNodeId((current) =>
         next?.nodes?.some((item) => item.id === current)
           ? current
@@ -729,6 +757,8 @@ export default function AdminInteractiveStoriesPage() {
     setDetail(null);
     setStory(emptyStory());
     setNodeDraft(emptyNode());
+    setGenerateLength(220);
+    setGenerateChoiceByNode({});
     setNodeForms({});
     setChoiceForms({});
     setNewChoiceByNode({});
@@ -740,6 +770,8 @@ export default function AdminInteractiveStoriesPage() {
     return {
       slug: story.slug,
       title: story.title,
+      contentMode: story.contentMode || "NORMAL",
+      targetAudience: story.targetAudience || "US teens",
       seriesId: story.seriesId || null,
       description: story.description || null,
       baseContext: story.baseContext || null,
@@ -757,6 +789,9 @@ export default function AdminInteractiveStoriesPage() {
       baseContext: form.baseContext || null,
       basePrompt: form.basePrompt || null,
       fallbackText: form.fallbackText || null,
+      generatedByAI: Boolean(form.generatedByAI),
+      reviewStatus: form.reviewStatus || "approved",
+      editorNotes: form.editorNotes || null,
       requiredFlags: parseStringList(form.requiredFlagsText),
       blockedFlags: parseStringList(form.blockedFlagsText),
       stateEffects: parseJsonText(form.stateEffectsText, "节点状态变更"),
@@ -771,6 +806,9 @@ export default function AdminInteractiveStoriesPage() {
       label: form.label,
       description: form.description || null,
       targetNodeId: form.targetNodeId || null,
+      requiresPremium: Boolean(form.requiresPremium),
+      requiresTokens: normalizeInteger(form.requiresTokens),
+      unlockLabel: form.unlockLabel || null,
       sortOrder: normalizeInteger(form.sortOrder),
       requiredFlags: parseStringList(form.requiredFlagsText),
       blockedFlags: parseStringList(form.blockedFlagsText),
@@ -1093,6 +1131,47 @@ export default function AdminInteractiveStoriesPage() {
     setNodeDraft(emptyNode());
     await loadDetail(selectedStoryId);
     setSelectedNodeId(resp.data?.node?.id || "");
+  }
+
+  async function generateNodeDraftNow(nodeId) {
+    if (!selectedStoryId || !nodeId) {
+      return;
+    }
+
+    const choiceId = String(generateChoiceByNode[nodeId] || "").trim();
+    if (!choiceId) {
+      setFeedback({ type: "error", message: "请先选择一个分支，再生成下一节点草稿" });
+      return;
+    }
+
+    setBusy(true);
+    const resp = await adminPost(
+      `/api/admin/interactive-stories/${selectedStoryId}/generate-node`,
+      {
+        fromNodeId: nodeId,
+        choiceId,
+        desiredLength: normalizeInteger(generateLength, 220),
+      },
+    );
+    setBusy(false);
+
+    if (!resp.ok) {
+      setFeedback({ type: "error", message: msg(resp, "AI 生成草稿失败") });
+      return;
+    }
+
+    const generatedNodeId = resp.data?.node?.id || "";
+    const generation = resp.data?.generation || {};
+    setFeedback({
+      type: generation.ok ? "success" : "error",
+      message: generation.ok
+        ? "AI 草稿节点已生成，状态为 pending_review，请编辑审核后再发布。"
+        : `AI 草稿已落库，但被标记为 ${generation.status || "rejected"}，请人工处理。`,
+    });
+    await loadDetail(selectedStoryId);
+    if (generatedNodeId) {
+      setSelectedNodeId(generatedNodeId);
+    }
   }
 
   async function saveNode(nodeId) {
@@ -1730,6 +1809,24 @@ export default function AdminInteractiveStoriesPage() {
                         />
                       </AdminFormField>
                       <AdminFormField
+                        label="内容模式"
+                        helperText="NORMAL 只能挂普通内容，ADULT 仅成人模式可见。"
+                      >
+                        <select
+                          value={story.contentMode}
+                          onChange={(event) =>
+                            setStory((current) => ({
+                              ...current,
+                              contentMode: event.target.value,
+                            }))
+                          }
+                          className={adminSelectClassName}
+                        >
+                          <option value="NORMAL">NORMAL</option>
+                          <option value="ADULT">ADULT</option>
+                        </select>
+                      </AdminFormField>
+                      <AdminFormField
                         label="一句话简介"
                         helperText="给后台同事快速理解这篇互动稿的定位。"
                       >
@@ -2050,6 +2147,11 @@ export default function AdminInteractiveStoriesPage() {
                   nodeDraft={nodeDraft}
                   setNodeDraft={setNodeDraft}
                   createNode={createNode}
+                  generateLength={generateLength}
+                  setGenerateLength={setGenerateLength}
+                  generateChoiceByNode={generateChoiceByNode}
+                  setGenerateChoiceByNode={setGenerateChoiceByNode}
+                  generateNodeDraftNow={generateNodeDraftNow}
                   selectedStoryId={selectedStoryId}
                   setNodeForms={setNodeForms}
                   saveNode={saveNode}
@@ -2148,6 +2250,11 @@ function InteractiveStoryNodesTab({
   nodeDraft,
   setNodeDraft,
   createNode,
+  generateLength,
+  setGenerateLength,
+  generateChoiceByNode,
+  setGenerateChoiceByNode,
+  generateNodeDraftNow,
   selectedStoryId,
   setNodeForms,
   saveNode,
@@ -2953,6 +3060,137 @@ function InteractiveStoryNodesTab({
                     启用 AI
                   </label>
                 </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <AdminFormField label="Review Status">
+                    <select
+                      value={selectedNodeForm.reviewStatus}
+                      onChange={(event) =>
+                        setNodeForms((current) => ({
+                          ...current,
+                          [selectedNode.id]: {
+                            ...selectedNodeForm,
+                            reviewStatus: event.target.value,
+                          },
+                        }))
+                      }
+                      className={adminSelectClassName}
+                    >
+                      <option value="draft">draft</option>
+                      <option value="pending_review">pending_review</option>
+                      <option value="approved">approved</option>
+                      <option value="rejected">rejected</option>
+                    </select>
+                  </AdminFormField>
+                  <AdminFormField label="Editor Notes">
+                    <textarea
+                      rows={4}
+                      value={selectedNodeForm.editorNotes}
+                      onChange={(event) =>
+                        setNodeForms((current) => ({
+                          ...current,
+                          [selectedNode.id]: {
+                            ...selectedNodeForm,
+                            editorNotes: event.target.value,
+                          },
+                        }))
+                      }
+                      className={adminTextareaClassName}
+                      placeholder="记录审核意见、改稿建议和安全备注。"
+                    />
+                  </AdminFormField>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={selectedNodeForm.generatedByAI}
+                      onChange={(event) =>
+                        setNodeForms((current) => ({
+                          ...current,
+                          [selectedNode.id]: {
+                            ...selectedNodeForm,
+                            generatedByAI: event.target.checked,
+                          },
+                        }))
+                      }
+                      className={adminCheckboxClassName}
+                    />
+                    AI 生成节点
+                  </label>
+                </div>
+                {!selectedNodeForm.isEnding &&
+                Array.isArray(selectedNode?.choices) &&
+                selectedNode.choices.length > 0 ? (
+                  <div className="rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/70 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">
+                          Generate Next Node
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          只生成后台草稿节点，不自动发布，不会直接对读者可见。
+                        </p>
+                      </div>
+                      <AdminBadge tone="accent">draft only</AdminBadge>
+                      <AdminFormField
+                        label="Target Audience"
+                        helperText="AI 草稿生成时会把这个字段带进 prompt。NORMAL 模式建议保持 US teens。"
+                      >
+                        <input
+                          value={story.targetAudience}
+                          onChange={(event) =>
+                            setStory((current) => ({
+                              ...current,
+                              targetAudience: event.target.value,
+                            }))
+                          }
+                          className={adminInputClassName}
+                          placeholder="US teens"
+                        />
+                      </AdminFormField>
+                    </div>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <AdminFormField label="Source Choice">
+                        <select
+                          value={generateChoiceByNode[selectedNode.id] || ""}
+                          onChange={(event) =>
+                            setGenerateChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: event.target.value,
+                            }))
+                          }
+                          className={adminSelectClassName}
+                        >
+                          <option value="">请选择分支</option>
+                          {(selectedNode.choices || []).map((choice) => (
+                            <option key={choice.id} value={choice.id}>
+                              {choice.label}
+                            </option>
+                          ))}
+                        </select>
+                      </AdminFormField>
+                      <AdminFormField label="Desired Length">
+                        <input
+                          type="number"
+                          min="120"
+                          max="800"
+                          value={generateLength}
+                          onChange={(event) => setGenerateLength(event.target.value)}
+                          className={adminInputClassName}
+                        />
+                      </AdminFormField>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => generateNodeDraftNow(selectedNode.id)}
+                      disabled={!selectedNodeForm.aiEnabled || !detail?.aiEnabled}
+                    >
+                      <Sparkles className="size-4" />
+                      Generate Next Node
+                    </Button>
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" onClick={() => saveNode(selectedNode.id)}>
                     <Save className="size-4" />
@@ -3165,6 +3403,58 @@ function InteractiveStoryNodesTab({
                               className={adminInputClassName}
                             />
                           </AdminFormField>
+                          <AdminFormField label="锁定文案">
+                            <input
+                              value={form.unlockLabel}
+                              onChange={(event) =>
+                                setChoiceForms((current) => ({
+                                  ...current,
+                                  [choice.id]: {
+                                    ...form,
+                                    unlockLabel: event.target.value,
+                                  },
+                                }))
+                              }
+                              className={adminInputClassName}
+                              placeholder="Premium choice / 20 tokens"
+                            />
+                          </AdminFormField>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(form.requiresPremium)}
+                              onChange={(event) =>
+                                setChoiceForms((current) => ({
+                                  ...current,
+                                  [choice.id]: {
+                                    ...form,
+                                    requiresPremium: event.target.checked,
+                                  },
+                                }))
+                              }
+                              className={adminCheckboxClassName}
+                            />
+                            Premium 选项
+                          </label>
+                          <AdminFormField label="所需 Tokens">
+                            <input
+                              type="number"
+                              min="0"
+                              value={form.requiresTokens}
+                              onChange={(event) =>
+                                setChoiceForms((current) => ({
+                                  ...current,
+                                  [choice.id]: {
+                                    ...form,
+                                    requiresTokens: event.target.value,
+                                  },
+                                }))
+                              }
+                              className={adminInputClassName}
+                            />
+                          </AdminFormField>
                         </div>
                         <AdminFormField label="选项说明">
                           <textarea
@@ -3357,6 +3647,67 @@ function InteractiveStoryNodesTab({
                               [selectedNode.id]: {
                                 ...(current[selectedNode.id] || emptyChoice()),
                                 sortOrder: event.target.value,
+                              },
+                            }))
+                          }
+                          className={adminInputClassName}
+                        />
+                      </AdminFormField>
+                      <AdminFormField label="锁定文案">
+                        <input
+                          value={
+                            (newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .unlockLabel
+                          }
+                          onChange={(event) =>
+                            setNewChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: {
+                                ...(current[selectedNode.id] || emptyChoice()),
+                                unlockLabel: event.target.value,
+                              },
+                            }))
+                          }
+                          className={adminInputClassName}
+                          placeholder="Premium choice / 20 tokens"
+                        />
+                      </AdminFormField>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(
+                            (newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .requiresPremium,
+                          )}
+                          onChange={(event) =>
+                            setNewChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: {
+                                ...(current[selectedNode.id] || emptyChoice()),
+                                requiresPremium: event.target.checked,
+                              },
+                            }))
+                          }
+                          className={adminCheckboxClassName}
+                        />
+                        Premium 选项
+                      </label>
+                      <AdminFormField label="所需 Tokens">
+                        <input
+                          type="number"
+                          min="0"
+                          value={
+                            (newChoiceByNode[selectedNode.id] || emptyChoice())
+                              .requiresTokens
+                          }
+                          onChange={(event) =>
+                            setNewChoiceByNode((current) => ({
+                              ...current,
+                              [selectedNode.id]: {
+                                ...(current[selectedNode.id] || emptyChoice()),
+                                requiresTokens: event.target.value,
                               },
                             }))
                           }

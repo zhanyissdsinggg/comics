@@ -26,6 +26,11 @@ enum CreditRole {
   TEAM
 }
 
+enum InteractiveContentMode {
+  NORMAL
+  ADULT
+}
+
 model User {
   id             String         @id @default(cuid())
   email          String         @unique
@@ -122,6 +127,8 @@ model InteractiveStory {
   title         String
   description   String?
   baseContext   String?
+  contentMode   InteractiveContentMode @default(NORMAL)
+  targetAudience String? @default("US teens")
   initialNodeId String?
   initialState  Json     @default("{}")
   isPublished   Boolean  @default(false)
@@ -136,7 +143,7 @@ model InteractiveStory {
   choiceLogs     UserStoryChoiceLog[]
   generationLogs StoryGenerationLog[]
 
-  @@index([isPublished, updatedAt])
+  @@index([contentMode, isPublished, updatedAt])
   @@map("interactive_stories")
 }
 
@@ -148,6 +155,9 @@ model InteractiveStoryNode {
   baseContext   String?
   basePrompt    String?
   fallbackText  String?
+  generatedByAI Boolean  @default(false)
+  reviewStatus  String   @default("approved")
+  editorNotes   String?
   requiredFlags String[] @default([])
   blockedFlags  String[] @default([])
   stateEffects  Json     @default("{}")
@@ -177,6 +187,9 @@ model InteractiveStoryChoice {
   choiceKey     String
   label         String
   description   String?
+  requiresPremium Boolean @default(false)
+  requiresTokens Int      @default(0)
+  unlockLabel    String?
   requiredFlags String[] @default([])
   blockedFlags  String[] @default([])
   stateEffects  Json     @default("{}")
@@ -253,6 +266,7 @@ model UserStoryChoiceLog {
 
   @@index([userId, storyId, createdAt])
   @@index([storyId, createdAt])
+  @@index([userId, storyId, nodeId, choiceId, createdAt])
   @@map("user_story_choice_logs")
 }
 

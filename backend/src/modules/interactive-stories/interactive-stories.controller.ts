@@ -12,9 +12,12 @@ import { resolveAdultGateContext } from "../../common/utils/adult-gate";
 import { getUserIdFromRequest } from "../../common/utils/auth";
 import { buildError, ERROR_CODES } from "../../common/utils/errors";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { InteractiveStoriesService } from "./interactive-stories.service";
+import {
+  InteractiveStoriesService,
+  type StoryAccessContext,
+} from "./interactive-stories.service";
 
-function normalizeId(value: string): string {
+function normalizeText(value: unknown): string {
   return String(value || "").trim();
 }
 
@@ -25,33 +28,24 @@ export class InteractiveStoriesController {
     private readonly prisma: PrismaService,
   ) {}
 
-  private async enforceSeriesAdultGate(
-    req: Request,
-    res: Response,
-    seriesId: string | null | undefined,
-  ): Promise<boolean> {
-    const normalizedSeriesId = normalizeId(seriesId || "");
-    if (!normalizedSeriesId) {
-      return true;
-    }
-
-    const series = await this.prisma.series.findUnique({
-      where: { id: normalizedSeriesId },
-      select: { adult: true },
-    });
-
-    if (!series?.adult) {
-      return true;
-    }
-
+  private async buildAccessContext(req: Request): Promise<StoryAccessContext> {
     const gate = await resolveAdultGateContext(this.prisma, req);
-    if (gate.ok) {
-      return true;
-    }
+    return {
+      includeAdult: gate.ok,
+    };
+  }
 
-    res.status(403);
-    res.json(buildError(ERROR_CODES.ADULT_GATED, { reason: gate.reason }));
-    return false;
+  private async resolvePublicStoryBySlug(slug: string, req: Request) {
+    const access = await this.buildAccessContext(req);
+    const story = await this.interactiveStoriesService.getStoryBySlug(slug, access);
+    return { access, story };
+  }
+
+  @Get()
+  async listStories(@Req() req: Request) {
+    const access = await this.buildAccessContext(req);
+    const stories = await this.interactiveStoriesService.listStories(access);
+    return { stories };
   }
 
   @Get("by-series/:seriesId")
@@ -60,7 +54,7 @@ export class InteractiveStoriesController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const normalizedSeriesId = normalizeId(seriesId);
+    const normalizedSeriesId = normalizeText(seriesId);
     if (!normalizedSeriesId) {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {
@@ -68,27 +62,141 @@ export class InteractiveStoriesController {
       });
     }
 
-    const story = await this.interactiveStoriesService.getStoryBySeries(normalizedSeriesId);
+    const access = await this.buildAccessContext(req);
+    const story = await this.interactiveStoriesService.getStoryBySeries(
+      normalizedSeriesId,
+      access,
+    );
     if (!story) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
     }
 
-    const gatePassed = await this.enforceSeriesAdultGate(req, res, story.seriesId);
-    if (!gatePassed) {
-      return;
+    return { story };
+  }
+
+  @Get("slug/:slug")
+  async getStoryBySlug(
+    @Param("slug") slug: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedSlug = normalizeText(slug);
+    if (!normalizedSlug) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "slug is required",
+      });
+    }
+
+    const { story } = await this.resolvePublicStoryBySlug(normalizedSlug, req);
+    if (!story) {
+      res.status(404);
+      return buildError(ERROR_CODES.NOT_FOUND);
     }
 
     return { story };
   }
 
+  @Get("slug/:slug/current")
+  async getCurrentProgress(
+    @Param("slug") slug: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedSlug = normalizeText(slug);
+    if (!normalizedSlug) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "slug is required",
+      });
+    }
+
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const access = await this.buildAccessContext(req);
+    const progress = await this.interactiveStoriesService.getOrInitProgress(
+      normalizedSlug,
+      userId,
+      access,
+    );
+    if (!progress) {
+      res.status(404);
+      return buildError(ERROR_CODES.NOT_FOUND);
+    }
+
+    return { progress };
+  }
+
+  @Post("slug/:slug/choose")
+  async submitChoiceBySlug(
+    @Param("slug") slug: string,
+    @Body() body: { choiceId?: string; idempotencyKey?: string },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const normalizedSlug = normalizeText(slug);
+    const normalizedChoiceId = normalizeText(body?.choiceId);
+    if (!normalizedSlug || !normalizedChoiceId) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "slug and choiceId are required",
+      });
+    }
+
+    const userId = getUserIdFromRequest(req, false);
+    if (!userId) {
+      res.status(401);
+      return buildError(ERROR_CODES.UNAUTHENTICATED);
+    }
+
+    const access = await this.buildAccessContext(req);
+    const result = await this.interactiveStoriesService.submitChoice(
+      {
+        storySlug: normalizedSlug,
+        userId,
+        choiceId: normalizedChoiceId,
+        idempotencyKey: normalizeText(body?.idempotencyKey || req.headers["idempotency-key"] || ""),
+      },
+      access,
+    );
+
+    if (!result.ok) {
+      if (result.reason === "CHOICE_LOCKED") {
+        res.status(403);
+        return buildError(ERROR_CODES.FORBIDDEN, {
+          message: "Choice is locked",
+          reason: "CHOICE_LOCKED",
+        });
+      }
+      if (result.reason === "DUPLICATE_SUBMIT") {
+        res.status(409);
+        return buildError(ERROR_CODES.INVALID_REQUEST, {
+          message: "Duplicate choice submission",
+          reason: "DUPLICATE_SUBMIT",
+        });
+      }
+
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "Invalid or unavailable choice for current node",
+      });
+    }
+
+    return { progress: result.progress };
+  }
+
   @Get(":storyId")
-  async getStory(
+  async getStoryLegacy(
     @Param("storyId") storyId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const normalizedStoryId = normalizeId(storyId);
+    const normalizedStoryId = normalizeText(storyId);
     if (!normalizedStoryId) {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {
@@ -96,27 +204,32 @@ export class InteractiveStoriesController {
       });
     }
 
-    const story = await this.interactiveStoriesService.getStory(normalizedStoryId);
-    if (!story) {
+    const access = await this.buildAccessContext(req);
+    const story = await this.prisma.interactiveStory.findUnique({
+      where: { id: normalizedStoryId },
+      select: { slug: true },
+    });
+
+    if (!story?.slug) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
     }
 
-    const gatePassed = await this.enforceSeriesAdultGate(req, res, story.seriesId);
-    if (!gatePassed) {
-      return;
+    const payload = await this.interactiveStoriesService.getStoryBySlug(story.slug, access);
+    if (!payload) {
+      res.status(404);
+      return buildError(ERROR_CODES.NOT_FOUND);
     }
-
-    return { story };
+    return { story: payload };
   }
 
   @Get(":storyId/progress")
-  async getProgress(
+  async getProgressLegacy(
     @Param("storyId") storyId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const normalizedStoryId = normalizeId(storyId);
+    const normalizedStoryId = normalizeText(storyId);
     if (!normalizedStoryId) {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {
@@ -130,18 +243,21 @@ export class InteractiveStoriesController {
       return buildError(ERROR_CODES.UNAUTHENTICATED);
     }
 
-    const story = await this.interactiveStoriesService.getStory(normalizedStoryId);
-    if (!story) {
+    const story = await this.prisma.interactiveStory.findUnique({
+      where: { id: normalizedStoryId },
+      select: { slug: true },
+    });
+    if (!story?.slug) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
     }
 
-    const gatePassed = await this.enforceSeriesAdultGate(req, res, story.seriesId);
-    if (!gatePassed) {
-      return;
-    }
-
-    const progress = await this.interactiveStoriesService.getOrInitProgress(normalizedStoryId, userId);
+    const access = await this.buildAccessContext(req);
+    const progress = await this.interactiveStoriesService.getOrInitProgress(
+      story.slug,
+      userId,
+      access,
+    );
     if (!progress) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
@@ -151,51 +267,29 @@ export class InteractiveStoriesController {
   }
 
   @Post(":storyId/choice")
-  async submitChoice(
+  async submitChoiceLegacy(
     @Param("storyId") storyId: string,
-    @Body() body: { choiceId?: string },
+    @Body() body: { choiceId?: string; idempotencyKey?: string },
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const normalizedStoryId = normalizeId(storyId);
-    const normalizedChoiceId = normalizeId(body?.choiceId || "");
-    if (!normalizedStoryId || !normalizedChoiceId) {
+    const normalizedStoryId = normalizeText(storyId);
+    if (!normalizedStoryId) {
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {
-        message: "storyId and choiceId are required",
+        message: "storyId is required",
       });
     }
 
-    const userId = getUserIdFromRequest(req, false);
-    if (!userId) {
-      res.status(401);
-      return buildError(ERROR_CODES.UNAUTHENTICATED);
-    }
-
-    const story = await this.interactiveStoriesService.getStory(normalizedStoryId);
-    if (!story) {
+    const story = await this.prisma.interactiveStory.findUnique({
+      where: { id: normalizedStoryId },
+      select: { slug: true },
+    });
+    if (!story?.slug) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
     }
 
-    const gatePassed = await this.enforceSeriesAdultGate(req, res, story.seriesId);
-    if (!gatePassed) {
-      return;
-    }
-
-    const progress = await this.interactiveStoriesService.submitChoice(
-      normalizedStoryId,
-      userId,
-      normalizedChoiceId,
-    );
-
-    if (!progress) {
-      res.status(400);
-      return buildError(ERROR_CODES.INVALID_REQUEST, {
-        message: "Invalid or unavailable choice for current node",
-      });
-    }
-
-    return { progress };
+    return this.submitChoiceBySlug(story.slug, body, req, res);
   }
 }

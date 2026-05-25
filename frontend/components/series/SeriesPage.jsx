@@ -1057,7 +1057,9 @@ export default function SeriesPage({
                 type="button"
                 onClick={() =>
                   router.push(
-                    `/series/${encodeURIComponent(seriesId)}/interactive`,
+                    `/interactive/${encodeURIComponent(
+                      interactiveStory.slug,
+                    )}`,
                   )
                 }
                 className={storefrontSecondaryButtonClass}

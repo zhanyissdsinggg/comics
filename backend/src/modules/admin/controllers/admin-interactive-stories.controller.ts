@@ -10,12 +10,17 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
+import type { Request } from "express";
 import { ContentCacheInvalidationService } from "../../../common/cache/content-cache-invalidation.service";
+import { isAdminContentGeneratorEnabledConfig } from "../../../common/config/app-config";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { checkRateLimit } from "../../../common/storage/limits";
 import { validateInteractiveStoryGraph } from "../../interactive-stories/interactive-story-validation";
+import { InteractiveAiService } from "../../interactive-stories/interactive-ai.service";
 import { RequireAdminPermissions } from "../decorators/admin-permissions.decorator";
 import { AdminAuthGuard } from "../guards/admin-auth.guard";
 import { AdminPermission } from "../permissions/admin-permissions";
@@ -25,6 +30,8 @@ type AdminStoryInput = {
   title?: string;
   description?: string | null;
   baseContext?: string | null;
+  contentMode?: string;
+  targetAudience?: string | null;
   seriesId?: string | null;
   initialNodeId?: string | null;
   initialState?: Record<string, unknown> | null;
@@ -38,6 +45,9 @@ type AdminNodeInput = {
   baseContext?: string | null;
   basePrompt?: string | null;
   fallbackText?: string | null;
+  generatedByAI?: boolean;
+  reviewStatus?: string;
+  editorNotes?: string | null;
   requiredFlags?: string[];
   blockedFlags?: string[];
   stateEffects?: Record<string, unknown> | null;
@@ -51,10 +61,19 @@ type AdminChoiceInput = {
   label?: string;
   description?: string | null;
   targetNodeId?: string | null;
+  requiresPremium?: boolean;
+  requiresTokens?: number;
+  unlockLabel?: string | null;
   requiredFlags?: string[];
   blockedFlags?: string[];
   stateEffects?: Record<string, unknown> | null;
   sortOrder?: number;
+};
+
+type GenerateNodeBody = {
+  fromNodeId?: string;
+  choiceId?: string;
+  desiredLength?: number;
 };
 
 type StoryImportPayload = {
@@ -77,6 +96,8 @@ const STORY_LIST_SELECT = {
   slug: true,
   title: true,
   description: true,
+  contentMode: true,
+  targetAudience: true,
   seriesId: true,
   initialNodeId: true,
   isPublished: true,
@@ -88,6 +109,8 @@ const STORY_LIST_SELECT = {
       id: true,
       title: true,
       type: true,
+      genres: true,
+      adult: true,
     },
   },
   _count: {
@@ -113,6 +136,9 @@ const STORY_DETAIL_SELECT = {
       baseContext: true,
       basePrompt: true,
       fallbackText: true,
+      generatedByAI: true,
+      reviewStatus: true,
+      editorNotes: true,
       requiredFlags: true,
       blockedFlags: true,
       stateEffects: true,
@@ -130,6 +156,9 @@ const STORY_DETAIL_SELECT = {
           choiceKey: true,
           label: true,
           description: true,
+          requiresPremium: true,
+          requiresTokens: true,
+          unlockLabel: true,
           requiredFlags: true,
           blockedFlags: true,
           stateEffects: true,
@@ -177,6 +206,20 @@ function normalizeJsonObject(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
+function normalizeContentMode(value: unknown): "NORMAL" | "ADULT" {
+  return String(value || "").trim().toUpperCase() === "ADULT"
+    ? "ADULT"
+    : "NORMAL";
+}
+
+function normalizeReviewStatus(value: unknown): "draft" | "pending_review" | "approved" | "rejected" {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "draft") return "draft";
+  if (normalized === "pending_review") return "pending_review";
+  if (normalized === "rejected") return "rejected";
+  return "approved";
+}
+
 @Controller("admin/interactive-stories")
 @UseGuards(AdminAuthGuard)
 @RequireAdminPermissions(AdminPermission.INTERACTIVE_STORY_READ)
@@ -184,6 +227,7 @@ export class AdminInteractiveStoriesController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly contentCacheInvalidation: ContentCacheInvalidationService,
+    private readonly interactiveAiService: InteractiveAiService,
   ) {}
 
   private async invalidateSeriesContent(seriesIds: Array<string | null | undefined>) {
@@ -216,6 +260,30 @@ export class AdminInteractiveStoriesController {
       throw new BadRequestException("seriesId does not exist");
     }
     return normalizedSeriesId;
+  }
+
+  private async assertStorySeriesContentModeCompatibility(
+    seriesId: string | null | undefined,
+    contentMode: "NORMAL" | "ADULT",
+  ) {
+    const normalizedSeriesId = normalizeText(seriesId);
+    if (!normalizedSeriesId) {
+      return null;
+    }
+
+    const series = await this.prisma.series.findUnique({
+      where: { id: normalizedSeriesId },
+      select: { id: true, adult: true },
+    });
+    if (!series) {
+      throw new BadRequestException("seriesId does not exist");
+    }
+    if (contentMode === "NORMAL" && series.adult) {
+      throw new BadRequestException(
+        "NORMAL interactive story cannot be linked to an adult series",
+      );
+    }
+    return series.id;
   }
 
   private async assertInitialNodeBelongsToStory(
@@ -285,6 +353,8 @@ export class AdminInteractiveStoriesController {
       title,
       description: normalizeNullableText(input?.description),
       baseContext: normalizeNullableText(input?.baseContext),
+      contentMode: normalizeContentMode(input?.contentMode),
+      targetAudience: normalizeNullableText(input?.targetAudience) || "US teens",
       initialState: normalizeJsonObject(input?.initialState),
       isPublished: Boolean(input?.isPublished),
       aiEnabled: input?.aiEnabled !== false,
@@ -314,6 +384,13 @@ export class AdminInteractiveStoriesController {
     if (Object.prototype.hasOwnProperty.call(input || {}, "baseContext")) {
       data.baseContext = normalizeNullableText(input?.baseContext);
     }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "contentMode")) {
+      data.contentMode = normalizeContentMode(input?.contentMode);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "targetAudience")) {
+      data.targetAudience =
+        normalizeNullableText(input?.targetAudience) || "US teens";
+    }
     if (Object.prototype.hasOwnProperty.call(input || {}, "initialState")) {
       data.initialState = normalizeJsonObject(input?.initialState);
     }
@@ -341,6 +418,9 @@ export class AdminInteractiveStoriesController {
       baseContext: normalizeNullableText(input?.baseContext),
       basePrompt: normalizeNullableText(input?.basePrompt),
       fallbackText: normalizeNullableText(input?.fallbackText),
+      generatedByAI: Boolean(input?.generatedByAI),
+      reviewStatus: normalizeReviewStatus(input?.reviewStatus),
+      editorNotes: normalizeNullableText(input?.editorNotes),
       requiredFlags: normalizeStringArray(input?.requiredFlags),
       blockedFlags: normalizeStringArray(input?.blockedFlags),
       stateEffects: normalizeJsonObject(input?.stateEffects),
@@ -377,6 +457,15 @@ export class AdminInteractiveStoriesController {
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "fallbackText")) {
       data.fallbackText = normalizeNullableText(input?.fallbackText);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "generatedByAI")) {
+      data.generatedByAI = Boolean(input?.generatedByAI);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "reviewStatus")) {
+      data.reviewStatus = normalizeReviewStatus(input?.reviewStatus);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "editorNotes")) {
+      data.editorNotes = normalizeNullableText(input?.editorNotes);
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "requiredFlags")) {
       data.requiredFlags = normalizeStringArray(input?.requiredFlags);
@@ -417,6 +506,9 @@ export class AdminInteractiveStoriesController {
       choiceKey,
       label,
       description: normalizeNullableText(input?.description),
+      requiresPremium: Boolean(input?.requiresPremium),
+      requiresTokens: Math.max(0, Number(input?.requiresTokens || 0)),
+      unlockLabel: normalizeNullableText(input?.unlockLabel),
       requiredFlags: normalizeStringArray(input?.requiredFlags),
       blockedFlags: normalizeStringArray(input?.blockedFlags),
       stateEffects: normalizeJsonObject(input?.stateEffects),
@@ -444,6 +536,15 @@ export class AdminInteractiveStoriesController {
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "description")) {
       data.description = normalizeNullableText(input?.description);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "requiresPremium")) {
+      data.requiresPremium = Boolean(input?.requiresPremium);
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "requiresTokens")) {
+      data.requiresTokens = Math.max(0, Number(input?.requiresTokens || 0));
+    }
+    if (Object.prototype.hasOwnProperty.call(input || {}, "unlockLabel")) {
+      data.unlockLabel = normalizeNullableText(input?.unlockLabel);
     }
     if (Object.prototype.hasOwnProperty.call(input || {}, "targetNodeId")) {
       const targetNodeId = normalizeNullableText(input?.targetNodeId);
@@ -544,7 +645,11 @@ export class AdminInteractiveStoriesController {
       throw new BadRequestException("payload.story.slug and payload.story.title are required");
     }
 
-    const seriesId = await this.assertSeriesExists(storyInput?.seriesId ?? null);
+    const importContentMode = normalizeContentMode(storyInput?.contentMode);
+    const seriesId = await this.assertStorySeriesContentModeCompatibility(
+      storyInput?.seriesId ?? null,
+      importContentMode,
+    );
 
     const result = await this.prisma.$transaction(async (tx) => {
       let storyId = normalizeText(storyInput?.id || "");
@@ -571,6 +676,9 @@ export class AdminInteractiveStoriesController {
             title,
             description: normalizeNullableText(storyInput?.description),
             baseContext: normalizeNullableText(storyInput?.baseContext),
+            contentMode: importContentMode,
+            targetAudience:
+              normalizeNullableText(storyInput?.targetAudience) || "US teens",
             initialState: normalizeJsonObject(storyInput?.initialState),
             isPublished: false,
             aiEnabled: storyInput?.aiEnabled !== false,
@@ -588,6 +696,9 @@ export class AdminInteractiveStoriesController {
             title,
             description: normalizeNullableText(storyInput?.description),
             baseContext: normalizeNullableText(storyInput?.baseContext),
+            contentMode: importContentMode,
+            targetAudience:
+              normalizeNullableText(storyInput?.targetAudience) || "US teens",
             initialState: normalizeJsonObject(storyInput?.initialState),
             isPublished: false,
             aiEnabled: storyInput?.aiEnabled !== false,
@@ -618,6 +729,9 @@ export class AdminInteractiveStoriesController {
             baseContext: normalizeNullableText(node?.baseContext),
             basePrompt: normalizeNullableText(node?.basePrompt),
             fallbackText: normalizeNullableText(node?.fallbackText),
+            generatedByAI: Boolean(node?.generatedByAI),
+            reviewStatus: normalizeReviewStatus(node?.reviewStatus),
+            editorNotes: normalizeNullableText(node?.editorNotes),
             requiredFlags: normalizeStringArray(node?.requiredFlags),
             blockedFlags: normalizeStringArray(node?.blockedFlags),
             stateEffects: normalizeJsonObject(node?.stateEffects),
@@ -665,6 +779,9 @@ export class AdminInteractiveStoriesController {
               choiceKey,
               label,
               description: normalizeNullableText(choice?.description),
+              requiresPremium: Boolean(choice?.requiresPremium),
+              requiresTokens: Math.max(0, Number(choice?.requiresTokens || 0)),
+              unlockLabel: normalizeNullableText(choice?.unlockLabel),
               requiredFlags: normalizeStringArray(choice?.requiredFlags),
               blockedFlags: normalizeStringArray(choice?.blockedFlags),
               stateEffects: normalizeJsonObject(choice?.stateEffects),
@@ -716,6 +833,8 @@ export class AdminInteractiveStoriesController {
         slug: story.slug,
         title: story.title,
         description: story.description,
+        contentMode: story.contentMode,
+        targetAudience: story.targetAudience,
         seriesId: story.seriesId,
         baseContext: story.baseContext,
         initialNodeId: story.initialNodeId,
@@ -729,6 +848,9 @@ export class AdminInteractiveStoriesController {
         baseContext: node.baseContext,
         basePrompt: node.basePrompt,
         fallbackText: node.fallbackText,
+        generatedByAI: node.generatedByAI,
+        reviewStatus: node.reviewStatus,
+        editorNotes: node.editorNotes,
         requiredFlags: node.requiredFlags,
         blockedFlags: node.blockedFlags,
         stateEffects: node.stateEffects,
@@ -739,6 +861,9 @@ export class AdminInteractiveStoriesController {
           choiceKey: choice.choiceKey,
           label: choice.label,
           description: choice.description,
+          requiresPremium: choice.requiresPremium,
+          requiresTokens: choice.requiresTokens,
+          unlockLabel: choice.unlockLabel,
           requiredFlags: choice.requiredFlags,
           blockedFlags: choice.blockedFlags,
           stateEffects: choice.stateEffects,
@@ -762,12 +887,222 @@ export class AdminInteractiveStoriesController {
     return { story };
   }
 
+  @Post(":id/generate-node")
+  @RequireAdminPermissions(AdminPermission.INTERACTIVE_STORY_UPDATE)
+  async generateNodeDraft(
+    @Param("id") id: string,
+    @Body() body: GenerateNodeBody,
+    @Req() req: Request,
+  ) {
+    if (!isAdminContentGeneratorEnabledConfig()) {
+      throw new BadRequestException(
+        "Interactive AI generator is disabled in this environment",
+      );
+    }
+
+    const storyId = normalizeText(id);
+    const fromNodeId = normalizeText(body?.fromNodeId || "");
+    const choiceId = normalizeText(body?.choiceId || "");
+    if (!storyId || !fromNodeId || !choiceId) {
+      throw new BadRequestException("story id, fromNodeId, and choiceId are required");
+    }
+
+    const adminKey =
+      String((req as Request & { user?: { sub?: string } }).user?.sub || "").trim() ||
+      String(req.headers["x-admin-id"] || "admin").trim();
+    const rate = await checkRateLimit(
+      this.prisma,
+      adminKey,
+      "interactive_generate_node",
+      6,
+      60,
+    );
+    if (!rate.ok) {
+      throw new BadRequestException({
+        error: "RATE_LIMITED",
+        retryAfterSec: rate.retryAfterSec,
+      });
+    }
+
+    const story = await this.prisma.interactiveStory.findUnique({
+      where: { id: storyId },
+      select: {
+        id: true,
+        title: true,
+        seriesId: true,
+        contentMode: true,
+        targetAudience: true,
+        baseContext: true,
+        aiEnabled: true,
+        series: {
+          select: {
+            genres: true,
+          },
+        },
+        nodes: {
+          orderBy: { sortOrder: "asc" },
+          select: {
+            id: true,
+            nodeKey: true,
+            title: true,
+            baseContext: true,
+            fallbackText: true,
+            aiEnabled: true,
+            sortOrder: true,
+            choices: {
+              orderBy: { sortOrder: "asc" },
+              select: {
+                id: true,
+                label: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!story) {
+      throw new NotFoundException("Interactive story not found");
+    }
+
+    const sourceNode = (story.nodes || []).find((node) => node.id === fromNodeId);
+    if (!sourceNode) {
+      throw new NotFoundException("Source node not found");
+    }
+    const selectedChoice = (sourceNode.choices || []).find((choice) => choice.id === choiceId);
+    if (!selectedChoice) {
+      throw new NotFoundException("Choice not found on source node");
+    }
+    if (!story.aiEnabled || !sourceNode.aiEnabled) {
+      throw new BadRequestException("AI generation is disabled for this story or node");
+    }
+
+    const previousNodes = (story.nodes || [])
+      .filter((node) => Number(node.sortOrder || 0) <= Number(sourceNode.sortOrder || 0))
+      .slice(-5)
+      .map((node) => ({
+        title: node.title,
+        body: normalizeText(node.fallbackText || node.baseContext),
+      }));
+
+    const aiResult = await this.interactiveAiService.generateDraftNode({
+      story: {
+        id: story.id,
+        title: story.title,
+        genre: Array.isArray(story.series?.genres) ? story.series.genres : [],
+        targetAudience: normalizeText(story.targetAudience || "US teens"),
+        contentMode: normalizeContentMode(story.contentMode),
+        baseContext: normalizeText(story.baseContext),
+      },
+      currentNode: {
+        id: sourceNode.id,
+        title: sourceNode.title,
+        body: normalizeText(sourceNode.fallbackText || sourceNode.baseContext),
+        aiEnabled: sourceNode.aiEnabled,
+      },
+      selectedChoice: {
+        id: selectedChoice.id,
+        label: selectedChoice.label,
+        description: normalizeText(selectedChoice.description),
+      },
+      previousNodes,
+      desiredLength: Math.max(120, Number(body?.desiredLength || 220)),
+    });
+
+    const nextSortOrder =
+      Math.max(
+        0,
+        ...(story.nodes || []).map((node) => Number(node.sortOrder || 0)),
+      ) + 10;
+    const nextNodeKeyBase = `${normalizeText(sourceNode.nodeKey || "node")}-ai`;
+    const nextNodeKey = `${nextNodeKeyBase}-${Date.now()}`;
+    const reviewStatus = aiResult.ok ? "pending_review" : "rejected";
+    const editorNotes = aiResult.ok
+      ? normalizeText(aiResult.draft?.safetyNotes)
+      : `AI generation rejected: ${normalizeText(aiResult.errorMessage)}`;
+
+    const createdNode = await this.prisma.interactiveStoryNode.create({
+      data: {
+        storyId: story.id,
+        nodeKey: nextNodeKey,
+        title: aiResult.draft?.title || "AI Draft Node",
+        baseContext: aiResult.draft?.body || null,
+        fallbackText: aiResult.draft?.body || null,
+        sortOrder: nextSortOrder,
+        isEnding: false,
+        aiEnabled: false,
+        generatedByAI: true,
+        reviewStatus,
+        editorNotes,
+      },
+      include: {
+        choices: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    });
+
+    if (aiResult.ok && Array.isArray(aiResult.draft?.choices)) {
+      for (let index = 0; index < aiResult.draft.choices.length; index += 1) {
+        const choice = aiResult.draft.choices[index];
+        await this.prisma.interactiveStoryChoice.create({
+          data: {
+            nodeId: createdNode.id,
+            choiceKey: `ai-choice-${index + 1}`,
+            label: choice.label,
+            description: choice.description || null,
+            sortOrder: (index + 1) * 10,
+          },
+        });
+      }
+    }
+
+    await this.prisma.storyGenerationLog.create({
+      data: {
+        storyId: story.id,
+        nodeId: createdNode.id,
+        choiceId,
+        status: aiResult.status,
+        provider: aiResult.provider,
+        model: aiResult.model,
+        prompt: aiResult.prompt,
+        response: aiResult.rawResponse,
+        errorMessage: aiResult.errorMessage,
+        latencyMs: aiResult.latencyMs,
+      },
+    });
+
+    await this.invalidateSeriesContent([story.seriesId]);
+
+    const refreshed = await this.prisma.interactiveStoryNode.findUnique({
+      where: { id: createdNode.id },
+      include: {
+        choices: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    });
+
+    return {
+      node: refreshed,
+      generation: {
+        ok: aiResult.ok,
+        status: aiResult.status,
+        errorMessage: aiResult.errorMessage,
+      },
+    };
+  }
+
   @Post()
   @RequireAdminPermissions(AdminPermission.INTERACTIVE_STORY_CREATE)
   async create(@Body() body: { story?: AdminStoryInput }) {
     const input = body?.story || {};
     const createData = this.toStoryCreateData(input);
-    const seriesId = await this.assertSeriesExists(input.seriesId ?? null);
+    const contentMode = normalizeContentMode(input.contentMode);
+    const seriesId = await this.assertStorySeriesContentModeCompatibility(
+      input.seriesId ?? null,
+      contentMode,
+    );
 
     try {
       const created = await this.prisma.interactiveStory.create({
@@ -804,12 +1139,30 @@ export class AdminInteractiveStoriesController {
 
     const input = body?.story || {};
     const updateData = this.toStoryUpdateData(input);
+    const nextContentMode = Object.prototype.hasOwnProperty.call(input || {}, "contentMode")
+      ? normalizeContentMode(input?.contentMode)
+      : normalizeContentMode(
+          (
+            await this.prisma.interactiveStory.findUnique({
+              where: { id: storyId },
+              select: { contentMode: true },
+            })
+          )?.contentMode,
+        );
 
     if (Object.prototype.hasOwnProperty.call(input || {}, "seriesId")) {
-      const seriesId = await this.assertSeriesExists(input.seriesId ?? null);
+      const seriesId = await this.assertStorySeriesContentModeCompatibility(
+        input.seriesId ?? null,
+        nextContentMode,
+      );
       updateData.series = seriesId
         ? { connect: { id: seriesId } }
         : { disconnect: true };
+    } else if (Object.prototype.hasOwnProperty.call(input || {}, "contentMode")) {
+      await this.assertStorySeriesContentModeCompatibility(
+        existing.seriesId ?? null,
+        nextContentMode,
+      );
     }
 
     if (Object.prototype.hasOwnProperty.call(input || {}, "initialNodeId")) {
