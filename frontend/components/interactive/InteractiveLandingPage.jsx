@@ -31,7 +31,6 @@ export default function InteractiveLandingPage({
   initialStories = [],
   initialContentMode = "normal",
   showLaunchChecklist = false,
-  deploymentEnv = "",
 }) {
   const [stories] = useState(() => normalizeStories(initialStories));
   const [continueMap, setContinueMap] = useState(() => new Map());
@@ -91,7 +90,6 @@ export default function InteractiveLandingPage({
 
   const featuredStories = useMemo(() => stories.slice(0, 3), [stories]);
   const hasStories = stories.length > 0;
-  const isProduction = normalizeText(deploymentEnv).toLowerCase() === "production";
   const totalEndings = useMemo(
     () => stories.reduce((sum, item) => sum + Number(item?.endingsCount || 0), 0),
     [stories],
@@ -216,21 +214,19 @@ export default function InteractiveLandingPage({
                   ) : (
                     <>
                       <p>
-                        Interactive stories are on the way. The first published routes will show up here as soon as they clear release review.
+                        Interactive stories are almost here. The first live routes will open as soon as they finish release review.
                       </p>
                       <p>
-                        Come back soon for branching teen-safe stories with replayable endings.
+                        Come back soon for branching teen-safe stories with replayable endings built for quick restarts and new routes.
                       </p>
-                      {isProduction ? (
-                        <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                            Coming soon
-                          </div>
-                          <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
-                            No live interactive stories yet
-                          </div>
+                      <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                          Coming soon
                         </div>
-                      ) : null}
+                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                          Fresh interactive stories are on the way
+                        </div>
+                      </div>
                     </>
                   )}
                 </div>
@@ -326,7 +322,7 @@ export default function InteractiveLandingPage({
             <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
               {showLaunchChecklist
                 ? "No interactive stories are published yet."
-                : "Interactive stories are coming soon. Check back for the first live routes."}
+                : "Interactive stories are almost here. Check back soon for the first live routes."}
             </div>
           ) : null}
         </section>

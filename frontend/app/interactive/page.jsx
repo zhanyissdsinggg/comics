@@ -43,14 +43,13 @@ export default async function InteractiveLandingRoute() {
     getInteractiveServerAccess(),
     getInteractiveStoriesServer(),
   ]);
-  const { deploymentEnv, showLaunchChecklist } = resolveInteractiveLaunchMode();
+  const { showLaunchChecklist } = resolveInteractiveLaunchMode();
 
   return (
     <InteractiveLandingPage
       initialStories={stories}
       initialContentMode={access.contentMode}
       showLaunchChecklist={showLaunchChecklist}
-      deploymentEnv={deploymentEnv}
     />
   );
 }

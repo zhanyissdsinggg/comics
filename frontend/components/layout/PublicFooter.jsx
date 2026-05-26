@@ -4,9 +4,13 @@ import { usePathname } from "next/navigation";
 import SiteFooter from "./SiteFooter";
 import { useInteractiveAvailability } from "../../lib/interactiveAvailability";
 
-export default function PublicFooter() {
+export default function PublicFooter({ initialShowInteractiveNav = true }) {
   const pathname = usePathname() || "";
   const { showInteractiveNav } = useInteractiveAvailability();
+  const resolvedShowInteractiveNav =
+    typeof showInteractiveNav === "boolean"
+      ? showInteractiveNav
+      : initialShowInteractiveNav;
   const searchQuery =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -30,7 +34,7 @@ export default function PublicFooter() {
       variant="compact"
       pathname={footerPathname}
       showTagline={false}
-      showInteractiveNav={showInteractiveNav}
+      showInteractiveNav={resolvedShowInteractiveNav}
     />
   );
 }

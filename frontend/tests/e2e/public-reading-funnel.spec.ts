@@ -2326,12 +2326,12 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     const html = await page.content();
     expect(html).toContain(
-      "Interactive stories are coming soon. Check back for the first live routes.",
+      "Interactive stories are almost here. Check back soon for the first live routes.",
     );
     expect(html).not.toContain(">Loading<");
     expect(html).not.toContain("Launch checklist");
     await expect(page.locator("main")).toContainText(
-      "Interactive stories are coming soon. Check back for the first live routes.",
+      "Interactive stories are almost here. Check back soon for the first live routes.",
     );
     await expect(
       page.getByRole("link", { name: "Interactive", exact: true }),

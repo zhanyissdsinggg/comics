@@ -135,9 +135,17 @@ export default function AppProviders({
                                   <NotificationsProvider>
                                     <BehaviorProvider>
                                       <HistoryProvider>
-                                        {shouldShowPublicChrome ? <PublicHeader /> : null}
+                                        {shouldShowPublicChrome ? (
+                                          <PublicHeader
+                                            initialShowInteractiveNav={initialShowInteractiveNav}
+                                          />
+                                        ) : null}
                                         {children}
-                                        {shouldShowPublicChrome ? <PublicFooter /> : null}
+                                        {shouldShowPublicChrome ? (
+                                          <PublicFooter
+                                            initialShowInteractiveNav={initialShowInteractiveNav}
+                                          />
+                                        ) : null}
                                         <PWAInstallPrompt />
                                       </HistoryProvider>
                                     </BehaviorProvider>
