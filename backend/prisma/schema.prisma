@@ -136,7 +136,7 @@ model InteractiveStory {
   title         String
   description   String?
   baseContext   String?
-  contentMode   String   @default("NORMAL")
+  contentMode   InteractiveContentMode @default(NORMAL)
   targetAudience String? @default("US teens")
   initialNodeId String?
   initialState  Json     @default("{}")
@@ -219,7 +219,7 @@ model InteractiveStoryChoice {
   choiceKey     String
   label         String
   description   String?
-  unlockPolicy  String   @default("FREE")
+  unlockPolicy  InteractiveUnlockPolicy @default(FREE)
   requiresPremium Boolean @default(false)
   requiresTokens Int      @default(0)
   unlockLabel    String?

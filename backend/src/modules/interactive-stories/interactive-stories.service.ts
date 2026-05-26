@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import type {
   InteractiveStoryChoice,
   InteractiveStoryNode,
-  Prisma,
 } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { chargeWallet } from "../../common/utils/wallet";
@@ -278,6 +278,20 @@ function buildScopedKey(scope: ChoiceScope) {
   ].join(":");
 }
 
+function parseReplayPayload(record: { body?: unknown; response?: string | null } | null | undefined) {
+  if (!record) {
+    return null;
+  }
+  if (record.body && typeof record.body === "object" && !Array.isArray(record.body)) {
+    return (record.body as Record<string, any>)?.progress || null;
+  }
+  try {
+    return JSON.parse(String(record.response || "{}"))?.progress || null;
+  } catch {
+    return null;
+  }
+}
+
 @Injectable()
 export class InteractiveStoriesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -285,8 +299,13 @@ export class InteractiveStoriesService {
   private buildStoryFilter(access: StoryAccessContext): Prisma.InteractiveStoryWhereInput {
     return {
       isPublished: true,
-      contentMode: access.includeAdult ? "ADULT" : "NORMAL",
     };
+  }
+
+  private isStoryVisibleInAccess(story: StoryWithGraph, access: StoryAccessContext) {
+    return access.includeAdult
+      ? normalizeContentMode(story.contentMode) === "ADULT"
+      : normalizeContentMode(story.contentMode) === "NORMAL";
   }
 
   private buildStoryFromSnapshot(record: any): StoryWithGraph | null {
@@ -426,7 +445,11 @@ export class InteractiveStoriesService {
     if (!record) {
       return null;
     }
-    return this.buildStoryFromSnapshot(record);
+    const story = this.buildStoryFromSnapshot(record);
+    if (!story || !this.isStoryVisibleInAccess(story, access)) {
+      return null;
+    }
+    return story;
   }
 
   private ensureSeriesCompatibility(story: StoryWithGraph | null): StoryWithGraph | null {
@@ -735,7 +758,9 @@ export class InteractiveStoriesService {
     });
 
     return records
-      .map((record) => this.ensureSeriesCompatibility(this.buildStoryFromSnapshot(record)))
+      .map((record) => this.buildStoryFromSnapshot(record))
+      .filter((story) => Boolean(story) && this.isStoryVisibleInAccess(story as StoryWithGraph, access))
+      .map((story) => this.ensureSeriesCompatibility(story as StoryWithGraph))
       .filter(Boolean)
       .map((story) => ({
         id: story!.id,
@@ -761,7 +786,7 @@ export class InteractiveStoriesService {
     const stub = await this.prisma.interactiveStory.findFirst({
       where: {
         seriesId: normalizedSeriesId,
-        ...this.buildStoryFilter(access),
+        isPublished: true,
       },
       select: { slug: true },
     });
@@ -1037,38 +1062,29 @@ export class InteractiveStoriesService {
     input: SubmitChoiceInput,
     storyId: string,
     fromNodeId: string,
-  ): ChoiceScope | null {
+  ): ChoiceScope {
     const requestKey = normalizeText(input.idempotencyKey);
     if (!requestKey) {
-      return null;
+      throw new Error("interactive choice submit requires a non-empty idempotency key");
     }
-    return {
+    const scope = {
       operation: "interactive_choice_submit",
-      userId: input.userId,
-      storyId,
-      fromNodeId,
+      userId: normalizeText(input.userId),
+      storyId: normalizeText(storyId),
+      fromNodeId: normalizeText(fromNodeId),
       choiceId: normalizeText(input.choiceId),
       requestKey,
     };
+    if (!scope.userId || !scope.storyId || !scope.fromNodeId || !scope.choiceId) {
+      throw new Error("interactive choice submit requires a fully scoped idempotency key");
+    }
+    return scope;
   }
 
-  private async readScopedReplay(scope: ChoiceScope | null) {
-    if (!scope) {
-      return null;
-    }
-
+  private async readScopedReplay(scope: ChoiceScope) {
     const now = Date.now();
     const record = (await this.prisma.idempotencyKey.findUnique({
-      where: {
-        operation_userId_storyId_fromNodeId_choiceId_requestKey: {
-          operation: scope.operation,
-          userId: scope.userId,
-          storyId: scope.storyId,
-          fromNodeId: scope.fromNodeId,
-          choiceId: scope.choiceId,
-          requestKey: scope.requestKey,
-        },
-      },
+      where: { scopedKey: buildScopedKey(scope) },
       select: {
         state: true,
         body: true,
@@ -1078,14 +1094,7 @@ export class InteractiveStoriesService {
     })) as any;
 
     if (record && record.expiresAt.getTime() > now && record.state === "completed") {
-      if (record.body && typeof record.body === "object" && !Array.isArray(record.body)) {
-        return (record.body as Record<string, any>)?.progress || null;
-      }
-      try {
-        return JSON.parse(String(record.response || "{}"))?.progress || null;
-      } catch {
-        return null;
-      }
+      return parseReplayPayload(record);
     }
     return null;
   }
@@ -1107,6 +1116,7 @@ export class InteractiveStoriesService {
         operation: "interactive_choice_submit",
         userId: params.userId,
         storyId: params.storyId,
+        fromNodeId: { not: null },
         choiceId,
         requestKey,
         state: "completed",
@@ -1122,16 +1132,7 @@ export class InteractiveStoriesService {
     if (!record) {
       return null;
     }
-
-    if (record.body && typeof record.body === "object" && !Array.isArray(record.body)) {
-      return (record.body as Record<string, any>)?.progress || null;
-    }
-
-    try {
-      return JSON.parse(String(record.response || "{}"))?.progress || null;
-    } catch {
-      return null;
-    }
+    return parseReplayPayload(record);
   }
 
   private buildUnlockDecision(
@@ -1464,78 +1465,67 @@ export class InteractiveStoriesService {
       resolved.nextNode.fallbackText || resolved.nextNode.baseContext,
     );
     const now = new Date();
+    const scopedKey = buildScopedKey(scope);
 
     const result = await this.prisma.$transaction(async (tx) => {
-      if (scope) {
-        const existingRecord = (await tx.idempotencyKey.findUnique({
-          where: {
-            operation_userId_storyId_fromNodeId_choiceId_requestKey: {
-              operation: scope.operation,
-              userId: scope.userId,
-              storyId: scope.storyId,
-              fromNodeId: scope.fromNodeId,
-              choiceId: scope.choiceId,
-              requestKey: scope.requestKey,
-            },
-          },
-          select: {
-            state: true,
-            body: true,
-            response: true,
-            expiresAt: true,
-          },
-        })) as any;
+      if (typeof (tx as Prisma.TransactionClient & { $queryRawUnsafe?: Function }).$queryRawUnsafe === "function") {
+        await (tx as Prisma.TransactionClient & { $queryRawUnsafe: Function }).$queryRawUnsafe(
+          "SELECT 1 FROM pg_advisory_xact_lock(hashtext($1))",
+          scopedKey,
+        );
+      }
 
-        if (existingRecord && existingRecord.expiresAt.getTime() > Date.now()) {
-          if (existingRecord.state === "completed") {
-            if (
-              existingRecord.body &&
-              typeof existingRecord.body === "object" &&
-              !Array.isArray(existingRecord.body)
-            ) {
-              return {
-                replay: (existingRecord.body as Record<string, any>).progress as StoryProgressView,
-              };
-            }
-            try {
-              return {
-                replay: JSON.parse(String(existingRecord.response || "{}")).progress as StoryProgressView,
-              };
-            } catch {
-              return { ok: false as const, reason: "INVALID_CHOICE" as const };
-            }
+      const existingRecord = (await tx.idempotencyKey.findUnique({
+        where: { scopedKey },
+        select: {
+          scopedKey: true,
+          state: true,
+          body: true,
+          response: true,
+          expiresAt: true,
+        },
+      })) as any;
+
+      if (existingRecord && existingRecord.expiresAt.getTime() > Date.now()) {
+        if (existingRecord.state === "completed") {
+          const replayProgress = parseReplayPayload(existingRecord);
+          if (replayProgress) {
+            return {
+              replay: replayProgress as StoryProgressView,
+            };
           }
           return { ok: false as const, reason: "INVALID_CHOICE" as const };
-        } else {
-          await tx.idempotencyKey.upsert({
-            where: {
-              operation_userId_storyId_fromNodeId_choiceId_requestKey: {
-                operation: scope.operation,
-                userId: scope.userId,
-                storyId: scope.storyId,
-                fromNodeId: scope.fromNodeId,
-                choiceId: scope.choiceId,
-                requestKey: scope.requestKey,
-              },
-            },
-            update: {
-              state: "processing",
-              expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-            },
-            create: {
-              scopedKey: buildScopedKey(scope),
-              userId: scope.userId,
-              operation: scope.operation,
-              storyId: scope.storyId,
-              fromNodeId: scope.fromNodeId,
-              choiceId: scope.choiceId,
-              requestKey: scope.requestKey,
-              state: "processing",
-              expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-            },
-          });
         }
+        return { ok: false as const, reason: "INVALID_CHOICE" as const };
       }
+
+      await tx.idempotencyKey.upsert({
+        where: { scopedKey },
+        update: {
+          userId: scope.userId,
+          operation: scope.operation,
+          storyId: scope.storyId,
+          fromNodeId: scope.fromNodeId,
+          choiceId: scope.choiceId,
+          requestKey: scope.requestKey,
+          state: "processing",
+          status: null,
+          body: Prisma.JsonNull,
+          response: null,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+        create: {
+          scopedKey,
+          userId: scope.userId,
+          operation: scope.operation,
+          storyId: scope.storyId,
+          fromNodeId: scope.fromNodeId,
+          choiceId: scope.choiceId,
+          requestKey: scope.requestKey,
+          state: "processing",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
 
       const unlockResult = await this.unlockWithinTransaction({
         tx,
@@ -1624,28 +1614,17 @@ export class InteractiveStoriesService {
         unlockContext: resolved.unlockContext,
       });
 
-      if (scope) {
-        const payload = { progress };
-        await tx.idempotencyKey.update({
-          where: {
-            operation_userId_storyId_fromNodeId_choiceId_requestKey: {
-              operation: scope.operation,
-              userId: scope.userId,
-              storyId: scope.storyId,
-              fromNodeId: scope.fromNodeId,
-              choiceId: scope.choiceId,
-              requestKey: scope.requestKey,
-            },
-          },
-          data: {
-            state: "completed",
-            status: 200,
-            body: payload as Prisma.InputJsonValue,
-            response: JSON.stringify(payload),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-          },
-        });
-      }
+      const payload = { progress };
+      await tx.idempotencyKey.update({
+        where: { scopedKey },
+        data: {
+          state: "completed",
+          status: 200,
+          body: payload as Prisma.InputJsonValue,
+          response: JSON.stringify(payload),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
 
       return { ok: true as const, progress };
     });

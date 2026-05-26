@@ -176,6 +176,7 @@ describe("InteractiveStoriesService", () => {
       },
       $transaction: jest.fn(async (callback: any) =>
         callback({
+          $queryRawUnsafe: jest.fn().mockResolvedValue([]),
           userStoryProgress: { upsert: prisma.userStoryProgress.upsert },
           userStoryState: { upsert: prisma.userStoryState.upsert },
           userStoryChoiceLog: { create: prisma.userStoryChoiceLog.create },
@@ -387,9 +388,37 @@ describe("InteractiveStoriesService", () => {
     expect(prisma.idempotencyKey.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          operation_userId_storyId_fromNodeId_choiceId_requestKey: expect.objectContaining({
-            storyId: "story-2",
-          }),
+          scopedKey: expect.stringContaining("story-2"),
+        }),
+      }),
+    );
+  });
+
+  it("uses the scoped key as the single interactive idempotency lookup", async () => {
+    prisma.interactiveStory.findFirst.mockResolvedValue(createPublishedSnapshotFixture());
+    prisma.userStoryProgress.findUnique.mockResolvedValue({
+      currentNodeId: "node-1",
+      lastGeneratedText: "Fallback start text.",
+    });
+    prisma.userStoryState.findUnique.mockResolvedValue({
+      state: { trust: 0, clues: 0, flags: [] },
+      flags: [],
+    });
+
+    await service.submitChoice(
+      {
+        storySlug: "solar-wind-first-contact",
+        userId: "user-1",
+        choiceId: "choice-1",
+        idempotencyKey: "scope-test",
+      },
+      { includeAdult: false },
+    );
+
+    expect(prisma.idempotencyKey.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          scopedKey: expect.stringContaining("interactive_choice_submit:user-1:story-1:node-1:choice-1:scope-test"),
         }),
       }),
     );

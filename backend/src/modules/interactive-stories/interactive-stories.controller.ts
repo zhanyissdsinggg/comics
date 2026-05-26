@@ -181,6 +181,13 @@ export class InteractiveStoriesController {
       res.status(401);
       return buildError(ERROR_CODES.UNAUTHENTICATED);
     }
+    const requestKey = normalizeText(body?.idempotencyKey || req.headers["idempotency-key"] || "");
+    if (!requestKey) {
+      res.status(400);
+      return buildError(ERROR_CODES.INVALID_REQUEST, {
+        message: "idempotencyKey is required",
+      });
+    }
 
     const access = await this.buildAccessContext(req);
     const result = await this.interactiveStoriesService.submitChoice(
@@ -188,7 +195,7 @@ export class InteractiveStoriesController {
         storySlug: normalizedSlug,
         userId,
         choiceId: normalizedChoiceId,
-        idempotencyKey: normalizeText(body?.idempotencyKey || req.headers["idempotency-key"] || ""),
+        idempotencyKey: requestKey,
       },
       access,
     );

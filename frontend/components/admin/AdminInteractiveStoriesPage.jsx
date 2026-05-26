@@ -3528,42 +3528,9 @@ function InteractiveStoryNodesTab({
                         <p className="text-xs text-slate-500">
                           派生结果：{getDerivedUnlockLabel(form)}
                         </p>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(form.requiresPremium)}
-                              onChange={(event) =>
-                                setChoiceForms((current) => ({
-                                  ...current,
-                                  [choice.id]: {
-                                    ...form,
-                                    requiresPremium: event.target.checked,
-                                  },
-                                }))
-                              }
-                              className={adminCheckboxClassName}
-                            />
-                            Premium 选项
-                          </label>
-                          <AdminFormField label="所需 Tokens">
-                            <input
-                              type="number"
-                              min="0"
-                              value={form.requiresTokens}
-                              onChange={(event) =>
-                                setChoiceForms((current) => ({
-                                  ...current,
-                                  [choice.id]: {
-                                    ...form,
-                                    requiresTokens: event.target.value,
-                                  },
-                                }))
-                              }
-                              className={adminInputClassName}
-                            />
-                          </AdminFormField>
-                        </div>
+                        <p className="text-xs text-slate-500">
+                          Billing flags are derived from unlock policy and token amount.
+                        </p>
                         <AdminFormField label="选项说明">
                           <textarea
                             rows={3}
@@ -3844,48 +3811,9 @@ function InteractiveStoryNodesTab({
                         newChoiceByNode[selectedNode.id] || emptyChoice(),
                       )}
                     </p>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(
-                            (newChoiceByNode[selectedNode.id] || emptyChoice())
-                              .requiresPremium,
-                          )}
-                          onChange={(event) =>
-                            setNewChoiceByNode((current) => ({
-                              ...current,
-                              [selectedNode.id]: {
-                                ...(current[selectedNode.id] || emptyChoice()),
-                                requiresPremium: event.target.checked,
-                              },
-                            }))
-                          }
-                          className={adminCheckboxClassName}
-                        />
-                        Premium 选项
-                      </label>
-                      <AdminFormField label="所需 Tokens">
-                        <input
-                          type="number"
-                          min="0"
-                          value={
-                            (newChoiceByNode[selectedNode.id] || emptyChoice())
-                              .requiresTokens
-                          }
-                          onChange={(event) =>
-                            setNewChoiceByNode((current) => ({
-                              ...current,
-                              [selectedNode.id]: {
-                                ...(current[selectedNode.id] || emptyChoice()),
-                                requiresTokens: event.target.value,
-                              },
-                            }))
-                          }
-                          className={adminInputClassName}
-                        />
-                      </AdminFormField>
-                    </div>
+                    <p className="text-xs text-slate-500">
+                      Billing flags are derived from unlock policy and token amount.
+                    </p>
                     <AdminFormField label="选项说明">
                       <textarea
                         rows={3}

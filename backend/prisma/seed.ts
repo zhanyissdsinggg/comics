@@ -1,5 +1,12 @@
 import { createHash } from "crypto";
-import { CreditRole, CreatorType, Prisma, PrismaClient } from "@prisma/client";
+import {
+  CreditRole,
+  CreatorType,
+  InteractiveContentMode,
+  InteractiveUnlockPolicy,
+  Prisma,
+  PrismaClient,
+} from "@prisma/client";
 import { resolve } from "path";
 
 const envLoader = process as NodeJS.Process & {
@@ -1279,6 +1286,10 @@ async function seedRecommendationSlots() {
 async function seedInteractiveStories() {
   for (const story of interactiveStorySeeds) {
     const initialNode = story.nodes[0];
+    const storyContentMode =
+      story.contentMode === "ADULT"
+        ? InteractiveContentMode.ADULT
+        : InteractiveContentMode.NORMAL;
     await prisma.interactiveStory.upsert({
       where: { id: story.id },
       update: {
@@ -1287,7 +1298,7 @@ async function seedInteractiveStories() {
         title: story.title,
         description: story.description,
         baseContext: story.baseContext,
-        contentMode: (story.contentMode || "NORMAL") as any,
+        contentMode: storyContentMode,
         targetAudience: story.targetAudience || "US teens",
         initialNodeId: initialNode?.id || null,
         initialState: toInputJson(story.initialState),
@@ -1303,7 +1314,7 @@ async function seedInteractiveStories() {
         title: story.title,
         description: story.description,
         baseContext: story.baseContext,
-        contentMode: (story.contentMode || "NORMAL") as any,
+        contentMode: storyContentMode,
         targetAudience: story.targetAudience || "US teens",
         initialNodeId: initialNode?.id || null,
         initialState: toInputJson(story.initialState),
@@ -1355,6 +1366,11 @@ async function seedInteractiveStories() {
 
     for (const node of story.nodes) {
       for (const [choiceIndex, choice] of node.choices.entries()) {
+        const choiceCommerce = deriveSeedChoiceCommerce(choice);
+        const unlockPolicy =
+          InteractiveUnlockPolicy[
+            choiceCommerce.unlockPolicy as keyof typeof InteractiveUnlockPolicy
+          ];
         await prisma.interactiveStoryChoice.upsert({
           where: {
             nodeId_choiceKey: {
@@ -1367,10 +1383,10 @@ async function seedInteractiveStories() {
             targetNodeId: choice.targetNodeId,
             label: choice.label,
             description: null,
-            unlockPolicy: deriveSeedChoiceCommerce(choice).unlockPolicy as any,
-            requiresPremium: deriveSeedChoiceCommerce(choice).requiresPremium,
-            requiresTokens: deriveSeedChoiceCommerce(choice).requiresTokens,
-            unlockLabel: deriveSeedChoiceCommerce(choice).unlockLabel,
+            unlockPolicy,
+            requiresPremium: choiceCommerce.requiresPremium,
+            requiresTokens: choiceCommerce.requiresTokens,
+            unlockLabel: choiceCommerce.unlockLabel,
             requiredFlags: choice.requiredFlags || [],
             blockedFlags: choice.blockedFlags || [],
             stateEffects: toInputJson(choice.stateEffects || {}),
@@ -1383,10 +1399,10 @@ async function seedInteractiveStories() {
             choiceKey: choice.key,
             label: choice.label,
             description: null,
-            unlockPolicy: deriveSeedChoiceCommerce(choice).unlockPolicy as any,
-            requiresPremium: deriveSeedChoiceCommerce(choice).requiresPremium,
-            requiresTokens: deriveSeedChoiceCommerce(choice).requiresTokens,
-            unlockLabel: deriveSeedChoiceCommerce(choice).unlockLabel,
+            unlockPolicy,
+            requiresPremium: choiceCommerce.requiresPremium,
+            requiresTokens: choiceCommerce.requiresTokens,
+            unlockLabel: choiceCommerce.unlockLabel,
             requiredFlags: choice.requiredFlags || [],
             blockedFlags: choice.blockedFlags || [],
             stateEffects: toInputJson(choice.stateEffects || {}),
