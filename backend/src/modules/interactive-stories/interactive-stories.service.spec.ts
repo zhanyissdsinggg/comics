@@ -627,6 +627,54 @@ describe("InteractiveStoriesService", () => {
     });
   });
 
+  it("returns request in progress for an active scoped processing record without side effects", async () => {
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+    prisma.__setState({
+      idempotency: [
+        {
+          id: "idem-processing-1",
+          scopedKey:
+            "interactive_choice_submit:user-1:story-1:story-1-node-1:story-1-choice-1:req-processing",
+          operation: "interactive_choice_submit",
+          userId: "user-1",
+          storyId: "story-1",
+          fromNodeId: "story-1-node-1",
+          choiceId: "story-1-choice-1",
+          requestKey: "req-processing",
+          state: "processing",
+          responseJson: null,
+          expiresAt,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    const result = await service.submitChoice(
+      {
+        storySlug: "solar-wind-first-contact",
+        userId: "user-1",
+        choiceId: "story-1-choice-1",
+        idempotencyKey: "req-processing",
+      },
+      { includeAdult: false },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      reason: "REQUEST_IN_PROGRESS",
+    });
+
+    const persisted = prisma.__getState();
+    const calls = prisma.__getCallCounts();
+    expect(persisted.progress).toHaveLength(0);
+    expect(persisted.choiceLogs).toHaveLength(0);
+    expect(persisted.unlocks).toHaveLength(0);
+    expect(calls.progressUpsert).toBe(0);
+    expect(calls.choiceLogCreate).toBe(0);
+    expect(calls.unlockCreate).toBe(0);
+  });
+
   it("replays identical response for the same request key after the first completion", async () => {
     const first = await service.submitChoice(
       {

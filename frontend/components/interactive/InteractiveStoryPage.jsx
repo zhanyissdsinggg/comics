@@ -18,6 +18,14 @@ function normalizeText(value) {
     .trim();
 }
 
+function isProductionDeployment() {
+  const deployEnv = normalizeText(process.env.NEXT_PUBLIC_DEPLOY_ENV).toLowerCase();
+  const vercelEnv = normalizeText(process.env.NEXT_PUBLIC_VERCEL_ENV).toLowerCase();
+  const nodeEnv = normalizeText(process.env.NODE_ENV).toLowerCase();
+  const resolved = deployEnv || vercelEnv || nodeEnv;
+  return resolved === "production";
+}
+
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -453,7 +461,9 @@ export default function InteractiveStoryPage({
         setDegradedNotice(
           response.data?.reason === "TARGET_NODE_NOT_AVAILABLE"
             ? "That branch isn't approved for readers yet."
-            : "Synced your latest node.",
+            : response.data?.reason === "REQUEST_IN_PROGRESS"
+              ? "That choice is already being processed. Give it a second."
+              : "Synced your latest node.",
         );
         await loadProgress();
         return;
@@ -511,6 +521,7 @@ export default function InteractiveStoryPage({
   const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
   const playHref = `${detailHref}/play`;
   const showSignInStart = authRequired && !node?.id;
+  const showRawState = !isProductionDeployment();
 
   if (loading) {
     return <LoadingShell />;
@@ -829,7 +840,7 @@ export default function InteractiveStoryPage({
           <div className="grid gap-4">
             <SurfacePanel tone="muted" accent="blue" appearance="dark">
               <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
-                Route so far
+                Your route so far
               </h3>
               <div className="mt-3 grid gap-2">
                 {path.map((item, index) => (
@@ -853,7 +864,7 @@ export default function InteractiveStoryPage({
               </div>
             </SurfacePanel>
 
-            {storyStateRows.length > 0 ? (
+            {showRawState && storyStateRows.length > 0 ? (
               <SurfacePanel tone="muted" accent="rose" appearance="dark">
                 <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
                   State

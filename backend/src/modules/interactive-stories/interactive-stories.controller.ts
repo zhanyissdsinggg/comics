@@ -219,6 +219,13 @@ export class InteractiveStoriesController {
           reason: result.reason,
         });
       }
+      if (result.reason === "REQUEST_IN_PROGRESS") {
+        res.status(409);
+        return buildError(ERROR_CODES.INVALID_REQUEST, {
+          message: "Choice request is already being processed",
+          reason: result.reason,
+        });
+      }
 
       res.status(400);
       return buildError(ERROR_CODES.INVALID_REQUEST, {

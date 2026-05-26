@@ -155,7 +155,8 @@ type ChoiceResultReason =
   | "TARGET_NODE_NOT_AVAILABLE"
   | "PREMIUM_REQUIRED"
   | "TOKENS_REQUIRED"
-  | "TOKEN_UNLOCK_COMING_SOON";
+  | "TOKEN_UNLOCK_COMING_SOON"
+  | "REQUEST_IN_PROGRESS";
 
 type ChoiceScope = {
   operation: string;
@@ -1657,7 +1658,7 @@ export class InteractiveStoriesService {
           }
           return { ok: false as const, reason: "INVALID_CHOICE" as const };
         }
-        return { ok: false as const, reason: "INVALID_CHOICE" as const };
+        return { ok: false as const, reason: "REQUEST_IN_PROGRESS" as const };
       }
 
       const completedActionReplay = await this.readCompletedActionReplayInTransaction(

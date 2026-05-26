@@ -2548,7 +2548,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
     await expect(page.locator("main")).toContainText("Choices");
     await expect(page.locator("main")).toContainText("Choose carefully");
-    await expect(page.locator("main")).toContainText("Route so far");
+    await expect(page.locator("main")).toContainText("Your route so far");
     await expect(page.locator("main")).toContainText("Depth 1");
 
     const unlockedChoice = page.getByRole("button", {
