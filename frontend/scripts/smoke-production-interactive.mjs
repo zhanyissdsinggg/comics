@@ -5,7 +5,7 @@ const BASE_URL =
   process.env.READER_PROD_BASE_URL ||
   "https://www.gushcomics.com";
 
-const INTERACTIVE_ONLY_PRESENT = ["Solar Wind"];
+const EXPECTED_PRODUCTION_STORY = "The Locker Letter";
 const FORBIDDEN_MIXED_TITLES = [
   "The Last Kingdom",
   "Velvet Archive",
@@ -44,10 +44,16 @@ async function assertInteractiveOnly(page, route) {
   }
 
   const bodyText = await page.locator("body").innerText();
-  for (const title of INTERACTIVE_ONLY_PRESENT) {
-    if (!bodyText.includes(title)) {
-      throw new Error(`[${route}] missing interactive title "${title}"`);
-    }
+  const hasPublishedStory = bodyText.includes(EXPECTED_PRODUCTION_STORY);
+  const hasComingSoon =
+    bodyText.includes("No live interactive stories yet") ||
+    bodyText.includes("Interactive stories are coming soon") ||
+    bodyText.includes("No interactive stories are published yet");
+
+  if (!hasPublishedStory && !hasComingSoon) {
+    throw new Error(
+      `[${route}] expected either published story "${EXPECTED_PRODUCTION_STORY}" or a coming-soon empty state`,
+    );
   }
   for (const title of FORBIDDEN_MIXED_TITLES) {
     if (bodyText.includes(title)) {
@@ -65,6 +71,8 @@ async function assertHomeInteractiveLink(page) {
     throw new Error(`[home] returned ${response?.status() || "unknown"}`);
   }
 
+  const homeBodyText = await page.locator("body").innerText();
+  const lockerPublished = homeBodyText.includes(EXPECTED_PRODUCTION_STORY);
   const links = await page.evaluate(() =>
     Array.from(document.querySelectorAll('a[href]'))
       .map((node) => ({
@@ -74,8 +82,15 @@ async function assertHomeInteractiveLink(page) {
       .filter((item) => item.label.toLowerCase() === "interactive"),
   );
 
+  if (!lockerPublished) {
+    if (links.length > 0) {
+      throw new Error("[home] interactive nav should be hidden when no published normal stories exist");
+    }
+    return;
+  }
+
   if (links.length === 0) {
-    throw new Error("[home] missing visible Interactive navigation link");
+    throw new Error("[home] missing visible Interactive navigation link while published stories exist");
   }
   const invalid = links.filter((item) => item.href !== "/interactive");
   if (invalid.length > 0) {

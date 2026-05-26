@@ -6,6 +6,7 @@ import ErrorBoundary from "../components/common/ErrorBoundary";
 import { defaultSocialImage } from "../lib/seo";
 import { readServerAdultGateState } from "../lib/serverAdultGate";
 import { siteConfig } from "../lib/siteConfig";
+import { getInteractiveNavigationAvailabilityServer } from "../lib/interactiveServerApi";
 
 const CookieConsent = dynamic(
   () => import("../components/common/CookieConsent"),
@@ -92,7 +93,10 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const initialAdultState = await readServerAdultGateState();
+  const [initialAdultState, interactiveAvailability] = await Promise.all([
+    readServerAdultGateState(),
+    getInteractiveNavigationAvailabilityServer(),
+  ]);
 
   return (
     <html lang="en" suppressHydrationWarning className="font-sans dark">
@@ -110,7 +114,10 @@ export default async function RootLayout({ children }) {
           />
         ) : null}
         <ErrorBoundary name="RootBoundary">
-          <AppProviders initialAdultState={initialAdultState}>
+          <AppProviders
+            initialAdultState={initialAdultState}
+            initialShowInteractiveNav={interactiveAvailability.showInteractiveNav}
+          >
             {children}
           </AppProviders>
           <CookieConsent />

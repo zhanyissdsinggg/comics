@@ -31,6 +31,9 @@ BEGIN
 END $$;
 
 ALTER TABLE "interactive_stories"
+  ALTER COLUMN "contentMode" DROP DEFAULT;
+
+ALTER TABLE "interactive_stories"
   ALTER COLUMN "contentMode" TYPE "InteractiveContentMode"
   USING (
     CASE
@@ -41,6 +44,9 @@ ALTER TABLE "interactive_stories"
   ),
   ALTER COLUMN "contentMode" SET DEFAULT 'NORMAL',
   ALTER COLUMN "contentMode" SET NOT NULL;
+
+ALTER TABLE "interactive_story_choices"
+  ALTER COLUMN "unlockPolicy" DROP DEFAULT;
 
 ALTER TABLE "interactive_story_choices"
   ALTER COLUMN "unlockPolicy" TYPE "InteractiveUnlockPolicy"

@@ -62,13 +62,16 @@ export default function HeaderMenuModal({
   onClose,
   onOpenLogin,
   variant = "default",
+  showInteractiveNav = true,
 }) {
   const pathname = usePathname();
   const { hydrated, isSignedIn } = useAuthStore();
   const { unreadCount } = useNotificationsStore();
   const { paidPts, bonusPts } = useWalletStore();
   const walletTotal = Number(paidPts || 0) + Number(bonusPts || 0);
-  const menuLinks = PUBLIC_MENU_LINKS;
+  const menuLinks = PUBLIC_MENU_LINKS.filter(
+    (item) => item.label !== "Interactive" || showInteractiveNav,
+  );
   const renderMenuLink = (item, className, content) => {
     const useDocumentNavigation = shouldUseDocumentNavigation(
       pathname,

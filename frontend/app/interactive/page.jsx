@@ -16,11 +16,13 @@ function resolveInteractiveLaunchMode() {
   const nodeEnv = normalizeEnv(process.env.NODE_ENV);
   const deploymentEnv = vercelEnv || deployEnv || nodeEnv;
   const isProduction = deploymentEnv === "production";
-  const showLaunchChecklist =
-    vercelEnv === "preview" ||
-    deployEnv === "staging" ||
-    deployEnv === "preview" ||
-    nodeEnv === "development";
+  const showLaunchChecklist = !isProduction &&
+    (
+      vercelEnv === "preview" ||
+      deployEnv === "staging" ||
+      deployEnv === "preview" ||
+      nodeEnv === "development"
+    );
 
   return {
     deploymentEnv,

@@ -278,18 +278,30 @@ function buildScopedKey(scope: ChoiceScope) {
   ].join(":");
 }
 
-function parseReplayPayload(record: { body?: unknown; response?: string | null } | null | undefined) {
+function buildActionScopedPrefix(scope: ChoiceScope) {
+  return [
+    scope.operation,
+    scope.userId,
+    scope.storyId,
+    scope.fromNodeId,
+    scope.choiceId,
+  ].join(":");
+}
+
+function parseReplayPayload(
+  record: { responseJson?: unknown } | null | undefined,
+) {
   if (!record) {
     return null;
   }
-  if (record.body && typeof record.body === "object" && !Array.isArray(record.body)) {
-    return (record.body as Record<string, any>)?.progress || null;
+  if (
+    record.responseJson &&
+    typeof record.responseJson === "object" &&
+    !Array.isArray(record.responseJson)
+  ) {
+    return (record.responseJson as Record<string, any>)?.progress || null;
   }
-  try {
-    return JSON.parse(String(record.response || "{}"))?.progress || null;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 @Injectable()
@@ -1081,14 +1093,29 @@ export class InteractiveStoriesService {
     return scope;
   }
 
+  private async acquireTransactionLock(
+    tx: Prisma.TransactionClient,
+    lockKey: string,
+  ) {
+    const rawTx = tx as Prisma.TransactionClient & {
+      $queryRawUnsafe?: (query: string, value: string) => Promise<unknown>;
+    };
+    if (typeof rawTx.$queryRawUnsafe !== "function") {
+      return;
+    }
+    await rawTx.$queryRawUnsafe(
+      "SELECT 1 FROM pg_advisory_xact_lock(hashtext($1))",
+      lockKey,
+    );
+  }
+
   private async readScopedReplay(scope: ChoiceScope) {
     const now = Date.now();
-    const record = (await this.prisma.idempotencyKey.findUnique({
+    const record = (await this.prisma.interactiveChoiceIdempotency.findUnique({
       where: { scopedKey: buildScopedKey(scope) },
       select: {
         state: true,
-        body: true,
-        response: true,
+        responseJson: true,
         expiresAt: true,
       },
     })) as any;
@@ -1111,12 +1138,11 @@ export class InteractiveStoriesService {
       return null;
     }
 
-    const record = (await this.prisma.idempotencyKey.findFirst({
+    const record = (await this.prisma.interactiveChoiceIdempotency.findFirst({
       where: {
         operation: "interactive_choice_submit",
         userId: params.userId,
         storyId: params.storyId,
-        fromNodeId: { not: null },
         choiceId,
         requestKey,
         state: "completed",
@@ -1124,8 +1150,7 @@ export class InteractiveStoriesService {
       },
       orderBy: [{ createdAt: "desc" }],
       select: {
-        body: true,
-        response: true,
+        responseJson: true,
       },
     })) as any;
 
@@ -1133,6 +1158,37 @@ export class InteractiveStoriesService {
       return null;
     }
     return parseReplayPayload(record);
+  }
+
+  private async readCompletedActionReplayInTransaction(
+    tx: Prisma.TransactionClient,
+    scope: ChoiceScope,
+  ) {
+    const record = (await tx.interactiveChoiceIdempotency.findFirst({
+      where: {
+        operation: scope.operation,
+        userId: scope.userId,
+        storyId: scope.storyId,
+        fromNodeId: scope.fromNodeId,
+        choiceId: scope.choiceId,
+        state: "completed",
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: [{ updatedAt: "desc" }],
+      select: {
+        scopedKey: true,
+        responseJson: true,
+        expiresAt: true,
+      },
+    })) as any;
+
+    if (!record) {
+      return null;
+    }
+    return {
+      record,
+      replay: parseReplayPayload(record),
+    };
   }
 
   private buildUnlockDecision(
@@ -1209,6 +1265,11 @@ export class InteractiveStoriesService {
     if (decision.unlockType === "free" || decision.unlockType === "already_unlocked") {
       return { ok: true as const };
     }
+
+    await this.acquireTransactionLock(
+      params.tx,
+      `interactive_choice_unlock:${params.userId}:${choiceId}`,
+    );
 
     const existingUnlock = await params.tx.userInteractiveChoiceUnlock.findUnique({
       where: {
@@ -1468,20 +1529,17 @@ export class InteractiveStoriesService {
     const scopedKey = buildScopedKey(scope);
 
     const result = await this.prisma.$transaction(async (tx) => {
-      if (typeof (tx as Prisma.TransactionClient & { $queryRawUnsafe?: Function }).$queryRawUnsafe === "function") {
-        await (tx as Prisma.TransactionClient & { $queryRawUnsafe: Function }).$queryRawUnsafe(
-          "SELECT 1 FROM pg_advisory_xact_lock(hashtext($1))",
-          scopedKey,
-        );
-      }
+      await this.acquireTransactionLock(
+        tx,
+        `interactive_choice_action:${buildActionScopedPrefix(scope)}`,
+      );
 
-      const existingRecord = (await tx.idempotencyKey.findUnique({
+      const existingRecord = (await tx.interactiveChoiceIdempotency.findUnique({
         where: { scopedKey },
         select: {
           scopedKey: true,
           state: true,
-          body: true,
-          response: true,
+          responseJson: true,
           expiresAt: true,
         },
       })) as any;
@@ -1499,25 +1557,61 @@ export class InteractiveStoriesService {
         return { ok: false as const, reason: "INVALID_CHOICE" as const };
       }
 
-      await tx.idempotencyKey.upsert({
+      const completedActionReplay = await this.readCompletedActionReplayInTransaction(
+        tx,
+        scope,
+      );
+      if (completedActionReplay?.replay) {
+        if (completedActionReplay.record.scopedKey !== scopedKey) {
+          await tx.interactiveChoiceIdempotency.upsert({
+            where: { scopedKey },
+            update: {
+              operation: scope.operation,
+              userId: scope.userId,
+              storyId: scope.storyId,
+              fromNodeId: scope.fromNodeId,
+              choiceId: scope.choiceId,
+              requestKey: scope.requestKey,
+              state: "completed",
+              responseJson: completedActionReplay.record.responseJson as Prisma.InputJsonValue,
+              expiresAt: completedActionReplay.record.expiresAt,
+            },
+            create: {
+              scopedKey,
+              operation: scope.operation,
+              userId: scope.userId,
+              storyId: scope.storyId,
+              fromNodeId: scope.fromNodeId,
+              choiceId: scope.choiceId,
+              requestKey: scope.requestKey,
+              state: "completed",
+              responseJson: completedActionReplay.record.responseJson as Prisma.InputJsonValue,
+              expiresAt: completedActionReplay.record.expiresAt,
+            },
+          });
+        }
+        return {
+          replay: completedActionReplay.replay as StoryProgressView,
+        };
+      }
+
+      await tx.interactiveChoiceIdempotency.upsert({
         where: { scopedKey },
         update: {
-          userId: scope.userId,
           operation: scope.operation,
+          userId: scope.userId,
           storyId: scope.storyId,
           fromNodeId: scope.fromNodeId,
           choiceId: scope.choiceId,
           requestKey: scope.requestKey,
           state: "processing",
-          status: null,
-          body: Prisma.JsonNull,
-          response: null,
+          responseJson: Prisma.JsonNull,
           expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         },
         create: {
           scopedKey,
-          userId: scope.userId,
           operation: scope.operation,
+          userId: scope.userId,
           storyId: scope.storyId,
           fromNodeId: scope.fromNodeId,
           choiceId: scope.choiceId,
@@ -1615,13 +1709,11 @@ export class InteractiveStoriesService {
       });
 
       const payload = { progress };
-      await tx.idempotencyKey.update({
+      await tx.interactiveChoiceIdempotency.update({
         where: { scopedKey },
         data: {
           state: "completed",
-          status: 200,
-          body: payload as Prisma.InputJsonValue,
-          response: JSON.stringify(payload),
+          responseJson: payload as Prisma.InputJsonValue,
           expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         },
       });

@@ -21,6 +21,7 @@ export default function HeaderModals({
   pendingAdultToggle,
   onPendingAdultToggleChange,
   variant = "default",
+  showInteractiveNav = true,
 }) {
   const { signIn } = useAuthStore();
   const { requestAdultToggle, confirmAge, ageRuleKey, legalAge } =
@@ -121,6 +122,7 @@ export default function HeaderModals({
         onClose={() => onModalClose("menu")}
         onOpenLogin={() => onModalClose("login", true)}
         variant={variant}
+        showInteractiveNav={showInteractiveNav}
       />
 
       <LoginGateModal

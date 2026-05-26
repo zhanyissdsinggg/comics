@@ -26,6 +26,7 @@ import { ToastProvider } from "../common/ToastContext";
 import { useAuthOpenListener } from "../../hooks/useAuthOpenListener";
 import PublicHeader from "./PublicHeader";
 import PublicFooter from "./PublicFooter";
+import { InteractiveAvailabilityProvider } from "../../lib/interactiveAvailability";
 
 const GlobalErrorToast = dynamic(() => import("../common/GlobalErrorToast"), {
   ssr: false,
@@ -85,7 +86,11 @@ function BrandingHeadSync() {
   return null;
 }
 
-export default function AppProviders({ children, initialAdultState = null }) {
+export default function AppProviders({
+  children,
+  initialAdultState = null,
+  initialShowInteractiveNav = true,
+}) {
   useAuthOpenListener();
 
   const pathname = usePathname();
@@ -117,30 +122,34 @@ export default function AppProviders({ children, initialAdultState = null }) {
                   <BrandingHeadSync />
                   <ToastContainer />
                   {!isAdminRoute ? <AuthRequiredModal /> : null}
-                  <ProgressProvider>
-                    <WalletProvider>
-                      <RewardsProvider>
-                        <EntitlementProvider>
-                          <CouponProvider>
-                            <BookmarkProvider>
-                              <FollowProvider>
-                                <NotificationsProvider>
-                                  <BehaviorProvider>
-                                    <HistoryProvider>
-                                      {shouldShowPublicChrome ? <PublicHeader /> : null}
-                                      {children}
-                                      {shouldShowPublicChrome ? <PublicFooter /> : null}
-                                      <PWAInstallPrompt />
-                                    </HistoryProvider>
-                                  </BehaviorProvider>
-                                </NotificationsProvider>
-                              </FollowProvider>
-                            </BookmarkProvider>
-                          </CouponProvider>
-                        </EntitlementProvider>
-                      </RewardsProvider>
-                    </WalletProvider>
-                  </ProgressProvider>
+                  <InteractiveAvailabilityProvider
+                    initialShowInteractiveNav={initialShowInteractiveNav}
+                  >
+                    <ProgressProvider>
+                      <WalletProvider>
+                        <RewardsProvider>
+                          <EntitlementProvider>
+                            <CouponProvider>
+                              <BookmarkProvider>
+                                <FollowProvider>
+                                  <NotificationsProvider>
+                                    <BehaviorProvider>
+                                      <HistoryProvider>
+                                        {shouldShowPublicChrome ? <PublicHeader /> : null}
+                                        {children}
+                                        {shouldShowPublicChrome ? <PublicFooter /> : null}
+                                        <PWAInstallPrompt />
+                                      </HistoryProvider>
+                                    </BehaviorProvider>
+                                  </NotificationsProvider>
+                                </FollowProvider>
+                              </BookmarkProvider>
+                            </CouponProvider>
+                          </EntitlementProvider>
+                        </RewardsProvider>
+                      </WalletProvider>
+                    </ProgressProvider>
+                  </InteractiveAvailabilityProvider>
                 </RegionProvider>
               </BrandingProvider>
             </AdultGateProvider>

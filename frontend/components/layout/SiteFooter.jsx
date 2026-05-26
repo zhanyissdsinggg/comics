@@ -159,6 +159,7 @@ export default function SiteFooter({
   pathname = "",
   taglineOverride,
   showTagline = true,
+  showInteractiveNav = true,
 }) {
   const currentYear = new Date().getFullYear();
   const isHome = tone === "home" || tone === "light";
@@ -168,8 +169,10 @@ export default function SiteFooter({
     pathname,
     "/",
   );
+  const filterInteractive = (links) =>
+    links.filter((link) => link.label !== "Interactive" || showInteractiveNav);
   const footerPrimaryLinks = filterLinks(
-    isHome && isCompact ? homePrimaryFooterLinks : primaryFooterLinks,
+    filterInteractive(isHome && isCompact ? homePrimaryFooterLinks : primaryFooterLinks),
     currentRouteKey,
   );
   const footerMetaLinks = filterLinks(
@@ -180,7 +183,13 @@ export default function SiteFooter({
         : fullMetaFooterLinks,
     currentRouteKey,
   );
-  const footerSections = filterSections(fullFooterSections, currentRouteKey);
+  const footerSections = filterSections(
+    fullFooterSections.map((section) => ({
+      ...section,
+      links: filterInteractive(section.links),
+    })),
+    currentRouteKey,
+  );
   const footerTagline = taglineOverride ?? siteConfig.tagline;
   const FooterHomeLink = forceDocumentHomeNavigation ? "a" : Link;
   const footerHomeLinkProps = forceDocumentHomeNavigation

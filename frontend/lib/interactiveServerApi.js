@@ -69,6 +69,34 @@ export async function getInteractiveStoriesServer() {
   return Array.isArray(payload?.stories) ? payload.stories : [];
 }
 
+function normalizeEnv(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function resolveInteractiveDeploymentMode() {
+  const vercelEnv = normalizeEnv(process.env.VERCEL_ENV);
+  const deployEnv = normalizeEnv(process.env.NEXT_PUBLIC_DEPLOY_ENV);
+  const nodeEnv = normalizeEnv(process.env.NODE_ENV);
+  return vercelEnv || deployEnv || nodeEnv;
+}
+
+export async function getInteractiveNavigationAvailabilityServer() {
+  const stories = await getInteractiveStoriesServer();
+  if (stories.length > 0) {
+    return {
+      showInteractiveNav: true,
+      hasPublishedStories: true,
+    };
+  }
+
+  const deploymentEnv = resolveInteractiveDeploymentMode();
+  const isProduction = deploymentEnv === "production";
+  return {
+    showInteractiveNav: !isProduction,
+    hasPublishedStories: false,
+  };
+}
+
 export async function getInteractiveStoryServer(slug) {
   const normalizedSlug = String(slug || "").trim();
   if (!normalizedSlug) {

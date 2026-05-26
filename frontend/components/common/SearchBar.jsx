@@ -54,6 +54,7 @@ const SearchBar = memo(function SearchBar({
   variant = "default",
   showShortcut = true,
   initialValue = "",
+  showInteractiveNav = true,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -69,7 +70,9 @@ const SearchBar = memo(function SearchBar({
   const shortcutLabel = useSearchShortcutLabel();
   const isHome = variant === "home";
   const isDark = variant === "dark";
-  const discoveryLanes = HOME_DISCOVERY_LANES;
+  const discoveryLanes = HOME_DISCOVERY_LANES.filter(
+    (lane) => lane.id !== "browse-interactive" || showInteractiveNav,
+  );
   const discoveryHeading = "Browse";
   const shellClass = isFocused
     ? isDark

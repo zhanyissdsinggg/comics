@@ -2264,6 +2264,7 @@ test.describe("Public reading funnel", () => {
     const html = await page.content();
     expect(html).toContain("Midnight Archive");
     expect(html).not.toContain(">Loading<");
+    expect(html).toContain("Pick a route. Wear the consequences.");
     await expect(
       page.getByRole("heading", { name: /Pick a route\. Wear the consequences\./i }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
@@ -2328,9 +2329,13 @@ test.describe("Public reading funnel", () => {
       "Interactive stories are coming soon. Check back for the first live routes.",
     );
     expect(html).not.toContain(">Loading<");
+    expect(html).not.toContain("Launch checklist");
     await expect(page.locator("main")).toContainText(
       "Interactive stories are coming soon. Check back for the first live routes.",
     );
+    await expect(
+      page.getByRole("link", { name: "Interactive", exact: true }),
+    ).toHaveCount(0);
     await expectNoRuntimeIssues("interactive-empty-state", runtimeIssues);
   });
 

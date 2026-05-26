@@ -349,6 +349,27 @@ model UserInteractiveChoiceUnlock {
   @@map("user_interactive_choice_unlocks")
 }
 
+model InteractiveChoiceIdempotency {
+  id         String   @id @default(cuid())
+  scopedKey  String   @unique
+  operation  String
+  userId     String
+  storyId    String
+  fromNodeId String
+  choiceId   String
+  requestKey String
+  state      String   @default("processing")
+  responseJson Json?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([operation, userId, storyId, fromNodeId, choiceId, requestKey])
+  @@index([operation, userId, storyId, fromNodeId, choiceId, state])
+  @@index([userId, storyId, createdAt])
+  @@map("interactive_choice_idempotency")
+}
+
 model Creator {
   id             String         @id @default(cuid())
   slug           String         @unique

@@ -54,7 +54,7 @@ async function main() {
   await prisma.userStoryState.deleteMany({ where: { userId, storyId } });
   await prisma.userStoryChoiceLog.deleteMany({ where: { userId, storyId } });
   await prisma.userInteractiveChoiceUnlock.deleteMany({ where: { userId, storyId } });
-  await prisma.idempotencyKey.deleteMany({ where: { userId, storyId } });
+  await prisma.interactiveChoiceIdempotency.deleteMany({ where: { userId, storyId } });
 
   const start = await service.getOrInitProgress("the-locker-letter", userId, access);
   console.log(
