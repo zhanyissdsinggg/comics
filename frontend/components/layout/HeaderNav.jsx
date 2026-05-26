@@ -12,7 +12,7 @@ import { siteConfig } from "../../lib/siteConfig";
 const PUBLIC_NAV_ITEMS = [
   { id: "comics", label: "Comics", href: "/comics" },
   { id: "novels", label: "Novels", href: "/novels" },
-  { id: "interactive", label: "Interactive", href: "/search?type=interactive" },
+  { id: "interactive", label: "Interactive", href: "/interactive" },
 ]
   .concat(
     siteConfig.navigation.showRankingsInNav
@@ -25,10 +25,12 @@ const PUBLIC_NAV_ITEMS = [
       : [],
   );
 
-export default function HeaderNav({ variant = "default" }) {
+export default function HeaderNav({ variant = "default", showInteractiveNav = true }) {
   const pathname = usePathname();
   const { setHomeTab } = useHomeStore();
-  const navItems = PUBLIC_NAV_ITEMS;
+  const navItems = PUBLIC_NAV_ITEMS.filter(
+    (item) => item.id !== "interactive" || showInteractiveNav,
+  );
 
   return (
     <nav className="hidden flex-1 justify-center md:flex">

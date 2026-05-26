@@ -376,6 +376,34 @@ function createContentModeMockBackendServer() {
       return;
     }
 
+    if (pathname === "/api/interactive-stories") {
+      const stories = matureVerified && matureModeEnabled
+        ? [
+            {
+              id: "interactive-adult-001",
+              slug: "vampire-oath",
+              title: "Vampire Oath",
+              description: "A mature-only manor route.",
+              contentMode: "ADULT",
+              endingsCount: 2,
+              choicesCount: 8,
+            },
+          ]
+        : [
+            {
+              id: "interactive-normal-001",
+              slug: "solar-wind-first-contact",
+              title: "Solar Wind",
+              description: "A branching relay-field thriller.",
+              contentMode: "NORMAL",
+              endingsCount: 2,
+              choicesCount: 6,
+            },
+          ];
+      jsonServerResponse(response, 200, { stories });
+      return;
+    }
+
     if (pathname === "/api/episode") {
       const seriesId = String(url.searchParams.get("seriesId") || "").trim();
       const episodeId = String(url.searchParams.get("episodeId") || "").trim();
@@ -818,6 +846,34 @@ async function installContentModeRoutes(
         .map((item) => item.title)
         .filter((title) => title.toLowerCase().includes(query));
       await fulfillJson(route, { suggestions });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories") {
+      const stories = adultFlag
+        ? [
+            {
+              id: "interactive-adult-001",
+              slug: "vampire-oath",
+              title: "Vampire Oath",
+              description: "A mature-only manor route.",
+              contentMode: "ADULT",
+              endingsCount: 2,
+              choicesCount: 8,
+            },
+          ]
+        : [
+            {
+              id: "interactive-normal-001",
+              slug: "solar-wind-first-contact",
+              title: "Solar Wind",
+              description: "A branching relay-field thriller.",
+              contentMode: "NORMAL",
+              endingsCount: 2,
+              choicesCount: 6,
+            },
+          ];
+      await fulfillJson(route, { stories });
       return;
     }
 
@@ -1642,6 +1698,7 @@ test.describe("Content mode filtering", () => {
 
     await page.getByRole("button", { name: /menu/i }).first().click();
     const interactiveLink = page
+      .locator('div.fixed.inset-0.z-50')
       .getByRole("link", { name: "Interactive", exact: true })
       .first();
     await expect(interactiveLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
@@ -1649,13 +1706,37 @@ test.describe("Content mode filtering", () => {
 
     await interactiveLink.click();
     await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
-    await expect(
-      page.getByRole("heading", { name: /Solar Wind/i }).first(),
-    ).toBeVisible({
+    await expect(page.locator("main")).toContainText("Solar Wind", {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("body")).not.toContainText("The Last Kingdom");
     await expect(page.locator("body")).not.toContainText("Velvet Archive");
+  });
+
+  test("desktop header should expose Interactive and route to /interactive", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1080 });
+    await installContentModeRoutes(page, {
+      adultMode: false,
+      adultConfirmed: false,
+      signedIn: false,
+    });
+
+    const response = await page.goto("/", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+
+    const interactiveLink = page
+      .locator('header[data-site-header="1"]')
+      .getByRole("link", { name: "Interactive", exact: true })
+      .first();
+    await expect(interactiveLink).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(interactiveLink).toHaveAttribute("href", "/interactive");
+
+    await interactiveLink.click();
+    await expect(page).toHaveURL(/\/interactive(?:\?|$)/);
   });
 
   test("series footer should keep public discovery links", async ({ page }) => {
