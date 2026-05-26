@@ -63,16 +63,20 @@ async function assertInteractiveOnly(page, route) {
   if (bodyText.includes("All Formats")) {
     throw new Error(`[${route}] still renders All Formats on interactive-only route`);
   }
+
+  return {
+    hasPublishedStory,
+    hasComingSoon,
+  };
 }
 
-async function assertHomeInteractiveLink(page) {
+async function assertHomeInteractiveLink(page, options = {}) {
+  const hasPublishedStory = Boolean(options.hasPublishedStory);
   const response = await page.goto(BASE_URL, { waitUntil: "networkidle" });
   if (!response?.ok()) {
     throw new Error(`[home] returned ${response?.status() || "unknown"}`);
   }
 
-  const homeBodyText = await page.locator("body").innerText();
-  const lockerPublished = homeBodyText.includes(EXPECTED_PRODUCTION_STORY);
   const links = await page.evaluate(() =>
     Array.from(document.querySelectorAll('a[href]'))
       .map((node) => ({
@@ -82,7 +86,7 @@ async function assertHomeInteractiveLink(page) {
       .filter((item) => item.label.toLowerCase() === "interactive"),
   );
 
-  if (!lockerPublished) {
+  if (!hasPublishedStory) {
     if (links.length > 0) {
       throw new Error("[home] interactive nav should be hidden when no published normal stories exist");
     }
@@ -116,10 +120,12 @@ async function main() {
     await assertInteractiveOnly(page, "/search?format=interactive");
     console.log("PASS /search?format=interactive");
 
-    await assertInteractiveOnly(page, "/interactive");
+    const interactiveLanding = await assertInteractiveOnly(page, "/interactive");
     console.log("PASS /interactive");
 
-    await assertHomeInteractiveLink(page);
+    await assertHomeInteractiveLink(page, {
+      hasPublishedStory: interactiveLanding.hasPublishedStory,
+    });
     console.log("PASS home interactive link");
 
     console.log(`Production interactive smoke passed against ${BASE_URL}`);
