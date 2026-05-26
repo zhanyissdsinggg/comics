@@ -71,6 +71,7 @@ type InteractiveStorySeed = {
       id: string;
       key: string;
       label: string;
+      description?: string;
       targetNodeId: string;
       unlockPolicy?:
         | "FREE"
@@ -519,6 +520,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-solar-wind-choice-001",
             key: "scan_signal",
             label: "Run a deep scan before moving.",
+            description: "Reduce immediate risk and pull more signal data before the ship commits.",
             targetNodeId: "story-solar-wind-node-002",
             stateEffects: {
               trust: 1,
@@ -531,6 +533,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-solar-wind-choice-002",
             key: "approach_beacon",
             label: "Approach the beacon at half thrust.",
+            description: "Push toward the source before the unknown beacon goes silent again.",
             targetNodeId: "story-solar-wind-node-003",
             stateEffects: { risk: 2, clues: 1, flags: ["direct_approach"] },
           },
@@ -538,6 +541,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-solar-wind-choice-003",
             key: "wake_captain",
             label: "Wake the captain and hold position.",
+            description: "Bring senior command in before the crew drifts deeper into the relay.",
             targetNodeId: "story-solar-wind-node-004",
             stateEffects: {
               affection: 1,
@@ -726,6 +730,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-locker-letter-choice-001",
             key: "show_maya",
             label: "Show the letter to Maya",
+            description: "Trust your sharpest friend with the note before the rumor spreads further.",
             targetNodeId: "story-locker-letter-node-002",
             stateEffects: { trust: 1, flags: ["maya_in_loop"] },
           },
@@ -733,6 +738,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-locker-letter-choice-002",
             key: "inspect_letter",
             label: "Inspect the envelope alone",
+            description: "Study the paper and ink yourself before anyone else can shape the story.",
             targetNodeId: "story-locker-letter-node-003",
             stateEffects: { clues: 1, flags: ["checked_handwriting"] },
           },
@@ -740,6 +746,7 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
             id: "story-locker-letter-choice-003",
             key: "follow_note_now",
             label: "Skip lunch and follow the note now",
+            description: "Move first and test whether the warning is bait or a real plea for help.",
             targetNodeId: "story-locker-letter-node-004",
             stateEffects: { courage: 1, flags: ["went_early"] },
           },
@@ -1382,7 +1389,7 @@ async function seedInteractiveStories() {
             id: choice.id,
             targetNodeId: choice.targetNodeId,
             label: choice.label,
-            description: null,
+            description: choice.description || null,
             unlockPolicy,
             requiresPremium: choiceCommerce.requiresPremium,
             requiresTokens: choiceCommerce.requiresTokens,
@@ -1398,7 +1405,7 @@ async function seedInteractiveStories() {
             targetNodeId: choice.targetNodeId,
             choiceKey: choice.key,
             label: choice.label,
-            description: null,
+            description: choice.description || null,
             unlockPolicy,
             requiresPremium: choiceCommerce.requiresPremium,
             requiresTokens: choiceCommerce.requiresTokens,

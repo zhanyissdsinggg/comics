@@ -230,6 +230,14 @@ function parseStringArray(value: unknown): string[] {
   return value.map((item) => normalizeText(item)).filter(Boolean);
 }
 
+function toSentenceCaseLabel(value: unknown) {
+  const text = normalizeText(value);
+  if (!text) {
+    return "";
+  }
+  return text.endsWith(".") ? text.slice(0, -1) : text;
+}
+
 function parsePathNodeIds(value: unknown): string[] {
   return parseStringArray(value);
 }
@@ -639,11 +647,17 @@ export class InteractiveStoriesService {
           Math.max(0, Number(choice.requiresTokens || 0)),
         );
         const lockedReason = this.getLockedReason(choice, unlockContext);
+        const explicitDescription = normalizeText(choice.description);
+        const targetTitle = normalizeText((choice as any)?.targetNode?.title);
+        const fallbackDescription = explicitDescription ||
+          (targetTitle
+            ? `Leads to ${targetTitle}.`
+            : `Choose ${toSentenceCaseLabel(choice.label).toLowerCase()} to continue this route.`);
         return {
           id: choice.id,
           key: choice.choiceKey,
           label: normalizeText(choice.label),
-          description: normalizeText(choice.description),
+          description: fallbackDescription,
           unlockPolicy,
           requiresPremium: Boolean(choice.requiresPremium),
           requiresTokens: Math.max(0, Number(choice.requiresTokens || 0)),

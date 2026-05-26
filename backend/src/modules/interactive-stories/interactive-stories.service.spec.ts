@@ -572,6 +572,18 @@ describe("InteractiveStoriesService", () => {
     expect(result?.endingsCount).toBe(1);
   });
 
+  it("builds public start progress with readable fallback choice descriptions", async () => {
+    const result = await service.getPublicStartProgress("solar-wind-first-contact", {
+      includeAdult: false,
+    });
+
+    expect(result?.node.title).toBe("Relay Entrance");
+    expect(result?.node.content).toBe("Fallback start text.");
+    expect(result?.node.choices).toHaveLength(2);
+    expect(result?.node.choices[0].description).toBe("Leads to Scan Results.");
+    expect(result?.node.choices[1].description).toBe("Leads to Scan Results.");
+  });
+
   it("blocks public choice submission when target node is not approved", async () => {
     prisma.__setState({
       stories: [

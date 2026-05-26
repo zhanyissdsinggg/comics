@@ -2547,6 +2547,7 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
     await expect(page.locator("main")).toContainText("Choices");
+    await expect(page.locator("main")).toContainText("Choose carefully");
     await expect(page.locator("main")).toContainText("Route so far");
     await expect(page.locator("main")).toContainText("Depth 1");
 
@@ -2655,6 +2656,7 @@ test.describe("Public reading funnel", () => {
     expect(playResponse?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Current Node");
     await expect(page.locator("main")).toContainText("The Locker Letter");
+    await expect(page.locator("main")).toContainText("Choose carefully");
     await expect(page.locator("main")).toContainText(
       "Between fourth period and lunch, a folded note slides out of locker 318.",
     );

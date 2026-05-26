@@ -200,7 +200,7 @@ export default function InteractiveStoryPage({
       setAuthRequired(true);
       setProgress(null);
       if (mode === "play") {
-        setError("Sign in to start.");
+        setError("Sign in to start this interactive story.");
       }
       return null;
     }
@@ -662,7 +662,7 @@ export default function InteractiveStoryPage({
                 {showSignInStart ? (
                   <div className="grid gap-4">
                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                      Sign in to start
+                      Sign in to start this interactive story
                     </p>
                     <p className="text-sm leading-7 text-white/80">
                       Sign in to save your route, unlock premium branches, and keep your progress synced.
@@ -673,7 +673,7 @@ export default function InteractiveStoryPage({
                         onClick={openAuthModal}
                         className={storefrontPrimaryButtonClass}
                       >
-                        Sign in to start
+                        Sign in to start this interactive story
                       </button>
                       <Link href={detailHref} className={storefrontSecondaryButtonClass}>
                         Back to story
@@ -738,7 +738,7 @@ export default function InteractiveStoryPage({
                     Choices
                   </h2>
                   <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-                    1 tap protected
+                    Choose carefully
                   </div>
                 </div>
                 <div className="mt-4 grid gap-3">
