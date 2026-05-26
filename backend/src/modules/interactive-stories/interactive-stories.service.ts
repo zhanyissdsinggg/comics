@@ -154,7 +154,8 @@ type ChoiceResultReason =
   | "INVALID_CHOICE"
   | "TARGET_NODE_NOT_AVAILABLE"
   | "PREMIUM_REQUIRED"
-  | "TOKENS_REQUIRED";
+  | "TOKENS_REQUIRED"
+  | "TOKEN_UNLOCK_COMING_SOON";
 
 type ChoiceScope = {
   operation: string;
@@ -184,6 +185,14 @@ function normalizeReviewStatus(value: unknown): ReviewStatus {
   if (normalized === "pending_review") return "pending_review";
   if (normalized === "rejected") return "rejected";
   return "approved";
+}
+
+function normalizeBoolean(value: unknown, fallback = false): boolean {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) {
+    return fallback;
+  }
+  return ["1", "true", "yes", "on"].includes(normalized);
 }
 
 function normalizeUnlockPolicy(
@@ -307,6 +316,10 @@ function parseReplayPayload(
 @Injectable()
 export class InteractiveStoriesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private isTokenUnlockEnabled() {
+    return normalizeBoolean(process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED, false);
+  }
 
   private buildStoryFilter(access: StoryAccessContext): Prisma.InteractiveStoryWhereInput {
     return {
@@ -513,18 +526,35 @@ export class InteractiveStoriesService {
       !blocked.some((flag) => currentFlags.has(flag));
   }
 
-  private async getUnlockContext(userId: string, storyId: string): Promise<UnlockContext> {
+  private buildGuestUnlockContext(): UnlockContext {
+    return {
+      wallet: null,
+      subscription: null,
+      unlockedChoiceIds: new Set<string>(),
+    };
+  }
+
+  private async getUnlockContext(
+    userId?: string | null,
+    storyId?: string | null,
+  ): Promise<UnlockContext> {
+    const normalizedUserId = normalizeText(userId);
+    const normalizedStoryId = normalizeText(storyId);
+    if (!normalizedUserId || !normalizedStoryId) {
+      return this.buildGuestUnlockContext();
+    }
+
     const [wallet, subscription, unlocks] = await Promise.all([
       this.prisma.wallet.findUnique({
-        where: { userId },
+        where: { userId: normalizedUserId },
         select: { userId: true, paidPts: true, bonusPts: true, plan: true },
       }),
       this.prisma.subscription.findUnique({
-        where: { userId },
+        where: { userId: normalizedUserId },
         select: { userId: true, active: true, planId: true, expiresAt: true },
       }),
       this.prisma.userInteractiveChoiceUnlock.findMany({
-        where: { userId, storyId },
+        where: { userId: normalizedUserId, storyId: normalizedStoryId },
         select: { choiceId: true },
       }),
     ]);
@@ -571,11 +601,23 @@ export class InteractiveStoriesService {
       case "PREMIUM_ONLY":
         return hasPremium ? null : "PREMIUM_REQUIRED";
       case "TOKENS_ONLY":
+        if (!this.isTokenUnlockEnabled()) {
+          return "TOKEN_UNLOCK_COMING_SOON";
+        }
         return hasTokens ? null : "TOKENS_REQUIRED";
       case "PREMIUM_OR_TOKENS":
-        return hasPremium || hasTokens ? null : "TOKENS_REQUIRED";
+        if (hasPremium) {
+          return null;
+        }
+        if (!this.isTokenUnlockEnabled()) {
+          return "TOKEN_UNLOCK_COMING_SOON";
+        }
+        return hasTokens ? null : "TOKENS_REQUIRED";
       case "PREMIUM_AND_TOKENS":
         if (!hasPremium) return "PREMIUM_REQUIRED";
+        if (!this.isTokenUnlockEnabled()) {
+          return "TOKEN_UNLOCK_COMING_SOON";
+        }
         return hasTokens ? null : "TOKENS_REQUIRED";
       default:
         return null;
@@ -690,7 +732,7 @@ export class InteractiveStoriesService {
 
   private async buildStoryProgress(
     story: StoryWithGraph,
-    userId: string,
+    userId?: string | null,
     progressRow?: { currentNodeId: string; lastGeneratedText: string | null } | null,
     stateRow?: { state: Prisma.JsonValue | null; flags: string[] } | null,
   ): Promise<StoryProgressView | null> {
@@ -945,6 +987,44 @@ export class InteractiveStoriesService {
     }
 
     return this.buildStoryProgress(story, userId, progressRow, stateRow);
+  }
+
+  async getPublicStartProgress(
+    storySlug: string,
+    access: StoryAccessContext,
+  ): Promise<StoryProgressView | null> {
+    const story = this.ensureSeriesCompatibility(
+      await this.findStoryGraphBySlug(normalizeText(storySlug), access),
+    );
+    if (!story || this.getApprovedNodes(story).length === 0) {
+      return null;
+    }
+
+    const startNode = this.getStartNode(story);
+    if (!startNode) {
+      return null;
+    }
+
+    const baseState = parseState(story.initialState);
+    const flags = mergeFlags(baseState, []);
+    const nextState = {
+      ...baseState,
+      flags,
+      pathNodeIds: [startNode.id],
+      endingsReached: [],
+    };
+
+    return this.toProgressView({
+      story,
+      node: startNode,
+      state: nextState,
+      flags,
+      generatedText: normalizeText(startNode.fallbackText || startNode.baseContext) || null,
+      pathNodeIds: [startNode.id],
+      endingsReached: [],
+      approvedChoices: this.getApprovedChoices(startNode, this.buildApprovedNodeById(story)),
+      unlockContext: this.buildGuestUnlockContext(),
+    });
   }
 
   async getBulkProgress(
@@ -1220,12 +1300,18 @@ export class InteractiveStoriesService {
           ? { ok: true as const, tokensToCharge: 0, unlockType: "premium" }
           : { ok: false as const, reason: "PREMIUM_REQUIRED" as const };
       case "TOKENS_ONLY":
+        if (!this.isTokenUnlockEnabled()) {
+          return { ok: false as const, reason: "TOKEN_UNLOCK_COMING_SOON" as const };
+        }
         return hasTokens
           ? { ok: true as const, tokensToCharge: tokensRequired, unlockType: "tokens" }
           : { ok: false as const, reason: "TOKENS_REQUIRED" as const };
       case "PREMIUM_OR_TOKENS":
         if (hasPremium) {
           return { ok: true as const, tokensToCharge: 0, unlockType: "premium_or_tokens" };
+        }
+        if (!this.isTokenUnlockEnabled()) {
+          return { ok: false as const, reason: "TOKEN_UNLOCK_COMING_SOON" as const };
         }
         return hasTokens
           ? {
@@ -1237,6 +1323,9 @@ export class InteractiveStoriesService {
       case "PREMIUM_AND_TOKENS":
         if (!hasPremium) {
           return { ok: false as const, reason: "PREMIUM_REQUIRED" as const };
+        }
+        if (!this.isTokenUnlockEnabled()) {
+          return { ok: false as const, reason: "TOKEN_UNLOCK_COMING_SOON" as const };
         }
         return hasTokens
           ? {

@@ -113,17 +113,17 @@ export class InteractiveStoriesController {
     }
 
     const userId = getUserIdFromRequest(req, false);
-    if (!userId) {
-      res.status(401);
-      return buildError(ERROR_CODES.UNAUTHENTICATED);
-    }
-
     const access = await this.buildAccessContext(req);
-    const progress = await this.interactiveStoriesService.getOrInitProgress(
-      normalizedSlug,
-      userId,
-      access,
-    );
+    const progress = userId
+      ? await this.interactiveStoriesService.getOrInitProgress(
+          normalizedSlug,
+          userId,
+          access,
+        )
+      : await this.interactiveStoriesService.getPublicStartProgress(
+          normalizedSlug,
+          access,
+        );
     if (!progress) {
       res.status(404);
       return buildError(ERROR_CODES.NOT_FOUND);
@@ -201,7 +201,11 @@ export class InteractiveStoriesController {
     );
 
     if (!result.ok) {
-      if (result.reason === "PREMIUM_REQUIRED" || result.reason === "TOKENS_REQUIRED") {
+      if (
+        result.reason === "PREMIUM_REQUIRED" ||
+        result.reason === "TOKENS_REQUIRED" ||
+        result.reason === "TOKEN_UNLOCK_COMING_SOON"
+      ) {
         res.status(403);
         return buildError(ERROR_CODES.FORBIDDEN, {
           message: "Choice is locked",
@@ -293,7 +297,11 @@ export class InteractiveStoriesController {
     );
 
     if (!result.ok) {
-      if (result.reason === "PREMIUM_REQUIRED" || result.reason === "TOKENS_REQUIRED") {
+      if (
+        result.reason === "PREMIUM_REQUIRED" ||
+        result.reason === "TOKENS_REQUIRED" ||
+        result.reason === "TOKEN_UNLOCK_COMING_SOON"
+      ) {
         res.status(403);
         return buildError(ERROR_CODES.FORBIDDEN, {
           message: "Choice unlock blocked",

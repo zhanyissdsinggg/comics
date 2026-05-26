@@ -538,10 +538,20 @@ function createFakePrisma(initialState?: Partial<FakeDbState>) {
 describe("InteractiveStoriesService", () => {
   let prisma: ReturnType<typeof createFakePrisma>;
   let service: InteractiveStoriesService;
+  const originalTokenUnlockEnv = process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED;
 
   beforeEach(() => {
+    process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED = "";
     prisma = createFakePrisma();
     service = new InteractiveStoriesService(prisma as unknown as PrismaService);
+  });
+
+  afterAll(() => {
+    if (typeof originalTokenUnlockEnv === "undefined") {
+      delete process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED;
+      return;
+    }
+    process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED = originalTokenUnlockEnv;
   });
 
   it("returns SSR-safe published snapshot detail and hides unapproved nodes from counts", async () => {
@@ -686,6 +696,7 @@ describe("InteractiveStoriesService", () => {
   });
 
   it("rolls back token charge side effects when progress update fails", async () => {
+    process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED = "1";
     prisma.__setState({
       wallets: [
         {
@@ -719,7 +730,46 @@ describe("InteractiveStoriesService", () => {
     expect(persisted.idempotency).toHaveLength(0);
   });
 
+  it("keeps token choice locked behind coming soon when token unlock is disabled", async () => {
+    prisma.__setState({
+      wallets: [
+        {
+          id: "wallet-user-1",
+          userId: "user-1",
+          paidPts: 50,
+          bonusPts: 0,
+          plan: "free",
+        },
+      ],
+    });
+
+    const result = await service.submitChoice(
+      {
+        storySlug: "solar-wind-first-contact",
+        userId: "user-1",
+        choiceId: "story-1-choice-token",
+        idempotencyKey: "token-coming-soon",
+      },
+      { includeAdult: false },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      reason: "TOKEN_UNLOCK_COMING_SOON",
+    });
+
+    const persisted = prisma.__getState();
+    const calls = prisma.__getCallCounts();
+    expect(persisted.wallets[0].paidPts).toBe(50);
+    expect(persisted.unlocks).toHaveLength(0);
+    expect(persisted.choiceLogs).toHaveLength(0);
+    expect(persisted.idempotency).toHaveLength(0);
+    expect(calls.walletUpsert).toBe(0);
+    expect(calls.unlockCreate).toBe(0);
+  });
+
   it("concurrent same-key token submits execute side effects once and return a replay", async () => {
+    process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED = "1";
     prisma.__setState({
       wallets: [
         {
@@ -770,6 +820,7 @@ describe("InteractiveStoriesService", () => {
   });
 
   it("concurrent different-key token submits still charge once because unlock persists inside the same transaction flow", async () => {
+    process.env.INTERACTIVE_TOKEN_UNLOCK_ENABLED = "1";
     prisma.__setState({
       wallets: [
         {

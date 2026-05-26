@@ -43,6 +43,18 @@ const INTERACTIVE_STORIES = [
     nodeCount: 4,
   },
   {
+    id: "story-normal-002",
+    slug: "the-locker-letter",
+    title: "The Locker Letter",
+    description: "A hallway rumor turns into a branching teen mystery.",
+    seriesId: "series-015",
+    contentMode: "NORMAL",
+    genre: ["Teen Mystery", "Drama"],
+    endingsCount: 2,
+    choicesCount: 6,
+    nodeCount: 5,
+  },
+  {
     id: "story-adult-001",
     slug: "after-dark-protocol",
     title: "After Dark Protocol",
@@ -1280,10 +1292,6 @@ function createMockBackendServer() {
     }
 
     if (pathname === "/api/interactive-stories/slug/midnight-archive/current") {
-      if (!signedIn) {
-        jsonResponse(response, 401, { error: "UNAUTHENTICATED" });
-        return;
-      }
       const currentNodeId = "node-midnight-1";
       jsonResponse(response, 200, {
         progress: {
@@ -1680,6 +1688,16 @@ async function mockPublicApi(
       return;
     }
 
+    if (pathname === "/api/interactive-stories/slug/the-locker-letter") {
+      await fulfillJson(route, {
+        story: {
+          ...INTERACTIVE_STORIES[1],
+          baseContext: "A folded letter slips from a locker and points to two very different truths.",
+        },
+      });
+      return;
+    }
+
     if (pathname === "/api/interactive-stories/slug/after-dark-protocol") {
       if (!signedIn || !matureConfirmed || !matureModeEnabled) {
         await fulfillJson(route, { error: "NOT_FOUND" }, 404);
@@ -1784,6 +1802,82 @@ async function mockPublicApi(
             };
 
       await fulfillJson(route, { progress });
+      return;
+    }
+
+    if (pathname === "/api/interactive-stories/slug/the-locker-letter/current") {
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[1],
+          state: {
+            trust: 0,
+            clues: 0,
+            risk: 0,
+            pathNodeIds: ["node-locker-1"],
+            endingsReached: [],
+          },
+          flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: "node-locker-1",
+              nodeKey: "locker-start",
+              title: "The Locker Letter",
+              isEnding: false,
+            },
+          ],
+          node: {
+            id: "node-locker-1",
+            key: "locker-start",
+            title: "The Locker Letter",
+            content:
+              "Between fourth period and lunch, a folded note slides out of locker 318. It says your name, two warnings, and one lie you can test right now.",
+            isEnding: false,
+            choices: [
+              {
+                id: "choice-locker-open",
+                key: "ask-maya",
+                label: "Ask Maya about the note",
+                description: "Go straight to the one friend who notices every hallway rumor.",
+                requiresPremium: false,
+                requiresTokens: 0,
+                unlockPolicy: "FREE",
+                unlockLabel: null,
+                locked: false,
+                lockedReason: null,
+                unlocked: false,
+              },
+              {
+                id: "choice-locker-premium",
+                key: "check-camera",
+                label: "Check the security camera room",
+                description: "A member-only branch with a faster clue path.",
+                requiresPremium: true,
+                requiresTokens: 0,
+                unlockPolicy: "PREMIUM_ONLY",
+                unlockLabel: "Members Only",
+                locked: true,
+                lockedReason: "PREMIUM_REQUIRED",
+                unlocked: false,
+              },
+              {
+                id: "choice-locker-token",
+                key: "buy-snack-alibi",
+                label: "Bribe the lunch cashier for the receipt log",
+                description: "A token route that is still gated during rollout.",
+                requiresPremium: false,
+                requiresTokens: 15,
+                unlockPolicy: "TOKENS_ONLY",
+                unlockLabel: "Token unlock coming soon",
+                locked: true,
+                lockedReason: "TOKEN_UNLOCK_COMING_SOON",
+                unlocked: false,
+              },
+            ],
+          },
+        },
+      });
       return;
     }
 
@@ -1964,6 +2058,167 @@ async function mockPublicApi(
       await fulfillJson(
         route,
         { error: "FORBIDDEN", reason: "PREMIUM_REQUIRED" },
+        403,
+      );
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/the-locker-letter/choose" &&
+      route.request().method() === "POST"
+    ) {
+      const payload = route.request().postDataJSON?.() || {};
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      if (payload.choiceId === "choice-locker-premium") {
+        await fulfillJson(route, { error: "FORBIDDEN", reason: "PREMIUM_REQUIRED" }, 403);
+        return;
+      }
+      if (payload.choiceId === "choice-locker-token") {
+        await fulfillJson(
+          route,
+          { error: "FORBIDDEN", reason: "TOKEN_UNLOCK_COMING_SOON" },
+          403,
+        );
+        return;
+      }
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[1],
+          state: {
+            trust: 1,
+            clues: 1,
+            risk: 0,
+            pathNodeIds: ["node-locker-1", "node-locker-ending"],
+            endingsReached: ["node-locker-ending"],
+          },
+          flags: [],
+          currentDepth: 2,
+          endingsReached: 1,
+          path: [
+            {
+              nodeId: "node-locker-1",
+              nodeKey: "locker-start",
+              title: "The Locker Letter",
+              isEnding: false,
+            },
+            {
+              nodeId: "node-locker-ending",
+              nodeKey: "cafeteria-ending",
+              title: "Cafeteria Ending",
+              isEnding: true,
+            },
+          ],
+          node: {
+            id: "node-locker-ending",
+            key: "cafeteria-ending",
+            title: "Cafeteria Ending",
+            content:
+              "Maya matches the handwriting to a fake pass sheet, and by lunch the lie finally has nowhere left to hide.",
+            isEnding: true,
+            choices: [],
+          },
+        },
+      });
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/the-locker-letter/restart" &&
+      route.request().method() === "POST"
+    ) {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      await fulfillJson(route, {
+        progress: {
+          story: INTERACTIVE_STORIES[1],
+          state: {
+            trust: 0,
+            clues: 0,
+            risk: 0,
+            pathNodeIds: ["node-locker-1"],
+            endingsReached: [],
+          },
+          flags: [],
+          currentDepth: 1,
+          endingsReached: 0,
+          path: [
+            {
+              nodeId: "node-locker-1",
+              nodeKey: "locker-start",
+              title: "The Locker Letter",
+              isEnding: false,
+            },
+          ],
+          node: {
+            id: "node-locker-1",
+            key: "locker-start",
+            title: "The Locker Letter",
+            content:
+              "Between fourth period and lunch, a folded note slides out of locker 318. It says your name, two warnings, and one lie you can test right now.",
+            isEnding: false,
+            choices: [
+              {
+                id: "choice-locker-open",
+                key: "ask-maya",
+                label: "Ask Maya about the note",
+                description: "Go straight to the one friend who notices every hallway rumor.",
+                requiresPremium: false,
+                requiresTokens: 0,
+                unlockPolicy: "FREE",
+                unlockLabel: null,
+                locked: false,
+                lockedReason: null,
+                unlocked: false,
+              },
+              {
+                id: "choice-locker-premium",
+                key: "check-camera",
+                label: "Check the security camera room",
+                description: "A member-only branch with a faster clue path.",
+                requiresPremium: true,
+                requiresTokens: 0,
+                unlockPolicy: "PREMIUM_ONLY",
+                unlockLabel: "Members Only",
+                locked: true,
+                lockedReason: "PREMIUM_REQUIRED",
+                unlocked: false,
+              },
+              {
+                id: "choice-locker-token",
+                key: "buy-snack-alibi",
+                label: "Bribe the lunch cashier for the receipt log",
+                description: "A token route that is still gated during rollout.",
+                requiresPremium: false,
+                requiresTokens: 15,
+                unlockPolicy: "TOKENS_ONLY",
+                unlockLabel: "Token unlock coming soon",
+                locked: true,
+                lockedReason: "TOKEN_UNLOCK_COMING_SOON",
+                unlocked: false,
+              },
+            ],
+          },
+        },
+      });
+      return;
+    }
+
+    if (
+      pathname === "/api/interactive-stories/slug/the-locker-letter/unlock-choice" &&
+      route.request().method() === "POST"
+    ) {
+      if (!signedIn) {
+        await fulfillJson(route, { error: "UNAUTHENTICATED" }, 401);
+        return;
+      }
+      await fulfillJson(
+        route,
+        { error: "FORBIDDEN", reason: "TOKEN_UNLOCK_COMING_SOON" },
         403,
       );
       return;
@@ -2367,6 +2622,95 @@ test.describe("Public reading funnel", () => {
     await expect(page.getByRole("button", { name: /Restart/i }).first()).toBeVisible();
 
     await expectNoRuntimeIssues("interactive-choice-submit", runtimeIssues);
+  });
+
+  test("interactive locker letter play renders story body, locked states, ending, and restart", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: true,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const landingResponse = await page.goto("/interactive", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(landingResponse?.ok()).toBeTruthy();
+    const landingHtml = await page.content();
+    expect(landingHtml).toContain("Midnight Archive");
+    expect(landingHtml).toContain("The Locker Letter");
+
+    const detailResponse = await page.goto("/interactive/the-locker-letter", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(detailResponse?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("The Locker Letter");
+    await expect(page.locator("main")).toContainText("hallway rumor");
+
+    const playResponse = await page.goto("/interactive/the-locker-letter/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(playResponse?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("Current Node");
+    await expect(page.locator("main")).toContainText("The Locker Letter");
+    await expect(page.locator("main")).toContainText(
+      "Between fourth period and lunch, a folded note slides out of locker 318.",
+    );
+    await expect(page.locator("main")).toContainText("Ask Maya about the note");
+    await expect(page.locator("main")).toContainText("Check the security camera room");
+    await expect(page.locator("main")).toContainText("Bribe the lunch cashier for the receipt log");
+    await expect(page.locator("main")).toContainText("Members can unlock this branch.");
+    await expect(page.locator("main")).toContainText("Token unlock coming soon.");
+
+    const firstChoice = page.getByRole("button", {
+      name: /Ask Maya about the note/i,
+    });
+    await firstChoice.click();
+    await expect(page.locator("main")).toContainText("Cafeteria Ending", {
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).toContainText("Ending");
+
+    await page.getByRole("button", { name: /Restart/i }).first().click();
+    await expect(page.locator("main")).toContainText(
+      "Between fourth period and lunch, a folded note slides out of locker 318.",
+      { timeout: UI_TIMEOUT_MS },
+    );
+    await expect(page.locator("main")).toContainText("Ask Maya about the note");
+
+    const tokenLockedChoice = page.getByRole("button", {
+      name: "Bribe the lunch cashier for the receipt log",
+      exact: true,
+    });
+    await expect(tokenLockedChoice).toBeDisabled();
+
+    await expectNoRuntimeIssues("interactive-locker-letter-play", runtimeIssues);
+  });
+
+  test("interactive play lets guests read the opening node without empty current-node shell", async ({
+    page,
+  }) => {
+    const runtimeIssues = collectRuntimeIssues(page);
+    await mockPublicApi(page, {
+      signedIn: false,
+      matureConfirmed: false,
+      matureModeEnabled: false,
+    });
+
+    const response = await page.goto("/interactive/midnight-archive/play", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.ok()).toBeTruthy();
+    await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
+    await expect(page.locator("main")).toContainText(
+      "The archive room clicks shut behind you. One note points upstairs.",
+    );
+    await expect(page.locator("main")).toContainText("Follow the upstairs note");
+    await expect(page.locator("main")).not.toContainText("Sign in to start");
+
+    await expectNoRuntimeIssues("interactive-guest-opening-node", runtimeIssues);
   });
 
   test("interactive adult stories stay hidden outside adult mode", async ({

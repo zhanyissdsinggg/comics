@@ -51,6 +51,9 @@ function getLockedCopy(choice) {
   }
   const tokens = Number(choice?.requiresTokens || 0);
   const policy = normalizeText(choice?.unlockPolicy || "").toUpperCase();
+  if (choice.lockedReason === "TOKEN_UNLOCK_COMING_SOON") {
+    return choice.unlockLabel || "Token unlock coming soon";
+  }
   if (policy === "PREMIUM_ONLY") {
     return choice.unlockLabel || "Members Only";
   }
@@ -70,6 +73,22 @@ function getLockedCopy(choice) {
     return choice.unlockLabel || `Unlock for ${tokens} Tokens`;
   }
   return choice.unlockLabel || "Locked";
+}
+
+function getLockedReasonDescription(choice) {
+  if (!choice?.locked) {
+    return "";
+  }
+  if (choice.lockedReason === "PREMIUM_REQUIRED") {
+    return "Members can unlock this branch.";
+  }
+  if (choice.lockedReason === "TOKENS_REQUIRED") {
+    return `Need ${Number(choice?.requiresTokens || 0)} tokens to unlock this branch.`;
+  }
+  if (choice.lockedReason === "TOKEN_UNLOCK_COMING_SOON") {
+    return "Token unlock coming soon.";
+  }
+  return "This branch is locked right now.";
 }
 
 function getRouteDepth(progress) {
@@ -181,7 +200,7 @@ export default function InteractiveStoryPage({
       setAuthRequired(true);
       setProgress(null);
       if (mode === "play") {
-        setError("Sign in to keep going.");
+        setError("Sign in to start.");
       }
       return null;
     }
@@ -350,7 +369,11 @@ export default function InteractiveStoryPage({
           }),
           reason: response.data?.reason || choice.lockedReason || "LOCKED",
         });
-        setDegradedNotice("That choice is still locked for this account.");
+        setDegradedNotice(
+          response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
+            ? "Token unlock coming soon."
+            : "That choice is still locked for this account.",
+        );
         await loadProgress();
         return;
       }
@@ -417,7 +440,11 @@ export default function InteractiveStoryPage({
       }
 
       if (response.status === 403) {
-        setDegradedNotice("That choice is locked right now.");
+        setDegradedNotice(
+          response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
+            ? "Token unlock coming soon."
+            : "That choice is locked right now.",
+        );
         await loadProgress();
         return;
       }
@@ -483,6 +510,7 @@ export default function InteractiveStoryPage({
   const continueLabel = progress?.node?.id ? "Resume story" : "Start story";
   const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
   const playHref = `${detailHref}/play`;
+  const showSignInStart = authRequired && !node?.id;
 
   if (loading) {
     return <LoadingShell />;
@@ -631,51 +659,79 @@ export default function InteractiveStoryPage({
           <div className="grid gap-4">
             <div ref={storyBodyRef} className="scroll-mt-24">
               <SurfacePanel tone="muted" accent={isEnding ? "rose" : "cyan"} appearance="dark">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  {isEnding ? (
-                    <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                      Ending
+                {showSignInStart ? (
+                  <div className="grid gap-4">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                      Sign in to start
+                    </p>
+                    <p className="text-sm leading-7 text-white/80">
+                      Sign in to save your route, unlock premium branches, and keep your progress synced.
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={openAuthModal}
+                        className={storefrontPrimaryButtonClass}
+                      >
+                        Sign in to start
+                      </button>
+                      <Link href={detailHref} className={storefrontSecondaryButtonClass}>
+                        Back to story
+                      </Link>
                     </div>
-                  ) : null}
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                    {normalizeText(node?.title || "Current Node")}
-                  </p>
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
-                  Depth {routeDepth}
-                </div>
-              </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        {isEnding ? (
+                          <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                            Ending
+                          </div>
+                        ) : null}
+                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                          Current Node
+                        </p>
+                        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">
+                          {normalizeText(node?.title || "Story start")}
+                        </h2>
+                      </div>
+                      <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
+                        Depth {routeDepth}
+                      </div>
+                    </div>
 
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,#67e8f9_0%,#fda4af_100%)] transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(18, routeDepth * 18))}%` }}
-                />
-              </div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,#67e8f9_0%,#fda4af_100%)] transition-all duration-500"
+                        style={{ width: `${Math.min(100, Math.max(18, routeDepth * 18))}%` }}
+                      />
+                    </div>
 
-              <p className="mt-5 whitespace-pre-line text-[15px] leading-8 text-white/85 transition-opacity duration-300">
-                {normalizeText(node?.content)}
-              </p>
+                    <p className="mt-5 whitespace-pre-line text-[15px] leading-8 text-white/85 transition-opacity duration-300">
+                      {normalizeText(node?.content || story?.baseContext)}
+                    </p>
 
-              {isEnding ? (
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleRestart}
-                    className={storefrontPrimaryButtonClass}
-                  >
-                    Restart
-                  </button>
-                  <Link href={detailHref} className={storefrontSecondaryButtonClass}>
-                    Try another path
-                  </Link>
-                </div>
-              ) : null}
+                    {isEnding ? (
+                      <div className="mt-6 flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleRestart}
+                          className={storefrontPrimaryButtonClass}
+                        >
+                          Restart
+                        </button>
+                        <Link href={detailHref} className={storefrontSecondaryButtonClass}>
+                          Try another path
+                        </Link>
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </SurfacePanel>
             </div>
 
-            {!isEnding ? (
+            {!isEnding && !showSignInStart ? (
               <SurfacePanel tone="muted" accent="amber" appearance="dark">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="text-base font-black uppercase tracking-[0.01em] text-white">
@@ -718,6 +774,11 @@ export default function InteractiveStoryPage({
                             {choice.description ? (
                               <div className="mt-1 text-xs leading-5 text-white/65">
                                 {normalizeText(choice.description)}
+                              </div>
+                            ) : null}
+                            {choice.locked ? (
+                              <div className="mt-2 text-[11px] leading-5 text-amber-200/90">
+                                {getLockedReasonDescription(choice)}
                               </div>
                             ) : null}
                           </div>
