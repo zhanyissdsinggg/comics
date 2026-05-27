@@ -26,6 +26,17 @@ function isProductionDeployment() {
   return resolved === "production";
 }
 
+function isInteractiveDebugEnabled() {
+  const explicit = normalizeText(process.env.NEXT_PUBLIC_SHOW_INTERACTIVE_DEBUG).toLowerCase();
+  if (["1", "true", "yes", "on"].includes(explicit)) {
+    return true;
+  }
+  if (["0", "false", "no", "off"].includes(explicit)) {
+    return false;
+  }
+  return !isProductionDeployment();
+}
+
 function createIdempotencyKey() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -521,7 +532,7 @@ export default function InteractiveStoryPage({
   const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
   const playHref = `${detailHref}/play`;
   const showSignInStart = authRequired && !node?.id;
-  const showRawState = !isProductionDeployment();
+  const showRawState = isInteractiveDebugEnabled();
 
   if (loading) {
     return <LoadingShell />;

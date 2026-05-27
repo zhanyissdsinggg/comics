@@ -106,6 +106,38 @@ async function assertHomeInteractiveLink(page, options = {}) {
   }
 }
 
+async function assertInteractivePlay(page) {
+  const response = await page.goto(`${BASE_URL}/interactive/the-locker-letter/play`, {
+    waitUntil: "networkidle",
+  });
+  if (!response?.ok()) {
+    throw new Error(`[play] returned ${response?.status() || "unknown"}`);
+  }
+
+  const bodyText = await page.locator("main").innerText();
+  const html = await page.content();
+  const requiredCopy = [
+    "A Letter in the Locker",
+    "Choose carefully",
+    "Show the letter to Maya",
+    "Inspect the envelope alone",
+    "Skip lunch and follow the note now",
+    "Your route so far",
+  ];
+  for (const copy of requiredCopy) {
+    if (!bodyText.includes(copy) && !html.includes(copy)) {
+      throw new Error(`[play] missing expected copy "${copy}"`);
+    }
+  }
+
+  const forbiddenDebug = ["affection:", "trust:", "risk:", "clues:", "State"];
+  for (const copy of forbiddenDebug) {
+    if (bodyText.includes(copy)) {
+      throw new Error(`[play] leaked raw interactive debug copy "${copy}"`);
+    }
+  }
+}
+
 async function main() {
   const browser = await chromium.launch({ headless: true });
 
@@ -127,6 +159,9 @@ async function main() {
       hasPublishedStory: interactiveLanding.hasPublishedStory,
     });
     console.log("PASS home interactive link");
+
+    await assertInteractivePlay(page);
+    console.log("PASS /interactive/the-locker-letter/play");
 
     console.log(`Production interactive smoke passed against ${BASE_URL}`);
   } finally {

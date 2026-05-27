@@ -2660,6 +2660,12 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText(
       "Between fourth period and lunch, a folded note slides out of locker 318.",
     );
+    await expect(page.locator("main")).toContainText("Your route so far");
+    await expect(page.locator("main")).not.toContainText("State");
+    await expect(page.locator("main")).not.toContainText("affection:");
+    await expect(page.locator("main")).not.toContainText("trust:");
+    await expect(page.locator("main")).not.toContainText("risk:");
+    await expect(page.locator("main")).not.toContainText("clues:");
     await expect(page.locator("main")).toContainText("Ask Maya about the note");
     await expect(page.locator("main")).toContainText("Check the security camera room");
     await expect(page.locator("main")).toContainText("Bribe the lunch cashier for the receipt log");
