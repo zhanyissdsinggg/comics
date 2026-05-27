@@ -446,7 +446,7 @@ function SeriesDetailContent({
   return (
     <main className={cn("min-h-screen", palette.rootBg)}>
       <FigmaChrome>
-        <div className="relative h-[300px] w-full bg-black min-[420px]:h-[320px] sm:h-[390px] md:h-[520px]">
+        <div className="relative min-h-[420px] w-full bg-black sm:min-h-[520px] md:min-h-[620px]">
             <div className="absolute inset-0">
               <div
                 aria-hidden="true"
@@ -466,16 +466,16 @@ function SeriesDetailContent({
             />
           </div>
 
-          <div className="relative mx-auto flex h-full max-w-[1200px] flex-col justify-end px-4 pb-5 md:px-8 md:pb-10">
-            <div className="flex w-full flex-col items-start gap-3.5 md:flex-row md:items-start md:gap-8">
+          <div className="relative mx-auto flex h-full max-w-[1240px] flex-col justify-end px-4 pb-6 md:px-8 md:pb-12">
+            <div className="flex w-full flex-col items-start gap-4 md:flex-row md:items-end md:gap-10">
               <img
                 src={coverImageUrl}
                 alt={coverAltText}
-                className="w-28 shrink-0 self-end translate-y-3 rounded-xl object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-32 min-[420px]:translate-y-5 md:w-64 md:self-auto md:translate-y-24"
+                className="w-36 shrink-0 self-end translate-y-6 rounded-[22px] object-cover shadow-2xl ring-2 ring-white/10 min-[420px]:w-40 md:w-72 md:self-auto md:translate-y-20"
               />
 
-              <div className="w-full flex-1 rounded-[24px] border border-white/10 bg-black/24 px-4 py-3.5 backdrop-blur-md md:rounded-[26px] md:border-0 md:bg-transparent md:px-0 md:py-0">
-                <div className="mb-2 flex flex-wrap gap-2 md:mb-3">
+              <div className="w-full flex-1 rounded-[28px] border border-white/10 bg-black/24 px-4 py-4 backdrop-blur-md md:border-0 md:bg-transparent md:px-0 md:py-0">
+                <div className="mb-3 flex flex-wrap gap-2">
                   {detailItem.tags.map((tag) => (
                     <span
                       key={tag}
@@ -488,7 +488,7 @@ function SeriesDetailContent({
                     </span>
                   ))}
                 </div>
-                <h1 className="mb-1 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[1.75rem] font-black leading-none tracking-tight text-transparent drop-shadow-sm md:mb-2 md:text-5xl">
+                <h1 className="mb-2 max-w-[10ch] bg-gradient-to-r from-white to-gray-300 bg-clip-text text-[2rem] font-black leading-[0.9] tracking-tight text-transparent drop-shadow-sm md:text-[4.5rem]">
                   {detailItem.title}
                 </h1>
                 <div className="mb-3 text-sm font-medium text-gray-300 md:mb-4 md:text-lg">
@@ -504,8 +504,11 @@ function SeriesDetailContent({
                     <p>{creatorLabel}</p>
                   )}
                 </div>
+                <p className="mb-4 max-w-[42rem] text-sm leading-7 text-gray-200/78 md:mb-5 md:text-base">
+                  {detailItem.description}
+                </p>
 
-                <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:mb-6 md:gap-6 md:text-sm">
+                <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-bold text-gray-400 md:mb-7 md:gap-6 md:text-sm">
                   <div
                     data-testid="series-hero-metadata"
                     className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium uppercase tracking-[0.12em] text-gray-400 md:text-sm"
@@ -577,6 +580,9 @@ function SeriesDetailContent({
                     </button>
                   </div>
                 </div>
+                <p className="mt-4 text-xs uppercase tracking-[0.18em] text-gray-400 md:text-sm">
+                  Start with {chapterItems[chapterItems.length - 1]?.title || "the first chapter"} and keep going from there.
+                </p>
               </div>
             </div>
           </div>
@@ -592,10 +598,10 @@ function SeriesDetailContent({
               )}
             >
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                Story Brief
+                Why Start
               </p>
               <h3 className="mt-3 text-lg font-black text-white md:text-xl">
-                Synopsis
+                Open this if you want
               </h3>
               <p className="mt-3 text-sm leading-6 text-gray-400 md:leading-relaxed">
                 {detailItem.description}
@@ -615,7 +621,7 @@ function SeriesDetailContent({
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Shelf State
+                    Reading Pace
                   </p>
                   <p className="mt-2 text-sm font-bold text-white">
                     {detailItem.status || "Ongoing"}
@@ -641,19 +647,16 @@ function SeriesDetailContent({
               <div className="mb-5 flex flex-col items-start gap-2.5 border-b border-gray-800 pb-3 sm:flex-row sm:items-center sm:justify-between md:mb-6 md:pb-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
-                    Reading Queue
+                    Start Reading
                   </p>
                   <h2 className="mt-2 flex items-center gap-2 text-lg font-bold tracking-tight text-white md:text-xl">
                     <List className={cn("h-5 w-5", palette.primaryText)} />
                     {chapterPrefix} ({chapterItems.length})
                   </h2>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Begin at chapter one or jump into the newest drop.
+                  </p>
                 </div>
-                <button
-                  type="button"
-                  className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400 transition-colors hover:text-white"
-                >
-                  Sort: Newest
-                </button>
               </div>
 
               <div className="space-y-3">

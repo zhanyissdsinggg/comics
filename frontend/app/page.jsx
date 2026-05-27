@@ -1,5 +1,5 @@
 import StructuredDataScript from "../components/common/StructuredDataScript";
-import HomePage from "../components/home/HomePage";
+import HomeLandingPage from "../components/storefront/HomeLandingPage";
 import { buildNoIndexRobots, createPageMetadata } from "../lib/seo";
 import {
   buildOrganizationStructuredData,
@@ -34,7 +34,7 @@ export default async function Page({ searchParams }) {
   return (
     <>
       <StructuredDataScript id="home-jsonld" data={structuredData} />
-      <HomePage
+      <HomeLandingPage
         initialSearchParams={(await searchParams) || {}}
         initialHomeData={initialHomeData}
       />

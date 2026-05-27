@@ -1,5 +1,4 @@
-import FigmaHomePage from "../../components/figma/FigmaHomePage";
-import { FIGMA_CONTENT_TYPES } from "../../components/figma/figma-utils";
+import ComicsLandingPage from "../../components/storefront/ComicsLandingPage";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
@@ -22,10 +21,10 @@ export default async function Page() {
   });
 
   return (
-    <FigmaHomePage
-      seriesList={payload?.series || []}
-      initialContentType={FIGMA_CONTENT_TYPES.COMICS}
+    <ComicsLandingPage
+      initialSeries={payload?.series || []}
       initialReady={payload?.ready}
+      initialIncludeAdult={includeAdult}
     />
   );
 }

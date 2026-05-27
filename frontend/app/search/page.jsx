@@ -4,7 +4,9 @@ import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 import { loadSearchSeoPayload } from "../../lib/storefrontSeo";
 
-const SearchPage = dynamic(() => import("../../components/search/SearchPage"));
+const DiscoverySearchPage = dynamic(() =>
+  import("../../components/storefront/DiscoverySearchPage"),
+);
 
 export const metadata = createPageMetadata({
   title: "Search Comics & Novels",
@@ -64,7 +66,7 @@ export default async function Page({ searchParams }) {
   });
 
   return (
-    <SearchPage
+    <DiscoverySearchPage
       initialQuery={initialQuery}
       initialType={initialType}
       initialFormat={initialFormat}

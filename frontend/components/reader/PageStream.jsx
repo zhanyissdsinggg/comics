@@ -563,7 +563,7 @@ export default function PageStream({
         </>
       ) : (
         <article
-          className="mx-auto w-full max-w-[42.5rem] pb-8"
+          className="mx-auto w-full max-w-[42.5rem] pb-10 pt-2"
           style={{
             fontSize: `${fontSize}px`,
             lineHeight,
@@ -579,18 +579,14 @@ export default function PageStream({
               }}
               data-index={index}
             >
-              {index === 0 ? (
-                <div
-                  className={`mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] ${proseMutedClass}`}
-                >
-                  Continue reading
-                </div>
-              ) : null}
               <p
-                className="whitespace-pre-wrap break-words text-[1em] leading-[inherit]"
+                className={cn(
+                  "whitespace-pre-wrap break-words text-[1em] leading-[inherit]",
+                  index === 0 ? "text-[1.02em]" : "",
+                )}
                 style={{
                   marginBottom:
-                    index === visibleParagraphs.length - 1 ? "0" : "1.18em",
+                    index === visibleParagraphs.length - 1 ? "0" : "1.35em",
                 }}
               >
                 {paragraph}

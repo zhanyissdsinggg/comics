@@ -1,6 +1,6 @@
 "use client";
 
-import FigmaReaderPage from "../../../../components/figma/FigmaReaderPage";
+import ReaderV2 from "../../../../components/storefront/ReaderV2";
 import { BookmarkProvider } from "../../../../store/useBookmarkStore";
 import { CouponProvider } from "../../../../store/useCouponStore";
 import { EntitlementProvider } from "../../../../store/useEntitlementStore";
@@ -21,7 +21,7 @@ export default function ReaderPageRuntime({
           <CouponProvider>
             <ReaderSettingsProvider>
               <BookmarkProvider>
-                <FigmaReaderPage
+                <ReaderV2
                   seriesId={seriesId}
                   episodeId={episodeId}
                   fallbackData={fallbackData}

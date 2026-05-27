@@ -2,13 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import {
-  Bookmark,
-  BookmarkCheck,
-  ChevronLeft,
-  Ellipsis,
-  Settings2,
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const ShareButton = dynamic(() => import("../common/ShareButton"), {
@@ -43,8 +37,6 @@ export default function ReaderTopBar({
   seriesType = "comic",
   variant = "minimal",
   isComic = false,
-  rightSlot = null,
-  bookmarkActive = false,
 }) {
   if (variant === "minimal") {
     return (
@@ -77,16 +69,6 @@ export default function ReaderTopBar({
               <ChevronLeft className="h-5 w-5" />
             </button>
             <div className="min-w-0">
-              {subtitle ? (
-                <p
-                  className={cn(
-                    "mb-1 truncate text-[10px] font-semibold uppercase tracking-[0.22em]",
-                    isComic ? "text-white/58" : "text-[#667085]",
-                  )}
-                >
-                  {subtitle}
-                </p>
-              ) : null}
               {contextLabel ? (
                 <p
                   className={cn(
@@ -116,58 +98,17 @@ export default function ReaderTopBar({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {typeof onAddBookmark === "function" ? (
-              <button
-                type="button"
-                onClick={onAddBookmark}
-                aria-label={
-                  bookmarkActive ? "Remove bookmark" : "Save bookmark"
-                }
-                className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
-                  isComic
-                    ? "border-white/10 bg-white/5 text-gray-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                    : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
-                )}
-              >
-                {bookmarkActive ? (
-                  <BookmarkCheck className="h-5 w-5" />
-                ) : (
-                  <Bookmark className="h-5 w-5" />
-                )}
-              </button>
-            ) : null}
-            {typeof onOpenSettings === "function" ? (
-              <button
-                type="button"
-                onClick={onOpenSettings}
-                aria-label="Reader Settings"
-                className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-2xl border transition-all active:scale-[0.97]",
-                  isComic
-                    ? "border-white/10 bg-white/5 text-gray-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                    : "border-[#d8dde6] bg-white/90 text-[#1f2933] hover:bg-white",
-                )}
-              >
-                <Settings2 className="h-5 w-5" />
-              </button>
-            ) : null}
-            {rightSlot}
-            {!rightSlot ? (
-              <button
-                type="button"
-                aria-label="More"
-                className={cn(
-                  "hidden h-11 w-11 items-center justify-center rounded-2xl border transition-all md:flex",
-                  isComic
-                    ? "border-white/10 bg-white/5 text-gray-300"
-                    : "border-[#d8dde6] bg-white/90 text-[#1f2933]",
-                )}
-              >
-                <Ellipsis className="h-5 w-5" />
-              </button>
-            ) : null}
+          <div
+            className={cn(
+              "inline-flex min-h-[44px] items-center rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em]",
+              isComic
+                ? "border-white/10 bg-white/5 text-white/72"
+                : "border-[#d8dde6] bg-white/90 text-[#667085]",
+            )}
+          >
+            {typeof progress === "number"
+              ? `${Math.max(1, Math.round(progress * 100))}%`
+              : subtitle || "Reader"}
           </div>
         </div>
       </header>

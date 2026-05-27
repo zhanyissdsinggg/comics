@@ -117,11 +117,11 @@ export default function InteractiveLandingPage({
               Interactive Stories
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-[-0.06em] text-white sm:text-5xl">
-              Pick a route. Wear the consequences.
+              Your Choice Changes the Story
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-              Branching comic and novel experiences built for replay. Every approved node
-              counts, every choice leaves a mark, and endings are earned.
+              Read interactive comics where every decision unlocks a new scene, a
+              secret route, or a completely different ending.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button

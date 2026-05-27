@@ -1,5 +1,5 @@
 import StructuredDataScript from "../../../components/common/StructuredDataScript";
-import FigmaSeriesDetailPage from "../../../components/figma/FigmaSeriesDetailPage";
+import SeriesDetailV2 from "../../../components/storefront/SeriesDetailV2";
 import { notFound } from "next/navigation";
 import { buildNoIndexRobots, createPageMetadata } from "../../../lib/seo";
 import { resolveSeriesCreatorName } from "../../../lib/creatorIdentity";
@@ -163,7 +163,7 @@ export default async function SeriesRoutePage({ params, searchParams }) {
         id={`series-jsonld-${seriesId}`}
         data={structuredData}
       />
-      <FigmaSeriesDetailPage
+      <SeriesDetailV2
         seriesId={seriesId}
         series={routePayload?.payload?.series || null}
         episodes={routePayload?.payload?.episodes || []}

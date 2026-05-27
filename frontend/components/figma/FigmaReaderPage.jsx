@@ -1397,6 +1397,7 @@ function ReaderContent({
           contextActionLabel={discoveryContext?.returnLabel || ""}
           subtitle={currentInstallmentLabel}
           episodeLabel={currentEpisodeTitle}
+          progress={readingPercent}
           onBack={() =>
             router.push(discoveryContext?.sourcePath || backToSeriesHref)
           }
@@ -1427,7 +1428,7 @@ function ReaderContent({
         onSaveProgress={handleBookmarkToggle}
       />
 
-      <section className="relative px-4 pb-4 pt-24 md:px-6 md:pt-28">
+      <section className="relative px-4 pb-2 pt-24 md:px-6 md:pt-28">
         <div
           className={cn(
             "mx-auto w-full",
@@ -1439,7 +1440,7 @@ function ReaderContent({
               "relative overflow-hidden border",
               isComic
                 ? "rounded-[26px] border-white/8 bg-[linear-gradient(180deg,rgba(10,10,10,0.96)_0%,rgba(6,6,6,0.92)_100%)] px-5 py-5 md:px-6 md:py-6"
-                : novelHeroClass,
+                : "rounded-[26px] border-[#e5dccd] bg-[linear-gradient(180deg,rgba(255,251,244,0.98)_0%,rgba(250,244,235,0.98)_100%)] px-5 py-5 shadow-[0_24px_60px_rgba(82,56,28,0.08)] md:px-6 md:py-6",
             )}
           >
             <div className="relative">
@@ -1451,7 +1452,7 @@ function ReaderContent({
                       : `${novelBorderClass} bg-transparent ${readerMutedClass}`,
                   )}
                 >
-                  Reader
+                  {isComic ? "Reader" : "Chapter"}
                 </ReaderMetaPill>
                 <ReaderMetaPill
                   className={cn(
@@ -1461,7 +1462,7 @@ function ReaderContent({
                     readerMutedClass,
                   )}
                 >
-                  {isComic ? "Comic" : isNovel ? "Novel" : "Reader"}
+                  {isComic ? "Comic" : currentInstallmentLabel}
                 </ReaderMetaPill>
                 <Pill
                   className={
@@ -1494,24 +1495,24 @@ function ReaderContent({
               >
                 {seriesData.series.title}
               </p>
-              <p
-                className={cn(
-                  "mt-3 max-w-3xl text-sm",
-                  isComic ? "leading-5" : "leading-6",
-                  readerMutedClass,
-                )}
-              >
-                {creatorName} -{" "}
-                {formatMetaDate(
-                  currentEpisode?.releasedAt ||
-                    episodeData?.releasedAt ||
-                    seriesData.series.updatedAt,
-                )}{" "}
-                -{" "}
-                {unlocked
-                  ? `Full ${installmentLabel.toLowerCase()} is ready.`
-                  : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
-              </p>
+                <p
+                  className={cn(
+                    "mt-3 max-w-3xl text-sm",
+                    isComic ? "leading-5" : "leading-7",
+                    readerMutedClass,
+                  )}
+                >
+                  {creatorName} ·{" "}
+                  {formatMetaDate(
+                    currentEpisode?.releasedAt ||
+                      episodeData?.releasedAt ||
+                      seriesData.series.updatedAt,
+                  )}{" "}
+                  ·{" "}
+                  {unlocked
+                    ? `Settle in for the full ${installmentLabel.toLowerCase()}.`
+                    : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
+                </p>
             </div>
           </div>
         </div>

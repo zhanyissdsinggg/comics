@@ -1,6 +1,5 @@
 "use client";
 
-import { Heart, Share2 } from "lucide-react";
 import { siteConfig } from "../../lib/siteConfig";
 import { cn } from "../../lib/utils";
 
@@ -24,11 +23,7 @@ export default function ReaderEndPanel({
   liked = false,
   onPrimaryAction,
   onOpenComments,
-  onPrev,
   onBack,
-  onBookmark,
-  onLike,
-  onShare,
   onOpenLogin,
   onOpenStore,
   onUnlock,
@@ -86,15 +81,15 @@ export default function ReaderEndPanel({
               </div>
             ) : null}
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
               {isUnlocked ? (
                 <button
                   type="button"
                   onClick={onPrimaryAction}
-                  aria-label={hasNextEpisode ? "Continue reading" : "Back to series"}
+                  aria-label={hasNextEpisode ? "Next chapter" : "More from this series"}
                   className={primaryButtonClassName}
                 >
-                  {hasNextEpisode ? "Continue reading" : "Back to series"}
+                  {hasNextEpisode ? "Next chapter" : "More from this series"}
                 </button>
               ) : !isSignedIn ? (
                 <button
@@ -141,59 +136,21 @@ export default function ReaderEndPanel({
                 onClick={onOpenComments}
                 className={secondaryButtonClassName}
               >
-                Join the discussion
-              </button>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={onPrev}
-                className={secondaryButtonClassName}
-              >
-                Previous chapter
+                Comments
               </button>
               <button
                 type="button"
                 onClick={onBack}
                 className={secondaryButtonClassName}
               >
-                Back to series
-              </button>
-              <button
-                type="button"
-                onClick={onBookmark}
-                className={secondaryButtonClassName}
-              >
-                {currentBookmark ? "Remove bookmark" : "Save progress"}
+                More from this series
               </button>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={onLike}
-                className={cn(
-                  "flex min-h-[92px] items-center justify-center gap-3 rounded-[24px] border px-4 py-4 text-sm font-bold transition-all active:scale-[0.98]",
-                  liked
-                    ? "border-red-500/30 bg-red-500/10 text-red-300"
-                    : borderClassName,
-                )}
-              >
-                <Heart className={cn("h-5 w-5", liked ? "fill-current" : "")} />
-                <span>{liked ? "Liked" : "Like"}</span>
-              </button>
-              <button
-                type="button"
-                onClick={onShare}
-                className={cn(
-                  "flex min-h-[92px] items-center justify-center gap-3 rounded-[24px] border px-4 py-4 text-sm font-bold transition-all active:scale-[0.98]",
-                  borderClassName,
-                )}
-              >
-                <Share2 className="h-5 w-5" />
-                <span>Share</span>
-              </button>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-gray-500">
+              {hasNextEpisode ? <span>Next chapter ready below</span> : null}
+              {currentBookmark ? <span>Progress saved</span> : null}
+              {liked ? <span>Liked</span> : null}
             </div>
           </div>
         </div>

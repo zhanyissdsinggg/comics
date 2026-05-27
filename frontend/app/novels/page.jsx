@@ -1,5 +1,4 @@
-import FigmaHomePage from "../../components/figma/FigmaHomePage";
-import { FIGMA_CONTENT_TYPES } from "../../components/figma/figma-utils";
+import NovelsLandingPage from "../../components/storefront/NovelsLandingPage";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
 import { loadSeriesCatalogSeoPayload } from "../../lib/storefrontSeo";
@@ -96,10 +95,10 @@ export default async function Page() {
   const initialReady = Boolean(payload?.ready) || snapshot.safeCatalog.length > 0;
 
   return (
-    <FigmaHomePage
-      seriesList={safeSeries}
-      initialContentType={FIGMA_CONTENT_TYPES.NOVELS}
+    <NovelsLandingPage
+      initialSeries={safeSeries}
       initialReady={initialReady}
+      initialIncludeAdult={includeAdult}
     />
   );
 }
