@@ -120,7 +120,6 @@ async function assertInteractivePlay(page) {
     "A Letter in the Locker",
     "Choose carefully",
     "Current Scene",
-    "Step 1",
     "Show the letter to Maya",
     "Inspect the envelope alone",
     "Skip lunch and follow the note now",
@@ -130,6 +129,14 @@ async function assertInteractivePlay(page) {
     if (!bodyText.includes(copy) && !html.includes(copy)) {
       throw new Error(`[play] missing expected copy "${copy}"`);
     }
+  }
+
+  const hasStepCopy =
+    bodyText.includes("Step 1") ||
+    html.includes("Step 1") ||
+    html.includes("Step <!-- -->1");
+  if (!hasStepCopy) {
+    throw new Error('[play] missing expected route step copy "Step 1"');
   }
 
   const forbiddenDebug = ["affection:", "trust:", "risk:", "clues:", "State"];
