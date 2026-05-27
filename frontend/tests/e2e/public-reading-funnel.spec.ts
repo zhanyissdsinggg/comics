@@ -2549,7 +2549,7 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Choices");
     await expect(page.locator("main")).toContainText("Choose carefully");
     await expect(page.locator("main")).toContainText("Your route so far");
-    await expect(page.locator("main")).toContainText("Depth 1");
+    await expect(page.locator("main")).toContainText("Step 1");
 
     const unlockedChoice = page.getByRole("button", {
       name: /Follow the upstairs note/i,
@@ -2649,12 +2649,17 @@ test.describe("Public reading funnel", () => {
     expect(detailResponse?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("The Locker Letter");
     await expect(page.locator("main")).toContainText("hallway rumor");
+    await expect(page.locator("main")).toContainText("Why play this story");
+    await expect(page.locator("main")).toContainText("2 endings");
+    await expect(page.locator("main")).toContainText("17 choices");
+    await expect(page.locator("main")).toContainText("Hidden clue route");
+    await expect(page.locator("main")).toContainText("Quick mystery run");
 
     const playResponse = await page.goto("/interactive/the-locker-letter/play", {
       waitUntil: "domcontentloaded",
     });
     expect(playResponse?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("Current Node");
+    await expect(page.locator("main")).toContainText("Current Scene");
     await expect(page.locator("main")).toContainText("The Locker Letter");
     await expect(page.locator("main")).toContainText("Choose carefully");
     await expect(page.locator("main")).toContainText(

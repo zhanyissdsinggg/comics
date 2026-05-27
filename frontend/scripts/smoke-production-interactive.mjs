@@ -119,6 +119,8 @@ async function assertInteractivePlay(page) {
   const requiredCopy = [
     "A Letter in the Locker",
     "Choose carefully",
+    "Current Scene",
+    "Step 1",
     "Show the letter to Maya",
     "Inspect the envelope alone",
     "Skip lunch and follow the note now",

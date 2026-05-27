@@ -114,6 +114,27 @@ function getRouteDepth(progress) {
   return Number(progress?.path?.length || progress?.currentDepth || 0);
 }
 
+function getStoryWhyPlayItems(story) {
+  const slug = normalizeText(story?.slug).toLowerCase();
+  if (slug === "the-locker-letter") {
+    return [
+      "2 endings",
+      "17 choices",
+      "Hidden clue route",
+      "Quick mystery run",
+    ];
+  }
+  if (slug === "solar-wind-first-contact") {
+    return [
+      "2 endings",
+      "13 choices",
+      "Space signal mystery",
+      "Quick sci-fi run",
+    ];
+  }
+  return [];
+}
+
 function getAnalyticsPayload({
   story,
   progress,
@@ -533,6 +554,7 @@ export default function InteractiveStoryPage({
   const playHref = `${detailHref}/play`;
   const showSignInStart = authRequired && !node?.id;
   const showRawState = isInteractiveDebugEnabled();
+  const whyPlayItems = useMemo(() => getStoryWhyPlayItems(story), [story]);
 
   if (loading) {
     return <LoadingShell />;
@@ -605,10 +627,27 @@ export default function InteractiveStoryPage({
                   </div>
                   <div className="mt-2 text-sm leading-6 text-white/80">
                     {progress?.node?.title
-                      ? `Current node: ${normalizeText(progress.node.title)}`
+                      ? `Current scene: ${normalizeText(progress.node.title)}`
                       : "No active progress yet."}
                   </div>
                 </SurfacePanel>
+                {whyPlayItems.length > 0 ? (
+                  <SurfacePanel tone="muted" accent="cyan" appearance="dark">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      Why play this story
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      {whyPlayItems.map((item) => (
+                        <div
+                          key={item}
+                          className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm font-semibold text-white/82"
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </SurfacePanel>
+                ) : null}
               </div>
             </div>
           </SurfacePanel>
@@ -712,14 +751,14 @@ export default function InteractiveStoryPage({
                           </div>
                         ) : null}
                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                          Current Node
+                          Current Scene
                         </p>
                         <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">
                           {normalizeText(node?.title || "Story start")}
                         </h2>
                       </div>
                       <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
-                        Depth {routeDepth}
+                        Step {routeDepth}
                       </div>
                     </div>
 
