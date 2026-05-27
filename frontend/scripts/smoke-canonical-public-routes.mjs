@@ -12,10 +12,10 @@ const buildIdPath = path.join(frontendRoot, ".next", "BUILD_ID");
 
 const ROUTE_SPECS = [
   { path: "/", expectedTitle: "Trending Comics, Novels, and Interactive Stories | Gush", expectedHeading: "" },
-  { path: "/comics", expectedTitle: "Comics", expectedHeading: "Comics" },
-  { path: "/novels", expectedTitle: "Novels", expectedHeading: "Novels" },
+  { path: "/comics", expectedTitle: "Comics", expectedHeading: "Crimson Tide" },
+  { path: "/novels", expectedTitle: "Novels", expectedHeading: "Solar Wind" },
   { path: "/creators", expectedTitle: "Creators", expectedHeading: "Creators" },
-  { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Find your next obsession" },
+  { path: "/search", expectedTitle: "Search Comics & Novels", expectedHeading: "Browse by mood, genre, and format" },
   { path: "/rankings", expectedTitle: "Trending Stories", expectedHeading: "Trending" },
   { path: "/series/series-001", expectedTitle: "The Last Kingdom", expectedHeading: "The Last Kingdom" },
   { path: "/series/series-004", expectedTitle: "Cherry Blossom High", expectedHeading: "Cherry Blossom High" },

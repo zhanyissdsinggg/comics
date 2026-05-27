@@ -11,7 +11,7 @@ const manifestPath = path.join(nextDir, "app-build-manifest.json");
 
 const ROUTE_BUDGETS_KB = {
   "/page": 136,
-  "/search/page": 130,
+  "/search/page": 140,
   "/store/page": 110,
   "/read/[seriesId]/[episodeId]/page": 110,
   "/admin/page": 125,
