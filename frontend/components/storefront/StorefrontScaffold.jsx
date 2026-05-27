@@ -173,7 +173,7 @@ export function SectionHeading({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.055em] text-white sm:text-[2.4rem]">
+        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.022em] text-white sm:text-[2.4rem]">
           {title}
         </h2>
         {description ? (
@@ -233,7 +233,7 @@ export function StoryHero({
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="max-w-[12ch] font-display text-[2.8rem] font-semibold leading-[0.86] tracking-[-0.08em] text-white sm:text-[4.1rem]">
+            <h1 className="max-w-[12ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.03em] text-white sm:text-[4rem]">
               {heroTitle}
             </h1>
             {description ? (
@@ -570,7 +570,7 @@ export function InteractivePromo() {
             <Gamepad2 className="size-3.5" />
             Interactive Stories
           </p>
-          <h2 className="font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.055em] text-white sm:text-[2.5rem]">
+          <h2 className="font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.022em] text-white sm:text-[2.5rem]">
             Your Choice Changes the Story
           </h2>
           <p className="max-w-[44rem] text-sm leading-7 text-white/68">

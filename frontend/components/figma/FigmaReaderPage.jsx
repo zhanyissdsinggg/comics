@@ -42,6 +42,7 @@ import {
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
+import { resolveReaderNarrativeParagraphs } from "../../lib/readerNarrativeCopy";
 import { siteConfig } from "../../lib/siteConfig";
 import { cn, isAdultContent } from "./figma-utils";
 
@@ -681,10 +682,15 @@ function ReaderContent({
     [episodeId, seriesBookmarks],
   );
   const pages = Array.isArray(episodeData?.pages) ? episodeData.pages : [];
-  const paragraphs = extractNarrativeParagraphs(
+  const rawParagraphs = extractNarrativeParagraphs(
     episodeData,
     episodeData?.paragraphs,
   );
+  const paragraphs = resolveReaderNarrativeParagraphs({
+    seriesId,
+    episodeNumber: currentNumber,
+    paragraphs: rawParagraphs,
+  });
   const isNovel = detectNovelReaderContent(episodeData, seriesType, paragraphs);
   const isComic =
     detectComicReaderContent(episodeData, seriesType, pages, paragraphs) &&
@@ -826,6 +832,17 @@ function ReaderContent({
       }),
     [activeAttribution, seriesData?.series],
   );
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return undefined;
+    }
+
+    document.body.classList.add("reader-page");
+    return () => {
+      document.body.classList.remove("reader-page");
+    };
+  }, []);
 
   useEffect(() => {
     if (!routeAttribution) {
@@ -1557,8 +1574,8 @@ function ReaderContent({
           imageSizes="(max-width: 768px) 100vw, 768px"
           seriesType={seriesType}
           textTheme={novelTheme}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
+          fontSize={Math.max(18, Number(fontSize || 18))}
+          lineHeight={Math.max(1.75, Number(lineHeight || 1.78))}
           brightness={brightness}
           shellClassName={readerPanelClass}
           onActiveIndexChange={setActiveIndex}

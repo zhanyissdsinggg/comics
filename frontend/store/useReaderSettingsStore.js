@@ -20,8 +20,8 @@ const DEFAULT_SETTINGS = {
   layoutMode: "vertical", // vertical, horizontal
   readingMode: "scroll", // scroll, single, double
 
-  fontSize: 16, // 12-24
-  lineHeight: 1.6, // 1.2-2.0
+  fontSize: 18, // 12-24
+  lineHeight: 1.78, // 1.2-2.0
   brightness: 100, // 50-150
 
   backgroundColor: "#ffffff",
@@ -115,7 +115,7 @@ export function ReaderSettingsProvider({ children }) {
 
   const setFontSize = useCallback((size) => {
     setSettings((prev) => {
-      const fontSize = Math.max(12, Math.min(24, Number(size) || 16));
+      const fontSize = Math.max(12, Math.min(24, Number(size) || 18));
       const next = { ...prev, fontSize };
       writeSettings(next);
       return next;
@@ -124,7 +124,7 @@ export function ReaderSettingsProvider({ children }) {
 
   const setLineHeight = useCallback((height) => {
     setSettings((prev) => {
-      const lineHeight = Math.max(1.2, Math.min(2.0, Number(height) || 1.6));
+      const lineHeight = Math.max(1.2, Math.min(2.0, Number(height) || 1.78));
       const next = { ...prev, lineHeight };
       writeSettings(next);
       return next;

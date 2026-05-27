@@ -388,11 +388,11 @@ export default function DiscoverySearchPage({
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
               Discovery
             </p>
-            <h1 className="mt-4 max-w-[14ch] font-display text-[2.9rem] font-semibold leading-[0.86] tracking-[-0.08em] text-white sm:text-[4rem]">
+            <h1 className="mt-4 max-w-[14ch] font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.03em] text-white sm:text-[3.9rem]">
               {heroTitle}
             </h1>
             <p className="mt-3 max-w-[42rem] text-[0.98rem] leading-7 text-white/68">
-              Search input stays up front, but the page now acts like a discovery shelf instead of a blank utility state.
+              Search stays fast, but the page now opens like a discovery floor with live covers, hot searches, and shelves worth tapping.
             </p>
           </div>
 
@@ -476,6 +476,17 @@ export default function DiscoverySearchPage({
 
       {!hasSearchIntent ? (
         <>
+          {discoveryModel.featured ? (
+            <StoryHero
+              series={discoveryModel.featured}
+              eyebrow="Discovery Pick"
+              title={discoveryModel.featured.title}
+              hook="Start from one strong cover, then branch into mood tags, genres, and fresh updates."
+              primaryLabel="Start Reading"
+              secondaryLabel="Open Series"
+            />
+          ) : null}
+
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Trending Searches"

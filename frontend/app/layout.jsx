@@ -1,3 +1,8 @@
+import {
+  Bricolage_Grotesque,
+  DM_Sans,
+  Literata,
+} from "next/font/google";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import "./globals.css";
@@ -11,6 +16,24 @@ import { getInteractiveNavigationAvailabilityServer } from "../lib/interactiveSe
 const CookieConsent = dynamic(
   () => import("../components/common/CookieConsent"),
 );
+
+const displayFont = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display-face",
+  display: "swap",
+});
+
+const bodyFont = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-body-face",
+  display: "swap",
+});
+
+const readerFont = Literata({
+  subsets: ["latin"],
+  variable: "--font-reader-face",
+  display: "swap",
+});
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const defaultTitle = `${siteConfig.siteName} | Comics, novels, and interactive stories`;
@@ -99,7 +122,11 @@ export default async function RootLayout({ children }) {
   ]);
 
   return (
-    <html lang="en" suppressHydrationWarning className="font-sans dark">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${displayFont.variable} ${bodyFont.variable} ${readerFont.variable} font-sans dark`}
+    >
       <body className="min-h-screen font-sans antialiased">
         <div
           hidden

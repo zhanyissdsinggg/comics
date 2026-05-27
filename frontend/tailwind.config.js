@@ -62,7 +62,7 @@ module.exports = {
           "-apple-system",
           "BlinkMacSystemFont",
           "\"Segoe UI\"",
-          "Inter",
+          "DM Sans",
           "Helvetica Neue",
           "Arial",
           "sans-serif",
@@ -73,6 +73,12 @@ module.exports = {
           "-apple-system",
           "BlinkMacSystemFont",
           "sans-serif",
+        ],
+        reader: [
+          "var(--font-reader)",
+          "Georgia",
+          "\"Times New Roman\"",
+          "serif",
         ],
       },
       borderRadius: {

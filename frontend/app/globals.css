@@ -7,13 +7,16 @@
 :root {
   color-scheme: dark;
   --font-ui-body:
-    "Avenir Next", "Inter", "SF Pro Text", "Segoe UI", "Helvetica Neue",
-    "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+    var(--font-body-face), "DM Sans", "Inter", "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
   --font-body:
-    var(--font-ui-body), "Avenir Next", "SF Pro Text", "Segoe UI",
-    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+    var(--font-body-face), "DM Sans", "Inter", "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
   --font-display:
-    "Fraunces", Georgia, "Times New Roman", serif;
+    var(--font-display-face), "Bricolage Grotesque", "Space Grotesk",
+    "DM Sans", sans-serif;
+  --font-reader:
+    var(--font-reader-face), "Literata", "Source Serif 4", Georgia, serif;
   --gush-bg: #0f0d13;
   --gush-bg-soft: #17131d;
   --gush-card: #1e1926;
@@ -182,6 +185,8 @@ main {
   :root {
     --gush-page-gutter: 0.9rem;
     --gush-section-gap: 1.6rem;
+    --gush-text-display-lg: clamp(2.15rem, 11vw, 3.35rem);
+    --gush-text-title-lg: clamp(1.42rem, 6.8vw, 1.9rem);
   }
 
   body::before {
@@ -190,6 +195,17 @@ main {
       radial-gradient(circle at 12% 8%, rgba(255, 79, 154, 0.11), transparent 22%),
       radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.08), transparent 24%);
     opacity: 0.98;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  :where(h1, h2, h3, h4, h5, h6).font-display {
+    letter-spacing: -0.014em;
+    line-height: 0.98;
   }
 }
 
@@ -201,8 +217,8 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.055em;
-  line-height: 0.9;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
   font-weight: 600;
   font-optical-sizing: auto;
   text-wrap: balance;
@@ -225,7 +241,23 @@ h4,
 h5,
 h6 {
   font-size: 1rem;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
+}
+
+:where(h1, h2, h3, h4, h5, h6).font-display {
+  letter-spacing: -0.022em;
+  line-height: 0.94;
+}
+
+.reader-prose {
+  font-family: var(--font-reader);
+  font-size: clamp(18px, 1.12rem, 20px);
+  line-height: 1.82;
+  letter-spacing: -0.003em;
+}
+
+.reader-prose p {
+  color: inherit;
 }
 
 p {

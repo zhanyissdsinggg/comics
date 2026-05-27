@@ -563,8 +563,9 @@ export default function PageStream({
         </>
       ) : (
         <article
-          className="mx-auto w-full max-w-[42.5rem] pb-10 pt-2"
+          className="reader-prose mx-auto w-full max-w-[44rem] px-1 pb-10 pt-2 sm:px-0"
           style={{
+            fontFamily: "var(--font-reader)",
             fontSize: `${fontSize}px`,
             lineHeight,
           }}

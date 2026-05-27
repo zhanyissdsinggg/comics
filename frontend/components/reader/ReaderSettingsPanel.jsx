@@ -144,9 +144,9 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
   disableLayoutToggle = false,
   theme = "light",
   onThemeChange,
-  fontSize = 16,
+  fontSize = 18,
   onFontSizeChange,
-  lineHeight = 1.6,
+  lineHeight = 1.78,
   onLineHeightChange,
   brightness = 100,
   onBrightnessChange,
@@ -156,8 +156,8 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
 }) {
   const [isDesktop, setIsDesktop] = useState(false);
   const safeBrightness = clamp(brightness, 50, 150, 100);
-  const safeFontSize = clamp(fontSize, 12, 24, 16);
-  const safeLineHeight = clamp(lineHeight, 1.2, 2.0, 1.6);
+  const safeFontSize = clamp(fontSize, 12, 24, 18);
+  const safeLineHeight = clamp(lineHeight, 1.2, 2.0, 1.78);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -190,11 +190,11 @@ const ReaderSettingsPanel = memo(function ReaderSettingsPanel({
       if (showTextControls && theme !== "light") {
         onThemeChange?.("light");
       }
-      if (showTextControls && safeFontSize !== 16) {
-        onFontSizeChange?.(16);
+      if (showTextControls && safeFontSize !== 18) {
+        onFontSizeChange?.(18);
       }
-      if (showTextControls && safeLineHeight !== 1.6) {
-        onLineHeightChange?.(1.6);
+      if (showTextControls && safeLineHeight !== 1.78) {
+        onLineHeightChange?.(1.78);
       }
       if (safeBrightness !== 100) {
         onBrightnessChange?.(100);

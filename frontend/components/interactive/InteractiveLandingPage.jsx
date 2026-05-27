@@ -120,8 +120,8 @@ export default function InteractiveLandingPage({
               Your Choice Changes the Story
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-              Read interactive comics where every decision unlocks a new scene, a
-              secret route, or a completely different ending.
+              Every choice changes the route. Unlock secret scenes, hidden clues,
+              and different endings.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button

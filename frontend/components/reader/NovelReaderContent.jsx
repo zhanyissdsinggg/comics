@@ -28,7 +28,7 @@ export default function NovelReaderContent({
 }) {
   return (
     <section className="relative">
-      <div className="mx-auto w-full max-w-[760px]">
+      <div className="mx-auto w-full max-w-[740px]">
         <div
           data-testid="novel-reader-content"
           data-reader-kind="novel"
