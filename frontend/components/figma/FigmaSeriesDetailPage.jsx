@@ -99,17 +99,22 @@ function buildSeriesStatusCopy(series) {
   return "Ongoing";
 }
 
-function resolveEpisodeReadsLabel(episode) {
-  const numeric =
-    Number(
-      episode?.readCount ||
-        episode?.reads ||
-        episode?.viewCount ||
-        episode?.views ||
-        0,
-    ) || 0;
+function resolveEpisodeReadsValue(episode) {
+  const candidates = [
+    episode?.readCount,
+    episode?.reads,
+    episode?.viewCount,
+    episode?.views,
+  ];
 
-  return compactNumberLabel(numeric);
+  for (const candidate of candidates) {
+    const numeric = Number(candidate || 0);
+    if (Number.isFinite(numeric) && numeric > 0) {
+      return numeric;
+    }
+  }
+
+  return 0;
 }
 
 function ModeBlockedState({
@@ -302,7 +307,7 @@ function SeriesDetailContent({
       return [];
     }
 
-    return [...episodes]
+    const mappedChapters = [...episodes]
       .sort((left, right) => {
         const rightNumber = Number(right?.number || 0);
         const leftNumber = Number(left?.number || 0);
@@ -326,10 +331,27 @@ function SeriesDetailContent({
               day: "numeric",
             }).format(new Date(episode.releasedAt))
           : "Today",
-        readsText: resolveEpisodeReadsLabel(episode),
+        readsValue: resolveEpisodeReadsValue(episode),
         number: Number(episode?.number || 0) || 1,
         rawEpisode: episode,
       }));
+
+    const distinctReadValues = new Set(
+      mappedChapters
+        .map((chapter) => Number(chapter.readsValue || 0))
+        .filter((value) => value > 0),
+    );
+    const shouldHideReads =
+      distinctReadValues.size === 0 ||
+      (distinctReadValues.size === 1 && mappedChapters.length > 1);
+
+    return mappedChapters.map((chapter) => ({
+      ...chapter,
+      readsText:
+        shouldHideReads || Number(chapter.readsValue || 0) <= 0
+          ? ""
+          : compactNumberLabel(chapter.readsValue),
+    }));
   }, [payload?.episodes, payload?.series]);
 
   const isInteractive = detailItem?.kind === FIGMA_CONTENT_TYPES.INTERACTIVE;
@@ -377,7 +399,11 @@ function SeriesDetailContent({
     adult: detailItem?.adult || detailItem?.isAdult,
   });
   const publicStatusLabel = useMemo(
-    () => buildSeriesStatusCopy(payload?.series || detailItem?.raw || null),
+    () =>
+      buildSeriesStatusCopy(payload?.series || detailItem?.raw || null)
+        .replace(/\s+[^\w\s]+\s+New episodes weekly$/u, " · New episodes weekly")
+        .replace(/\s{2,}/g, " ")
+        .trim(),
     [detailItem?.raw, payload?.series],
   );
 

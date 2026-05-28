@@ -566,14 +566,9 @@ export function GenreShelfSection({
       <SectionHeading title={title} description={description} />
       {shelves.map((shelf) => (
         <div key={shelf.genre} className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="font-display text-[1.45rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white">
-              {shelf.genre}
-            </h3>
-            <p className="text-sm leading-6 text-white/60">
-              Open the {shelf.genre.toLowerCase()} shelf and keep going.
-            </p>
-          </div>
+          <h3 className="font-display text-[1.45rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white">
+            {shelf.genre}
+          </h3>
           <ShelfScroller>
             {shelf.items.map((series) => (
               <CoverCard

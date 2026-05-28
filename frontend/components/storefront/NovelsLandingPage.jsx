@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { BookOpen, Clock3, Library } from "lucide-react";
+import { Library } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { trackEvent } from "../../lib/trackEvent";
@@ -65,7 +65,10 @@ export default function NovelsLandingPage({
     const latest = buildUpdatedRail(seriesList, 16).filter(
       (series) => String(series?.id || "").trim() !== featuredId,
     );
-    const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(0, 8);
+    const continueItems = buildContinueReadingItems(seriesList, bySeriesId).slice(
+      0,
+      8,
+    );
     const continueIds = new Set(
       continueItems.map((series) => String(series?.id || "").trim()),
     );
@@ -79,10 +82,10 @@ export default function NovelsLandingPage({
       featured,
       latest: latest.slice(0, 8),
       continueItems,
-      binge: binge.slice(0, 10),
-      shortReads: buildShortReadsRail(seriesList, 10).filter(
-        (series) => String(series?.id || "").trim() !== featuredId,
-      ),
+      binge: binge.slice(0, 8),
+      shortReads: buildShortReadsRail(seriesList, 10)
+        .filter((series) => String(series?.id || "").trim() !== featuredId)
+        .slice(0, 8),
       genres: buildGenreShelves(seriesList, {
         maxGenres: 4,
         perGenre: 8,
@@ -92,6 +95,7 @@ export default function NovelsLandingPage({
   }, [bySeriesId, seriesList]);
 
   const compactTopShelf = model.top.length <= 3;
+  const showLateNightShelf = model.binge.length >= 4;
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.16)] via-[rgba(255,255,255,0.04)] to-[rgba(255,79,154,0.08)]">
@@ -101,7 +105,10 @@ export default function NovelsLandingPage({
           eyebrow="Featured Novel"
           primaryLabel="Start Reading"
           secondaryLabel="View Series"
-          chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(0, 3)}
+          chips={(Array.isArray(model.featured?.genres)
+            ? model.featured.genres
+            : []
+          ).slice(0, 3)}
           stats={[
             {
               label: "Hook",
@@ -118,7 +125,11 @@ export default function NovelsLandingPage({
           ]}
         />
       ) : loading ? null : (
-        <EmptyShelf title="No novels here yet" description="Novel picks will show up here as soon as they go live in this mode." actionHref="/search?type=novel" />
+        <EmptyShelf
+          title="No novels here yet"
+          description="Novel picks will show up here as soon as they go live in this mode."
+          actionHref="/search?type=novel"
+        />
       )}
 
       <section className="space-y-4">
@@ -127,7 +138,38 @@ export default function NovelsLandingPage({
           title="New chapters you will tear through"
           description="Fresh chapters with no easy stopping point."
         />
-        <UpdateList items={model.latest} variant="novel" sectionName="novels_latest" />
+        <UpdateList
+          items={model.latest}
+          variant="novel"
+          sectionName="novels_latest"
+        />
+      </section>
+
+      <section className="space-y-4">
+        <SectionHeading
+          eyebrow="Short Reads"
+          title="Quick reads, strong hook"
+          description="A full mood and a real finish in less time."
+        />
+        <ShelfScroller>
+          {model.shortReads.map((series, index) => (
+            <CoverCard
+              key={series.id}
+              series={series}
+              href={`/series/${series.id}`}
+              variant="novel"
+              badge="Short Read"
+              actionLabel={`${buildReadingTimeLabel(series)} read`}
+              onClick={() =>
+                trackEvent("story_click", {
+                  seriesId: series?.id,
+                  sourceSection: "novels_short_reads",
+                  position: index + 1,
+                })
+              }
+            />
+          ))}
+        </ShelfScroller>
       </section>
 
       {model.continueItems.length > 0 ? (
@@ -169,39 +211,52 @@ export default function NovelsLandingPage({
         </section>
       ) : null}
 
-      <section className="space-y-4">
-        <SectionHeading
-          eyebrow="Short Reads"
-          title="Quick reads, strong hook"
-          description="A full mood and a real finish in less time."
+      {compactTopShelf ? (
+        <RankList
+          items={model.top}
+          label="Top Novels"
+          compact
+          eyebrow="Reader Rankings"
+          description="The novel titles readers keep opening first."
         />
-        <ShelfScroller>
-          {model.shortReads.map((series, index) => (
-            <CoverCard
-              key={series.id}
-              series={series}
-              href={`/series/${series.id}`}
-              variant="novel"
-              badge={buildReadingTimeLabel(series)}
-              actionLabel={buildLatestInstallmentLabel(series)}
-              onClick={() =>
-                trackEvent("story_click", {
-                  seriesId: series?.id,
-                  sourceSection: "novels_short_reads",
-                  position: index + 1,
-                })
-              }
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+            <SectionHeading
+              eyebrow="Late-Night Reads"
+              title="Stories built for one more chapter."
+              description="Short hooks, long pull, and a few complete runs when you're not stopping yet."
             />
-          ))}
-        </ShelfScroller>
-      </section>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                "Sharp hooks that make one more chapter automatic.",
+                "Complete runs and quick reads when you want momentum tonight.",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/72"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </section>
 
-      {model.binge.length > 0 ? (
+          <RankList
+            items={model.top}
+            label="Top Novels"
+            eyebrow="Reader Rankings"
+            description="The novel titles readers keep opening first."
+          />
+        </div>
+      )}
+
+      {showLateNightShelf ? (
         <section className="space-y-4">
           <SectionHeading
-            eyebrow="Binge Novels"
-            title="Long reads with no waiting"
-            description="Completed novels for nights that need one more chapter."
+            eyebrow="Late-Night Reads"
+            title="Complete runs for one more chapter"
+            description="Finished stories when you want to keep going without waiting a week."
           />
           <ShelfScroller>
             {model.binge.map((series, index) => (
@@ -215,7 +270,7 @@ export default function NovelsLandingPage({
                 onClick={() =>
                   trackEvent("story_click", {
                     seriesId: series?.id,
-                    sourceSection: "novels_binge",
+                    sourceSection: "novels_late_night_reads",
                     position: index + 1,
                   })
                 }
@@ -225,60 +280,14 @@ export default function NovelsLandingPage({
         </section>
       ) : null}
 
-      <GenreShelfSection
-        shelves={model.genres}
-        variant="novel"
-        title="Genre Shelves"
-        description="Fantasy pulls, romance spirals, mystery hooks, and more."
-      />
-
-      <div className={compactTopShelf ? "space-y-6" : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"}>
-        <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
-          <SectionHeading
-            eyebrow="Late-Night Reads"
-            title="Stories built for one more chapter."
-            description="Slow burns and sharp hooks for late nights."
-          />
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {[
-              {
-                icon: Clock3,
-                title: "One more chapter",
-                body: "The kind of read where one more chapter turns into three.",
-              },
-              {
-                icon: BookOpen,
-                title: "Slow-burn pull",
-                body: "Hooks that tighten up and make the next chapter impossible to skip.",
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="rounded-[22px] border border-white/10 bg-black/15 p-4"
-                >
-                  <Icon className="size-5 text-[var(--gush-cyan)]" />
-                  <h3 className="mt-3 text-lg font-semibold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-white/64">
-                    {item.body}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <RankList
-          items={model.top}
-          label="Top Novels"
-          compact={compactTopShelf}
-          eyebrow="Reader Rankings"
-          description="The novel titles readers keep opening first."
+      {model.genres.length > 0 ? (
+        <GenreShelfSection
+          shelves={model.genres}
+          variant="novel"
+          title="Genre Shelves"
+          description="Fantasy pulls, romance spirals, mystery hooks, and more."
         />
-      </div>
+      ) : null}
     </StorefrontPage>
   );
 }
