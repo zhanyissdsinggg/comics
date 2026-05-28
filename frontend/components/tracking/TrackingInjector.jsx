@@ -132,7 +132,7 @@ async function injectFromStorage() {
   const hasLocalSnapshot = cachedRaw ? applySnapshot(cachedRaw) : false;
 
   try {
-    const response = await apiGet("/api/tracking", {
+    const response = await apiGet("/api/tracking-config", {
       cacheMs: 60000,
       suppressAuthModal: true,
     });

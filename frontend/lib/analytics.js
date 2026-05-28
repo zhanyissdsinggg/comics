@@ -272,6 +272,10 @@ function getClientContext() {
 }
 
 function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
   const envBase =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_BASE_URL ||
@@ -279,13 +283,6 @@ function getBaseUrl() {
 
   if (envBase) {
     return envBase.replace(/\/$/, "");
-  }
-
-  if (
-    typeof window !== "undefined" &&
-    !window.location.hostname.includes("localhost")
-  ) {
-    return window.location.origin;
   }
 
   return "http://127.0.0.1:4000";
