@@ -1,12 +1,11 @@
-import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { buildNoIndexRobots, createPageMetadata } from "../../lib/seo";
 import { isServerAdultModeEnabled } from "../../lib/serverAdultGate";
-import { loadSearchSeoPayload } from "../../lib/storefrontSeo";
-
-const DiscoverySearchPage = dynamic(() =>
-  import("../../components/storefront/DiscoverySearchPage"),
-);
+import DiscoverySearchPage from "../../components/storefront/DiscoverySearchPage";
+import {
+  loadSearchSeoPayload,
+  loadSeriesCatalogSeoPayload,
+} from "../../lib/storefrontSeo";
 
 export const metadata = createPageMetadata({
   title: "Search Comics & Novels",
@@ -56,14 +55,17 @@ export default async function Page({ searchParams }) {
   }
 
   const includeAdult = await isServerAdultModeEnabled();
-  const searchPayload = await loadSearchSeoPayload(initialQuery, {
-    includeAdult,
-    type: seoType,
-    status: String(resolvedSearchParams.status || "").trim(),
-    genre: String(resolvedSearchParams.genre || "").trim(),
-    sort: String(resolvedSearchParams.sort || "").trim(),
-    page: String(resolvedSearchParams.page || "").trim(),
-  });
+  const [searchPayload, catalogPayload] = await Promise.all([
+    loadSearchSeoPayload(initialQuery, {
+      includeAdult,
+      type: seoType,
+      status: String(resolvedSearchParams.status || "").trim(),
+      genre: String(resolvedSearchParams.genre || "").trim(),
+      sort: String(resolvedSearchParams.sort || "").trim(),
+      page: String(resolvedSearchParams.page || "").trim(),
+    }),
+    loadSeriesCatalogSeoPayload({ includeAdult }),
+  ]);
 
   return (
     <DiscoverySearchPage
@@ -78,6 +80,7 @@ export default async function Page({ searchParams }) {
       initialResults={searchPayload.results || []}
       initialTotal={Number(searchPayload.total || 0)}
       initialHotKeywords={searchPayload.hotKeywords || []}
+      initialCatalog={catalogPayload.series || []}
       initialReady={searchPayload.ready === true}
     />
   );

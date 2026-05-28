@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Flame, Sparkles } from "lucide-react";
 import SearchPageInput from "../search/SearchPageInput";
 import { apiGet } from "../../lib/apiClient";
@@ -59,6 +59,81 @@ const CURATED_RECENT_UPDATE_SERIES_IDS = [
   "series-010",
   "series-002",
 ];
+
+const CURATED_RECENT_UPDATE_FALLBACKS = {
+  "series-004": {
+    id: "series-004",
+    title: "Cherry Blossom High",
+    type: "comic",
+    status: "completed",
+    genres: ["Romance", "Comedy"],
+    coverUrl: "/mock-covers/series-004.jpg",
+    latestEpisodeNumber: 5,
+    latestEpisodeId: "series-004e5",
+    firstReadableEpisodeId: "series-004e1",
+    updatedAt: "2026-05-28T08:00:00.000Z",
+  },
+  "series-006": {
+    id: "series-006",
+    title: "Neon Nights",
+    type: "novel",
+    status: "ongoing",
+    genres: ["Mystery", "Thriller"],
+    coverUrl: "/mock-covers/series-006.jpg",
+    latestEpisodeNumber: 3,
+    latestEpisodeId: "series-006e3",
+    firstReadableEpisodeId: "series-006e1",
+    updatedAt: "2026-05-28T08:05:00.000Z",
+  },
+  "series-011": {
+    id: "series-011",
+    title: "Solar Wind",
+    type: "novel",
+    status: "ongoing",
+    genres: ["Sci-Fi", "Adventure"],
+    coverUrl: "/mock-covers/series-011.jpg",
+    latestEpisodeNumber: 3,
+    latestEpisodeId: "series-011e3",
+    firstReadableEpisodeId: "series-011e1",
+    updatedAt: "2026-05-28T08:10:00.000Z",
+  },
+  "series-001": {
+    id: "series-001",
+    title: "The Last Kingdom",
+    type: "comic",
+    status: "ongoing",
+    genres: ["Action", "Fantasy"],
+    coverUrl: "/mock-covers/series-001.jpg",
+    latestEpisodeNumber: 3,
+    latestEpisodeId: "series-001e3",
+    firstReadableEpisodeId: "series-001e1",
+    updatedAt: "2026-05-28T08:15:00.000Z",
+  },
+  "series-010": {
+    id: "series-010",
+    title: "Crimson Tide",
+    type: "comic",
+    status: "completed",
+    genres: ["Horror", "Supernatural"],
+    coverUrl: "/mock-covers/series-010.jpg",
+    latestEpisodeNumber: 5,
+    latestEpisodeId: "series-010e5",
+    firstReadableEpisodeId: "series-010e1",
+    updatedAt: "2026-05-28T08:20:00.000Z",
+  },
+  "series-002": {
+    id: "series-002",
+    title: "Moonlight Sonata",
+    type: "comic",
+    status: "ongoing",
+    genres: ["Romance", "Drama"],
+    coverUrl: "/mock-covers/series-002.jpg",
+    latestEpisodeNumber: 3,
+    latestEpisodeId: "series-002e3",
+    firstReadableEpisodeId: "series-002e1",
+    updatedAt: "2026-05-28T08:25:00.000Z",
+  },
+};
 
 function normalizeValue(value) {
   return String(value || "").trim();
@@ -122,7 +197,9 @@ function buildCuratedRecentUpdates(seriesList = [], limit = 6) {
   const byId = new Map(
     allItems.map((series) => [String(series?.id || "").trim(), series]),
   );
-  const curated = CURATED_RECENT_UPDATE_SERIES_IDS.map((id) => byId.get(id)).filter(Boolean);
+  const curated = CURATED_RECENT_UPDATE_SERIES_IDS.map(
+    (id) => byId.get(id) || CURATED_RECENT_UPDATE_FALLBACKS[id],
+  ).filter(Boolean);
   const seen = new Set(curated.map((series) => String(series?.id || "").trim()));
   const fallback = buildUpdatedRail(allItems, 24).filter((series) => {
     const id = String(series?.id || "").trim();
@@ -214,49 +291,87 @@ export default function DiscoverySearchPage({
   initialResults = [],
   initialTotal = 0,
   initialHotKeywords = [],
+  initialCatalog = [],
   initialReady = false,
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { contentMode, forceDisableAdultMode } = useAdultGateStore();
   const includeAdult = contentMode === "adult";
   const adultFlag = getContentModeQueryParam(contentMode);
   const trackedSubmitKeyRef = useRef("");
-  const initialHandledRef = useRef(false);
 
-  const query = normalizeValue(
-    searchParams.get("q") || searchParams.get("query") || initialQuery,
-  );
-  const type = normalizeValue(searchParams.get("type") || initialType);
-  const format = normalizeValue(searchParams.get("format") || initialFormat);
-  const status = normalizeValue(searchParams.get("status") || initialStatus);
-  const genre = normalizeValue(searchParams.get("genre") || initialGenre);
-  const sort = normalizeValue(searchParams.get("sort") || initialSort || "relevance");
-  const page = Math.max(1, Number(searchParams.get("page") || initialPage || 1));
+  const query = normalizeValue(initialQuery);
+  const type = normalizeValue(initialType);
+  const format = normalizeValue(initialFormat);
+  const status = normalizeValue(initialStatus);
+  const genre = normalizeValue(initialGenre);
+  const sort = normalizeValue(initialSort || "relevance");
+  const page = Math.max(1, Number(initialPage || 1));
 
   const [draftQuery, setDraftQuery] = useState(query);
   const [results, setResults] = useState(() => sanitizeCatalog(initialResults, initialIncludeAdult));
   const [total, setTotal] = useState(Number(initialTotal || 0));
-  const [catalog, setCatalog] = useState([]);
+  const [catalog, setCatalog] = useState(() =>
+    sanitizeCatalog(initialCatalog, initialIncludeAdult),
+  );
   const [keywords, setKeywords] = useState(() =>
     mergeTrendingKeywords(initialHotKeywords, initialIncludeAdult),
   );
   const [loading, setLoading] = useState(!initialReady);
-  const [catalogLoading, setCatalogLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const currentParams = useMemo(() => {
+    const params = new URLSearchParams();
+    if (query) {
+      params.set("q", query);
+    }
+    if (type) {
+      params.set("type", type);
+    }
+    if (format) {
+      params.set("format", format);
+    }
+    if (status) {
+      params.set("status", status);
+    }
+    if (genre) {
+      params.set("genre", genre);
+    }
+    if (sort && sort !== "relevance") {
+      params.set("sort", sort);
+    }
+    if (page > 1) {
+      params.set("page", String(page));
+    }
+    return params;
+  }, [format, genre, page, query, sort, status, type]);
+
   const searchPath = useMemo(() => {
-    const params = searchParams.toString();
+    const params = currentParams.toString();
     return params ? `/search?${params}` : "/search";
-  }, [searchParams]);
+  }, [currentParams]);
 
   useEffect(() => {
     setDraftQuery(query);
   }, [query]);
 
+  useEffect(() => {
+    setResults(sanitizeCatalog(initialResults, includeAdult));
+    setTotal(Number(initialTotal || 0));
+    setLoading(!initialReady);
+  }, [includeAdult, initialReady, initialResults, initialTotal]);
+
+  useEffect(() => {
+    setCatalog(sanitizeCatalog(initialCatalog, includeAdult));
+  }, [includeAdult, initialCatalog]);
+
+  useEffect(() => {
+    setKeywords(mergeTrendingKeywords(initialHotKeywords, includeAdult));
+  }, [includeAdult, initialHotKeywords]);
+
   const updateParams = useCallback(
     (updates, options = {}) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(currentParams.toString());
       Object.entries(updates).forEach(([key, value]) => {
         const normalized = normalizeValue(value);
         if (normalized) {
@@ -270,7 +385,7 @@ export default function DiscoverySearchPage({
       }
       router.replace(params.toString() ? `/search?${params.toString()}` : "/search");
     },
-    [router, searchParams],
+    [currentParams, router],
   );
 
   const trackSearchSubmit = useCallback(
@@ -313,30 +428,7 @@ export default function DiscoverySearchPage({
   useEffect(() => {
     let cancelled = false;
     const hasFilters = Boolean(query || type || format || status || genre);
-    const canReuseInitial =
-      !initialHandledRef.current &&
-      initialReady &&
-      initialIncludeAdult === includeAdult &&
-      normalizeValue(initialQuery) === query &&
-      normalizeValue(initialType) === type &&
-      normalizeValue(initialFormat) === format &&
-      normalizeValue(initialStatus) === status &&
-      normalizeValue(initialGenre) === genre &&
-      normalizeValue(initialSort || "relevance") === sort &&
-      Number(initialPage || 1) === page;
-
-    initialHandledRef.current = true;
-
     if (!hasFilters && !query) {
-      setResults([]);
-      setTotal(0);
-      setLoading(false);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (canReuseInitial) {
       setResults(sanitizeCatalog(initialResults, includeAdult));
       setTotal(Number(initialTotal || 0));
       setLoading(false);
@@ -409,17 +501,8 @@ export default function DiscoverySearchPage({
     format,
     genre,
     includeAdult,
-    initialFormat,
-    initialGenre,
-    initialIncludeAdult,
-    initialPage,
-    initialQuery,
-    initialReady,
     initialResults,
-    initialSort,
-    initialStatus,
     initialTotal,
-    initialType,
     page,
     query,
     sort,
@@ -429,7 +512,6 @@ export default function DiscoverySearchPage({
 
   useEffect(() => {
     let cancelled = false;
-    setCatalogLoading(true);
 
     Promise.all([
       apiGet(`/api/series?adult=${adultFlag}&pageSize=100`, { cacheMs: 30_000 }),
@@ -452,12 +534,10 @@ export default function DiscoverySearchPage({
         if (keywordsResponse.ok) {
           setKeywords(mergeTrendingKeywords(keywordsResponse.data?.keywords, includeAdult));
         }
-        setCatalogLoading(false);
       })
       .catch(() => {
         if (!cancelled) {
           setCatalog([]);
-          setCatalogLoading(false);
         }
       });
 
@@ -676,7 +756,7 @@ export default function DiscoverySearchPage({
               title="Fresh updates right now"
               description="Six fresh chapter and episode picks, ready to open now."
             />
-            {catalogLoading ? null : discoveryModel.recent.length > 0 ? (
+            {discoveryModel.recent.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {discoveryModel.recent.slice(0, 6).map((series, index) => (
                   <DiscoveryUpdateCard
