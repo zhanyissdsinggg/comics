@@ -51,6 +51,15 @@ const CURATED_TRENDING_SEARCHES = [
   "Space signal",
 ];
 
+const CURATED_RECENT_UPDATE_SERIES_IDS = [
+  "series-004",
+  "series-006",
+  "series-011",
+  "series-001",
+  "series-010",
+  "series-002",
+];
+
 function normalizeValue(value) {
   return String(value || "").trim();
 }
@@ -106,6 +115,21 @@ function sanitizeCatalog(items = [], includeAdult = false) {
     }
     return includeAdult ? true : !isAdultContent(series);
   });
+}
+
+function buildCuratedRecentUpdates(seriesList = [], limit = 6) {
+  const allItems = Array.isArray(seriesList) ? seriesList : [];
+  const byId = new Map(
+    allItems.map((series) => [String(series?.id || "").trim(), series]),
+  );
+  const curated = CURATED_RECENT_UPDATE_SERIES_IDS.map((id) => byId.get(id)).filter(Boolean);
+  const seen = new Set(curated.map((series) => String(series?.id || "").trim()));
+  const fallback = buildUpdatedRail(allItems, 24).filter((series) => {
+    const id = String(series?.id || "").trim();
+    return id && !seen.has(id);
+  });
+
+  return [...curated, ...fallback].slice(0, limit);
 }
 
 function buildSeriesHref(series, searchPath, query, campaignId) {
@@ -448,7 +472,7 @@ export default function DiscoverySearchPage({
       normalizedType && normalizedType !== "interactive"
         ? catalog.filter((series) => normalizeType(series?.type) === normalizedType)
         : catalog;
-    const recent = buildUpdatedRail(filteredCatalog, 12);
+    const recent = buildCuratedRecentUpdates(filteredCatalog, 12);
     const featured = pickFeaturedSeries(
       query || genre || status ? results : filteredCatalog,
     );
