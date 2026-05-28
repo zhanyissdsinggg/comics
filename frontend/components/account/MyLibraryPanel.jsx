@@ -109,7 +109,7 @@ function formatProgressLabel(series, currentInstallment, totalInstallments) {
 
 function formatBookmarkSummary(count) {
   const total = Number(count || 0);
-  return `${total} saved ${total === 1 ? "spot" : "spots"}`;
+  return `${total} ${total === 1 ? "bookmark" : "bookmarks"}`;
 }
 
 function formatUnlockedSummary(series, count, latestChapter) {
@@ -448,13 +448,13 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             coverUrl: series.coverUrl,
             coverTone: series.coverTone,
             badge: followedSeriesIds.includes(seriesId)
-              ? "In Library"
+              ? "Saved"
               : "Bookmarked",
             primaryLine:
               followedSeriesIds.includes(seriesId) && bookmarks.length > 0
-                ? `Saved to your shelf with ${formatBookmarkSummary(bookmarks.length)}`
+                ? `Saved with ${formatBookmarkSummary(bookmarks.length)}`
                 : followedSeriesIds.includes(seriesId)
-                  ? "Saved to your shelf"
+                  ? "Saved to your library"
                   : formatBookmarkSummary(bookmarks.length),
             summary: latestBookmark?.label || series.status || "",
             updatedLabel: formatRelativeTime(
@@ -624,7 +624,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60">
-            Library
+            Saved Series
           </p>
           <h2 className="mt-2 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
             Your library
@@ -637,7 +637,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
             onClick={() => router.push("/library")}
             className={buttonBaseClass}
           >
-            Library
+            Open Library
           </button>
         ) : null}
       </div>

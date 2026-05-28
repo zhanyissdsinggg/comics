@@ -132,7 +132,7 @@ function AccountContent({ seriesList = [] }) {
                 },
                 {
                   title: "Jump back in faster",
-                  body: "Open your saved spot without rebuilding your history every time you switch devices.",
+                  body: "Pick up your last chapter without rebuilding your history every time you switch devices.",
                 },
               ].map((item) => (
                 <div
@@ -249,7 +249,7 @@ function AccountContent({ seriesList = [] }) {
                       Sync
                     </p>
                     <p className="mt-2 text-sm font-bold text-white">
-                      Library live
+                      Shelf synced
                     </p>
                   </div>
                 </div>
@@ -363,7 +363,7 @@ function AccountContent({ seriesList = [] }) {
                 )}
               >
                 <Bookmark className="h-4 w-4" />
-                My Library
+                Saved Series
               </button>
             </div>
 
@@ -456,7 +456,7 @@ function AccountContent({ seriesList = [] }) {
                           {item.chapter}
                         </p>
                         <span className="mt-auto pt-4 text-sm font-bold text-white/75">
-                          Open saved spot
+                          Continue Reading
                         </span>
                       </div>
                     </Link>

@@ -98,9 +98,9 @@ export default function NovelsLandingPage({
       {model.featured ? (
         <StoryHero
           series={model.featured}
-          eyebrow="Featured Novel Hero"
+          eyebrow="Featured Novel"
           primaryLabel="Start Reading"
-          secondaryLabel="View Episodes"
+          secondaryLabel="View Series"
           chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(0, 3)}
           stats={[
             {
@@ -118,14 +118,14 @@ export default function NovelsLandingPage({
           ]}
         />
       ) : loading ? null : (
-        <EmptyShelf title="Novel shelves are empty" description="Once novel titles are live in this mode, this page will fill out." actionHref="/search?type=novel" />
+        <EmptyShelf title="No novels here yet" description="Novel picks will show up here as soon as they go live in this mode." actionHref="/search?type=novel" />
       )}
 
       <section className="space-y-4">
         <SectionHeading
           eyebrow="Latest Chapters"
-          title="New chapters with real read-through energy"
-          description="Recent updates and chapter-first entries for readers who want text-heavy momentum."
+          title="New chapters you will tear through"
+          description="Fresh chapters with no easy stopping point."
         />
         <UpdateList items={model.latest} variant="novel" sectionName="novels_latest" />
       </section>
@@ -135,14 +135,14 @@ export default function NovelsLandingPage({
           <SectionHeading
             eyebrow="Continue Reading"
             title="Pick up where you stopped"
-            description="Return to your last open novel chapter without scanning the episode list again."
+            description="Continue before the mood slips away."
             action={
               <Link
                 href="/library"
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
               >
                 <Library className="size-4" />
-                Library
+                Open Library
               </Link>
             }
           />
@@ -172,8 +172,8 @@ export default function NovelsLandingPage({
       <section className="space-y-4">
         <SectionHeading
           eyebrow="Binge Novels"
-          title="Long reads with no wait between chapters"
-          description="Completed novels for full-session reading and late-night chapter chains."
+          title="Long reads with no waiting"
+          description="Completed novels for nights that need one more chapter."
         />
         <ShelfScroller>
           {model.binge.map((series, index) => (
@@ -183,7 +183,7 @@ export default function NovelsLandingPage({
               href={`/series/${series.id}`}
               variant="novel"
               badge="Completed"
-              actionLabel="Read all"
+              actionLabel="Read Full Series"
               onClick={() =>
                 trackEvent("story_click", {
                   seriesId: series?.id,
@@ -199,8 +199,8 @@ export default function NovelsLandingPage({
       <section className="space-y-4">
         <SectionHeading
           eyebrow="Short Reads"
-          title="One-sitting episodes and quick entry novels"
-          description="For when you want a complete mood before the train ride ends."
+          title="Quick reads, strong hook"
+          description="A full mood and a real finish in less time."
         />
         <ShelfScroller>
           {model.shortReads.map((series, index) => (
@@ -228,26 +228,26 @@ export default function NovelsLandingPage({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
           <SectionHeading
-            eyebrow="Novel Signals"
-            title="What matters on a novel shelf"
-            description="One-line hook, latest chapter, reading time, and status all stay visible before the tap."
+            eyebrow="Late-Night Reads"
+            title="Stories built for one more chapter."
+            description="Slow burns and sharp hooks for late nights."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[
               {
                 icon: Clock3,
-                title: "Reading time",
-                body: "Novel cards show a quick time estimate before you commit.",
+                title: "One more chapter",
+                body: "The kind of read where one more chapter turns into three.",
               },
               {
                 icon: BookOpen,
-                title: "Latest chapter",
-                body: "Readers can see how far the story has gone without entering.",
+                title: "Slow-burn pull",
+                body: "Hooks that tighten up and make the next chapter impossible to skip.",
               },
               {
                 icon: Library,
-                title: "One-line hook",
-                body: "Every card gets a sharper hook instead of generic marketing copy.",
+                title: "Stay-up-too-late energy",
+                body: "Moody stories that keep the light on longer than planned.",
               },
             ].map((item) => {
               const Icon = item.icon;

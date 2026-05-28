@@ -183,11 +183,11 @@ export default function EndOfEpisodeOverlay({
   const secondaryButtonClass = storefrontSecondaryButtonClass;
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
   const previewPrimaryLabel = showSubscribe
-    ? "Membership preview"
-    : "Store preview";
+    ? "See Membership"
+    : "Open Store";
   const previewSecondaryLabel = showSubscribe
-    ? "Store preview"
-    : "Membership preview";
+    ? "Open Store"
+    : "See Membership";
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
@@ -253,7 +253,7 @@ export default function EndOfEpisodeOverlay({
                       onClick={onViewSeries}
                       className={`px-4 py-2 text-sm ${secondaryButtonClass}`}
                     >
-                      Series
+                      View Series
                     </button>
                   ) : null}
                 </div>
@@ -381,7 +381,7 @@ export default function EndOfEpisodeOverlay({
                 onClick={onViewSeries}
                 className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
-                Series
+                View Series
               </button>
             ) : null}
             {onOpenStore ? (
@@ -399,7 +399,7 @@ export default function EndOfEpisodeOverlay({
                 onClick={onOpenSupport}
                 className={`px-4 py-2 text-xs font-semibold ${secondaryButtonClass}`}
               >
-                Support
+                Help
               </button>
             ) : null}
           </div>

@@ -2519,9 +2519,9 @@ test.describe("Public reading funnel", () => {
     const html = await page.content();
     expect(html).toContain("Midnight Archive");
     expect(html).not.toContain(">Loading<");
-    expect(html).toContain("Pick a route. Wear the consequences.");
+    expect(html).toContain("Your Choice Changes the Story");
     await expect(
-      page.getByRole("heading", { name: /Pick a route\. Wear the consequences\./i }),
+      page.getByRole("heading", { name: /Your Choice Changes the Story/i }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(page.locator("body")).not.toContainText(/^Loading$/);
     await expect(page.locator("main")).toContainText("Midnight Archive");
@@ -2536,7 +2536,7 @@ test.describe("Public reading funnel", () => {
       page.getByRole("heading", { name: "Midnight Archive" }),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(
-      page.getByRole("link", { name: /Start story|Resume story/i }),
+      page.getByRole("link", { name: /Start Reading|Continue Reading/i }),
     ).toHaveAttribute("href", /\/interactive\/midnight-archive\/play$/);
     await expect(page.locator("main")).toContainText("Mystery");
     await expect(page.locator("main")).toContainText("7");
@@ -2547,8 +2547,8 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("The Hall Goes Quiet");
     await expect(page.locator("main")).toContainText("Choices");
-    await expect(page.locator("main")).toContainText("Choose carefully");
-    await expect(page.locator("main")).toContainText("Your route so far");
+    await expect(page.locator("main")).toContainText("Pick carefully");
+    await expect(page.locator("main")).toContainText("Your story so far");
     await expect(page.locator("main")).toContainText("Step 1");
 
     const unlockedChoice = page.getByRole("button", {
@@ -2649,23 +2649,23 @@ test.describe("Public reading funnel", () => {
     expect(detailResponse?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("The Locker Letter");
     await expect(page.locator("main")).toContainText("hallway rumor");
-    await expect(page.locator("main")).toContainText("Why play this story");
+    await expect(page.locator("main")).toContainText("Why you'll like it");
     await expect(page.locator("main")).toContainText("2 endings");
     await expect(page.locator("main")).toContainText("17 choices");
-    await expect(page.locator("main")).toContainText("Hidden clue route");
+    await expect(page.locator("main")).toContainText("Hidden clue path");
     await expect(page.locator("main")).toContainText("Quick mystery run");
 
     const playResponse = await page.goto("/interactive/the-locker-letter/play", {
       waitUntil: "domcontentloaded",
     });
     expect(playResponse?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("Current Scene");
+    await expect(page.locator("main")).toContainText("Now Reading");
     await expect(page.locator("main")).toContainText("The Locker Letter");
-    await expect(page.locator("main")).toContainText("Choose carefully");
+    await expect(page.locator("main")).toContainText("Pick carefully");
     await expect(page.locator("main")).toContainText(
       "Between fourth period and lunch, a folded note slides out of locker 318.",
     );
-    await expect(page.locator("main")).toContainText("Your route so far");
+    await expect(page.locator("main")).toContainText("Your story so far");
     await expect(page.locator("main")).not.toContainText("State");
     await expect(page.locator("main")).not.toContainText("affection:");
     await expect(page.locator("main")).not.toContainText("trust:");
@@ -2674,8 +2674,8 @@ test.describe("Public reading funnel", () => {
     await expect(page.locator("main")).toContainText("Ask Maya about the note");
     await expect(page.locator("main")).toContainText("Check the security camera room");
     await expect(page.locator("main")).toContainText("Bribe the lunch cashier for the receipt log");
-    await expect(page.locator("main")).toContainText("Members can unlock this branch.");
-    await expect(page.locator("main")).toContainText("Token unlock coming soon.");
+    await expect(page.locator("main")).toContainText("Premium readers can open this choice.");
+    await expect(page.locator("main")).toContainText("This choice unlocks later.");
 
     const firstChoice = page.getByRole("button", {
       name: /Ask Maya about the note/i,
@@ -3001,11 +3001,9 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Solar Wind" })).toBeVisible(
-      {
-        timeout: UI_TIMEOUT_MS,
-      },
-    );
+    await expect(page.locator("main h1").filter({ hasText: "Solar Wind" })).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
     await expect(page.locator("body")).toContainText("Episodes");
     await expect(page.locator("#episode-series-011e1")).toContainText(
       "Episode 1",
@@ -3025,7 +3023,7 @@ test.describe("Public reading funnel", () => {
     );
   });
 
-  test("novels page should fall back to Coming Soon instead of forcing duplicate shelves", async ({
+  test("novels page should render the refined shelf mix without duplicate fallback copy", async ({
     page,
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
@@ -3036,16 +3034,17 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(page.getByRole("heading", { name: "Solar Wind" })).toBeVisible(
-      {
-        timeout: UI_TIMEOUT_MS,
-      },
-    );
-    await expect(page.locator("main")).toContainText("Neon Nights");
-    await expect(page.locator("main")).toContainText("Coming Soon");
     await expect(
-      page.getByRole("heading", { name: /Top Rated Novels/i }),
-    ).toHaveCount(0);
+      page.locator("main h1").filter({ hasText: "Solar Wind" }),
+    ).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await expect(page.locator("main")).toContainText("Neon Nights");
+    await expect(
+      page.getByRole("heading", { name: /Top Novels/i }),
+    ).toBeVisible();
+    await expect(page.locator("main")).toContainText("Late-Night Reads");
+    await expect(page.locator("main")).not.toContainText("Coming Soon");
     await expectNoRuntimeIssues("/novels shelf fallback", runtimeIssues);
   });
 

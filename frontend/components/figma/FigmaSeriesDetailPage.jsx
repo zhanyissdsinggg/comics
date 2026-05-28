@@ -358,9 +358,9 @@ function SeriesDetailContent({
     return (
       <ModeBlockedState
         palette={palette}
-        title="Age Restricted Content"
-        description="18+ access is required for this title. Enable mature mode after a verified sign-in before we show it."
-        ctaLabel="Verify Age Now"
+        title="Mature Title"
+        description="This story is in the mature catalog. Turn on adult mode after signing in to open it."
+        ctaLabel="Turn On Adult Mode"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
       />
@@ -371,9 +371,9 @@ function SeriesDetailContent({
     return (
       <ModeBlockedState
         palette={palette}
-        title="Normal Mode Required"
-        description="This title belongs to the normal catalog. Switch back to normal mode to continue."
-        ctaLabel="Normal"
+        title="Switch to Normal Mode"
+        description="This story is in the normal catalog. Switch back to normal mode to keep reading."
+        ctaLabel="Back to Normal Mode"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
       />
@@ -417,9 +417,9 @@ function SeriesDetailContent({
     return (
       <ModeBlockedState
         palette={palette}
-        title="Age Restricted Content"
-        description="18+ access is required for this title. Enable mature mode after a verified sign-in before we show it."
-        ctaLabel="Verify Age Now"
+        title="Mature Title"
+        description="This story is in the mature catalog. Turn on adult mode after signing in to open it."
+        ctaLabel="Turn On Adult Mode"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
       />
@@ -434,9 +434,9 @@ function SeriesDetailContent({
     return (
       <ModeBlockedState
         palette={palette}
-        title="Normal Mode Required"
-        description="This title belongs to the normal catalog. Switch back to normal mode to continue."
-        ctaLabel="Normal"
+        title="Switch to Normal Mode"
+        description="This story is in the normal catalog. Switch back to normal mode to keep reading."
+        ctaLabel="Back to Normal Mode"
         onCta={handleAdultToggle}
         onBack={() => router.back()}
       />
@@ -556,7 +556,7 @@ function SeriesDetailContent({
                       type="button"
                       onClick={handleLibraryToggle}
                       aria-label={
-                        isFollowing ? "Remove from library" : "Add to Library"
+                        isFollowing ? "Remove from saved" : "Save series"
                       }
                       className={cn(
                         "flex min-h-[46px] items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold shadow-lg transition-all hover:bg-white/10 active:scale-95 md:min-h-[48px] md:px-5",
@@ -565,7 +565,7 @@ function SeriesDetailContent({
                       )}
                     >
                       <BookmarkPlus className="h-5 w-5" />
-                      <span>{isFollowing ? "Saved" : "Add to Library"}</span>
+                      <span>{isFollowing ? "Saved" : "Save Series"}</span>
                     </button>
                     <button
                       type="button"

@@ -188,11 +188,11 @@ export const EmptyLibrary = memo(function EmptyLibrary({ onBrowse }) {
   return (
     <EmptyState
       icon="book"
-      title="Library is empty"
-      description="Save a few titles and they'll wait here when you're ready."
+      title="Your library is empty"
+      description="Save a few series and they'll be waiting here when you're ready."
       action={onBrowse}
-      actionText="Add to Library"
-      eyebrow="Library"
+      actionText="Find a Story"
+      eyebrow="Saved Series"
     />
   );
 });

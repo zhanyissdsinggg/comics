@@ -225,7 +225,7 @@ export default function NotificationsPage() {
                   className={storefrontPrimaryButtonClass}
                   data-testid="notifications-go-library"
                 >
-                  Library
+                  Open Library
                 </button>
                 <button
                   type="button"
@@ -253,7 +253,7 @@ export default function NotificationsPage() {
                   className={storefrontPrimaryButtonClass}
                   data-testid="notifications-go-library"
                 >
-                  Library
+                  Open Library
                 </button>
                 <button
                   type="button"

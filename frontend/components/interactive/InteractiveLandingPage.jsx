@@ -116,7 +116,7 @@ export default function InteractiveLandingPage({
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-200/70">
               Interactive Stories
             </p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-[-0.06em] text-white sm:text-5xl">
+            <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-[-0.038em] text-white sm:text-5xl sm:tracking-[-0.042em]">
               Your Choice Changes the Story
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
@@ -163,7 +163,7 @@ export default function InteractiveLandingPage({
           <SurfacePanel tone="muted" accent="amber" appearance="dark" className="flex flex-col justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/70">
-                {showLaunchChecklist ? "Launch checklist" : "What to expect"}
+                {showLaunchChecklist ? "Story Snapshot" : "Inside"}
               </p>
               {showLaunchChecklist ? (
                 <div className="mt-4 grid gap-3 text-sm text-white/80">
@@ -171,7 +171,7 @@ export default function InteractiveLandingPage({
                     <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
                       Mode
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
                       {initialContentMode === "adult" ? "Adult mode" : "Normal mode"}
                     </div>
                   </div>
@@ -179,7 +179,7 @@ export default function InteractiveLandingPage({
                     <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
                       Published stories
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
                       {stories.length}
                     </div>
                   </div>
@@ -187,7 +187,7 @@ export default function InteractiveLandingPage({
                     <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
                       Replay factor
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
                       {totalEndings} endings
                     </div>
                   </div>
@@ -197,16 +197,14 @@ export default function InteractiveLandingPage({
                   {hasStories ? (
                     <>
                       <p>
-                        Start in normal mode, pick a route, and carry your choices all the way to a real ending.
+                        Start with one choice, follow the route, and watch how fast the story twists around you.
                       </p>
-                      <p>
-                        Locked routes can open with premium access or tokens when a story supports them.
-                      </p>
+                      <p>Some routes may unlock later through premium access.</p>
                       <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                          Live today
+                          Available now
                         </div>
-                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
+                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
                           {stories.length} stories, {totalEndings} endings
                         </div>
                       </div>
@@ -214,17 +212,17 @@ export default function InteractiveLandingPage({
                   ) : (
                     <>
                       <p>
-                        Interactive stories are almost here. The first live routes will open as soon as they finish release review.
+                        Interactive stories are almost here. The first branching reads will open soon.
                       </p>
                       <p>
-                        Come back soon for branching teen-safe stories with replayable endings built for quick restarts and new routes.
+                        Come back soon for replayable stories, secret endings, and choices worth trying again the second you finish.
                       </p>
                       <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                          Coming soon
+                          On the way
                         </div>
-                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.04em]">
-                          Fresh interactive stories are on the way
+                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                          New interactive stories are on the way
                         </div>
                       </div>
                     </>
@@ -256,7 +254,7 @@ export default function InteractiveLandingPage({
                     Featured
                   </span>
                 </div>
-                <h2 className="mt-5 text-2xl font-black tracking-[-0.05em] text-white">
+                <h2 className="mt-5 text-2xl font-black tracking-[-0.024em] text-white">
                   {normalizeText(story.title)}
                 </h2>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/68">
@@ -290,10 +288,10 @@ export default function InteractiveLandingPage({
                     {story.contentMode}
                   </span>
                   <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">
-                    {isResume ? "Resume ready" : "Open"}
+                    {isResume ? "Continue" : "Open Story"}
                   </span>
                 </div>
-                <h2 className="mt-4 text-2xl font-black tracking-[-0.05em] text-white">
+                <h2 className="mt-4 text-2xl font-black tracking-[-0.024em] text-white">
                   {normalizeText(story.title)}
                 </h2>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/68">
@@ -309,11 +307,11 @@ export default function InteractiveLandingPage({
                 </div>
                 {isResume ? (
                   <div className="mt-4 rounded-[18px] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-5 text-cyan-100/88">
-                    Continue from {normalizeText(continueProgress?.node?.title || "your last node")}.
+                    Pick it back up at {normalizeText(continueProgress?.node?.title || "your last choice")}.
                   </div>
                 ) : null}
                 <div className="mt-6 inline-flex items-center rounded-full border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/70 transition group-hover:border-cyan-200/30 group-hover:text-cyan-100">
-                  {isResume ? "View details" : "Enter story"}
+                  {isResume ? "Continue Reading" : "Open Story"}
                 </div>
               </Link>
             );
@@ -322,7 +320,7 @@ export default function InteractiveLandingPage({
             <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
               {showLaunchChecklist
                 ? "No interactive stories are published yet."
-                : "Interactive stories are almost here. Check back soon for the first live routes."}
+                : "Interactive stories are almost here. Check back soon for the first branching reads."}
             </div>
           ) : null}
         </section>

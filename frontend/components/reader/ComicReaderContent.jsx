@@ -6,6 +6,7 @@ import { cn } from "../../lib/utils";
 export default function ComicReaderContent({
   pages,
   paragraphs,
+  openingParagraphs,
   seriesId,
   seriesTitle,
   episodeTitle,
@@ -17,6 +18,7 @@ export default function ComicReaderContent({
   imageSizes,
   seriesType,
   brightness,
+  showOpeningParagraphs = false,
   onActiveIndexChange,
   onPreviewEndRef,
   onEndRef,
@@ -25,6 +27,22 @@ export default function ComicReaderContent({
   return (
     <section className="relative">
       <div className="mx-auto w-full max-w-[1120px]">
+        {showOpeningParagraphs && Array.isArray(openingParagraphs) && openingParagraphs.length > 0 ? (
+          <article className="reader-prose mx-auto mb-5 w-full max-w-[44rem] px-1 pt-1 text-white/92 sm:px-0">
+            {openingParagraphs.map((paragraph, index) => (
+              <p
+                key={`comic-opening-${index}`}
+                className="whitespace-pre-wrap break-words text-[1em] leading-[inherit]"
+                style={{
+                  marginBottom:
+                    index === openingParagraphs.length - 1 ? "0" : "1.35em",
+                }}
+              >
+                {paragraph}
+              </p>
+            ))}
+          </article>
+        ) : null}
         <div
           data-testid="comic-reader-content"
           data-reader-kind="comic"

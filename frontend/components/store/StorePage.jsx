@@ -58,7 +58,7 @@ function getReturnLabel(returnTo, sourceEntry) {
     return "Back";
   }
   if (returnTo.startsWith("/library")) {
-    return "Library";
+    return "Open Library";
   }
   if (returnTo.startsWith("/account")) {
     return "Account";

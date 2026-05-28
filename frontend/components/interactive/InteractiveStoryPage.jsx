@@ -68,28 +68,27 @@ function getLockedCopy(choice) {
   if (!choice?.locked) {
     return "";
   }
-  const tokens = Number(choice?.requiresTokens || 0);
   const policy = normalizeText(choice?.unlockPolicy || "").toUpperCase();
   if (choice.lockedReason === "TOKEN_UNLOCK_COMING_SOON") {
-    return choice.unlockLabel || "Token unlock coming soon";
+    return choice.unlockLabel || "Unlocks Later";
   }
   if (policy === "PREMIUM_ONLY") {
-    return choice.unlockLabel || "Members Only";
+    return choice.unlockLabel || "Premium";
   }
   if (policy === "TOKENS_ONLY") {
-    return choice.unlockLabel || `Unlock for ${tokens} Tokens`;
+    return choice.unlockLabel || "Unlocks Later";
   }
   if (policy === "PREMIUM_OR_TOKENS") {
-    return choice.unlockLabel || `Premium or ${tokens} Tokens`;
+    return choice.unlockLabel || "Premium Access";
   }
   if (policy === "PREMIUM_AND_TOKENS") {
-    return choice.unlockLabel || `Premium + ${tokens} Tokens`;
+    return choice.unlockLabel || "Premium Access";
   }
   if (choice.lockedReason === "PREMIUM_REQUIRED") {
-    return choice.unlockLabel || "Members Only";
+    return choice.unlockLabel || "Premium";
   }
   if (choice.lockedReason === "TOKENS_REQUIRED") {
-    return choice.unlockLabel || `Unlock for ${tokens} Tokens`;
+    return choice.unlockLabel || "Unlocks Later";
   }
   return choice.unlockLabel || "Locked";
 }
@@ -99,15 +98,15 @@ function getLockedReasonDescription(choice) {
     return "";
   }
   if (choice.lockedReason === "PREMIUM_REQUIRED") {
-    return "Members can unlock this branch.";
+    return "Premium readers can open this choice.";
   }
   if (choice.lockedReason === "TOKENS_REQUIRED") {
-    return `Need ${Number(choice?.requiresTokens || 0)} tokens to unlock this branch.`;
+    return "This choice unlocks later.";
   }
   if (choice.lockedReason === "TOKEN_UNLOCK_COMING_SOON") {
-    return "Token unlock coming soon.";
+    return "This choice unlocks later.";
   }
-  return "This branch is locked right now.";
+  return "This choice is locked for now.";
 }
 
 function getRouteDepth(progress) {
@@ -120,7 +119,7 @@ function getStoryWhyPlayItems(story) {
     return [
       "2 endings",
       "17 choices",
-      "Hidden clue route",
+      "Hidden clue path",
       "Quick mystery run",
     ];
   }
@@ -240,7 +239,7 @@ export default function InteractiveStoryPage({
       setAuthRequired(true);
       setProgress(null);
       if (mode === "play") {
-        setError("Sign in to start this interactive story.");
+        setError("Sign in to start reading.");
       }
       return null;
     }
@@ -411,14 +410,14 @@ export default function InteractiveStoryPage({
         });
         setDegradedNotice(
           response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
-            ? "Token unlock coming soon."
+            ? "This choice unlocks later."
             : "That choice is still locked for this account.",
         );
         await loadProgress();
         return;
       }
 
-      setDegradedNotice("Couldn't unlock that route right now.");
+      setDegradedNotice("Couldn't unlock this choice right now.");
     },
     [loadProgress, progress, resolvedContentMode, story],
   );
@@ -482,7 +481,7 @@ export default function InteractiveStoryPage({
       if (response.status === 403) {
         setDegradedNotice(
           response.data?.reason === "TOKEN_UNLOCK_COMING_SOON"
-            ? "Token unlock coming soon."
+            ? "This choice unlocks later."
             : "That choice is locked right now.",
         );
         await loadProgress();
@@ -492,17 +491,17 @@ export default function InteractiveStoryPage({
       if (response.status === 409) {
         setDegradedNotice(
           response.data?.reason === "TARGET_NODE_NOT_AVAILABLE"
-            ? "That branch isn't approved for readers yet."
+            ? "That path isn't open yet."
             : response.data?.reason === "REQUEST_IN_PROGRESS"
               ? "That choice is already being processed. Give it a second."
-              : "Synced your latest node.",
+              : "Synced your latest scene.",
         );
         await loadProgress();
         return;
       }
 
       if (response.status === 400) {
-        setDegradedNotice("That choice isn't available anymore. Reloaded your latest node.");
+        setDegradedNotice("That choice isn't available anymore. Reloaded your latest scene.");
         await loadProgress();
         return;
       }
@@ -549,7 +548,7 @@ export default function InteractiveStoryPage({
   const isEnding = Boolean(node?.isEnding);
   const path = Array.isArray(progress?.path) ? progress.path : [];
   const routeDepth = Math.max(1, getRouteDepth(progress));
-  const continueLabel = progress?.node?.id ? "Resume story" : "Start story";
+  const continueLabel = progress?.node?.id ? "Continue Reading" : "Start Reading";
   const detailHref = `/interactive/${encodeURIComponent(normalizedSlug)}`;
   const playHref = `${detailHref}/play`;
   const showSignInStart = authRequired && !node?.id;
@@ -599,7 +598,7 @@ export default function InteractiveStoryPage({
                       href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
                       className={storefrontSecondaryButtonClass}
                     >
-                      View series
+                      View Series
                     </Link>
                   ) : null}
                 </div>
@@ -627,14 +626,14 @@ export default function InteractiveStoryPage({
                   </div>
                   <div className="mt-2 text-sm leading-6 text-white/80">
                     {progress?.node?.title
-                      ? `Current scene: ${normalizeText(progress.node.title)}`
-                      : "No active progress yet."}
+                      ? `Now reading: ${normalizeText(progress.node.title)}`
+                      : "You haven't started yet."}
                   </div>
                 </SurfacePanel>
                 {whyPlayItems.length > 0 ? (
                   <SurfacePanel tone="muted" accent="cyan" appearance="dark">
                     <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                      Why play this story
+                      Why you'll like it
                     </div>
                     <div className="mt-3 grid gap-2">
                       {whyPlayItems.map((item) => (
@@ -675,12 +674,12 @@ export default function InteractiveStoryPage({
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link
-                href={detailHref}
-                className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
-              >
-                Story
-              </Link>
+                <Link
+                  href={detailHref}
+                  className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
+                >
+                  Overview
+                </Link>
               {seriesId || story?.seriesId ? (
                 <Link
                   href={`/series/${encodeURIComponent(seriesId || story.seriesId)}`}
@@ -723,10 +722,10 @@ export default function InteractiveStoryPage({
                 {showSignInStart ? (
                   <div className="grid gap-4">
                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                      Sign in to start this interactive story
+                      Sign in to start reading
                     </p>
                     <p className="text-sm leading-7 text-white/80">
-                      Sign in to save your route, unlock premium branches, and keep your progress synced.
+                      Sign in to save your choices and keep your progress synced.
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <button
@@ -734,10 +733,10 @@ export default function InteractiveStoryPage({
                         onClick={openAuthModal}
                         className={storefrontPrimaryButtonClass}
                       >
-                        Sign in to start this interactive story
+                        Sign in to start reading
                       </button>
                       <Link href={detailHref} className={storefrontSecondaryButtonClass}>
-                        Back to story
+                        Back to overview
                       </Link>
                     </div>
                   </div>
@@ -751,10 +750,10 @@ export default function InteractiveStoryPage({
                           </div>
                         ) : null}
                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
-                          Current Scene
+                          Now Reading
                         </p>
                         <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">
-                          {normalizeText(node?.title || "Story start")}
+                          {normalizeText(node?.title || "Opening scene")}
                         </h2>
                       </div>
                       <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
@@ -799,7 +798,7 @@ export default function InteractiveStoryPage({
                     Choices
                   </h2>
                   <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-                    Choose carefully
+                    Pick carefully
                   </div>
                 </div>
                 <div className="mt-4 grid gap-3">
@@ -861,7 +860,7 @@ export default function InteractiveStoryPage({
                               disabled || choice.locked ? "opacity-60" : "",
                             ].join(" ")}
                           >
-                            {choice.locked ? "Locked route" : "Choose"}
+                            {choice.locked ? "Locked" : "Choose"}
                           </button>
                           {choice.locked ? (
                             <button
@@ -890,7 +889,7 @@ export default function InteractiveStoryPage({
           <div className="grid gap-4">
             <SurfacePanel tone="muted" accent="blue" appearance="dark">
               <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
-                Your route so far
+                Your story so far
               </h3>
               <div className="mt-3 grid gap-2">
                 {path.map((item, index) => (
@@ -908,7 +907,7 @@ export default function InteractiveStoryPage({
                 ))}
                 {path.length === 0 ? (
                   <div className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/65">
-                    Start the route to see your path.
+                    Start reading to see your path.
                   </div>
                 ) : null}
               </div>
@@ -937,7 +936,7 @@ export default function InteractiveStoryPage({
 
             <SurfacePanel tone="muted" accent="amber" appearance="dark">
               <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
-                Replay
+                Try Again
               </h3>
               <div className="mt-3 text-sm leading-6 text-white/75">
                 Endings reached: {Number(progress?.endingsReached || 0)}
@@ -948,13 +947,13 @@ export default function InteractiveStoryPage({
                   onClick={handleRestart}
                   className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
                 >
-                  Restart now
+                  Start Again
                 </button>
                 <Link
                   href={detailHref}
                   className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
                 >
-                  Story detail
+                  About This Story
                 </Link>
               </div>
             </SurfacePanel>

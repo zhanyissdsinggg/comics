@@ -245,7 +245,7 @@ h6 {
 }
 
 :where(h1, h2, h3, h4, h5, h6).font-display {
-  letter-spacing: -0.022em;
+  letter-spacing: -0.02em;
   line-height: 0.94;
 }
 

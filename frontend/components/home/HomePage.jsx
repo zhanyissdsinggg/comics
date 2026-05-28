@@ -719,7 +719,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
               href={secondaryHref}
               className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 text-sm font-medium text-white transition-colors hover:bg-white/[0.08]"
             >
-              {hasFeaturedSeries ? "Add to Library" : "Add to Library"}
+              {hasFeaturedSeries ? "Save Series" : "Save Series"}
               <Plus className="size-4" />
             </Link>
           </div>

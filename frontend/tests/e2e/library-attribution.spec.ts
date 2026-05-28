@@ -263,23 +263,23 @@ test.describe("Library attribution", () => {
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
-    await expect(page.getByRole("button", { name: "Resume now" })).toBeVisible({
-      timeout: LIBRARY_UI_TIMEOUT_MS,
-    });
+    await expect(
+      page.getByRole("button", { name: "Continue Reading" }),
+    ).toBeVisible({ timeout: LIBRARY_UI_TIMEOUT_MS });
 
     await Promise.all([
       page.waitForURL(
         /\/read\/series-001\/series-001e1\?entry=LIBRARY_RESUME_SPOTLIGHT&campaignId=resume_spotlight&sourcePath=%2Flibrary/,
         { timeout: LIBRARY_UI_TIMEOUT_MS },
       ),
-      page.getByRole("button", { name: "Resume now" }).click(),
+      page.getByRole("button", { name: "Continue Reading" }).click(),
     ]);
 
-    await expect(page.getByText("Library | Saved in library")).toBeVisible({
+    await expect(page.getByText("Saved Series | Saved")).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Back to library" }),
+      page.getByRole("button", { name: "Open Library" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });

@@ -95,43 +95,43 @@ function buildGenreFallback(series, { includeTitle = false } = {}) {
   const leadIn = includeTitle ? title : "This story";
 
   if (/(crown|king|kingdom|prince|queen|royal|throne)/.test(titleHint)) {
-    return `${leadIn} starts with a stolen crown, a lie dressed up as loyalty, and someone running for their life before the court can finish the job.`;
+    return `${leadIn} opens with a stolen crown, a bad lie, and a court already hunting someone down.`;
   }
 
   if (/(ghost|grave|funeral|midnight|mourning)/.test(titleHint)) {
-    return `${leadIn} opens with grief already in the room, then keeps tightening once the dead start asking for something back.`;
+    return `${leadIn} opens with grief in the room and gets worse once the dead ask for something back.`;
   }
 
   if (/(school|campus|class|detention|club)/.test(titleHint)) {
-    return `${leadIn} turns one reckless choice into gossip, damage control, and feelings nobody involved knows how to explain cleanly.`;
+    return `${leadIn} turns one reckless choice into gossip, fallout, and feelings nobody can explain.`;
   }
 
   if (/(blood|knife|hunt|hunter|crime|case)/.test(titleHint)) {
-    return `${leadIn} begins after the damage is already done, and every answer only makes the next decision look worse.`;
+    return `${leadIn} starts after the damage is done, and every answer makes the next move worse.`;
   }
 
   if (/(romance|love|bl|gl)/.test(primaryGenre)) {
-    return `${leadIn} starts with terrible timing, one loaded glance too many, and a relationship that gets riskier the longer nobody says the obvious part out loud.`;
+    return `${leadIn} starts with bad timing, one loaded glance too many, and feelings that get riskier by the chapter.`;
   }
 
   if (/(fantasy|magic|isekai|supernatural)/.test(primaryGenre)) {
-    return `${leadIn} drops one bad decision into a world built on rules nobody survives by following for long.`;
+    return `${leadIn} drops one bad decision into a world where the rules never save anyone for long.`;
   }
 
   if (/(school|slice|comedy)/.test(primaryGenre)) {
-    return `${leadIn} starts playful, gets messy fast, and somehow lands exactly where the feelings hurt most.`;
+    return `${leadIn} starts playful, gets messy fast, and hits where the feelings hurt.`;
   }
 
   if (/(mystery|thriller|crime|dark|horror)/.test(primaryGenre)) {
-    return `${leadIn} opens with one wrong move, then keeps tightening the screws until even the quiet scenes feel like a trap.`;
+    return `${leadIn} opens with one wrong move and keeps tightening until even the quiet scenes feel dangerous.`;
   }
 
   if (/(action|adventure|sports|battle)/.test(primaryGenre)) {
-    return `${leadIn} hits fast, leaves bruises early, and keeps escalating before anybody earns a safe way out.`;
+    return `${leadIn} hits fast, bruises early, and keeps escalating before anyone earns a way out.`;
   }
 
   if (/(sci-fi|sci fi|science fiction|cyber)/.test(primaryGenre)) {
-    return `${leadIn} moves like a plan that already went wrong once, with pressure building every time the fix gets uglier.`;
+    return `${leadIn} moves like a plan that already failed once, with pressure climbing every time the fix gets uglier.`;
   }
 
   if (
@@ -139,10 +139,10 @@ function buildGenreFallback(series, { includeTitle = false } = {}) {
       .trim()
       .toLowerCase() === "completed"
   ) {
-    return `${leadIn} is all sharp turns, emotional fallout, and a finish that lands without making you wait around for it.`;
+    return `${leadIn} is all sharp turns, fallout, and a finish that lands without making you wait.`;
   }
 
-  return `${leadIn} opens on a problem already spiraling, keeps the pressure close, and leaves the next chapter feeling like a very bad idea you still want immediately.`;
+  return `${leadIn} opens on a problem already spiraling and leaves the next chapter feeling impossible to skip.`;
 }
 
 function extractEditorialSentence(text) {
@@ -207,13 +207,13 @@ export function buildCreatorEditorialHook(creator, options = {}) {
 
   if (genres.length > 0) {
     return clampText(
-      `Stories built around ${genres.slice(0, 2).join(" and ").toLowerCase()}, with enough personality to keep the shelf feeling distinct.`,
+      `Stories built around ${genres.slice(0, 2).join(" and ").toLowerCase()}, with enough pull to stand out fast.`,
       maxLength,
     );
   }
 
   return clampText(
-    "A creator page for readers who want the next title to come with a clear point of view.",
+    "A creator page for readers chasing a strong point of view.",
     maxLength,
   );
 }

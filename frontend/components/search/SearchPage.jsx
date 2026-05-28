@@ -976,7 +976,7 @@ export default function SearchPage({
                     No results
                   </p>
                   <h2 className="mt-2 font-display text-[2.2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
-                    Nothing landed this time.
+                    Nothing matched that search.
                   </h2>
                 </div>
                 <div className="grid gap-4 md:grid-cols-3">

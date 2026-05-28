@@ -299,7 +299,7 @@ export default function AccountPage({ initialSignedIn = false }) {
         }
       });
     } else {
-      setMessage("Saved on this device.");
+      setMessage("Saved in this browser.");
     }
   };
 
@@ -474,9 +474,9 @@ export default function AccountPage({ initialSignedIn = false }) {
       {
         id: "library",
         eyebrow: "Reading",
-        title: "Library",
+        title: "Saved Series",
         description: "",
-        cta: "Library",
+        cta: "Open Library",
         onClick: () => router.push("/library"),
         accentClass: actionSecondaryButtonClass,
       },
@@ -836,7 +836,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                     onClick={() => router.push("/library")}
                     className={primaryButtonClass}
                   >
-                    Library
+                    Open Library
                   </button>
                   <button
                     type="button"

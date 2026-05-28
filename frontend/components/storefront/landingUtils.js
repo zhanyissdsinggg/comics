@@ -174,12 +174,12 @@ export function buildCreatorLabel(series) {
 export function buildUpdatedLabel(series) {
   const updatedAt = toTimestamp(series?.updatedAt);
   if (!updatedAt) {
-    return "Fresh pick";
+    return "New";
   }
 
   const oneDay = 24 * 60 * 60 * 1000;
   if (updatedAt >= Date.now() - oneDay) {
-    return "Updated today";
+    return "Today";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -196,12 +196,12 @@ export function buildReadingTimeLabel(series) {
   const explicit =
     Number(series?.readingTimeMinutes || series?.readingTime || 0) || 0;
   if (explicit > 0) {
-    return `${explicit} min read`;
+    return `${explicit} min`;
   }
 
   const episodeCount = Math.max(1, Number(series?.episodeCount || 1));
   const estimated = Math.max(8, Math.min(36, episodeCount * 4));
-  return `${estimated} min read`;
+  return `${estimated} min`;
 }
 
 export function pickFeaturedSeries(seriesList = [], preferredSeriesId = "") {
@@ -279,9 +279,9 @@ export function buildGenreShelves(seriesList = [], options = {}) {
 
 export function buildMoodTags(seriesList = []) {
   const moods = [
-    "Slow Burn Romance",
+    "Slow-Burn Romance",
     "Messy Friend Group",
-    "Late Night Mystery",
+    "Late-Night Mystery",
     "Chaotic Fantasy",
     "Campus Drama",
     "Soft Escape",

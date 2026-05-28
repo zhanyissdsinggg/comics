@@ -50,7 +50,7 @@ const ReadingStats = React.memo(() => {
       badges.push("100 reads");
     }
     if (stats.followedCount >= 5) {
-      badges.push("Following 5+");
+      badges.push("Saved 5+");
     }
     if (stats.readingHours >= 10) {
       badges.push("10+ hours");
@@ -93,9 +93,9 @@ const ReadingStats = React.memo(() => {
       hint: `Average progress ${stats.avgProgress}%.`,
     },
     {
-      label: "Following",
+      label: "Saved Series",
       value: `${stats.followedCount}`,
-      hint: "Saved for later.",
+      hint: "Ready to read.",
     },
   ];
 

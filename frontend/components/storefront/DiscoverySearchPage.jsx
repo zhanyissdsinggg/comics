@@ -378,7 +378,7 @@ export default function DiscoverySearchPage({
 
   const hasSearchIntent = Boolean(query || type || format || status || genre);
   const activeFilterCount = [type || format, status, genre].filter(Boolean).length;
-  const heroTitle = query ? `"${query}"` : "Browse by mood, genre, and format";
+  const heroTitle = query ? `"${query}"` : "Find your next obsession";
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(255,79,154,0.08)] to-[rgba(255,255,255,0.04)]">
@@ -386,13 +386,15 @@ export default function DiscoverySearchPage({
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
-              Discovery
+              Find Tonight's Read
             </p>
-            <h1 className="mt-4 max-w-[14ch] font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.03em] text-white sm:text-[3.9rem]">
+            <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.038em] text-white sm:text-[3.9rem] sm:tracking-[-0.042em]">
               {heroTitle}
             </h1>
             <p className="mt-3 max-w-[42rem] text-[0.98rem] leading-7 text-white/68">
-              Search stays fast, but the page now opens like a discovery floor with live covers, hot searches, and shelves worth tapping.
+              {query
+                ? "Search by mood, genre, or format."
+                : "Search by mood, genre, or format."}
             </p>
           </div>
 
@@ -479,19 +481,19 @@ export default function DiscoverySearchPage({
           {discoveryModel.featured ? (
             <StoryHero
               series={discoveryModel.featured}
-              eyebrow="Discovery Pick"
+              eyebrow="Tonight's Pick"
               title={discoveryModel.featured.title}
-              hook="Start from one strong cover, then branch into mood tags, genres, and fresh updates."
+              hook="Start with one strong pick, then follow the mood from there."
               primaryLabel="Start Reading"
-              secondaryLabel="Open Series"
+              secondaryLabel="View Series"
             />
           ) : null}
 
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Trending Searches"
-              title="What readers are typing right now"
-              description="Open a hot search instead of starting from zero."
+              title="What everyone keeps searching"
+              description="The titles and vibes readers keep looking up."
             />
             <div className="flex flex-wrap gap-2.5">
               {discoveryModel.trendingKeywords.map((item) => (
@@ -511,8 +513,8 @@ export default function DiscoverySearchPage({
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Mood Tags"
-              title="Start from the vibe, not the title"
-              description="Mood-first entry points feel closer to a teen reading app than a utility dashboard."
+              title="Start with a vibe"
+              description="Pick a vibe and open what fits."
             />
             <div className="flex flex-wrap gap-2.5">
               {discoveryModel.moodTags.map((tag) => (
@@ -532,8 +534,8 @@ export default function DiscoverySearchPage({
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Popular Genres"
-              title="Open a genre shelf"
-              description="A faster path into romance, fantasy, mystery, and everything adjacent."
+              title="Browse by genre"
+              description="Romance, fantasy, mystery, and more."
             />
             <div className="flex flex-wrap gap-2.5">
               {discoveryModel.popularGenres.map((tag) => (
@@ -551,15 +553,15 @@ export default function DiscoverySearchPage({
           <section className="space-y-4">
             <SectionHeading
               eyebrow="Recently Updated"
-              title="The shelves moving right now"
-              description="Recently updated series across comics and novels, surfaced as discovery instead of empty search."
+              title="Fresh updates right now"
+              description="New chapters across comics and novels."
             />
             {catalogLoading ? null : discoveryModel.recent.length > 0 ? (
               <UpdateList items={discoveryModel.recent.slice(0, 8)} sectionName="search_recently_updated" />
             ) : (
               <EmptyShelf
-                title="No discovery shelves yet"
-                description="When catalog data is available, trending discovery rails will show up here."
+                title="Nothing fresh yet"
+                description="Updated stories will show up here as soon as the next wave lands."
                 actionHref="/"
               />
             )}
@@ -569,8 +571,8 @@ export default function DiscoverySearchPage({
             <section className="space-y-4">
               <SectionHeading
                 eyebrow="Formats"
-                title="Popular picks across the catalog"
-                description="A cover-first fallback when you just want something good fast."
+                title="Choose a format"
+                description="Comics, novels, or interactive stories."
               />
               <ShelfScroller>
                 {discoveryModel.popular.map((series) => (
@@ -579,7 +581,7 @@ export default function DiscoverySearchPage({
                     series={series}
                     href={buildSeriesHref(series, searchPath, "", "discovery_popular")}
                     variant={normalizeType(series?.type) === "novel" ? "novel" : "comic"}
-                    actionLabel="Open title"
+                    actionLabel="View Series"
                   />
                 ))}
               </ShelfScroller>
@@ -593,15 +595,15 @@ export default function DiscoverySearchPage({
               series={discoveryModel.featured}
               eyebrow="Best Match"
               title={discoveryModel.featured.title}
-              hook={query ? `Best match for "${query}" plus adjacent reads in the same lane.` : undefined}
-              primaryLabel="Open Series"
+              hook={query ? `Best match for "${query}", plus a few more stories with the same pull.` : undefined}
+              primaryLabel="Start Reading"
               primaryHref={buildSeriesHref(
                 discoveryModel.featured,
                 searchPath,
                 query,
                 "search_featured_match",
               )}
-              secondaryLabel="Start Reading"
+              secondaryLabel="View Series"
             />
           ) : null}
 
@@ -609,12 +611,12 @@ export default function DiscoverySearchPage({
             <SectionHeading
               eyebrow="Search Results"
               title={query ? `"${query}"` : "Filtered Titles"}
-              description="Results stay visual, shelf-like, and easy to scan instead of collapsing into a bare results list."
+              description="The closest matches right now."
             />
             {loading ? null : error ? (
               <EmptyShelf
                 title="Search stalled out"
-                description="The query could not be refreshed right now. Try again in a moment."
+                description="That search did not load right. Give it another shot in a second."
                 actionHref="/search"
               />
             ) : results.length > 0 ? (
@@ -631,7 +633,7 @@ export default function DiscoverySearchPage({
                     )}
                     variant={normalizeType(series?.type) === "novel" ? "novel" : "comic"}
                     badge={normalizeStatus(series?.status) === "completed" ? "Completed" : "Updated"}
-                    actionLabel="View title"
+                    actionLabel="View Series"
                     onClick={() =>
                       trackEvent("search_result_click", {
                         seriesId: series.id,
@@ -647,7 +649,7 @@ export default function DiscoverySearchPage({
             ) : (
               <EmptyShelf
                 title="Nothing landed this time"
-                description="Try a broader mood tag, open a hot search, or drop the filter stack."
+                description="Try a broader vibe, open a hot search, or clear a few filters."
                 actionHref="/search"
               />
             )}
@@ -668,8 +670,8 @@ export default function DiscoverySearchPage({
             <section className="space-y-4">
               <SectionHeading
                 eyebrow="Recently Updated"
-                title="Keep browsing after the first result"
-                description="Discovery shelves stay visible so search does not feel like a dead-end utility tool."
+                title="Still looking?"
+                description="Fresh updates if the first result misses."
               />
               <UpdateList items={discoveryModel.recent.slice(0, 6)} sectionName="search_post_results_recent" />
             </section>

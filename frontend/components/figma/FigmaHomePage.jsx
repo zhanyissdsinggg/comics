@@ -793,7 +793,7 @@ function HomeContent({
                   aria-label="Account shelf"
                   className="flex items-center text-sm font-semibold text-gray-400 transition-colors hover:text-white"
                 >
-                  My Library
+                  Open Library
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>

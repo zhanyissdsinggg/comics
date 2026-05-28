@@ -21,13 +21,13 @@ test.describe("Library reading-state regression", () => {
       "/library",
     );
     await expect(
-      signedIn.page.getByRole("button", { name: "Resume now" }),
+      signedIn.page.getByRole("button", { name: "Continue Reading" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     const signedInText = await getPageBodyText(signedIn.page);
     expect(signedInText).toContain("Continue Reading");
-    expect(signedInText).toContain("Library");
+    expect(signedInText).toContain("Saved Series");
 
     await signedIn.page.goto("/series/series-fresh", {
       waitUntil: "domcontentloaded",
@@ -72,7 +72,7 @@ test.describe("Library reading-state regression", () => {
 
     await signedIn.page.goto("/library", { waitUntil: "domcontentloaded" });
     await expect(
-      signedIn.page.getByRole("button", { name: "Resume now" }),
+      signedIn.page.getByRole("button", { name: "Continue Reading" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
@@ -119,7 +119,7 @@ test.describe("Library reading-state regression", () => {
       "/library",
     );
     await expect(
-      relogin.page.getByRole("button", { name: "Resume now" }),
+      relogin.page.getByRole("button", { name: "Continue Reading" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });

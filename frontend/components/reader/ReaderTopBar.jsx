@@ -32,6 +32,7 @@ export default function ReaderTopBar({
   layoutMode,
   disableLayoutToggle,
   progress,
+  bookmarkActive = false,
   hasPrev = true,
   hasNext = true,
   seriesType = "comic",
@@ -202,8 +203,11 @@ export default function ReaderTopBar({
               type="button"
               onClick={onAddBookmark}
               className={topBarButtonClass}
+              aria-label={
+                bookmarkActive ? "Remove bookmark" : "Save bookmark"
+              }
             >
-              Save
+              {bookmarkActive ? "Saved" : "Save"}
             </button>
           ) : null}
           <ShareButton

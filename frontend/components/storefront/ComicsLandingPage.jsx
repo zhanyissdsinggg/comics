@@ -86,9 +86,9 @@ export default function ComicsLandingPage({
       {model.featured ? (
         <StoryHero
           series={model.featured}
-          eyebrow="Top Comic Hero"
+          eyebrow="Featured Comic"
           primaryLabel="Start Reading"
-          secondaryLabel="See Chapters"
+          secondaryLabel="View Series"
           chips={(Array.isArray(model.featured?.genres) ? model.featured.genres : []).slice(0, 3)}
           stats={[
             {
@@ -106,14 +106,14 @@ export default function ComicsLandingPage({
           ]}
         />
       ) : loading ? null : (
-        <EmptyShelf title="Comic shelves are empty" description="Once comic titles are live in this mode, this page will fill out." actionHref="/search?type=comic" />
+        <EmptyShelf title="No comics here yet" description="Comic picks will show up here as soon as they go live in this mode." actionHref="/search?type=comic" />
       )}
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Today's Comic Updates"
+          eyebrow="Today's Updates"
           title="Fresh panels and new chapter drops"
-          description="Latest comic updates, fast openers, and the series readers are checking first."
+          description="New chapters and quick catch-ups."
         />
         <UpdateList items={model.updated} sectionName="comics_updates" />
       </section>
@@ -122,7 +122,7 @@ export default function ComicsLandingPage({
         <SectionHeading
           eyebrow="Popular Comics"
           title="The covers readers keep tapping"
-          description="High-velocity comics with the strongest shelf pull."
+          description="The comics everyone keeps opening."
         />
         <ShelfScroller>
           {model.popular.map((series, index) => (
@@ -149,13 +149,13 @@ export default function ComicsLandingPage({
         <SectionHeading
           eyebrow="New Comics"
           title="Recent arrivals and rising launches"
-          description="Fresh series and newer shelves still building momentum."
+          description="Fresh launches and early favorites."
           action={
             <Link
               href="/search?type=comic&sort=latest"
               className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
             >
-              See latest
+              Latest drops
             </Link>
           }
         />
@@ -184,7 +184,7 @@ export default function ComicsLandingPage({
         <SectionHeading
           eyebrow="Completed Comics"
           title="Binge the whole run"
-          description="Finished comic series when you want a complete reading session."
+          description="Finished runs when you want the whole story now."
         />
         <ShelfScroller>
           {model.completed.map((series, index) => (
@@ -194,7 +194,7 @@ export default function ComicsLandingPage({
               href={`/series/${series.id}`}
               variant="comic"
               badge="Completed"
-              actionLabel="Binge now"
+              actionLabel="Read Full Series"
               onClick={() =>
                 trackEvent("story_click", {
                   seriesId: series?.id,
@@ -212,26 +212,26 @@ export default function ComicsLandingPage({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
           <SectionHeading
-            eyebrow="Shelf Guide"
-            title="How comic readers are browsing right now"
-            description="Fast open, cover-first, latest chapter visible, and status clear before the tap."
+            eyebrow="Reader Favorites"
+            title="What comic readers keep saving for later"
+            description="Big cliffhangers, easy catch-ups, and full runs."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[
               {
                 icon: Flame,
-                title: "Cover first",
-                body: "Visual priority stays on the poster before supporting copy.",
+                title: "Cliffhanger rush",
+                body: "Hard stops and wild reveals that make one more tap automatic.",
               },
               {
                 icon: Trophy,
-                title: "Latest chapter",
-                body: "Readers can see exactly how current a series is before opening it.",
+                title: "Weekend catch-up",
+                body: "A stack of fresh chapters when you want easy momentum.",
               },
               {
                 icon: Flame,
-                title: "Status clear",
-                body: "Ongoing versus completed stays visible on every shelf card.",
+                title: "Full-run binge",
+                body: "Completed favorites when waiting a week is not happening.",
               },
             ].map((item) => {
               const Icon = item.icon;

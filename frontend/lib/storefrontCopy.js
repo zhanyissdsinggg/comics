@@ -28,7 +28,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Flexible pick",
     title: "Flexible pack",
     description: "Good for regular reading.",
-    nextCta: "Library",
+    nextCta: "Open Library",
     nextHref: "/library",
   },
   value: {
@@ -63,7 +63,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Plan regular",
     title: "Pro plan",
     description: "Better for weekly readers.",
-    nextCta: "Library",
+    nextCta: "Open Library",
     nextHref: "/library",
   },
   vip: {
@@ -77,7 +77,7 @@ const COMMERCE_JOURNEY_GUIDES = {
     eyebrow: "Recent order",
     title: "Recent purchase",
     description: "Already in your account.",
-    nextCta: "Library",
+    nextCta: "Open Library",
     nextHref: "/library",
   },
 };

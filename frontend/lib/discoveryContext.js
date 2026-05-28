@@ -53,8 +53,8 @@ function getReturnConfig(sourcePath) {
 
   if (path.startsWith("/library")) {
     return {
-      label: "Back to library",
-      title: "Library",
+      label: "Open Library",
+      title: "Saved Series",
       hint: "",
     };
   }
@@ -174,8 +174,8 @@ function getLaneReason({ entryPoint, campaignId, series }) {
   if (entryPoint.startsWith("library_")) {
     return {
       sourceLabel: "Library",
-      laneValue: "Saved in library",
-      title: `${series?.title || "This title"} came from your library.`,
+      laneValue: "Saved",
+      title: `${series?.title || "This title"} came from your saved series.`,
       description: "",
     };
   }

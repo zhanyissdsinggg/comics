@@ -103,7 +103,7 @@ export default function ReaderSkeleton({
                   : `${borderClassName} bg-black/[0.03] text-current hover:bg-black/[0.05]`,
               )}
             >
-              Back to series
+              View Series
             </button>
           </div>
         </div>

@@ -178,10 +178,10 @@ function buildNovelParagraphs(seriesTitle: string, episodeNumber: number) {
   }
 
   return [
-    `${seriesTitle} Episode ${episodeNumber} opens with a quiet decision that changes the direction of the story.`,
-    "The chapter slows down long enough to show what the choice costs before the next turn arrives.",
-    "Each scene keeps the emotional stakes close to the character instead of explaining the plot from outside it.",
-    "By the final beat, the episode leaves a clean hook that makes the next chapter feel earned.",
+    `Night pressed close around ${seriesTitle}, and Episode ${episodeNumber} opened on a choice that already felt one second too late.`,
+    "The first turn landed fast, pulling the character forward before fear had time to dress itself up as caution.",
+    "Details from the setting kept the danger physical, immediate, and impossible to explain away.",
+    "By the final beat, the chapter left the kind of hook that made the next page feel necessary.",
   ];
 }
 

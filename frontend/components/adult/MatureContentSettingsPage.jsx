@@ -165,7 +165,7 @@ export default function MatureContentSettingsPage() {
       setFeedback("");
 
       if (!viewerSignedIn) {
-        setFeedback("Saved on this device.");
+        setFeedback("Saved in this browser.");
         return;
       }
 

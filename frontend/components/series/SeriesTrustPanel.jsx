@@ -128,7 +128,7 @@ export default function SeriesTrustPanel({
           : formatCompactCount(Math.max(views, ratingCount)),
       hint:
         followers > 0
-          ? "Following now."
+          ? "Readers are here."
           : views > 0
             ? "Readers are here."
             : ratingCount > 0
@@ -273,7 +273,7 @@ export default function SeriesTrustPanel({
             }
             className={secondaryButtonClass}
           >
-            {isFollowing ? "Library" : "Add to Library"}
+            {isFollowing ? "Open Library" : "Save Series"}
           </button>
         ) : null}
         <ShareButton

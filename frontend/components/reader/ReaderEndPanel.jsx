@@ -36,7 +36,7 @@ export default function ReaderEndPanel({
         <div className="grid gap-4">
           <div className={shellClassName}>
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-              End of chapter
+              Chapter Complete
             </p>
             <h3
               className={cn(
@@ -65,7 +65,7 @@ export default function ReaderEndPanel({
                     mutedClassName,
                   )}
                 >
-                  More from this series
+                  Up Next
                 </p>
                 <p
                   className={cn(
@@ -86,10 +86,10 @@ export default function ReaderEndPanel({
                 <button
                   type="button"
                   onClick={onPrimaryAction}
-                  aria-label={hasNextEpisode ? "Next chapter" : "More from this series"}
+                  aria-label={hasNextEpisode ? "Next chapter" : "View Series"}
                   className={primaryButtonClassName}
                 >
-                  {hasNextEpisode ? "Next chapter" : "More from this series"}
+                  {hasNextEpisode ? "Next chapter" : "View Series"}
                 </button>
               ) : !isSignedIn ? (
                 <button
@@ -105,7 +105,7 @@ export default function ReaderEndPanel({
                   onClick={onOpenStore}
                   className={primaryButtonClassName}
                 >
-                  Store preview
+                  Open Store
                 </button>
               ) : shortfallPts > 0 ? (
                 <button
@@ -113,7 +113,7 @@ export default function ReaderEndPanel({
                   onClick={onOpenStore}
                   className={primaryButtonClassName}
                 >
-                  {checkoutEnabled ? "Get more points" : "Store preview"}
+                  {checkoutEnabled ? "Add Points" : "Open Store"}
                 </button>
               ) : (
                 <button
@@ -143,12 +143,12 @@ export default function ReaderEndPanel({
                 onClick={onBack}
                 className={secondaryButtonClassName}
               >
-                More from this series
+                View Series
               </button>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-gray-500">
-              {hasNextEpisode ? <span>Next chapter ready below</span> : null}
+              {hasNextEpisode ? <span>Next chapter is ready</span> : null}
               {currentBookmark ? <span>Progress saved</span> : null}
               {liked ? <span>Liked</span> : null}
             </div>

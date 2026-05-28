@@ -42,7 +42,10 @@ import {
   persistPaymentAttribution,
   readPaymentAttributionFromSearchParams,
 } from "../../lib/paymentAttribution";
-import { resolveReaderNarrativeParagraphs } from "../../lib/readerNarrativeCopy";
+import {
+  resolveReaderNarrativeParagraphs,
+  resolveReaderOpeningParagraphs,
+} from "../../lib/readerNarrativeCopy";
 import { siteConfig } from "../../lib/siteConfig";
 import { cn, isAdultContent } from "./figma-utils";
 
@@ -219,6 +222,14 @@ function detectNovelReaderContent(episode, seriesType, paragraphs) {
 
   if (novelSignals.has(normalizedType)) {
     return true;
+  }
+
+  if (
+    normalizedType.includes("comic") ||
+    normalizedType.includes("manga") ||
+    normalizedType.includes("webcomic")
+  ) {
+    return false;
   }
 
   if (
@@ -691,6 +702,10 @@ function ReaderContent({
     episodeNumber: currentNumber,
     paragraphs: rawParagraphs,
   });
+  const openingParagraphs = resolveReaderOpeningParagraphs({
+    seriesId,
+    episodeNumber: currentNumber,
+  });
   const isNovel = detectNovelReaderContent(episodeData, seriesType, paragraphs);
   const isComic =
     detectComicReaderContent(episodeData, seriesType, pages, paragraphs) &&
@@ -900,8 +915,8 @@ function ReaderContent({
       if (!canAccessInContentMode(safeTarget, contentMode)) {
         setToast(
           contentMode === "adult"
-            ? "Switch back to normal mode to open this chapter."
-            : "Enable adult mode to open this chapter.",
+            ? "Switch to normal mode to open this chapter."
+            : "Turn on adult mode to open this chapter.",
         );
         return;
       }
@@ -1020,7 +1035,7 @@ function ReaderContent({
       ) {
         await navigator.clipboard.writeText(shareUrl);
       }
-      setToast("Reader link ready");
+      setToast("Link copied");
     } catch {
       setToast("Share cancelled");
     }
@@ -1074,7 +1089,9 @@ function ReaderContent({
       errorCode: response.error,
       pricePts: currentPricePts,
     });
-    setToast(response.status === 402 ? "Not enough points" : "Unlock failed");
+    setToast(
+      response.status === 402 ? "Need more points" : "Couldn't unlock chapter",
+    );
     if (response.status === 402) {
       router.push("/store");
     }
@@ -1298,10 +1315,10 @@ function ReaderContent({
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
         <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-        <h1 className="mb-4 text-3xl font-black">Age Restricted Content</h1>
+        <h1 className="mb-4 text-3xl font-black">Mature Chapter</h1>
         <p className="mb-8 max-w-md text-gray-400">
-          This title is marked mature. Enable adult mode before opening the
-          reader.
+          This chapter is in the mature catalog. Turn on adult mode to start
+          reading.
         </p>
         <button
           type="button"
@@ -1311,14 +1328,14 @@ function ReaderContent({
             palette.primaryBg,
           )}
         >
-          Verify Age Now
+          Turn On Adult Mode
         </button>
         <button
           type="button"
           onClick={handleAdultGateExit}
           className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
         >
-          Back to series
+          View Series
         </button>
       </main>
     );
@@ -1328,10 +1345,10 @@ function ReaderContent({
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#06080a] px-4 py-20 text-center text-white">
         <Lock className="mb-6 h-16 w-16 text-red-500 opacity-80" />
-        <h1 className="mb-4 text-3xl font-black">Normal Mode Required</h1>
+        <h1 className="mb-4 text-3xl font-black">Switch to Normal Mode</h1>
         <p className="mb-8 max-w-md text-gray-400">
-          This title belongs to the normal catalog. Switch back to normal mode
-          to keep reading.
+          This chapter is in the normal catalog. Switch back to normal mode to
+          keep reading.
         </p>
         <button
           type="button"
@@ -1341,14 +1358,14 @@ function ReaderContent({
             palette.primaryBg,
           )}
         >
-          Normal
+          Back to Normal Mode
         </button>
         <button
           type="button"
           onClick={() => router.push(backToSeriesHref)}
           className="mt-6 font-bold text-gray-500 transition-colors hover:text-white"
         >
-          Back to series
+          View Series
         </button>
       </main>
     );
@@ -1488,7 +1505,7 @@ function ReaderContent({
                       : `${novelBorderClass} bg-transparent ${readerMutedClass}`
                   }
                 >
-                  {unlocked ? "Full access" : formatPriceLabel(currentPricePts)}
+                  {unlocked ? "Unlocked" : formatPriceLabel(currentPricePts)}
                 </Pill>
               </div>
 
@@ -1512,24 +1529,23 @@ function ReaderContent({
               >
                 {seriesData.series.title}
               </p>
-                <p
-                  className={cn(
-                    "mt-3 max-w-3xl text-sm",
-                    isComic ? "leading-5" : "leading-7",
-                    readerMutedClass,
-                  )}
-                >
-                  {creatorName} ·{" "}
-                  {formatMetaDate(
-                    currentEpisode?.releasedAt ||
-                      episodeData?.releasedAt ||
-                      seriesData.series.updatedAt,
-                  )}{" "}
-                  ·{" "}
-                  {unlocked
-                    ? `Settle in for the full ${installmentLabel.toLowerCase()}.`
-                    : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} before unlock.`}
-                </p>
+              <p
+                className={cn(
+                  "mt-3 max-w-3xl text-sm",
+                  isComic ? "leading-5" : "leading-7",
+                  readerMutedClass,
+                )}
+              >
+                {creatorName}{" / "}
+                {formatMetaDate(
+                  currentEpisode?.releasedAt ||
+                    episodeData?.releasedAt ||
+                    seriesData.series.updatedAt,
+                )}{" / "}
+                {unlocked
+                  ? `Full ${installmentLabel.toLowerCase()} unlocked.`
+                  : `${safeVisibleUnits} free ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} open now.`}
+              </p>
             </div>
           </div>
         </div>
@@ -1539,6 +1555,7 @@ function ReaderContent({
         <ComicReaderContent
           pages={pages}
           paragraphs={paragraphs}
+          openingParagraphs={openingParagraphs}
           seriesId={seriesData.series.id}
           seriesTitle={seriesData.series.title}
           episodeTitle={currentEpisodeTitle}
@@ -1550,6 +1567,7 @@ function ReaderContent({
           imageSizes="(max-width: 768px) 100vw, 768px"
           seriesType={seriesType}
           brightness={brightness}
+          showOpeningParagraphs={unlocked}
           onActiveIndexChange={setActiveIndex}
           onPreviewEndRef={(node) => {
             previewEndRef.current = node;
@@ -1603,7 +1621,7 @@ function ReaderContent({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill className="border-amber-500/25 bg-amber-500/10 text-amber-200">
-                      Preview ends here
+                      Free preview ends here
                     </Pill>
                     <Pill className="border-white/10 bg-white/5 text-gray-300">
                       {formatPriceLabel(currentPricePts)}
@@ -1613,22 +1631,22 @@ function ReaderContent({
                     Unlock the rest of this {installmentLabel.toLowerCase()}.
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-                    Preview ends here. Unlock the rest to continue.
+                    Unlock the rest to keep reading.
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
                     <Metric
                       label="Unlock price"
                       value={formatPriceLabel(currentPricePts)}
-                      hint={`${safeVisibleUnits} preview unit${safeVisibleUnits === 1 ? "" : "s"} already open`}
+                      hint={`${safeVisibleUnits} preview ${isComic ? "page" : "section"}${safeVisibleUnits === 1 ? "" : "s"} already open`}
                     />
                     <Metric
                       label="Wallet total"
                       value={`${walletBalance} pts`}
                       hint={
                         isSignedIn
-                          ? `${paidPts} paid · ${bonusPts} bonus`
-                          : "Sign in to check balance"
+                          ? `${paidPts} paid / ${bonusPts} bonus`
+                          : "Sign in to view your balance"
                       }
                     />
                     <Metric
@@ -1638,8 +1656,8 @@ function ReaderContent({
                       }
                       hint={
                         shortfallPts > 0
-                          ? "Top up to continue instantly"
-                          : "Enough points to open now"
+                          ? "Add points to keep reading"
+                          : "Enough points to unlock now"
                       }
                     />
                   </div>
@@ -1670,7 +1688,7 @@ function ReaderContent({
                           palette.primaryBg,
                         )}
                       >
-                        Get more points
+                        Add Points
                       </button>
                     ) : (
                       <button
@@ -1693,24 +1711,24 @@ function ReaderContent({
                       onClick={() => router.push(backToSeriesHref)}
                       className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-white/10 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/5"
                     >
-                      Back to series
+                      View Series
                     </button>
                   </div>
                 </div>
 
                 <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">
-                    Unlock adds
+                    Unlock Includes
                   </p>
                   <div className="mt-4 space-y-3">
                     <Metric
-                      label="Continue instantly"
-                      value="No route break"
+                      label="Keep reading"
+                      value="No break"
                       hint="Stay in the same reading flow after access flips live."
                     />
                     <Metric
-                      label="Queue context"
-                      value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more ahead`}
+                      label="Up next"
+                      value={`${Math.max(episodes.length - (currentIndex + 1), 0)} more chapters`}
                       hint={`You are reading ${currentInstallmentLabel.toLowerCase()} of ${Math.max(episodes.length, 1)}.`}
                     />
                     <Metric
@@ -1759,8 +1777,8 @@ function ReaderContent({
         }
         description={
           unlocked
-            ? `${currentInstallmentLabel} is complete. Continue reading, revisit the previous chapter, or jump into the discussion below.`
-            : `The free preview ends here. Unlock the rest of this ${installmentLabel.toLowerCase()} to keep reading without leaving the reader.`
+            ? `${currentInstallmentLabel} is complete. Keep reading, revisit the previous chapter, or jump into the comments below.`
+            : `The free preview stops here. Unlock the rest of this ${installmentLabel.toLowerCase()} to keep reading.`
         }
         nextEpisodeTitle={
           nextEpisode
@@ -1777,7 +1795,7 @@ function ReaderContent({
         nextEpisodeHint={
           Number(nextEpisode?.pricePts || 0) > 0
             ? `${formatPriceLabel(nextEpisode?.pricePts)} if this next chapter is still locked.`
-            : "The next chapter is ready to open right away."
+            : "The next chapter is ready."
         }
         hasNextEpisode={Boolean(nextEpisode)}
         isUnlocked={unlocked}
@@ -1840,7 +1858,7 @@ function ReaderContent({
                 isComic ? "text-white" : "text-current",
               )}
             >
-              Join the discussion
+              Talk about this chapter
             </h3>
           </div>
           <FigmaCommentsSection seriesTitle={seriesData.series.title} />

@@ -104,13 +104,13 @@ function HomeLandingContent({ initialHomeData = null }) {
       {homeModel.featured ? (
         <StoryHero
           series={homeModel.featured}
-          eyebrow="Featured Hero"
+          eyebrow="Editor's Pick"
           primaryLabel="Start Reading"
           primaryHref={
             initialHomeData?.canonicalHome?.featuredReadHref ||
             buildReadHref(homeModel.featured)
           }
-          secondaryLabel="Open Series"
+          secondaryLabel="View Series"
           stats={featuredStats}
           chips={(Array.isArray(homeModel.featured?.genres)
             ? homeModel.featured.genres
@@ -119,19 +119,19 @@ function HomeLandingContent({ initialHomeData = null }) {
         />
       ) : loading ? null : (
         <EmptyShelf
-          title="The front page is warming up"
-          description="Once stories are live in this mode, the hero and shelves will show up here."
+          title="The front page is getting ready"
+          description="New stories will land here as soon as they go live in this mode."
           actionHref="/search"
         />
       )}
 
       {homeModel.trending.length > 0 ? (
-        <section className="space-y-4">
-          <SectionHeading
-            eyebrow="Trending Covers"
-            title="Tap what looks impossible to ignore"
-            description="Cover-first picks built for quick entry, late-night binging, and instant curiosity."
-          />
+      <section className="space-y-4">
+        <SectionHeading
+          eyebrow="Trending Covers"
+          title="The covers nobody is skipping"
+          description="Big covers and sharp hooks."
+        />
           <ShelfScroller>
             {homeModel.trending.map((series, index) => (
               <CoverCard
@@ -156,15 +156,15 @@ function HomeLandingContent({ initialHomeData = null }) {
       <section className="space-y-4">
         <SectionHeading
           eyebrow="New Episodes Today"
-          title="Fresh drops worth opening now"
-          description="Recently updated chapters, quick catch-ups, and titles with real reading momentum."
+          title="New drops for tonight"
+          description="Fresh chapters and quick catch-ups."
         />
         {homeModel.updates.length > 0 ? (
           <UpdateList items={homeModel.updates} sectionName="home_new_episodes" />
         ) : (
           <EmptyShelf
             title="No new drops yet"
-            description="Updates will land here as soon as the release flow catches up."
+            description="Fresh chapters will show up here as soon as today's drops are in."
             actionHref="/comics"
           />
         )}
@@ -174,15 +174,15 @@ function HomeLandingContent({ initialHomeData = null }) {
         <section className="space-y-4">
           <SectionHeading
             eyebrow="Continue Reading"
-            title="Your last open tabs"
-            description="Jump back into the exact title you were in the middle of."
+            title="Right where you left it"
+            description="Pick up right where you stopped."
             action={
               <Link
                 href="/library"
                 className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/76"
               >
                 <Library className="size-4" />
-                Library
+                Open Library
               </Link>
             }
           />
@@ -212,8 +212,8 @@ function HomeLandingContent({ initialHomeData = null }) {
         <section className="space-y-4">
           <SectionHeading
             eyebrow="Binge-worthy Completed"
-            title="No waiting. Just keep going."
-            description="Finished series when you want payoff without hanging around for the next drop."
+            title="Whole stories, zero waiting"
+            description="Finished stories with no waiting."
           />
           <ShelfScroller>
             {homeModel.completed.map((series, index) => (
@@ -222,7 +222,7 @@ function HomeLandingContent({ initialHomeData = null }) {
                 series={series}
                 href={`/series/${series.id}`}
                 badge="Completed"
-                actionLabel="Binge now"
+                actionLabel="Read Full Series"
                 onClick={() =>
                   trackEvent("story_click", {
                     seriesId: series?.id,
@@ -240,28 +240,28 @@ function HomeLandingContent({ initialHomeData = null }) {
 
       <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
         <SectionHeading
-          eyebrow="Quick Routes"
-          title="Where to next?"
-          description="Jump straight into the shelf that matches what you want to read right now."
+          eyebrow="Read Tonight"
+          title="Choose your next read"
+          description="Comics, novels, or whatever clicks first."
         />
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           {[
             {
               href: "/comics",
               title: "Comics",
-              body: "Open cover-heavy action, romance, and cliffhanger shelves.",
+              body: "Bold covers, cliffhangers, and fast reads.",
               icon: Flame,
             },
             {
               href: "/novels",
               title: "Novels",
-              body: "Go narrower, moodier, and more chapter-driven.",
+              body: "Moodier stories built for one more chapter.",
               icon: Sparkles,
             },
             {
               href: "/search",
               title: "Discovery",
-              body: "Browse by vibe, genre, update speed, or format.",
+              body: "Start with a vibe and follow what clicks.",
               icon: Library,
             },
           ].map((item) => {

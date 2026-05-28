@@ -311,14 +311,14 @@ export default function SeriesHeader({
                       : storefrontSecondaryButtonClass
                   }`}
                   aria-label={
-                    isFollowing ? "Remove from library" : "Save to library"
+                    isFollowing ? "Remove from saved" : "Save series"
                   }
                 >
                   <Heart
                     size={18}
                     className={isFollowing ? "fill-current" : ""}
                   />
-                  <span>{isFollowing ? "Saved" : "Add to Library"}</span>
+                  <span>{isFollowing ? "Saved" : "Save Series"}</span>
                 </button>
               ) : null}
               <ShareButton

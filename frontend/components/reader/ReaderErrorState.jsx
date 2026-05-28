@@ -32,7 +32,7 @@ export default function ReaderErrorState({
             mutedClassName,
           )}
         >
-          Reader
+          Chapter Error
         </p>
         <h1
           className={cn(
@@ -64,7 +64,7 @@ export default function ReaderErrorState({
             onClick={onBack}
             className={secondaryButtonClassName}
           >
-            Back to series
+            View Series
           </button>
         </div>
       </div>

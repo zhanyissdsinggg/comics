@@ -1535,7 +1535,7 @@ test.describe("Content mode filtering", () => {
       waitUntil: "domcontentloaded",
     });
     await page
-      .getByRole("link", { name: /Add to Library/i })
+      .getByRole("link", { name: /View Series/i })
       .first()
       .click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
@@ -1562,7 +1562,7 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /Nothing landed this time\./i }),
+      page.getByRole("heading", { name: /Nothing landed this time/i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1595,7 +1595,7 @@ test.describe("Content mode filtering", () => {
         /Curated Grid|Discovery Shelf|Panel Logic/i,
       );
       await expect(page.locator("body")).toContainText(
-        /Editor's Picks|Explore More|Top Rated/i,
+        /Featured Comic|Featured Novel|Reader Favorites|Late-Night Reads|Top 10 Comics|Top Novels/i,
       );
     }
   });
@@ -1647,21 +1647,24 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const trendingRail = page.getByTestId("search-rail-trending");
-    await expect(trendingRail).toBeVisible({ timeout: UI_TIMEOUT_MS });
-
-    const titleLinks = trendingRail.getByRole("link");
-    await expect(titleLinks.first()).toBeVisible({ timeout: UI_TIMEOUT_MS });
-
-    const titles = (await titleLinks.allTextContents())
-      .map((text) => text.trim())
-      .filter(Boolean)
-      .slice(0, 8);
-
-    expect(titles.length).toBeGreaterThanOrEqual(2);
-    expect(titles.join(" ")).toContain("The Last Kingdom");
-    expect(titles.join(" ")).toContain("Velvet Archive");
-    expect(new Set(titles).size).toBeGreaterThanOrEqual(2);
+    await expect(
+      page.getByRole("heading", {
+        name: /What everyone keeps searching/i,
+      }),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", {
+        name: /Start with a vibe/i,
+      }),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("heading", {
+        name: /Browse by genre/i,
+      }),
+    ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("button", { name: /Clear filters/i }),
+    ).not.toBeVisible();
   });
 
   test("interactive footer should keep Search when the current page is the interactive route", async ({
@@ -1751,7 +1754,7 @@ test.describe("Content mode filtering", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await page.getByRole("link", { name: "Add to Library" }).first().click();
+    await page.getByRole("link", { name: "View Series" }).first().click();
     await expect(page).toHaveURL(/\/series\/series-001$/);
 
     const footer = page.locator('footer[data-site-footer="1"]').first();
@@ -1782,7 +1785,7 @@ test.describe("Content mode filtering", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("heading", { name: /Age Restricted Content/i }),
+      page.getByRole("heading", { name: /Mature Chapter/i }),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -1821,7 +1824,7 @@ test.describe("Content mode filtering", () => {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("main")).not.toContainText(
-      /Age Restricted Content|Enable adult mode/i,
+      /Mature Chapter|Turn on adult mode/i,
     );
     const initialEpisodeRequests = routes.getAdultEpisodeRequests();
     if (initialEpisodeRequests.length > 0) {

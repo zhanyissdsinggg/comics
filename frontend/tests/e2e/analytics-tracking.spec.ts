@@ -731,7 +731,7 @@ test.describe("Analytics tracking", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByText(/Adult mode required|Confirm your age|Enable adult mode/i),
+      page.getByRole("heading", { name: /Mature Chapter/i }),
     ).toBeVisible();
     await flushAnalytics(page, capturedEvents);
 

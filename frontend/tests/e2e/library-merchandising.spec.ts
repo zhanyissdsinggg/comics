@@ -269,7 +269,7 @@ test.describe("Library merchandising", () => {
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Back to library" }),
+      page.getByRole("button", { name: "Open Library" }),
     ).toBeVisible({
       timeout: LIBRARY_UI_TIMEOUT_MS,
     });

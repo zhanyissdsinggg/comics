@@ -594,7 +594,7 @@ export default function LibraryPage({
           detailItems.push(series.status);
         }
         if (isFollowed) {
-          detailItems.push("Saved in Library");
+          detailItems.push("Saved");
         }
         if (latestShelfTouch) {
           detailItems.push(formatRelativeLibraryTime(latestShelfTouch));
@@ -753,14 +753,14 @@ export default function LibraryPage({
               value: visibleLibraryItems.length.toLocaleString(),
               hint:
                 bookmarkCountTotal > 0
-                  ? `${formatBookmarkCountLabel(bookmarkCountTotal)} saved`
-                  : "Saved titles",
+                  ? `${formatBookmarkCountLabel(bookmarkCountTotal)} ready`
+                  : "Saved series",
             },
             {
               label: "Bookmarks",
               value: bookmarkCountTotal.toLocaleString(),
               hint:
-                bookmarkCountTotal > 0 ? "Saved moments" : "No bookmarks yet",
+                bookmarkCountTotal > 0 ? "Bookmarks ready" : "No bookmarks yet",
             },
           ]
         : [],
@@ -821,9 +821,9 @@ export default function LibraryPage({
         description:
           visibleLibraryItems.length > 0
             ? bookmarkCountTotal > 0
-              ? `${formatBookmarkCountLabel(bookmarkCountTotal)} saved`
-              : visibleLibraryItems[0]?.statusLabel || "Saved"
-            : "Saved",
+              ? `${formatBookmarkCountLabel(bookmarkCountTotal)} ready`
+              : visibleLibraryItems[0]?.statusLabel || "Saved series"
+            : "Saved series",
         onClick: () =>
           visibleLibraryItems.length > 0
             ? scrollToSection("saved-series")
@@ -852,7 +852,7 @@ export default function LibraryPage({
     ? hasLibrarySignals
       ? resumeSpotlightReadHref
         ? "Jump back in."
-        : "Saved titles and recent reads."
+        : "Saved series and recent reads."
       : "Save a few titles to get started."
     : "Sign in to save progress and favorites.";
   const signedOutHeroSecondary =
@@ -901,7 +901,7 @@ export default function LibraryPage({
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
-            eyebrow="Library"
+            eyebrow="Saved Series"
             title={libraryDeskTitle}
             description={signedInHeroDescription}
             secondary={signedOutHeroSecondary}
@@ -916,7 +916,7 @@ export default function LibraryPage({
                     role="button"
                     className={primaryButtonClass}
                   >
-                    Resume now
+                    Continue Reading
                   </a>
                 ) : viewerSignedIn && visibleLibraryItems.length > 0 ? (
                   <button
@@ -924,7 +924,7 @@ export default function LibraryPage({
                     onClick={() => scrollToSection("saved-series")}
                     className={primaryButtonClass}
                   >
-                    View shelf
+                    Saved Series
                   </button>
                 ) : (
                   <Link
@@ -948,7 +948,7 @@ export default function LibraryPage({
                     className={secondaryButtonClass}
                   >
                     {visibleLibraryItems.length > 0
-                      ? "Library"
+                      ? "Open Library"
                       : showCollectionManager
                         ? "Hide collections"
                         : "Collections"}
@@ -991,7 +991,7 @@ export default function LibraryPage({
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
-                          : "Library"}
+                          : "Saved Series"}
                       </p>
                       <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
                         {resumeSpotlightPanelTitle}
@@ -1069,7 +1069,7 @@ export default function LibraryPage({
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
                     <div className="rounded-[26px] border-2 border-black bg-[#0b0b0b] p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
-                        Library
+                        Saved Series
                       </p>
                       <h2 className="mt-3 text-[2rem] font-black uppercase leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.35rem]">
                         {libraryDeskTitle}
@@ -1163,9 +1163,13 @@ export default function LibraryPage({
               {continueRailItems.length > 0 ? (
                 <div id="continue-reading">
                   <Rail
-                    eyebrow={viewerSignedIn ? "Continue Reading" : "On Device"}
-                    title={
+                    eyebrow={
                       viewerSignedIn ? "Continue Reading" : "On This Device"
+                    }
+                    title={
+                      viewerSignedIn
+                        ? "Continue Reading"
+                        : "Continue on this device"
                     }
                     railName="continue"
                     items={continueRailItems}
@@ -1237,8 +1241,8 @@ export default function LibraryPage({
               {viewerSignedIn && visibleLibraryItems.length > 0 ? (
                 <div id="saved-series">
                   <Rail
-                    eyebrow="Library"
-                    title="Library"
+                    eyebrow="Saved Series"
+                    title="Saved Series"
                     railName="following"
                     items={visibleLibraryItems}
                     appearance="dark"

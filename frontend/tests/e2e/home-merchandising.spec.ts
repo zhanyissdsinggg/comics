@@ -322,36 +322,18 @@ test.describe("Homepage merchandising sync", () => {
     const startReadingLink = page.getByRole("link", {
       name: /Continue Reading|Continue Chapter|Start reading/i,
     });
-    const addToLibraryLink = page.getByRole("link", {
-      name: /Add to Library/i,
+    const viewSeriesLink = page.getByRole("link", {
+      name: /View Series/i,
     });
-    const heartbreakButton = page
-      .getByRole("button", { name: "Heartbreak", exact: true })
-      .first();
-    const magicSchoolButton = page
-      .getByRole("button", { name: "Magic school", exact: true })
-      .first();
-    const enemiesButton = page
-      .getByRole("button", { name: "Enemies to lovers", exact: true })
-      .first();
-    const browseAllButton = page.getByRole("link", {
-      name: /Browse all/i,
-    });
+    const firstShelfLink = page.locator("main a[href]").nth(2);
 
     await expect(startReadingLink).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(addToLibraryLink).toBeVisible({
+    await expect(viewSeriesLink).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
-    await expect(heartbreakButton).toBeVisible({
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(magicSchoolButton).toBeVisible({
-      timeout: HOME_UI_TIMEOUT_MS,
-    });
-    await expect(enemiesButton).toBeVisible({ timeout: HOME_UI_TIMEOUT_MS });
-    await expect(browseAllButton).toBeVisible({
+    await expect(firstShelfLink).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });
 
@@ -364,31 +346,17 @@ test.describe("Homepage merchandising sync", () => {
     );
 
     await startReadingLink.press("Tab");
-    await expect(addToLibraryLink).toBeFocused();
+    await expect(viewSeriesLink).toBeFocused();
     await expectVisibleFocusIndicator(
-      addToLibraryLink,
-      "Homepage Add to Library link",
+      viewSeriesLink,
+      "Homepage View Series link",
     );
 
-    await addToLibraryLink.press("Tab");
-    await expect(heartbreakButton).toBeFocused();
+    await viewSeriesLink.press("Tab");
+    await expect(firstShelfLink).toBeFocused();
     await expectVisibleFocusIndicator(
-      heartbreakButton,
-      "Homepage Heartbreak button",
-    );
-
-    await heartbreakButton.press("Tab");
-    await expect(magicSchoolButton).toBeFocused();
-    await expectVisibleFocusIndicator(
-      magicSchoolButton,
-      "Homepage Magic school button",
-    );
-
-    await magicSchoolButton.press("Tab");
-    await expect(enemiesButton).toBeFocused();
-    await expectVisibleFocusIndicator(
-      enemiesButton,
-      "Homepage Enemies to lovers button",
+      firstShelfLink,
+      "Homepage first shelf link",
     );
 
     await expectNoRuntimeIssues("/", runtimeIssues);

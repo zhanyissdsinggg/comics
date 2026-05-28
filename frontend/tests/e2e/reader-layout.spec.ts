@@ -100,7 +100,7 @@ const CLEAN_FREE_READER_SERIES = [
   { seriesId: "series-012", episodeId: "series-012e1", title: "Wild Hearts" },
 ];
 const NOVEL_TEST_FIRST_PARAGRAPH =
-  "Solar Wind Episode 1 opens with a quiet decision that changes the direction of the story.";
+  "The first warning came as a color, not a sound.";
 
 function buildReaderTestUrl(
   seriesId: string,
@@ -862,14 +862,21 @@ test.describe("Reader layout", () => {
       exact: true,
     });
     await expect(topBarHeading).toBeVisible();
-    const bookmarkButton = page.getByRole("button", {
-      name: "Save bookmark",
+    const settingsButton = page.getByRole("button", {
+      name: "Reader Settings",
     });
-    await expect(bookmarkButton).toBeVisible();
-    await bookmarkButton.click();
+    await expect(settingsButton).toBeVisible();
+    await settingsButton.click();
+    const saveProgressAction = page.getByRole("button", {
+      name: /Save progress/i,
+    });
+    await expect(saveProgressAction).toBeVisible();
+    await saveProgressAction.click();
     await expect(page.getByText("Bookmark saved")).toBeVisible();
 
-    await page.getByRole("button", { name: "Remove bookmark" }).first().click();
+    await settingsButton.click();
+    await expect(saveProgressAction).toBeVisible();
+    await saveProgressAction.click();
     await expect(page.getByText("Bookmark removed")).toBeVisible();
 
     await expectNoRuntimeIssues(
@@ -904,12 +911,12 @@ test.describe("Reader layout", () => {
     await expect(
       page
         .getByRole("button", {
-          name: /Sign in to unlock|Get more points|Unlock with \d+ pts/i,
+          name: /Sign in to unlock|Add Points|Unlock with \d+ pts/i,
         })
         .first(),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Back to series/i }).first(),
+      page.getByRole("button", { name: /View Series/i }).first(),
     ).toBeVisible();
 
     await expectNoRuntimeIssues(
@@ -944,9 +951,9 @@ test.describe("Reader layout", () => {
           pages: [],
           paragraphs: [
             NOVEL_TEST_FIRST_PARAGRAPH,
-            "The lead studies the stakes, weighs the cost, and realizes there is no harmless way forward anymore.",
-            "A second beat widens the world, grounding the chapter in consequence instead of spectacle.",
-            "By the closing paragraph, the episode lands on a hook that invites the next chapter instead of padding the read.",
+            "Every loose screw in the console hummed in the same key, and the bridge suddenly felt too small for what was looking back at them.",
+            "Outside the hull, the storm leaned against the ship like it knew the route better than the crew did.",
+            "By the closing paragraph, Lena understood the signal was not calling for help. It was choosing an audience.",
           ],
         },
       },
@@ -987,7 +994,7 @@ test.describe("Reader layout", () => {
       ) as HTMLElement | null;
       const commentsHeading = Array.from(
         document.querySelectorAll("main h3"),
-      ).find((node) => node.textContent?.includes("Join the discussion")) as
+      ).find((node) => node.textContent?.includes("Talk about this chapter")) as
         | HTMLElement
         | undefined;
 
@@ -1041,8 +1048,8 @@ test.describe("Reader layout", () => {
           pages: [],
           paragraphs: [
             NOVEL_TEST_FIRST_PARAGRAPH,
-            "The lead studies the stakes, weighs the cost, and realizes there is no harmless way forward anymore.",
-            "A second beat widens the world, grounding the chapter in consequence instead of spectacle.",
+            "Every loose screw in the console hummed in the same key, and the bridge suddenly felt too small for what was looking back at them.",
+            "Outside the hull, the storm leaned against the ship like it knew the route better than the crew did.",
           ],
         },
       },
@@ -1137,7 +1144,7 @@ test.describe("Reader layout", () => {
           pages: [],
           paragraphs: [
             NOVEL_TEST_FIRST_PARAGRAPH,
-            "The lead studies the stakes, weighs the cost, and realizes there is no harmless way forward anymore.",
+            "Every loose screw in the console hummed in the same key, and the bridge suddenly felt too small for what was looking back at them.",
           ],
         },
       },
@@ -1233,15 +1240,15 @@ test.describe("Reader layout", () => {
     await expect(endPanel).toBeVisible();
     await expect(shellMarker).toBeAttached();
     await expect(contentMarker).toBeAttached();
-    await expect(endPanel).toContainText("End of chapter");
+    await expect(endPanel).toContainText("Chapter Complete");
     await expect(
       endPanel
-        .getByRole("button", { name: /Next chapter|Back to series/i })
+        .getByRole("button", { name: /Next chapter|View Series/i })
         .first(),
     ).toBeVisible();
     await expect(
       endPanel
-        .getByRole("button", { name: /Previous chapter|Back to series/i })
+        .getByRole("button", { name: /Previous chapter|View Series/i })
         .first(),
     ).toBeVisible();
 
@@ -1260,7 +1267,7 @@ test.describe("Reader layout", () => {
       ) as HTMLElement | null;
       const commentsHeading = Array.from(
         document.querySelectorAll("main h3"),
-      ).find((node) => node.textContent?.includes("Join the discussion")) as
+      ).find((node) => node.textContent?.includes("Talk about this chapter")) as
         | HTMLElement
         | undefined;
       const documentTop = window.scrollY;

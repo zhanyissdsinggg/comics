@@ -292,7 +292,7 @@ const WalletTopUpPrompt = memo(function WalletTopUpPrompt({
                           {formatPackagePrice(pkg)}
                         </div>
                         <div className="text-xs font-semibold uppercase tracking-[0.08em] text-white/65">
-                          {purchaseActionsEnabled ? "Get Points" : "View Store"}
+                          {purchaseActionsEnabled ? "Add Points" : "View Store"}
                         </div>
                       </div>
                     </div>

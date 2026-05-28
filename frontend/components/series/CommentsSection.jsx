@@ -293,7 +293,7 @@ export default function CommentsSection({
                   : "border-white/12 bg-[rgba(255,255,255,0.04)] text-white/80 shadow-[0_12px_28px_rgba(8,6,20,0.18)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,255,255,0.08)]"
               }`}
             >
-              {isFollowing ? "Saved" : "Add to Library"}
+              {isFollowing ? "Saved" : "Save Series"}
             </button>
           ) : null}
           <button

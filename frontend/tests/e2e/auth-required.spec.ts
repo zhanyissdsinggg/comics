@@ -172,10 +172,10 @@ test.describe("Auth-required UX", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByRole("button", { name: /Add to Library/i }).first(),
+      page.getByRole("button", { name: /Save Series/i }).first(),
     ).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
-    await page.getByRole("button", { name: /Add to Library/i }).first().click();
+    await page.getByRole("button", { name: /Save Series/i }).first().click();
 
     await expect(
       page.getByRole("heading", { name: /^Sign in$/i }).first(),

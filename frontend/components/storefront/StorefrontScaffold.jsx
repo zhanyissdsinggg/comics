@@ -173,7 +173,7 @@ export function SectionHeading({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.022em] text-white sm:text-[2.4rem]">
+        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.02em] text-white sm:text-[2.4rem]">
           {title}
         </h2>
         {description ? (
@@ -233,7 +233,7 @@ export function StoryHero({
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="max-w-[12ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.03em] text-white sm:text-[4rem]">
+            <h1 className="max-w-[13ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.038em] text-white sm:text-[4rem] sm:tracking-[-0.042em]">
               {heroTitle}
             </h1>
             {description ? (
@@ -331,7 +331,7 @@ export function CoverCard({
   href,
   variant = "comic",
   badge = "",
-  actionLabel = "Read",
+  actionLabel = "Start Reading",
   progressPercent = 0,
   subtitle = "",
   onClick,
@@ -380,7 +380,7 @@ export function CoverCard({
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/58">
               {meta.eyebrow}
             </p>
-            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.04em] text-white">
+            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.022em] text-white">
               {series.title}
             </h3>
             <p className="line-clamp-2 text-sm leading-5 text-white/70">
@@ -463,7 +463,7 @@ export function UpdateList({ items = [], variant = "comic", sectionName = "" }) 
               <p className="mt-1 line-clamp-2 text-sm leading-6 text-white/64">
                 {variant === "novel"
                   ? buildCardHook(series, 88)
-                  : `${buildLatestInstallmentLabel(series)} now live`}
+                  : buildLatestInstallmentLabel(series)}
               </p>
             </div>
             <div className="text-right">
@@ -471,7 +471,7 @@ export function UpdateList({ items = [], variant = "comic", sectionName = "" }) 
                 {buildUpdatedLabel(series)}
               </p>
               <p className="mt-2 text-sm font-medium text-white/76">
-                {series?.progressPercent > 0 ? "Continue" : "Read"}
+                {series?.progressPercent > 0 ? "Continue Reading" : "Start Reading"}
               </p>
             </div>
           </Link>
@@ -491,7 +491,7 @@ export function RankList({ items = [], label = "Top 10" }) {
       <SectionHeading
         eyebrow="Charts"
         title={label}
-        description="The titles readers keep tapping first."
+        description="The titles everyone keeps opening."
       />
       <div className="mt-5 grid gap-3">
         {items.map((series, index) => (
@@ -540,9 +540,9 @@ export function GenreShelfSection({ shelves = [], variant = "comic" }) {
       {shelves.map((shelf) => (
         <div key={shelf.genre} className="space-y-4">
           <SectionHeading
-            eyebrow="Genre Shelf"
+            eyebrow="Genre Shelves"
             title={shelf.genre}
-            description={`Open the ${shelf.genre.toLowerCase()} shelf and keep scrolling.`}
+            description={`Open the ${shelf.genre.toLowerCase()} shelf and start reading.`}
           />
           <ShelfScroller>
             {shelf.items.map((series) => (
@@ -570,7 +570,7 @@ export function InteractivePromo() {
             <Gamepad2 className="size-3.5" />
             Interactive Stories
           </p>
-          <h2 className="font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.022em] text-white sm:text-[2.5rem]">
+          <h2 className="font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.02em] text-white sm:text-[2.5rem]">
             Your Choice Changes the Story
           </h2>
           <p className="max-w-[44rem] text-sm leading-7 text-white/68">
@@ -589,7 +589,7 @@ export function InteractivePromo() {
             href="/search?format=interactive"
             className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/12 bg-white/[0.05] px-5 text-sm font-medium text-white/82"
           >
-            Discover More
+            More Stories
           </Link>
         </div>
       </div>
@@ -620,15 +620,15 @@ export function DiscoveryFilterPill({
 
 export function EmptyShelf({
   title = "Nothing here yet",
-  description = "Fresh titles will show up here as soon as the catalog fills out.",
+  description = "Fresh stories will land here soon.",
   actionHref = "/search",
 }) {
   return (
     <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 shadow-[var(--gush-shadow-panel)]">
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/48">
-        Stand by
+        Next Up
       </p>
-      <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
+      <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.022em] text-white">
         {title}
       </h2>
       <p className="mt-3 max-w-[34rem] text-sm leading-7 text-white/66">
@@ -638,7 +638,7 @@ export function EmptyShelf({
         href={actionHref}
         className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/12 bg-white/[0.05] px-4 text-sm font-medium text-white/82"
       >
-        Browse Library
+        Find a Story
         <Library className="size-4" />
       </Link>
     </section>

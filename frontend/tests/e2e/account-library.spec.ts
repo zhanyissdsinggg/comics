@@ -322,7 +322,7 @@ test.describe("Account My Library", () => {
       page.getByRole("heading", { name: "Velvet Archive" }),
     ).toBeVisible({ timeout: 10000 });
     await expect(
-      page.getByText("Saved to your shelf with 1 saved spot"),
+      page.getByText("Saved with 1 bookmark"),
     ).toBeVisible({
       timeout: 10000,
     });

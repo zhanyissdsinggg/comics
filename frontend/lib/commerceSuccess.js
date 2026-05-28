@@ -29,7 +29,7 @@ function createTargetAction(targetPath) {
     return { label: "Return to series", href: targetPath };
   }
   if (targetPath.startsWith("/library")) {
-    return { label: "Library", href: targetPath };
+    return { label: "Open Library", href: targetPath };
   }
   if (targetPath.startsWith("/search")) {
     return { label: "Return to search", href: targetPath };
@@ -132,7 +132,7 @@ export function getCommerceSuccessPresentation(payload) {
       primaryAction: { label: guide.nextCta, href: guide.nextHref },
       secondaryAction:
         guide.nextHref === "/orders"
-          ? { label: "Library", href: "/library" }
+          ? { label: "Open Library", href: "/library" }
           : { label: "View orders", href: "/orders" },
     };
   }

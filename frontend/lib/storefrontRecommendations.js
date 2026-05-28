@@ -6,7 +6,7 @@ const HOME_RAIL_PRESETS = {
     title: "New from your follows",
     reason: "Fresh updates from the series already living on your shelf.",
     href: "/library",
-    ctaLabel: "Library",
+    ctaLabel: "Open Library",
   },
   continue: {
     eyebrow: STOREFRONT_TERMS.readingDesk,
