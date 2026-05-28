@@ -10,7 +10,7 @@ const DiscoverySearchPage = dynamic(() =>
 
 export const metadata = createPageMetadata({
   title: "Search Comics & Novels",
-  description: "Find your next obsession across stories, creators, and formats on Gush.",
+  description: "Find a story by mood, genre, format, and whatever you want to read tonight on Gush.",
   path: "/search",
   robots: buildNoIndexRobots({ follow: true }),
 });

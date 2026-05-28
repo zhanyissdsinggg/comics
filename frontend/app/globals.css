@@ -106,7 +106,7 @@ body {
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
   line-height: var(--gush-leading-copy);
-  letter-spacing: -0.012em;
+  letter-spacing: -0.006em;
   font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -204,8 +204,8 @@ main {
   h5,
   h6,
   :where(h1, h2, h3, h4, h5, h6).font-display {
-    letter-spacing: -0.014em;
-    line-height: 0.98;
+    letter-spacing: -0.01em;
+    line-height: 1.02;
   }
 }
 
@@ -218,7 +218,7 @@ h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
   letter-spacing: -0.02em;
-  line-height: 0.94;
+  line-height: 1.02;
   font-weight: 600;
   font-optical-sizing: auto;
   text-wrap: balance;
@@ -246,7 +246,7 @@ h6 {
 
 :where(h1, h2, h3, h4, h5, h6).font-display {
   letter-spacing: -0.02em;
-  line-height: 0.94;
+  line-height: 1.02;
 }
 
 .reader-prose {

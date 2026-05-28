@@ -378,7 +378,7 @@ export default function DiscoverySearchPage({
 
   const hasSearchIntent = Boolean(query || type || format || status || genre);
   const activeFilterCount = [type || format, status, genre].filter(Boolean).length;
-  const heroTitle = query ? `"${query}"` : "Find your next obsession";
+  const heroTitle = query ? `"${query}"` : "Find your next read";
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(255,79,154,0.08)] to-[rgba(255,255,255,0.04)]">
@@ -386,15 +386,13 @@ export default function DiscoverySearchPage({
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
-              Find Tonight's Read
+              Search Stories
             </p>
             <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.038em] text-white sm:text-[3.9rem] sm:tracking-[-0.042em]">
               {heroTitle}
             </h1>
             <p className="mt-3 max-w-[42rem] text-[0.98rem] leading-7 text-white/68">
-              {query
-                ? "Search by mood, genre, or format."
-                : "Search by mood, genre, or format."}
+              Find a story by mood, genre, format, or whatever you're craving tonight.
             </p>
           </div>
 
@@ -483,7 +481,7 @@ export default function DiscoverySearchPage({
               series={discoveryModel.featured}
               eyebrow="Tonight's Pick"
               title={discoveryModel.featured.title}
-              hook="Start with one strong pick, then follow the mood from there."
+              hook="Start with a vibe and see what fits."
               primaryLabel="Start Reading"
               secondaryLabel="View Series"
             />
@@ -514,7 +512,7 @@ export default function DiscoverySearchPage({
             <SectionHeading
               eyebrow="Mood Tags"
               title="Start with a vibe"
-              description="Pick a vibe and open what fits."
+              description="Start with a vibe and see what fits."
             />
             <div className="flex flex-wrap gap-2.5">
               {discoveryModel.moodTags.map((tag) => (

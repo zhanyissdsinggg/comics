@@ -163,7 +163,7 @@ export default function InteractiveLandingPage({
           <SurfacePanel tone="muted" accent="amber" appearance="dark" className="flex flex-col justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/70">
-                {showLaunchChecklist ? "Story Snapshot" : "Inside"}
+                {showLaunchChecklist ? "Story Guide" : "What to Expect"}
               </p>
               {showLaunchChecklist ? (
                 <div className="mt-4 grid gap-3 text-sm text-white/80">
@@ -212,17 +212,17 @@ export default function InteractiveLandingPage({
                   ) : (
                     <>
                       <p>
-                        Interactive stories are almost here. The first branching reads will open soon.
+                        More interactive stories are on the way. Check back soon for new routes, secret endings, and scenes worth replaying.
                       </p>
                       <p>
-                        Come back soon for replayable stories, secret endings, and choices worth trying again the second you finish.
+                        The first wave is just the start. More stories will land soon with new turns, bad decisions, and endings worth chasing.
                       </p>
                       <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
                         <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
-                          On the way
+                          Coming soon
                         </div>
                         <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
-                          New interactive stories are on the way
+                          More interactive stories are on the way
                         </div>
                       </div>
                     </>
@@ -307,7 +307,9 @@ export default function InteractiveLandingPage({
                 </div>
                 {isResume ? (
                   <div className="mt-4 rounded-[18px] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-5 text-cyan-100/88">
-                    Pick it back up at {normalizeText(continueProgress?.node?.title || "your last choice")}.
+                    {continueProgress?.node?.title
+                      ? `Jump back in from ${normalizeText(continueProgress.node.title)}.`
+                      : "Jump back in where you left off."}
                   </div>
                 ) : null}
                 <div className="mt-6 inline-flex items-center rounded-full border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/70 transition group-hover:border-cyan-200/30 group-hover:text-cyan-100">
@@ -320,7 +322,7 @@ export default function InteractiveLandingPage({
             <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
               {showLaunchChecklist
                 ? "No interactive stories are published yet."
-                : "Interactive stories are almost here. Check back soon for the first branching reads."}
+                : "More interactive stories are on the way. Check back soon for fresh routes and new endings."}
             </div>
           ) : null}
         </section>

@@ -173,7 +173,7 @@ export function SectionHeading({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.02em] text-white sm:text-[2.4rem]">
+        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-[2.4rem]">
           {title}
         </h2>
         {description ? (
@@ -194,8 +194,10 @@ export function StoryHero({
   title,
   primaryLabel = "Start Reading",
   primaryHref,
+  primaryTestId,
   secondaryLabel = "View Series",
   secondaryHref,
+  secondaryTestId,
   stats = [],
   chips = [],
   trailingCard = null,
@@ -233,7 +235,7 @@ export function StoryHero({
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="max-w-[13ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.038em] text-white sm:text-[4rem] sm:tracking-[-0.042em]">
+            <h1 className="max-w-[13ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.04em] text-white sm:text-[4rem] sm:tracking-[-0.044em]">
               {heroTitle}
             </h1>
             {description ? (
@@ -264,6 +266,7 @@ export function StoryHero({
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href={readHref}
+              data-testid={primaryTestId}
               className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#ff5fa4_0%,#ff86b9_100%)] px-6 text-sm font-semibold text-[#1b0e17] shadow-[var(--gush-shadow-button)] transition-transform duration-150 hover:-translate-y-0.5"
             >
               {primaryLabel}
@@ -271,6 +274,7 @@ export function StoryHero({
             </Link>
             <Link
               href={detailHref}
+              data-testid={secondaryTestId}
               className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/12 bg-white/[0.05] px-5 text-sm font-medium text-white/82 transition-colors hover:bg-white/[0.08]"
             >
               {secondaryLabel}
@@ -355,6 +359,7 @@ export function CoverCard({
     <Link
       href={href}
       onClick={onClick}
+      aria-label={String(series?.title || "").trim() || "Open story"}
       className={`group scroll-snap-item ${widthClass} shrink-0`}
     >
       <article className="space-y-3">
@@ -570,7 +575,7 @@ export function InteractivePromo() {
             <Gamepad2 className="size-3.5" />
             Interactive Stories
           </p>
-          <h2 className="font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.02em] text-white sm:text-[2.5rem]">
+          <h2 className="font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-[2.5rem]">
             Your Choice Changes the Story
           </h2>
           <p className="max-w-[44rem] text-sm leading-7 text-white/68">

@@ -678,7 +678,7 @@ export default function InteractiveStoryPage({
                   href={detailHref}
                   className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
                 >
-                  Overview
+                  Story Page
                 </Link>
               {seriesId || story?.seriesId ? (
                 <Link
@@ -953,7 +953,7 @@ export default function InteractiveStoryPage({
                   href={detailHref}
                   className={`${storefrontSecondaryButtonClass} h-10 px-4 text-[11px] tracking-[0.08em]`}
                 >
-                  About This Story
+                  Story Page
                 </Link>
               </div>
             </SurfacePanel>

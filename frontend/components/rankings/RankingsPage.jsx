@@ -36,7 +36,7 @@ const VIEWS = [
   },
   {
     id: "start-here",
-    label: "Top Picks",
+    label: "Start Here",
     description: "Easy starts with strong early chapters.",
   },
   {

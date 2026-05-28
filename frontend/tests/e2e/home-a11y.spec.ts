@@ -233,7 +233,7 @@ test.describe("Home accessibility", () => {
     expect(response?.ok()).toBeTruthy();
 
     await expect(
-      page.getByText("Read original comics and novels in one place.").first(),
+      page.getByText("Open a story you'll keep thinking about.").first(),
     ).toBeVisible({
       timeout: HOME_UI_TIMEOUT_MS,
     });

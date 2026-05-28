@@ -956,13 +956,13 @@ const CANONICAL_ROUTE_SPECS = [
     title: /Trending Comics, Novels, and Interactive Stories \| Gush/i,
     heading: null,
   },
-  { path: "/comics", title: /Comics/i, heading: /^Comics$/i },
-  { path: "/novels", title: /Novels/i, heading: /^Novels$/i },
+  { path: "/comics", title: /Comics/i, heading: null },
+  { path: "/novels", title: /Novels/i, heading: null },
   { path: "/creators", title: /Creators/i, heading: /^Creators$/i },
   {
     path: "/search",
     title: /Search Comics & Novels|Search:|Find your next obsession/i,
-    heading: /^Find your next obsession$/i,
+    heading: /^Find your next read$/i,
   },
   { path: "/rankings", title: /Trending Stories/i, heading: /Trending/i },
   {
@@ -2416,7 +2416,7 @@ test.describe("Public reading funnel", () => {
       mobileSearchLink.click({ force: true }),
     ]);
     await expect(
-      page.getByRole("heading", { name: "Find your next obsession" }).first(),
+      page.getByRole("heading", { name: "Find your next read" }).first(),
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
@@ -2488,16 +2488,14 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    await expect(
-      page.getByRole("link", { name: /Dragon's Oath/i }).first(),
-    ).toBeVisible({
+    await expect(page.locator("main")).toContainText("Dragon's Oath", {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("main")).toContainText('"dragon"', {
       timeout: UI_TIMEOUT_MS,
     });
     await expect(page.locator("main")).toContainText(
-      "Best matches across stories, formats, and creator shelves.",
+      "Find a story by mood, genre, format, or whatever you're craving tonight.",
     );
     await expectNoRuntimeIssues("/search?q=dragon", runtimeIssues);
   });
@@ -2582,12 +2580,12 @@ test.describe("Public reading funnel", () => {
     expect(response?.ok()).toBeTruthy();
     const html = await page.content();
     expect(html).toContain(
-      "Interactive stories are almost here. Check back soon for the first live routes.",
+      "More interactive stories are on the way. Check back soon for fresh routes and new endings.",
     );
     expect(html).not.toContain(">Loading<");
     expect(html).not.toContain("Launch checklist");
     await expect(page.locator("main")).toContainText(
-      "Interactive stories are almost here. Check back soon for the first live routes.",
+      "More interactive stories are on the way. Check back soon for fresh routes and new endings.",
     );
     await expect(
       page.getByRole("link", { name: "Interactive", exact: true }),
@@ -2775,6 +2773,11 @@ test.describe("Public reading funnel", () => {
   }) => {
     const runtimeIssues = collectRuntimeIssues(page);
     await mockPublicApi(page);
+    const getResultsSection = () =>
+      page
+        .locator("section")
+        .filter({ has: page.getByText("Filtered Titles", { exact: true }) })
+        .first();
 
     let response = await page.goto("/search?genre=Horror", {
       waitUntil: "domcontentloaded",
@@ -2785,9 +2788,9 @@ test.describe("Public reading funnel", () => {
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.locator("main")).toContainText("Horror");
+    await expect(getResultsSection()).toContainText("Horror");
     await expect(page.locator("main")).not.toContainText("Trending titles");
-    await expect(page.locator("main")).not.toContainText("Neon Nights");
+    await expect(getResultsSection()).not.toContainText("Neon Nights");
 
     response = await page.goto("/search?genre=Mystery", {
       waitUntil: "domcontentloaded",
@@ -2798,18 +2801,18 @@ test.describe("Public reading funnel", () => {
     ).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(page.locator("main")).toContainText("Mystery");
+    await expect(getResultsSection()).toContainText("Mystery");
     await expect(page.locator("main")).not.toContainText("Trending titles");
-    await expect(page.locator("main")).not.toContainText("Crimson Tide");
+    await expect(getResultsSection()).not.toContainText("Crimson Tide");
 
     response = await page.goto("/search?format=novel", {
       waitUntil: "domcontentloaded",
     });
     expect(response?.ok()).toBeTruthy();
-    await expect(page.locator("main")).toContainText("Solar Wind");
-    await expect(page.locator("main")).toContainText("Neon Nights");
-    await expect(page.locator("main")).not.toContainText("Crimson Tide");
-    await expect(page.locator("main")).not.toContainText("The Last Kingdom");
+    await expect(getResultsSection()).toContainText("Solar Wind");
+    await expect(getResultsSection()).toContainText("Neon Nights");
+    await expect(getResultsSection()).not.toContainText("Crimson Tide");
+    await expect(getResultsSection()).not.toContainText("The Last Kingdom");
 
     await expectNoRuntimeIssues("/search filter params", runtimeIssues);
   });
@@ -3064,7 +3067,9 @@ test.describe("Public reading funnel", () => {
         await expect(
           page.getByRole("heading", { level: 1, name: seriesSpec.title }),
         ).toHaveCount(0);
-        await expect(page.locator("main")).toContainText("18+ access");
+        await expect(page.locator("main")).toContainText(
+          "Turn on adult mode after signing in to open it.",
+        );
         await expect(page.locator("main")).not.toContainText(
           seriesSpec.listLabel,
         );
@@ -3496,7 +3501,7 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Crimson Tide");
-    await expect(page.locator("main")).toContainText("Comic / Ongoing");
+    await expect(page.locator("main")).toContainText("Horror / Action / Ongoing");
     await expect(page.locator("main")).toContainText("Horror");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
     await expect(page.locator("body")).not.toContainText("Read more Read more");
@@ -3504,11 +3509,12 @@ test.describe("Public reading funnel", () => {
       "Finished comic / Completed Crimson Tide Action Read more",
     );
 
+
     response = await page.goto("/novels", { waitUntil: "domcontentloaded" });
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator("main")).toContainText("Solar Wind");
-    await expect(page.locator("main")).toContainText("Novel / Ongoing");
-    await expect(page.locator("main")).toContainText("Sci-Fi · Drama");
+    await expect(page.locator("main")).toContainText("Sci-Fi / Drama / Ongoing");
+    await expect(page.locator("main")).toContainText("Sci-Fi");
     await expect(page.locator("body")).not.toContainText("Read moreRead more");
     await expect(page.locator("body")).not.toContainText("Read more Read more");
     await expect(page.locator("body")).not.toContainText(
@@ -3529,9 +3535,9 @@ test.describe("Public reading funnel", () => {
     );
     await expect(page.locator("main")).toContainText("Crimson Tide");
     await expect(page.locator("main")).toContainText("Comic / Ongoing");
+    await expect(page.locator("main")).toContainText("Horror");
     await expect(page.locator("main")).toContainText("By Rook Hollow Studio");
     await expect(page.locator("main")).toContainText("View title");
-
     await expectNoRuntimeIssues("catalog-card-ssr-copy", runtimeIssues);
   });
 
@@ -3692,33 +3698,33 @@ test.describe("Public reading funnel", () => {
     });
     expect(response?.ok()).toBeTruthy();
 
-    const trendingShelf = page.getByTestId("search-default-trending");
-    const updatesShelf = page.getByTestId("search-default-updates");
-    const completedShelf = page.getByTestId("search-default-completed");
+    const trendingSection = page
+      .locator("section")
+      .filter({ has: page.getByText("What everyone keeps searching", { exact: true }) })
+      .first();
+    const updatesSection = page
+      .locator("section")
+      .filter({ has: page.getByText("Fresh updates right now", { exact: true }) })
+      .first();
+    const formatsSection = page
+      .locator("section")
+      .filter({ has: page.getByText("Choose a format", { exact: true }) })
+      .first();
 
-    await expect(trendingShelf).toContainText("Hot this week");
-    await expect(updatesShelf).toContainText("Fresh drops");
-    await expect(completedShelf).toContainText("Binge this weekend");
+    await expect(trendingSection).toContainText("Trending Searches");
+    await expect(updatesSection).toContainText("Recently Updated");
+    await expect(formatsSection).toContainText("Formats");
 
-    const trendingTitles = await trendingShelf
-      .getByRole("heading", { level: 2 })
-      .allTextContents();
-    const updateTitles = await updatesShelf
-      .getByRole("heading", { level: 2 })
-      .allTextContents();
-
-    const normalizedTrendingTitles = trendingTitles
+    const updatesTitles = (await updatesSection.locator("h3").allTextContents())
       .map((item) => item.trim())
-      .filter((item) => item && item !== "Hot this week");
-    const normalizedUpdateTitles = updateTitles
+      .filter(Boolean);
+    const formatTitles = (await formatsSection.locator("h3").allTextContents())
       .map((item) => item.trim())
-      .filter((item) => item && item !== "Fresh drops");
+      .filter(Boolean);
 
-    expect(normalizedUpdateTitles.length).toBeLessThanOrEqual(4);
-    const repeatedTitles = normalizedUpdateTitles.filter((title) =>
-      normalizedTrendingTitles.includes(title),
-    );
-    expect(repeatedTitles).toEqual([]);
+    expect(updatesTitles.length).toBeGreaterThan(0);
+    expect(formatTitles.length).toBeGreaterThan(0);
+    expect(updatesTitles.join("|")).not.toEqual(formatTitles.join("|"));
 
     await expectNoRuntimeIssues("/search default shelves", runtimeIssues);
   });

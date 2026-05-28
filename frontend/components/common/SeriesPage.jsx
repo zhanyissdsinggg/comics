@@ -80,7 +80,7 @@ function getSeriesBadge(series) {
   }
 
   if (getEpisodeCount(series) > 0 && getEpisodeCount(series) <= 12) {
-    return "Top Pick";
+    return "Early Favorite";
   }
 
   return "";
@@ -401,19 +401,19 @@ export default function SeriesPage({
               </p>
               <div className="space-y-10">
                 <CatalogSection
-                  title="Hot this week"
+                  title="Popular Right Now"
                   ctaLabel="See all"
                   href="/rankings"
                   items={trendingItems}
                 />
                 <CatalogSection
-                  title="Fresh drops"
+                  title="Latest Updates"
                   ctaLabel="Latest"
                   href={`${config.pathname}?sort=latest`}
                   items={newUpdateItems}
                 />
                 <CatalogSection
-                  title="Binge this weekend"
+                  title="Completed Reads"
                   ctaLabel="Finished"
                   href={`${config.pathname}?status=completed`}
                   items={completedItems}

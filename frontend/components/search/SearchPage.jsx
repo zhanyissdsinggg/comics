@@ -257,7 +257,7 @@ function getSearchSeriesBadge(series) {
   }
 
   if (Number(series?.episodeCount || 0) > 0 && Number(series?.episodeCount || 0) <= 12) {
-    return "Top Pick";
+    return "Early Favorite";
   }
 
   return "";
@@ -829,10 +829,10 @@ export default function SearchPage({
               </p>
             </div>
             <h1 className="mt-5 max-w-4xl font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3.5rem]">
-              Find your next obsession
+              Find your next read
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/68 sm:text-[0.98rem]">
-              Search by mood, genre, format, or creator.
+              Find a story by mood, genre, format, or whatever you're craving tonight.
             </p>
           </div>
 
@@ -879,7 +879,7 @@ export default function SearchPage({
               <SearchSectionHeader
                 eyebrow="Results"
                 title={query ? `"${query}"` : "Browse"}
-                description="Best matches across stories, formats, and creator shelves."
+                description="Best matches across stories, genres, and formats."
                 actions={
                   <>
                     <button
@@ -1098,8 +1098,8 @@ export default function SearchPage({
           <div className="space-y-6">
             <SearchShelf
               testId="search-default-trending"
-              title="Hot this week"
-              description="The stories readers are opening right now."
+              title="Trending Now"
+              description="The stories readers keep opening tonight."
               items={defaultShelves.trending}
               buildHref={(series) =>
                 buildSeriesHref(series, "SEARCH_DEFAULT_TRENDING", "search_default_trending")
@@ -1114,8 +1114,8 @@ export default function SearchPage({
             />
             <SearchShelf
               testId="search-default-updates"
-              title="Fresh drops"
-              description="Recently updated titles without repeating the whole trending shelf."
+              title="Recently Updated"
+              description="New chapters and recent returns worth opening next."
               items={defaultShelves.updates}
               buildHref={(series) =>
                 buildSeriesHref(series, "SEARCH_DEFAULT_UPDATES", "search_default_updates")
@@ -1130,8 +1130,8 @@ export default function SearchPage({
             />
             <SearchShelf
               testId="search-default-completed"
-              title="Binge this weekend"
-              description="Completed reads when you want payoff without waiting."
+              title="Completed Reads"
+              description="Finished stories when you want the whole run right now."
               items={defaultShelves.completed}
               buildHref={(series) =>
                 buildSeriesHref(series, "SEARCH_DEFAULT_COMPLETED", "search_default_completed")
@@ -1146,8 +1146,8 @@ export default function SearchPage({
             />
             <SearchShelf
               testId="search-rail-trending"
-              title="Hot this week"
-              description="A compact trending rail for the public discovery flow."
+              title="Trending Now"
+              description="More stories readers are passing around right now."
               items={defaultShelves.trending}
               buildHref={(series) =>
                 buildSeriesHref(series, "SEARCH_RAIL_TRENDING", "search_rail_trending")

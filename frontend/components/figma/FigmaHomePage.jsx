@@ -604,7 +604,7 @@ function HomeContent({
                 </div>
 
                 <HeroHeadingTag className="mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-[2.25rem] font-black leading-[1.06] tracking-tight text-transparent drop-shadow-sm md:mb-6 md:text-6xl lg:text-7xl">
-                  Read original comics and novels in one place.
+                  Open a story you&apos;ll keep thinking about.
                 </HeroHeadingTag>
 
                 <p className="mb-5 max-w-xl text-sm leading-6 text-gray-300 md:mb-8 md:text-lg md:leading-relaxed">

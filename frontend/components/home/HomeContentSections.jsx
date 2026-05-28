@@ -636,8 +636,8 @@ export default function HomeContentSections({
           Array.isArray(startHereItems) &&
           startHereItems.length > 0 ? (
             <HomeShelfSection
-              eyebrow="Top Picks"
-              title="Top Picks"
+              eyebrow="Start Here"
+              title="Start Here"
               description=""
               items={startHereItems}
               actionLabel="Start reading"

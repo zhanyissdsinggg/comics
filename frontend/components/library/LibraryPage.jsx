@@ -1032,7 +1032,7 @@ export default function LibraryPage({
                             }
                             className={primaryButtonClass}
                           >
-                            Top Picks
+                            Start Here
                           </button>
                         ) : null}
 
@@ -1082,7 +1082,7 @@ export default function LibraryPage({
                           }
                           className={primaryButtonClass}
                         >
-                          Top Picks
+                          Start Here
                         </button>
                         <button
                           type="button"

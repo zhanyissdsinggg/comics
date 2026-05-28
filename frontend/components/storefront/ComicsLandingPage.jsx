@@ -213,8 +213,8 @@ export default function ComicsLandingPage({
         <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
           <SectionHeading
             eyebrow="Reader Favorites"
-            title="What comic readers keep saving for later"
-            description="Big cliffhangers, easy catch-ups, and full runs."
+            title="Fast starts, new chapters, and complete runs"
+            description="Fast starts, new chapters, and complete runs readers keep opening."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {[

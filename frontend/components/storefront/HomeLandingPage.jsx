@@ -104,8 +104,10 @@ function HomeLandingContent({ initialHomeData = null }) {
       {homeModel.featured ? (
         <StoryHero
           series={homeModel.featured}
-          eyebrow="Editor's Pick"
+          eyebrow="Featured Today"
+          hook="Open a story you'll keep thinking about."
           primaryLabel="Start Reading"
+          primaryTestId="home-hero-primary-cta"
           primaryHref={
             initialHomeData?.canonicalHome?.featuredReadHref ||
             buildReadHref(homeModel.featured)

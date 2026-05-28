@@ -120,7 +120,7 @@ export default function SearchCreatorMatchesPanel({
 
         if (spotlightTitleMatch) {
           if (!hasPrimaryMatch) {
-            matchLabel = "Top Pick";
+            matchLabel = "Best Match";
             matchDescription = "Best title match.";
           }
           matchScore += 220;

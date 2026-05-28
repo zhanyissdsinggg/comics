@@ -953,7 +953,7 @@ test.describe("Reader layout", () => {
             NOVEL_TEST_FIRST_PARAGRAPH,
             "Every loose screw in the console hummed in the same key, and the bridge suddenly felt too small for what was looking back at them.",
             "Outside the hull, the storm leaned against the ship like it knew the route better than the crew did.",
-            "By the closing paragraph, Lena understood the signal was not calling for help. It was choosing an audience.",
+            "On Lena's console, the message stopped sounding like a distress call and started sounding like a warning sent too late.",
           ],
         },
       },

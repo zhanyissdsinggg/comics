@@ -232,7 +232,7 @@ export default function AdultHubPage() {
           mapAdultItem(
             series,
             series.genres?.slice(0, 2).join(" / ") || "Mature title",
-            "Hot this week",
+            "Trending now",
           ),
         ),
     [seriesList],
@@ -259,7 +259,7 @@ export default function AdultHubPage() {
         )
         .slice(0, 10)
         .map((series) =>
-          mapAdultItem(series, "Recently updated", "Fresh drop"),
+          mapAdultItem(series, "Recently updated", "New update"),
         ),
     [seriesList],
   );
@@ -380,8 +380,8 @@ export default function AdultHubPage() {
         ) : (
           <div className="space-y-6">
             <Rail
-              eyebrow="Featured shelf"
-              title="Hot this week"
+              eyebrow="Featured"
+              title="Trending Now"
               items={spotlightItems}
               reason="Mature titles that readers are opening most right now."
               href="/mature-content"
@@ -395,8 +395,8 @@ export default function AdultHubPage() {
 
             {recentItems.length > 0 ? (
               <Rail
-                eyebrow="Recent updates"
-                title="Fresh drops"
+                eyebrow="Recent Updates"
+                title="Latest Updates"
                 items={recentItems}
                 reason="New chapters and recent returns inside Mature Mode."
                 railName="new"
@@ -409,7 +409,7 @@ export default function AdultHubPage() {
 
             {completedItems.length > 0 ? (
               <Rail
-                eyebrow="Completed shelf"
+                eyebrow="Completed"
                 title="Binge-worthy"
                 items={completedItems}
                 reason="Finished mature series when you want a full run."

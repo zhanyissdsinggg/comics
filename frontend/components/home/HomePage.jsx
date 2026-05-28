@@ -137,7 +137,7 @@ function buildSeriesSignal(series, section) {
   if (String(series?.status || "").toLowerCase() === "completed") {
     return "Complete";
   }
-  return "Hot this week";
+  return "Trending now";
 }
 
 function buildShortHook(series) {
@@ -642,7 +642,7 @@ function HomeSection({
 function HomeHero({ featuredSeries, featuredReadHref }) {
   const hasFeaturedSeries = Boolean(featuredSeries);
   const title = String(
-    featuredSeries?.title || "Find your next obsession",
+    featuredSeries?.title || "Find your next read",
   ).trim();
   const creatorName = resolveSeriesCreatorName(featuredSeries);
   const genres = hasFeaturedSeries
@@ -661,7 +661,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
   const secondaryHref = hasFeaturedSeries
     ? `/series/${encodeURIComponent(featuredSeries.id)}`
     : "/library";
-  const heroHeading = "Read original comics and novels in one place.";
+  const heroHeading = "Open a story you'll keep thinking about.";
 
   return (
     <section className="relative min-h-[78vh] overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(19,15,24,0.98)_0%,rgba(14,12,19,0.96)_44%,rgba(20,16,27,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:min-h-[620px] sm:p-6 lg:p-8">
@@ -670,7 +670,7 @@ function HomeHero({ featuredSeries, featuredReadHref }) {
         <div className="order-2 space-y-5 lg:order-1 lg:max-w-[42rem]">
           <div className="space-y-3">
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/62">
-              TODAY&apos;S OBSESSION
+              FEATURED TODAY
             </p>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">
               {heroHeading}
@@ -935,7 +935,7 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
           <VibeChips items={VIBE_OPTIONS} onSelect={handleVibeSelect} />
 
           <HomeSection
-            title="Hot this week"
+            title="Trending Covers"
             description="Cover-first picks readers keep opening first."
             ctaLabel="See rankings"
             ctaHref="/rankings"
@@ -943,7 +943,7 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             section="trending"
           />
           <HomeSection
-            title="Fresh drops"
+            title="New Episodes Today"
             description="New chapters, quick catch-ups, and recent returns."
             ctaLabel="Browse all"
             ctaHref="/search?status=ongoing"
@@ -951,7 +951,7 @@ function HomeContent({ initialSearchParams = {}, initialHomeData = null }) {
             section="updates"
           />
           <HomeSection
-            title="Binge this weekend"
+            title="Binge-worthy Completed"
             description="Completed stories with no waiting."
             ctaLabel="More finished reads"
             ctaHref="/search?status=completed"
