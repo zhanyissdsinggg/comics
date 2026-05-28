@@ -281,6 +281,20 @@ export default function CommentsSection({
           <h3 className="mt-2 font-display text-[1.6rem] font-semibold tracking-[-0.04em] text-white">
             Comments
           </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              "Start the discussion",
+              "Be first to call the twist",
+              "Tell readers what you noticed",
+            ].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/12 bg-[rgba(255,255,255,0.04)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-white/74 shadow-[0_12px_28px_rgba(8,6,20,0.18)]"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {onFollowToggle ? (
@@ -392,10 +406,10 @@ export default function CommentsSection({
         {sortedComments.length === 0 ? (
           <div className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 text-white shadow-[0_18px_44px_rgba(8,6,20,0.24)]">
             <p className="text-sm font-semibold tracking-[-0.02em] text-white">
-              No comments.
+              No comments yet.
             </p>
             <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
-              Start one.
+              Say what you think before everyone else catches up.
             </p>
           </div>
         ) : (

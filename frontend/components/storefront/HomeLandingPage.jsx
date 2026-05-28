@@ -72,6 +72,70 @@ function HomeLandingContent({ initialHomeData = null }) {
         String(series?.id || "").trim() !== featuredId &&
         !continueIds.has(String(series?.id || "").trim()),
     );
+    const romancePick =
+      trending.find((series) =>
+        Array.isArray(series?.genres)
+          ? series.genres.some((genre) =>
+              String(genre || "").trim().toLowerCase().includes("romance"),
+            )
+          : false,
+      ) ||
+      popularPool.find((series) =>
+        Array.isArray(series?.genres)
+          ? series.genres.some((genre) =>
+              String(genre || "").trim().toLowerCase().includes("romance"),
+            )
+          : false,
+      ) ||
+      featured;
+    const darkFantasyPick =
+      trending.find((series) =>
+        Array.isArray(series?.genres)
+          ? series.genres.some((genre) =>
+              ["fantasy", "horror", "supernatural", "thriller"].includes(
+                String(genre || "").trim().toLowerCase(),
+              ),
+            )
+          : false,
+      ) ||
+      popularPool.find((series) =>
+        Array.isArray(series?.genres)
+          ? series.genres.some((genre) =>
+              ["fantasy", "horror", "supernatural", "thriller"].includes(
+                String(genre || "").trim().toLowerCase(),
+              ),
+            )
+          : false,
+      ) ||
+      featured;
+    const latestTapPick = updates[0] || trending[0] || featured;
+    const heatSignals = [
+      {
+        label: "Most opened tonight",
+        series: trending[0] || featured,
+        body: "Readers keep opening this one first and staying for the cliffhanger.",
+      },
+      {
+        label: "Readers are starting here",
+        series: featured || trending[1] || trending[0],
+        body: "A fast first chapter, a strong hook, and an easy place to fall in.",
+      },
+      {
+        label: "Trending in romance",
+        series: romancePick,
+        body: "Slow burns, messy feelings, and the chapter people keep texting about.",
+      },
+      {
+        label: "Trending in dark fantasy",
+        series: darkFantasyPick,
+        body: "Shadowy kingdoms, bad choices, and the route readers keep chasing.",
+      },
+      {
+        label: "New chapters people keep tapping",
+        series: latestTapPick,
+        body: "Fresh updates are landing here before the rest of the shelf catches up.",
+      },
+    ].filter((item) => item.series);
 
     return {
       featured,
@@ -79,6 +143,7 @@ function HomeLandingContent({ initialHomeData = null }) {
       updates: updates.slice(0, 8),
       continueItems,
       completed: completed.slice(0, 8),
+      heatSignals,
     };
   }, [bySeriesId, featuredSeriesId, seriesList]);
 
@@ -127,11 +192,50 @@ function HomeLandingContent({ initialHomeData = null }) {
         />
       )}
 
+      {homeModel.heatSignals.length > 0 ? (
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Readers Right Now"
+            title="What people are opening tonight"
+            description="A fast look at the titles getting opened, passed around, and started first."
+          />
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            {homeModel.heatSignals.map((item, index) => (
+              <Link
+                key={`${item.label}-${item.series.id}`}
+                href={`/series/${item.series.id}`}
+                className="group rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[var(--gush-shadow-panel)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)]"
+                onClick={() =>
+                  trackEvent("story_click", {
+                    seriesId: item.series?.id,
+                    sourceSection: "home_heat_signals",
+                    position: index + 1,
+                  })
+                }
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/52">
+                  {item.label}
+                </p>
+                <h3 className="mt-3 text-lg font-semibold leading-[1.02] tracking-[-0.018em] text-white">
+                  {item.series.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-white/62">
+                  {buildGenreLabel(item.series, 2) || "Reader favorite"}
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/74">
+                  {item.body}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {homeModel.trending.length > 0 ? (
       <section className="space-y-4">
         <SectionHeading
           eyebrow="Trending Covers"
-          title="The covers nobody is skipping"
+          title="Most opened tonight"
           description="The covers readers keep opening tonight."
         />
           <ShelfScroller>
@@ -158,8 +262,8 @@ function HomeLandingContent({ initialHomeData = null }) {
       <section className="space-y-4">
         <SectionHeading
           eyebrow="New Episodes Today"
-          title="New drops for tonight"
-          description="Fresh chapters and quick catch-ups."
+          title="New chapters people keep tapping"
+          description="Fresh drops, quick catch-ups, and the updates readers are opening first."
         />
         {homeModel.updates.length > 0 ? (
           <UpdateList items={homeModel.updates} sectionName="home_new_episodes" />

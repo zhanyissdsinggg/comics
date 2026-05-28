@@ -131,6 +131,30 @@ function getStoryWhyPlayItems(story) {
       "Quick sci-fi run",
     ];
   }
+  if (slug === "last-bus-home") {
+    return [
+      "2 endings",
+      "15 choices",
+      "Midnight transit mystery",
+      "Fast urban thriller",
+    ];
+  }
+  if (slug === "the-group-chat-leak") {
+    return [
+      "2 endings",
+      "15 choices",
+      "School rumor fallout",
+      "Late-night social drama",
+    ];
+  }
+  if (slug === "pool-light-signal") {
+    return [
+      "2 endings",
+      "15 choices",
+      "Summer pool mystery",
+      "Small-town secret run",
+    ];
+  }
   return [];
 }
 

@@ -94,9 +94,12 @@ export default function NovelsLandingPage({
     };
   }, [bySeriesId, seriesList]);
 
+  const lowInventory = seriesList.length < 6;
   const compactTopShelf = model.top.length <= 3;
   const minimalTopShelf = model.top.length <= 2;
-  const showLateNightShelf = model.binge.length >= 4;
+  const showLateNightShelf = model.binge.length >= 4 && !lowInventory;
+  const visibleShortReads = lowInventory ? model.shortReads.slice(0, 4) : model.shortReads;
+  const visibleGenres = lowInventory ? [] : model.genres;
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.16)] via-[rgba(255,255,255,0.04)] to-[rgba(255,79,154,0.08)]">
@@ -153,7 +156,7 @@ export default function NovelsLandingPage({
           description="A full mood and a real finish in less time."
         />
         <ShelfScroller>
-          {model.shortReads.map((series, index) => (
+          {visibleShortReads.map((series, index) => (
             <CoverCard
               key={series.id}
               series={series}
@@ -172,6 +175,24 @@ export default function NovelsLandingPage({
           ))}
         </ShelfScroller>
       </section>
+
+      {lowInventory ? (
+        <section className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+          <SectionHeading
+            eyebrow="Coming Next"
+            title="More novel drops soon"
+            description="This shelf is still growing. Fresh late-night reads are on the way."
+          />
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/74">
+              Featured Novel, Latest Chapters, and Short Reads stay up front while the catalog fills out.
+            </div>
+            <div className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/74">
+              Check back soon for more chapter drops, longer binge runs, and a fuller novel shelf.
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {compactTopShelf ? (
         <div className={minimalTopShelf ? "max-w-[620px]" : ""}>
@@ -286,9 +307,9 @@ export default function NovelsLandingPage({
         </section>
       ) : null}
 
-      {model.genres.length > 0 ? (
+      {visibleGenres.length > 0 ? (
         <GenreShelfSection
-          shelves={model.genres}
+          shelves={visibleGenres}
           variant="novel"
           title="Genre Shelves"
           description="Fantasy pulls, romance spirals, mystery hooks, and more."

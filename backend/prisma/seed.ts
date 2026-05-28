@@ -859,12 +859,11 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
           },
           {
             id: "story-locker-letter-choice-007",
-            key: "buy_print_token",
-            label: "Print the indent scan in the library",
+            key: "premium_indent_scan",
+            label: "Use the library media room to scan the page",
             targetNodeId: "story-locker-letter-node-007",
-            unlockPolicy: "TOKENS_ONLY",
-            requiresTokens: 15,
-            unlockLabel: "Unlock for 15 Tokens",
+            unlockPolicy: "PREMIUM_ONLY",
+            unlockLabel: "Members Only",
             stateEffects: { clues: 2, flags: ["scan_printed"] },
           },
         ],
@@ -1013,6 +1012,685 @@ const interactiveStorySeeds: InteractiveStorySeed[] = [
           "You never get the full dramatic confession, but you do stop the damage. By the final bell, the note is no longer a weapon, just a clumsy mistake between students who needed to talk like actual people.",
         basePrompt:
           "Write a softer ending focused on harm reduction and emotional maturity.",
+        isEnding: true,
+        choices: [],
+      },
+    ],
+  },
+  {
+    id: "story-last-bus-home-001",
+    seriesId: null,
+    slug: "last-bus-home",
+    title: "Last Bus Home",
+    description:
+      "A midnight bus ride goes wrong when one missing text turns into a citywide rumor, a dead route, and two very different endings.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
+    baseContext:
+      "At 12:11 a.m., the last bus pulls up almost empty, and your best friend sends one message before it disappears: do not let me get off alone.",
+    initialState: {
+      trust: 0,
+      courage: 0,
+      clues: 0,
+      flags: [],
+    },
+    nodes: [
+      {
+        id: "story-last-bus-home-node-001",
+        key: "midnight_stop",
+        title: "The Last Bus Pulls In",
+        fallbackText:
+          "The bus doors sigh open under the broken shelter light. Your best friend Rowan is nowhere in sight, but the phone screen in your hand still glows with that last message: do not let me get off alone.",
+        basePrompt:
+          "Write a sharp YA opening with instant urgency, clean visual detail, and a clear hook.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-001",
+            key: "board_now",
+            label: "Get on the bus before it leaves.",
+            description: "Fast route. Stay close to whatever Rowan saw.",
+            targetNodeId: "story-last-bus-home-node-002",
+            stateEffects: { courage: 1, flags: ["boarded_bus"] },
+          },
+          {
+            id: "story-last-bus-home-choice-002",
+            key: "call_rowan",
+            label: "Call Rowan again from the curb.",
+            description: "Trust route. Listen before you run.",
+            targetNodeId: "story-last-bus-home-node-003",
+            stateEffects: { trust: 1, flags: ["called_rowan"] },
+          },
+          {
+            id: "story-last-bus-home-choice-003",
+            key: "check_camera",
+            label: "Check the stop camera reflection in the ad glass.",
+            description: "Clue route. Look for who was here first.",
+            targetNodeId: "story-last-bus-home-node-004",
+            stateEffects: { clues: 1, flags: ["checked_camera_glass"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-002",
+        key: "empty_bus",
+        title: "Too Empty to Feel Safe",
+        fallbackText:
+          "Inside, the bus is almost silent except for the rattle of the back window and one guy in a football jacket pretending not to watch you. Two seats up, Rowan's silver keychain hangs from the rail like they dropped it on purpose.",
+        basePrompt:
+          "Write a claustrophobic transit scene that keeps the threat believable and teen-readable.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-004",
+            key: "sit_by_keychain",
+            label: "Take the seat by Rowan's keychain.",
+            targetNodeId: "story-last-bus-home-node-005",
+            stateEffects: { clues: 1, flags: ["found_keychain"] },
+          },
+          {
+            id: "story-last-bus-home-choice-005",
+            key: "watch_driver",
+            label: "Stay near the driver and watch the mirror.",
+            targetNodeId: "story-last-bus-home-node-006",
+            stateEffects: { trust: 1, flags: ["watched_driver"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-003",
+        key: "voice_mail",
+        title: "A Voice Mail That Wasn't Finished",
+        fallbackText:
+          "Rowan does not answer, but a voice mail starts playing by itself. You catch bus brakes, somebody saying service tunnel, and Rowan whispering your name like they were trying not to be heard.",
+        basePrompt:
+          "Write a suspense beat around an incomplete voice mail with specific, usable clues.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-006",
+            key: "follow_tunnel",
+            label: "Head for the service tunnel under the station.",
+            targetNodeId: "story-last-bus-home-node-007",
+            stateEffects: { courage: 1, clues: 1, flags: ["tunnel_route"] },
+          },
+          {
+            id: "story-last-bus-home-choice-007",
+            key: "text_brother",
+            label: "Text your older brother to meet you there.",
+            targetNodeId: "story-last-bus-home-node-006",
+            unlockPolicy: "PREMIUM_ONLY",
+            unlockLabel: "Premium Route",
+            stateEffects: { trust: 1, courage: 1, flags: ["backup_called"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-004",
+        key: "glass_reflection",
+        title: "Something in the Glass",
+        fallbackText:
+          "The ad glass shows more than the street behind you. In the reflection, Rowan is on the bus already, standing in the back with someone else's hoodie pulled over their head like they don't want the driver to know they're there.",
+        basePrompt:
+          "Write a hooky reveal scene built around a reflection and a split-second decision.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-008",
+            key: "bang_on_door",
+            label: "Bang on the bus door and make the driver stop.",
+            targetNodeId: "story-last-bus-home-node-005",
+            stateEffects: { courage: 1, flags: ["forced_stop"] },
+          },
+          {
+            id: "story-last-bus-home-choice-009",
+            key: "follow_in_bike_lane",
+            label: "Cut through the bike lane and beat it to the depot.",
+            targetNodeId: "story-last-bus-home-node-007",
+            stateEffects: { clues: 1, flags: ["raced_to_depot"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-005",
+        key: "depot_drop",
+        title: "The Wrong Depot",
+        fallbackText:
+          "The bus rolls past the regular line and into an out-of-service depot lit by one sodium lamp. Rowan is there after all, but they are not trapped. They are waiting for you to choose whether to blow up a lie or protect the person who started it.",
+        basePrompt:
+          "Write a reveal node where danger shifts into social stakes without losing momentum.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-010",
+            key: "go_public",
+            label: "Tell the driver and call the police line.",
+            targetNodeId: "story-last-bus-home-node-008",
+            stateEffects: { courage: 1, flags: ["went_public"] },
+          },
+          {
+            id: "story-last-bus-home-choice-011",
+            key: "hear_rowan_out",
+            label: "Hear Rowan out before anyone else steps in.",
+            targetNodeId: "story-last-bus-home-node-009",
+            stateEffects: { trust: 2, flags: ["heard_rowan"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-006",
+        key: "river_platform",
+        title: "The River Platform",
+        fallbackText:
+          "The clue trail sends you to the closed platform by the river where Rowan finally answers. They say they staged the disappearance to catch the senior who had been using fake emergency calls to scare freshmen off the late route.",
+        basePrompt:
+          "Write a confession scene with social stakes, not melodrama, and keep the tension active.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-012",
+            key: "back_rowan_plan",
+            label: "Back Rowan's plan and help expose it cleanly.",
+            targetNodeId: "story-last-bus-home-node-009",
+            stateEffects: { trust: 1, clues: 1, flags: ["backed_plan"] },
+          },
+          {
+            id: "story-last-bus-home-choice-013",
+            key: "shut_it_down",
+            label: "Shut it down before someone else gets dragged in.",
+            targetNodeId: "story-last-bus-home-node-008",
+            stateEffects: { courage: 1, flags: ["stopped_plan"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-007",
+        key: "service_tunnel",
+        title: "Under the Station",
+        fallbackText:
+          "The service tunnel smells like rainwater and old brake dust. Rowan has left arrows in chalk on the wall, and every one of them points to the same fact: this wasn't a kidnapping. It was bait.",
+        basePrompt:
+          "Write a fast-moving tunnel scene that turns fear into a bigger mystery.",
+        choices: [
+          {
+            id: "story-last-bus-home-choice-014",
+            key: "follow_chalk",
+            label: "Follow the chalk trail to Rowan.",
+            targetNodeId: "story-last-bus-home-node-009",
+            stateEffects: { clues: 1, trust: 1, flags: ["followed_chalk"] },
+          },
+          {
+            id: "story-last-bus-home-choice-015",
+            key: "pull_alarm",
+            label: "Pull the emergency alarm and flood the tunnel with adults.",
+            targetNodeId: "story-last-bus-home-node-008",
+            stateEffects: { courage: 1, flags: ["pulled_alarm"] },
+          },
+        ],
+      },
+      {
+        id: "story-last-bus-home-node-008",
+        key: "ending_clean_break",
+        title: "Ending: Clean Break",
+        fallbackText:
+          "You stop the stunt before it spreads. The late-route rumor dies, the senior behind the scare campaign gets named, and Rowan has to live with being angry at you and grateful at the same time.",
+        basePrompt:
+          "Write a strong YA ending where choosing safety costs something but still feels right.",
+        isEnding: true,
+        choices: [],
+      },
+      {
+        id: "story-last-bus-home-node-009",
+        key: "ending_keep_the_line_open",
+        title: "Ending: Keep the Line Open",
+        fallbackText:
+          "You stay with Rowan long enough to finish what they started. By sunrise the fake emergency calls are exposed, the route is safe again, and the two of you are left with the kind of trust that only survives a terrible idea once.",
+        basePrompt:
+          "Write a satisfying ending built on trust, cleanup, and one final emotional beat.",
+        isEnding: true,
+        choices: [],
+      },
+    ],
+  },
+  {
+    id: "story-group-chat-leak-001",
+    seriesId: null,
+    slug: "the-group-chat-leak",
+    title: "The Group Chat Leak",
+    description:
+      "A private screenshot hits the school group chat at 11:47 p.m., and by midnight you have to decide whether to clear your name or protect the person who set you up.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
+    baseContext:
+      "At 11:47 p.m., your class group chat lights up with a screenshot of a message you never sent, and your phone starts vibrating like the whole school is standing outside your door.",
+    initialState: {
+      trust: 0,
+      clues: 0,
+      courage: 0,
+      flags: [],
+    },
+    nodes: [
+      {
+        id: "story-group-chat-leak-node-001",
+        key: "screenshot_drop",
+        title: "The Screenshot Lands",
+        fallbackText:
+          "The screenshot is ugly, specific, and fake in exactly the way that makes people believe it faster. Three dots bloom in six different chats before you can even decide whether to defend yourself or disappear.",
+        basePrompt:
+          "Write a modern YA opening with digital urgency and immediate social stakes.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-001",
+            key: "call_best_friend",
+            label: "Call your best friend first.",
+            targetNodeId: "story-group-chat-leak-node-002",
+            stateEffects: { trust: 1, flags: ["friend_called"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-002",
+            key: "inspect_metadata",
+            label: "Check the screenshot for editing mistakes.",
+            targetNodeId: "story-group-chat-leak-node-003",
+            stateEffects: { clues: 1, flags: ["metadata_checked"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-003",
+            key: "go_quiet",
+            label: "Go quiet and watch who pushes it hardest.",
+            targetNodeId: "story-group-chat-leak-node-004",
+            stateEffects: { courage: 1, flags: ["stayed_quiet"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-002",
+        key: "best_friend_angle",
+        title: "The One Person Who Knows Your Typing Style",
+        fallbackText:
+          "Your best friend Iris answers on the first ring and says the fake message is almost convincing, except for one thing: whoever forged it copied your punctuation but not your panic. She thinks the leak came from someone close enough to imitate you badly.",
+        basePrompt:
+          "Write a friendship scene that turns comfort into a credible clue.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-004",
+            key: "check_shared_drive",
+            label: "Check the shared debate-team drive.",
+            targetNodeId: "story-group-chat-leak-node-005",
+            stateEffects: { clues: 1, flags: ["debate_drive"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-005",
+            key: "meet_iris_now",
+            label: "Meet Iris outside the library tonight.",
+            targetNodeId: "story-group-chat-leak-node-006",
+            stateEffects: { trust: 1, courage: 1, flags: ["met_iris"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-003",
+        key: "metadata_crack",
+        title: "A Tiny Editing Error",
+        fallbackText:
+          "The screenshot metadata shows it was cropped twice, once on school wifi and once from a phone with low-power mode on. That narrows it down to somebody who was in the journalism room after the game and nervous enough to rush.",
+        basePrompt:
+          "Write a clue scene around phone metadata that still feels dramatic.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-006",
+            key: "check_journalism_room",
+            label: "Go to the journalism room before janitorial lockup.",
+            targetNodeId: "story-group-chat-leak-node-005",
+            stateEffects: { clues: 1, flags: ["journalism_room"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-007",
+            key: "post_one_reply",
+            label: "Post one calm reply and see who panics.",
+            targetNodeId: "story-group-chat-leak-node-007",
+            stateEffects: { courage: 1, flags: ["posted_reply"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-004",
+        key: "silence_strategy",
+        title: "Silence Makes People Loud",
+        fallbackText:
+          "You stay quiet for eight brutal minutes and learn more than you wanted. One classmate keeps repeating the screenshot like they need the story to stay alive, and another privately sends you a location pin for the old rooftop greenhouse.",
+        basePrompt:
+          "Write a tense social-media beat where silence reveals motive.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-008",
+            key: "take_rooftop_pin",
+            label: "Follow the rooftop pin.",
+            targetNodeId: "story-group-chat-leak-node-006",
+            stateEffects: { courage: 1, clues: 1, flags: ["rooftop_pin"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-009",
+            key: "screen_record_chat",
+            label: "Screen-record the chat before messages vanish.",
+            targetNodeId: "story-group-chat-leak-node-007",
+            stateEffects: { clues: 1, flags: ["chat_recorded"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-005",
+        key: "drive_receipts",
+        title: "Receipts in the Shared Drive",
+        fallbackText:
+          "Inside the shared drive is a deleted draft with your name in the file history and somebody else's login attached to the last edit. The fake screenshot was not random. It was supposed to wreck tomorrow's student panel before you could speak.",
+        basePrompt:
+          "Write a reveal scene that keeps the stakes grounded in school politics and betrayal.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-010",
+            key: "name_them_tonight",
+            label: "Drop the receipts into the group chat tonight.",
+            targetNodeId: "story-group-chat-leak-node-008",
+            stateEffects: { courage: 1, flags: ["receipts_dropped"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-011",
+            key: "confront_privately",
+            label: "Confront the leaker privately first.",
+            targetNodeId: "story-group-chat-leak-node-009",
+            stateEffects: { trust: 1, clues: 1, flags: ["private_confrontation"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-006",
+        key: "greenhouse_meet",
+        title: "The Rooftop Greenhouse",
+        fallbackText:
+          "The rooftop greenhouse smells like wet soil and overheated glass. The person waiting there is not your enemy exactly. They leaked the fake screenshot to stop a worse rumor from reaching someone they love, and now they need you to decide how ugly the cleanup gets.",
+        basePrompt:
+          "Write a confrontation scene with emotional complexity and clear options.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-012",
+            key: "protect_then_fix",
+            label: "Protect them tonight and fix it in the morning.",
+            targetNodeId: "story-group-chat-leak-node-009",
+            stateEffects: { trust: 2, flags: ["protected_them"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-013",
+            key: "force_truth_now",
+            label: "Force the truth into the open right now.",
+            targetNodeId: "story-group-chat-leak-node-008",
+            stateEffects: { courage: 1, flags: ["forced_truth"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-007",
+        key: "panic_in_public",
+        title: "Who Panics First",
+        fallbackText:
+          "The second you nudge the chat, one student deletes three messages and another sends you a paragraph begging you not to post anything else. The leak is suddenly less about your reputation and more about who is terrified of being seen standing next to it.",
+        basePrompt:
+          "Write a pressure scene where public panic becomes useful information.",
+        choices: [
+          {
+            id: "story-group-chat-leak-choice-014",
+            key: "save_everything",
+            label: "Save everything and bring it to the faculty moderator.",
+            targetNodeId: "story-group-chat-leak-node-008",
+            stateEffects: { clues: 1, flags: ["faculty_route"] },
+          },
+          {
+            id: "story-group-chat-leak-choice-015",
+            key: "dm_the_quiet_one",
+            label: "DM the quiet one who never meant this to spread.",
+            targetNodeId: "story-group-chat-leak-node-009",
+            stateEffects: { trust: 1, flags: ["quiet_dm"] },
+          },
+        ],
+      },
+      {
+        id: "story-group-chat-leak-node-008",
+        key: "ending_clear_your_name",
+        title: "Ending: Clear Your Name",
+        fallbackText:
+          "By morning, the receipts are out, the fake screenshot falls apart under real timestamps, and your name is clean again. The panel still happens, but now everyone walks in knowing exactly who treated a lie like a strategy.",
+        basePrompt:
+          "Write a decisive YA ending where public truth wins, but not without social fallout.",
+        isEnding: true,
+        choices: [],
+      },
+      {
+        id: "story-group-chat-leak-node-009",
+        key: "ending_protect_the_soft_spot",
+        title: "Ending: Protect the Soft Spot",
+        fallbackText:
+          "You fix the lie without turning one mistake into a school execution. The rumor dies quieter, your name still survives, and one person who hurt you ends up owing you honesty for a very long time.",
+        basePrompt:
+          "Write a softer but still satisfying ending about control, mercy, and earned trust.",
+        isEnding: true,
+        choices: [],
+      },
+    ],
+  },
+  {
+    id: "story-pool-light-signal-001",
+    seriesId: null,
+    slug: "pool-light-signal",
+    title: "Pool Light Signal",
+    description:
+      "The public pool is closed for the summer, but at 12:13 a.m. the underwater lights flash your name across the deep end.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
+    baseContext:
+      "The pool has been locked since Memorial Day, so when the deep-end lights blink on at 12:13 a.m. and spell your initials across the water, you know someone wants you there.",
+    initialState: {
+      trust: 0,
+      clues: 0,
+      courage: 0,
+      flags: [],
+    },
+    nodes: [
+      {
+        id: "story-pool-light-signal-node-001",
+        key: "midnight_pool",
+        title: "Lights Under Black Water",
+        fallbackText:
+          "The chain-link gate rattles in the wind, and the pool beyond it glows an impossible blue. No lifeguards, no music, no summer noise at all. Just your initials rippling across the deep end like the water learned how to text.",
+        basePrompt:
+          "Write a hooky YA mystery opening with vivid visuals and an eerie but teen-safe tone.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-001",
+            key: "climb_gate",
+            label: "Climb the gate and get inside.",
+            targetNodeId: "story-pool-light-signal-node-002",
+            stateEffects: { courage: 1, flags: ["climbed_gate"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-002",
+            key: "circle_fence",
+            label: "Circle the fence and look for a side entry.",
+            targetNodeId: "story-pool-light-signal-node-003",
+            stateEffects: { clues: 1, flags: ["circled_fence"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-003",
+            key: "call_nina",
+            label: "Call Nina, the ex-lifeguard.",
+            targetNodeId: "story-pool-light-signal-node-004",
+            stateEffects: { trust: 1, flags: ["called_nina"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-002",
+        key: "wet_deck",
+        title: "The Deck Is Already Wet",
+        fallbackText:
+          "Inside the gate, the concrete is wet like someone dragged a lane rope across it minutes ago. At the starting blocks, you find a whistle, a flashlight, and a folded note that says look below where the trophies were.",
+        basePrompt:
+          "Write a clue-heavy poolside scene with clean spatial detail and real momentum.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-004",
+            key: "check_trophy_case",
+            label: "Check beneath the old trophy case.",
+            targetNodeId: "story-pool-light-signal-node-005",
+            stateEffects: { clues: 1, flags: ["trophy_case"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-005",
+            key: "shine_flashlight_water",
+            label: "Sweep the flashlight across the water first.",
+            targetNodeId: "story-pool-light-signal-node-006",
+            stateEffects: { courage: 1, flags: ["swept_water"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-003",
+        key: "pump_room_door",
+        title: "The Pump Room Door",
+        fallbackText:
+          "The side fence leads to the pump room, where the padlock is open but still hanging in place. Inside, the timer board has been rewired by hand, and one relay keeps tripping on and off like someone wanted the lights to call you, not anyone else.",
+        basePrompt:
+          "Write a mechanical clue scene that still feels cinematic and teen-friendly.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-006",
+            key: "trace_wires",
+            label: "Trace the rewired lights to their power source.",
+            targetNodeId: "story-pool-light-signal-node-005",
+            stateEffects: { clues: 1, flags: ["traced_wires"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-007",
+            key: "follow_footprints",
+            label: "Follow the wet footprints back outside.",
+            targetNodeId: "story-pool-light-signal-node-006",
+            stateEffects: { courage: 1, clues: 1, flags: ["followed_footprints"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-004",
+        key: "nina_knows",
+        title: "Nina Picks Up",
+        fallbackText:
+          "Nina answers whispering, then swears when you say the pool lights are on. She tells you nobody should be there except the booster-club president's son, who has been sneaking in after hours looking for the meet ledger that disappeared the week your brother got blamed.",
+        basePrompt:
+          "Write a phone-call reveal that ties the mystery to a personal stake.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-008",
+            key: "wait_for_nina",
+            label: "Wait for Nina to drive over.",
+            targetNodeId: "story-pool-light-signal-node-007",
+            unlockPolicy: "PREMIUM_ONLY",
+            unlockLabel: "Premium Route",
+            stateEffects: { trust: 2, flags: ["waited_for_nina"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-009",
+            key: "go_without_her",
+            label: "Go in before whoever is there can leave.",
+            targetNodeId: "story-pool-light-signal-node-006",
+            stateEffects: { courage: 1, flags: ["went_alone"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-005",
+        key: "ledger_box",
+        title: "The Missing Ledger",
+        fallbackText:
+          "Below the trophy case is a plastic document box wrapped in a swim-team towel from three seasons ago. Inside is the missing ledger, plus proof that meet fees were skimmed and pinned on your brother because he was easiest to blame.",
+        basePrompt:
+          "Write a mid-story discovery scene that turns a spooky setup into a human betrayal.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-010",
+            key: "take_box_public",
+            label: "Take the box straight to the night manager.",
+            targetNodeId: "story-pool-light-signal-node-008",
+            stateEffects: { courage: 1, flags: ["box_public"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-011",
+            key: "catch_real_thief",
+            label: "Hide the box and catch who comes back for it.",
+            targetNodeId: "story-pool-light-signal-node-009",
+            stateEffects: { clues: 1, trust: 1, flags: ["set_watch"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-006",
+        key: "deep_end_shadow",
+        title: "Movement in the Deep End",
+        fallbackText:
+          "Someone cuts through the reflection at the deep end and starts toward the pump room. It is not a ghost, just a scared boy with a stolen key and the kind of guilt that makes him move like every splash is an alarm.",
+        basePrompt:
+          "Write a confrontation reveal that replaces supernatural fear with urgent human stakes.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-012",
+            key: "corner_him",
+            label: "Corner him before he can dump the evidence.",
+            targetNodeId: "story-pool-light-signal-node-009",
+            stateEffects: { courage: 1, flags: ["cornered_him"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-013",
+            key: "offer_deal",
+            label: "Offer him one chance to tell the truth first.",
+            targetNodeId: "story-pool-light-signal-node-008",
+            stateEffects: { trust: 1, flags: ["offered_deal"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-007",
+        key: "nina_arrives",
+        title: "Headlights Through the Fence",
+        fallbackText:
+          "Nina's headlights rake across the chain-link just as a second figure bolts from the locker hall. With backup finally here, the pool stops feeling haunted and starts feeling like a crime scene that waited too long for a witness.",
+        basePrompt:
+          "Write a relief beat that sharpens the chase instead of defusing it.",
+        choices: [
+          {
+            id: "story-pool-light-signal-choice-014",
+            key: "split_up",
+            label: "Split up and cover both exits.",
+            targetNodeId: "story-pool-light-signal-node-009",
+            stateEffects: { clues: 1, trust: 1, flags: ["split_up"] },
+          },
+          {
+            id: "story-pool-light-signal-choice-015",
+            key: "protect_ledger",
+            label: "Stay with the ledger and make the evidence stick.",
+            targetNodeId: "story-pool-light-signal-node-008",
+            stateEffects: { courage: 1, flags: ["protected_ledger"] },
+          },
+        ],
+      },
+      {
+        id: "story-pool-light-signal-node-008",
+        key: "ending_clear_the_name",
+        title: "Ending: Clear the Name",
+        fallbackText:
+          "By sunrise, the ledger is in adult hands, the fake story about your brother finally cracks, and the pool lights go dark for ordinary reasons again. Some secrets still float around town, but this one stops owning your family.",
+        basePrompt:
+          "Write a clean, satisfying ending focused on vindication and relief.",
+        isEnding: true,
+        choices: [],
+      },
+      {
+        id: "story-pool-light-signal-node-009",
+        key: "ending_catch_them_wet",
+        title: "Ending: Catch Them Wet",
+        fallbackText:
+          "You catch the real thief trying to recover the ledger before dawn and force the whole mess into daylight. The truth is uglier than the ghost story people wanted, but it finally belongs to the right people.",
+        basePrompt:
+          "Write a sharper ending where catching the culprit matters as much as the evidence.",
         isEnding: true,
         choices: [],
       },

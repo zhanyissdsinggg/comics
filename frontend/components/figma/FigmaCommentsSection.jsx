@@ -159,7 +159,6 @@ function CommentItem({ comment, onRequireAuth }) {
 
 export default function FigmaCommentsSection({
   title = "Discussion",
-  seriesTitle,
   comments = [],
 }) {
   const { palette } = useFigmaSite();
@@ -178,10 +177,26 @@ export default function FigmaCommentsSection({
   return (
     <div className="mt-12 w-full pb-24">
       <div className="mb-8 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
-          <MessageSquare className={cn("h-6 w-6", palette.primaryText)} />
-          {title}
-        </h3>
+        <div>
+          <h3 className="flex items-center gap-2 text-2xl font-black tracking-tight text-white">
+            <MessageSquare className={cn("h-6 w-6", palette.primaryText)} />
+            {title}
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {[
+              "Start the discussion",
+              "Be first to call the twist",
+              "Tell readers what you noticed",
+            ].map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold tracking-[0.01em] text-white/72"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
         <button
           type="button"
           className="flex items-center gap-1 text-sm font-bold text-gray-400 transition-colors hover:text-white"
@@ -272,7 +287,7 @@ export default function FigmaCommentsSection({
             Be the first to comment
           </p>
           <p className="mt-2 text-sm text-gray-400">
-            No public discussion is live for {seriesTitle || "this chapter"} yet.
+            No comments yet. Say what you think before everyone else catches up.
           </p>
         </div>
       )}
