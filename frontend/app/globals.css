@@ -82,7 +82,7 @@
   --gush-text-body-lg: 1.08rem;
   --gush-text-body: 0.98rem;
   --gush-text-body-sm: 0.875rem;
-  --gush-leading-display: 0.92;
+  --gush-leading-display: 1.02;
   --gush-leading-copy: 1.7;
   --gush-mobile-bottom-nav-height: 6.4rem;
 }
@@ -204,7 +204,7 @@ main {
   h5,
   h6,
   :where(h1, h2, h3, h4, h5, h6).font-display {
-    letter-spacing: -0.01em;
+    letter-spacing: -0.008em;
     line-height: 1.02;
   }
 }
@@ -217,7 +217,7 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.014em;
   line-height: 1.02;
   font-weight: 600;
   font-optical-sizing: auto;
@@ -241,11 +241,11 @@ h4,
 h5,
 h6 {
   font-size: 1rem;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.012em;
 }
 
 :where(h1, h2, h3, h4, h5, h6).font-display {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.014em;
   line-height: 1.02;
 }
 

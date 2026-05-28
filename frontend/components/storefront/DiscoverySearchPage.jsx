@@ -37,6 +37,15 @@ const SORT_OPTIONS = [
   { id: "latest", label: "Latest" },
 ];
 
+const CURATED_TRENDING_SEARCHES = [
+  "Enemies to lovers",
+  "Magic school",
+  "Vampire hunter",
+  "Late-night mystery",
+  "Quick romance",
+  "Space signal",
+];
+
 function normalizeValue(value) {
   return String(value || "").trim();
 }
@@ -59,6 +68,30 @@ function normalizeKeywordList(items = [], includeAdult = false) {
     })
     .filter(Boolean)
     .filter((item) => (includeAdult ? true : !/adult|18\+|mature/i.test(item.label)));
+}
+
+function mergeTrendingKeywords(primary = [], includeAdult = false) {
+  const seeded = normalizeKeywordList(
+    CURATED_TRENDING_SEARCHES.map((label, index) => ({
+      id: `curated-hot-${index}`,
+      label,
+      query: label,
+    })),
+    includeAdult,
+  );
+  const merged = [];
+  const seen = new Set();
+
+  [...seeded, ...normalizeKeywordList(primary, includeAdult)].forEach((item) => {
+    const key = String(item?.label || "").trim().toLowerCase();
+    if (!key || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    merged.push(item);
+  });
+
+  return merged;
 }
 
 function sanitizeCatalog(items = [], includeAdult = false) {
@@ -117,7 +150,7 @@ export default function DiscoverySearchPage({
   const [total, setTotal] = useState(Number(initialTotal || 0));
   const [catalog, setCatalog] = useState([]);
   const [keywords, setKeywords] = useState(() =>
-    normalizeKeywordList(initialHotKeywords, initialIncludeAdult),
+    mergeTrendingKeywords(initialHotKeywords, initialIncludeAdult),
   );
   const [loading, setLoading] = useState(!initialReady);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -328,7 +361,7 @@ export default function DiscoverySearchPage({
         }
 
         if (keywordsResponse.ok) {
-          setKeywords(normalizeKeywordList(keywordsResponse.data?.keywords, includeAdult));
+          setKeywords(mergeTrendingKeywords(keywordsResponse.data?.keywords, includeAdult));
         }
         setCatalogLoading(false);
       })
@@ -555,7 +588,25 @@ export default function DiscoverySearchPage({
               description="New chapters across comics and novels."
             />
             {catalogLoading ? null : discoveryModel.recent.length > 0 ? (
-              <UpdateList items={discoveryModel.recent.slice(0, 8)} sectionName="search_recently_updated" />
+              <ShelfScroller>
+                {discoveryModel.recent.slice(0, 6).map((series, index) => (
+                  <CoverCard
+                    key={series.id}
+                    series={series}
+                    href={buildSeriesHref(series, searchPath, "", "search_recently_updated")}
+                    variant={normalizeType(series?.type) === "novel" ? "novel" : "comic"}
+                    badge="Updated"
+                    actionLabel="View Series"
+                    onClick={() =>
+                      trackEvent("story_click", {
+                        seriesId: series?.id,
+                        sourceSection: "search_recently_updated",
+                        position: index + 1,
+                      })
+                    }
+                  />
+                ))}
+              </ShelfScroller>
             ) : (
               <EmptyShelf
                 title="Nothing fresh yet"

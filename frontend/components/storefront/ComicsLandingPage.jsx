@@ -26,6 +26,7 @@ import {
   buildTopTen,
   buildUpdatedRail,
   pickFeaturedSeries,
+  uniqueBySeriesId,
 } from "./landingUtils";
 
 export default function ComicsLandingPage({
@@ -48,6 +49,7 @@ export default function ComicsLandingPage({
   }, []);
 
   const model = useMemo(() => {
+    const genrePriority = ["Action", "Romance", "Adventure", "Fantasy"];
     const featured = pickFeaturedSeries(seriesList);
     const featuredId = String(featured?.id || "").trim();
     const updated = buildUpdatedRail(seriesList, 14).filter(
@@ -66,20 +68,35 @@ export default function ComicsLandingPage({
     const completed = buildCompletedRail(seriesList, 12).filter(
       (series) => String(series?.id || "").trim() !== featuredId,
     );
+    const allGenreShelves = buildGenreShelves(seriesList, {
+      maxGenres: 12,
+      perGenre: 8,
+    });
+    const genres = genrePriority
+      .map((genre) =>
+        allGenreShelves.find(
+          (entry) => String(entry?.genre || "").toLowerCase() === genre.toLowerCase(),
+        ),
+      )
+      .filter(Boolean);
+    const recentArrivals = uniqueBySeriesId([...fresh, ...updated]).filter(
+      (series) => String(series?.id || "").trim() !== featuredId,
+    );
 
     return {
       featured,
       updated: updated.slice(0, 8),
       popular: popular.slice(0, 10),
       fresh: fresh.slice(0, 10),
+      recentArrivals: recentArrivals.slice(0, 10),
       completed: completed.slice(0, 10),
-      genres: buildGenreShelves(seriesList, {
-        maxGenres: 4,
-        perGenre: 8,
-      }),
+      genres,
       topTen: buildTopTen(seriesList),
     };
   }, [seriesList]);
+
+  const showNewShelf = model.fresh.length >= 4;
+  const showRecentArrivalsShelf = !showNewShelf && model.recentArrivals.length >= 4;
 
   return (
     <StorefrontPage accentClass="from-[rgba(255,93,136,0.15)] via-[rgba(255,178,92,0.08)] to-[rgba(103,232,249,0.08)]">
@@ -145,40 +162,50 @@ export default function ComicsLandingPage({
         </ShelfScroller>
       </section>
 
-      <section className="space-y-4">
-        <SectionHeading
-          eyebrow="New Comics"
-          title="Recent arrivals and rising launches"
-          description="Fresh launches and early favorites."
-          action={
-            <Link
-              href="/search?type=comic&sort=latest"
-              className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
-            >
-              Latest drops
-            </Link>
-          }
-        />
-        <ShelfScroller>
-          {model.fresh.map((series, index) => (
-            <CoverCard
-              key={series.id}
-              series={series}
-              href={`/series/${series.id}`}
-              variant="comic"
-              badge="New"
-              actionLabel={buildLatestInstallmentLabel(series)}
-              onClick={() =>
-                trackEvent("story_click", {
-                  seriesId: series?.id,
-                  sourceSection: "comics_new",
-                  position: index + 1,
-                })
-              }
-            />
-          ))}
-        </ShelfScroller>
-      </section>
+      {showNewShelf || showRecentArrivalsShelf ? (
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow={showNewShelf ? "New Comics" : "Recent Arrivals"}
+            title={
+              showNewShelf
+                ? "Recent arrivals and rising launches"
+                : "Fresh arrivals worth opening first"
+            }
+            description={
+              showNewShelf
+                ? "Fresh launches and early favorites."
+                : "New drops and recent updates landing now."
+            }
+            action={
+              <Link
+                href="/search?type=comic&sort=latest"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/76"
+              >
+                Latest drops
+              </Link>
+            }
+          />
+          <ShelfScroller>
+            {(showNewShelf ? model.fresh : model.recentArrivals).map((series, index) => (
+              <CoverCard
+                key={series.id}
+                series={series}
+                href={`/series/${series.id}`}
+                variant="comic"
+                badge={showNewShelf ? "New" : "Fresh"}
+                actionLabel={buildLatestInstallmentLabel(series)}
+                onClick={() =>
+                  trackEvent("story_click", {
+                    seriesId: series?.id,
+                    sourceSection: showNewShelf ? "comics_new" : "comics_recent_arrivals",
+                    position: index + 1,
+                  })
+                }
+              />
+            ))}
+          </ShelfScroller>
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <SectionHeading
@@ -207,7 +234,12 @@ export default function ComicsLandingPage({
         </ShelfScroller>
       </section>
 
-      <GenreShelfSection shelves={model.genres} variant="comic" />
+      <GenreShelfSection
+        shelves={model.genres}
+        variant="comic"
+        title="Genre Shelves"
+        description="Action, romance, adventure, and fantasy picks."
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
@@ -253,7 +285,12 @@ export default function ComicsLandingPage({
           </div>
         </section>
 
-        <RankList items={model.topTen} label="Top 10 Comics" />
+        <RankList
+          items={model.topTen}
+          label="Top 10 Comics"
+          eyebrow="Reader Rankings"
+          description="The comic titles readers keep opening first."
+        />
       </div>
     </StorefrontPage>
   );

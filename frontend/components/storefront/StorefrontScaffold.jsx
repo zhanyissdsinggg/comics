@@ -48,9 +48,11 @@ function ratingLabel(series) {
 function buildCoverMeta(series, variant = "comic") {
   if (variant === "novel") {
     return {
-      eyebrow: buildReadingTimeLabel(series),
-      secondary: buildStatusLabel(series),
-      tertiary: buildLatestInstallmentLabel(series),
+      eyebrow: buildGenreLabel(series, 2) || "Novel",
+      secondary: buildReadingTimeLabel(series),
+      tertiary: [buildLatestInstallmentLabel(series), buildStatusLabel(series)]
+        .filter(Boolean)
+        .join(" / "),
     };
   }
 
@@ -173,7 +175,7 @@ export function SectionHeading({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-[2.4rem]">
+        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white sm:text-[2.4rem]">
           {title}
         </h2>
         {description ? (
@@ -354,6 +356,10 @@ export function CoverCard({
   });
   const rating = ratingLabel(series);
   const widthClass = variant === "novel" ? "w-[58vw] max-w-[240px]" : "w-[52vw] max-w-[220px]";
+  const metaLine =
+    variant === "novel"
+      ? meta.tertiary || [buildLatestInstallmentLabel(series), status].filter(Boolean).join(" / ")
+      : [genres, meta.tertiary || status].filter(Boolean).join(" / ");
 
   return (
     <Link
@@ -385,7 +391,7 @@ export function CoverCard({
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/58">
               {meta.eyebrow}
             </p>
-            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.022em] text-white">
+            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.018em] text-white">
               {series.title}
             </h3>
             <p className="line-clamp-2 text-sm leading-5 text-white/70">
@@ -395,7 +401,7 @@ export function CoverCard({
         </div>
         <div className="space-y-1 px-1">
           <p className="text-[11px] uppercase tracking-[0.14em] text-white/44">
-            {[genres, meta.tertiary || status].filter(Boolean).join(" / ")}
+            {metaLine}
           </p>
           <div className="flex items-center justify-between gap-3 text-sm text-white/72">
             <span className="truncate">{actionLabel}</span>
@@ -486,17 +492,27 @@ export function UpdateList({ items = [], variant = "comic", sectionName = "" }) 
   );
 }
 
-export function RankList({ items = [], label = "Top 10" }) {
+export function RankList({
+  items = [],
+  label = "Top 10",
+  eyebrow = "Reader Rankings",
+  description = "The titles everyone keeps opening.",
+  compact = false,
+}) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
   }
 
   return (
-    <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[var(--gush-shadow-panel)] sm:p-5">
+    <section
+      className={`rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[var(--gush-shadow-panel)] ${
+        compact ? "p-4" : "p-4 sm:p-5"
+      }`}
+    >
       <SectionHeading
-        eyebrow="Charts"
+        eyebrow={eyebrow}
         title={label}
-        description="The titles everyone keeps opening."
+        description={description}
       />
       <div className="mt-5 grid gap-3">
         {items.map((series, index) => (
@@ -535,20 +551,29 @@ export function RankList({ items = [], label = "Top 10" }) {
   );
 }
 
-export function GenreShelfSection({ shelves = [], variant = "comic" }) {
+export function GenreShelfSection({
+  shelves = [],
+  variant = "comic",
+  title = "Genre Shelves",
+  description = "Open a shelf and keep reading.",
+}) {
   if (!Array.isArray(shelves) || shelves.length === 0) {
     return null;
   }
 
   return (
     <section className="space-y-8">
+      <SectionHeading title={title} description={description} />
       {shelves.map((shelf) => (
         <div key={shelf.genre} className="space-y-4">
-          <SectionHeading
-            eyebrow="Genre Shelves"
-            title={shelf.genre}
-            description={`Open the ${shelf.genre.toLowerCase()} shelf and start reading.`}
-          />
+          <div className="space-y-1">
+            <h3 className="font-display text-[1.45rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white">
+              {shelf.genre}
+            </h3>
+            <p className="text-sm leading-6 text-white/60">
+              Open the {shelf.genre.toLowerCase()} shelf and keep going.
+            </p>
+          </div>
           <ShelfScroller>
             {shelf.items.map((series) => (
               <CoverCard
@@ -575,7 +600,7 @@ export function InteractivePromo() {
             <Gamepad2 className="size-3.5" />
             Interactive Stories
           </p>
-          <h2 className="font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:text-[2.5rem]">
+          <h2 className="font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white sm:text-[2.5rem]">
             Your Choice Changes the Story
           </h2>
           <p className="max-w-[44rem] text-sm leading-7 text-white/68">
@@ -633,7 +658,7 @@ export function EmptyShelf({
       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/48">
         Next Up
       </p>
-      <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.022em] text-white">
+      <h2 className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.014em] text-white">
         {title}
       </h2>
       <p className="mt-3 max-w-[34rem] text-sm leading-7 text-white/66">
@@ -656,4 +681,5 @@ export const discoveryIcons = {
   Sparkles,
   BookOpen,
   Library,
+  Compass,
 };

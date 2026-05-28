@@ -24,7 +24,6 @@ import {
   buildGenreLabel,
   buildGenreShelves,
   buildLatestInstallmentLabel,
-  buildPopularRail,
   buildReadingTimeLabel,
   buildShortReadsRail,
   buildStatusLabel,
@@ -89,9 +88,10 @@ export default function NovelsLandingPage({
         perGenre: 8,
       }),
       top: buildTopTen(seriesList),
-      popular: buildPopularRail(seriesList, 12),
     };
   }, [bySeriesId, seriesList]);
+
+  const compactTopShelf = model.top.length <= 3;
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.16)] via-[rgba(255,255,255,0.04)] to-[rgba(255,79,154,0.08)]">
@@ -171,33 +171,6 @@ export default function NovelsLandingPage({
 
       <section className="space-y-4">
         <SectionHeading
-          eyebrow="Binge Novels"
-          title="Long reads with no waiting"
-          description="Completed novels for nights that need one more chapter."
-        />
-        <ShelfScroller>
-          {model.binge.map((series, index) => (
-            <CoverCard
-              key={series.id}
-              series={series}
-              href={`/series/${series.id}`}
-              variant="novel"
-              badge="Completed"
-              actionLabel="Read Full Series"
-              onClick={() =>
-                trackEvent("story_click", {
-                  seriesId: series?.id,
-                  sourceSection: "novels_binge",
-                  position: index + 1,
-                })
-              }
-            />
-          ))}
-        </ShelfScroller>
-      </section>
-
-      <section className="space-y-4">
-        <SectionHeading
           eyebrow="Short Reads"
           title="Quick reads, strong hook"
           description="A full mood and a real finish in less time."
@@ -223,16 +196,50 @@ export default function NovelsLandingPage({
         </ShelfScroller>
       </section>
 
-      <GenreShelfSection shelves={model.genres} variant="novel" />
+      {model.binge.length > 0 ? (
+        <section className="space-y-4">
+          <SectionHeading
+            eyebrow="Binge Novels"
+            title="Long reads with no waiting"
+            description="Completed novels for nights that need one more chapter."
+          />
+          <ShelfScroller>
+            {model.binge.map((series, index) => (
+              <CoverCard
+                key={series.id}
+                series={series}
+                href={`/series/${series.id}`}
+                variant="novel"
+                badge="Completed"
+                actionLabel="Read Full Series"
+                onClick={() =>
+                  trackEvent("story_click", {
+                    seriesId: series?.id,
+                    sourceSection: "novels_binge",
+                    position: index + 1,
+                  })
+                }
+              />
+            ))}
+          </ShelfScroller>
+        </section>
+      ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <GenreShelfSection
+        shelves={model.genres}
+        variant="novel"
+        title="Genre Shelves"
+        description="Fantasy pulls, romance spirals, mystery hooks, and more."
+      />
+
+      <div className={compactTopShelf ? "space-y-6" : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"}>
         <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
           <SectionHeading
             eyebrow="Late-Night Reads"
             title="Stories built for one more chapter."
             description="Slow burns and sharp hooks for late nights."
           />
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {[
               {
                 icon: Clock3,
@@ -243,11 +250,6 @@ export default function NovelsLandingPage({
                 icon: BookOpen,
                 title: "Slow-burn pull",
                 body: "Hooks that tighten up and make the next chapter impossible to skip.",
-              },
-              {
-                icon: Library,
-                title: "Stay-up-too-late energy",
-                body: "Moody stories that keep the light on longer than planned.",
               },
             ].map((item) => {
               const Icon = item.icon;
@@ -269,7 +271,13 @@ export default function NovelsLandingPage({
           </div>
         </section>
 
-        <RankList items={model.top} label="Top Novels" />
+        <RankList
+          items={model.top}
+          label="Top Novels"
+          compact={compactTopShelf}
+          eyebrow="Reader Rankings"
+          description="The novel titles readers keep opening first."
+        />
       </div>
     </StorefrontPage>
   );

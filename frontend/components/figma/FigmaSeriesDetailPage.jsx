@@ -64,6 +64,54 @@ function buildCoverAltText(label, seriesType = "") {
   return "Series cover image";
 }
 
+function compactNumberLabel(value) {
+  const numeric = Number(value || 0);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return "";
+  }
+
+  if (numeric >= 1_000_000) {
+    return `${(numeric / 1_000_000).toFixed(numeric >= 10_000_000 ? 0 : 1)}M`;
+  }
+
+  if (numeric >= 1_000) {
+    return `${(numeric / 1_000).toFixed(numeric >= 100_000 ? 0 : 1)}K`;
+  }
+
+  return `${Math.round(numeric)}`;
+}
+
+function buildSeriesStatusCopy(series) {
+  const normalizedStatus = String(series?.status || "")
+    .trim()
+    .toLowerCase();
+
+  if (normalizedStatus === "completed" || normalizedStatus === "end") {
+    return "Completed";
+  }
+
+  const updatedAt = new Date(series?.updatedAt || 0).getTime() || 0;
+  const weeklyWindowMs = 10 * 24 * 60 * 60 * 1000;
+  if (updatedAt && Date.now() - updatedAt <= weeklyWindowMs) {
+    return "Ongoing · New episodes weekly";
+  }
+
+  return "Ongoing";
+}
+
+function resolveEpisodeReadsLabel(episode) {
+  const numeric =
+    Number(
+      episode?.readCount ||
+        episode?.reads ||
+        episode?.viewCount ||
+        episode?.views ||
+        0,
+    ) || 0;
+
+  return compactNumberLabel(numeric);
+}
+
 function ModeBlockedState({
   palette,
   title,
@@ -278,7 +326,7 @@ function SeriesDetailContent({
               day: "numeric",
             }).format(new Date(episode.releasedAt))
           : "Today",
-        views: "100K",
+        readsText: resolveEpisodeReadsLabel(episode),
         number: Number(episode?.number || 0) || 1,
         rawEpisode: episode,
       }));
@@ -328,6 +376,10 @@ function SeriesDetailContent({
     kind: "cover",
     adult: detailItem?.adult || detailItem?.isAdult,
   });
+  const publicStatusLabel = useMemo(
+    () => buildSeriesStatusCopy(payload?.series || detailItem?.raw || null),
+    [detailItem?.raw, payload?.series],
+  );
 
   if (loading && !detailItem) {
     return (
@@ -621,10 +673,10 @@ function SeriesDetailContent({
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
-                    Reading Pace
+                    Status
                   </p>
                   <p className="mt-2 text-sm font-bold text-white">
-                    {detailItem.status || "Ongoing"}
+                    {publicStatusLabel}
                   </p>
                 </div>
               </div>
@@ -777,12 +829,14 @@ function SeriesDetailContent({
                           </p>
                         </div>
                       </div>
-                      <div className="text-left text-xs font-semibold text-gray-400 transition-colors group-hover:text-white sm:text-right md:text-sm">
-                        <div>{chapter.views}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                          Reads
+                      {chapter.readsText ? (
+                        <div className="text-left text-xs font-semibold text-gray-400 transition-colors group-hover:text-white sm:text-right md:text-sm">
+                          <div>{chapter.readsText}</div>
+                          <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                            Reads
+                          </div>
                         </div>
-                      </div>
+                      ) : null}
                       </Link>
                     </div>
                   );
