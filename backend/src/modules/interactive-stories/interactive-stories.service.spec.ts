@@ -179,6 +179,196 @@ function createPublishedSnapshotFixture(
   };
 }
 
+function createRestartReplayFixture() {
+  const storyId = "story-restart";
+  const seriesId = "series-restart";
+  const startNodeId = "story-restart-node-1";
+  const branchNodeId = "story-restart-node-2";
+  const endingAId = "story-restart-node-3";
+  const endingBId = "story-restart-node-4";
+  const publishedSnapshot = {
+    story: {
+      id: storyId,
+      slug: "restart-replay-story",
+      title: "Restart Replay Story",
+      description: "Fixture used to validate restart replay isolation.",
+      baseContext: "A restartable branch.",
+      contentMode: "NORMAL",
+      targetAudience: "US teens",
+      seriesId,
+      initialNodeId: startNodeId,
+      initialState: { trust: 0, clues: 0, flags: [] },
+      publishedVersion: 1,
+    },
+    series: {
+      id: seriesId,
+      title: "Restart Replay Story",
+      adult: false,
+      coverUrl: "https://cdn.test/restart.jpg",
+      genres: ["Mystery"],
+    },
+    nodes: [
+      {
+        id: startNodeId,
+        storyId,
+        nodeKey: "restart_start",
+        title: "Restart Start",
+        baseContext: "Start node.",
+        basePrompt: "Write start node.",
+        fallbackText: "Start node.",
+        generatedByAI: false,
+        reviewStatus: "approved",
+        editorNotes: null,
+        requiredFlags: [],
+        blockedFlags: [],
+        stateEffects: {},
+        sortOrder: 0,
+        isEnding: false,
+        aiEnabled: true,
+        choices: [
+          {
+            id: "story-restart-choice-1",
+            nodeId: startNodeId,
+            targetNodeId: branchNodeId,
+            choiceKey: "take_branch",
+            label: "Take the branch",
+            description: null,
+            unlockPolicy: "FREE",
+            requiresPremium: false,
+            requiresTokens: 0,
+            unlockLabel: null,
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { trust: 1, flags: ["branch_taken"] },
+            sortOrder: 0,
+          },
+        ],
+      },
+      {
+        id: branchNodeId,
+        storyId,
+        nodeKey: "restart_branch",
+        title: "Restart Branch",
+        baseContext: "Branch node.",
+        basePrompt: "Write branch node.",
+        fallbackText: "Branch node.",
+        generatedByAI: false,
+        reviewStatus: "approved",
+        editorNotes: null,
+        requiredFlags: [],
+        blockedFlags: [],
+        stateEffects: {},
+        sortOrder: 1,
+        isEnding: false,
+        aiEnabled: true,
+        choices: [
+          {
+            id: "story-restart-choice-2",
+            nodeId: branchNodeId,
+            targetNodeId: endingAId,
+            choiceKey: "ending_a",
+            label: "Take ending A",
+            description: null,
+            unlockPolicy: "FREE",
+            requiresPremium: false,
+            requiresTokens: 0,
+            unlockLabel: null,
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { clues: 1, flags: ["ending_a"] },
+            sortOrder: 0,
+          },
+          {
+            id: "story-restart-choice-3",
+            nodeId: branchNodeId,
+            targetNodeId: endingBId,
+            choiceKey: "ending_b",
+            label: "Take ending B",
+            description: null,
+            unlockPolicy: "FREE",
+            requiresPremium: false,
+            requiresTokens: 0,
+            unlockLabel: null,
+            requiredFlags: [],
+            blockedFlags: [],
+            stateEffects: { courage: 1, flags: ["ending_b"] },
+            sortOrder: 1,
+          },
+        ],
+      },
+      {
+        id: endingAId,
+        storyId,
+        nodeKey: "ending_a",
+        title: "Ending: A",
+        baseContext: "Ending A.",
+        basePrompt: "Write ending A.",
+        fallbackText: "Ending A.",
+        generatedByAI: false,
+        reviewStatus: "approved",
+        editorNotes: null,
+        requiredFlags: [],
+        blockedFlags: [],
+        stateEffects: {},
+        sortOrder: 2,
+        isEnding: true,
+        aiEnabled: true,
+        choices: [],
+      },
+      {
+        id: endingBId,
+        storyId,
+        nodeKey: "ending_b",
+        title: "Ending: B",
+        baseContext: "Ending B.",
+        basePrompt: "Write ending B.",
+        fallbackText: "Ending B.",
+        generatedByAI: false,
+        reviewStatus: "approved",
+        editorNotes: null,
+        requiredFlags: [],
+        blockedFlags: [],
+        stateEffects: {},
+        sortOrder: 3,
+        isEnding: true,
+        aiEnabled: true,
+        choices: [],
+      },
+    ],
+  };
+
+  return {
+    id: storyId,
+    slug: "restart-replay-story",
+    title: "Restart Replay Story",
+    description: "Fixture used to validate restart replay isolation.",
+    baseContext: "A restartable branch.",
+    contentMode: "NORMAL",
+    targetAudience: "US teens",
+    seriesId,
+    initialNodeId: startNodeId,
+    initialState: { trust: 0, clues: 0, flags: [] },
+    isPublished: true,
+    publishedVersion: 1,
+    aiEnabled: true,
+    publishedSnapshots: [
+      {
+        snapshotJson: publishedSnapshot,
+        version: 1,
+        publishedAt: new Date("2026-05-25T22:00:00.000Z"),
+        isActive: true,
+      },
+    ],
+    series: {
+      id: seriesId,
+      title: "Restart Replay Story",
+      adult: false,
+      coverUrl: "https://cdn.test/restart.jpg",
+      genres: ["Mystery"],
+    },
+  };
+}
+
 function createInitialState(overrides: Partial<FakeDbState> = {}): FakeDbState {
   return {
     stories: [createPublishedSnapshotFixture()],
@@ -390,6 +580,19 @@ function createFakePrisma(initialState?: Partial<FakeDbState>) {
           updatedAt: new Date().toISOString(),
         });
         return deepClone(existing);
+      }),
+      deleteMany: jest.fn(async ({ where }: any) => {
+        const before = workingState.idempotency.length;
+        workingState.idempotency = workingState.idempotency.filter((item) => {
+          if (where?.userId && item.userId !== where.userId) {
+            return true;
+          }
+          if (where?.storyId && item.storyId !== where.storyId) {
+            return true;
+          }
+          return false;
+        });
+        return { count: before - workingState.idempotency.length };
       }),
     },
   });
@@ -703,6 +906,82 @@ describe("InteractiveStoriesService", () => {
       expect(second.replay).toBe(true);
       expect(second.progress.node.id).toBe("story-1-node-2");
     }
+  });
+
+  it("does not reuse stale completed choice replays after restarting a story", async () => {
+    prisma.__setState({
+      stories: [createRestartReplayFixture()],
+    });
+
+    const firstBranch = await service.submitChoice(
+      {
+        storySlug: "restart-replay-story",
+        userId: "user-1",
+        choiceId: "story-restart-choice-1",
+        idempotencyKey: "run-1-step-1",
+      },
+      { includeAdult: false },
+    );
+    expect(firstBranch.ok).toBe(true);
+
+    const firstEnding = await service.submitChoice(
+      {
+        storySlug: "restart-replay-story",
+        userId: "user-1",
+        choiceId: "story-restart-choice-2",
+        idempotencyKey: "run-1-step-2",
+      },
+      { includeAdult: false },
+    );
+    expect(firstEnding.ok).toBe(true);
+    if (firstEnding.ok) {
+      expect(firstEnding.progress.node.title).toBe("Ending: A");
+    }
+
+    const restarted = await service.restartProgress(
+      "restart-replay-story",
+      "user-1",
+      { includeAdult: false },
+    );
+    expect(restarted?.node?.title).toBe("Restart Start");
+
+    const secondBranch = await service.submitChoice(
+      {
+        storySlug: "restart-replay-story",
+        userId: "user-1",
+        choiceId: "story-restart-choice-1",
+        idempotencyKey: "run-2-step-1",
+      },
+      { includeAdult: false },
+    );
+    expect(secondBranch.ok).toBe(true);
+    if (secondBranch.ok) {
+      expect(secondBranch.replay).toBeUndefined();
+      expect(secondBranch.progress.node.title).toBe("Restart Branch");
+    }
+
+    const secondEnding = await service.submitChoice(
+      {
+        storySlug: "restart-replay-story",
+        userId: "user-1",
+        choiceId: "story-restart-choice-3",
+        idempotencyKey: "run-2-step-2",
+      },
+      { includeAdult: false },
+    );
+    expect(secondEnding.ok).toBe(true);
+    if (secondEnding.ok) {
+      expect(secondEnding.replay).toBeUndefined();
+      expect(secondEnding.progress.node.title).toBe("Ending: B");
+      expect(secondEnding.progress.endingsReached).toBe(1);
+    }
+
+    const persisted = prisma.__getState();
+    expect(persisted.progress[0]?.currentNodeId).toBe("story-restart-node-4");
+    expect(persisted.idempotency.map((item) => item.requestKey).sort()).toEqual([
+      "run-2-step-1",
+      "run-2-step-2",
+    ]);
   });
 
   it("keeps the same request key isolated across different stories", async () => {

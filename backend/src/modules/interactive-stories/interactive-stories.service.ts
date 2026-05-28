@@ -1111,6 +1111,12 @@ export class InteractiveStoriesService {
     };
 
     await this.prisma.$transaction(async (tx) => {
+      await tx.interactiveChoiceIdempotency.deleteMany({
+        where: {
+          userId,
+          storyId: story.id,
+        },
+      });
       await tx.userStoryProgress.upsert({
         where: {
           userId_storyId: {
