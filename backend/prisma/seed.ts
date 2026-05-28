@@ -2118,6 +2118,32 @@ async function seedInteractiveStories() {
           InteractiveUnlockPolicy[
             choiceCommerce.unlockPolicy as keyof typeof InteractiveUnlockPolicy
           ];
+        const existingChoiceById = await prisma.interactiveStoryChoice.findUnique({
+          where: { id: choice.id },
+          select: { id: true },
+        });
+        if (existingChoiceById) {
+          await prisma.interactiveStoryChoice.update({
+            where: { id: choice.id },
+            data: {
+              nodeId: node.id,
+              targetNodeId: choice.targetNodeId,
+              choiceKey: choice.key,
+              label: choice.label,
+              description: choice.description || null,
+              unlockPolicy,
+              requiresPremium: choiceCommerce.requiresPremium,
+              requiresTokens: choiceCommerce.requiresTokens,
+              unlockLabel: choiceCommerce.unlockLabel,
+              requiredFlags: choice.requiredFlags || [],
+              blockedFlags: choice.blockedFlags || [],
+              stateEffects: toInputJson(choice.stateEffects || {}),
+              sortOrder: choiceIndex,
+            },
+          });
+          continue;
+        }
+
         await prisma.interactiveStoryChoice.upsert({
           where: {
             nodeId_choiceKey: {
@@ -2126,7 +2152,6 @@ async function seedInteractiveStories() {
             },
           },
           update: {
-            id: choice.id,
             targetNodeId: choice.targetNodeId,
             label: choice.label,
             description: choice.description || null,
