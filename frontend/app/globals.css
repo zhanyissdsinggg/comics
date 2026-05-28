@@ -82,7 +82,7 @@
   --gush-text-body-lg: 1.08rem;
   --gush-text-body: 0.98rem;
   --gush-text-body-sm: 0.875rem;
-  --gush-leading-display: 1.02;
+  --gush-leading-display: 1;
   --gush-leading-copy: 1.7;
   --gush-mobile-bottom-nav-height: 6.4rem;
 }
@@ -200,12 +200,17 @@ main {
   h1,
   h2,
   h3,
+  :where(h1, h2, h3).font-display {
+    letter-spacing: -0.008em;
+    line-height: 1;
+  }
+
   h4,
   h5,
   h6,
-  :where(h1, h2, h3, h4, h5, h6).font-display {
+  :where(h4, h5, h6).font-display {
     letter-spacing: -0.008em;
-    line-height: 1.02;
+    line-height: 1.08;
   }
 }
 
@@ -218,7 +223,7 @@ h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
   letter-spacing: -0.014em;
-  line-height: 1.02;
+  line-height: 1;
   font-weight: 600;
   font-optical-sizing: auto;
   text-wrap: balance;
@@ -242,11 +247,17 @@ h5,
 h6 {
   font-size: 1rem;
   letter-spacing: -0.014em;
+  line-height: 1.08;
 }
 
-:where(h1, h2, h3, h4, h5, h6).font-display {
+:where(h1, h2, h3).font-display {
   letter-spacing: -0.014em;
-  line-height: 1.02;
+  line-height: 1;
+}
+
+:where(h4, h5, h6).font-display {
+  letter-spacing: -0.014em;
+  line-height: 1.08;
 }
 
 .reader-prose {

@@ -80,12 +80,12 @@ export default function NovelsLandingPage({
 
     return {
       featured,
-      latest: latest.slice(0, 8),
+      latest: latest.slice(0, 6),
       continueItems,
-      binge: binge.slice(0, 8),
+      binge: binge.slice(0, 6),
       shortReads: buildShortReadsRail(seriesList, 10)
         .filter((series) => String(series?.id || "").trim() !== featuredId)
-        .slice(0, 8),
+        .slice(0, 6),
       genres: buildGenreShelves(seriesList, {
         maxGenres: 4,
         perGenre: 8,
@@ -95,6 +95,7 @@ export default function NovelsLandingPage({
   }, [bySeriesId, seriesList]);
 
   const compactTopShelf = model.top.length <= 3;
+  const minimalTopShelf = model.top.length <= 2;
   const showLateNightShelf = model.binge.length >= 4;
 
   return (
@@ -172,6 +173,51 @@ export default function NovelsLandingPage({
         </ShelfScroller>
       </section>
 
+      {compactTopShelf ? (
+        <div className={minimalTopShelf ? "max-w-[620px]" : ""}>
+          <RankList
+            items={model.top}
+            label="Top Novels"
+            compact
+            minimal={minimalTopShelf}
+            eyebrow="Reader Rankings"
+            description={
+              minimalTopShelf ? "Two titles readers are opening first tonight." : "The novel titles readers keep opening first."
+            }
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
+            <SectionHeading
+              eyebrow="Late-Night Reads"
+              title="Stories built for one more chapter."
+              description="Short hooks, long pull, and a few complete runs when you're not stopping yet."
+            />
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                "Sharp hooks that make one more chapter automatic.",
+                "Complete runs and quick reads when you want momentum tonight.",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/72"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <RankList
+            items={model.top}
+            label="Top Novels"
+            eyebrow="Reader Rankings"
+            description="The novel titles readers keep opening first."
+          />
+        </div>
+      )}
+
       {model.continueItems.length > 0 ? (
         <section className="space-y-4">
           <SectionHeading
@@ -210,46 +256,6 @@ export default function NovelsLandingPage({
           </ShelfScroller>
         </section>
       ) : null}
-
-      {compactTopShelf ? (
-        <RankList
-          items={model.top}
-          label="Top Novels"
-          compact
-          eyebrow="Reader Rankings"
-          description="The novel titles readers keep opening first."
-        />
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 shadow-[var(--gush-shadow-panel)]">
-            <SectionHeading
-              eyebrow="Late-Night Reads"
-              title="Stories built for one more chapter."
-              description="Short hooks, long pull, and a few complete runs when you're not stopping yet."
-            />
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {[
-                "Sharp hooks that make one more chapter automatic.",
-                "Complete runs and quick reads when you want momentum tonight.",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/72"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <RankList
-            items={model.top}
-            label="Top Novels"
-            eyebrow="Reader Rankings"
-            description="The novel titles readers keep opening first."
-          />
-        </div>
-      )}
 
       {showLateNightShelf ? (
         <section className="space-y-4">

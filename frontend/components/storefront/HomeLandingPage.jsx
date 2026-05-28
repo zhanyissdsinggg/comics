@@ -132,7 +132,7 @@ function HomeLandingContent({ initialHomeData = null }) {
         <SectionHeading
           eyebrow="Trending Covers"
           title="The covers nobody is skipping"
-          description="Big covers and sharp hooks."
+          description="The covers readers keep opening tonight."
         />
           <ShelfScroller>
             {homeModel.trending.map((series, index) => (

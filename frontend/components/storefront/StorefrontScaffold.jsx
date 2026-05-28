@@ -175,7 +175,7 @@ export function SectionHeading({
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white sm:text-[2.4rem]">
+        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[1] tracking-[-0.014em] text-white sm:text-[2.4rem]">
           {title}
         </h2>
         {description ? (
@@ -237,7 +237,7 @@ export function StoryHero({
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="max-w-[13ch] font-display text-[2.65rem] font-semibold leading-[0.92] tracking-[-0.04em] text-white sm:text-[4rem] sm:tracking-[-0.044em]">
+            <h1 className="max-w-[13ch] font-display text-[2.65rem] font-semibold leading-[1] tracking-[-0.018em] text-white sm:text-[4rem] sm:tracking-[-0.02em]">
               {heroTitle}
             </h1>
             {description ? (
@@ -391,7 +391,7 @@ export function CoverCard({
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/58">
               {meta.eyebrow}
             </p>
-            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.018em] text-white">
+            <h3 className="line-clamp-2 text-[1.15rem] font-semibold leading-[1] tracking-[-0.014em] text-white">
               {series.title}
             </h3>
             <p className="line-clamp-2 text-sm leading-5 text-white/70">
@@ -498,6 +498,7 @@ export function RankList({
   eyebrow = "Reader Rankings",
   description = "The titles everyone keeps opening.",
   compact = false,
+  minimal = false,
 }) {
   if (!Array.isArray(items) || items.length === 0) {
     return null;
@@ -506,7 +507,7 @@ export function RankList({
   return (
     <section
       className={`rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[var(--gush-shadow-panel)] ${
-        compact ? "p-4" : "p-4 sm:p-5"
+        minimal ? "p-3.5" : compact ? "p-4" : "p-4 sm:p-5"
       }`}
     >
       <SectionHeading
@@ -514,17 +515,21 @@ export function RankList({
         title={label}
         description={description}
       />
-      <div className="mt-5 grid gap-3">
+      <div className={`grid ${minimal ? "mt-4 gap-2.5" : "mt-5 gap-3"}`}>
         {items.map((series, index) => (
           <Link
             key={`${series.id}-${index}`}
             href={buildSeriesHref(series)}
-            className="group grid grid-cols-[34px_56px_minmax(0,1fr)] items-center gap-3 rounded-[22px] border border-white/8 bg-black/15 px-3 py-3 transition-colors hover:bg-white/[0.05]"
+            className={`group grid items-center gap-3 border border-white/8 bg-black/15 transition-colors hover:bg-white/[0.05] ${
+              minimal
+                ? "grid-cols-[30px_48px_minmax(0,1fr)] rounded-[20px] px-3 py-2.5"
+                : "grid-cols-[34px_56px_minmax(0,1fr)] rounded-[22px] px-3 py-3"
+            }`}
           >
-            <span className="text-center font-display text-[1.5rem] font-semibold text-white/72">
+            <span className={`text-center font-display font-semibold text-white/72 ${minimal ? "text-[1.25rem]" : "text-[1.5rem]"}`}>
               {index + 1}
             </span>
-            <div className="aspect-[3/4] overflow-hidden rounded-[16px] border border-white/10">
+            <div className={`aspect-[3/4] overflow-hidden border border-white/10 ${minimal ? "rounded-[14px]" : "rounded-[16px]"}`}>
               <img
                 src={resolveDisplayImageUrl(series?.coverUrl, {
                   kind: "cover",
@@ -535,7 +540,7 @@ export function RankList({
               />
             </div>
             <div className="min-w-0">
-              <h3 className="truncate text-base font-semibold text-white">
+              <h3 className={`truncate font-semibold text-white ${minimal ? "text-[0.95rem] leading-[1]" : "text-base leading-[1]"}`}>
                 {series.title}
               </h3>
               <p className="truncate text-sm text-white/58">
@@ -566,7 +571,7 @@ export function GenreShelfSection({
       <SectionHeading title={title} description={description} />
       {shelves.map((shelf) => (
         <div key={shelf.genre} className="space-y-4">
-          <h3 className="font-display text-[1.45rem] font-semibold leading-[1.02] tracking-[-0.014em] text-white">
+          <h3 className="font-display text-[1.45rem] font-semibold leading-[1] tracking-[-0.014em] text-white">
             {shelf.genre}
           </h3>
           <ShelfScroller>

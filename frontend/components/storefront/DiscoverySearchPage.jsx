@@ -7,6 +7,7 @@ import { Flame, Sparkles } from "lucide-react";
 import SearchPageInput from "../search/SearchPageInput";
 import { apiGet } from "../../lib/apiClient";
 import { getContentModeQueryParam, isAdultContent } from "../../lib/contentFilters";
+import { resolveDisplayImageUrl } from "../../lib/fallbackImage";
 import { buildPathWithAttribution } from "../../lib/paymentAttribution";
 import { trackEvent } from "../../lib/trackEvent";
 import { useAdultGateStore } from "../../store/useAdultGateStore";
@@ -23,8 +24,12 @@ import {
 } from "./StorefrontScaffold";
 import {
   buildGenreShelves,
+  buildGenreLabel,
+  buildLatestInstallmentLabel,
   buildMoodTags,
   buildPopularRail,
+  buildReadHref,
+  buildUpdatedLabel,
   buildUpdatedRail,
   normalizeStatus,
   normalizeType,
@@ -111,6 +116,66 @@ function buildSeriesHref(series, searchPath, query, campaignId) {
     sourceSeriesId: series.id,
     returnTo: query ? `/search?q=${encodeURIComponent(query)}` : "/search",
   });
+}
+
+function DiscoveryUpdateCard({ series, index = 0, sectionName = "search_recently_updated" }) {
+  if (!series) {
+    return null;
+  }
+
+  const normalizedType = normalizeType(series?.type) === "novel" ? "Novel" : "Comic";
+  const latestInstallment = buildLatestInstallmentLabel(series);
+  const genreLabel = buildGenreLabel(series, 2) || "Fresh update";
+  const readHref = buildReadHref(series);
+
+  return (
+    <Link
+      href={readHref}
+      onClick={() =>
+        trackEvent("story_click", {
+          seriesId: series?.id,
+          sourceSection: sectionName,
+          position: index + 1,
+        })
+      }
+      className="group rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 shadow-[var(--gush-shadow-soft)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[rgba(255,255,255,0.06)]"
+    >
+      <article className="grid grid-cols-[88px_minmax(0,1fr)] gap-3">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-[18px] border border-white/10">
+          <img
+            src={resolveDisplayImageUrl(series?.coverUrl, {
+              kind: "cover",
+              adult: series?.adult || series?.isAdult,
+            })}
+            alt={`${normalizedType} cover image for ${String(series?.title || "Untitled").trim() || "Untitled"}`}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-white/48">
+              {normalizedType}
+            </p>
+            <p className="shrink-0 text-[11px] uppercase tracking-[0.16em] text-white/40">
+              {buildUpdatedLabel(series)}
+            </p>
+          </div>
+          <h3 className="mt-2 line-clamp-2 text-[1.05rem] font-semibold leading-[1] tracking-[-0.014em] text-white">
+            {series.title}
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-white/72">
+            {latestInstallment}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-white/58">
+            {genreLabel}
+          </p>
+          <div className="mt-4 inline-flex min-h-[44px] items-center rounded-full border border-white/12 bg-white/[0.05] px-4 text-sm font-medium text-white/82">
+            Start Reading
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
 }
 
 export default function DiscoverySearchPage({
@@ -421,7 +486,7 @@ export default function DiscoverySearchPage({
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
               Search Stories
             </p>
-            <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[0.92] tracking-[-0.038em] text-white sm:text-[3.9rem] sm:tracking-[-0.042em]">
+            <h1 className="mt-4 max-w-[15ch] font-display text-[2.75rem] font-semibold leading-[1] tracking-[-0.018em] text-white sm:text-[3.9rem] sm:tracking-[-0.02em]">
               {heroTitle}
             </h1>
             <p className="mt-3 max-w-[42rem] text-[0.98rem] leading-7 text-white/68">
@@ -585,28 +650,19 @@ export default function DiscoverySearchPage({
             <SectionHeading
               eyebrow="Recently Updated"
               title="Fresh updates right now"
-              description="New chapters across comics and novels."
+              description="Six fresh chapter and episode picks, ready to open now."
             />
             {catalogLoading ? null : discoveryModel.recent.length > 0 ? (
-              <ShelfScroller>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {discoveryModel.recent.slice(0, 6).map((series, index) => (
-                  <CoverCard
+                  <DiscoveryUpdateCard
                     key={series.id}
                     series={series}
-                    href={buildSeriesHref(series, searchPath, "", "search_recently_updated")}
-                    variant={normalizeType(series?.type) === "novel" ? "novel" : "comic"}
-                    badge="Updated"
-                    actionLabel="View Series"
-                    onClick={() =>
-                      trackEvent("story_click", {
-                        seriesId: series?.id,
-                        sourceSection: "search_recently_updated",
-                        position: index + 1,
-                      })
-                    }
+                    index={index}
+                    sectionName="search_recently_updated"
                   />
                 ))}
-              </ShelfScroller>
+              </div>
             ) : (
               <EmptyShelf
                 title="Nothing fresh yet"
@@ -722,7 +778,16 @@ export default function DiscoverySearchPage({
                 title="Still looking?"
                 description="Fresh updates if the first result misses."
               />
-              <UpdateList items={discoveryModel.recent.slice(0, 6)} sectionName="search_post_results_recent" />
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {discoveryModel.recent.slice(0, 6).map((series, index) => (
+                  <DiscoveryUpdateCard
+                    key={series.id}
+                    series={series}
+                    index={index}
+                    sectionName="search_post_results_recent"
+                  />
+                ))}
+              </div>
             </section>
           ) : null}
         </>
