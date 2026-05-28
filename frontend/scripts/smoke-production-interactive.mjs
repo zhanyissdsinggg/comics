@@ -116,18 +116,22 @@ async function assertInteractivePlay(page) {
 
   const bodyText = await page.locator("main").innerText();
   const html = await page.content();
-  const requiredCopy = [
-    "A Letter in the Locker",
-    "Choose carefully",
-    "Current Scene",
-    "Show the letter to Maya",
-    "Inspect the envelope alone",
-    "Skip lunch and follow the note now",
-    "Your route so far",
+  const requiredCopyGroups = [
+    ["A Letter in the Locker"],
+    ["Pick carefully", "Choose carefully"],
+    ["Now reading", "Current Scene"],
+    ["Show the letter to Maya"],
+    ["Inspect the envelope alone"],
+    ["Skip lunch and follow the note now"],
+    ["Your story so far", "Your route so far"],
   ];
-  for (const copy of requiredCopy) {
-    if (!bodyText.includes(copy) && !html.includes(copy)) {
-      throw new Error(`[play] missing expected copy "${copy}"`);
+  for (const variants of requiredCopyGroups) {
+    const matched = variants.some(
+      (copy) => bodyText.toLowerCase().includes(copy.toLowerCase())
+        || html.toLowerCase().includes(copy.toLowerCase()),
+    );
+    if (!matched) {
+      throw new Error(`[play] missing expected copy "${variants.join('" or "')}"`);
     }
   }
 

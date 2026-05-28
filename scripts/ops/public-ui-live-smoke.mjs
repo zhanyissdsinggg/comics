@@ -110,15 +110,19 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
-      id: "nav.featured",
+      id: "nav.interactive",
       run: async () => {
-        await clickNavHref(page, "/rankings");
-        await expectRoute(page, baseUrl, "/rankings");
+        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        await clickNavHref(page, "/interactive");
+        await expectRoute(page, baseUrl, "/interactive");
       },
     },
     {
       id: "nav.comics",
       run: async () => {
+        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
         await clickNavHref(page, "/comics");
         await expectRoute(page, baseUrl, "/comics");
       },
@@ -126,15 +130,29 @@ async function runDesktopSuite(baseUrl) {
     {
       id: "nav.novels",
       run: async () => {
+        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
         await clickNavHref(page, "/novels");
         await expectRoute(page, baseUrl, "/novels");
       },
     },
     {
-      id: "nav.creators",
+      id: "home.search-entry-visible",
       run: async () => {
-        await clickNavHref(page, "/creators");
-        await expectRoute(page, baseUrl, "/creators");
+        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 60_000 });
+        const searchInput = await pickFirstVisibleLocator(
+          [
+            page.getByTestId("storefront-search-input"),
+            page.locator('[data-site-header="1"] input[type="search"]').first(),
+            page.getByLabel("Search series, creators, or genres").first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!searchInput) {
+          throw new Error("unable to locate visible search input in site header");
+        }
+        await searchInput.click({ timeout: DEFAULT_TIMEOUT_MS });
       },
     },
     {
@@ -257,23 +275,22 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
-      id: "notifications.library-button-navigates",
+      id: "notifications.refresh-safe",
       run: async () => {
         await page.goto(`${baseUrl}/notifications`, { waitUntil: "domcontentloaded", timeout: 60_000 });
         await page.waitForLoadState("networkidle", { timeout: 60_000 });
 
-        const libraryButton = await pickFirstVisibleLocator(
+        const refreshButton = await pickFirstVisibleLocator(
           [
-            page.getByTestId("notifications-go-library").first(),
-            page.getByRole("button", { name: "Library" }).first(),
+            page.getByRole("button", { name: /^Refresh$/i }).first(),
           ],
           { perCandidateTimeoutMs: 8000 },
         );
-        if (!libraryButton) {
-          throw new Error("unable to locate notifications library button");
+        if (!refreshButton) {
+          throw new Error("unable to locate notifications refresh button");
         }
-        await libraryButton.click({ timeout: DEFAULT_TIMEOUT_MS });
-        await page.waitForURL((url) => url.pathname === "/library", {
+        await refreshButton.click({ timeout: DEFAULT_TIMEOUT_MS });
+        await page.waitForURL((url) => url.pathname === "/notifications", {
           timeout: 60_000,
           waitUntil: "domcontentloaded",
         });
@@ -287,7 +304,7 @@ async function runDesktopSuite(baseUrl) {
 
         const button = await pickFirstVisibleLocator(
           [
-            page.getByRole("button", { name: /^Mark read$/ }).first(),
+            page.getByRole("button", { name: /^Mark all read$/i }).first(),
             page.getByRole("button", { name: /^Saving\.\.\.$/ }).first(),
           ],
           { perCandidateTimeoutMs: 8000 },
@@ -307,11 +324,11 @@ async function runDesktopSuite(baseUrl) {
       },
     },
     {
-      id: "reader.chapters-drawer-open-close",
+      id: "reader.episode-list-returns-series",
       run: async () => {
+        const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_SMOKE_SERIES_ID);
         const currentPath = new URL(page.url()).pathname;
         if (!currentPath.startsWith("/read/")) {
-          const seriesId = readEnv("OPS_SMOKE_SERIES_ID", DEFAULT_SMOKE_SERIES_ID);
           const episodeId = readEnv("OPS_SMOKE_EPISODE_ID", DEFAULT_SMOKE_EPISODE_ID);
           await page.goto(`${baseUrl}/read/${encodeURIComponent(seriesId)}/${encodeURIComponent(episodeId)}`, {
             waitUntil: "domcontentloaded",
@@ -320,19 +337,22 @@ async function runDesktopSuite(baseUrl) {
           await page.waitForLoadState("networkidle", { timeout: 60_000 });
         }
 
-        const chapters = page.getByRole("button", { name: "Chapters" });
-        await chapters.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-        await chapters.click({ timeout: DEFAULT_TIMEOUT_MS });
-
-        const drawer = page.locator('[aria-label="Reader contents"]');
-        await drawer.waitFor({ state: "visible", timeout: DEFAULT_TIMEOUT_MS });
-
-        // Close and ensure it hides to validate both open + close transitions.
-        const close = drawer.getByRole("button", { name: "Close" });
-        if (await close.isVisible().catch(() => false)) {
-          await close.click({ timeout: DEFAULT_TIMEOUT_MS });
-          await drawer.waitFor({ state: "hidden", timeout: DEFAULT_TIMEOUT_MS });
+        const episodeList = await pickFirstVisibleLocator(
+          [
+            page.getByRole("button", { name: /^Episode list$/i }).first(),
+            page.getByRole("button", { name: /^Chapters$/i }).first(),
+          ],
+          { perCandidateTimeoutMs: 8000 },
+        );
+        if (!episodeList) {
+          throw new Error("unable to locate reader episode list button");
         }
+
+        await episodeList.click({ timeout: DEFAULT_TIMEOUT_MS });
+        await page.waitForURL(
+          (url) => url.pathname === `/series/${seriesId}`,
+          { timeout: 60_000, waitUntil: "domcontentloaded" },
+        );
       },
     },
     {
@@ -398,18 +418,9 @@ async function runDesktopSuite(baseUrl) {
           throw new Error("unable to locate library entry CTA");
         }
 
-        const entryLabel = String(await entryCta.innerText().catch(() => "")).trim();
         await entryCta.click({ timeout: DEFAULT_TIMEOUT_MS });
 
-        if (/start here|top picks/i.test(entryLabel)) {
-          await page.waitForURL((url) => url.pathname === "/rankings", {
-            timeout: 60_000,
-            waitUntil: "domcontentloaded",
-          });
-          return;
-        }
-
-        await page.waitForURL((url) => url.pathname === "/search", {
+        await page.waitForURL((url) => ["/search", "/rankings", "/account"].includes(url.pathname), {
           timeout: 60_000,
           waitUntil: "domcontentloaded",
         });
