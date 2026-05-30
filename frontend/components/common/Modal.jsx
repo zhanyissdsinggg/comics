@@ -104,7 +104,9 @@ export const Modal = memo(function Modal({
   return (
     <div
       className={`fixed inset-0 z-[9999] flex items-end justify-center p-0 transition-all duration-300 sm:items-center sm:p-4 ${
-        isAnimating ? "bg-black/72 backdrop-blur-md" : "bg-black/0"
+        isAnimating
+          ? "bg-[rgba(6,7,16,0.76)] backdrop-blur-xl"
+          : "bg-black/0"
       }`}
       onClick={handleOverlayClick}
       style={{ WebkitTapHighlightColor: "transparent" }}
@@ -115,7 +117,7 @@ export const Modal = memo(function Modal({
       <div
         ref={modalRef}
         onClick={handleContentClick}
-        className={`relative w-full ${sizeClasses[size]} overflow-hidden rounded-[26px] border-2 border-black bg-[#0b0b0b] text-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 sm:rounded-3xl ${
+        className={`relative w-full ${sizeClasses[size]} overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(180deg,rgba(18,17,31,0.98)_0%,rgba(10,10,19,0.96)_100%)] text-white shadow-[0_28px_72px_rgba(5,5,15,0.42)] backdrop-blur-2xl transition-all duration-300 sm:rounded-[32px] ${
           isAnimating
             ? "translate-y-0 scale-100 opacity-100"
             : "translate-y-full opacity-0 sm:translate-y-0 sm:scale-95"
@@ -125,16 +127,18 @@ export const Modal = memo(function Modal({
           borderTopRightRadius: "1.5rem",
         }}
       >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,99,168,0.15),transparent_30%),radial-gradient(circle_at_top_right,rgba(92,228,255,0.12),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_32%)]" />
+        <div className="pointer-events-none absolute inset-[1px] rounded-[27px] border border-white/6 sm:rounded-[31px]" />
         <div className="flex justify-center pb-2 pt-3 sm:hidden">
           <div className="h-1.5 w-12 rounded-full bg-white/15" />
         </div>
 
         {(title || showCloseButton) && (
-          <div className="relative flex items-center justify-between border-b-2 border-black px-6 py-4">
+          <div className="relative flex items-center justify-between border-b border-white/10 px-6 py-4">
             {title ? (
               <h2
                 id="modal-title"
-                className="font-display text-xl font-black uppercase tracking-[-0.05em] text-white"
+                className="font-display text-xl font-semibold tracking-[-0.05em] text-white sm:text-[1.6rem]"
               >
                 {title}
               </h2>
@@ -143,7 +147,7 @@ export const Modal = memo(function Modal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-black bg-[#FFE500] p-2 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95"
+                className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-[rgba(255,255,255,0.06)] p-2 text-white shadow-[0_14px_32px_rgba(8,6,20,0.26)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.11)] active:scale-95"
                 aria-label="Close dialog"
               >
                 <X size={20} />
@@ -157,7 +161,7 @@ export const Modal = memo(function Modal({
         </div>
 
         {footer ? (
-          <div className="relative border-t-2 border-black px-6 py-4">
+          <div className="relative border-t border-white/10 px-6 py-4">
             {footer}
           </div>
         ) : null}
@@ -179,9 +183,9 @@ export const ConfirmModal = memo(function ConfirmModal({
   const variantClasses = {
     default: storefrontPrimaryButtonClass,
     danger:
-      "inline-flex items-center justify-center rounded-full border-2 border-black bg-[#FF007A] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95",
+      "inline-flex items-center justify-center rounded-full border border-[rgba(255,120,164,0.28)] bg-[linear-gradient(135deg,#ff487f_0%,#ff6f98_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_34px_rgba(255,72,127,0.28)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_40px_rgba(255,72,127,0.32)] active:scale-95",
     warning:
-      "inline-flex items-center justify-center rounded-full border-2 border-black bg-[#FFE500] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 active:scale-95",
+      "inline-flex items-center justify-center rounded-full border border-[rgba(255,217,120,0.24)] bg-[linear-gradient(135deg,#f7bf59_0%,#ffd77d_100%)] px-6 py-3 text-sm font-semibold text-[#22160a] shadow-[0_18px_34px_rgba(247,191,89,0.24)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_24px_40px_rgba(247,191,89,0.3)] active:scale-95",
   };
 
   const handleConfirm = () => {

@@ -44,7 +44,7 @@ import { buildReaderPath } from "../../lib/readerRoutes";
 import { siteConfig } from "../../lib/siteConfig";
 
 const seriesPageShellClass =
-  "min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(43,28,56,0.48)_0%,rgba(19,16,27,0.96)_34%,#0f0d13_100%)] text-white";
+  "min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_34%,#13131d_100%)] text-white";
 
 function EpisodeListSkeleton() {
   return (
@@ -1001,6 +1001,7 @@ export default function SeriesPage({
 
   return (
     <main className={seriesPageShellClass}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(circle_at_14%_12%,rgba(255,79,154,0.12),transparent_22%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.1),transparent_18%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         {commerceNotice ? (
           <div className="pt-6">

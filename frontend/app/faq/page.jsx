@@ -64,7 +64,8 @@ export default function FAQPage() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <StructuredDataScript id="faq-jsonld" data={structuredData} />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -102,6 +103,7 @@ export default function FAQPage() {
           <StorefrontDesk
             eyebrow="More"
             title="More."
+            description="Need direct help, billing details, or 18+ access guidance? Jump to the right page."
             actions={
               <>
                 <Link href="/support" className={storefrontPrimaryButtonClass}>
@@ -140,7 +142,17 @@ export default function FAQPage() {
                 appearance="dark"
                 accent="cyan"
               >
-                <StorefrontSectionHeading eyebrow="More" title={item.title} />
+                <StorefrontSectionHeading
+                  eyebrow="More"
+                  title={item.title}
+                  description={
+                    item.title === "Support"
+                      ? "Send one message and get a reply by email."
+                      : item.title === "Access"
+                        ? "Points, plans, and reading basics."
+                        : "How mature content access and mode switching work."
+                  }
+                />
                 <Link
                   href={item.href}
                   className={`mt-6 inline-flex ${storefrontSecondaryButtonClass}`}

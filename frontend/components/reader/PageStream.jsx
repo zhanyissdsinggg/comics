@@ -462,7 +462,7 @@ export default function PageStream({
                     <button
                       type="button"
                       onClick={() => handleRetry(index)}
-                      className="rounded-full border-2 border-black bg-[#FFE500] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                      className="rounded-full border border-cyan-300/24 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] px-4 py-2 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
                     >
                       Tap to retry
                     </button>

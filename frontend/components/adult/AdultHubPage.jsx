@@ -265,7 +265,8 @@ export default function AdultHubPage() {
   );
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#09070c_0%,#120b13_42%,#0b0910_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.16),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(244,201,93,0.1),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <SurfacePanel
@@ -277,10 +278,10 @@ export default function AdultHubPage() {
             <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[rgba(244,201,93,0.72)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[rgba(244,201,93,0.72)]">
                     Private vault
                   </p>
-                  <h1 className="max-w-[12ch] font-display text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.9rem]">
+                  <h1 className="max-w-[12ch] font-display text-[2.2rem] font-semibold leading-[0.92] tracking-[-0.065em] text-white sm:text-[2.95rem]">
                     Mature Mode On
                   </h1>
                 </div>
@@ -289,7 +290,7 @@ export default function AdultHubPage() {
                 </div>
               </div>
 
-              <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
+              <p className="mt-4 max-w-[40rem] text-sm leading-[1.72] text-white/72 sm:text-[15px]">
                 Normal mode shows standard content only. Adult mode switches
                 home, search, rankings, library, and reader surfaces to 18+
                 content only. The two modes never mix.
@@ -318,25 +319,25 @@ export default function AdultHubPage() {
 
           <SurfacePanel appearance="dark" tone="muted" accent="cyan">
             <div className="space-y-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/56">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/56">
                 Access status
               </p>
               <div className="space-y-3">
-                <div className="rounded-[22px] border border-[rgba(244,201,93,0.12)] bg-[rgba(255,255,255,0.02)] p-4">
+                <div className="rounded-[24px] border border-[rgba(244,201,93,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.025)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
                   <div className="flex items-center gap-2 text-sm font-medium text-white">
                     <ShieldCheck className="size-4 text-[rgba(244,201,93,0.92)]" />
                     18+ verified
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-white/64">
+                  <p className="mt-2 text-sm leading-[1.68] text-white/64">
                     Access is active for this device while Mature Mode stays on.
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.02)] p-4">
+                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.025)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
                   <div className="flex items-center gap-2 text-sm font-medium text-white">
                     <ToggleLeft className="size-4 text-[#ffd8e6]" />
                     Hidden from public surfaces
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-white/64">
+                  <p className="mt-2 text-sm leading-[1.68] text-white/64">
                     Adult titles never mix with the normal home feed, normal
                     search results, normal rankings, normal library, or the
                     normal reader flow.
@@ -348,7 +349,7 @@ export default function AdultHubPage() {
         </section>
 
         {showStale ? (
-          <div className="rounded-[22px] border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/72 shadow-[0_12px_26px_rgba(8,6,20,0.2)]">
+          <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3 text-sm leading-[1.68] text-white/72 shadow-[0_14px_30px_rgba(8,6,20,0.2)] backdrop-blur-xl">
             Showing saved results while fresh data loads.
           </div>
         ) : null}

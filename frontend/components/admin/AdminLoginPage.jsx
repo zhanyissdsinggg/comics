@@ -32,7 +32,10 @@ export default function AdminLoginPage() {
         router.push("/admin");
       }
     } else {
-      setError(result.error || "登录失败，请检查后台邮箱或密码。");
+      setError(
+        result.error ||
+          "Sign-in failed. Check the admin email, password, or verification code.",
+      );
     }
 
     setIsLoading(false);
@@ -40,21 +43,23 @@ export default function AdminLoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--gush-page-bg)] px-4 py-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_16%_0%,rgba(15,23,42,0.06),transparent_24%),radial-gradient(circle_at_84%_4%,rgba(15,23,42,0.045),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.52),transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-[radial-gradient(circle_at_16%_0%,rgba(255,79,154,0.12),transparent_24%),radial-gradient(circle_at_84%_4%,rgba(103,232,249,0.1),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.52),transparent_100%)]" />
 
-      <div className="relative w-full max-w-md rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(247,247,249,0.94))] p-8 shadow-[0_28px_64px_rgba(15,23,42,0.07)] ring-1 ring-black/[0.03]">
+      <div className="relative w-full max-w-md rounded-[32px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(255,243,249,0.94))] p-8 shadow-[0_28px_64px_rgba(49,25,77,0.09)] ring-1 ring-white/80 backdrop-blur-xl">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,#ffffff,#f5f5f7)] text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,#ffffff,#fff1f8)] text-slate-950 shadow-[0_14px_34px_rgba(255,79,154,0.12)]">
             <ShieldCheck className="size-8" />
           </div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            后台
+            Admin
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            登录内容管理后台
+            Sign in to Gush Control
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            使用后台邮箱和密码进入运营面板。成员身份、角色和两步验证设置会从后台成员目录里读取。
+            Use the admin email and password assigned to your operator account.
+            Role access and two-step verification are resolved from the admin
+            member directory.
           </p>
         </div>
 
@@ -71,7 +76,9 @@ export default function AdminLoginPage() {
           />
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">后台邮箱</span>
+            <span className="text-sm font-medium text-slate-700">
+              Admin email
+            </span>
             <input
               id="adminEmail"
               name="email"
@@ -80,14 +87,16 @@ export default function AdminLoginPage() {
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="username"
               className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-950 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
-              placeholder="输入邮箱地址（例如 admin@example.com）"
+              placeholder="Enter an email address, for example admin@example.com"
               required
               disabled={isLoading}
             />
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">后台密码</span>
+            <span className="text-sm font-medium text-slate-700">
+              Admin password
+            </span>
             <input
               id="adminPassword"
               name="password"
@@ -96,7 +105,7 @@ export default function AdminLoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
               className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-950 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
-              placeholder="输入密码"
+              placeholder="Enter the current password"
               required
               disabled={isLoading}
             />
@@ -104,7 +113,7 @@ export default function AdminLoginPage() {
 
           <label className="block space-y-2">
             <span className="text-sm font-medium text-slate-700">
-              6 位验证码
+              6-digit verification code
             </span>
             <input
               id="totpCode"
@@ -119,7 +128,7 @@ export default function AdminLoginPage() {
               }}
               autoComplete="one-time-code"
               className="h-12 w-full rounded-[20px] border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)]/76 px-4 text-sm text-slate-950 outline-none transition-[background-color,border-color,box-shadow] duration-200 focus:border-[color:var(--gush-border-strong)] focus:bg-white focus:ring-[3px] focus:ring-slate-200/70"
-              placeholder="如已启用两步验证，请输入最新的 6 位验证码"
+              placeholder="If two-step verification is enabled, enter the latest 6-digit code"
               disabled={isLoading}
             />
           </label>
@@ -131,13 +140,14 @@ export default function AdminLoginPage() {
           ) : null}
 
           <Button type="submit" className="h-12 w-full" disabled={isLoading}>
-            {isLoading ? "登录中..." : "登录"}
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
 
         <div className="mt-6 rounded-[22px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,245,247,0.92))] px-4 py-4 text-sm leading-6 text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
-          后台会话会通过安全 Cookie
-          保存。如当前成员启用了两步验证，请继续输入最新的 6 位验证码。
+          Admin sessions are stored in secure cookies. If your operator account
+          uses two-step verification, keep the latest 6-digit code ready before
+          continuing.
         </div>
       </div>
     </div>

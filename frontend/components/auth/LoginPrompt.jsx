@@ -2,10 +2,14 @@
 
 import { memo, useEffect, useState } from "react";
 import { X, Sparkles, Gift, BookOpen } from "lucide-react";
+import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontBadgeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
+
 const LoginPrompt = memo(function LoginPrompt({
   isOpen = false,
   onClose,
@@ -75,23 +79,26 @@ const LoginPrompt = memo(function LoginPrompt({
       onClick={handleClose}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      <div
+      <SurfacePanel
+        appearance="dark"
+        accent="cyan"
+        tone="highlight"
         onClick={handleContentClick}
-        className={`relative w-full overflow-hidden rounded-[30px] border-2 border-white/20 bg-black/95 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 sm:max-w-md ${
+        className={`relative w-full px-0 py-0 text-white transition-all duration-300 sm:max-w-md ${
           isAnimating
             ? "translate-y-0 opacity-100 scale-100"
             : "translate-y-full sm:translate-y-0 opacity-0 sm:scale-95"
         }`}
       >
-        <div className="border-b-2 border-white/10 bg-black/80 px-6 py-5">
+        <div className="border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] px-6 py-5">
           <div className="flex justify-center pb-2 sm:hidden">
-            <div className="h-1.5 w-12 rounded-full bg-white/15" />
+            <div className="h-1.5 w-12 rounded-full bg-white/14" />
           </div>
 
           <button
             type="button"
             onClick={handleClose}
-            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black/70 p-2 text-white/80 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:text-white active:translate-y-px"
+            className="absolute right-4 top-4 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-white/6 p-2 text-white/74 shadow-[0_14px_28px_rgba(8,6,20,0.24)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
             aria-label="Close sign-in prompt"
           >
             <X size={20} />
@@ -99,11 +106,11 @@ const LoginPrompt = memo(function LoginPrompt({
 
           <div className="relative text-center">
             {eyebrow ? (
-              <p className="mb-3 inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <p className={`mb-3 ${storefrontBadgeClass}`}>
                 {eyebrow}
               </p>
             ) : null}
-            <h2 className="text-3xl font-black uppercase leading-none tracking-[-0.06em] text-white sm:text-4xl">
+            <h2 className="font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[2.35rem]">
               {title}
             </h2>
           </div>
@@ -112,7 +119,7 @@ const LoginPrompt = memo(function LoginPrompt({
         <div className="relative p-6 sm:p-8">
           <div className="mb-6 text-center">
             {message ? (
-              <p className="text-sm font-semibold leading-7 text-white/80">
+              <p className="text-sm leading-7 text-white/72">
                 {message}
               </p>
             ) : null}
@@ -124,13 +131,13 @@ const LoginPrompt = memo(function LoginPrompt({
                 const Icon = feature.icon;
                 return (
                   <div
-                    key={index}
-                    className="flex items-center gap-3 rounded-[22px] border-2 border-white/15 bg-[#0a0a0a] p-3.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                    key={`${feature.text}-${index}`}
+                    className={`flex items-center gap-3 ${storefrontSoftCardClass} border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.025)_100%)] p-3.5`}
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[18px] border border-white/12 bg-[linear-gradient(135deg,rgba(255,122,177,0.92)_0%,rgba(125,244,255,0.9)_100%)] text-[#170c1d] shadow-[0_14px_28px_rgba(255,79,154,0.2)]">
                       <Icon size={20} />
                     </div>
-                    <p className="text-sm font-semibold text-white/80">
+                    <p className="text-sm font-medium text-white/80">
                       {feature.text}
                     </p>
                   </div>
@@ -155,8 +162,12 @@ const LoginPrompt = memo(function LoginPrompt({
               {secondaryLabel}
             </button>
           </div>
+
+          <p className="mt-5 text-center text-xs leading-6 text-white/42">
+            Keep your progress, picks, and unlocked episodes in one place.
+          </p>
         </div>
-      </div>
+      </SurfacePanel>
     </div>
   );
 });

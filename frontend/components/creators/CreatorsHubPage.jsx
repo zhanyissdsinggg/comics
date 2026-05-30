@@ -136,7 +136,7 @@ function CreatorCard({ creator }) {
   return (
     <Link
       href={creator.path || "/creators"}
-      className="group block rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,21,35,0.98)_0%,rgba(15,13,22,0.98)_100%)] p-4 text-white shadow-[0_20px_48px_rgba(8,6,20,0.24)] transition-all duration-200 hover:-translate-y-1 hover:border-white/16 hover:shadow-[0_28px_64px_rgba(8,6,20,0.3)]"
+      className="group block rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(25,21,35,0.98)_0%,rgba(15,13,22,0.98)_100%)] p-4 text-white shadow-[0_20px_48px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1.5 hover:border-white/16 hover:shadow-[0_28px_64px_rgba(8,6,20,0.3)]"
       aria-label={`View ${creator.name}`}
     >
       <div className="grid gap-4 sm:grid-cols-[120px_minmax(0,1fr)]">
@@ -155,10 +155,10 @@ function CreatorCard({ creator }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
                 {formatCreditTypeLabel(role)}
               </p>
-              <h2 className="mt-2 line-clamp-2 font-display text-xl font-semibold tracking-[-0.04em] text-white">
+              <h2 className="mt-2 line-clamp-2 font-display text-[1.45rem] font-semibold leading-[0.98] tracking-[-0.05em] text-white">
                 {creator.name}
               </h2>
             </div>
@@ -180,7 +180,7 @@ function CreatorCard({ creator }) {
             </div>
           ) : null}
 
-          <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/68">
+          <p className="mt-4 line-clamp-2 text-sm leading-[1.68] text-white/68">
             {creatorHook}
           </p>
 
@@ -325,7 +325,8 @@ function buildCreatorsFilterHref({ role, genre }) {
 
 function CreatorsHubSkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -484,23 +485,23 @@ export default function CreatorsHubPage({
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                 Creator Directory
               </p>
-              <h1 className="font-display text-[2.45rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[3rem]">
+              <h1 className="font-display text-[2.45rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3rem]">
                 Creators
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
+              <p className="max-w-2xl text-sm leading-[1.72] text-white/70 sm:text-base">
                 Artists, writers, studios, and teams with shelves worth
                 following.
               </p>
             </div>
 
             <div className="max-w-md rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_16px_36px_rgba(8,6,20,0.2)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/46">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
                 Why browse here
               </p>
-              <p className="mt-2 text-sm leading-6 text-white/72">
+              <p className="mt-2 text-sm leading-[1.68] text-white/72">
                 Find the shelves behind your favorite stories, then follow the
                 creators whose pacing, drama, or art style keeps hitting.
               </p>
@@ -517,10 +518,10 @@ export default function CreatorsHubPage({
           >
             <div className="flex items-end justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                   Spotlight
                 </p>
-                <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
+                <h2 className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
                   Editors' picks
                 </h2>
               </div>
@@ -664,13 +665,13 @@ export default function CreatorsHubPage({
               <div>
                 <p
                   data-testid="creator-results-label"
-                  className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56"
+                  className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56"
                 >
                   {creatorResultsLabel}
                 </p>
                 <h2
                   data-testid="creator-results-heading"
-                  className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white"
+                  className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white"
                 >
                   {creatorResultsTitle}
                 </h2>
@@ -678,7 +679,7 @@ export default function CreatorsHubPage({
                   {creatorResultsCountLabel}
                 </p>
               </div>
-              <p className="text-sm leading-6 text-white/56">
+              <p className="text-sm leading-[1.68] text-white/56">
                 Follow the voice that feels closest to your mood.
               </p>
             </div>

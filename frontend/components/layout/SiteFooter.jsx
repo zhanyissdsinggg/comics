@@ -233,37 +233,37 @@ export default function SiteFooter({
     return (
       <footer
         data-site-footer="1"
-        className={`${isHome ? "mt-0" : "mt-16"} border-t-[4px] border-[#ffe500] bg-black text-white`}
+        className={`${isHome ? "mt-0" : "mt-16"} border-t border-white/10 bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_100%)] text-white`}
       >
         <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-md space-y-2">
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className="text-[1.95rem] font-black uppercase tracking-[0.04em] text-white"
+                className="font-display text-[1.9rem] font-semibold tracking-[-0.05em] text-white"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
             </div>
 
-            <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm font-semibold uppercase tracking-[0.08em]">
+            <nav className="flex max-w-3xl flex-wrap gap-x-4 gap-y-2 text-sm font-medium">
               {footerPrimaryLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "text-white/60 transition-colors hover:text-[#ff007a]",
+                  "text-white/60 transition-colors hover:text-white",
                 ),
               )}
             </nav>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t-[2px] border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-end">
+          <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-3 text-sm text-white/50 lg:flex-row lg:items-center lg:justify-end">
             <div className="flex flex-col gap-3">
               {footerMetaLinks.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                   {footerMetaLinks.map((link) =>
                     renderInternalLink(
                       link,
-                      "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
+                      "font-medium text-white/60 transition-colors hover:text-white",
                     ),
                   )}
                 </div>
@@ -284,18 +284,18 @@ export default function SiteFooter({
   return (
     <footer
       data-site-footer="1"
-      className="mt-16 border-t-[4px] border-[#ffe500] bg-black text-white"
+      className="mt-16 border-t border-white/10 bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_100%)] text-white"
     >
       <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           <div className="max-w-xl space-y-4">
             <div className="space-y-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/46">
                 Read
               </p>
               <FooterHomeLink
                 {...footerHomeLinkProps}
-                className="text-[2.45rem] font-black uppercase tracking-[0.04em] text-white"
+                className="font-display text-[2.45rem] font-semibold tracking-[-0.06em] text-white"
               >
                 {siteConfig.siteName}
               </FooterHomeLink>
@@ -304,7 +304,7 @@ export default function SiteFooter({
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
               <a
                 href={`mailto:${siteConfig.supportEmail}`}
-                className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
+                className="font-medium text-white/60 transition-colors hover:text-white"
               >
                 {siteConfig.supportEmail}
               </a>
@@ -313,14 +313,14 @@ export default function SiteFooter({
                   <a
                     key={item.label}
                     href={item.href}
-                    className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
+                    className="font-medium text-white/60 transition-colors hover:text-white"
                   >
                     {item.label}
                   </a>
                 ) : (
                   renderInternalLink(
                     item,
-                    "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
+                    "font-medium text-white/60 transition-colors hover:text-white",
                   )
                 ),
               )}
@@ -330,7 +330,7 @@ export default function SiteFooter({
           <div className="grid gap-6 sm:grid-cols-3">
             {footerSections.map((section) => (
               <div key={section.title} className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.32em] text-[#ffe500]">
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/46">
                   {section.title}
                 </h4>
                 <ul className="space-y-2.5">
@@ -338,7 +338,7 @@ export default function SiteFooter({
                     <li key={link.href}>
                       {renderInternalLink(
                         link,
-                        "text-sm font-medium text-white/70 transition-colors hover:text-[#ff007a]",
+                        "text-sm font-medium text-white/70 transition-colors hover:text-white",
                       )}
                     </li>
                   ))}
@@ -348,13 +348,13 @@ export default function SiteFooter({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t-[2px] border-white/10 pt-4 text-sm text-white/60 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-4 text-sm text-white/60 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {footerMetaLinks.map((link) =>
                 renderInternalLink(
                   link,
-                  "font-medium text-white/60 transition-colors hover:text-[#ff007a]",
+                  "font-medium text-white/60 transition-colors hover:text-white",
                 ),
               )}
             </div>
@@ -365,7 +365,7 @@ export default function SiteFooter({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-white/60 transition-colors hover:text-[#ff007a]"
+                  className="font-medium text-white/60 transition-colors hover:text-white"
                 >
                   {item.label}
                 </a>

@@ -122,18 +122,20 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
   };
 
   return (
-    <section className="rounded-[28px] border-2 border-white/20 bg-black/90 p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
-      <div className="space-y-5">
+    <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,17,31,0.94)_0%,rgba(12,12,22,0.92)_100%)] p-5 text-white shadow-[0_22px_52px_rgba(8,6,20,0.3)] backdrop-blur-2xl sm:p-6">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,92,163,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(92,228,255,0.08),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.07),transparent_32%)]" />
+      <div className="pointer-events-none absolute inset-[1px] rounded-[27px] border border-white/6" />
+      <div className="relative space-y-5">
         {history.length > 0 ? (
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/62">
                 Recent searches
               </p>
               <button
                 type="button"
                 onClick={clearHistory}
-                className="rounded-full border-2 border-white/20 bg-black px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-white/75 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#FFE500] hover:bg-[#111111]"
+                className="rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-3 py-1.5 text-[11px] font-semibold tracking-[0.04em] text-white/75 shadow-[0_14px_30px_rgba(8,6,20,0.22)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-[#ffd77a]/24 hover:bg-[rgba(255,255,255,0.08)]"
               >
                 Clear
               </button>
@@ -142,7 +144,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
               {history.map((keyword, index) => (
                 <div
                   key={`${keyword}-${index}`}
-                  className="inline-flex min-w-0 items-center gap-1 rounded-full border-2 border-white/20 bg-black px-2 py-1.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                  className="inline-flex min-w-0 items-center gap-1 rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-2 py-1.5 shadow-[0_12px_28px_rgba(8,6,20,0.2)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-cyan-300/22"
                 >
                   <button
                     type="button"
@@ -154,7 +156,7 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                   <button
                     type="button"
                     onClick={() => removeFromHistory(keyword)}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 border-transparent text-white/60 transition-colors hover:border-white/20 hover:bg-[#111111] hover:text-white"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-transparent text-white/60 transition-colors hover:border-white/12 hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
                   >
                     <svg
                       className="h-4 w-4"
@@ -177,8 +179,8 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
         ) : null}
 
         {trendingKeywords.length > 0 ? (
-          <div className="space-y-2.5 border-t-2 border-white/10 pt-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+          <div className="space-y-2.5 border-t border-white/10 pt-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/62">
               Trending
             </p>
             <div className="flex flex-wrap gap-2">
@@ -187,13 +189,13 @@ const SearchHistoryPanel = memo(function SearchHistoryPanel({
                   key={keyword.id}
                   type="button"
                   onClick={() => handleSearch(keyword.value)}
-                  className="inline-flex max-w-full items-center gap-2 rounded-full border-2 border-white/20 bg-black px-3 py-2 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111]"
+                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,255,255,0.045)] px-3 py-2 text-left shadow-[0_14px_30px_rgba(8,6,20,0.22)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-cyan-300/24 hover:bg-[rgba(255,255,255,0.08)]"
                 >
                   <span
                     className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                       index < 3
-                        ? "border-2 border-black bg-[#FFE500] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                        : "border-2 border-white/20 bg-[#0a0a0a] text-white/75"
+                        ? "border border-[rgba(255,214,130,0.22)] bg-[rgba(247,195,91,0.22)] text-white"
+                        : "border border-white/12 bg-[rgba(255,255,255,0.05)] text-white/75"
                     }`}
                   >
                     {index + 1}

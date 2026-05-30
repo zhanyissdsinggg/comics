@@ -7,8 +7,13 @@ import { Check, Gift, Sparkles, Star, Zap } from "lucide-react";
 import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
+  storefrontInsetCardClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import { SUBSCRIPTION_OFFERS } from "../../lib/offers/catalog";
 import {
@@ -337,14 +342,13 @@ export default function SubscribePage({
 
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const secondaryButtonClass = `${storefrontSecondaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`;
-  const quietCardClass =
-    "rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+  const quietCardClass = `${storefrontInsetCardClass} text-white`;
   const compareShellClass =
-    "overflow-hidden rounded-[30px] border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+    "overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(18,18,30,0.88)] text-white shadow-[0_22px_54px_rgba(8,6,20,0.34)] backdrop-blur-[24px]";
 
   if (!siteConfig.monetization.membershipEnabled) {
     return (
-      <div className="min-h-screen overflow-hidden bg-black text-white">
+      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.14),transparent_26%),radial-gradient(circle_at_20%_20%,rgba(255,87,166,0.16),transparent_32%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
         <main className="mx-auto flex max-w-[960px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
           <SurfacePanel className="space-y-5" appearance="dark" accent="blue">
             <div className="space-y-3">
@@ -380,7 +384,7 @@ export default function SubscribePage({
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.14),transparent_26%),radial-gradient(circle_at_20%_20%,rgba(255,87,166,0.16),transparent_32%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
@@ -456,7 +460,7 @@ export default function SubscribePage({
           </div>
 
           {!subscriptionActionsEnabled ? (
-            <div className="rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <div className={storefrontNoticeClass}>
               <h3 className="text-xl font-black uppercase tracking-[-0.05em] text-white">
                 Plans unavailable
               </h3>
@@ -582,7 +586,7 @@ export default function SubscribePage({
           accent="blue"
         >
           {feedback ? (
-            <div className="rounded-[24px] border-2 border-[#FF007A] bg-black px-4 py-3 text-sm font-semibold text-[#FF007A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="rounded-[24px] border border-rose-300/20 bg-[linear-gradient(135deg,rgba(255,79,154,0.14)_0%,rgba(88,28,135,0.18)_100%)] px-4 py-3 text-sm font-medium text-rose-100 shadow-[0_18px_40px_rgba(255,79,154,0.16)] backdrop-blur-xl">
               {feedback}
             </div>
           ) : null}
@@ -623,12 +627,14 @@ export default function SubscribePage({
               return (
                 <div
                   key={plan.id}
-                  className={`relative rounded-[30px] border-2 border-white/15 p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 ${
-                    isBest ? "bg-[#101010]" : "bg-black"
-                  } ${isCurrent ? "ring-1 ring-[#00E5FF]/35" : ""}`}
+                  className={`relative rounded-[30px] border p-5 text-white shadow-[0_26px_58px_rgba(8,6,20,0.32)] backdrop-blur-[24px] transition-all duration-200 hover:-translate-y-1 hover:border-white/18 hover:shadow-[0_32px_70px_rgba(8,6,20,0.4)] ${
+                    isBest
+                      ? "border-[rgba(255,143,195,0.28)] bg-[linear-gradient(180deg,rgba(26,20,40,0.98)_0%,rgba(14,14,24,0.96)_100%)]"
+                      : "border-white/10 bg-[rgba(17,18,30,0.9)]"
+                  } ${isCurrent ? "ring-1 ring-cyan-300/35" : ""}`}
                 >
                   {isBest ? (
-                    <div className="absolute -top-3 left-5 rounded-full border-2 border-black bg-[#FF007A] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className={`absolute -top-3 left-5 ${storefrontHighlightBadgeClass}`}>
                       Best value
                     </div>
                   ) : null}
@@ -637,10 +643,10 @@ export default function SubscribePage({
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-3">
                         <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                          className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
                             isBest
-                              ? "border-2 border-black bg-[#00E5FF] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                              : "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                              ? "border-cyan-300/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.22)_0%,rgba(96,165,250,0.14)_100%)] text-cyan-100 shadow-[0_18px_34px_rgba(34,211,238,0.16)]"
+                              : "border-white/12 bg-[rgba(255,255,255,0.06)] text-amber-100 shadow-[0_16px_30px_rgba(8,6,20,0.2)]"
                           }`}
                         >
                           {getPlanIcon(plan.id)}
@@ -660,7 +666,7 @@ export default function SubscribePage({
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                        <span className={storefrontBadgeClass}>
                           Active
                         </span>
                       ) : null}
@@ -676,15 +682,15 @@ export default function SubscribePage({
                         </span>
                       </div>
                       {perks?.discountPct ? (
-                        <div className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-                          <Zap className="h-3.5 w-3.5 text-black/70" />
+                        <div className={storefrontHighlightBadgeClass}>
+                          <Zap className="h-3.5 w-3.5 text-white/70" />
                           Save {perks.discountPct}% on chapters
                         </div>
                       ) : null}
                     </div>
 
                     <div className="space-y-3 border-t border-white/10 pt-5 text-sm text-white/70">
-                      <div className="rounded-2xl border-2 border-white/15 bg-black px-4 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                      <div className={storefrontSoftCardClass}>
                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
                           Fit
                         </p>
@@ -693,8 +699,8 @@ export default function SubscribePage({
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white/15 bg-black">
-                          <Check className="h-3 w-3 text-[#00E5FF]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10">
+                          <Check className="h-3 w-3 text-cyan-200" />
                         </div>
                         <span>
                           <span className="font-black uppercase tracking-[0.04em] text-white">
@@ -704,8 +710,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white/15 bg-black">
-                          <Check className="h-3 w-3 text-[#00E5FF]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10">
+                          <Check className="h-3 w-3 text-cyan-200" />
                         </div>
                         <span>
                           <span className="font-black uppercase tracking-[0.04em] text-white">
@@ -717,8 +723,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white/15 bg-black">
-                          <Check className="h-3 w-3 text-[#00E5FF]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10">
+                          <Check className="h-3 w-3 text-cyan-200" />
                         </div>
                         <span>
                           <span className="font-black uppercase tracking-[0.04em] text-white">
@@ -728,8 +734,8 @@ export default function SubscribePage({
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-white/15 bg-black">
-                          <Check className="h-3 w-3 text-[#00E5FF]" />
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10">
+                          <Check className="h-3 w-3 text-cyan-200" />
                         </div>
                         <span>Great for frequent readers</span>
                       </div>
@@ -776,7 +782,7 @@ export default function SubscribePage({
               {planComparisonRows.map((plan) => (
                 <div
                   key={plan.id}
-                  className="rounded-[20px] border-2 border-white/15 bg-black px-4 py-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className={storefrontSoftCardClass}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-black uppercase tracking-[0.04em] text-white">

@@ -184,7 +184,7 @@ function LoginContent() {
                 {TRUST_POINTS.map((item) => (
                   <div
                     key={item.title}
-                    className="rounded-[24px] border border-white/10 bg-black/20 p-3 sm:p-4"
+                    className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3 shadow-[0_16px_34px_rgba(8,6,20,0.22)] backdrop-blur-xl sm:p-4"
                   >
                     <div className="flex items-start gap-3 sm:block">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-white sm:h-9 sm:w-9">
@@ -233,7 +233,7 @@ function LoginContent() {
                 <button
                   key={action.id}
                   type="button"
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-700 bg-black/35 px-4 py-3 font-bold text-white transition-colors hover:bg-white/10 md:py-3.5"
+                  className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/12 bg-[rgba(255,255,255,0.045)] px-4 py-3 font-bold text-white shadow-[0_14px_28px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-[rgba(255,255,255,0.08)] md:py-3.5"
                 >
                   {action.icon}
                   {action.label}
@@ -264,7 +264,7 @@ function LoginContent() {
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
                     className={cn(
-                      "w-full rounded-2xl border bg-black/50 py-3 pl-12 pr-4 text-white placeholder:text-gray-600 outline-none transition-all md:py-3.5",
+                      "w-full rounded-2xl border bg-[rgba(7,10,21,0.72)] py-3 pl-12 pr-4 text-white placeholder:text-gray-500 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_12px_28px_rgba(8,6,20,0.18)] transition-all md:py-3.5",
                       isAdultMode
                         ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                         : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
@@ -298,7 +298,7 @@ function LoginContent() {
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Enter your password"
                     className={cn(
-                      "w-full rounded-2xl border bg-black/50 py-3 pl-12 pr-12 text-white placeholder:text-gray-600 outline-none transition-all md:py-3.5",
+                      "w-full rounded-2xl border bg-[rgba(7,10,21,0.72)] py-3 pl-12 pr-12 text-white placeholder:text-gray-500 outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_12px_28px_rgba(8,6,20,0.18)] transition-all md:py-3.5",
                       isAdultMode
                         ? "border-gray-800 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                         : "border-gray-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400",
@@ -343,7 +343,7 @@ function LoginContent() {
               </button>
             </form>
 
-            <div className="mt-5 rounded-[24px] border border-white/10 bg-black/20 p-3.5 md:mt-6 md:p-4">
+            <div className="mt-5 rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3.5 shadow-[0_16px_34px_rgba(8,6,20,0.22)] backdrop-blur-xl md:mt-6 md:p-4">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 md:text-xs">
                 Reader flow
               </p>

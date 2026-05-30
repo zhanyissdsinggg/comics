@@ -184,10 +184,10 @@ export default function NovelsLandingPage({
             description="This shelf is still growing. Fresh late-night reads are on the way."
           />
           <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/74">
+            <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.18)]">
               Featured Novel, Latest Chapters, and Short Reads stay up front while the catalog fills out.
             </div>
-            <div className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/74">
+            <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.18)]">
               Check back soon for more chapter drops, longer binge runs, and a fuller novel shelf.
             </div>
           </div>
@@ -216,13 +216,13 @@ export default function NovelsLandingPage({
               description="Short hooks, long pull, and a few complete runs when you're not stopping yet."
             />
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {[
+              {[ 
                 "Sharp hooks that make one more chapter automatic.",
                 "Complete runs and quick reads when you want momentum tonight.",
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-[22px] border border-white/10 bg-black/15 p-4 text-sm leading-6 text-white/72"
+                  className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-sm leading-6 text-white/72 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
                 >
                   {item}
                 </div>

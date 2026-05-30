@@ -12,8 +12,12 @@ import {
 } from "lucide-react";
 import SurfacePanel from "../common/SurfacePanel";
 import {
+  storefrontBadgeClass,
+  storefrontHighlightBadgeClass,
+  storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import { apiGet } from "../../lib/apiClient";
 import {
@@ -132,7 +136,7 @@ function sortByUpdatedAt(items) {
 function CoverThumb({ title, coverUrl, coverTone }) {
   if (coverUrl) {
     return (
-      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border-2 border-black bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="relative h-[92px] w-[72px] overflow-hidden rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_14px_30px_rgba(8,6,20,0.2)]">
         <Image
           src={resolveDisplayImageUrl(coverUrl, { kind: "cover" })}
           alt={`Cover image for ${title}`}
@@ -147,7 +151,7 @@ function CoverThumb({ title, coverUrl, coverTone }) {
 
   return (
     <div
-      className="flex h-[92px] w-[72px] items-end rounded-[18px] border-2 border-black px-3 py-3 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+      className="flex h-[92px] w-[72px] items-end rounded-[18px] border border-white/10 px-3 py-3 text-white shadow-[0_14px_30px_rgba(8,6,20,0.2)]"
       style={{
         background:
           coverTone ||
@@ -173,7 +177,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
     .join(" / ");
 
   return (
-    <article className="rounded-[26px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5">
+    <article className="rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-white shadow-[0_18px_42px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16">
       <div className="flex items-start gap-4">
         <CoverThumb
           title={item.title}
@@ -189,7 +193,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                   {item.title}
                 </h3>
                 {item.badge ? (
-                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className={storefrontBadgeClass}>
                     {item.badge}
                   </span>
                 ) : null}
@@ -224,9 +228,9 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
                 <span>{item.progressLabel}</span>
                 <span>{item.progressPercentLabel}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full border-2 border-black bg-black/40">
+              <div className="h-2 overflow-hidden rounded-full bg-white/8">
                 <div
-                  className="h-full rounded-full bg-[#00E5FF]"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#56d7ff_0%,#7c5cff_100%)]"
                   style={{
                     width: `${Math.max(8, Math.round(item.progressPercent * 100))}%`,
                   }}
@@ -240,7 +244,7 @@ function LibraryRow({ item, mode, onOpenSeries, onResume }) {
               {item.genreLine.map((genre) => (
                 <span
                   key={`${item.seriesId}-${genre}`}
-                  className="rounded-full border-2 border-black bg-black px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white/80 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  className={storefrontBadgeClass}
                 >
                   {genre}
                 </span>
@@ -259,7 +263,7 @@ function PanelSkeleton() {
       {[0, 1, 2].map((index) => (
         <div
           key={`account-library-skeleton-${index}`}
-          className="h-[124px] animate-pulse rounded-[26px] border-2 border-black bg-[#111111]"
+          className="h-[124px] animate-pulse rounded-[26px] border border-white/10 bg-[rgba(255,255,255,0.045)]"
         />
       ))}
     </div>
@@ -617,7 +621,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
 
   return (
     <SurfacePanel
-      className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+      className="space-y-5"
       appearance="dark"
       accent="blue"
     >
@@ -643,7 +647,7 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
       </div>
 
       {!showSignedInShell ? (
-        <div className="rounded-[28px] border-2 border-white/15 bg-black p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className={`${storefrontInsetCardClass} p-5 text-white`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.06em] text-white">
@@ -680,14 +684,14 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.08em] transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                     isActive
-                      ? "border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                      : "border-2 border-white/20 bg-black text-white/75 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:border-white/30 hover:bg-[#111111] active:translate-y-px"
+                      ? "border border-[rgba(86,215,255,0.34)] bg-[linear-gradient(135deg,rgba(86,215,255,0.22)_0%,rgba(124,92,255,0.2)_100%)] text-white shadow-[0_16px_30px_rgba(86,215,255,0.16)]"
+                      : "border border-white/12 bg-[rgba(255,255,255,0.04)] text-white/75 shadow-[0_14px_26px_rgba(8,6,20,0.18)] hover:border-white/20 hover:bg-[rgba(255,255,255,0.07)] active:translate-y-px"
                   }`}
                 >
                   <Icon className="size-4" />
                   <span>{tab.label}</span>
                   <span
-                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-black bg-[#FFE500] text-black" : "border-white/20 bg-[#0a0a0a] text-white/70"}`}
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.08em] ${isActive ? "border-white/14 bg-white/90 text-[#120b1b]" : "border-white/18 bg-white/6 text-white/70"}`}
                   >
                     {signedInCount[tab.id]}
                   </span>
@@ -716,8 +720,8 @@ export default function MyLibraryPanel({ viewerSignedIn = false, onOpenAuth }) {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[28px] border-2 border-dashed border-white/15 bg-black px-5 py-8 text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-black bg-[#FFE500] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className="rounded-[28px] border border-dashed border-white/14 bg-[rgba(255,255,255,0.03)] px-5 py-8 text-center backdrop-blur-xl">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-[linear-gradient(135deg,rgba(255,79,154,0.18)_0%,rgba(124,58,237,0.18)_100%)] text-white shadow-[0_16px_30px_rgba(255,79,154,0.14)]">
                   <BookMarked className="size-5" />
                 </div>
                 <p className="mt-4 text-base font-black uppercase tracking-[0.04em] text-white">

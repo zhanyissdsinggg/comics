@@ -3,10 +3,15 @@
 import AdminShell from "./AdminShell";
 
 /**
- * 旧后台页仍然通过 AdminLayout 渲染，但共享的 AdminShell
- * 已经接管了后台壳子、间距和导航语言。
+ * Legacy admin routes still render through AdminLayout, but the shared
+ * AdminShell owns the chrome, spacing, and navigation language.
  */
-export function AdminLayout({ children, title = "仪表盘", subtitle, actions }) {
+export function AdminLayout({
+  children,
+  title = "Dashboard",
+  subtitle,
+  actions,
+}) {
   return (
     <AdminShell title={title} subtitle={subtitle} actions={actions}>
       {children}

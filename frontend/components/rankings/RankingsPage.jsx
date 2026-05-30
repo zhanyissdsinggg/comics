@@ -361,7 +361,8 @@ export default function RankingsPage({
     curatedSeries.length > 0 ? `${curatedSeries.length} titles` : "";
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0f0d13_0%,#130f18_44%,#17131d_100%)] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0a0c13_0%,#0f1118_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(circle_at_14%_12%,rgba(255,79,154,0.12),transparent_22%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.1),transparent_18%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-4 py-6 md:gap-8 md:px-8 md:py-10">
         <section>
           <EditorialHero
@@ -393,9 +394,7 @@ export default function RankingsPage({
                 key={view.id}
                 type="button"
                 onClick={() => router.push(`/rankings?view=${view.id}`)}
-                className={
-                  isActive ? primaryButtonClass : secondaryButtonClass
-                }
+                className={isActive ? primaryButtonClass : secondaryButtonClass}
               >
                 {view.label}
               </button>
@@ -559,7 +558,7 @@ export default function RankingsPage({
               ) : null}
 
               {boardEntries.length > 0 ? (
-                <section className="space-y-4 rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 text-white shadow-[0_20px_52px_rgba(8,6,20,0.22)] sm:space-y-5 sm:p-6">
+                <section className="space-y-4 rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.03))] p-3.5 text-white shadow-[0_20px_52px_rgba(8,6,20,0.22)] backdrop-blur-xl sm:space-y-5 sm:p-6">
                   <RankingsSectionHeader
                     eyebrow=""
                     title="More trending stories"

@@ -6,6 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import EmailLinkActionShell from "../../../components/auth/EmailLinkActionShell";
 import {
   StorefrontInfoCard,
+  storefrontBadgeClass,
+  storefrontInputClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../../../components/common/StorefrontPagePrimitives";
@@ -18,21 +21,21 @@ function StatusNotice({ tone = "neutral", title = "", message = "" }) {
 
   const toneMap = {
     neutral:
-      "rounded-[22px] border-2 border-black bg-[#00E5FF] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+      "border-cyan-300/22 bg-[linear-gradient(135deg,rgba(34,211,238,0.18)_0%,rgba(17,24,39,0.92)_100%)] text-white",
     success:
-      "rounded-[22px] border-2 border-black bg-[#00C767] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+      "border-emerald-300/24 bg-[linear-gradient(135deg,rgba(16,185,129,0.2)_0%,rgba(17,24,39,0.92)_100%)] text-white",
     error:
-      "rounded-[22px] border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+      "border-rose-300/24 bg-[linear-gradient(135deg,rgba(244,63,94,0.2)_0%,rgba(17,24,39,0.94)_100%)] text-white",
   };
 
   return (
-    <div className={`px-4 py-3 ${toneMap[tone] || toneMap.neutral}`}>
+    <div
+      className={`${storefrontNoticeClass} px-4 py-3.5 ${toneMap[tone] || toneMap.neutral}`}
+    >
       {title ? (
-        <p className="text-sm font-black uppercase tracking-[0.14em]">
-          {title}
-        </p>
+        <p className="text-sm font-semibold tracking-[-0.02em]">{title}</p>
       ) : null}
-      {message ? <p className="mt-1 text-sm leading-6">{message}</p> : null}
+      {message ? <p className="mt-1.5 text-sm leading-6 text-white/72">{message}</p> : null}
     </div>
   );
 }
@@ -45,8 +48,6 @@ function VerifyPageContent() {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState(null);
   const [autoTriggered, setAutoTriggered] = useState(false);
-  const inputClassName =
-    "w-full rounded-[20px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]";
 
   useEffect(() => {
     const queryToken = String(searchParams.get("token") || "").trim();
@@ -153,13 +154,13 @@ function VerifyPageContent() {
     >
       <div className="space-y-6">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
+          <p className={storefrontBadgeClass}>
             Account confirmation
           </p>
-          <h2 className="mt-3 font-display text-2xl font-black uppercase tracking-[-0.05em] text-white">
+          <h2 className="mt-4 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white sm:text-[2.15rem]">
             {hasToken ? "Verifying your email link" : "Send another email?"}
           </h2>
-          <p className="mt-3 text-sm leading-6 text-white/68">
+          <p className="mt-3 max-w-xl text-sm leading-7 text-white/68">
             {hasToken ? "Checking your account." : "Enter your email."}
           </p>
         </div>
@@ -167,9 +168,10 @@ function VerifyPageContent() {
         {hasToken ? (
           <div className="space-y-4">
             <StorefrontInfoCard
-              title="Link loaded"
-              description=""
-              className="border-[#00E5FF]/50 bg-[#00E5FF]/12"
+              eyebrow="Ready"
+              title="Verification link loaded"
+              description="No extra code needed. We only need to confirm this token."
+              className="border-cyan-300/16 bg-[linear-gradient(135deg,rgba(34,211,238,0.08)_0%,rgba(255,255,255,0.04)_100%)]"
             />
             <p className="text-sm font-semibold leading-6 text-white/68">
               No code field required.
@@ -178,7 +180,7 @@ function VerifyPageContent() {
               type="button"
               disabled={submitting}
               onClick={handleVerify}
-              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
+              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
               {submitting ? "Verifying..." : "Verify again"}
             </button>
@@ -189,7 +191,7 @@ function VerifyPageContent() {
                 setToken("");
                 setStatus(null);
               }}
-              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
+              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontSecondaryButtonClass}`}
             >
               Send a new email
             </button>
@@ -202,13 +204,13 @@ function VerifyPageContent() {
               onChange={(event) => setEmail(event.target.value)}
               placeholder="name@example.com"
               autoComplete="email"
-              className={inputClassName}
+              className={storefrontInputClass}
             />
             <button
               type="button"
               disabled={submitting}
               onClick={handleSendVerifyLink}
-              className={`w-full disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
+              className={`w-full min-h-[48px] disabled:cursor-not-allowed disabled:opacity-60 ${storefrontPrimaryButtonClass}`}
             >
               {submitting ? "Sending..." : "Send email"}
             </button>

@@ -12,6 +12,12 @@ import { getCookie, setCookie } from "../../lib/cookies";
 import { useRegionStore } from "../../store/useRegionStore";
 import { isGoogleAuthEnabled } from "../../lib/socialAuthConfig";
 import SocialAuthButton from "../auth/SocialAuthButton";
+import {
+  storefrontInputClass,
+  storefrontNoticeClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 export default function LoginGateModal({
   open,
@@ -37,17 +43,12 @@ export default function LoginGateModal({
   const { refresh } = useAuthStore();
   const { config } = useRegionStore();
   const googleAuthEnabled = isGoogleAuthEnabled();
-  const inputClass =
-    "w-full rounded-[20px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-medium text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] placeholder:text-white/35 transition-all duration-150 focus:border-[#FFE500] focus:outline-none";
+  const inputClass = storefrontInputClass.replace("mt-2 ", "");
   const secondaryPillClass =
-    "rounded-full border-2 border-white/20 bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
-  const secondaryButtonClass =
-    "rounded-full border-2 border-white/20 bg-black px-6 py-3 text-sm font-semibold tracking-[0.02em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#00E5FF] hover:text-black hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
+    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.045)] text-white shadow-[0_14px_28px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5 hover:border-cyan-300/28 hover:bg-[rgba(255,255,255,0.08)]";
   const activePillClass =
-    "rounded-full border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
-  const dividerClass = "h-px flex-1 bg-[#111111]";
-  const primaryButtonClass =
-    "rounded-full border-2 border-black bg-[#00E5FF] px-6 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none";
+    "rounded-full border border-[rgba(255,214,130,0.24)] bg-[linear-gradient(135deg,#f6c25f_0%,#ffd77a_100%)] text-[#241608] shadow-[0_16px_30px_rgba(246,194,95,0.24)]";
+  const dividerClass = "h-px flex-1 bg-white/10";
 
   useEffect(() => {
     if (open) {
@@ -175,7 +176,7 @@ export default function LoginGateModal({
     <ModalBase open={open} title={title} onClose={onClose}>
       <form onSubmit={handleSubmit}>
         {description ? (
-          <p className="rounded-[22px] border-2 border-[#00E5FF] bg-black px-4 py-3 text-sm font-medium leading-6 text-white/78 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className={storefrontNoticeClass}>
             {description}
           </p>
         ) : null}
@@ -230,7 +231,7 @@ export default function LoginGateModal({
                   <select
                     value={countryCode}
                     onChange={(event) => setCountryCode(event.target.value)}
-                    className="rounded-[20px] border-2 border-white/20 bg-black px-3 py-3 text-sm font-medium text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[border-color,box-shadow,background-color] duration-200 focus:border-[#FFE500] focus:bg-black focus:outline-none"
+                    className="min-h-[48px] rounded-[22px] border border-white/12 bg-[rgba(7,10,21,0.72)] px-3 py-3 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_12px_28px_rgba(8,6,20,0.18)] transition-[border-color,box-shadow,background-color] duration-200 focus:border-cyan-300/40 focus:bg-[rgba(11,15,28,0.92)] focus:outline-none focus:ring-4 focus:ring-cyan-400/10"
                   >
                     {(
                       config?.countryCodes || [
@@ -285,13 +286,13 @@ export default function LoginGateModal({
         </div>
 
         {errorMessage ? (
-          <p className="mt-4 rounded-[20px] border-2 border-[#FF007A] bg-black px-4 py-2 text-xs font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="mt-4 rounded-[22px] border border-rose-300/22 bg-[rgba(255,79,154,0.12)] px-4 py-2.5 text-xs font-semibold text-white shadow-[0_16px_32px_rgba(255,79,154,0.14)]">
             {errorMessage}
           </p>
         ) : null}
 
         {socialError ? (
-          <p className="mt-4 rounded-[20px] border-2 border-[#FF007A] bg-black px-4 py-2 text-xs font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <p className="mt-4 rounded-[22px] border border-rose-300/22 bg-[rgba(255,79,154,0.12)] px-4 py-2.5 text-xs font-semibold text-white shadow-[0_16px_32px_rgba(255,79,154,0.14)]">
             {socialError}
           </p>
         ) : null}
@@ -302,7 +303,7 @@ export default function LoginGateModal({
             <button
               type="button"
               onClick={handleResendOtp}
-              className="ml-2 font-semibold uppercase tracking-[0.08em] text-[#FFE500] transition-colors duration-200 hover:text-[#fff173]"
+              className="ml-2 font-semibold tracking-[0.02em] text-[#ffd879] transition-colors duration-200 hover:text-[#fff0bb]"
             >
               Resend
             </button>
@@ -336,19 +337,19 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={handleReset}
-            className="font-black uppercase tracking-[0.06em] text-white/55 transition-colors duration-300 hover:text-white"
+            className="font-semibold tracking-[0.01em] text-white/55 transition-colors duration-300 hover:text-white"
           >
             Forgot password?
           </button>
         </div>
 
         {resetStatus ? (
-          <div className="mt-3 rounded-[20px] border-2 border-[#00E5FF] bg-black px-4 py-2 text-xs font-semibold text-white/78 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="mt-3 rounded-[22px] border border-cyan-300/22 bg-[rgba(92,228,255,0.12)] px-4 py-2.5 text-xs font-semibold text-white/78 shadow-[0_16px_32px_rgba(92,228,255,0.14)]">
             {resetStatus}
           </div>
         ) : null}
 
-        <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">
+        <p className="mt-4 text-[11px] font-medium tracking-[0.04em] text-white/40">
           Need email verification? Use the link in your inbox.
         </p>
 
@@ -356,11 +357,11 @@ export default function LoginGateModal({
           <button
             type="button"
             onClick={onClose}
-            className={secondaryButtonClass}
+            className={storefrontSecondaryButtonClass}
           >
             Cancel
           </button>
-          <button type="submit" className={primaryButtonClass}>
+          <button type="submit" className={storefrontPrimaryButtonClass}>
             {mode === "register" ? "Register" : "Sign in"}
           </button>
         </div>

@@ -11,8 +11,10 @@ import EditorialHero from "../common/EditorialHero";
 import SurfacePanel from "../common/SurfacePanel";
 import CommerceSuccessBanner from "../common/CommerceSuccessBanner";
 import {
+  storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import { trackEvent } from "../../lib/trackEvent";
 import { useProgressStore } from "../../store/useProgressStore";
@@ -875,7 +877,7 @@ export default function LibraryPage({
             key={card.id}
             type="button"
             onClick={card.onClick}
-            className="group rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+            className="group rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-left text-white shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16"
           >
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/65">
               {card.label}
@@ -897,7 +899,7 @@ export default function LibraryPage({
     ) : null;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_15%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
@@ -987,7 +989,7 @@ export default function LibraryPage({
                   tone="muted"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[26px] border-2 border-black bg-[#0b0b0b] p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
+                    <div className={`${storefrontInsetCardClass} p-5 text-white sm:p-6`}>
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                         {resumeSpotlightReadHref
                           ? "Continue Reading"
@@ -1004,9 +1006,9 @@ export default function LibraryPage({
                             </span>
                             <span>{resumeSpotlightProgressLabel}</span>
                           </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[#111111]">
+                          <div className="h-2 overflow-hidden rounded-full bg-white/8">
                             <div
-                              className="h-full rounded-full bg-[#00E5FF]"
+                              className="h-full rounded-full bg-[linear-gradient(90deg,#56d7ff_0%,#7c5cff_100%)]"
                               style={{
                                 width: `${Math.round(resumeSpotlightProgressWidth)}%`,
                               }}
@@ -1067,7 +1069,7 @@ export default function LibraryPage({
                   tone="muted"
                 >
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] xl:items-stretch">
-                    <div className="rounded-[26px] border-2 border-black bg-[#0b0b0b] p-5 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
+                    <div className={`${storefrontInsetCardClass} p-5 text-white sm:p-6`}>
                       <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">
                         Saved Series
                       </p>
@@ -1138,7 +1140,7 @@ export default function LibraryPage({
                           ),
                         )
                       }
-                      className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-left text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                      className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-4 text-left text-white shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl transition-all duration-200 ease-out hover:-translate-y-1 hover:border-white/16"
                     >
                       <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
                         {item.eyebrow || "Free start"}
@@ -1150,7 +1152,7 @@ export default function LibraryPage({
                         {item.subtitle ||
                           "Open the series page and start reading."}
                       </p>
-                      <span className="mt-4 inline-flex rounded-full border-2 border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
+                      <span className="mt-4 inline-flex rounded-full border border-white/14 bg-white/6 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/75">
                         Start reading
                       </span>
                     </button>

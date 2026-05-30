@@ -7,6 +7,8 @@ import SurfacePanel from "../../components/common/SurfacePanel";
 import {
   StorefrontDesk,
   StorefrontSectionHeading,
+  storefrontBadgeClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../../components/common/StorefrontPagePrimitives";
@@ -270,10 +272,9 @@ export default function NotificationsPage() {
         {loading ? (
           <SurfacePanel className="space-y-5" appearance="dark" accent="blue">
             <div className="space-y-2">
-              <div
-                className="h-4 w-28 animate-pulse rounded-full bg-white/20"
-                aria-hidden="true"
-              />
+              <p className={storefrontBadgeClass} aria-hidden="true">
+                Inbox
+              </p>
               <div
                 className="h-9 w-64 animate-pulse rounded-2xl bg-white/20"
                 aria-hidden="true"
@@ -311,8 +312,12 @@ export default function NotificationsPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-white">
+                <p className="text-base font-semibold tracking-[-0.03em] text-white">
                   Couldn't load notifications.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/68">
+                  Pull the inbox again and we&apos;ll reload new episode drops,
+                  promo alerts, and unlock reminders.
                 </p>
               </div>
               <button
@@ -328,10 +333,15 @@ export default function NotificationsPage() {
           <SurfacePanel className="space-y-5" appearance="dark" accent="blue">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <StorefrontSectionHeading eyebrow="Inbox" title="Latest" />
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/60">
+              <p className={storefrontBadgeClass}>
                 {notifications.length} updates
               </p>
             </div>
+            {workingId === "__all__" ? (
+              <div className={storefrontNoticeClass}>
+                Marking every unread notification as read.
+              </div>
+            ) : null}
             <NotificationList
               notifications={notifications}
               onMarkRead={handleMarkRead}

@@ -134,14 +134,6 @@ export default function ReaderTopBar({
     setAutoScrollState(Boolean(autoScroll));
   }, [autoScroll]);
 
-  const lightButtonClass =
-    "border-2 border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111]";
-  const lightActiveButtonClass =
-    "border-2 border-black bg-[#00C767] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
-  const lightMutedButtonClass =
-    "border-2 border-white/10 bg-black text-white/35 shadow-none";
-  const lightLockedButtonClass =
-    "border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
   const installmentPlural = seriesType === "novel" ? "Episodes" : "Chapters";
   const installmentSingle = seriesType === "novel" ? "episode" : "chapter";
 

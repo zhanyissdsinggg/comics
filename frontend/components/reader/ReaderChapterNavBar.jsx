@@ -23,7 +23,7 @@ export default function ReaderChapterNavBar({
         visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
       )}
     >
-      <div className="pointer-events-auto flex w-full max-w-md items-center gap-2 rounded-[24px] border-2 border-white/20 bg-black/95 px-3 py-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] backdrop-blur-xl">
+      <div className="pointer-events-auto flex w-full max-w-md items-center gap-2 rounded-[24px] border border-white/12 bg-[rgba(10,12,20,0.9)] px-3 py-3 shadow-[0_24px_54px_rgba(0,0,0,0.36)] backdrop-blur-[22px]">
         <span className="hidden shrink-0 text-[10px] font-black uppercase tracking-[0.24em] text-white/50 sm:inline">
           {installmentLabel} Navigation
         </span>
@@ -34,10 +34,10 @@ export default function ReaderChapterNavBar({
           disabled={!hasPrev}
           aria-label={`Previous ${installmentLabel}`}
           className={cn(
-            "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] transition-all duration-150 ease-out",
+            "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-black uppercase tracking-[0.04em] transition-all duration-150 ease-out",
             hasPrev
-              ? "border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#FFE500] hover:bg-[#111111]"
-              : "border-white/10 bg-black text-white/35 shadow-none",
+              ? "border-white/16 bg-white/[0.05] text-white shadow-[0_16px_30px_rgba(8,6,20,0.22)] hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08]"
+              : "border-white/8 bg-white/[0.02] text-white/35 shadow-none",
           )}
         >
           <ChevronLeft className="size-4" strokeWidth={2.2} />
@@ -56,12 +56,12 @@ export default function ReaderChapterNavBar({
                 : `Next ${installmentLabel}`
           }
           className={cn(
-            "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border-2 px-4 py-2 text-sm font-black uppercase tracking-[0.04em] transition-all duration-150 ease-out",
+            "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border px-4 py-2 text-sm font-black uppercase tracking-[0.04em] transition-all duration-150 ease-out",
             !hasNext
-              ? "border-white/10 bg-black text-white/35 shadow-none"
+              ? "border-white/8 bg-white/[0.02] text-white/35 shadow-none"
               : nextLocked
-                ? "border-2 border-black bg-[#FF007A] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:bg-[#ff1f8a]"
-                : "border-white/20 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:border-[#00E5FF] hover:bg-[#111111]",
+                ? "border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(255,124,177,0.16)_100%)] text-white shadow-[0_16px_30px_rgba(255,79,154,0.18)] hover:-translate-y-0.5"
+                : "border-white/16 bg-white/[0.05] text-white shadow-[0_16px_30px_rgba(8,6,20,0.22)] hover:-translate-y-0.5 hover:border-cyan-300/20 hover:bg-white/[0.08]",
           )}
         >
           <span>{nextLocked ? "Unlock Next" : `Next ${installmentLabel}`}</span>

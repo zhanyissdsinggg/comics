@@ -361,14 +361,14 @@ export default function SupportPage() {
   };
 
   const fieldLabelClass =
-    "text-[11px] font-black uppercase tracking-[0.28em] text-white/60";
+    "text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58";
   const fieldClass =
-    "mt-2 w-full rounded-[22px] border-2 border-white/15 bg-black px-4 py-3.5 text-sm font-semibold text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 placeholder:text-white/35 focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15";
+    "mt-2 w-full rounded-[22px] border border-white/12 bg-[rgba(255,255,255,0.04)] px-4 py-3.5 text-sm font-medium text-white outline-none shadow-[0_14px_32px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 placeholder:text-white/35 focus:border-cyan-300/40 focus:bg-[rgba(255,255,255,0.06)] focus:ring-4 focus:ring-cyan-400/10";
   const primaryButtonClass = `${storefrontPrimaryButtonClass} disabled:cursor-not-allowed disabled:opacity-60`;
   const topicCardClass =
-    "rounded-[22px] border-2 bg-black p-4 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-[24px] border bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-left shadow-[0_18px_36px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 hover:-translate-y-0.5";
   const supportSectionCardClass =
-    "rounded-[24px] border-2 border-white/15 bg-[#111111] p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
+    "rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)] backdrop-blur-xl";
   const supportHeroStats = [
     {
       label: "Replies",
@@ -381,7 +381,8 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
@@ -394,7 +395,7 @@ export default function SupportPage() {
           />
 
           <SurfacePanel
-            className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="space-y-4"
             appearance="dark"
             accent="blue"
           >
@@ -407,9 +408,9 @@ export default function SupportPage() {
             <StorefrontInfoCard
               title={siteConfig.supportEmail}
               eyebrow="Support email"
-              className="border-2 border-white/15 bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className="border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] shadow-[0_18px_36px_rgba(8,6,20,0.18)]"
             >
-              <p className="mt-3 text-sm font-medium leading-6 text-white/70">
+              <p className="mt-3 text-sm leading-[1.68] text-white/70">
                 Expected reply time: {EXPECTED_REPLY_TIME}.
               </p>
             </StorefrontInfoCard>
@@ -432,7 +433,7 @@ export default function SupportPage() {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <SurfacePanel
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="space-y-5"
             appearance="dark"
             accent="blue"
           >
@@ -452,8 +453,8 @@ export default function SupportPage() {
                   }
                 />
 
-                <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/55">
                     Reply email
                   </p>
                   <p className="mt-2 text-base font-semibold text-white">
@@ -497,7 +498,7 @@ export default function SupportPage() {
                 />
 
                 {feedback.text ? (
-                  <div className="rounded-[22px] border-2 border-[#FF007A] bg-black px-4 py-3 text-sm font-semibold text-[#FF007A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="rounded-[22px] border border-[rgba(255,79,154,0.36)] bg-[rgba(255,79,154,0.12)] px-4 py-3 text-sm font-medium text-[#ff9cc0] shadow-[0_14px_30px_rgba(255,79,154,0.14)]">
                     {feedback.text}
                   </div>
                 ) : null}
@@ -706,11 +707,11 @@ export default function SupportPage() {
                   >
                     <h2
                       id="support-email-backup-heading"
-                      className="text-[11px] font-black uppercase tracking-[0.24em] text-white/60"
-                    >
-                      Email backup
-                    </h2>
-                    <p className="mt-2 text-sm font-medium leading-6 text-white/70">
+                    className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/60"
+                  >
+                     Email backup
+                   </h2>
+                    <p className="mt-2 text-sm leading-[1.68] text-white/70">
                       If the form is unavailable, use your email app instead.
                     </p>
                     <a
@@ -726,7 +727,7 @@ export default function SupportPage() {
           </SurfacePanel>
 
           <SurfacePanel
-            className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="space-y-4"
             appearance="dark"
             accent="blue"
           >
@@ -736,8 +737,8 @@ export default function SupportPage() {
               description="Add the title, chapter, order ID, or screenshot details in your message."
             />
 
-            <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <ul className="space-y-2 text-sm font-medium leading-6 text-white/70">
+            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
+              <ul className="space-y-2 text-sm leading-[1.68] text-white/70">
                 <li>Use the issue type that fits best.</li>
                 <li>Include your reply email if you're signed out.</li>
                 <li>Add an order ID for billing problems when you have one.</li>

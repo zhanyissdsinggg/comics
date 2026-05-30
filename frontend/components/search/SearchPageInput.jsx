@@ -41,7 +41,7 @@ export default function SearchPageInput({
       {trackedParams.map(([key, currentValue]) => (
         <input key={key} type="hidden" name={key} value={String(currentValue)} />
       ))}
-      <div className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4 py-3 shadow-[0_16px_38px_rgba(8,6,20,0.22)]">
+      <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.04))] px-4 py-3 shadow-[0_18px_40px_rgba(8,6,20,0.24)] backdrop-blur-xl">
         <input
           type="search"
           name="q"
@@ -61,7 +61,7 @@ export default function SearchPageInput({
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          className="inline-flex h-11 items-center justify-center rounded-full border border-white/12 bg-[rgba(255,79,154,0.16)] px-5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(8,6,20,0.18)] transition-all hover:-translate-y-0.5 hover:border-white/18 hover:bg-[rgba(255,79,154,0.22)]"
+          className="inline-flex h-11 items-center justify-center rounded-full border border-[rgba(255,79,154,0.26)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22),rgba(255,120,177,0.16))] px-5 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(8,6,20,0.2)] transition-all hover:-translate-y-0.5 hover:border-white/18"
         >
           Search
         </button>

@@ -3,8 +3,11 @@
 import React, { useCallback, useState } from "react";
 import { useFollowStore } from "../../store/useFollowStore";
 import {
+  storefrontInputClass,
+  storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 
 const CollectionManager = React.memo(({ seriesId, onClose }) => {
@@ -105,7 +108,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-2 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+            className={`${storefrontSecondaryButtonClass} px-3 py-2 text-xs tracking-[0.08em]`}
             aria-label="Close"
           >
             <span aria-hidden="true">Close</span>
@@ -114,12 +117,12 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
       </div>
 
       {message ? (
-        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-3 text-sm font-semibold text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className={`${storefrontSoftCardClass} text-sm font-medium text-white`}>
           {message}
         </div>
       ) : null}
 
-      <div className="rounded-[24px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <div className={`${storefrontInsetCardClass} p-4`}>
         <h4 className="text-sm font-black uppercase tracking-[0.08em] text-white/80">
           New Collection
         </h4>
@@ -130,7 +133,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
             onChange={(event) => setNewCollectionName(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && handleCreate()}
             placeholder="Collection name"
-            className="flex-1 rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] placeholder:text-white/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]"
+            className={`flex-1 ${storefrontInputClass} mt-0 rounded-full px-3 py-2`}
           />
           <button
             type="button"
@@ -159,14 +162,14 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
           return (
             <div
               key={collection.id}
-              className="flex items-center gap-3 rounded-[20px] border-2 border-black bg-[#0b0b0b] p-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+              className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.045)] p-3 shadow-[0_18px_38px_rgba(8,6,20,0.22)] backdrop-blur-xl transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/16"
             >
               {seriesId ? (
                 <input
                   type="checkbox"
                   checked={isInCollection}
                   onChange={() => handleToggleCollection(collection.id)}
-                  className="h-4 w-4 rounded border-2 border-white/20 bg-black text-[#FFE500]"
+                  className="h-4 w-4 rounded border border-white/20 bg-[rgba(7,10,21,0.72)] text-cyan-300"
                 />
               ) : null}
 
@@ -179,7 +182,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                     onKeyDown={(event) =>
                       event.key === "Enter" && handleSaveEdit()
                     }
-                    className="w-full rounded-full border-2 border-white/20 bg-black px-3 py-2 text-sm font-semibold text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFE500]"
+                    className={`w-full ${storefrontInputClass} mt-0 rounded-full px-3 py-2`}
                     autoFocus
                   />
                 ) : (
@@ -225,7 +228,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
                       <button
                         type="button"
                         onClick={() => handleDelete(collection.id)}
-                        className="h-9 rounded-full border-2 border-black bg-[#FF007A] px-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5"
+                        className="h-9 rounded-full border border-[rgba(255,79,154,0.28)] bg-[linear-gradient(135deg,rgba(255,79,154,0.22)_0%,rgba(255,124,177,0.16)_100%)] px-3 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_rgba(255,79,154,0.18)] transition-transform duration-150 ease-out hover:-translate-y-0.5"
                       >
                         Delete
                       </button>
@@ -238,7 +241,7 @@ const CollectionManager = React.memo(({ seriesId, onClose }) => {
         })}
       </div>
 
-      <div className="rounded-[22px] border-2 border-black bg-black p-3 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <div className={`${storefrontSoftCardClass} text-xs font-medium text-white/70`}>
         Default collections like Favorites, Reading, Completed, and Wishlist can
         be renamed but not deleted.
       </div>

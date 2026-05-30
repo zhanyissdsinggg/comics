@@ -105,10 +105,10 @@ function LegalSection({
 }) {
   return (
     <SurfacePanel className={className} appearance="dark" accent="cyan">
-      <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
+      <h2 className="font-display text-[1.8rem] font-semibold leading-[0.96] tracking-[-0.06em] text-white">
         {title}
       </h2>
-      <div className="mt-4 space-y-4 text-sm font-medium leading-7 text-white/72">
+      <div className="mt-4 space-y-4 text-sm leading-[1.72] text-white/72">
         {paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
@@ -128,20 +128,20 @@ function LegalSection({
 function ContactCard() {
   return (
     <StorefrontInfoCard title="Privacy contact">
-      <p className="mt-3 text-sm font-medium text-white/68">
-        <span className="font-black uppercase tracking-[0.08em] text-white">
+      <p className="mt-3 text-sm text-white/68">
+        <span className="font-semibold uppercase tracking-[0.08em] text-white">
           Email:
         </span>{" "}
         <a
           href={`mailto:${siteConfig.privacyEmail}`}
-          className="font-black text-[#FF007A] transition hover:text-[#ff4fa0]"
+          className="font-semibold text-[#ff77b0] transition hover:text-[#ff9cc0]"
         >
           {siteConfig.privacyEmail}
         </a>
       </p>
       {siteConfig.companyAddress ? (
-        <p className="mt-3 text-sm font-medium text-white/68">
-          <span className="font-black uppercase tracking-[0.08em] text-white">
+        <p className="mt-3 text-sm text-white/68">
+          <span className="font-semibold uppercase tracking-[0.08em] text-white">
             Address:
           </span>{" "}
           {siteConfig.companyAddress}
@@ -153,7 +153,8 @@ function ContactCard() {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero

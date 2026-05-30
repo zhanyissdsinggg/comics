@@ -134,7 +134,8 @@ export default function AdultGatePage() {
   }, [reason, returnTo]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[linear-gradient(180deg,#120f1c_0%,#0d0b14_100%)] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.16),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
       <main className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <SurfacePanel
@@ -146,10 +147,10 @@ export default function AdultGatePage() {
             <div className="relative overflow-hidden px-5 py-6 sm:px-7 sm:py-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/58">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/58">
                     {gateStep.eyebrow}
                   </p>
-                  <h1 className="max-w-[12ch] text-[2.15rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[2.75rem]">
+                  <h1 className="max-w-[12ch] font-display text-[2.2rem] font-semibold leading-[0.92] tracking-[-0.065em] text-white sm:text-[2.9rem]">
                     {titleMap[reason]}
                   </h1>
                 </div>
@@ -158,7 +159,7 @@ export default function AdultGatePage() {
                 </div>
               </div>
 
-              <p className="mt-4 max-w-[40rem] text-sm leading-7 text-white/72 sm:text-[15px]">
+              <p className="mt-4 max-w-[40rem] text-sm leading-[1.72] text-white/72 sm:text-[15px]">
                 {descriptionMap[reason]}
               </p>
 
@@ -175,7 +176,7 @@ export default function AdultGatePage() {
                 </Link>
               </div>
 
-              <p className="mt-4 text-sm text-white/54">
+              <p className="mt-4 text-sm leading-[1.68] text-white/54">
                 Normal mode shows normal content only. After access is complete,
                 adult mode switches home, search, rankings, library, and reader
                 to adult-only content.
@@ -185,28 +186,28 @@ export default function AdultGatePage() {
 
           <SurfacePanel appearance="dark" tone="muted" accent="cyan">
             <div className="space-y-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/56">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/56">
                 Before you continue
               </p>
               <div className="space-y-3">
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
                   <p className="text-sm font-medium text-white">18+ only</p>
-                  <p className="mt-2 text-sm leading-6 text-white/66">
+                  <p className="mt-2 text-sm leading-[1.68] text-white/66">
                     Mature content uses access controls and noindex rules.
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
                   <p className="text-sm font-medium text-white">
                     Separate mode
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-white/66">
+                  <p className="mt-2 text-sm leading-[1.68] text-white/66">
                     Adult mode is isolated and mutually exclusive. The two modes
                     never mix on the same surfaces.
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4">
+                <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]">
                   <p className="text-sm font-medium text-white">This step</p>
-                  <p className="mt-2 text-sm leading-6 text-white/66">
+                  <p className="mt-2 text-sm leading-[1.68] text-white/66">
                     {gateStep.support}
                   </p>
                 </div>
@@ -217,7 +218,7 @@ export default function AdultGatePage() {
                 </p>
               ) : null}
               {reason === "NEED_AGE_CONFIRM" ? (
-                <p className="text-xs text-white/56">
+                <p className="text-xs leading-[1.6] text-white/56">
                   Current regional requirement: {legalAge}+.
                 </p>
               ) : null}

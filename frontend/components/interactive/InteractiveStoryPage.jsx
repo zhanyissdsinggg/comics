@@ -578,6 +578,10 @@ export default function InteractiveStoryPage({
   const showSignInStart = authRequired && !node?.id;
   const showRawState = isInteractiveDebugEnabled();
   const whyPlayItems = useMemo(() => getStoryWhyPlayItems(story), [story]);
+  const panelEyebrowClass =
+    "text-[10px] font-semibold uppercase tracking-[0.2em] text-white/64";
+  const statCardClass =
+    "rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-3.5 shadow-[0_18px_38px_rgba(8,6,20,0.18)]";
 
   if (loading) {
     return <LoadingShell />;
@@ -585,29 +589,30 @@ export default function InteractiveStoryPage({
 
   if (mode !== "play") {
     return (
-      <main className="min-h-screen overflow-hidden bg-black text-white">
+      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.14),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
         <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
           <SurfacePanel tone="highlight" accent="cyan" appearance="dark">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                <p className={panelEyebrowClass}>
                   Interactive Story
                 </p>
-                <h1 className="mt-2 text-3xl font-black uppercase tracking-[-0.05em] text-white">
+                <h1 className="mt-2 font-display text-[2.5rem] font-semibold leading-[0.92] tracking-[-0.07em] text-white">
                   {storyTitle}
                 </h1>
                 {storyDescription ? (
-                  <p className="mt-4 max-w-3xl text-sm leading-7 text-white/80">
+                  <p className="mt-4 max-w-3xl text-sm leading-[1.72] text-white/80">
                     {storyDescription}
                   </p>
                 ) : null}
-                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-                  <span className="rounded-full border border-white/10 px-3 py-2">
+                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                     {normalizeText(story?.contentMode || "NORMAL")}
                   </span>
                   {Array.isArray(story?.genre)
                     ? story.genre.slice(0, 3).map((item) => (
-                        <span key={item} className="rounded-full border border-white/10 px-3 py-2">
+                        <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                           {normalizeText(item)}
                         </span>
                       ))
@@ -629,26 +634,26 @@ export default function InteractiveStoryPage({
               </div>
               <div className="grid gap-3">
                 <SurfacePanel tone="muted" accent="rose" appearance="dark">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className={panelEyebrowClass}>
                     Endings
                   </div>
-                  <div className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">
+                  <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
                     {Number(story?.endingsCount || 0)}
                   </div>
                 </SurfacePanel>
                 <SurfacePanel tone="muted" accent="blue" appearance="dark">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className={panelEyebrowClass}>
                     Choices
                   </div>
-                  <div className="mt-2 text-3xl font-black tracking-[-0.04em] text-white">
+                  <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.06em] text-white">
                     {Number(story?.choicesCount || 0)}
                   </div>
                 </SurfacePanel>
                 <SurfacePanel tone="muted" accent="amber" appearance="dark">
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className={panelEyebrowClass}>
                     Progress
                   </div>
-                  <div className="mt-2 text-sm leading-6 text-white/80">
+                  <div className="mt-2 text-sm leading-[1.68] text-white/80">
                     {progress?.node?.title
                       ? `Now reading: ${normalizeText(progress.node.title)}`
                       : "You haven't started yet."}
@@ -656,15 +661,12 @@ export default function InteractiveStoryPage({
                 </SurfacePanel>
                 {whyPlayItems.length > 0 ? (
                   <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                    <div className={panelEyebrowClass}>
                       Why you'll like it
                     </div>
                     <div className="mt-3 grid gap-2">
                       {whyPlayItems.map((item) => (
-                        <div
-                          key={item}
-                          className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm font-semibold text-white/82"
-                        >
+                        <div key={item} className={statCardClass}>
                           {item}
                         </div>
                       ))}
@@ -680,19 +682,20 @@ export default function InteractiveStoryPage({
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-black text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.14),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-6 md:px-8 md:py-8">
         <SurfacePanel tone="muted" accent="cyan" appearance="dark">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+              <p className={panelEyebrowClass}>
                 Interactive
               </p>
-              <h1 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em] text-white">
+              <h1 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
                 {storyTitle}
               </h1>
               {storyDescription ? (
-                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-white/78">
+                <p className="mt-2 max-w-2xl text-sm leading-[1.68] text-white/78">
                   {storyDescription}
                 </p>
               ) : null}
@@ -745,10 +748,10 @@ export default function InteractiveStoryPage({
               <SurfacePanel tone="muted" accent={isEnding ? "rose" : "cyan"} appearance="dark">
                 {showSignInStart ? (
                   <div className="grid gap-4">
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                    <p className={panelEyebrowClass}>
                       Sign in to start reading
                     </p>
-                    <p className="text-sm leading-7 text-white/80">
+                    <p className="text-sm leading-[1.72] text-white/80">
                       Sign in to save your choices and keep your progress synced.
                     </p>
                     <div className="flex flex-wrap gap-3">
@@ -769,18 +772,18 @@ export default function InteractiveStoryPage({
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         {isEnding ? (
-                          <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                          <div className="mb-3 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-xl">
                             Ending
                           </div>
                         ) : null}
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
+                        <p className={panelEyebrowClass}>
                           Now Reading
                         </p>
-                        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-white">
+                        <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                           {normalizeText(node?.title || "Opening scene")}
                         </h2>
                       </div>
-                      <div className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
+                      <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/65 shadow-[0_12px_24px_rgba(8,6,20,0.14)] backdrop-blur-xl">
                         Step {routeDepth}
                       </div>
                     </div>
@@ -792,7 +795,7 @@ export default function InteractiveStoryPage({
                       />
                     </div>
 
-                    <p className="mt-5 whitespace-pre-line text-[15px] leading-8 text-white/85 transition-opacity duration-300">
+                    <p className="mt-5 whitespace-pre-line text-[15px] leading-[1.9] text-white/85 transition-opacity duration-300">
                       {normalizeText(node?.content || story?.baseContext)}
                     </p>
 
@@ -818,10 +821,10 @@ export default function InteractiveStoryPage({
             {!isEnding && !showSignInStart ? (
               <SurfacePanel tone="muted" accent="amber" appearance="dark">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-base font-black uppercase tracking-[0.01em] text-white">
+                  <h2 className="text-base font-semibold tracking-[-0.02em] text-white">
                     Choices
                   </h2>
-                  <div className="text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
+                  <div className={panelEyebrowClass}>
                     Pick carefully
                   </div>
                 </div>
@@ -841,14 +844,14 @@ export default function InteractiveStoryPage({
                       <div
                         key={choice.id}
                         className={[
-                          "rounded-[24px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out",
-                          choice.locked ? "border-white/25 bg-[#111111]" : "",
-                          choosing || unlocking ? "translate-x-0.5 translate-y-0.5" : "",
+                          "rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_20px_42px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-150 ease-out",
+                          choice.locked ? "border-white/18 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)]" : "hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_24px_48px_rgba(0,0,0,0.26)]",
+                          choosing || unlocking ? "translate-y-0.5 opacity-90" : "",
                         ].join(" ")}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div className="text-sm font-black text-white">
+                            <div className="text-sm font-semibold text-white">
                               {choosing
                                 ? "Loading..."
                                 : unlocking
@@ -856,7 +859,7 @@ export default function InteractiveStoryPage({
                                   : normalizeText(choice.label)}
                             </div>
                             {choice.description ? (
-                              <div className="mt-1 text-xs leading-5 text-white/65">
+                              <div className="mt-1 text-xs leading-[1.6] text-white/65">
                                 {normalizeText(choice.description)}
                               </div>
                             ) : null}
@@ -867,7 +870,7 @@ export default function InteractiveStoryPage({
                             ) : null}
                           </div>
                           {choice.locked ? (
-                            <span className="rounded-full border border-white/20 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-white/70">
+                            <span className="rounded-full border border-white/20 bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
                               {lockCopy}
                             </span>
                           ) : null}
@@ -912,16 +915,13 @@ export default function InteractiveStoryPage({
 
           <div className="grid gap-4">
             <SurfacePanel tone="muted" accent="blue" appearance="dark">
-              <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+              <h3 className={panelEyebrowClass}>
                 Your story so far
               </h3>
               <div className="mt-3 grid gap-2">
                 {path.map((item, index) => (
-                  <div
-                    key={`${item.nodeId}-${index}`}
-                    className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3"
-                  >
-                    <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/50">
+                  <div key={`${item.nodeId}-${index}`} className={statCardClass}>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/50">
                       Step {index + 1}
                     </div>
                     <div className="mt-1 text-sm font-semibold text-white">
@@ -930,7 +930,7 @@ export default function InteractiveStoryPage({
                   </div>
                 ))}
                 {path.length === 0 ? (
-                  <div className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/65">
+                  <div className={`${statCardClass} text-sm text-white/65`}>
                     Start reading to see your path.
                   </div>
                 ) : null}
@@ -939,16 +939,13 @@ export default function InteractiveStoryPage({
 
             {showRawState && storyStateRows.length > 0 ? (
               <SurfacePanel tone="muted" accent="rose" appearance="dark">
-                <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+                <h3 className={panelEyebrowClass}>
                   State
                 </h3>
                 <div className="mt-3 grid gap-2">
                   {storyStateRows.map((item) => (
-                    <div
-                      key={item.key}
-                      className="rounded-[18px] border border-white/10 bg-white/5 px-3 py-3 text-sm text-white"
-                    >
-                      <span className="font-black uppercase tracking-[0.08em] text-white/80">
+                    <div key={item.key} className={`${statCardClass} text-sm text-white`}>
+                      <span className="font-semibold uppercase tracking-[0.08em] text-white/80">
                         {item.key}
                       </span>
                       : {item.value}
@@ -959,10 +956,10 @@ export default function InteractiveStoryPage({
             ) : null}
 
             <SurfacePanel tone="muted" accent="amber" appearance="dark">
-              <h3 className="text-xs font-black uppercase tracking-[0.16em] text-white/70">
+              <h3 className={panelEyebrowClass}>
                 Try Again
               </h3>
-              <div className="mt-3 text-sm leading-6 text-white/75">
+              <div className="mt-3 text-sm leading-[1.68] text-white/75">
                 Endings reached: {Number(progress?.endingsReached || 0)}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">

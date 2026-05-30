@@ -9,12 +9,14 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-white/20 bg-black text-white",
+        default:
+          "border-white/12 bg-[rgba(255,255,255,0.06)] text-white/82 shadow-[0_10px_24px_rgba(8,6,20,0.16)] backdrop-blur-xl",
         secondary:
-          "border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] text-slate-600",
-        destructive: "border-red-200 bg-red-50 text-red-600",
-        outline: "border-white/20 bg-transparent text-white/80",
-        ghost: "border-transparent bg-transparent text-slate-600",
+          "border-[rgba(43,33,65,0.12)] bg-[rgba(255,253,249,0.94)] text-[color:var(--gush-ink-strong)] shadow-[0_10px_22px_rgba(58,44,86,0.08)]",
+        destructive:
+          "border-rose-300/22 bg-[linear-gradient(135deg,rgba(244,63,94,0.14)_0%,rgba(255,255,255,0.88)_100%)] text-rose-700 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.22)_0%,rgba(17,24,39,0.9)_100%)] dark:text-rose-100",
+        outline: "border-white/16 bg-transparent text-white/78",
+        ghost: "border-transparent bg-transparent text-slate-600 dark:text-white/68",
         link: "rounded-none border-transparent bg-transparent px-0 text-[var(--gush-accent,#3157d6)] hover:underline",
       },
     },

@@ -63,7 +63,7 @@ export default function ReaderDrawer({
       onClick={onClose}
     >
       <div
-        className="flex h-full w-full max-w-full flex-col border-l border-black/10 bg-[linear-gradient(180deg,rgba(18,20,24,0.98)_0%,rgba(13,15,18,0.99)_100%)] px-4 py-5 shadow-[-20px_0_44px_rgba(0,0,0,0.28)] sm:max-w-sm"
+        className="flex h-full w-full max-w-full flex-col border-l border-white/10 bg-[linear-gradient(180deg,rgba(17,18,30,0.98)_0%,rgba(10,12,20,0.99)_100%)] px-4 py-5 shadow-[-20px_0_44px_rgba(0,0,0,0.28)] sm:max-w-sm"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -77,8 +77,8 @@ export default function ReaderDrawer({
               aria-pressed={tab === "toc"}
               className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "toc"
-                  ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-white/15 bg-black text-neutral-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#111111]"
+                  ? "border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
+                  : "border border-white/12 bg-white/[0.04] text-neutral-300 shadow-[0_12px_24px_rgba(0,0,0,0.22)] hover:bg-white/[0.08]"
               }`}
             >
               {installmentPlural}
@@ -89,8 +89,8 @@ export default function ReaderDrawer({
               aria-pressed={tab === "bookmarks"}
               className={`rounded-full px-3 py-1 transition-[background-color,border-color,box-shadow,transform] duration-200 ${
                 tab === "bookmarks"
-                  ? "border-2 border-black bg-[#FFE500] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-white/15 bg-black text-neutral-300 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#111111]"
+                  ? "border border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
+                  : "border border-white/12 bg-white/[0.04] text-neutral-300 shadow-[0_12px_24px_rgba(0,0,0,0.22)] hover:bg-white/[0.08]"
               }`}
             >
               Bookmarks
@@ -99,13 +99,13 @@ export default function ReaderDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border-2 border-white/15 bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[#111111] active:translate-y-px"
+            className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/[0.08] active:translate-y-px"
           >
             Close
           </button>
         </div>
         {onSubscribe ? (
-          <div className="mt-4 rounded-[22px] border-2 border-white/12 bg-black p-3 text-xs text-neutral-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="mt-4 rounded-[22px] border border-white/10 bg-white/[0.04] p-3 text-xs text-neutral-300 shadow-[0_14px_28px_rgba(0,0,0,0.22)]">
             <div className="flex items-center justify-between gap-3">
               <span>Plans can unlock free reads.</span>
               <button
@@ -116,7 +116,7 @@ export default function ReaderDrawer({
                   });
                   onSubscribe();
                 }}
-                className="rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] active:translate-y-px"
+                className="rounded-full border border-white/14 bg-white/[0.05] px-3 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08] active:translate-y-px"
               >
                 Plans
               </button>
@@ -144,7 +144,7 @@ export default function ReaderDrawer({
                         onSelectEpisode(episode.id);
                       }
                     }}
-                    className="w-full rounded-[22px] border-2 border-white/12 bg-black px-3 py-2 text-left text-sm text-neutral-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-[#111111]"
+                    className="w-full rounded-[22px] border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-sm text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:bg-white/[0.08]"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -171,7 +171,7 @@ export default function ReaderDrawer({
           ) : (
             <div className="space-y-2 pb-6">
               {bookmarks.length === 0 ? (
-                <div className="rounded-[22px] border-2 border-white/12 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_12px_24px_rgba(0,0,0,0.2)]">
                   <div className="text-sm font-black uppercase tracking-[0.04em] text-neutral-100">
                     No bookmarks yet.
                   </div>
@@ -180,7 +180,7 @@ export default function ReaderDrawer({
                 bookmarks.map((bookmark) => (
                   <div
                     key={bookmark.id}
-                    className="rounded-[22px] border-2 border-white/12 bg-black px-3 py-2 text-sm text-neutral-200 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                    className="rounded-[22px] border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-neutral-200 shadow-[0_12px_24px_rgba(0,0,0,0.2)]"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -204,7 +204,7 @@ export default function ReaderDrawer({
                     <button
                       type="button"
                       onClick={() => onGoBookmark(bookmark)}
-                      className="mt-2 w-full rounded-full border-2 border-white/20 bg-black px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/35 hover:bg-[#111111] active:translate-y-px"
+                      className="mt-2 w-full rounded-full border border-white/14 bg-white/[0.05] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_24px_rgba(0,0,0,0.22)] transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-white/24 hover:bg-white/[0.08] active:translate-y-px"
                     >
                       Go there
                     </button>

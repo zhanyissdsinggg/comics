@@ -2,6 +2,11 @@
 
 import React, { useMemo } from "react";
 import SurfacePanel from "../common/SurfacePanel";
+import {
+  storefrontBadgeClass,
+  storefrontInsetCardClass,
+  storefrontSoftCardClass,
+} from "../common/StorefrontPagePrimitives";
 import { useHistoryStore } from "../../store/useHistoryStore";
 import { useProgressStore } from "../../store/useProgressStore";
 import { useFollowStore } from "../../store/useFollowStore";
@@ -125,9 +130,9 @@ const ReadingStats = React.memo(() => {
           <div
             key={card.label}
             className={[
-              "rounded-[22px] border-2 border-black bg-[#0b0b0b] px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]",
+              `${storefrontInsetCardClass} text-white`,
               card.highlighted || index === 0
-                ? "outline outline-2 outline-offset-2 outline-[#00E5FF]"
+                ? "ring-1 ring-cyan-300/35 shadow-[0_22px_46px_rgba(34,211,238,0.16)]"
                 : "",
             ].join(" ")}
           >
@@ -145,7 +150,7 @@ const ReadingStats = React.memo(() => {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className={`${storefrontInsetCardClass} text-white`}>
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
             Milestones
           </p>
@@ -154,7 +159,7 @@ const ReadingStats = React.memo(() => {
               achievements.map((achievement) => (
                 <span
                   key={achievement}
-                  className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className={storefrontBadgeClass}
                 >
                   {achievement}
                 </span>
@@ -167,7 +172,7 @@ const ReadingStats = React.memo(() => {
           </div>
         </div>
 
-        <div className="rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className={`${storefrontSoftCardClass} text-white`}>
           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">
             Right now
           </p>

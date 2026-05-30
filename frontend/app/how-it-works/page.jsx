@@ -82,7 +82,8 @@ export default function HowItWorksPage() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <StructuredDataScript id="how-it-works-jsonld" data={structuredData} />
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -147,7 +148,7 @@ export default function HowItWorksPage() {
                 eyebrow={step.eyebrow}
                 title={step.title}
               />
-              <p className="mt-3 text-sm font-semibold leading-6 text-white/75">
+              <p className="mt-3 text-sm leading-[1.68] text-white/75">
                 {step.body}
               </p>
             </SurfacePanel>
@@ -157,7 +158,7 @@ export default function HowItWorksPage() {
         <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading eyebrow="Reading" title="Basics." />
-            <ul className="space-y-3 text-sm font-medium leading-7 text-white/70">
+            <ul className="space-y-3 text-sm leading-[1.72] text-white/70">
               <li>Some series start free.</li>
               <li>Locked chapters use points.</li>
               <li>Your place saves automatically.</li>
@@ -166,7 +167,7 @@ export default function HowItWorksPage() {
 
           <SurfacePanel className="space-y-5" appearance="dark" accent="cyan">
             <StorefrontSectionHeading eyebrow="Billing" title="Billing." />
-            <ul className="space-y-3 text-sm font-medium leading-7 text-white/70">
+            <ul className="space-y-3 text-sm leading-[1.72] text-white/70">
               <li>Orders shows receipts.</li>
               <li>Account shows your plan.</li>
               <li>Support handles billing issues.</li>

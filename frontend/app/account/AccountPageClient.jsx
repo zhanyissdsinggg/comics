@@ -9,6 +9,14 @@ import SurfacePanel from "../../components/common/SurfacePanel";
 import CommerceSuccessBanner from "../../components/common/CommerceSuccessBanner";
 import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGrid";
 import {
+  storefrontInputClass,
+  storefrontInsetCardClass,
+  storefrontNoticeClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "../../components/common/StorefrontPagePrimitives";
+import {
   LANGUAGE_OPTIONS,
   REGION_KEYS,
   getRegionConfig,
@@ -382,9 +390,9 @@ export default function AccountPage({ initialSignedIn = false }) {
   ]);
 
   const actionSecondaryButtonClass =
-    "inline-flex min-h-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-50";
+    `${storefrontSecondaryButtonClass} min-h-[44px] px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50`;
   const actionPrimaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50";
+    `${storefrontPrimaryButtonClass} min-h-[48px] px-5 py-3 disabled:cursor-not-allowed disabled:opacity-50`;
 
   const accountActionCards = useMemo(() => {
     if (!viewerSignedIn) {
@@ -509,28 +517,24 @@ export default function AccountPage({ initialSignedIn = false }) {
   ]);
 
   const sectionEyebrowClass =
-    "text-[11px] font-black uppercase tracking-[0.24em] text-white/60";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-white/58";
   const sectionTitleClass =
     "font-display text-2xl font-black uppercase tracking-[-0.05em] text-white";
-  const mutedCopyClass = "text-sm font-semibold leading-6 text-white/70";
+  const mutedCopyClass = "text-sm font-medium leading-6 text-white/70";
   const fieldLabelClass =
-    "text-[11px] font-black uppercase tracking-[0.24em] text-white/60";
-  const fieldClass =
-    "mt-2 w-full rounded-[22px] border-2 border-white/20 bg-black px-4 py-3 text-sm font-semibold text-white outline-none transition-transform duration-150 placeholder:text-white/35 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:border-[#00E5FF]/60 focus:ring-4 focus:ring-[#00E5FF]/15";
+    "text-[11px] font-black uppercase tracking-[0.24em] text-white/58";
+  const fieldClass = storefrontInputClass;
   const secondaryButtonClass =
-    "inline-flex min-h-[44px] items-center justify-center rounded-full border-2 border-white/20 bg-black px-4 py-2 text-xs font-semibold tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-50";
+    `${storefrontSecondaryButtonClass} min-h-[44px] px-4 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50`;
   const primaryButtonClass =
-    "inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-black bg-[#00E5FF] px-5 py-3 text-sm font-semibold tracking-[0.02em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50";
-  const highlightCardClass =
-    "rounded-[24px] border-2 border-white/15 bg-black px-4 py-4 text-sm font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
-  const softInfoCardClass =
-    "rounded-[24px] border-2 border-white/15 bg-black p-4 text-sm font-semibold text-white/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
-  const orderCardClass =
-    "rounded-[24px] border-2 border-white/15 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
+    `${storefrontPrimaryButtonClass} min-h-[48px] px-5 py-3 disabled:cursor-not-allowed disabled:opacity-50`;
+  const highlightCardClass = `${storefrontInsetCardClass} text-sm font-medium text-white/74`;
+  const softInfoCardClass = `${storefrontSoftCardClass} text-sm font-medium text-white/68`;
+  const orderCardClass = `${storefrontInsetCardClass} text-white`;
   const checkboxClass =
-    "h-4 w-4 rounded-none border-[2px] border-white/30 bg-black text-[#00E5FF] focus:ring-0";
+    "h-4 w-4 rounded border border-white/25 bg-[rgba(7,10,21,0.72)] text-cyan-300 focus:ring-cyan-300/20";
   const checkboxCardClass =
-    "flex items-center gap-3 rounded-[24px] border-2 border-white/15 bg-black px-4 py-3 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]";
+    `flex items-center gap-3 ${storefrontSoftCardClass} text-sm font-medium text-white/74`;
   const messageIsError = /failed|couldn't|not found/i.test(message);
   const accountDeskTitle = viewerSignedIn ? "Account" : "Support";
   const accountDeskCopy = viewerSignedIn
@@ -549,7 +553,7 @@ export default function AccountPage({ initialSignedIn = false }) {
 
   if (!viewerSignedIn) {
     return (
-      <div className="min-h-screen overflow-hidden bg-black text-white">
+      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_12%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
         <main className="mx-auto flex max-w-[1080px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
             <EditorialHero
@@ -624,12 +628,12 @@ export default function AccountPage({ initialSignedIn = false }) {
               accent={messageIsError ? "rose" : "amber"}
               className={
                 messageIsError
-                  ? "border-2 border-[#FF007A] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                  : "border-2 border-[#FFE500] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                  ? "border border-rose-300/20 bg-[linear-gradient(135deg,rgba(255,79,154,0.14)_0%,rgba(88,28,135,0.18)_100%)] shadow-[0_18px_40px_rgba(255,79,154,0.16)]"
+                  : "border border-amber-300/22 bg-[linear-gradient(135deg,rgba(245,158,11,0.16)_0%,rgba(251,191,36,0.08)_100%)] shadow-[0_18px_40px_rgba(245,158,11,0.14)]"
               }
             >
               <p
-                className={`text-sm font-semibold ${messageIsError ? "text-[#FF007A]" : "text-white/78"}`}
+                className={`text-sm font-medium ${messageIsError ? "text-rose-100" : "text-white/82"}`}
               >
                 {message}
               </p>
@@ -649,7 +653,7 @@ export default function AccountPage({ initialSignedIn = false }) {
               onToggle={(event) =>
                 setSignedOutDeviceSettingsOpen(event.currentTarget.open)
               }
-              className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              className={`group ${storefrontInsetCardClass}`}
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <div>
@@ -751,7 +755,7 @@ export default function AccountPage({ initialSignedIn = false }) {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-black text-white">
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(82,188,255,0.13),transparent_24%),radial-gradient(circle_at_12%_18%,rgba(255,87,166,0.16),transparent_28%),linear-gradient(180deg,#090912_0%,#0d1020_52%,#090912_100%)] text-white">
       <main className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <EditorialHero
@@ -895,12 +899,12 @@ export default function AccountPage({ initialSignedIn = false }) {
             accent={messageIsError ? "rose" : "amber"}
             className={
               messageIsError
-                ? "border-2 border-[#FF007A] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                : "border-2 border-[#FFE500] bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                ? "border border-rose-300/20 bg-[linear-gradient(135deg,rgba(255,79,154,0.14)_0%,rgba(88,28,135,0.18)_100%)] shadow-[0_18px_40px_rgba(255,79,154,0.16)]"
+                : "border border-amber-300/22 bg-[linear-gradient(135deg,rgba(245,158,11,0.16)_0%,rgba(251,191,36,0.08)_100%)] shadow-[0_18px_40px_rgba(245,158,11,0.14)]"
             }
           >
             <p
-              className={`text-sm font-semibold ${messageIsError ? "text-[#FF007A]" : "text-white/78"}`}
+              className={`text-sm font-medium ${messageIsError ? "text-rose-100" : "text-white/82"}`}
             >
               {message}
             </p>
@@ -938,7 +942,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                 appearance="dark"
                 accent="cyan"
               >
-                <details className="group rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <details className={`group ${storefrontInsetCardClass}`}>
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                     <div>
                       <p className={sectionEyebrowClass}>Device settings</p>
@@ -1228,7 +1232,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border-2 border-white/15 bg-black p-4 text-sm font-semibold text-white/70 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <div className={storefrontNoticeClass}>
                   Manage mature visibility and device history in one place.
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -1488,7 +1492,7 @@ export default function AccountPage({ initialSignedIn = false }) {
                       {Array.from({ length: 2 }).map((_, index) => (
                         <div
                           key={index}
-                          className="rounded-[20px] border-2 border-white/15 bg-black px-4 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                          className={storefrontSoftCardClass}
                         >
                           <div className="h-4 w-28 animate-pulse rounded-full bg-slate-200" />
                           <div className="mt-3 h-3 w-40 animate-pulse rounded-full bg-slate-100" />

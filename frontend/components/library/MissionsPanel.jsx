@@ -1,7 +1,10 @@
 "use client";
 
 import SurfacePanel from "../common/SurfacePanel";
-import { storefrontPrimaryButtonClass } from "../common/StorefrontPagePrimitives";
+import {
+  storefrontInsetCardClass,
+  storefrontPrimaryButtonClass,
+} from "../common/StorefrontPagePrimitives";
 
 export default function MissionsPanel({ missions, onClaim, workingId }) {
   if (!missions) {
@@ -29,7 +32,7 @@ export default function MissionsPanel({ missions, onClaim, workingId }) {
     return (
       <div
         key={mission.id}
-        className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border-2 border-black bg-[#0b0b0b] p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+        className={`flex flex-wrap items-center justify-between gap-3 ${storefrontInsetCardClass} text-white`}
       >
         <div>
           <p className="text-sm font-black uppercase tracking-[-0.02em] text-white">

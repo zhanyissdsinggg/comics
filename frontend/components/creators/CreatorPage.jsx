@@ -172,7 +172,8 @@ function buildGridItems(items) {
 
 function CreatorPageSkeleton() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.12),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.12),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.08),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -432,13 +433,13 @@ export default function CreatorPage({
             </div>
 
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                 {formatCreditTypeLabel(creatorIdentity.creditType)}
               </p>
-              <h1 className="mt-3 font-display text-[2.4rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-[3rem]">
+              <h1 className="mt-3 font-display text-[2.4rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[3rem]">
                 {creatorName}
               </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/68 sm:text-[0.98rem]">
+              <p className="mt-3 max-w-3xl text-sm leading-[1.72] text-white/68 sm:text-[0.98rem]">
                 {creatorHook}
               </p>
 
@@ -459,12 +460,12 @@ export default function CreatorPage({
                 {creatorMetaCards.map((card) => (
                   <div
                     key={card.id}
-                    className="rounded-[22px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 shadow-[0_16px_34px_rgba(8,6,20,0.2)]"
+                    className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] px-4 py-4 shadow-[0_18px_36px_rgba(8,6,20,0.18)]"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/46">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/46">
                       {card.label}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-white/78">
+                    <p className="mt-2 text-sm leading-[1.68] text-white/78">
                       {card.value}
                     </p>
                   </div>
@@ -478,10 +479,10 @@ export default function CreatorPage({
           <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                   Start here
                 </p>
-                <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
+                <h2 className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
                   {spotlightSeries.title}
                 </h2>
               </div>
@@ -494,7 +495,7 @@ export default function CreatorPage({
               </button>
             </div>
 
-            <p className="max-w-3xl text-sm leading-7 text-white/72">
+            <p className="max-w-3xl text-sm leading-[1.72] text-white/72">
               {spotlightHook}
             </p>
           </SurfacePanel>
@@ -503,14 +504,14 @@ export default function CreatorPage({
         <SurfacePanel appearance="dark" accent="cyan" className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/56">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                 On the shelf
               </p>
-              <h2 className="mt-2 font-display text-[2rem] font-semibold leading-[0.95] tracking-[-0.05em] text-white">
+              <h2 className="mt-2 font-display text-[1.9rem] font-semibold leading-[0.94] tracking-[-0.06em] text-white">
                 More from {creatorName}
               </h2>
             </div>
-            <p className="text-sm leading-6 text-white/56">
+            <p className="text-sm leading-[1.68] text-white/56">
               Start with the cover that catches you.
             </p>
           </div>

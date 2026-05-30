@@ -7,13 +7,13 @@
 :root {
   color-scheme: dark;
   --font-ui-body:
-    var(--font-body-face), "DM Sans", "Inter", "Segoe UI", "Helvetica Neue",
+    var(--font-body-face), "DM Sans", "Avenir Next", "Segoe UI", "Helvetica Neue",
     Arial, sans-serif;
   --font-body:
-    var(--font-body-face), "DM Sans", "Inter", "Segoe UI", "Helvetica Neue",
+    var(--font-body-face), "DM Sans", "Avenir Next", "Segoe UI", "Helvetica Neue",
     Arial, sans-serif;
   --font-display:
-    var(--font-display-face), "Bricolage Grotesque", "Space Grotesk",
+    var(--font-display-face), "Bricolage Grotesque", "Clash Display",
     "DM Sans", sans-serif;
   --font-reader:
     var(--font-reader-face), "Literata", "Source Serif 4", Georgia, serif;
@@ -79,11 +79,11 @@
   --gush-text-display-lg: clamp(2.5rem, 5.6vw, 4.8rem);
   --gush-text-title-lg: clamp(1.52rem, 3vw, 2.1rem);
   --gush-text-title-md: clamp(1.14rem, 2vw, 1.48rem);
-  --gush-text-body-lg: 1.08rem;
-  --gush-text-body: 0.98rem;
-  --gush-text-body-sm: 0.875rem;
+  --gush-text-body-lg: clamp(1.02rem, 1rem + 0.12vw, 1.1rem);
+  --gush-text-body: clamp(0.95rem, 0.93rem + 0.08vw, 1rem);
+  --gush-text-body-sm: clamp(0.84rem, 0.82rem + 0.05vw, 0.9rem);
   --gush-leading-display: 1;
-  --gush-leading-copy: 1.7;
+  --gush-leading-copy: 1.68;
   --gush-mobile-bottom-nav-height: 6.4rem;
 }
 
@@ -106,7 +106,7 @@ body {
   font-family: var(--font-body);
   font-size: var(--gush-text-body);
   line-height: var(--gush-leading-copy);
-  letter-spacing: -0.006em;
+  letter-spacing: -0.01em;
   font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -222,7 +222,7 @@ h5,
 h6 {
   color: var(--gush-ink-strong);
   font-family: var(--font-display), var(--font-body);
-  letter-spacing: -0.014em;
+  letter-spacing: -0.022em;
   line-height: 1;
   font-weight: 600;
   font-optical-sizing: auto;
@@ -251,7 +251,7 @@ h6 {
 }
 
 :where(h1, h2, h3).font-display {
-  letter-spacing: -0.014em;
+  letter-spacing: -0.022em;
   line-height: 1;
 }
 
@@ -484,21 +484,38 @@ html.dark .skeleton {
 
 .admin-theme {
   position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  --gush-page-bg: #ffffff;
-  --gush-page-bg-elevated: #ffffff;
-  --gush-page-bg-muted: #fafafc;
-  --gush-surface: #ffffff;
-  --gush-surface-strong: #ffffff;
-  --gush-surface-muted: #fcfcfd;
-  --gush-border: rgba(29, 29, 31, 0.08);
-  --gush-border-strong: rgba(29, 29, 31, 0.12);
-  --gush-shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.035);
-  --gush-shadow-panel: 0 18px 40px rgba(15, 23, 42, 0.04);
-  --gush-shadow-floating: 0 12px 28px rgba(15, 23, 42, 0.04);
-  --gush-shadow-header: 0 10px 24px rgba(15, 23, 42, 0.04);
+  --gush-page-bg: #f4eef8;
+  --gush-page-bg-elevated: #fcf8ff;
+  --gush-page-bg-muted: #f7f1fb;
+  --gush-surface: rgba(255, 255, 255, 0.86);
+  --gush-surface-strong: rgba(255, 255, 255, 0.94);
+  --gush-surface-muted: rgba(252, 248, 255, 0.9);
+  --gush-border: rgba(74, 44, 104, 0.11);
+  --gush-border-strong: rgba(112, 62, 162, 0.2);
+  --gush-shadow-soft: 0 18px 44px rgba(49, 25, 77, 0.08);
+  --gush-shadow-panel: 0 28px 64px rgba(49, 25, 77, 0.1);
+  --gush-shadow-floating: 0 20px 48px rgba(49, 25, 77, 0.09);
+  --gush-shadow-header: 0 18px 40px rgba(49, 25, 77, 0.08);
   color: var(--gush-ink-strong);
-  background: var(--gush-page-bg);
+  background:
+    radial-gradient(circle at top left, rgba(255, 79, 154, 0.08), transparent 24%),
+    radial-gradient(circle at top right, rgba(103, 232, 249, 0.08), transparent 22%),
+    linear-gradient(180deg, #f7f1fb 0%, #f1ecf8 52%, #efe9f6 100%);
+}
+
+.admin-theme::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 79, 154, 0.12), transparent 18%),
+    radial-gradient(circle at 88% 8%, rgba(103, 232, 249, 0.12), transparent 18%),
+    radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.12), transparent 24%);
+  opacity: 0.9;
 }
 
 .admin-theme :is(
@@ -576,7 +593,7 @@ html.dark .skeleton {
 }
 
 .admin-theme [class*="shadow-[var(--gush-shadow-panel)]"] {
-  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 28px 64px rgba(49, 25, 77, 0.1) !important;
 }
 
 .admin-theme [class*="bg-[linear-gradient(180deg,#ffffff,#f5f5f7)]"],

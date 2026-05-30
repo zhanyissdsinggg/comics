@@ -9,6 +9,8 @@ import StorefrontPathwaysGrid from "../../components/common/StorefrontPathwaysGr
 import {
   StorefrontDesk,
   StorefrontSectionHeading,
+  storefrontBadgeClass,
+  storefrontNoticeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
 } from "../../components/common/StorefrontPagePrimitives";
@@ -196,11 +198,14 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
   // NOTE: These class strings are referenced by multiple useMemo blocks below.
   // They must be declared before use to avoid TDZ runtime errors in production builds.
   const actionCardPrimaryClass =
-    "border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:border-white/25 hover:bg-[#111111]";
+    "border border-[rgba(255,79,154,0.24)] bg-[linear-gradient(180deg,rgba(255,79,154,0.12)_0%,rgba(255,255,255,0.03)_100%)] text-white shadow-[0_22px_46px_rgba(8,6,20,0.24)] hover:border-[rgba(255,79,154,0.34)] hover:bg-[linear-gradient(180deg,rgba(255,79,154,0.16)_0%,rgba(255,255,255,0.05)_100%)]";
   const actionCardSecondaryClass =
-    "border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:border-white/25 hover:bg-[#111111]";
+    "border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] text-white shadow-[0_22px_46px_rgba(8,6,20,0.24)] hover:border-white/16 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)]";
   const subtleChipClass =
-    "rounded-full border-2 border-white/15 bg-black px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/70 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]";
+    "rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/72 shadow-[0_12px_24px_rgba(8,6,20,0.18)]";
+  const panelClass = "space-y-5";
+  const orderCardClass =
+    "rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0.03)_100%)] p-4 text-white shadow-[0_18px_40px_rgba(8,6,20,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/16 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.04)_100%)]";
   const latestPaidOrder = useMemo(
     () => orders.find((order) => order.status === "PAID") || null,
     [orders],
@@ -409,15 +414,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           />
 
           <SurfacePanel
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className={panelClass}
             appearance="dark"
             accent="blue"
           >
             <div className="space-y-2">
-              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                 Account
               </p>
-              <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
+              <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
                 Sign in to view purchases
               </h2>
               <p className="text-sm font-semibold leading-6 text-white/70">
@@ -521,12 +526,12 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
             accent={feedback.type === "error" ? "rose" : "amber"}
             className={
               feedback.type === "error"
-                ? "border-2 border-[#FF007A] bg-black text-[#FF007A] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                : "border-2 border-[#FFE500] bg-black text-[#FFE500] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                ? "border border-rose-300/22 bg-[rgba(255,79,154,0.12)] shadow-[0_18px_38px_rgba(255,79,154,0.14)]"
+                : "border border-amber-300/20 bg-[rgba(247,195,91,0.12)] shadow-[0_18px_38px_rgba(247,195,91,0.14)]"
             }
           >
             <p
-              className={`text-sm font-medium ${feedback.type === "error" ? "text-[#FF007A]" : "text-[#FFE500]"}`}
+              className={`text-sm font-medium ${feedback.type === "error" ? "text-rose-100" : "text-amber-100"}`}
             >
               {feedback.text}
             </p>
@@ -535,14 +540,14 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {viewerSignedIn && refundPreviewOnly ? (
           <SurfacePanel
-            className="border-2 border-[#FFE500] bg-black text-[#FFE500] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            className="border border-amber-300/20 bg-[rgba(247,195,91,0.12)] text-amber-100 shadow-[0_18px_38px_rgba(247,195,91,0.14)]"
             appearance="dark"
             tone="warning"
             accent="blue"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <p className="text-sm font-black uppercase tracking-[0.03em]">
+                <p className="text-sm font-semibold tracking-[0.01em]">
                   Need help?
                 </p>
               </div>
@@ -562,15 +567,15 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         {viewerSignedIn && hydrated ? (
           <>
             <SurfacePanel
-              className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+              className={panelClass}
               appearance="dark"
               accent="blue"
             >
               <div className="space-y-2">
-                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/56">
                   Tasks
                 </p>
-                <h2 className="text-2xl font-black uppercase tracking-[-0.05em] text-white">
+                <h2 className="font-display text-[2rem] font-semibold tracking-[-0.05em] text-white">
                   Orders
                 </h2>
               </div>
@@ -585,7 +590,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
 
         {!hydrated || loading ? (
           <SurfacePanel
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className={panelClass}
             appearance="dark"
             accent="blue"
           >
@@ -607,7 +612,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
               {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className="rounded-[24px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.22)]"
                   aria-hidden="true"
                 >
                   <div className="h-4 w-24 animate-pulse rounded-full bg-white/20" />
@@ -619,7 +624,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
           </SurfacePanel>
         ) : orders.length === 0 ? (
           <SurfacePanel
-            className="space-y-4 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="space-y-4"
             appearance="dark"
             accent="blue"
           >
@@ -639,7 +644,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
         ) : (
           <SurfacePanel
             id="purchase-history"
-            className="space-y-5 border-2 border-white/15 bg-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className={panelClass}
             appearance="dark"
             accent="blue"
           >
@@ -671,11 +676,11 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                 return (
                   <div
                     key={order.orderId}
-                    className="rounded-[26px] border-2 border-white/15 bg-black p-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 hover:bg-[#111111]"
+                    className={orderCardClass}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-black uppercase tracking-[-0.02em] text-white">
+                        <p className="text-sm font-semibold tracking-[-0.02em] text-white">
                           {formatOrderPackageLabel(order.packageId)}
                         </p>
                         <p className="mt-2 text-xs font-medium text-white/55">
@@ -686,10 +691,10 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                       <span className={subtleChipClass}>{order.status}</span>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-white/55">
-                      <span className="rounded-full border-2 border-black bg-[#00E5FF] px-3 py-1 font-semibold uppercase tracking-[0.12em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                      <span className={storefrontBadgeClass}>
                         {orderGuide.eyebrow}
                       </span>
-                      <span className="rounded-full border-2 border-white/15 bg-black px-3 py-1 font-semibold uppercase tracking-[0.12em] text-white/65 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                      <span className={subtleChipClass}>
                         Placed {formatOrderDate(order.createdAt)}
                       </span>
                     </div>
@@ -734,7 +739,7 @@ export default function OrdersPageClient({ initialSignedIn = false }) {
                           }}
                           className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition ${
                             workingId === order.orderId
-                              ? "cursor-not-allowed border-2 border-white/10 bg-[#0a0a0a] text-white/40 shadow-none"
+                              ? "cursor-not-allowed border border-white/10 bg-[rgba(255,255,255,0.04)] text-white/40 shadow-none"
                               : primaryButtonClass
                           }`}
                           disabled={workingId === order.orderId}

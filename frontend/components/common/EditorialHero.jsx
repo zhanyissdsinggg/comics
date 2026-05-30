@@ -18,8 +18,8 @@ export default function EditorialHero({
   const resolvedAppearance = appearance === "default" ? "dark" : appearance;
   const isLight = resolvedAppearance === "light";
   const statClass = isLight
-    ? "border border-[rgba(29,29,31,0.12)] bg-[rgba(255,255,255,0.94)] shadow-[0_14px_34px_rgba(58,44,86,0.1)]"
-    : "border border-white/10 bg-[rgba(255,255,255,0.04)] shadow-[0_14px_34px_rgba(8,6,20,0.2)]";
+    ? "border border-[rgba(29,29,31,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(255,250,252,0.92)_100%)] shadow-[0_14px_34px_rgba(58,44,86,0.1)]"
+    : "border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.035)_100%)] shadow-[0_18px_40px_rgba(8,6,20,0.22)]";
 
   return (
     <SurfacePanel
@@ -33,8 +33,8 @@ export default function EditorialHero({
           {eyebrow ? (
             <p
               className={cn(
-                "text-[11px] font-semibold uppercase tracking-[0.24em]",
-                isLight ? "text-white/80" : "text-neutral-400",
+                "text-[10px] font-semibold uppercase tracking-[0.24em]",
+                isLight ? "text-slate-500" : "text-neutral-400",
               )}
             >
               {eyebrow}
@@ -53,8 +53,8 @@ export default function EditorialHero({
           {description ? (
             <p
               className={cn(
-                "mt-4 max-w-2xl text-sm leading-6 sm:text-[15px] sm:leading-7",
-                isLight ? "text-white/90" : "text-neutral-200",
+                "mt-4 max-w-2xl text-sm leading-[1.72] sm:text-[15px] sm:leading-[1.78]",
+                isLight ? "text-slate-700" : "text-neutral-200",
               )}
             >
               {description}
@@ -64,8 +64,8 @@ export default function EditorialHero({
           {secondary ? (
             <p
               className={cn(
-                "mt-2.5 max-w-xl text-sm leading-6",
-                isLight ? "text-white/70" : "text-neutral-400",
+                "mt-2.5 max-w-xl text-sm leading-[1.68]",
+                isLight ? "text-slate-500" : "text-neutral-400",
               )}
             >
               {secondary}
@@ -91,16 +91,16 @@ export default function EditorialHero({
                 >
                   <p
                     className={cn(
-                      "text-[11px] font-semibold uppercase tracking-[0.22em]",
-                      isLight ? "text-white/60" : "text-neutral-400",
+                      "text-[10px] font-semibold uppercase tracking-[0.22em]",
+                      isLight ? "text-slate-500" : "text-neutral-400",
                     )}
                   >
                     {stat.label}
                   </p>
                   <p
                     className={cn(
-                      "mt-2 font-display text-[1.32rem] font-black uppercase tracking-[-0.04em]",
-                      "text-white",
+                      "mt-2 font-display text-[1.28rem] font-semibold tracking-[-0.04em]",
+                      isLight ? "text-slate-950" : "text-white",
                     )}
                   >
                     {stat.value}
@@ -108,8 +108,8 @@ export default function EditorialHero({
                   {stat.hint ? (
                     <p
                       className={cn(
-                        "mt-1.5 max-w-[16rem] text-[13px] leading-5",
-                        isLight ? "text-white/68" : "text-neutral-400",
+                        "mt-1.5 max-w-[16rem] text-[13px] leading-[1.58]",
+                        isLight ? "text-slate-500" : "text-neutral-400",
                       )}
                     >
                       {stat.hint}

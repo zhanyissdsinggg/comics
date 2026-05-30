@@ -31,7 +31,7 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
   const accentTextClass = "text-[color:var(--gush-accent,#3157d6)]";
 
   return (
-    <div className="rounded-[24px] border-[3px] border-white/20 bg-black px-4 py-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+    <div className="rounded-[24px] border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_34px_rgba(0,0,0,0.22)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p
@@ -60,10 +60,10 @@ function DiscoveryContextCard({ discoveryContext, onReturnToSource }) {
 function MetaPill({ children, accent = false }) {
   return (
     <span
-      className={`rounded-full border-2 border-black px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
+      className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] ${
         accent
-          ? "bg-[#FFE500] text-black"
-          : "bg-black text-white/70 border-white/20"
+          ? "border-cyan-300/28 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] text-white"
+          : "border-white/16 bg-white/[0.05] text-white/70"
       }`}
     >
       {children}
@@ -191,7 +191,7 @@ export default function EndOfEpisodeOverlay({
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border-[3px] border-white/20 bg-black p-5 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="w-full max-w-2xl rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(15,16,28,0.96)_0%,rgba(10,12,20,0.98)_100%)] p-5 text-white shadow-[0_28px_70px_rgba(0,0,0,0.38)] backdrop-blur-[26px]">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.26em] text-white/55">
@@ -221,7 +221,7 @@ export default function EndOfEpisodeOverlay({
           />
 
           {nextUnlocked ? (
-            <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <div className="rounded-[26px] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p
@@ -260,7 +260,7 @@ export default function EndOfEpisodeOverlay({
               </div>
             </div>
           ) : (
-            <div className="rounded-[26px] border-[3px] border-white/20 bg-black px-4 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <div className="rounded-[26px] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-xl">
                   <p
@@ -291,8 +291,8 @@ export default function EndOfEpisodeOverlay({
                       <div
                         className={`mt-4 ${
                           countdownVariant === "B"
-                            ? "flex flex-col gap-2 rounded-[22px] border-[3px] border-white/20 bg-black px-4 py-3 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-                            : "flex flex-wrap items-center gap-3 rounded-[22px] border-[3px] border-white/20 bg-black px-4 py-2 text-xs font-semibold text-white/70 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                            ? "flex flex-col gap-2 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-semibold text-white/70 shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
+                            : "flex flex-wrap items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white/70 shadow-[0_16px_32px_rgba(0,0,0,0.22)]"
                         }`}
                       >
                         <span>Free in {formatted || "--:--:--"}</span>

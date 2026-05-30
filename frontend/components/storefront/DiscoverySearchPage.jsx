@@ -188,17 +188,19 @@ function sanitizeCatalog(items = [], includeAdult = false) {
     if (!series || typeof series !== "object") {
       return false;
     }
-    return includeAdult ? true : !isAdultContent(series);
+    return includeAdult ? isAdultContent(series) : !isAdultContent(series);
   });
 }
 
-function buildCuratedRecentUpdates(seriesList = [], limit = 6) {
+function buildCuratedRecentUpdates(seriesList = [], limit = 6, includeAdult = false) {
   const allItems = Array.isArray(seriesList) ? seriesList : [];
   const byId = new Map(
     allItems.map((series) => [String(series?.id || "").trim(), series]),
   );
   const curated = CURATED_RECENT_UPDATE_SERIES_IDS.map(
-    (id) => byId.get(id) || CURATED_RECENT_UPDATE_FALLBACKS[id],
+    (id) =>
+      byId.get(id) ||
+      (includeAdult ? null : CURATED_RECENT_UPDATE_FALLBACKS[id]),
   ).filter(Boolean);
   const seen = new Set(curated.map((series) => String(series?.id || "").trim()));
   const fallback = buildUpdatedRail(allItems, 24).filter((series) => {
@@ -552,7 +554,7 @@ export default function DiscoverySearchPage({
       normalizedType && normalizedType !== "interactive"
         ? catalog.filter((series) => normalizeType(series?.type) === normalizedType)
         : catalog;
-    const recent = buildCuratedRecentUpdates(filteredCatalog, 12);
+    const recent = buildCuratedRecentUpdates(filteredCatalog, 12, includeAdult);
     const featured = pickFeaturedSeries(
       query || genre || status ? results : filteredCatalog,
     );
@@ -569,7 +571,7 @@ export default function DiscoverySearchPage({
       moodTags: buildMoodTags(filteredCatalog),
       popularGenres,
     };
-  }, [catalog, format, genre, keywords, query, results, status, type]);
+  }, [catalog, format, genre, includeAdult, keywords, query, results, status, type]);
 
   const formatCounts = useMemo(() => {
     return {
@@ -584,7 +586,7 @@ export default function DiscoverySearchPage({
 
   return (
     <StorefrontPage accentClass="from-[rgba(103,232,249,0.12)] via-[rgba(255,79,154,0.08)] to-[rgba(255,255,255,0.04)]">
-      <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(140deg,rgba(16,12,22,0.98)_0%,rgba(13,11,18,0.95)_52%,rgba(18,14,24,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:p-6 lg:p-8">
+      <section className="rounded-[36px] border border-white/10 bg-[linear-gradient(140deg,rgba(10,12,20,0.98)_0%,rgba(12,12,20,0.96)_48%,rgba(18,14,24,0.98)_100%)] p-4 shadow-[var(--gush-shadow-floating)] sm:p-6 lg:p-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div>
             <p className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70">
@@ -598,7 +600,7 @@ export default function DiscoverySearchPage({
             </p>
           </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-[rgba(255,255,255,0.05)] p-4 shadow-[var(--gush-shadow-panel)]">
+          <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.04))] p-4 shadow-[var(--gush-shadow-panel)] backdrop-blur-xl">
             <SearchPageInput
               initialQuery={draftQuery}
               includeAdult={includeAdult}
@@ -622,7 +624,7 @@ export default function DiscoverySearchPage({
                   className={`inline-flex min-h-[44px] items-center rounded-full border px-4 text-sm font-medium ${
                     sort === option.id
                       ? "border-white/16 bg-[rgba(255,79,154,0.16)] text-white"
-                      : "border-white/10 bg-white/[0.04] text-white/70"
+                      : "border-white/10 bg-white/[0.05] text-white/70"
                   }`}
                 >
                   {option.label}
@@ -701,7 +703,7 @@ export default function DiscoverySearchPage({
                   key={item.id}
                   type="button"
                   onClick={() => handleSearchSubmit(item.value)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/78 transition-colors hover:bg-white/[0.08]"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/78 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
                 >
                   <Flame className="size-4 text-[var(--gush-gold)]" />
                   {item.label}
@@ -722,7 +724,7 @@ export default function DiscoverySearchPage({
                   key={tag}
                   type="button"
                   onClick={() => handleSearchSubmit(tag)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,79,154,0.08)] px-4 text-sm font-medium text-white/78"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-[rgba(255,79,154,0.08)] px-4 text-sm font-medium text-white/78 transition-all hover:-translate-y-0.5"
                 >
                   <Sparkles className="size-4 text-[var(--gush-rose)]" />
                   {tag}
@@ -742,7 +744,7 @@ export default function DiscoverySearchPage({
                 <Link
                   key={tag}
                   href={`/search?genre=${encodeURIComponent(tag)}`}
-                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/72"
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/72 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
                 >
                   {tag}
                 </Link>
@@ -867,7 +869,7 @@ export default function DiscoverySearchPage({
                 <button
                   type="button"
                   onClick={() => updateParams({ page: String(page + 1) }, { resetPage: false })}
-                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-white/72"
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/72 transition-all hover:-translate-y-0.5 hover:bg-white/[0.08]"
                 >
                   More results
                 </button>

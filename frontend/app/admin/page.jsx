@@ -54,7 +54,10 @@ export default function AdminPage() {
   }
 
   return (
-    <AdminShell title="仪表盘" subtitle="先看今天最该处理的事。">
+    <AdminShell
+      title="Dashboard"
+      subtitle="Start with the highest-signal work waiting across content, storefront, and operations."
+    >
       <AdminDashboardClean />
     </AdminShell>
   );

@@ -82,8 +82,8 @@ export default function AdminRouteGuard({ children }) {
   if (isLoading || !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--gush-page-bg)] px-4">
-        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] px-6 py-4 text-sm text-slate-600 shadow-[0_14px_32px_rgba(15,23,42,0.04)] ring-1 ring-black/[0.02]">
-          正在检查后台登录状态...
+        <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,243,249,0.92))] px-6 py-4 text-sm text-slate-600 shadow-[0_14px_32px_rgba(49,25,77,0.07)] ring-1 ring-white/70 backdrop-blur-xl">
+          Checking the current admin session...
         </div>
       </div>
     );
@@ -92,22 +92,24 @@ export default function AdminRouteGuard({ children }) {
   if (!hasRouteAccess) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--gush-page-bg)] px-4">
-        <div className="w-full max-w-xl rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,247,249,0.92))] p-8 text-center shadow-[0_16px_36px_rgba(15,23,42,0.05)] ring-1 ring-black/[0.02]">
+        <div className="w-full max-w-xl rounded-[28px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,243,249,0.92))] p-8 text-center shadow-[0_16px_36px_rgba(49,25,77,0.08)] ring-1 ring-white/70 backdrop-blur-xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-            后台权限
+            Admin access
           </p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-            当前账号不能访问这个页面
+            This account cannot open this page
           </h1>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            当前角色的工作区已经按权限收口。若要进入这个页面，请先在后台角色分配里补齐权限。
+            The current role is already scoped to a smaller set of workspaces.
+            If this area should be available, update the operator role or route
+            permissions first.
           </p>
           <div className="mt-6 flex justify-center">
             <Link
               href={homePath || "/admin"}
-              className="inline-flex h-11 items-center rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-5 text-sm font-medium text-slate-950"
+              className="inline-flex h-11 items-center rounded-full border border-[color:var(--gush-border)] bg-white/88 px-5 text-sm font-medium text-slate-950 shadow-[0_10px_22px_rgba(49,25,77,0.06)] backdrop-blur-sm"
             >
-              返回可访问的工作区
+              Return to an available workspace
             </Link>
           </div>
         </div>

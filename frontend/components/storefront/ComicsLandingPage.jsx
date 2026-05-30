@@ -270,7 +270,7 @@ export default function ComicsLandingPage({
               return (
                 <div
                   key={item.title}
-                  className="rounded-[22px] border border-white/10 bg-black/15 p-4"
+                  className="rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_14px_30px_rgba(8,6,20,0.18)]"
                 >
                   <Icon className="size-5 text-[var(--gush-rose)]" />
                   <h3 className="mt-3 text-lg font-semibold text-white">

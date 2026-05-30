@@ -37,40 +37,40 @@ import { canAccessAdminRoute, getAdminRoleLabel } from "../../lib/adminAccess";
 
 const NAV_GROUPS = [
   {
-    label: "工作台",
+    label: "Workspace",
     items: [
       {
-        label: "仪表盘",
+        label: "Dashboard",
         href: "/admin",
         icon: BarChart3,
         match: ["/admin"],
         exact: true,
       },
       {
-        label: "数据分析",
+        label: "Analytics",
         href: "/admin/analytics",
         icon: BarChart3,
         match: ["/admin/analytics"],
       },
       {
-        label: "作品",
+        label: "Series",
         href: "/admin/series",
         icon: BookOpen,
         match: ["/admin/series"],
         children: [
-          { label: "全部作品", href: "/admin/series" },
-          { label: "漫画", href: "/admin/series?type=comic" },
-          { label: "小说", href: "/admin/series?type=novel" },
+          { label: "All Series", href: "/admin/series" },
+          { label: "Comics", href: "/admin/series?type=comic" },
+          { label: "Novels", href: "/admin/series?type=novel" },
         ],
       },
       {
-        label: "创作者",
+        label: "Creators",
         href: "/admin/creators",
         icon: PenSquare,
         match: ["/admin/creators"],
       },
       {
-        label: "互动小说",
+        label: "Interactive Stories",
         href: "/admin/interactive-stories",
         icon: BookOpen,
         match: ["/admin/interactive-stories"],
@@ -78,28 +78,28 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "发现与前台",
+    label: "Discovery & Frontend",
     items: [
       {
-        label: "前台巡检",
+        label: "Storefront Audit",
         href: "/admin/storefront",
         icon: Search,
         match: ["/admin/storefront"],
       },
       {
-        label: "首页编排",
+        label: "Home Merchandising",
         href: "/admin/merchandising",
         icon: Sparkles,
         match: ["/admin/merchandising"],
       },
       {
-        label: "推荐位",
+        label: "Recommendations",
         href: "/admin/recommendations",
         icon: Sparkles,
         match: ["/admin/recommendations"],
       },
       {
-        label: "评论",
+        label: "Comments",
         href: "/admin/comments",
         icon: MessageSquare,
         match: ["/admin/comments"],
@@ -107,28 +107,28 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "用户与服务",
+    label: "Users & Support",
     items: [
       {
-        label: "用户",
+        label: "Users",
         href: "/admin/users",
         icon: Users,
         match: ["/admin/users"],
       },
       {
-        label: "客服支持",
+        label: "Support",
         href: "/admin/support",
         icon: LifeBuoy,
         match: ["/admin/support"],
       },
       {
-        label: "通知",
+        label: "Notifications",
         href: "/admin/notifications",
         icon: Bell,
         match: ["/admin/notifications"],
       },
       {
-        label: "审计日志",
+        label: "Audit Logs",
         href: "/admin/logs",
         icon: ScrollText,
         match: ["/admin/logs"],
@@ -136,34 +136,34 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "商业与收入",
+    label: "Commerce & Revenue",
     items: [
       {
-        label: "活动",
+        label: "Promotions",
         href: "/admin/promotions",
         icon: Megaphone,
         match: ["/admin/promotions"],
       },
       {
-        label: "营销",
+        label: "Marketing",
         href: "/admin/marketing",
         icon: Megaphone,
         match: ["/admin/marketing"],
       },
       {
-        label: "订单",
+        label: "Orders",
         href: "/admin/orders",
         icon: Receipt,
         match: ["/admin/orders"],
       },
       {
-        label: "收入",
+        label: "Revenue",
         href: "/admin/revenue",
         icon: CreditCard,
         match: ["/admin/revenue"],
       },
       {
-        label: "计费",
+        label: "Billing",
         href: "/admin/billing",
         icon: CreditCard,
         match: ["/admin/billing"],
@@ -171,46 +171,46 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "设置",
+    label: "Settings",
     items: [
       {
-        label: "品牌素材",
+        label: "Brand Assets",
         href: "/admin/branding",
         icon: Image,
         match: ["/admin/branding"],
       },
       {
-        label: "邮件设置",
+        label: "Email Settings",
         href: "/admin/email-settings",
         icon: Mail,
         match: ["/admin/email-settings"],
       },
       {
-        label: "邮件任务",
+        label: "Email Jobs",
         href: "/admin/email-jobs",
         icon: MailCheck,
         match: ["/admin/email-jobs"],
       },
       {
-        label: "追踪设置",
+        label: "Tracking",
         href: "/admin/tracking",
         icon: Radar,
         match: ["/admin/tracking"],
       },
       {
-        label: "后台成员",
+        label: "Admin Members",
         href: "/admin/members",
         icon: ShieldCheck,
         match: ["/admin/members"],
       },
       {
-        label: "地区",
+        label: "Regions",
         href: "/admin/regions",
         icon: Globe,
         match: ["/admin/regions"],
       },
       {
-        label: "系统设置",
+        label: "System Settings",
         href: "/admin/settings",
         icon: Settings,
         match: ["/admin/settings"],
@@ -220,31 +220,31 @@ const NAV_GROUPS = [
 ];
 
 const BREADCRUMB_MAP = [
-  { match: "/admin", label: "仪表盘", exact: true },
-  { match: "/admin/analytics", label: "数据分析" },
-  { match: "/admin/series", label: "作品" },
-  { match: "/admin/creators", label: "创作者" },
-  { match: "/admin/interactive-stories", label: "互动小说" },
-  { match: "/admin/storefront", label: "前台巡检" },
-  { match: "/admin/merchandising", label: "首页编排" },
-  { match: "/admin/recommendations", label: "推荐位" },
-  { match: "/admin/comments", label: "评论" },
-  { match: "/admin/promotions", label: "活动" },
-  { match: "/admin/marketing", label: "营销" },
-  { match: "/admin/orders", label: "订单" },
-  { match: "/admin/revenue", label: "收入" },
-  { match: "/admin/billing", label: "计费" },
-  { match: "/admin/notifications", label: "通知" },
-  { match: "/admin/logs", label: "审计日志" },
-  { match: "/admin/users", label: "用户" },
-  { match: "/admin/support", label: "客服支持" },
-  { match: "/admin/branding", label: "品牌素材" },
-  { match: "/admin/email-settings", label: "邮件设置" },
-  { match: "/admin/email-jobs", label: "邮件任务" },
-  { match: "/admin/tracking", label: "追踪设置" },
-  { match: "/admin/members", label: "后台成员" },
-  { match: "/admin/regions", label: "地区" },
-  { match: "/admin/settings", label: "系统设置" },
+  { match: "/admin", label: "Dashboard", exact: true },
+  { match: "/admin/analytics", label: "Analytics" },
+  { match: "/admin/series", label: "Series" },
+  { match: "/admin/creators", label: "Creators" },
+  { match: "/admin/interactive-stories", label: "Interactive Stories" },
+  { match: "/admin/storefront", label: "Storefront Audit" },
+  { match: "/admin/merchandising", label: "Home Merchandising" },
+  { match: "/admin/recommendations", label: "Recommendations" },
+  { match: "/admin/comments", label: "Comments" },
+  { match: "/admin/promotions", label: "Promotions" },
+  { match: "/admin/marketing", label: "Marketing" },
+  { match: "/admin/orders", label: "Orders" },
+  { match: "/admin/revenue", label: "Revenue" },
+  { match: "/admin/billing", label: "Billing" },
+  { match: "/admin/notifications", label: "Notifications" },
+  { match: "/admin/logs", label: "Audit Logs" },
+  { match: "/admin/users", label: "Users" },
+  { match: "/admin/support", label: "Support" },
+  { match: "/admin/branding", label: "Brand Assets" },
+  { match: "/admin/email-settings", label: "Email Settings" },
+  { match: "/admin/email-jobs", label: "Email Jobs" },
+  { match: "/admin/tracking", label: "Tracking" },
+  { match: "/admin/members", label: "Admin Members" },
+  { match: "/admin/regions", label: "Regions" },
+  { match: "/admin/settings", label: "System Settings" },
 ];
 
 function getBreadcrumb(pathname) {
@@ -255,7 +255,7 @@ function getBreadcrumb(pathname) {
     return pathname.startsWith(item.match);
   });
 
-  return hit ? hit.label : "后台";
+  return hit ? hit.label : "Admin";
 }
 
 function isChildLinkActive(pathname, searchParams, href) {
@@ -311,7 +311,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
           : navItem.match?.some((prefix) => pathname.startsWith(prefix)),
       ),
     );
-    return group?.label || "工作台";
+    return group?.label || "Workspace";
   }, [pathname, visibleNavGroups]);
 
   const toggleMenu = (href) => {
@@ -358,10 +358,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
     <div className="admin-theme relative min-h-screen overflow-hidden bg-[var(--gush-page-bg)] text-[var(--gush-ink-strong)]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white" />
 
-      <div className="relative flex min-h-screen">
+      <div className="relative z-[1] flex min-h-screen">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.04)] transition-all duration-300 lg:relative",
+            "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[color:var(--gush-border)] bg-white/84 shadow-[0_24px_56px_rgba(41,19,67,0.12)] backdrop-blur-2xl transition-all duration-300 lg:relative",
             isCollapsed ? "w-[92px]" : "w-[284px]",
             isMobileMenuOpen
               ? "translate-x-0"
@@ -375,16 +375,16 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   href={effectiveHomePath}
                   className="flex items-center gap-3"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[color:var(--gush-border)] bg-white text-sm font-semibold tracking-[0.18em] text-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                    TT
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,248,0.96))] text-sm font-semibold tracking-[0.18em] text-slate-950 shadow-[0_16px_32px_rgba(255,79,154,0.12)]">
+                    GS
                   </div>
                   {!isCollapsed ? (
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                        后台
+                        Admin
                       </p>
                       <h1 className="mt-1 text-base font-semibold text-slate-950">
-                        内容管理后台
+                        Gush Control
                       </h1>
                     </div>
                   ) : null}
@@ -393,8 +393,8 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsCollapsed((current) => !current)}
-                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 lg:flex"
-                  aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+                  className="hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white/90 text-slate-500 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950 lg:flex"
+                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                   {isCollapsed ? (
                     <ChevronRight size={18} />
@@ -405,15 +405,16 @@ export default function AdminShell({ title, subtitle, children, actions }) {
               </div>
 
               {!isCollapsed ? (
-                <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <div className="mt-4 rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(255,246,251,0.92))] px-4 py-4 shadow-[0_14px_30px_rgba(41,19,67,0.08)] ring-1 ring-white/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    当前分区
+                    Current focus
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">
                     {activeGroupLabel}
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
-                    侧边导航已经按运营对象分组，优先从这里进入高频工作区。
+                    Navigation is grouped by operating area so the daily queue
+                    stays one click away.
                   </p>
                 </div>
               ) : null}
@@ -424,14 +425,14 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
                 className={cn(
-                  "flex h-11 w-full items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-left text-sm text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.035)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
+                  "flex h-11 w-full items-center gap-3 rounded-full border border-[color:var(--gush-border)] bg-white/88 px-4 text-left text-sm text-slate-700 shadow-[0_12px_26px_rgba(41,19,67,0.08)] backdrop-blur-sm transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950",
                   isCollapsed ? "justify-center px-0" : "",
                 )}
               >
                 <Search size={17} className="shrink-0 text-slate-500" />
                 {!isCollapsed ? (
                   <>
-                    <span className="flex-1">搜索后台页面</span>
+                    <span className="flex-1">Search admin pages</span>
                     <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                       Ctrl+K
                     </span>
@@ -465,9 +466,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                       const baseClass =
                         "group flex w-full items-center gap-3 rounded-[20px] border px-4 py-3 text-sm font-medium transition-all duration-200";
                       const activeClass =
-                        "border-[color:var(--gush-border-strong)] bg-white text-slate-950 shadow-[0_12px_28px_rgba(15,23,42,0.045)]";
+                        "border-[color:var(--gush-border-strong)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,248,0.94))] text-slate-950 shadow-[0_14px_30px_rgba(255,79,154,0.1)]";
                       const idleClass =
-                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950";
+                        "border-transparent text-slate-600 hover:border-[color:var(--gush-border)] hover:bg-white/80 hover:text-slate-950";
 
                       return (
                         <div key={item.label}>
@@ -527,7 +528,7 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                 <span className="truncate">{item.label}</span>
                               ) : null}
                               {isActive && !isCollapsed ? (
-                                <span className="ml-auto h-2 w-2 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
+                                <span className="ml-auto h-2 w-2 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(255,79,154,0.16)]" />
                               ) : null}
                             </Link>
                           )}
@@ -548,15 +549,15 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                                     className={cn(
                                       "group flex items-center gap-2 rounded-[16px] px-3 py-2 text-xs font-medium transition-all duration-200",
                                       childIsActive
-                                        ? "bg-white text-slate-950 shadow-[0_8px_18px_rgba(15,23,42,0.035)]"
-                                        : "text-slate-500 hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950",
+                                        ? "bg-white text-slate-950 shadow-[0_10px_20px_rgba(41,19,67,0.08)]"
+                                        : "text-slate-500 hover:bg-white/72 hover:text-slate-950",
                                     )}
                                   >
                                     <span className="truncate">
                                       {child.label}
                                     </span>
                                     {childIsActive ? (
-                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(0,113,227,0.12)]" />
+                                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[color:var(--gush-accent)] shadow-[0_0_0_4px_rgba(255,79,154,0.16)]" />
                                     ) : null}
                                   </Link>
                                 );
@@ -573,9 +574,9 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
             {!isCollapsed ? (
               <div className="border-t border-[color:var(--gush-border)] p-4">
-                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,23,42,0.03)] ring-1 ring-black/[0.02]">
+                <div className="rounded-[24px] border border-[color:var(--gush-border)] bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(246,249,255,0.92))] px-4 py-4 shadow-[0_14px_30px_rgba(41,19,67,0.08)] ring-1 ring-white/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    当前会话
+                    Current session
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-950">
                     {session?.adminName || roleLabel}
@@ -585,14 +586,14 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
                     <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
-                      {visibleNavGroups.length} 个工作分区
+                      {visibleNavGroups.length} groups
                     </span>
                     <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
-                      {permissions.length} 项权限
+                      {permissions.length} permissions
                     </span>
                     {session?.keySlot ? (
                       <span className="rounded-full border border-[color:var(--gush-border)] bg-white px-2.5 py-1">
-                        密钥槽位 {session.keySlot}
+                        Key slot {session.keySlot}
                       </span>
                     ) : null}
                   </div>
@@ -604,20 +605,20 @@ export default function AdminShell({ title, subtitle, children, actions }) {
 
         {isMobileMenuOpen ? (
           <div
-            className="fixed inset-0 z-40 bg-white/80 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-[rgba(18,12,28,0.28)] backdrop-blur-sm lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
         ) : null}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-[color:var(--gush-border)] bg-white/95 shadow-[0_10px_24px_rgba(15,23,42,0.035)] backdrop-blur-2xl">
+          <header className="sticky top-0 z-30 border-b border-[color:var(--gush-border)] bg-white/78 shadow-[0_18px_40px_rgba(41,19,67,0.08)] backdrop-blur-2xl">
             <div className="mx-auto flex w-[min(var(--gush-page-max-wide),calc(100%-2rem))] flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex items-start gap-4">
                 <button
                   type="button"
                   onClick={() => setIsMobileMenuOpen((current) => !current)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 lg:hidden"
-                  aria-label="打开导航"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--gush-border)] bg-white/90 text-slate-600 transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950 lg:hidden"
+                  aria-label="Open navigation"
                 >
                   <Menu size={20} />
                 </button>
@@ -641,10 +642,10 @@ export default function AdminShell({ title, subtitle, children, actions }) {
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(true)}
-                  className="hidden h-11 items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.035)] transition hover:border-[color:var(--gush-border-strong)] hover:bg-[color:var(--gush-page-bg-muted)] hover:text-slate-950 md:flex"
+                  className="hidden h-11 items-center gap-2 rounded-full border border-[color:var(--gush-border)] bg-white/88 px-4 text-sm font-medium text-slate-700 shadow-[0_12px_26px_rgba(41,19,67,0.08)] backdrop-blur-sm transition hover:border-[color:var(--gush-border-strong)] hover:bg-white hover:text-slate-950 md:flex"
                 >
                   <Search size={16} className="text-slate-500" />
-                  <span>搜索</span>
+                  <span>Search</span>
                   <kbd className="rounded-full border border-[color:var(--gush-border)] bg-[color:var(--gush-page-bg-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                     Ctrl+K
                   </kbd>

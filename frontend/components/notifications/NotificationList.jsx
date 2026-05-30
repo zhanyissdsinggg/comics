@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  storefrontBadgeClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../common/StorefrontPagePrimitives";
 import SurfacePanel from "../common/SurfacePanel";
 
@@ -59,7 +61,7 @@ export default function NotificationList({
   if (!notifications) {
     return (
       <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <p className={storefrontBadgeClass}>
           Inbox
         </p>
       </SurfacePanel>
@@ -69,11 +71,14 @@ export default function NotificationList({
   if (notifications.length === 0) {
     return (
       <SurfacePanel tone="muted" accent="cyan" appearance="dark">
-        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-white/70">
+        <p className={storefrontBadgeClass}>
           Inbox
         </p>
-        <p className="mt-2 text-sm font-black uppercase tracking-[0.04em] text-white">
+        <p className="mt-3 font-display text-[1.65rem] font-semibold tracking-[-0.05em] text-white">
           You're caught up.
+        </p>
+        <p className="mt-2 text-sm leading-6 text-white/64">
+          New chapter drops, member perks, and promo alerts will land here.
         </p>
       </SurfacePanel>
     );
@@ -85,23 +90,23 @@ export default function NotificationList({
         <div
           key={item.id}
           className={[
-            "rounded-[26px] border-2 border-black bg-[#0b0b0b] p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5",
+            `rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_20px_42px_rgba(8,6,20,0.28)] transition-all duration-150 ease-out hover:-translate-y-0.5 hover:border-white/16 sm:p-5 ${storefrontSoftCardClass}`,
             item.read ? "text-white/85" : "text-white",
           ].join(" ")}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-black uppercase tracking-[0.03em] text-white">
+                <p className="text-base font-semibold tracking-[-0.03em] text-white">
                   {item.title}
                 </p>
                 {!item.read ? (
-                  <span className="rounded-full border-2 border-black bg-[#FFE500] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <span className="inline-flex items-center rounded-full border border-[rgba(255,143,195,0.3)] bg-[linear-gradient(135deg,rgba(255,79,154,0.24)_0%,rgba(125,244,255,0.18)_100%)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_10px_22px_rgba(255,79,154,0.16)]">
                     Unread
                   </span>
                 ) : null}
               </div>
-              <p className="mt-2 text-sm font-semibold leading-6 text-white/80">
+              <p className="mt-2 text-sm leading-7 text-white/74">
                 {item.message}
               </p>
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">

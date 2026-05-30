@@ -108,18 +108,26 @@ export default function InteractiveLandingPage({
     return stories;
   }, [activeFilter, stories]);
 
+  const filterChipClass = (active) =>
+    `min-h-[44px] rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] shadow-[0_14px_30px_rgba(8,6,20,0.18)] backdrop-blur-xl transition-all duration-150 ${
+      active
+        ? "border-cyan-200/40 bg-cyan-200/12 text-cyan-100"
+        : "border-white/10 bg-white/[0.05] text-white/70 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.08] hover:text-white"
+    }`;
+
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,rgba(31,88,119,0.22)_0%,rgba(13,16,27,0.98)_42%,#07080d_100%)] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#090b12_0%,#0f1119_34%,#13131d_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(255,79,154,0.14),transparent_20%),radial-gradient(circle_at_84%_10%,rgba(103,232,249,0.14),transparent_22%),radial-gradient(circle_at_50%_0%,rgba(167,139,250,0.1),transparent_24%)]" />
       <div className="mx-auto flex max-w-[1320px] flex-col gap-8 px-4 py-8 md:px-8 md:py-10">
         <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <SurfacePanel tone="highlight" accent="cyan" appearance="dark" className="min-h-[320px]">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-200/70">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">
               Interactive Stories
             </p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-black uppercase tracking-[-0.038em] text-white sm:text-5xl sm:tracking-[-0.042em]">
+            <h1 className="mt-4 max-w-3xl font-display text-[2.6rem] font-semibold leading-[0.9] tracking-[-0.07em] text-white sm:text-[3.75rem]">
               Your Choice Changes the Story
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
+            <p className="mt-4 max-w-2xl text-sm leading-[1.72] text-white/72 sm:text-base">
               Every choice changes the route. Unlock secret scenes, hidden clues,
               and different endings.
             </p>
@@ -127,33 +135,21 @@ export default function InteractiveLandingPage({
               <button
                 type="button"
                 onClick={() => setActiveFilter("all")}
-                className={`rounded-full border px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition ${
-                  activeFilter === "all"
-                    ? "border-cyan-200/50 bg-cyan-200/12 text-cyan-100"
-                    : "border-white/10 bg-white/5 text-white/70"
-                }`}
+                className={filterChipClass(activeFilter === "all")}
               >
                 All stories
               </button>
               <button
                 type="button"
                 onClick={() => setActiveFilter("endings")}
-                className={`rounded-full border px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition ${
-                  activeFilter === "endings"
-                    ? "border-cyan-200/50 bg-cyan-200/12 text-cyan-100"
-                    : "border-white/10 bg-white/5 text-white/70"
-                }`}
+                className={filterChipClass(activeFilter === "endings")}
               >
                 Most endings
               </button>
               <button
                 type="button"
                 onClick={() => setActiveFilter("shortest")}
-                className={`rounded-full border px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] transition ${
-                  activeFilter === "shortest"
-                    ? "border-cyan-200/50 bg-cyan-200/12 text-cyan-100"
-                    : "border-white/10 bg-white/5 text-white/70"
-                }`}
+                className={filterChipClass(activeFilter === "shortest")}
               >
                 Quick runs
               </button>
@@ -162,49 +158,49 @@ export default function InteractiveLandingPage({
 
           <SurfacePanel tone="muted" accent="amber" appearance="dark" className="flex flex-col justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/70">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-100/70">
                 {showLaunchChecklist ? "Story Guide" : "What to Expect"}
               </p>
               {showLaunchChecklist ? (
                 <div className="mt-4 grid gap-3 text-sm text-white/80">
-                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
                       Mode
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                    <div className="mt-2 text-lg font-semibold tracking-[-0.04em]">
                       {initialContentMode === "adult" ? "Adult mode" : "Normal mode"}
                     </div>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
                       Published stories
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                    <div className="mt-2 text-lg font-semibold tracking-[-0.04em]">
                       {stories.length}
                     </div>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                  <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
                       Replay factor
                     </div>
-                    <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                    <div className="mt-2 text-lg font-semibold tracking-[-0.04em]">
                       {totalEndings} endings
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 space-y-3 text-sm leading-7 text-white/78">
+                <div className="mt-4 space-y-3 text-sm leading-[1.72] text-white/78">
                   {hasStories ? (
                     <>
                       <p>
                         Start with one choice, follow the route, and watch how fast the story twists around you.
                       </p>
                       <p>Some routes may unlock later through premium access.</p>
-                      <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
                           Available now
                         </div>
-                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                        <div className="mt-2 text-lg font-semibold tracking-[-0.04em]">
                           {stories.length} stories, {totalEndings} endings
                         </div>
                       </div>
@@ -217,11 +213,11 @@ export default function InteractiveLandingPage({
                       <p>
                         The first wave is just the start. More stories will land soon with new turns, bad decisions, and endings worth chasing.
                       </p>
-                      <div className="rounded-[22px] border border-white/10 bg-white/5 p-4">
-                        <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
+                      <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.03)_100%)] p-4 shadow-[0_18px_38px_rgba(8,6,20,0.18)]">
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
                           Coming soon
                         </div>
-                        <div className="mt-2 text-lg font-black uppercase tracking-[-0.022em]">
+                        <div className="mt-2 text-lg font-semibold tracking-[-0.04em]">
                           More interactive stories are on the way
                         </div>
                       </div>
@@ -247,24 +243,24 @@ export default function InteractiveLandingPage({
                 className="h-full transition duration-200 group-hover:-translate-y-1"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/64">
+                  <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64 backdrop-blur-xl">
                     {normalizeText(story.contentMode)}
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">
                     Featured
                   </span>
                 </div>
-                <h2 className="mt-5 text-2xl font-black tracking-[-0.024em] text-white">
+                <h2 className="mt-5 font-display text-[2rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                   {normalizeText(story.title)}
                 </h2>
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/68">
+                <p className="mt-3 line-clamp-3 text-sm leading-[1.68] text-white/68">
                   {normalizeText(story.description || "A branching interactive story.")}
                 </p>
-                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-                  <span className="rounded-full border border-white/10 px-3 py-2">
+                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                     {Number(story.choicesCount || 0)} choices
                   </span>
-                  <span className="rounded-full border border-white/10 px-3 py-2">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                     {Number(story.endingsCount || 0)} endings
                   </span>
                 </div>
@@ -281,45 +277,45 @@ export default function InteractiveLandingPage({
               <Link
                 key={story.id}
                 href={`/interactive/${encodeURIComponent(story.slug)}`}
-                className="group rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,28,38,0.98)_0%,rgba(12,14,22,0.98)_100%)] p-5 shadow-[0_22px_48px_rgba(0,0,0,0.22)] transition-all duration-200 hover:-translate-y-1 hover:border-white/18"
+                className="group rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,28,38,0.98)_0%,rgba(12,14,22,0.98)_100%)] p-5 shadow-[0_22px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1.5 hover:border-white/18 hover:shadow-[0_28px_64px_rgba(0,0,0,0.28)]"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/64">
+                  <span className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64 backdrop-blur-xl">
                     {story.contentMode}
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200/70">
                     {isResume ? "Continue" : "Open Story"}
                   </span>
                 </div>
-                <h2 className="mt-4 text-2xl font-black tracking-[-0.024em] text-white">
+                <h2 className="mt-4 font-display text-[1.95rem] font-semibold leading-[0.94] tracking-[-0.05em] text-white">
                   {normalizeText(story.title)}
                 </h2>
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/68">
+                <p className="mt-3 line-clamp-3 text-sm leading-[1.68] text-white/68">
                   {normalizeText(story.description || "A branching interactive story.")}
                 </p>
-                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/60">
-                  <span className="rounded-full border border-white/10 px-3 py-2">
+                <div className="mt-5 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                     {Number(story.choicesCount || 0)} choices
                   </span>
-                  <span className="rounded-full border border-white/10 px-3 py-2">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2">
                     {Number(story.endingsCount || 0)} endings
                   </span>
                 </div>
                 {isResume ? (
-                  <div className="mt-4 rounded-[18px] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-5 text-cyan-100/88">
+                  <div className="mt-4 rounded-[20px] border border-cyan-200/20 bg-cyan-200/8 px-4 py-3 text-xs leading-[1.6] text-cyan-100/88 shadow-[0_14px_28px_rgba(8,6,20,0.14)]">
                     {continueProgress?.node?.title
                       ? `Jump back in from ${normalizeText(continueProgress.node.title)}.`
                       : "Jump back in where you left off."}
                   </div>
                 ) : null}
-                <div className="mt-6 inline-flex items-center rounded-full border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/70 transition group-hover:border-cyan-200/30 group-hover:text-cyan-100">
+                <div className="mt-6 inline-flex min-h-[44px] items-center rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/70 shadow-[0_14px_28px_rgba(8,6,20,0.16)] backdrop-blur-xl transition group-hover:border-cyan-200/30 group-hover:text-cyan-100">
                   {isResume ? "Continue Reading" : "Open Story"}
                 </div>
               </Link>
             );
           })}
           {filteredStories.length === 0 ? (
-            <div className="rounded-[28px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-7 text-white/70">
+            <div className="rounded-[30px] border border-white/10 bg-[rgba(12,14,22,0.98)] p-6 text-sm leading-[1.72] text-white/70 shadow-[0_20px_46px_rgba(8,6,20,0.2)]">
               {showLaunchChecklist
                 ? "No interactive stories are published yet."
                 : "More interactive stories are on the way. Check back soon for fresh routes and new endings."}

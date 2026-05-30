@@ -2,6 +2,13 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import { Link2, Share2, X } from "lucide-react";
+import {
+  storefrontBadgeClass,
+  storefrontInputClass,
+  storefrontPrimaryButtonClass,
+  storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
+} from "./StorefrontPagePrimitives";
 
 const TRACKING_PARAM_KEYS = new Set([
   "entry",
@@ -68,7 +75,7 @@ const ShareButton = React.memo(function ShareButton({
   const shareableUrl = useMemo(() => sanitizeShareUrl(url), [url]);
   const buttonClassName = className
     ? `inline-flex items-center gap-2 ${className}`
-    : "inline-flex items-center gap-2 rounded-full border-2 border-white/20 bg-black px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30";
+    : `inline-flex min-h-[44px] items-center gap-2 ${storefrontSecondaryButtonClass}`;
 
   const platforms = useMemo(
     () => [
@@ -179,27 +186,37 @@ const ShareButton = React.memo(function ShareButton({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/72 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={handleClose}
         >
           <div
-            className="relative w-full max-w-md overflow-hidden rounded-[32px] border-2 border-white/15 bg-black text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            className="relative w-full max-w-md overflow-hidden rounded-t-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,20,33,0.98)_0%,rgba(12,12,21,0.96)_100%)] text-white shadow-[0_28px_68px_rgba(8,6,20,0.42)] backdrop-blur-[26px] sm:rounded-[32px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative border-b border-white/10 bg-black px-5 py-4">
+            <div className="pointer-events-none absolute left-5 top-5 h-14 w-14 rounded-full bg-cyan-300/18 blur-[42px]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,79,154,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,211,238,0.12),transparent_28%)] opacity-90" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_24%,transparent_46%)]" />
+
+            <div className="relative border-b border-white/10 px-5 py-4 sm:px-6">
+              <div className="flex justify-center pb-2 sm:hidden">
+                <div className="h-1.5 w-12 rounded-full bg-white/14" />
+              </div>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="inline-flex rounded-full border-2 border-white/20 bg-black px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                  <p className={storefrontBadgeClass}>
                     Share
                   </p>
-                  <h3 className="mt-3 text-3xl font-black leading-none tracking-[-0.06em] text-white">
+                  <h3 className="mt-3 font-display text-[2rem] font-semibold leading-[0.92] tracking-[-0.06em] text-white sm:text-[2.2rem]">
                     Send this title
                   </h3>
+                  <p className="mt-2 text-sm leading-6 text-white/64">
+                    Pass the link around without dragging tracking noise with it.
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full border-2 border-white/20 bg-black p-2 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/30 hover:bg-[#111111]"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/12 bg-white/6 p-2 text-white/74 shadow-[0_14px_30px_rgba(8,6,20,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-white/10 hover:text-white"
                   aria-label="Close"
                 >
                   <X size={16} />
@@ -207,13 +224,13 @@ const ShareButton = React.memo(function ShareButton({
               </div>
             </div>
 
-            <div className="relative grid grid-cols-3 gap-3 p-5">
+            <div className="relative grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6">
               {platforms.map((platform) => (
                 <button
                   key={platform.id}
                   type="button"
                   onClick={() => handleShare(platform)}
-                  className="flex flex-col items-center gap-2 rounded-[22px] border-2 border-white/15 bg-black p-4 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 hover:translate-x-0.5 hover:translate-y-0.5 hover:border-white/25 hover:bg-[#111111]"
+                  className={`flex flex-col items-center gap-2 rounded-[22px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.025)_100%)] p-4 text-white shadow-[0_18px_34px_rgba(8,6,20,0.24)] transition-all duration-150 hover:-translate-y-0.5 hover:border-white/18 hover:bg-[linear-gradient(135deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.035)_100%)]`}
                 >
                   <span
                     className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-full border px-2 text-xs font-semibold ${platform.badgeClass}`}
@@ -225,30 +242,35 @@ const ShareButton = React.memo(function ShareButton({
               ))}
             </div>
 
-            <div className="relative m-5 mt-0 rounded-[24px] border-2 border-white/15 bg-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div
+              className={`relative m-5 mt-0 rounded-[24px] border-white/10 p-4 sm:m-6 sm:mt-0 ${storefrontSoftCardClass}`}
+            >
               <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-white/60">
                 <Link2 size={14} />
                 <span>Copy link</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
                   value={shareableUrl}
                   readOnly
-                  className="flex-1 rounded-[18px] border-2 border-white/20 bg-black px-3 py-2 text-sm text-white outline-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  className={`flex-1 ${storefrontInputClass}`}
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`rounded-full border px-4 py-2 text-sm font-semibold tracking-[0.02em] transition-colors ${
+                  className={`min-h-[44px] px-4 text-sm ${
                     copied
-                      ? "border-black bg-[#00E5FF] text-black"
-                      : "border-2 border-black bg-[#00E5FF] text-black hover:translate-x-0.5 hover:translate-y-0.5"
+                      ? storefrontSecondaryButtonClass
+                      : storefrontPrimaryButtonClass
                   }`}
                 >
                   {copied ? "Copied" : "Copy"}
                 </button>
               </div>
+              <p className="mt-3 text-xs leading-6 text-white/46">
+                Shared links keep the route clean and drop campaign params.
+              </p>
             </div>
           </div>
         </div>

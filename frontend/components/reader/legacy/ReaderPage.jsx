@@ -44,8 +44,11 @@ import {
 import { buildDiscoveryContext } from "../../../lib/discoveryContext";
 import { STOREFRONT_TERMS } from "../../../lib/storefrontCopy";
 import {
+  storefrontBadgeClass,
+  storefrontInsetCardClass,
   storefrontPrimaryButtonClass,
   storefrontSecondaryButtonClass,
+  storefrontSoftCardClass,
 } from "../../common/StorefrontPagePrimitives";
 import {
   formatInstallmentLabel,
@@ -239,14 +242,10 @@ export default function ReaderPage({ seriesId, episodeId }) {
   const currentIndex = getEpisodeIndex(episodes, episodeId);
   const lightPrimaryButtonClass = storefrontPrimaryButtonClass;
   const lightSecondaryButtonClass = storefrontSecondaryButtonClass;
-  const lightSoftCardClass =
-    "rounded-[24px] border-[3px] border-white/20 bg-black p-6 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]";
+  const lightSoftCardClass = `${storefrontInsetCardClass} p-6 text-white`;
   const lightInfoCardClass =
-    "rounded-[22px] border-[3px] border-black bg-[#FFE500] px-4 py-4 text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
-  const lightMutedCardClass =
-    "rounded-[20px] border-[3px] border-white/20 bg-black px-4 py-4 text-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]";
-  const lightRoseButtonClass =
-    "rounded-full border-2 border-black bg-[#FF007A] px-4 py-2 text-sm font-black uppercase tracking-[0.02em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform duration-150 ease-out hover:translate-x-0.5 hover:translate-y-0.5";
+    "rounded-[22px] border border-cyan-300/20 bg-[linear-gradient(135deg,rgba(86,215,255,0.18)_0%,rgba(124,92,255,0.12)_100%)] px-4 py-4 text-white shadow-[0_18px_36px_rgba(86,215,255,0.14)]";
+  const lightMutedCardClass = `${storefrontSoftCardClass} px-4 py-4 text-white`;
   const nextEpisode = currentIndex >= 0 ? episodes[currentIndex + 1] : null;
   const prevEpisode = currentIndex > 0 ? episodes[currentIndex - 1] : null;
   const nextUnlocked = nextEpisode
@@ -1875,13 +1874,13 @@ export default function ReaderPage({ seriesId, episodeId }) {
                   : `Unlock for ${currentPricing.finalPrice} points`}
             </button>
             <div className="mt-4 flex flex-wrap gap-2 text-left text-[11px] text-white/62">
-              <div className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className={storefrontBadgeClass}>
                 Stays in library
               </div>
-              <div className="rounded-full border-2 border-black bg-[#0b0b0b] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className={storefrontBadgeClass}>
                 Packs save more
               </div>
-              <div className="rounded-full border-2 border-black bg-[#0b0b0b] px-3 py-1.5 font-semibold uppercase tracking-[0.08em] text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <div className={storefrontBadgeClass}>
                 Plans save more
               </div>
             </div>
@@ -2357,14 +2356,14 @@ export default function ReaderPage({ seriesId, episodeId }) {
                 setResumeMessage("Back where you left off");
                 setTimeout(() => setResumeMessage(""), 1500);
               }}
-              className="rounded-full border-2 border-black bg-[#FFE500] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+              className="rounded-full border border-cyan-300/24 bg-[linear-gradient(135deg,rgba(86,215,255,0.24)_0%,rgba(124,92,255,0.18)_100%)] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white shadow-[0_14px_28px_rgba(86,215,255,0.16)]"
             >
               Resume
             </button>
             <button
               type="button"
               onClick={() => setPendingResume(null)}
-              className="rounded-full border-2 border-white/20 bg-black px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white/75 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+              className="rounded-full border border-white/14 bg-white/[0.05] px-3 py-1 text-xs font-black uppercase tracking-[0.08em] text-white/75 shadow-[0_12px_24px_rgba(0,0,0,0.22)]"
             >
               From top
             </button>
